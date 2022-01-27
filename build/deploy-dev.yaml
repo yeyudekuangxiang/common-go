@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mio-dev
+  name: mio-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mio-dev
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: mio-dev
+    spec:
+      containers:
+        - image: 'registry.cn-hangzhou.aliyuncs.com/branch/mio:develop'
+          args:
+            - '-env=dev'
+          imagePullPolicy: Always
+          name: mio-dev
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mio-dev-svc #TODO: to specify your service name
+  labels:
+    app: mio-dev-svc
+spec:
+  selector:
+    app: mio-dev #TODO: change label selector to match your backend pod
+  ports:
+    - port: 80 #TODO: choose an unique port on each node to avoid port conflict
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mio-dev-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: xz.huoguifan.com
+      http:
+        paths:
+          - backend:
+              serviceName: mio-dev-svc
+              servicePort: 80
+            path: /mio-dev/?(.*)
+  tls:
+    - hosts:
+        - xz.huoguifan.com
+      secretName: xz.huoguifan.com
