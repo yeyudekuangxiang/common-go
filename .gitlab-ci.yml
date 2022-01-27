@@ -8,8 +8,6 @@ build:
   only:
     - develop
     - tags
-  tags:
-    - docker
   script:
     - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build .
   artifacts:
@@ -20,8 +18,6 @@ package:
   only:
     - develop
     - tags
-  tags:
-    - shell
   dependencies:
     - build
   script:
@@ -37,8 +33,6 @@ deploy:
   only:
     - develop
     - tags
-  tags:
-    - docker
   before_script:
     - echo ${k8s_config} | base64 -d >> ./config-ali
     - export KUBECONFIG=$(pwd)/config-ali
