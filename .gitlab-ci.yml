@@ -33,8 +33,7 @@ deploy:
   only:
     - develop
     - tags
-  before_script:
-    - echo ${k8s_config} | base64 -d >> ./config-ali
-    - export KUBECONFIG=$(pwd)/config-ali
   script:
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
     - bash ./build/deploy.sh $CI_COMMIT_REF_NAME
