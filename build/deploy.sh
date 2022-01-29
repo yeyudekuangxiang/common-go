@@ -1,10 +1,7 @@
 #!/bin/bash
 
-who i am > a.txt
-awk 'NR==1{print}' a.txt
-sed -n 1p a.txt -n
-mkdir -p $HOME/.kube
-echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+mkdir -p ./build/.kube
+echo -n $kube_config_sh | base64 -d > ./build/.kube/config
 
 currentPath=$(dirname $(readlink -f "$0"))
 cd $currentPath
