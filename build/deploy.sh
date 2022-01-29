@@ -1,7 +1,7 @@
 #!/bin/bash
 
-who i am
-echo "sss"
+who i am > a.txt
+cat a.txt
 mkdir -p $HOME/.kube
 echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
 
