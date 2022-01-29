@@ -1,7 +1,6 @@
 #!/bin/bash
 
-who i am > a.txt
-echo a.txt
+echo $HOME/.kube
 mkdir -p $HOME/.kube
 echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
 
