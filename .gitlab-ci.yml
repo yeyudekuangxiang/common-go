@@ -30,6 +30,8 @@ deploy:
     name: bitnami/kubectl:1.20.10
     entrypoint: [""]
   stage: deploy
+  tags:
+    - k8s
   only:
     - develop
     - tags
