@@ -1,5 +1,7 @@
 #!/bin/bash
 
+who i am
+echo "sss"
 mkdir -p $HOME/.kube
 echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
 
