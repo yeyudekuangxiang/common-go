@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mkdir -p $HOME/.kube
+echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+
 currentPath=$(dirname $(readlink -f "$0"))
 cd $currentPath
 if [ $1 = "develop" ]; then
