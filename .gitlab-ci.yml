@@ -26,9 +26,6 @@ package:
     - docker build -t $IMAGE_TAG -f ./build/Dockerfile .
     - docker push $IMAGE_TAG
 deploy:
-  image:
-    name: bitnami/kubectl:1.20.10
-    entrypoint: [""]
   stage: deploy
   tags:
     - k8s
