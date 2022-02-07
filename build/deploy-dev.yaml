@@ -4,7 +4,6 @@ metadata:
   labels:
     app: mio-dev
   name: mio-dev
-  namespace: dev
 spec:
   replicas: 1
   selector:
@@ -21,7 +20,7 @@ spec:
         app: mio-dev
     spec:
       containers:
-        - image: 'hub.miotech.com/mioyingtech/mio:develop'
+        - image: 'hub-cn.miotech.com/mioyingtech/mio:develop'
           args:
             - '-env=dev'
           imagePullPolicy: Always
