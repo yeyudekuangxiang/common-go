@@ -9,13 +9,6 @@ import (
 
 var DefaultUserService = NewUserService(repository.DefaultUserRepository)
 
-type Iu interface {
-	//根据token获取用户
-	GetUserByToken(string) (*entity.User, error)
-	//根据用户id获取用户信息
-	GetUserById(int) (*entity.User, error)
-}
-
 func NewUserService(r repository.IUserRepository) UserService {
 	return UserService{
 		r: r,

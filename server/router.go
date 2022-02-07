@@ -33,4 +33,5 @@ func Router(router *gin.Engine) {
 
 	apiRouter(router)
 	adminRouter(router)
+	pugcRouter(router)
 }

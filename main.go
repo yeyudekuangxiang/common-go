@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"log"
 	"mio/core/initialize"
 	"mio/internal/acm"
-	"log"
 	"os"
 	"os/signal"
 )

@@ -1,17 +1,17 @@
 package repository
 
 import (
+	"gorm.io/gorm"
 	"mio/core/app"
 	"mio/model/entity"
-	"gorm.io/gorm"
 )
 
 var DefaultUserRepository IUserRepository = NewUserRepository()
 
 type IUserRepository interface {
-	//根据guid获取用户信息
+	// GetUserByGuid 根据guid获取用户信息
 	GetUserByGuid(string) (*entity.User, error)
-	//根据用id获取用户信息
+	// GetUserById 根据用id获取用户信息
 	GetUserById(int) (*entity.User, error)
 }
 

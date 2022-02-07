@@ -8,7 +8,6 @@ import (
 func apiRouter(router *gin.Engine) {
 	apiRouter := router.Group("/api")
 	apiRouter.Use(throttle())
-	//apiRouter.Use(mustAuth())
 	{
 		apiRouter.GET("/user", format(api.DefaultUserController.GetUserInfo))
 		apiRouter.GET("/newUser", format(api.DefaultUserController.GetNewUser))
