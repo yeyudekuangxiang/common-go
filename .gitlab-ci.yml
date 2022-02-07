@@ -3,13 +3,13 @@ stages:
   - package
   - deploy
 build:
-  image: golang:1.14
+  image: golang:1.15
   stage: build
   only:
     - develop
     - tags
   script:
-    - env GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build .
+    - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build .
   artifacts:
     paths:
       - mio
