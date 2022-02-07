@@ -11,5 +11,6 @@ func pugcRouter(router *gin.Engine) {
 	//pugcRouter.Use(mustAuth())
 	{
 		pugcRouter.GET("/addPugc", format(pugc.DefaultPugcController.AddPugc))
+		pugcRouter.GET("/ex", format(pugc.DefaultPugcController.ExportExcel))
 	}
 }

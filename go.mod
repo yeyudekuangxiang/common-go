@@ -10,11 +10,13 @@ require (
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/issue9/unique v1.3.1 // indirect
 	github.com/nacos-group/nacos-sdk-go v1.0.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/xuri/excelize/v2 v2.5.0 // indirect
+	gitlab.com/rwxrob/uniq v0.0.0-20200325203910-f771e6779384 // indirect
 	go.uber.org/zap v1.16.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

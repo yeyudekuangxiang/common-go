@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"gitlab.com/rwxrob/uniq"
 	Pugc "mio/model/pugc"
 	"mio/service"
 	"strconv"
@@ -41,5 +42,24 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 	}
 	return gin.H{
 		"Pugc": "Pugc",
+	}, nil
+}
+
+func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
+	f := excelize.NewFile()
+	index := f.NewSheet("code")
+	f.SetCellValue("code", "A1", "联通注册12500积分")
+
+	for i := 0; i <= 200; i++ {
+		println(uniq.Hex(5))
+		f.SetCellValue("code", "A"+strconv.Itoa(i+2), uniq.Hex(5))
+	}
+	f.SetActiveSheet(index)
+	// Save spreadsheet by the given path.
+	if err := f.SaveAs("/Users/leo/Downloads/a.xlsx"); err != nil {
+		fmt.Println(err)
+	}
+	return gin.H{
+		"Pugc": "",
 	}, nil
 }
