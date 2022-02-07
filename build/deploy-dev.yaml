@@ -20,7 +20,7 @@ spec:
         app: mio-dev
     spec:
       containers:
-        - image: 'hub.miotech.com/mioyingtech/mio:develop'
+        - image: 'hub-cn.miotech.com/mioyingtech/mio:develop'
           args:
             - '-env=dev'
           imagePullPolicy: Always
