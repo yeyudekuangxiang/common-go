@@ -23,4 +23,5 @@ require (
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/gorm v1.22.3
+	k8s.io/client-go v0.23.3 // indirect
 )

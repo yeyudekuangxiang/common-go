@@ -2,6 +2,7 @@ FROM alpine:latest
 
 WORKDIR  /app
 COPY mio .
+COPY config.ini .
 ENV TZ=Asia/Shanghai
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
     && apk add --no-cache tzdata \
@@ -9,5 +10,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
     && chmod +x mio
 
 EXPOSE 80
-CMD ["-env","local"]
+CMD ["-env","dev"]
+
 ENTRYPOINT ["./mio"]

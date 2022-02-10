@@ -34,6 +34,7 @@ func initIni() {
 	case "local":
 		initialize.InitIni(*flagConf)
 	case "dev":
+		initialize.InitIni(*flagConf)
 		acmClient, err := acm.NewClient(AcmConf)
 		if err != nil {
 			log.Fatal("create acm client:", err)
@@ -60,8 +61,8 @@ func initIni() {
 func init() {
 	flag.Parse()
 
-	initIni()
-	initialize.InitLog()
+	initialize.InitIni(*flagConf)
+	//initialize.InitLog()
 	initialize.InitDB()
 	initialize.InitValidator()
 	initialize.InitServer()
