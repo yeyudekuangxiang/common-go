@@ -9,7 +9,7 @@ import (
 var DefaultPugcRepository IPugcRepository = NewPugcRepository()
 
 type IPugcRepository interface {
-	// GetPugcById 根据用id获取用户信息
+	// Insert GetPugcById 根据用id获取用户信息
 	Insert(pugc *Pugc.PugcAddModel) error
 }
 

@@ -21,7 +21,7 @@ package:
   dependencies:
     - build
   script:
-    - export IMAGE_TAG=${CI_BUILD_DOCKER_URL}mioyingtech/mio-dev:$CI_COMMIT_REF_NAME
+    - export IMAGE_TAG=${CI_BUILD_DOCKER_URL}mioyingtech/mio-go:$CI_COMMIT_REF_NAME
     - docker login -u $CI_BUILD_DOCKER_USER -p $CI_BUILD_TOKEN $CI_BUILD_DOCKER_URL
     - docker build -t $IMAGE_TAG -f ./build/Dockerfile .
     - docker push $IMAGE_TAG

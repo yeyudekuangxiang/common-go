@@ -32,28 +32,11 @@ const (
 func initIni() {
 	switch *flagEnv {
 	case "local":
-		initialize.InitIni(*flagConf)
+		initialize.InitIni("./config-dev.ini")
 	case "dev":
-		initialize.InitIni(*flagConf)
-		acmClient, err := acm.NewClient(AcmConf)
-		if err != nil {
-			log.Fatal("create acm client:", err)
-		}
-		content, err := acmClient.GetConfig(DevAcmGroup, DevAcmDataId)
-		if err != nil {
-			log.Fatal("get acm config:", err)
-		}
-		initialize.InitIni([]byte(content))
+		initialize.InitIni("./config-dev.ini")
 	case "prod":
-		acmClient, err := acm.NewClient(AcmConf)
-		if err != nil {
-			log.Fatal("create acm client:", err)
-		}
-		content, err := acmClient.GetConfig(ProdAcmGroup, ProdAcmDataId)
-		if err != nil {
-			log.Fatal("get acm config:", err)
-		}
-		initialize.InitIni([]byte(content))
+		initialize.InitIni("./config-prod.ini")
 	default:
 		log.Fatal("error env:", *flagEnv)
 	}
@@ -61,7 +44,7 @@ func initIni() {
 func init() {
 	flag.Parse()
 
-	initialize.InitIni(*flagConf)
+	initIni()
 	//initialize.InitLog()
 	initialize.InitDB()
 	initialize.InitValidator()

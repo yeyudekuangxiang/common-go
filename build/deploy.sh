@@ -10,7 +10,7 @@ if [ $1 = "develop" ]; then
   container_name="mio-dev"
 elif [ ${1:0:1} = "v" ]; then
   deploy_file='./deploy.yaml'
-  container_name="mio"
+  container_name="mio-prod"
 else
   echo "THIS CI_COMMIT_REF_NAME $1 DOES NOT REQUIRE DEPLOYMENT"
   exit 0

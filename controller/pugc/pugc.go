@@ -48,15 +48,15 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 	f := excelize.NewFile()
 	index := f.NewSheet("code")
-	f.SetCellValue("code", "A1", "联通注册12500积分")
+	f.SetCellValue("code", "A1", "绿喵0积分")
 
-	for i := 0; i <= 200; i++ {
+	for i := 0; i <= 3; i++ {
 		println(uniq.Hex(5))
 		f.SetCellValue("code", "A"+strconv.Itoa(i+2), uniq.Hex(5))
 	}
 	f.SetActiveSheet(index)
 	// Save spreadsheet by the given path.
-	if err := f.SaveAs("/Users/leo/Downloads/a.xlsx"); err != nil {
+	if err := f.SaveAs("/Users/leo/Downloads/绿喵0积分.xlsx"); err != nil {
 		fmt.Println(err)
 	}
 	return gin.H{
