@@ -3,6 +3,7 @@ package service
 import (
 	Coupon "mio/model/coupon"
 	"mio/repository"
+	"strings"
 )
 
 var DefaultCouponService = NewCouponService(repository.DefaultCouponRepository)
@@ -23,6 +24,11 @@ func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds string) (
 	if err == nil {
 		for _, row := range res {
 			row.CouponType = "滴滴兑换券"
+			timeArr1 := strings.Split(row.UpdateTime, "T")
+			time1 := timeArr1[0]
+			timeArr2 := strings.Split(timeArr1[1], ".")
+			time2 := timeArr2[0]
+			row.UpdateTime = time1 + " " + time2
 			res2 = append(res2, row)
 		}
 	}
