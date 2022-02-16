@@ -1,7 +1,7 @@
 package service
 
 import (
-	Coupon "mio/model/Coupon"
+	Coupon "mio/model/coupon"
 	"mio/repository"
 )
 
