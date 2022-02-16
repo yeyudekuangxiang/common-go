@@ -17,6 +17,14 @@ type CouponService struct {
 	r repository.ICouponRepository
 }
 
-func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds string) ([]Coupon.Coupon, error) {
-	return r.r.CouponListOfOpenid(openid, couponTypeIds)
+func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds string) ([]Coupon.CouponRes, error) {
+	res, err := r.r.CouponListOfOpenid(openid, couponTypeIds)
+	var res2 []Coupon.CouponRes
+	if err == nil {
+		for _, row := range res {
+			row.CouponType = "滴滴兑换券"
+			res2 = append(res2, row)
+		}
+	}
+	return res2, err
 }
