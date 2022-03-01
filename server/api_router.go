@@ -15,5 +15,7 @@ func apiRouter(router *gin.Engine) {
 		apiRouter.GET("/newUser", format(api.DefaultUserController.GetNewUser))
 		apiRouter.GET("/mp2c/product-item/list", format(product.DefaultProductController.ProductList))
 		apiRouter.GET("/mp2c/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
+		apiRouter.POST("/mp2c/topic/list", format(api.DefaultTopicController.List))
+		apiRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
 	}
 }

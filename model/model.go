@@ -13,6 +13,10 @@ import (
 const timeFormat = "2006-01-02 15:04:05"
 const dateFormat = "2006-01-02"
 
+type Model struct {
+	Id int64 `gorm:"primaryKey;autoIncrement" json:"id" form:"id"`
+}
+
 func NewTime() Time {
 	return Time{
 		time.Now(),
@@ -224,4 +228,13 @@ func (s *StrToInt) Scan(value interface{}) error {
 }
 func (s StrToInt) Int() int {
 	return int(s)
+}
+
+// 用户点赞
+type UserLike struct {
+	Model
+	UserId     int64  `gorm:"not null;uniqueIndex:idx_user_like_unique;" json:"userId" form:"userId"`                                            // 用户
+	EntityType string `gorm:"not null;size:32;uniqueIndex:idx_user_like_unique;index:idx_user_like_entity;" json:"entityType" form:"entityType"` // 实体类型
+	EntityId   int64  `gorm:"not null;uniqueIndex:idx_user_like_unique;index:idx_user_like_entity;" json:"topicId" form:"topicId"`               // 实体编号
+	CreateTime int64  `json:"createTime" form:"createTime"`                                                                                      // 创建时间
 }

@@ -1,0 +1,23 @@
+package service
+
+import (
+	"github.com/mlogclub/simple"
+	"mio/model"
+	"mio/repository"
+)
+
+var DefaultTagService = NewTagService(repository.DefaultTagRepository)
+
+func NewTagService(r repository.ITagRepository) TagService {
+	return TagService{
+		r: r,
+	}
+}
+
+type TagService struct {
+	r repository.ITagRepository
+}
+
+func (u TagService) List(cnq *simple.SqlCnd) (list []model.Tag) {
+	return u.r.List(cnq)
+}

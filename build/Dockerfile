@@ -11,6 +11,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
     && chmod +x mio
 
 EXPOSE 80
-CMD ["-env","prod"]
+CMD ["-env","dev"]
 
 ENTRYPOINT ["./mio"]

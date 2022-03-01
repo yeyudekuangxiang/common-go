@@ -50,7 +50,7 @@ func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 	index := f.NewSheet("code")
 	f.SetCellValue("code", "A1", "绿喵0积分")
 
-	for i := 0; i <= 1000; i++ {
+	for i := 0; i <= 10000; i++ {
 		println(uniq.Hex(6))
 		f.SetCellValue("code", "A"+strconv.Itoa(i+2), uniq.Hex(6))
 	}
