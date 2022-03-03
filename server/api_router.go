@@ -17,5 +17,7 @@ func apiRouter(router *gin.Engine) {
 		apiRouter.GET("/mp2c/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
 		apiRouter.POST("/mp2c/topic/list", format(api.DefaultTopicController.List))
 		apiRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
+
+		apiRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
 	}
 }

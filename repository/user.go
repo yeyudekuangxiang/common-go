@@ -9,10 +9,10 @@ import (
 var DefaultUserRepository IUserRepository = NewUserRepository()
 
 type IUserRepository interface {
-	// GetUserByGuid 根据guid获取用户信息
-	GetUserByGuid(string) (*entity.User, error)
 	// GetUserById 根据用id获取用户信息
 	GetUserById(int) (*entity.User, error)
+	GetUserBy(by GetUserBy) entity.User
+	GetShortUserBy(by GetUserBy) entity.ShortUser
 }
 
 func NewUserRepository() UserRepository {
@@ -32,14 +32,29 @@ func (u UserRepository) GetUserById(id int) (*entity.User, error) {
 	}
 	return &user, nil
 }
-
-func (u UserRepository) GetUserByGuid(guid string) (*entity.User, error) {
-	var user entity.User
-	if err := app.DB.Where("guid = ?", guid).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
-		return nil, err
+func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
+	user := entity.User{}
+	db := app.DB.Model(user)
+	if by.OpenId != "" {
+		app.DB.Where("openid = ?", by.OpenId)
 	}
-	return &user, nil
+	if err := db.First(&user).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return user
+}
+func (u UserRepository) GetShortUserBy(by GetUserBy) entity.ShortUser {
+	user := entity.ShortUser{}
+	db := app.DB.Model(entity.User{})
+	if by.OpenId != "" {
+		app.DB.Where("openid = ?", by.OpenId)
+	}
+	if err := db.First(&user).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return user
 }
