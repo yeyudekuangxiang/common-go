@@ -8,3 +8,7 @@ type GetTopicListForm struct {
 	ID         *int `json:"id" form:"id" binding:"omitempty,gt=0" alias:"topic id"`
 	TopicTagId *int `json:"topicTagId" form:"topicTagId" binding:"omitempty,gt=0" alias:"标签id"`
 }
+type ChangeTopicLikeForm struct {
+	UserId  int `json:"userId" form:"userId" binding:"gt=0" alias:"用户id"`
+	TopicId int `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
+}

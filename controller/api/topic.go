@@ -45,3 +45,16 @@ func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 		"contentType": contType,
 	}, nil
 }
+func (TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
+	form := ChangeTopicLikeForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, form.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"status": like.Status,
+	}, nil
+}
