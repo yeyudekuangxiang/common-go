@@ -26,6 +26,7 @@ type Topic struct {
 	Status        int    `gorm:"index:idx_topic_status;" json:"status" form:"status"`             // 状态：0：正常、1：删除
 	CreateTime    int64  `gorm:"index:idx_topic_create_time" json:"createTime" form:"createTime"` // 创建时间
 	Sort          int    `gorm:"index:idx_sort_" json:"sort" form:"sort"`                         // 排序编号
+	Avatar        string `json:"avatar"`
 }
 
 type TopicItemRes struct {

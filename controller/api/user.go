@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
-	"mio/internal/util"
 	"mio/service"
 )
 
@@ -49,7 +48,11 @@ func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 }
 
 func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
-	user := util.GetAuthUser(c)
+	openId := c.Query("openId")
+	user, err := service.DefaultUserService.GetUserByOpenId(openId)
+	if err != nil {
+		return nil, err
+	}
 	return gin.H{
 		"user": user,
 	}, nil

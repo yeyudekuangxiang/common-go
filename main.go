@@ -48,6 +48,7 @@ func init() {
 	//initialize.InitLog()
 	initialize.InitDB()
 	initialize.InitValidator()
+	initialize.InitWeapp()
 	initialize.InitServer()
 }
 func main() {
