@@ -20,10 +20,10 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 
 	sqlCnd := &simple.SqlCnd{}
 	if form.TopicTagId != nil {
-		sqlCnd.Eq("topic_tag_id", form.TopicTagId)
+		sqlCnd.Where("topic_tag_id = ?", form.TopicTagId)
 	}
 	if form.ID != nil {
-		sqlCnd.Eq("id", form.ID)
+		sqlCnd.Where("id = ?", form.ID)
 	}
 	sqlCnd.Desc("sort")
 	list := service.DefaultTopicService.List(sqlCnd)
