@@ -19,5 +19,6 @@ func apiRouter(router *gin.Engine) {
 		apiRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
 
 		apiRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
+		apiRouter.POST("/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 	}
 }
