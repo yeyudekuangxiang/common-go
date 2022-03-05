@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"gitlab.com/rwxrob/uniq"
-	Pugc "mio/model/pugc"
+	"mio/model/entity/pugc"
 	"mio/service"
 	"strconv"
 	"time"

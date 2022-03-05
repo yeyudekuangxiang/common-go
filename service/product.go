@@ -1,7 +1,7 @@
 package service
 
 import (
-	Product "mio/model/product"
+	"mio/model/entity/product"
 	"mio/repository"
 )
 

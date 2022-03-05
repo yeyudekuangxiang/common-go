@@ -2,7 +2,7 @@ package repository
 
 import (
 	"mio/core/app"
-	Product "mio/model/product"
+	"mio/model/entity/product"
 )
 
 var DefaultProductRepository IProductRepository = NewProductRepository()

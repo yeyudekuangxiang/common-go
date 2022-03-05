@@ -1,8 +1,10 @@
-package model
+package entity
+
+import "mio/model"
 
 // 标签
 type Tag struct {
-	Model
+	model.Model
 	Name        string `gorm:"size:32;unique" json:"name" form:"name"`          // 名称
 	Description string `gorm:"size:1024" json:"description" form:"description"` // 描述
 	Logo        string `gorm:"size:1024" json:"logo" form:"logo"`               // 图标
@@ -12,7 +14,7 @@ type Tag struct {
 }
 
 type Topic struct {
-	Model
+	Id            int64  `gorm:"primaryKey;autoIncrement" json:"id" form:"id"`
 	TopicTag      string `gorm:"type:int;not null:default:0" json:"topicTag" form:"topicTag"`     // 类型
 	UserId        int64  `gorm:"not null;index:idx_topic_user_id;" json:"userId" form:"userId"`   // 用户
 	Title         string `gorm:"size:128" json:"title" form:"title"`                              // 标题
@@ -27,10 +29,11 @@ type Topic struct {
 	CreateTime    int64  `gorm:"index:idx_topic_create_time" json:"createTime" form:"createTime"` // 创建时间
 	Sort          int    `gorm:"index:idx_sort_" json:"sort" form:"sort"`                         // 排序编号
 	Avatar        string `json:"avatar"`
+	Tags          []Tag  `json:"tags" gorm:"many2many:topic_tag;"`
 }
 
 type TopicItemRes struct {
-	Model
+	model.Model
 	TopicTag      string `gorm:"type:int;not null:default:0" json:"topicTag" form:"topicTag"`     // 类型
 	UserId        int64  `gorm:"not null;index:idx_topic_user_id;" json:"userId" form:"userId"`   // 用户
 	Title         string `gorm:"size:128" json:"title" form:"title"`                              // 标题

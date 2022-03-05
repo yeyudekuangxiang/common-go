@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/mlogclub/simple"
-	"mio/model"
+	"mio/model/entity"
 	"mio/repository"
 )
 
@@ -18,6 +18,6 @@ type TagService struct {
 	r repository.ITagRepository
 }
 
-func (u TagService) List(cnq *simple.SqlCnd) (list []model.Tag) {
+func (u TagService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
 	return u.r.List(cnq)
 }

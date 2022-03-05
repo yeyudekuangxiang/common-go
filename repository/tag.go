@@ -3,13 +3,13 @@ package repository
 import (
 	"github.com/mlogclub/simple"
 	"mio/core/app"
-	"mio/model"
+	"mio/model/entity"
 )
 
 var DefaultTagRepository ITagRepository = NewTagRepository()
 
 type ITagRepository interface {
-	List(cnd *simple.SqlCnd) (list []model.Tag)
+	List(cnd *simple.SqlCnd) (list []entity.Tag)
 }
 
 func NewTagRepository() TagRepository {
@@ -19,7 +19,7 @@ func NewTagRepository() TagRepository {
 type TagRepository struct {
 }
 
-func (u TagRepository) List(cnd *simple.SqlCnd) (list []model.Tag) {
+func (u TagRepository) List(cnd *simple.SqlCnd) (list []entity.Tag) {
 	cnd.Find(app.DB, &list)
 	return
 }
