@@ -28,6 +28,8 @@ type Topic struct {
 	Sort          int    `gorm:"index:idx_sort_" json:"sort" form:"sort"`                         // 排序编号
 	Avatar        string `json:"avatar"`
 	Tags          []Tag  `json:"tags" gorm:"many2many:topic_tag;"`
+	Nickname      string `json:"nickname"`
+	TopicTagId    string `json:"topicTagId" form:"topicTagId"` // 类型
 }
 
 type TopicItemRes struct {

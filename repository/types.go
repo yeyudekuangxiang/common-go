@@ -19,3 +19,9 @@ type GetTopicPageListBy struct {
 	Limit      int `json:"limit"`  //limit为0时不限制数量
 	UserId     int `json:"userId"` // 用于查询用户对帖子是否点赞
 }
+
+type GetTagPageListBy struct {
+	ID     int `json:"id"`
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"` //limit为0时不限制数量
+}
