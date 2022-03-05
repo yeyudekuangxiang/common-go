@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"mio/controller/pugc"
+	"mio/controller/api/pugc"
 )
 
 func pugcRouter(router *gin.Engine) {

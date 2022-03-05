@@ -39,7 +39,10 @@ func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(form.OpenId, form.TopicId)
+
+	user := util.GetAuthUser(c)
+
+	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(user.ID, form.TopicId)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +56,10 @@ func (TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, form.UserId)
+
+	user := util.GetAuthUser(c)
+
+	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, user.ID)
 	if err != nil {
 		return nil, err
 	}
