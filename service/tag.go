@@ -22,7 +22,7 @@ func (u TagService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
 	return u.r.List(cnq)
 }
 
-func (u TagService) GetTagPageList(param repository.GetTagPageListBy) ([]model.Tag, int64, error) {
+func (u TagService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error) {
 	list, total := u.r.GetTagPageList(param)
 
 	return list, total, nil
