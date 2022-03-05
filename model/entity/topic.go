@@ -4,13 +4,11 @@ import "mio/model"
 
 // 标签
 type Tag struct {
-	model.Model
+	Id          int64  `gorm:"primaryKey;autoIncrement" json:"id" form:"id"`
 	Name        string `gorm:"size:32;unique" json:"name" form:"name"`          // 名称
 	Description string `gorm:"size:1024" json:"description" form:"description"` // 描述
-	Logo        string `gorm:"size:1024" json:"logo" form:"logo"`               // 图标
+	Img         string `gorm:"size:1024" json:"img" form:"img"`                 // 图标
 	Sort        int    `gorm:"index:idx_sort_" json:"sort" form:"sort"`         // 排序编号
-	Status      int    `gorm:"not null" json:"status" form:"status"`            // 状态
-	CreateTime  int64  `json:"createTime" form:"createTime"`                    // 创建时间
 }
 
 type Topic struct {

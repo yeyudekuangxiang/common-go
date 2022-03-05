@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"mio/controller/api"
-	"mio/controller/coupon"
-	"mio/controller/product"
+	"mio/controller/api/coupon"
+	"mio/controller/api/product"
 )
 
 func apiRouter(router *gin.Engine) {
@@ -18,7 +18,11 @@ func apiRouter(router *gin.Engine) {
 		apiRouter.POST("/mp2c/topic/list", format(api.DefaultTopicController.List))
 		apiRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
 
-		apiRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
-		apiRouter.POST("/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
+	}
+
+	authRouter := router.Group("/api").Use(mustAuth2())
+	{
+		authRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
+		authRouter.POST("/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 	}
 }

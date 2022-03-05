@@ -29,10 +29,13 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 	if by.TopicTagId > 0 {
 		db.Where("topic_tag.tag_id = ?", by.TopicTagId)
 	}
-	err := db.Count(&total).
+	db.Select("topic.*").Group("topic.id")
+
+	db2 := app.DB.Table("(?) as t", db)
+	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
-		Order("topic.sort desc").
+		Order("sort desc").
 		Preload("Tags").
 		Find(&list).Error
 	if err != nil {

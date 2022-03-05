@@ -89,6 +89,25 @@ func mustAuth() gin.HandlerFunc {
 	}
 }
 
+//临时使用openid作为登陆验证
+func mustAuth2() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		openId := ctx.GetHeader("openid")
+		if openId == "" {
+			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrAuth, nil))
+			return
+		}
+
+		user, err := service.DefaultUserService.GetUserByOpenId(openId)
+		if err != nil || user == nil {
+			app.Logger.Error("用户登陆验证失败", user, err)
+			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+			return
+		}
+		ctx.Set("AuthUser", *user)
+	}
+}
+
 type ThrottleConfig struct {
 	Throttle string
 }
@@ -118,6 +137,6 @@ func throttle() gin.HandlerFunc {
 func corsM() gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AddAllowHeaders("x-token", "token", "authorization")
+	config.AddAllowHeaders("x-token", "token", "authorization", "openid")
 	return cors.New(config)
 }
