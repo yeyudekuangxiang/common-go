@@ -17,12 +17,13 @@ func apiRouter(router *gin.Engine) {
 		apiRouter.GET("/mp2c/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
 		apiRouter.POST("/mp2c/topic/list", format(api.DefaultTopicController.List))
 		apiRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
+		apiRouter.GET("/mp2c/user", format(api.DefaultUserController.GetUserInfo))
 
 	}
 
 	authRouter := router.Group("/api").Use(mustAuth2())
 	{
-		authRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
-		authRouter.POST("/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
+		authRouter.GET("/mp2c/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
+		authRouter.POST("/mp2c/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 	}
 }
