@@ -3,7 +3,7 @@ package repository
 import (
 	"gorm.io/gorm"
 	"mio/core/app"
-	Pugc "mio/model/pugc"
+	"mio/model/entity/pugc"
 )
 
 var DefaultPugcRepository IPugcRepository = NewPugcRepository()

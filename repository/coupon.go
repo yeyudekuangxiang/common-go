@@ -2,7 +2,7 @@ package repository
 
 import (
 	"mio/core/app"
-	Coupon "mio/model/coupon"
+	"mio/model/entity/coupon"
 )
 
 var DefaultCouponRepository ICouponRepository = NewCouponRepository()

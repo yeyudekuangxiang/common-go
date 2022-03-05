@@ -1,7 +1,7 @@
 package service
 
 import (
-	Coupon "mio/model/coupon"
+	"mio/model/entity/coupon"
 	"mio/repository"
 	"strings"
 )
