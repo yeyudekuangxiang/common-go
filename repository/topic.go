@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/mlogclub/simple"
 	"mio/core/app"
 	"mio/model"
 )
@@ -9,7 +8,7 @@ import (
 var DefaultTopicRepository ITopicRepository = NewTopicRepository()
 
 type ITopicRepository interface {
-	List(cnd *simple.SqlCnd) (list []model.Topic)
+	GetTopicPageList(by GetTopicPageListBy) (list []model.Topic, total int64)
 }
 
 func NewTopicRepository() TopicRepository {
@@ -19,7 +18,18 @@ func NewTopicRepository() TopicRepository {
 type TopicRepository struct {
 }
 
-func (u TopicRepository) List(cnd *simple.SqlCnd) (list []model.Topic) {
-	cnd.Find(app.DB, &list)
+func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []model.Topic, total int64) {
+	list = make([]model.Topic, 0)
+	db := app.DB.Model(model.Topic{})
+	if by.ID > 0 {
+		db.Where("id = ?", by.ID)
+	}
+	if by.TopicTagId > 0 {
+		db.Where("topic_tag_id = ?", by.TopicTagId)
+	}
+	err := db.Count(&total).Offset(by.Offset).Limit(by.Limit).Order("sort desc").Find(&list).Error
+	if err != nil {
+		panic(err)
+	}
 	return
 }

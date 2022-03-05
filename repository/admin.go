@@ -1,9 +1,9 @@
 package repository
 
 import (
+	"gorm.io/gorm"
 	"mio/core/app"
 	"mio/model/entity"
-	"gorm.io/gorm"
 )
 
 var DefaultAdminRepository IAdminRepository = NewAdminRepository()

@@ -2,12 +2,12 @@ package tests
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"mio/core/initialize"
 	"mio/internal/util"
 	mock_repository "mio/mock/repository"
 	"mio/model/auth"
 	"mio/service"
-	"log"
 	"net/http"
 	"os"
 	"strings"

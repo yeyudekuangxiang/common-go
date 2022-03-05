@@ -1,9 +1,9 @@
 package initialize
 
 import (
-	"mio/core/app"
 	"gopkg.in/ini.v1"
 	"log"
+	"mio/core/app"
 )
 
 func InitIni(source interface{}) {

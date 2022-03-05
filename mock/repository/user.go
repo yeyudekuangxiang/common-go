@@ -2,8 +2,8 @@ package repository
 
 import (
 	"fmt"
-	"mio/model/entity"
 	"gorm.io/gorm"
+	"mio/model/entity"
 )
 
 func NewUserMockRepository() UserMockRepository {
