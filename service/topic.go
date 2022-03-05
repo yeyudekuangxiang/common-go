@@ -3,11 +3,9 @@ package service
 import (
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
-	"github.com/mlogclub/simple"
 	"github.com/pkg/errors"
 	"mio/core/app"
 	"mio/internal/wxapp"
-	"mio/model"
 	"mio/repository"
 )
 
@@ -23,8 +21,35 @@ type TopicService struct {
 	r repository.ITopicRepository
 }
 
-func (u TopicService) List(cnq *simple.SqlCnd) (list []model.Topic) {
-	return u.r.List(cnq)
+func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+	list, total := u.r.GetTopicPageList(param)
+
+	//查询点赞信息
+	topicIds := make([]int64, 0)
+	for _, topic := range list {
+		topicIds = append(topicIds, topic.Id)
+	}
+	topicLikeMap := make(map[int64]bool)
+	if param.UserId > 0 {
+		likeList := repository.TopicLikeRepository{DB: app.DB}.GetListBy(repository.GetTopicLikeListBy{
+			TopicIds: topicIds,
+			UserId:   param.UserId,
+		})
+		for _, like := range likeList {
+			topicLikeMap[int64(like.TopicId)] = like.Status == 1
+		}
+	}
+
+	//整理数据
+	detailList := make([]TopicDetail, 0)
+	for _, topic := range list {
+		detailList = append(detailList, TopicDetail{
+			Topic:  topic,
+			IsLike: topicLikeMap[topic.Id],
+		})
+	}
+
+	return detailList, total, nil
 }
 func (u TopicService) GetShareWeappQrCode(openid string, topicId int) ([]byte, string, error) {
 	userRes := repository.NewUserRepository()

@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mlogclub/simple"
 	"mio/internal/util"
+	"mio/repository"
 	"mio/service"
 )
 
@@ -13,22 +13,25 @@ type TopicController struct {
 }
 
 func (TopicController) List(c *gin.Context) (gin.H, error) {
-	form := GetTopicListForm{}
+	form := GetTopicPageListForm{}
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	sqlCnd := &simple.SqlCnd{}
-	if form.TopicTagId != nil {
-		sqlCnd.Where("topic_tag_id = ?", form.TopicTagId)
+	list, total, err := service.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
+		ID:         form.ID,
+		TopicTagId: form.TopicTagId,
+		Offset:     form.Offset(),
+		Limit:      form.Limit(),
+	})
+	if err != nil {
+		return nil, err
 	}
-	if form.ID != nil {
-		sqlCnd.Where("id = ?", form.ID)
-	}
-	sqlCnd.Desc("sort")
-	list := service.DefaultTopicService.List(sqlCnd)
 	return gin.H{
-		"list": list,
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
 }
 func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {

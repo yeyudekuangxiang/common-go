@@ -8,5 +8,14 @@ type FindTopicLikeBy struct {
 	UserId  int
 }
 type GetTopicLikeListBy struct {
-	TopicIds []int
+	TopicIds []int64
+	UserId   int
+}
+
+type GetTopicPageListBy struct {
+	ID         int `json:"id"`
+	TopicTagId int `json:"topicTagId"`
+	Offset     int `json:"offset"`
+	Limit      int `json:"limit"`  //limit为0时不限制数量
+	UserId     int `json:"userId"` // 用于查询用户对帖子是否点赞
 }
