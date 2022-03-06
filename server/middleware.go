@@ -108,6 +108,24 @@ func mustAuth2() gin.HandlerFunc {
 	}
 }
 
+//临时使用openid作为登陆验证
+func auth2() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		openId := ctx.GetHeader("openid")
+		if openId == "" {
+			ctx.Set("AuthUser", entity.User{})
+			return
+		}
+
+		user, err := service.DefaultUserService.GetUserByOpenId(openId)
+		if err != nil || user == nil {
+			ctx.Set("AuthUser", entity.User{})
+			return
+		}
+		ctx.Set("AuthUser", *user)
+	}
+}
+
 type ThrottleConfig struct {
 	Throttle string
 }

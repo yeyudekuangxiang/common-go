@@ -8,22 +8,25 @@ import (
 )
 
 func apiRouter(router *gin.Engine) {
-	apiRouter := router.Group("/api")
-	apiRouter.Use(throttle())
-	{
-		apiRouter.GET("/user", format(api.DefaultUserController.GetUserInfo))
-		apiRouter.GET("/newUser", format(api.DefaultUserController.GetNewUser))
-		apiRouter.GET("/mp2c/product-item/list", format(product.DefaultProductController.ProductList))
-		apiRouter.GET("/mp2c/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
-		apiRouter.POST("/mp2c/topic/list", format(api.DefaultTopicController.List))
-		apiRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
-		apiRouter.GET("/mp2c/user", format(api.DefaultUserController.GetUserInfo))
 
+	//非必须登陆的路由
+	authRouter := router.Group("/api").Use(auth2(), throttle())
+	{
+
+		authRouter.GET("/newUser", format(api.DefaultUserController.GetNewUser))
+		authRouter.GET("/mp2c/product-item/list", format(product.DefaultProductController.ProductList))
+		authRouter.GET("/mp2c/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
+
+		authRouter.POST("/mp2c/tag/list", format(api.DefaultTagController.List))
+		authRouter.GET("/mp2c/user", format(api.DefaultUserController.GetUserInfo))
+		authRouter.POST("/mp2c/topic/list", format(api.DefaultTopicController.List))
 	}
 
-	authRouter := router.Group("/api").Use(mustAuth2())
+	//必须登陆的路由
+	mustAuthRouter := router.Group("/api").Use(mustAuth2(), throttle())
 	{
-		authRouter.GET("/mp2c/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
-		authRouter.POST("/mp2c/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
+		mustAuthRouter.GET("/user", format(api.DefaultUserController.GetUserInfo))
+		mustAuthRouter.GET("/mp2c/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
+		mustAuthRouter.POST("/mp2c/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 	}
 }
