@@ -36,7 +36,7 @@ func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	user := entity.User{}
 	db := app.DB.Model(user)
 	if by.OpenId != "" {
-		app.DB.Where("openid = ?", by.OpenId)
+		db.Where("openid = ?", by.OpenId)
 	}
 	if err := db.First(&user).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -49,7 +49,7 @@ func (u UserRepository) GetShortUserBy(by GetUserBy) entity.ShortUser {
 	user := entity.ShortUser{}
 	db := app.DB.Model(entity.User{})
 	if by.OpenId != "" {
-		app.DB.Where("openid = ?", by.OpenId)
+		db.Where("openid = ?", by.OpenId)
 	}
 	if err := db.First(&user).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {

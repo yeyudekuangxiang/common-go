@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/pkg/errors"
 	"mio/core/app"
 	"mio/model"
 	"mio/model/entity"
@@ -12,6 +13,11 @@ type TopicLikeService struct {
 }
 
 func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLike, error) {
+	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
+	if topic.Id == 0 {
+		return nil, errors.New("帖子不存在")
+	}
+
 	r := repository.TopicLikeRepository{DB: app.DB}
 	like := r.FindBy(repository.FindTopicLikeBy{
 		TopicId: topicId,
@@ -26,5 +32,11 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLi
 		like.UpdatedAt = model.Time{Time: time.Now()}
 		like.Status = (like.Status + 1) % 2
 	}
+	if like.Status == 1 {
+		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
+	} else {
+		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
+	}
+
 	return &like, r.Save(&like)
 }
