@@ -9,7 +9,7 @@ build:
     - develop
     - tags
   script:
-    - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build .
+    - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -o mio .
   artifacts:
     paths:
       - mio
@@ -27,8 +27,6 @@ package:
     - docker push $IMAGE_TAG
 deploy:
   stage: deploy
-  tags:
-    - k8s
   only:
     - develop
     - tags
