@@ -1,77 +1,68 @@
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: godev
   namespace: dev
   labels:
-    app: godev
-  annotations:
-    deployment.kubernetes.io/revision: '1'
-    kubesphere.io/creator: leoliu
+    app: mp2c-go
+  name: mp2c-go
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      app: godev
+      app: mp2c-go
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: godev
+        app: mp2c-go
     spec:
       containers:
-        - name: container-4neum4
-          image: 'hub-cn.miotech.com/mioyingtech/mio-dev:develop'
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: IfNotPresent
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      serviceAccountName: default
-      serviceAccount: default
-      securityContext: {}
+        - image: 'hub-cn.miotech.com/mioyingtech/mio-go:develop1'
+          args:
+            - '-c=/app/config/config.ini'
+          imagePullPolicy: Always
+          name: mp2c-go
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: mp2c-go-config
+              mountPath: "/app/config"
+      volumes:
+        - name: mp2c-go-config
+          secret:
+            secretName: mp2c-go-config
       imagePullSecrets:
         - name: miotech-registry-cn
-      affinity: {}
-      schedulerName: default-scheduler
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
-  revisionHistoryLimit: 10
-  progressDeadlineSeconds: 600
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mio-dev-svc #TODO: to specify your service name
+  name: mp2c-go-svc #TODO: to specify your service name
+  namespace: dev
   labels:
-    app: mio-dev-svc
+    app: mp2c-go-svc
 spec:
   selector:
-    app: mio-dev #TODO: change label selector to match your backend pod
+    app: mp2c-go #TODO: change label selector to match your backend pod
   ports:
     - port: 80 #TODO: choose an unique port on each node to avoid port conflict
+
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: mio-dev-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: mp2c-go-ingress
+  namespace: dev
 spec:
   rules:
-    - host: godev-api.miotech.com
+    - host: go-api.miotech.com
       http:
         paths:
           - backend:
-              serviceName: mio-dev-svc
+              serviceName: mp2c-go-svc
               servicePort: 80
-            path: /mio-dev/?(.*)
+            path: /
   tls:
     - hosts:
-        - godev-api.miotech.com
-      secretName: godev-api.miotech.com
+        - go-api.miotech.com
+      secretName: default-tls
