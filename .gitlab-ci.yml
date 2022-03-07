@@ -26,11 +26,15 @@ package:
     - docker build -t $IMAGE_TAG -f ./build/Dockerfile .
     - docker push $IMAGE_TAG
 deploy:
+  image:
+    name: bitnami/kubectl:1.20.10
+    entrypoint: [ "" ]
   stage: deploy
   only:
     - develop
     - tags
+  before_script:
+    - echo $kube_config_sh | base64 -d >> ./config-ali
+    - export KUBECONFIG=$(pwd)/config-ali
   script:
-    - mkdir -p $HOME/.kube
-    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
     - bash ./build/deploy.sh $CI_COMMIT_REF_NAME
