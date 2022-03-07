@@ -16,7 +16,7 @@ spec:
         app: mp2c-go
     spec:
       containers:
-        - image: 'hub-cn.miotech.com/mioyingtech/mio-go:develop1'
+        - image: 'hub-cn.miotech.com/mioyingtech/mio-go:develop'
           args:
             - '-c=/app/config/config.ini'
           imagePullPolicy: Always
@@ -55,7 +55,7 @@ metadata:
   namespace: dev
 spec:
   rules:
-    - host: go-api.miotech.com
+    - host: godev-api.miotech.com
       http:
         paths:
           - backend:
@@ -64,5 +64,5 @@ spec:
             path: /
   tls:
     - hosts:
-        - go-api.miotech.com
+        - godev-api.miotech.com
       secretName: default-tls
