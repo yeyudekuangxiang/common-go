@@ -2,12 +2,12 @@ package tests
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"mio/core/initialize"
 	"mio/internal/util"
 	mock_repository "mio/mock/repository"
 	"mio/model/auth"
 	"mio/service"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -65,7 +65,7 @@ func AddAdminToken(req *http.Request) {
 }
 func createUserToken() string {
 	token, err := util.CreateToken(auth.User{
-		Guid: "27c1c190-4c5f-42a1-aa2d-77298b97fe90",
+		Id: 1,
 	})
 	if err != nil {
 		log.Fatal("create token err:", err)

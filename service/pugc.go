@@ -1,7 +1,7 @@
 package service
 
 import (
-	Pugc "mio/model/pugc"
+	"mio/model/entity/pugc"
 	"mio/repository"
 )
 

@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"mio/controller/pugc"
+	"mio/controller/api/pugc"
 )
 
 func pugcRouter(router *gin.Engine) {
@@ -11,6 +11,6 @@ func pugcRouter(router *gin.Engine) {
 	//pugcRouter.Use(mustAuth())
 	{
 		pugcRouter.GET("/addPugc", format(pugc.DefaultPugcController.AddPugc))
-		pugcRouter.GET("/ex", format(pugc.DefaultPugcController.ExportExcel))
+		pugcRouter.POST("/ex", format(pugc.DefaultPugcController.ExportExcel))
 	}
 }

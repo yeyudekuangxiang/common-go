@@ -1,9 +1,9 @@
 package initialize
 
 import (
+	"log"
 	"mio/core/app"
 	"mio/internal/zap"
-	"log"
 )
 
 func InitLog() {

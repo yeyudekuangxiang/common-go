@@ -9,7 +9,7 @@ build:
     - develop
     - tags
   script:
-    - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build .
+    - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -o mio .
   artifacts:
     paths:
       - mio
@@ -21,7 +21,7 @@ package:
   dependencies:
     - build
   script:
-    - export IMAGE_TAG=${CI_BUILD_DOCKER_URL}mioyingtech/mio:$CI_COMMIT_REF_NAME
+    - export IMAGE_TAG=${CI_BUILD_DOCKER_URL}mioyingtech/mio-go:$CI_COMMIT_REF_NAME
     - docker login -u $CI_BUILD_DOCKER_USER -p $CI_BUILD_TOKEN $CI_BUILD_DOCKER_URL
     - docker build -t $IMAGE_TAG -f ./build/Dockerfile .
     - docker push $IMAGE_TAG
@@ -32,7 +32,8 @@ deploy:
   only:
     - develop
     - tags
-  script:
+  before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
-    - bash ./build/deploy.sh $CI_COMMIT_REF_NAME
+  script:
+    - sh ./build/deploy.sh $CI_COMMIT_REF_NAME

@@ -1,67 +1,68 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: dev
   labels:
-    app: mio-dev
-  name: mio-dev
-  namespage: dev
+    app: mp2c-go
+  name: mp2c-go
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      app: mio-dev
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      app: mp2c-go
   template:
     metadata:
       labels:
-        app: mio-dev
+        app: mp2c-go
     spec:
       containers:
-        - image: 'hub-cn.miotech.com/mioyingtech/mio:develop'
+        - image: 'hub-cn.miotech.com/mioyingtech/mio-go:develop'
           args:
-            - '-env=dev'
+            - '-c=/app/config/config.ini'
           imagePullPolicy: Always
-          name: mio-dev
+          name: mp2c-go
           ports:
             - containerPort: 80
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
+          volumeMounts:
+            - name: mp2c-go-config
+              mountPath: "/app/config"
+      volumes:
+        - name: mp2c-go-config
+          secret:
+            secretName: mp2c-go-config
+      imagePullSecrets:
+        - name: miotech-registry-cn
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mio-dev-svc #TODO: to specify your service name
+  name: mp2c-go-svc #TODO: to specify your service name
+  namespace: dev
   labels:
-    app: mio-dev-svc
+    app: mp2c-go-svc
 spec:
   selector:
-    app: mio-dev #TODO: change label selector to match your backend pod
+    app: mp2c-go #TODO: change label selector to match your backend pod
   ports:
     - port: 80 #TODO: choose an unique port on each node to avoid port conflict
+
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: mio-dev-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: mp2c-go-ingress
+  namespace: dev
 spec:
   rules:
     - host: godev-api.miotech.com
       http:
         paths:
           - backend:
-              serviceName: mio-dev-svc
+              serviceName: mp2c-go-svc
               servicePort: 80
-            path: /mio-dev/?(.*)
+            path: /
   tls:
     - hosts:
         - godev-api.miotech.com
-      secretName: godev-api.miotech.com
+      secretName: mp2c-go-tls

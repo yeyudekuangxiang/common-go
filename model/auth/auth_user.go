@@ -1,12 +1,11 @@
 package auth
 
+import "mio/model"
+
 type User struct {
-	BindMobile string `json:"bind_mobile"`
-	CreatedAt  string `json:"created_at"`
-	Guid       string `json:"guid"`
-	NowOpenid  string `json:"now_openid"`
-	Session    string `json:"session"`
-	SessionKey string `json:"session_key"`
+	Id        int64      `json:"id"`
+	Mobile    string     `json:"mobile"`
+	CreatedAt model.Time `json:"createdAt"`
 }
 
 func (au User) Valid() error {

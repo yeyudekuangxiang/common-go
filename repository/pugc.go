@@ -3,13 +3,13 @@ package repository
 import (
 	"gorm.io/gorm"
 	"mio/core/app"
-	Pugc "mio/model/pugc"
+	"mio/model/entity/pugc"
 )
 
 var DefaultPugcRepository IPugcRepository = NewPugcRepository()
 
 type IPugcRepository interface {
-	// GetPugcById 根据用id获取用户信息
+	// Insert GetPugcById 根据用id获取用户信息
 	Insert(pugc *Pugc.PugcAddModel) error
 }
 

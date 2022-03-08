@@ -1,9 +1,9 @@
 package initialize
 
 import (
+	"log"
 	"mio/core/app"
 	"mio/internal/db"
-	"log"
 )
 
 func InitDB() {

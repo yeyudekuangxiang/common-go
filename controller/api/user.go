@@ -49,8 +49,7 @@ func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 }
 
 func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
-	user := util.GetAuthUser(c)
 	return gin.H{
-		"user": user,
+		"user": util.GetAuthUser(c),
 	}, nil
 }

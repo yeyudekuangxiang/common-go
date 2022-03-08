@@ -3,4 +3,6 @@
 /.idea/
 /*.exe
 /acm
-#config.ini
+config.ini
+config-dev.ini
+config-prod.ini
