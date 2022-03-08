@@ -12,18 +12,18 @@ type BocController struct {
 }
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
-	form := GetRecordListForm{}
+	form := GetBocApplyRecordListForm{}
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
 	user := util.GetAuthUser(c)
 
-	list, total, err := activity.BocService{}.GetRecordPageList(activity.GetRecordPageListParam{
-		UserId:            user.ID,
-		ApplyRecordStatus: form.ApplyStatus,
-		Offset:            form.Offset(),
-		Limit:             form.Limit(),
+	list, total, err := activity.BocService{}.GetApplyRecordPageList(activity.GetRecordPageListParam{
+		UserId:      user.ID,
+		ApplyStatus: form.ApplyStatus,
+		Offset:      form.Offset(),
+		Limit:       form.Limit(),
 	})
 	if err != nil {
 		return nil, err
@@ -34,4 +34,19 @@ func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 		"page":  form.Page,
 		"size":  form.PageSize,
 	}, nil
+}
+func (b BocController) AddRecord(c *gin.Context) (gin.H, error) {
+	form := AddBocApplyRecordFrom{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := util.GetAuthUser(c)
+
+	_, err := activity.BocService{}.AddApplyRecord(activity.AddApplyRecordParam{
+		UserId:      user.ID,
+		ShareUserId: form.ShareUserId,
+	})
+
+	return nil, err
 }

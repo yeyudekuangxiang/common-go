@@ -3,9 +3,11 @@ package service
 import (
 	"github.com/pkg/errors"
 	"mio/internal/util"
+	"mio/model"
 	"mio/model/auth"
 	"mio/model/entity"
 	"mio/repository"
+	"time"
 )
 
 var DefaultUserService = NewUserService(repository.DefaultUserRepository)
@@ -49,7 +51,8 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 		return "", errors.New("用户不存在")
 	}
 	return util.CreateToken(auth.User{
-		Id:     user.ID,
-		Mobile: user.PhoneNumber,
+		Id:        user.ID,
+		Mobile:    user.PhoneNumber,
+		CreatedAt: model.Time{Time: time.Now()},
 	})
 }

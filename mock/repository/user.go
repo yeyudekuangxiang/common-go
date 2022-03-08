@@ -15,6 +15,11 @@ type UserMockRepository struct {
 	db *gorm.DB
 }
 
+func (u UserMockRepository) GetShortUserListBy(by repository.GetUserListBy) []entity.ShortUser {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (u UserMockRepository) GetUserById(i int64) (*entity.User, error) {
 	//TODO implement me
 	panic("implement me")
