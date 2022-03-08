@@ -20,7 +20,7 @@ type UserService struct {
 	r repository.IUserRepository
 }
 
-func (u UserService) GetUserById(id int) (*entity.User, error) {
+func (u UserService) GetUserById(id int64) (*entity.User, error) {
 	return u.r.GetUserById(id)
 }
 func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
@@ -38,5 +38,18 @@ func (u UserService) GetUserByToken(token string) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &entity.User{}, nil
+	return u.r.GetUserById(authUser.Id)
+}
+func (u UserService) CreateUserToken(id int64) (string, error) {
+	user, err := u.r.GetUserById(id)
+	if err != nil {
+		return "", err
+	}
+	if user == nil {
+		return "", errors.New("用户不存在")
+	}
+	return util.CreateToken(auth.User{
+		Id:     user.ID,
+		Mobile: user.PhoneNumber,
+	})
 }

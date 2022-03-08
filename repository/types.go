@@ -25,3 +25,8 @@ type GetTagPageListBy struct {
 	Offset int `json:"offset"`
 	Limit  int `json:"limit"` //limit为0时不限制数量
 }
+
+type GetUserListBy struct {
+	Mobile  string
+	UserIds []int64
+}

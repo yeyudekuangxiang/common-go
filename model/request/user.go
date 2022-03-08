@@ -1,5 +1,5 @@
 package request
 
 type ApiUserId struct {
-	ID int `form:"id" binding:"gt=0" alias:"用户id"`
+	ID int64 `form:"id" binding:"gt=0" alias:"用户id"`
 }

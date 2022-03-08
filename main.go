@@ -20,7 +20,7 @@ func init() {
 	flag.Parse()
 
 	initIni()
-	//initialize.InitLog()
+	initialize.InitLog()
 	initialize.InitDB()
 	initialize.InitValidator()
 	initialize.InitWeapp()

@@ -10,9 +10,10 @@ var DefaultUserRepository IUserRepository = NewUserRepository()
 
 type IUserRepository interface {
 	// GetUserById 根据用id获取用户信息
-	GetUserById(int) (*entity.User, error)
+	GetUserById(int64) (*entity.User, error)
 	GetUserBy(by GetUserBy) entity.User
 	GetShortUserBy(by GetUserBy) entity.ShortUser
+	GetUserListBy(by GetUserListBy) []entity.User
 }
 
 func NewUserRepository() UserRepository {
@@ -22,7 +23,7 @@ func NewUserRepository() UserRepository {
 type UserRepository struct {
 }
 
-func (u UserRepository) GetUserById(id int) (*entity.User, error) {
+func (u UserRepository) GetUserById(id int64) (*entity.User, error) {
 	var user entity.User
 	if err := app.DB.First(&user, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -57,4 +58,20 @@ func (u UserRepository) GetShortUserBy(by GetUserBy) entity.ShortUser {
 		}
 	}
 	return user
+}
+func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
+	list := make([]entity.User, 0)
+	db := app.DB.Model(entity.User{})
+
+	if by.Mobile != "" {
+		db.Where("phone_number = ?", by.Mobile)
+	}
+	if len(by.UserIds) > 0 {
+		db.Where("id in (?)", by.UserIds)
+	}
+
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
 }

@@ -27,14 +27,6 @@ type AdminService struct {
 }
 
 func (a AdminService) GetAdminByToken(token string) (*entity.Admin, error) {
-	if util.IsOldToken(token) {
-		var authAdmin auth.OldAdmin
-		err := util.ParseOldToken(token, &authAdmin)
-		if err != nil {
-			return nil, err
-		}
-		return a.r.GetAdminById(authAdmin.UserId.Int())
-	}
 	var authAdmin auth.Admin
 	err := util.ParseToken(token, &authAdmin)
 	if err != nil {

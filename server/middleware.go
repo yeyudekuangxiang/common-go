@@ -92,16 +92,28 @@ func mustAuth() gin.HandlerFunc {
 //临时使用openid作为登陆验证
 func mustAuth2() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		openId := ctx.GetHeader("openid")
-		if openId == "" {
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrAuth, nil))
-			return
+		var user *entity.User
+		var err error
+		if token := ctx.GetHeader("token"); token != "" {
+			user, err = service.DefaultUserService.GetUserByToken(token)
+			if err != nil || user == nil {
+				app.Logger.Error("mustAuth token err", token, err)
+				ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+				return
+			}
 		}
 
-		user, err := service.DefaultUserService.GetUserByOpenId(openId)
-		if err != nil || user == nil {
-			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+		if openId := ctx.GetHeader("openid"); openId != "" {
+			user, err = service.DefaultUserService.GetUserByOpenId(openId)
+			if err != nil || user == nil {
+				app.Logger.Error("mustAuth openid err", openId, err)
+				ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+				return
+			}
+		}
+
+		if user == nil {
+			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrAuth, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -111,16 +123,24 @@ func mustAuth2() gin.HandlerFunc {
 //临时使用openid作为登陆验证
 func auth2() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		openId := ctx.GetHeader("openid")
-		if openId == "" {
-			ctx.Set("AuthUser", entity.User{})
-			return
+		var user *entity.User
+		var err error
+
+		if token := ctx.GetHeader("token"); token != "" {
+			user, err = service.DefaultUserService.GetUserByToken(token)
+			if err != nil {
+				app.Logger.Error("auth token err", token, err)
+			}
 		}
 
-		user, err := service.DefaultUserService.GetUserByOpenId(openId)
-		if err != nil || user == nil {
-			ctx.Set("AuthUser", entity.User{})
-			return
+		if openId := ctx.GetHeader("openid"); openId != "" {
+			user, err = service.DefaultUserService.GetUserByOpenId(openId)
+			if err != nil {
+				app.Logger.Error("auth openid err", openId, err)
+			}
+		}
+		if user == nil {
+			user = &entity.User{}
 		}
 		ctx.Set("AuthUser", *user)
 	}

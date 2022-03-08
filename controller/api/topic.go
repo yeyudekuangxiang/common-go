@@ -25,7 +25,7 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
-		UserId:     user.ID,
+		UserId:     int(user.ID),
 	})
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 
 	user := util.GetAuthUser(c)
 
-	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(user.ID, form.TopicId)
+	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(int(user.ID), form.TopicId)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 	user := util.GetAuthUser(c)
 
-	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, user.ID)
+	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID))
 	if err != nil {
 		return nil, err
 	}
