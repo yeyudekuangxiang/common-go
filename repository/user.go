@@ -14,6 +14,7 @@ type IUserRepository interface {
 	GetUserBy(by GetUserBy) entity.User
 	GetShortUserBy(by GetUserBy) entity.ShortUser
 	GetUserListBy(by GetUserListBy) []entity.User
+	GetShortUserListBy(by GetUserListBy) []entity.ShortUser
 }
 
 func NewUserRepository() UserRepository {
@@ -61,6 +62,22 @@ func (u UserRepository) GetShortUserBy(by GetUserBy) entity.ShortUser {
 }
 func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	list := make([]entity.User, 0)
+	db := app.DB.Model(entity.User{})
+
+	if by.Mobile != "" {
+		db.Where("phone_number = ?", by.Mobile)
+	}
+	if len(by.UserIds) > 0 {
+		db.Where("id in (?)", by.UserIds)
+	}
+
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}
+func (u UserRepository) GetShortUserListBy(by GetUserListBy) []entity.ShortUser {
+	list := make([]entity.ShortUser, 0)
 	db := app.DB.Model(entity.User{})
 
 	if by.Mobile != "" {

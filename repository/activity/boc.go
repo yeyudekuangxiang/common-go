@@ -37,7 +37,15 @@ func (a BocApplyRecordRepository) GetPageListBy(by GetRecordListBy) (list []acti
 		db.Where("user_id in (?)", by.UserIds)
 	}
 
-	db.Count(&total).Offset(by.Offset).Limit(by.Limit)
+	if len(by.ShareUserIds) > 0 {
+		db.Where("share_user_id in (?)", by.ShareUserIds)
+	}
+
+	if by.ApplyStatus > 0 {
+		db.Where("apply_status = ?", by.ApplyStatus)
+	}
+
+	db.Count(&total).Order("created_at desc").Offset(by.Offset).Limit(by.Limit)
 
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)

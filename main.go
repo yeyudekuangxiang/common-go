@@ -8,8 +8,6 @@ import (
 )
 
 var (
-	//env(local,dev,prod) 等于local时是用本地配置文件、dev时是用acm测试配置、prod时是用acm正式配置
-	flagEnv  = flag.String("env", "local", "-env")
 	flagConf = flag.String("c", "./config.ini", "-c")
 )
 

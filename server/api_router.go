@@ -27,7 +27,8 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/mp2c/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
 		mustAuthRouter.POST("/mp2c/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 
-		mustAuthRouter.GET("/activity/boc/share", format(activity.DefaultBocController.GetRecordList))
+		mustAuthRouter.GET("/activity/boc/apply/share", format(activity.DefaultBocController.GetRecordList))
+		mustAuthRouter.POST("/activity/boc/apply/add", format(activity.DefaultBocController.AddRecord))
 	}
 
 }
