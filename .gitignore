@@ -4,3 +4,5 @@
 /*.exe
 /acm
 config.ini
+config-dev.ini
+config-prod.ini

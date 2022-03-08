@@ -65,4 +65,4 @@ spec:
   tls:
     - hosts:
         - godev-api.miotech.com
-      secretName: default-tls
+      secretName: mp2c-go-tls
