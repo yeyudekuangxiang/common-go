@@ -16,7 +16,7 @@ func InitServer() *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 
 	handler := gin.New()
-	app.Server = &http.Server{
+	*app.Server = http.Server{
 		Handler: handler,
 	}
 	server.Middleware(handler)

@@ -25,6 +25,12 @@ MaxLifetime=50
 #控制台日志等级 Silent Error Warn Info
 LogLevel=Info
 
+[redis]
+Host=127.0.0.1
+Port=3306
+Password=
+DB=0
+
 [log]
 #debug info warn error
 Level=info

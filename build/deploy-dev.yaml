@@ -48,21 +48,22 @@ spec:
     - port: 80 #TODO: choose an unique port on each node to avoid port conflict
 
 ---
-apiVersion: extensions/v1beta1
 kind: Ingress
+apiVersion: extensions/v1beta1
 metadata:
   name: mp2c-go-ingress
   namespace: dev
 spec:
+  tls:
+    - hosts:
+        - godev-api.miotech.com
+      secretName: default-tls
   rules:
     - host: godev-api.miotech.com
       http:
         paths:
-          - backend:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
               serviceName: mp2c-go-svc
               servicePort: 80
-            path: /
-  tls:
-    - hosts:
-        - godev-api.miotech.com
-      secretName: mp2c-go-tls

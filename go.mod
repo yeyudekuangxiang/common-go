@@ -10,8 +10,10 @@ require (
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang/mock v1.5.0 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
@@ -25,6 +27,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/gomega v1.16.0 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/xuri/excelize/v2 v2.5.0
