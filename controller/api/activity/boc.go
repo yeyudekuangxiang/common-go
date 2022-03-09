@@ -12,7 +12,7 @@ type BocController struct {
 }
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
-	form := GetBocApplyRecordListForm{}
+	form := GetBocRecordListForm{}
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -35,18 +35,18 @@ func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 		"size":  form.PageSize,
 	}, nil
 }
-func (b BocController) AddRecord(c *gin.Context) (gin.H, error) {
-	form := AddBocApplyRecordFrom{}
-	if err := util.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-
+func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
+	form := AddBocRecordFrom{}
 	user := util.GetAuthUser(c)
-
-	_, err := activity.BocService{}.AddApplyRecord(activity.AddApplyRecordParam{
+	record, err := activity.DefaultBocService.FindOrCreateApplyRecord(activity.AddApplyRecordParam{
 		UserId:      user.ID,
 		ShareUserId: form.ShareUserId,
 	})
 
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"record": record,
+	}, nil
 }

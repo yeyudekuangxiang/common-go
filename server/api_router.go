@@ -28,7 +28,7 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/mp2c/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 
 		mustAuthRouter.GET("/activity/boc/apply/share", format(activity.DefaultBocController.GetRecordList))
-		mustAuthRouter.POST("/activity/boc/apply/add", format(activity.DefaultBocController.AddRecord))
+		mustAuthRouter.POST("/activity/boc/apply", format(activity.DefaultBocController.FindOrCreateRecord))
 	}
 
 }

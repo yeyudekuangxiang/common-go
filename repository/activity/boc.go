@@ -6,19 +6,19 @@ import (
 	activityM "mio/model/entity/activity"
 )
 
-var DefaultBocApplyRecordRepository = BocApplyRecordRepository{
+var DefaultBocRecordRepository = BocRecordRepository{
 	DB: app.DB,
 }
 
-type BocApplyRecordRepository struct {
+type BocRecordRepository struct {
 	DB *gorm.DB
 }
 
-func (a BocApplyRecordRepository) Save(record *activityM.BocApplyRecord) error {
+func (a BocRecordRepository) Save(record *activityM.BocRecord) error {
 	return a.DB.Save(record).Error
 }
-func (a BocApplyRecordRepository) FindBy(by FindRecordBy) activityM.BocApplyRecord {
-	record := activityM.BocApplyRecord{}
+func (a BocRecordRepository) FindBy(by FindRecordBy) activityM.BocRecord {
+	record := activityM.BocRecord{}
 	db := a.DB.Model(record)
 	if by.UserId > 0 {
 		db.Where("user_id = ?", by.UserId)
@@ -30,9 +30,9 @@ func (a BocApplyRecordRepository) FindBy(by FindRecordBy) activityM.BocApplyReco
 	}
 	return record
 }
-func (a BocApplyRecordRepository) GetPageListBy(by GetRecordListBy) (list []activityM.BocApplyRecord, total int64) {
-	list = make([]activityM.BocApplyRecord, 0)
-	db := a.DB.Model(activityM.BocApplyRecord{})
+func (a BocRecordRepository) GetPageListBy(by GetRecordListBy) (list []activityM.BocRecord, total int64) {
+	list = make([]activityM.BocRecord, 0)
+	db := a.DB.Model(activityM.BocRecord{})
 	if len(by.UserIds) > 0 {
 		db.Where("user_id in (?)", by.UserIds)
 	}

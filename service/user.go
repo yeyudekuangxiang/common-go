@@ -23,6 +23,9 @@ type UserService struct {
 }
 
 func (u UserService) GetUserById(id int64) (*entity.User, error) {
+	if id == 0 {
+		return &entity.User{}, nil
+	}
 	return u.r.GetUserById(id)
 }
 func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
@@ -54,5 +57,33 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 		Id:        user.ID,
 		Mobile:    user.PhoneNumber,
 		CreatedAt: model.Time{Time: time.Now()},
+	})
+}
+func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
+	user := entity.User{}
+	if err := util.MapTo(param, &user); err != nil {
+		return nil, err
+	}
+	user.Time = model.NewTime()
+	return &user, repository.DefaultUserRepository.Save(&user)
+}
+func (u UserService) GetUserBy(by repository.GetUserBy) entity.User {
+	return repository.DefaultUserRepository.GetUserBy(by)
+}
+func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
+	user := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
+		Mobile: mobile,
+		Source: entity.UserSourceMobile,
+	})
+
+	if user.ID > 0 {
+		return &user, nil
+	}
+	return u.CreateUser(CreateUserParam{
+		OpenId:      mobile,
+		Nickname:    "手机用户" + mobile[len(mobile)-4:],
+		PhoneNumber: mobile,
+		Source:      entity.UserSourceMobile,
+		UnionId:     mobile,
 	})
 }
