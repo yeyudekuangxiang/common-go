@@ -21,6 +21,16 @@ type User struct {
 	UnionId     string     `gorm:"column:unionid" json:"unionId"`
 	Time        model.Time `gorm:"time" json:"time"`
 }
+
+func (u User) ShortUser() ShortUser {
+	return ShortUser{
+		ID:        u.ID,
+		AvatarUrl: u.AvatarUrl,
+		Gender:    u.Gender,
+		Nickname:  u.Nickname,
+	}
+}
+
 type ShortUser struct {
 	ID        int64  `gorm:"primary_key;column:id" json:"id"`
 	AvatarUrl string `gorm:"column:avatar_url" json:"avatarUrl"`

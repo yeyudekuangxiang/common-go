@@ -20,3 +20,11 @@ type BocRecordDetail struct {
 	activityM.BocRecord
 	User entity.ShortUser `json:"user"`
 }
+
+type CreateBocShareBonusRecordParam struct {
+	UserId int64
+	//金额 单位分
+	Value int64
+	Type  activityM.BocShareBonusType
+	Info  string
+}

@@ -82,6 +82,12 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	if len(by.UserIds) > 0 {
 		db.Where("id in (?)", by.UserIds)
 	}
+	if len(by.Mobiles) > 0 {
+		db.Where("phone_number in (?)", by.Mobiles)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
 
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
@@ -98,7 +104,12 @@ func (u UserRepository) GetShortUserListBy(by GetUserListBy) []entity.ShortUser 
 	if len(by.UserIds) > 0 {
 		db.Where("id in (?)", by.UserIds)
 	}
-
+	if len(by.Mobiles) > 0 {
+		db.Where("phone_number in (?)", by.Mobiles)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
