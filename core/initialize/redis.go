@@ -15,7 +15,7 @@ type redisConfig struct {
 
 func InitRedis() {
 	c := redisConfig{}
-	if err := app.Ini.MapTo(&c); err != nil {
+	if err := app.Ini.Section("redis").MapTo(&c); err != nil {
 		panic(err)
 	}
 	rdb := redis.NewClient(&redis.Options{
