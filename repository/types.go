@@ -35,6 +35,8 @@ type GetTagPageListBy struct {
 
 type GetUserListBy struct {
 	Mobile  string
+	Mobiles []string
+	Source  entity.UserSource
 	UserIds []int64
 }
 

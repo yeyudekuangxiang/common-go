@@ -23,5 +23,8 @@ type BocRecordDetail struct {
 
 type CreateBocShareBonusRecordParam struct {
 	UserId int64
-	Value  int64 //金额 单位分
+	//金额 单位分
+	Value int64
+	Type  activityM.BocShareBonusType
+	Info  string
 }

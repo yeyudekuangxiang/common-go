@@ -87,3 +87,21 @@ func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 		UnionId:     mobile,
 	})
 }
+
+// FindUserBySource 根据用户id 获取指定平台的用户
+func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
+	user, err := repository.DefaultUserRepository.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil || user.PhoneNumber == "" {
+		return &entity.User{}, nil
+	}
+
+	sourceUer := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
+		Mobile: user.PhoneNumber,
+		Source: source,
+	})
+
+	return &sourceUer, nil
+}
