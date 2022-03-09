@@ -23,7 +23,7 @@ func apiRouter(router *gin.Engine) {
 		//h5活动页调用
 		authRouter.POST("/activity/boc/record", format(activity.DefaultBocController.FindOrCreateRecord))
 		//小程序端调用
-		authRouter.GET("/activity/boc/share", format(activity.DefaultBocController.GetRecordList))
+		authRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
 		authRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
 	}
 
