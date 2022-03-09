@@ -9,3 +9,7 @@ type GetBocRecordListForm struct {
 type AddBocRecordFrom struct {
 	ShareUserId int64 `json:"shareUserId" form:"shareUserId" binding:"gte=0" alias:"分享者ID"`
 }
+
+type AnswerBocQuestionFrom struct {
+	Right int8 `json:"right" form:"right" binding:"oneof=2 3" alias:"答题结果"`
+}

@@ -7,6 +7,7 @@ import (
 	activityM "mio/model/entity/activity"
 	"mio/repository"
 	activityR "mio/repository/activity"
+	"mio/service"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func (b BocService) GetApplyRecordPageList(param GetRecordPageListParam) (list [
 	if err != nil {
 		return
 	}
-	if user.ID == 0 {
+	if user == nil {
 		err = errors.New("用户不存在")
 		return
 	}
@@ -113,6 +114,32 @@ func (b BocService) AddApplyRecord(param AddApplyRecordParam) (*activityM.BocRec
 
 	return &record, activityR.DefaultBocRecordRepository.Save(&record)
 }
+func (b BocService) FindApplyRecord(userId int64) (*activityM.BocRecord, error) {
+
+	defaultRecord := activityM.NewBocRecord()
+	defaultRecord.UserId = userId
+	if userId == 0 {
+		return &defaultRecord, nil
+	}
+
+	user, err := repository.DefaultUserRepository.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil || user.PhoneNumber == "" {
+		return &defaultRecord, nil
+	}
+
+	mobileUser := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
+		Mobile: user.PhoneNumber,
+		Source: entity.UserSourceMobile,
+	})
+
+	return b.FindOrCreateApplyRecord(AddApplyRecordParam{
+		UserId: mobileUser.ID,
+	})
+}
 func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activityM.BocRecord, error) {
 	if param.UserId == 0 {
 		record := activityM.NewBocRecord()
@@ -127,4 +154,54 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 		return b.AddApplyRecord(param)
 	}
 	return &record, nil
+}
+func (b BocService) AnswerQuestion(userId int64, right int) error {
+	record, err := b.FindOrCreateApplyRecord(AddApplyRecordParam{
+		UserId: userId,
+	})
+	if err != nil {
+		return err
+	}
+
+	if record.AnswerStatus > 1 {
+		return nil
+	}
+
+	record.AnswerStatus = right
+	record.UpdatedAt = model.NewTime()
+	record.AnswerBonusStatus = 2
+	err = activityR.DefaultBocRecordRepository.Save(record)
+	if err != nil {
+		return err
+	}
+	if right == 2 {
+		return b.makeAnswerPointTransaction(userId)
+	}
+	return nil
+}
+func (b BocService) makeAnswerPointTransaction(userId int64) error {
+	user, err := repository.DefaultUserRepository.GetUserById(userId)
+	if err != nil {
+		return err
+	}
+	if user == nil || user.PhoneNumber == "" {
+		return errors.New("积分发放失败,用户不存在")
+	}
+
+	mioUser := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
+		Mobile: user.PhoneNumber,
+		Source: entity.UserSourceMio,
+	})
+
+	if mioUser.ID == 0 {
+		return errors.New("积分发放失败,小程序未绑定手机号,请在小程序端绑定手机号")
+	}
+
+	_, err = service.DefaultPointTransactionService.Create(service.CreatePointTransactionParam{
+		OpenId:       mioUser.OpenId,
+		Type:         entity.POINT_QUIZ,
+		Value:        2500,
+		AdditionInfo: "",
+	})
+	return err
 }
