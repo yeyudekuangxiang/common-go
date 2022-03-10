@@ -26,3 +26,13 @@ type CreateUserParam struct {
 	Source      entity.UserSource `json:"source" binding:"oneof=mio mobile"`
 	UnionId     string            `json:"unionId"`
 }
+
+type unidianTypeId struct {
+	Test     string
+	FiveYuan string
+}
+
+var UnidianTypeId = unidianTypeId{
+	Test:     "10013", // 测试
+	FiveYuan: "10689", // 5元话费
+}

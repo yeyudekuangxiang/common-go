@@ -1,13 +1,18 @@
 package activity
 
 import (
+	"context"
+	"fmt"
 	"github.com/pkg/errors"
+	"mio/config"
+	"mio/core/app"
 	"mio/model"
 	"mio/model/entity"
 	activityM "mio/model/entity/activity"
 	"mio/repository"
 	activityR "mio/repository/activity"
 	"mio/service"
+	"strconv"
 	"time"
 )
 
@@ -248,6 +253,12 @@ func (b BocService) IsOldUser(t time.Time) bool {
 
 // SendApplyBonus 发放申请卡片奖励
 func (b BocService) SendApplyBonus(userId int64) error {
+	//防止并发
+	cmd := app.Redis.GetEx(context.Background(), config.RedisKey.Limit1S+strconv.Itoa(int(userId)), 1*time.Second)
+	fmt.Println(cmd)
+	if cmd.Val() != "" {
+		return errors.New("正在审核中,请稍等")
+	}
 	//更改奖励发放状态
 	record := activityR.DefaultBocRecordRepository.FindBy(activityR.FindRecordBy{
 		UserId: userId,
@@ -289,7 +300,11 @@ func (b BocService) SendApplyBonus(userId int64) error {
 	}
 
 	//后续进行实际话费充值操作
-
+	userInfo, _ := service.DefaultUserService.GetUserById(userId)                                       //需要手机号码
+	err = service.DefaultUnidianService.SendPrize(service.UnidianTypeId.FiveYuan, userInfo.PhoneNumber) //充话费
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -302,11 +317,13 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 	if record.Id == 0 {
 		return errors.New("未查询到活动参与记录")
 	}
-	if record.ApplyBonusStatus == 3 {
+	if record.ApplyBonusStatus == 2 {
+		return errors.New("审核中")
+	} else if record.ApplyBonusStatus == 3 {
 		return errors.New("奖励已经发放过了")
 	}
 	record.BindWechatStatus = 2
-	record.BindWechatBonusStatus = 3
+	record.BindWechatBonusStatus = 2
 	record.BindWechatBonusTime = model.NewTime()
 	record.UpdatedAt = model.NewTime()
 	err := activityR.DefaultBocRecordRepository.Save(&record)
@@ -326,8 +343,8 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 	_, err = DefaultBocShareBonusRecordService.CreateRecord(CreateBocShareBonusRecordParam{
 		UserId: user.ID,
 		Value:  1000,
-		Type:   activityM.BocShareBonusMio,
-		Info:   "申请卡片获取10元话费奖励金",
+		Type:   activityM.BocShareBonusBoc10,
+		Info:   "申请卡片获取10元消费金",
 	})
 
 	if err != nil {

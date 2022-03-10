@@ -15,16 +15,20 @@ func apiRouter(router *gin.Engine) {
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c").Use(auth2(), throttle())
 	{
-		authRouter.GET("/product-item/list", format(product.DefaultProductController.ProductList))
-		authRouter.GET("/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
-		authRouter.POST("/tag/list", format(api.DefaultTagController.List))
-		authRouter.POST("/topic/list", format(api.DefaultTopicController.List))
-
 		//h5活动页调用
 		authRouter.POST("/activity/boc/record", format(activity.DefaultBocController.FindOrCreateRecord))
 		//小程序端调用
 		authRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
 		authRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
+		authRouter.GET("/newUser", format(api.DefaultUserController.GetNewUser))
+		authRouter.GET("/product-item/list", format(product.DefaultProductController.ProductList))
+		authRouter.GET("/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
+		authRouter.POST("/tag/list", format(api.DefaultTagController.List))
+		authRouter.POST("/topic/list", format(api.DefaultTopicController.List))
+		authRouter.GET("/user/get-yzm", format(api.DefaultUserController.GetYZM))     //获取验证码
+		authRouter.GET("/user/check-yzm", format(api.DefaultUserController.CheckYZM)) //校验验证码
+
+		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 	}
 
 	//必须登陆的路由

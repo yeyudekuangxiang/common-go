@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
@@ -52,4 +53,44 @@ func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"user": util.GetAuthUser(c),
 	}, nil
+}
+
+func (UserController) GetYZM(c *gin.Context) (gin.H, error) {
+	form := GetYZMForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	code, err := service.DefaultUserService.GetYZM(form.Mobile)
+	if err != nil {
+		return gin.H{
+			"msg": "fail",
+		}, err
+	}
+	return gin.H{
+		"code": code,
+	}, nil
+}
+
+func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
+	form := GetYZMForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
+		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile)
+		if err != nil {
+			return gin.H{}, err
+		}
+		userId := user.ID
+		token, err := service.DefaultUserService.CreateUserToken(userId)
+		return gin.H{
+			"token":  token,
+			"userId": userId,
+		}, err
+	} else {
+		err := errors.New("验证码错误,请重新输入")
+		return gin.H{}, err
+	}
+
 }
