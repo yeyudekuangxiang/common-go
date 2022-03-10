@@ -3,6 +3,7 @@ module mio
 go 1.15
 
 require (
+	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/zap v0.0.1

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/controller/api"
 	"mio/controller/api/activity"
+	authCtr "mio/controller/api/auth"
 	"mio/controller/api/coupon"
 	"mio/controller/api/product"
 )
@@ -20,7 +21,7 @@ func apiRouter(router *gin.Engine) {
 		//小程序端调用
 		authRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
 		authRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
-		authRouter.GET("/newUser", format(api.DefaultUserController.GetNewUser))
+
 		authRouter.GET("/product-item/list", format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
 		authRouter.POST("/tag/list", format(api.DefaultTagController.List))
@@ -29,6 +30,8 @@ func apiRouter(router *gin.Engine) {
 		authRouter.GET("/user/check-yzm", format(api.DefaultUserController.CheckYZM)) //校验验证码
 
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
+
+		authRouter.POST("/auth/oa/configsign", format(authCtr.DefaultOaController.Sign))
 	}
 
 	//必须登陆的路由
