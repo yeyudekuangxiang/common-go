@@ -21,3 +21,7 @@ type GetYZMForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
 	Code   string `json:"code" form:"code"  alias:"验证码"`
 }
+
+type CreateQrcodeForm struct {
+	Src string `json:"src" form:"src" binding:"required" alias:"跳转链接"`
+}
