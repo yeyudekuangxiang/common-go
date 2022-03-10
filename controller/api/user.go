@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"mio/internal/util"
+	"mio/model/entity"
 	"mio/service"
 )
 
@@ -91,4 +92,15 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 		return gin.H{}, err
 	}
 
+}
+
+func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
+	user := util.GetAuthUser(c)
+	mobileUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMobile, user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"user": mobileUser.ShortUser(),
+	}, nil
 }
