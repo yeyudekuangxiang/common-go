@@ -32,6 +32,8 @@ func apiRouter(router *gin.Engine) {
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 
 		authRouter.POST("/auth/oa/configsign", format(authCtr.DefaultOaController.Sign))
+
+		authRouter.POST("/tool/get-qrcode", format(api.DefaultToolController.GetQrcode))
 	}
 
 	//必须登陆的路由
