@@ -7,15 +7,15 @@ import (
 )
 
 func NewClient(c *weapp.Client) *Client {
-	return &Client{c: c}
+	return &Client{Client: c}
 }
 
 type Client struct {
-	c *weapp.Client
+	*weapp.Client
 }
 
-func (c Client) GetUnlimitedQRCode(param *weapp.UnlimitedQRCode) (*UnlimitedQRCodeResponse, error) {
-	resp, cerr, err := c.c.GetUnlimitedQRCode(param)
+func (c Client) GetUnlimitedQRCodeResponse(param *weapp.UnlimitedQRCode) (*UnlimitedQRCodeResponse, error) {
+	resp, cerr, err := c.GetUnlimitedQRCode(param)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

@@ -1,12 +1,19 @@
 package service
 
 import (
+	"context"
+	"fmt"
 	"github.com/pkg/errors"
+	"math/rand"
+	"mio/config"
+	"mio/core/app"
+	"mio/internal/message"
 	"mio/internal/util"
 	"mio/model"
 	"mio/model/auth"
 	"mio/model/entity"
 	"mio/repository"
+	"strconv"
 	"time"
 )
 
@@ -23,6 +30,9 @@ type UserService struct {
 }
 
 func (u UserService) GetUserById(id int64) (*entity.User, error) {
+	if id == 0 {
+		return &entity.User{}, nil
+	}
 	return u.r.GetUserById(id)
 }
 func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
@@ -55,4 +65,75 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 		Mobile:    user.PhoneNumber,
 		CreatedAt: model.Time{Time: time.Now()},
 	})
+}
+func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
+	user := entity.User{}
+	if err := util.MapTo(param, &user); err != nil {
+		return nil, err
+	}
+	user.Time = model.NewTime()
+	return &user, repository.DefaultUserRepository.Save(&user)
+}
+func (u UserService) GetUserBy(by repository.GetUserBy) entity.User {
+	return repository.DefaultUserRepository.GetUserBy(by)
+}
+func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
+	user := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
+		Mobile: mobile,
+		Source: entity.UserSourceMobile,
+	})
+
+	if user.ID > 0 {
+		return &user, nil
+	}
+	return u.CreateUser(CreateUserParam{
+		OpenId:      mobile,
+		Nickname:    "手机用户" + mobile[len(mobile)-4:],
+		PhoneNumber: mobile,
+		Source:      entity.UserSourceMobile,
+		UnionId:     mobile,
+	})
+}
+
+// FindUserBySource 根据用户id 获取指定平台的用户
+func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
+	user, err := repository.DefaultUserRepository.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil || user.PhoneNumber == "" {
+		return &entity.User{}, nil
+	}
+
+	sourceUer := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
+		Mobile: user.PhoneNumber,
+		Source: source,
+	})
+
+	return &sourceUer, nil
+}
+func (u UserService) GetYZM(mobile string) (string, error) {
+	code := ""
+	for i := 0; i < 4; i++ {
+		code += strconv.Itoa(rand.Intn(9))
+	}
+	//加入缓存
+	cmd := app.Redis.Set(context.Background(), config.RedisKey.YZM+mobile, code, time.Second*30*60)
+	fmt.Println(cmd.String())
+	//发送短信
+	message.SendYZM(mobile, code)
+
+	return code, nil
+}
+
+func (u UserService) CheckYZM(mobile string, code string) bool {
+	//取出缓存
+	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM+mobile)
+	fmt.Println(codeCmd.String())
+	if codeCmd.Val() == code {
+		fmt.Println("验证码验证通过")
+		return true
+	}
+
+	return false
 }

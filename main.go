@@ -20,6 +20,7 @@ func init() {
 	initIni()
 	initialize.InitLog()
 	initialize.InitDB()
+	initialize.InitRedis()
 	initialize.InitValidator()
 	initialize.InitWeapp()
 	initialize.InitServer()

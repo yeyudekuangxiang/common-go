@@ -2,10 +2,14 @@ package activity
 
 import "mio/controller"
 
-type GetBocApplyRecordListForm struct {
+type GetBocRecordListForm struct {
 	ApplyStatus int8 `json:"applyStatus" form:"applyStatus" binding:"oneof=0 1 2 3 4" alias:"参与状态"`
 	controller.PageFrom
 }
-type AddBocApplyRecordFrom struct {
+type AddBocRecordFrom struct {
 	ShareUserId int64 `json:"shareUserId" form:"shareUserId" binding:"gte=0" alias:"分享者ID"`
+}
+
+type AnswerBocQuestionFrom struct {
+	Right int8 `json:"right" form:"right" binding:"oneof=2 3" alias:"答题结果"`
 }

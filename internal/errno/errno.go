@@ -31,6 +31,7 @@ var (
 	// 用户错误, 前缀为 203
 	ErrUserNotFound      = Errno{Code: 20301, Message: "用户没找到"}
 	ErrPasswordIncorrect = Errno{Code: 20302, Message: "密码错误"}
+	ErrNotBindMobile     = Errno{Code: 20303, Message: "未授权手机号码"}
 )
 
 // 定义错误码

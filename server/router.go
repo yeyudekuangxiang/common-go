@@ -31,6 +31,10 @@ func Router(router *gin.Engine) {
 		context.String(200, "mio")
 	})
 
+	router.Any("MP_verify_pp3ZifoA3gboswNR.txt", func(context *gin.Context) {
+		context.String(200, "pp3ZifoA3gboswNR")
+	})
+
 	apiRouter(router)
 	adminRouter(router)
 	pugcRouter(router)

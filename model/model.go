@@ -109,6 +109,9 @@ func (d *Date) Scan(value interface{}) error {
 	d.Time = t
 	return nil
 }
+func (d Date) String() string {
+	return d.Time.Format(dateFormat)
+}
 
 //json时格式化日期为2016-01-02 15:04:05的格式 并且获取值时如果为初始时间则赋值当前时间
 type CreatedTime struct {

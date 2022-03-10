@@ -25,6 +25,12 @@ MaxLifetime=50
 #控制台日志等级 Silent Error Warn Info
 LogLevel=Info
 
+[redis]
+Host=r-uf68v1lom3hv3bfksw.redis.rds.aliyuncs.com
+Port=6379
+Password=Mi0tech@1133
+DB=0
+
 [log]
 #debug info warn error
 Level=info
@@ -32,6 +38,10 @@ Level=info
 MaxSize=100
 
 [weapp]
+AppId=
+Secret=
+
+[wxoa]
 AppId=
 Secret=
 

@@ -16,7 +16,15 @@ type AddApplyRecordParam struct {
 	ShareUserId int64 `json:"shareUserId"` //分享者用户id
 }
 
-type BocApplyRecordDetail struct {
-	activityM.BocApplyRecord
+type BocRecordDetail struct {
+	activityM.BocRecord
 	User entity.ShortUser `json:"user"`
+}
+
+type CreateBocShareBonusRecordParam struct {
+	UserId int64
+	//金额 单位分
+	Value int64
+	Type  activityM.BocShareBonusType
+	Info  string
 }

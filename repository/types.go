@@ -1,7 +1,14 @@
 package repository
 
+import (
+	"mio/model"
+	"mio/model/entity"
+)
+
 type GetUserBy struct {
 	OpenId string
+	Source entity.UserSource
+	Mobile string
 }
 type FindTopicLikeBy struct {
 	TopicId int
@@ -28,5 +35,19 @@ type GetTagPageListBy struct {
 
 type GetUserListBy struct {
 	Mobile  string
+	Mobiles []string
+	Source  entity.UserSource
 	UserIds []int64
+}
+
+type FindPointBy struct {
+	OpenId string
+}
+type GetPointTransactionListBy struct {
+	OpenId string
+}
+type FindPointTransactionCountLimitBy struct {
+	OpenId          string
+	TransactionType entity.PointTransactionType
+	TransactionDate model.Date
 }

@@ -9,6 +9,7 @@ import (
 var DefaultUserRepository IUserRepository = NewUserRepository()
 
 type IUserRepository interface {
+	Save(user *entity.User) error
 	// GetUserById 根据用id获取用户信息
 	GetUserById(int64) (*entity.User, error)
 	GetUserBy(by GetUserBy) entity.User
@@ -24,6 +25,9 @@ func NewUserRepository() UserRepository {
 type UserRepository struct {
 }
 
+func (u UserRepository) Save(user *entity.User) error {
+	return app.DB.Save(user).Error
+}
 func (u UserRepository) GetUserById(id int64) (*entity.User, error) {
 	var user entity.User
 	if err := app.DB.First(&user, id).Error; err != nil {
@@ -37,9 +41,17 @@ func (u UserRepository) GetUserById(id int64) (*entity.User, error) {
 func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	user := entity.User{}
 	db := app.DB.Model(user)
+
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
+	if by.Mobile != "" {
+		db.Where("phone_number = ?", by.Mobile)
+	}
+
 	if err := db.First(&user).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
@@ -70,6 +82,12 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	if len(by.UserIds) > 0 {
 		db.Where("id in (?)", by.UserIds)
 	}
+	if len(by.Mobiles) > 0 {
+		db.Where("phone_number in (?)", by.Mobiles)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
 
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
@@ -86,7 +104,12 @@ func (u UserRepository) GetShortUserListBy(by GetUserListBy) []entity.ShortUser 
 	if len(by.UserIds) > 0 {
 		db.Where("id in (?)", by.UserIds)
 	}
-
+	if len(by.Mobiles) > 0 {
+		db.Where("phone_number in (?)", by.Mobiles)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}

@@ -28,5 +28,6 @@ func InitWeapp() {
 	if err := app.Ini.Section("weapp").MapTo(&conf); err != nil {
 		log.Panic("获取小程序配置文件失败", err)
 	}
-	app.Weapp = weapp.NewClient(conf.AppId, conf.Secret, weapp.WithCache(noCache{}))
+	c := weapp.NewClient(conf.AppId, conf.Secret, weapp.WithCache(noCache{}))
+	*app.Weapp = *c
 }

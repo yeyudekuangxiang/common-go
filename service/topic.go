@@ -52,7 +52,7 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 	return detailList, total, nil
 }
 func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCode(&weapp.UnlimitedQRCode{
+	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
 		Scene:     fmt.Sprintf("topicId=%d&userId=%d", topicId, userId),
 		Page:      "pages/cool-mio/mio-detail/index",
 		Width:     100,
