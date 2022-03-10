@@ -40,6 +40,7 @@ func apiRouter(router *gin.Engine) {
 	mustAuthRouter := router.Group("/api/mp2c").Use(mustAuth2(), throttle())
 	{
 		mustAuthRouter.GET("/user", format(api.DefaultUserController.GetUserInfo))
+		mustAuthRouter.GET("/mobile-user", format(api.DefaultUserController.GetMobileUserInfo))
 		mustAuthRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
 		mustAuthRouter.POST("/topic/like/change", format(api.DefaultTopicController.ChangeTopicLike))
 
