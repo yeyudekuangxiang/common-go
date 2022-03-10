@@ -5,8 +5,9 @@ import "mio/model"
 type BocShareBonusType string
 
 const (
-	BocShareBonusMio = "mio"
-	BocShareBonusBoc = "boc"
+	BocShareBonusMio   = "mio"
+	BocShareBonusBoc   = "boc"
+	BocShareBonusBoc10 = "boc10"
 )
 
 type BocShareBonusRecord struct {

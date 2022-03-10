@@ -46,6 +46,10 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 }
 
 func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
+
+	service.DefaultUnidianService.SendPrize(service.UnidianTypeId.FiveYuan, "13817715315")
+	//os.Exit(0)
+	return nil, nil
 	f := excelize.NewFile()
 	index := f.NewSheet("code")
 	f.SetCellValue("code", "A1", "绿喵0积分")

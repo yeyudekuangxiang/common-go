@@ -1,12 +1,19 @@
 package service
 
 import (
+	"context"
+	"fmt"
 	"github.com/pkg/errors"
+	"math/rand"
+	"mio/config"
+	"mio/core/app"
+	"mio/internal/message"
 	"mio/internal/util"
 	"mio/model"
 	"mio/model/auth"
 	"mio/model/entity"
 	"mio/repository"
+	"strconv"
 	"time"
 )
 
@@ -104,4 +111,29 @@ func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*
 	})
 
 	return &sourceUer, nil
+}
+func (u UserService) GetYZM(mobile string) (string, error) {
+	code := ""
+	for i := 0; i < 4; i++ {
+		code += strconv.Itoa(rand.Intn(9))
+	}
+	//加入缓存
+	cmd := app.Redis.Set(context.Background(), config.RedisKey.YZM+mobile, code, time.Second*30*60)
+	fmt.Println(cmd.String())
+	//发送短信
+	message.SendYZM(mobile, code)
+
+	return code, nil
+}
+
+func (u UserService) CheckYZM(mobile string, code string) bool {
+	//取出缓存
+	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM+mobile)
+	fmt.Println(codeCmd.String())
+	if codeCmd.Val() == code {
+		fmt.Println("验证码验证通过")
+		return true
+	}
+
+	return false
 }
