@@ -17,4 +17,5 @@ if [ -z "$(kubectl get deployment ${container_name} --namespace=${namespace} 2>/
   echo "deployment \"${container_name}\"  not exists. prepare for create"
   kubectl apply -f ${deploy_file} --validate=false --namespace=${namespace}
 fi
-kubectl patch deployment ${container_name} --namespace=${namespace} -p '{"spec":{"template":{"spec":{"containers":[{"name":"'${container_name}'","env":[{"name":"RESTART_TIME","value":"'$(date +%s)'"}]}]}}}}'
+kubectl patch deployment ${container_name} --namespace=${namespace} -p '{"spec":{"template":{"spec":{"containers":[{"name":"'${container_name}'","image": "hub-cn.miotech.com/mioyingtech/mio-go:'${1}'","env":[{"name":"RESTART_TIME","value":"'$(date +%s)'"}]}]}}}}'
+
