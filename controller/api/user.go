@@ -60,15 +60,13 @@ func (UserController) GetYZM(c *gin.Context) (gin.H, error) {
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	code, err := service.DefaultUserService.GetYZM(form.Mobile)
+	_, err := service.DefaultUserService.GetYZM(form.Mobile)
 	if err != nil {
 		return gin.H{
 			"msg": "fail",
 		}, err
 	}
-	return gin.H{
-		"code": code,
-	}, nil
+	return nil, nil
 }
 
 func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
