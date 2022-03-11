@@ -13,3 +13,7 @@ type AddBocRecordFrom struct {
 type AnswerBocQuestionFrom struct {
 	Right int8 `json:"right" form:"right" binding:"oneof=2 3" alias:"答题结果"`
 }
+
+type ApplySendBonus struct {
+	Type string `json:"type" form:"type" binding:"oneof=apply bind boc" alias:"奖励类型"`
+}

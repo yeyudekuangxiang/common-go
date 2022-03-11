@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"mio/config"
 	"mio/core/app"
 	"mio/model"
@@ -19,9 +20,10 @@ import (
 //活动开始时间 用户判断是否老用户
 var bocActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-09 00:00:00")
 
-var DefaultBocService = BocService{}
+var DefaultBocService = BocService{repo: activityR.DefaultBocRecordRepository}
 
 type BocService struct {
+	repo activityR.BocRecordRepository
 }
 
 // GetApplyRecordPageList 获取用户的分享记录
@@ -44,6 +46,7 @@ func (b BocService) GetApplyRecordPageList(param GetRecordPageListParam) (list [
 	//根据手机号获取用户所有账户
 	userList := repository.DefaultUserRepository.GetUserListBy(repository.GetUserListBy{
 		Mobile: user.PhoneNumber,
+		Source: entity.UserSourceMobile,
 	})
 	if len(userList) == 0 {
 		return
@@ -55,10 +58,11 @@ func (b BocService) GetApplyRecordPageList(param GetRecordPageListParam) (list [
 		userIds = append(userIds, u.ID)
 	}
 	recordList, total := activityR.DefaultBocRecordRepository.GetPageListBy(activityR.GetRecordListBy{
-		ApplyStatus:  param.ApplyStatus,
-		ShareUserIds: userIds,
-		Offset:       param.Offset,
-		Limit:        param.Limit,
+		ApplyStatus:             param.ApplyStatus,
+		ShareUserIds:            userIds,
+		ShareUserBocBonusStatus: param.ShareUserBocBonusStatus,
+		Offset:                  param.Offset,
+		Limit:                   param.Limit,
 	})
 	if len(recordList) == 0 {
 		return
@@ -250,8 +254,15 @@ func (b BocService) makeAnswerPointTransaction(userId int64) error {
 func (b BocService) IsOldUser(t time.Time) bool {
 	return !t.IsZero() && t.Before(bocActivityStartTime)
 }
+func (b BocService) IsOldUserById(userId int64) (bool, error) {
+	mioUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMio, userId)
+	if err != nil {
+		return false, err
+	}
+	return b.IsOldUser(mioUser.Time.Time), nil
+}
 
-// SendApplyBonus 发放申请卡片奖励
+// SendApplyBonus 发放申请卡片奖励(拿到中行列表后 根据中行列表和活动参与记录执行)
 func (b BocService) SendApplyBonus(userId int64) error {
 	//防止并发
 	cmd := app.Redis.GetEx(context.Background(), config.RedisKey.Limit1S+strconv.Itoa(int(userId)), 1*time.Second)
@@ -273,6 +284,7 @@ func (b BocService) SendApplyBonus(userId int64) error {
 
 	record.ApplyStatus = 3
 	record.ApplyBonusStatus = 3
+	record.ApplyBonusTime = model.NewTime()
 	record.UpdatedAt = model.NewTime()
 	err := activityR.DefaultBocRecordRepository.Save(&record)
 	if err != nil {
@@ -308,7 +320,7 @@ func (b BocService) SendApplyBonus(userId int64) error {
 	return nil
 }
 
-// SendBindWechatBonus 发放绑定微信奖励
+// SendBindWechatBonus 发放绑定微信奖励(拿到中行列表后 根据中行列表和活动参与记录执行)
 func (b BocService) SendBindWechatBonus(userId int64) error {
 	//更改奖励发放状态
 	record := activityR.DefaultBocRecordRepository.FindBy(activityR.FindRecordBy{
@@ -353,5 +365,99 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 
 	//后续进行实际话费充值操作
 
+	return nil
+}
+
+// ApplySendApplyBonus 申请发放五元奖励
+func (b BocService) ApplySendApplyBonus(userId int64) error {
+	mobileUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMobile, userId)
+	if err != nil {
+		return err
+	}
+	if mobileUser.ID == 0 {
+		return errors.New("请检查是否已经绑定手机号号码")
+	}
+	record := activityR.DefaultBocRecordRepository.FindBy(activityR.FindRecordBy{
+		UserId: mobileUser.ID,
+	})
+	if record.ApplyStatus != 3 {
+		return errors.New("银行卡暂未申请成功,请稍后再试")
+	}
+	if record.ApplyBonusStatus != 1 {
+		return errors.New("奖励已申请")
+	}
+	record.ApplyBonusStatus = 2
+	return activityR.DefaultBocRecordRepository.Save(&record)
+}
+
+// ApplySendBindWechatBonus 申请发放10圆奖励
+func (b BocService) ApplySendBindWechatBonus(userId int64) error {
+	mobileUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMobile, userId)
+	if err != nil {
+		return err
+	}
+	if mobileUser.ID == 0 {
+		return errors.New("请检查是否已经绑定手机号号码")
+	}
+	record := activityR.DefaultBocRecordRepository.FindBy(activityR.FindRecordBy{
+		UserId: mobileUser.ID,
+	})
+	if record.BindWechatStatus != 2 {
+		return errors.New("银行卡暂未绑定微信,请稍后再试")
+	}
+	if record.BindWechatBonusStatus != 1 {
+		return errors.New("奖励已申请")
+	}
+	record.BindWechatBonusStatus = 2
+	return activityR.DefaultBocRecordRepository.Save(&record)
+}
+
+// ApplySendBocBonus 申请发放中行奖励金
+func (b BocService) ApplySendBocBonus(userId int64) error {
+	list, _, err := b.GetApplyRecordPageList(GetRecordPageListParam{
+		UserId:                  userId,
+		ApplyStatus:             3,
+		ShareUserBocBonusStatus: 1,
+		Offset:                  0,
+		Limit:                   200,
+	})
+	if err != nil {
+		app.Logger.Error(userId, err)
+		return errors.New("申请失败,请稍后再试")
+	}
+
+	if len(list) == 0 {
+		return errors.New("没有未领取的奖励")
+	}
+
+	err = app.DB.Transaction(func(tx *gorm.DB) error {
+		bocRecordRepo := activityR.BocRecordRepository{DB: tx}
+		shareBonusRecordService := BocShareBonusRecordService{repo: activityR.BocShareBonusRecordRepository{DB: tx}}
+
+		var totalValue int64
+		ids := ""
+		for _, item := range list {
+			record := item.BocRecord
+			record.ShareUserBocBonusStatus = 2
+			record.ShareUserBocBonusTime = model.NewTime()
+			err := bocRecordRepo.Save(&record)
+			if err != nil {
+				return err
+			}
+			ids += strconv.Itoa(int(record.Id)) + ","
+			totalValue += 500
+		}
+		_, err = shareBonusRecordService.CreateRecord(CreateBocShareBonusRecordParam{
+			UserId: userId,
+			Value:  totalValue,
+			Type:   activityM.BocShareBonusBoc,
+			Info:   ids,
+		})
+		return err
+	})
+	if err != nil {
+		app.Logger.Error(userId, err)
+		return errors.New("申请失败,请稍后再试")
+	}
 	return nil
 }
