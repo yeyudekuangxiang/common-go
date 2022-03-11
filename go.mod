@@ -29,7 +29,7 @@ require (
 	github.com/onsi/gomega v1.16.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/satori/go.uuid v1.2.0 // indirect
-	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/xuri/excelize/v2 v2.5.0

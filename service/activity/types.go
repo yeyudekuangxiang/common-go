@@ -6,10 +6,11 @@ import (
 )
 
 type GetRecordPageListParam struct {
-	UserId      int64 `json:"userId"`
-	ApplyStatus int8  `json:"applyStatus"`
-	Offset      int   `json:"offset"`
-	Limit       int   `json:"limit"`
+	UserId                  int64 `json:"userId"`
+	ApplyStatus             int8  `json:"applyStatus"`
+	ShareUserBocBonusStatus int8  `json:"shareUserBocBonusStatus"`
+	Offset                  int   `json:"offset"`
+	Limit                   int   `json:"limit"`
 }
 type AddApplyRecordParam struct {
 	UserId      int64 `json:"userId"`

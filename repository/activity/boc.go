@@ -44,6 +44,9 @@ func (a BocRecordRepository) GetPageListBy(by GetRecordListBy) (list []activityM
 	if by.ApplyStatus > 0 {
 		db.Where("apply_status = ?", by.ApplyStatus)
 	}
+	if by.ShareUserBocBonusStatus > 0 {
+		db.Where("share_user_boc_bonus_status = ?", by.ShareUserBocBonusStatus)
+	}
 
 	db.Count(&total).Order("created_at desc").Offset(by.Offset).Limit(by.Limit)
 

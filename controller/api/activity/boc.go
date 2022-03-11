@@ -3,6 +3,7 @@ package activity
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/util"
+	activityM "mio/model/entity/activity"
 	"mio/service/activity"
 )
 
@@ -58,8 +59,21 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	isOldUser, err := activity.DefaultBocService.IsOldUserById(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	type recordDetail struct {
+		Record    *activityM.BocRecord `json:"record"`
+		IsOldUser bool                 `json:"isOldUser"`
+	}
+
 	return gin.H{
-		"record": record,
+		"record": recordDetail{
+			Record:    record,
+			IsOldUser: isOldUser,
+		},
 	}, nil
 }
 func (b BocController) Answer(c *gin.Context) (gin.H, error) {
@@ -83,4 +97,20 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"record": record,
 	}, nil
+}
+func (b BocController) ApplySendBonus(c *gin.Context) (gin.H, error) {
+	form := ApplySendBonus{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := util.GetAuthUser(c)
+	switch form.Type {
+	case "apply":
+		return nil, activity.DefaultBocService.ApplySendApplyBonus(user.ID)
+	case "bind":
+		return nil, activity.DefaultBocService.ApplySendBindWechatBonus(user.ID)
+	case "boc":
+		return nil, activity.DefaultBocService.ApplySendBocBonus(user.ID)
+	}
+	return nil, nil
 }
