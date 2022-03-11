@@ -68,15 +68,15 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 	}
 
 	type recordDetail struct {
-		Record        *activityM.BocRecord `json:"record"`
-		IsOldUser     bool                 `json:"isOldUser"`
-		ActivityIsEnd bool                 `json:"activityIsEnd"`
-		Now           string               `json:"now"`
+		*activityM.BocRecord
+		IsOldUser     bool   `json:"isOldUser"`
+		ActivityIsEnd bool   `json:"activityIsEnd"`
+		Now           string `json:"now"`
 	}
 
 	return gin.H{
 		"record": recordDetail{
-			Record:        record,
+			BocRecord:     record,
 			IsOldUser:     isOldUser,
 			ActivityIsEnd: bocEndTime.Before(time.Now()),
 			Now:           time.Now().String(),
@@ -106,15 +106,15 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 	}
 
 	type recordDetail struct {
-		Record        *activityM.BocRecord `json:"record"`
-		IsOldUser     bool                 `json:"isOldUser"`
-		ActivityIsEnd bool                 `json:"activityIsEnd"`
-		Now           string               `json:"now"`
+		*activityM.BocRecord
+		IsOldUser     bool   `json:"isOldUser"`
+		ActivityIsEnd bool   `json:"activityIsEnd"`
+		Now           string `json:"now"`
 	}
 
 	return gin.H{
 		"record": recordDetail{
-			Record:        record,
+			BocRecord:     record,
 			IsOldUser:     isOldUser,
 			ActivityIsEnd: bocEndTime.Before(time.Now()),
 			Now:           time.Now().String(),

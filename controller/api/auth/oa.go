@@ -43,7 +43,7 @@ func (OaController) Sign(c *gin.Context) (gin.H, error) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	sign := jssdk.WXConfigSign(ticker, nonceStr, timestamp, form.Url)
 	return gin.H{
-		"appId":     config.App.Weapp.AppId,
+		"appId":     config.App.Wxoa.AppId,
 		"timestamp": timestamp,
 		"nonceStr":  nonceStr,
 		"signature": sign,
