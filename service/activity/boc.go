@@ -430,6 +430,17 @@ func (b BocService) ApplySendBocBonus(userId int64) error {
 		return errors.New("没有未领取的奖励")
 	}
 
+	sum, err := DefaultBocShareBonusRecordService.SendBocSum(userId)
+
+	if err != nil {
+		app.Logger.Error(userId, err)
+		return errors.New("系统异常,请稍后再试")
+	}
+	if sum >= 5000 {
+		app.Logger.Error(userId, sum, "奖励最高可领50元")
+		return errors.New("奖励最高可领50元")
+	}
+
 	err = app.DB.Transaction(func(tx *gorm.DB) error {
 		bocRecordRepo := activityR.BocRecordRepository{DB: tx}
 		shareBonusRecordService := BocShareBonusRecordService{repo: activityR.BocShareBonusRecordRepository{DB: tx}}
@@ -446,7 +457,13 @@ func (b BocService) ApplySendBocBonus(userId int64) error {
 			}
 			ids += strconv.Itoa(int(record.Id)) + ","
 			totalValue += 500
+
+			if totalValue >= 5000-sum {
+				totalValue = 5000 - sum
+				break
+			}
 		}
+
 		_, err = shareBonusRecordService.CreateRecord(CreateBocShareBonusRecordParam{
 			UserId: userId,
 			Value:  totalValue,
