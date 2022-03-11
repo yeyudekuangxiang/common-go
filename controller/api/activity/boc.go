@@ -5,12 +5,15 @@ import (
 	"mio/internal/util"
 	activityM "mio/model/entity/activity"
 	"mio/service/activity"
+	"time"
 )
 
 var DefaultBocController = BocController{}
 
 type BocController struct {
 }
+
+var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-31 23:59:59")
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	form := GetBocRecordListForm{}
@@ -65,14 +68,18 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 	}
 
 	type recordDetail struct {
-		Record    *activityM.BocRecord `json:"record"`
-		IsOldUser bool                 `json:"isOldUser"`
+		Record        *activityM.BocRecord `json:"record"`
+		IsOldUser     bool                 `json:"isOldUser"`
+		ActivityIsEnd bool                 `json:"activityIsEnd"`
+		Now           string               `json:"now"`
 	}
 
 	return gin.H{
 		"record": recordDetail{
-			Record:    record,
-			IsOldUser: isOldUser,
+			Record:        record,
+			IsOldUser:     isOldUser,
+			ActivityIsEnd: bocEndTime.Before(time.Now()),
+			Now:           time.Now().String(),
 		},
 	}, nil
 }
@@ -99,13 +106,18 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 	}
 
 	type recordDetail struct {
-		Record    *activityM.BocRecord `json:"record"`
-		IsOldUser bool                 `json:"isOldUser"`
+		Record        *activityM.BocRecord `json:"record"`
+		IsOldUser     bool                 `json:"isOldUser"`
+		ActivityIsEnd bool                 `json:"activityIsEnd"`
+		Now           string               `json:"now"`
 	}
+
 	return gin.H{
 		"record": recordDetail{
-			Record:    record,
-			IsOldUser: isOldUser,
+			Record:        record,
+			IsOldUser:     isOldUser,
+			ActivityIsEnd: bocEndTime.Before(time.Now()),
+			Now:           time.Now().String(),
 		},
 	}, nil
 }

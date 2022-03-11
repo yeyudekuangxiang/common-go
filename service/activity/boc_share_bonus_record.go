@@ -25,3 +25,6 @@ func (b BocShareBonusRecordService) CreateRecord(param CreateBocShareBonusRecord
 
 	return &record, b.repo.Save(&record)
 }
+func (b BocShareBonusRecordService) SendBocSum(userId int64) (int64, error) {
+	return b.repo.GetUserBonus(userId, activityM.BocShareBonusBoc)
+}
