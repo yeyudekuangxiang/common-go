@@ -60,6 +60,12 @@ func (t *Time) Scan(value interface{}) error {
 	t.Time = ti
 	return nil
 }
+func (t *Time) Date() Date {
+	return Date{Time: t.Time}
+}
+func (t *Time) String() string {
+	return t.Format(timeFormat)
+}
 
 func NewDate(date string) (Date, error) {
 	t, err := time.Parse(dateFormat, date)

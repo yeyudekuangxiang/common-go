@@ -3,13 +3,17 @@ package activity
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/util"
+	activityM "mio/model/entity/activity"
 	"mio/service/activity"
+	"time"
 )
 
 var DefaultBocController = BocController{}
 
 type BocController struct {
 }
+
+var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-31 23:59:59")
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	form := GetBocRecordListForm{}
@@ -58,8 +62,25 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	isOldUser, err := activity.DefaultBocService.IsOldUserById(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	type recordDetail struct {
+		*activityM.BocRecord
+		IsOldUser     bool   `json:"isOldUser"`
+		ActivityIsEnd bool   `json:"activityIsEnd"`
+		Now           string `json:"now"`
+	}
+
 	return gin.H{
-		"record": record,
+		"record": recordDetail{
+			BocRecord:     record,
+			IsOldUser:     isOldUser,
+			ActivityIsEnd: bocEndTime.Before(time.Now()),
+			Now:           time.Now().String(),
+		},
 	}, nil
 }
 func (b BocController) Answer(c *gin.Context) (gin.H, error) {
@@ -76,11 +97,43 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 
 	user := util.GetAuthUser(c)
 	record, err := activity.DefaultBocService.FindApplyRecord(user.ID)
-
 	if err != nil {
 		return nil, err
 	}
+	isOldUser, err := activity.DefaultBocService.IsOldUserById(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	type recordDetail struct {
+		*activityM.BocRecord
+		IsOldUser     bool   `json:"isOldUser"`
+		ActivityIsEnd bool   `json:"activityIsEnd"`
+		Now           string `json:"now"`
+	}
+
 	return gin.H{
-		"record": record,
+		"record": recordDetail{
+			BocRecord:     record,
+			IsOldUser:     isOldUser,
+			ActivityIsEnd: bocEndTime.Before(time.Now()),
+			Now:           time.Now().String(),
+		},
 	}, nil
+}
+func (b BocController) ApplySendBonus(c *gin.Context) (gin.H, error) {
+	form := ApplySendBonus{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := util.GetAuthUser(c)
+	switch form.Type {
+	case "apply":
+		return nil, activity.DefaultBocService.ApplySendApplyBonus(user.ID)
+	case "bind":
+		return nil, activity.DefaultBocService.ApplySendBindWechatBonus(user.ID)
+	case "boc":
+		return nil, activity.DefaultBocService.ApplySendBocBonus(user.ID)
+	}
+	return nil, nil
 }

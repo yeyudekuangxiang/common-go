@@ -46,6 +46,7 @@ func apiRouter(router *gin.Engine) {
 
 		//h5活动页调用
 		mustAuthRouter.POST("/activity/boc/answer", format(activity.DefaultBocController.Answer))
+		mustAuthRouter.POST("/activity/bonus/apply", format(activity.DefaultBocController.ApplySendBonus))
 	}
 
 }

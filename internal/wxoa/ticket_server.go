@@ -47,6 +47,7 @@ func (srv *TicketTokenServer) getTicket() (*Ticket, error) {
 	return nil, fmt.Errorf("%d %s", oaResponse.ErrCode, oaResponse.ErrMsg)
 }
 func (srv *TicketTokenServer) Ticket() (ticket string, err error) {
+	//return srv.RefreshTicket("")
 	ticket, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
 	if err != nil {
 		app.Logger.Error(err)
@@ -70,7 +71,7 @@ func (srv *TicketTokenServer) RefreshTicket(currentTicket string) (ticket string
 	if err != nil {
 		app.Logger.Error(err)
 	}
-	if ticket != "" && ticket != currentTicket {
+	if ticket != "" && currentTicket != "" && ticket != currentTicket {
 		return
 	}
 

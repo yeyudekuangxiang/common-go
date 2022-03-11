@@ -1,15 +1,17 @@
 package activity
 
 import (
+	"mio/model"
 	"mio/model/entity"
 	activityM "mio/model/entity/activity"
 )
 
 type GetRecordPageListParam struct {
-	UserId      int64 `json:"userId"`
-	ApplyStatus int8  `json:"applyStatus"`
-	Offset      int   `json:"offset"`
-	Limit       int   `json:"limit"`
+	UserId                  int64 `json:"userId"`
+	ApplyStatus             int8  `json:"applyStatus"`
+	ShareUserBocBonusStatus int8  `json:"shareUserBocBonusStatus"`
+	Offset                  int   `json:"offset"`
+	Limit                   int   `json:"limit"`
 }
 type AddApplyRecordParam struct {
 	UserId      int64 `json:"userId"`
@@ -18,7 +20,9 @@ type AddApplyRecordParam struct {
 
 type BocRecordDetail struct {
 	activityM.BocRecord
-	User entity.ShortUser `json:"user"`
+	CreatedAtDate model.Date       `json:"createdAtDate"`
+	UpdatedAtDate model.Date       `json:"updatedAtDate"`
+	User          entity.ShortUser `json:"user"`
 }
 
 type CreateBocShareBonusRecordParam struct {
