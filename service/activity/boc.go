@@ -389,7 +389,14 @@ func (b BocService) ApplySendApplyBonus(userId int64) error {
 		return errors.New("奖励已申请")
 	}
 	record.ApplyBonusStatus = 2
-	return activityR.DefaultBocRecordRepository.Save(&record)
+	err = activityR.DefaultBocRecordRepository.Save(&record)
+	if err != nil {
+		app.Logger.Error(userId, err)
+		return errors.New("申请失败,请稍后再试")
+	}
+
+	//话费的无需审核直接充值
+	return b.SendApplyBonus(userId)
 }
 
 // ApplySendBindWechatBonus 申请发放10圆奖励
