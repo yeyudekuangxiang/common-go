@@ -90,12 +90,23 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 
 	user := util.GetAuthUser(c)
 	record, err := activity.DefaultBocService.FindApplyRecord(user.ID)
-
 	if err != nil {
 		return nil, err
 	}
+	isOldUser, err := activity.DefaultBocService.IsOldUserById(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	type recordDetail struct {
+		Record    *activityM.BocRecord `json:"record"`
+		IsOldUser bool                 `json:"isOldUser"`
+	}
 	return gin.H{
-		"record": record,
+		"record": recordDetail{
+			Record:    record,
+			IsOldUser: isOldUser,
+		},
 	}, nil
 }
 func (b BocController) ApplySendBonus(c *gin.Context) (gin.H, error) {
