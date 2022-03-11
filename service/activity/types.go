@@ -1,6 +1,7 @@
 package activity
 
 import (
+	"mio/model"
 	"mio/model/entity"
 	activityM "mio/model/entity/activity"
 )
@@ -19,7 +20,9 @@ type AddApplyRecordParam struct {
 
 type BocRecordDetail struct {
 	activityM.BocRecord
-	User entity.ShortUser `json:"user"`
+	CreatedAtDate model.Date       `json:"createdAtDate"`
+	UpdatedAtDate model.Date       `json:"updatedAtDate"`
+	User          entity.ShortUser `json:"user"`
 }
 
 type CreateBocShareBonusRecordParam struct {

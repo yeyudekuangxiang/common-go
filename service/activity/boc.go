@@ -104,8 +104,10 @@ func (b BocService) GetApplyRecordPageList(param GetRecordPageListParam) (list [
 		}
 
 		list = append(list, BocRecordDetail{
-			BocRecord: record,
-			User:      user.ShortUser(),
+			BocRecord:     record,
+			UpdatedAtDate: record.UpdatedAt.Date(),
+			CreatedAtDate: record.CreatedAt.Date(),
+			User:          user.ShortUser(),
 		})
 	}
 	return
