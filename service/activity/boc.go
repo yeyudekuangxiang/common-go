@@ -176,6 +176,7 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 		BindWechatBonusStatus: 1,
 		AnswerStatus:          1,
 		AnswerBonusStatus:     1,
+		Source:                param.Source,
 		CreatedAt:             model.Time{Time: time.Now()},
 		UpdatedAt:             model.Time{Time: time.Now()},
 	}

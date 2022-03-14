@@ -21,6 +21,7 @@ type BocRecord struct {
 	ShareNum                int        `json:"shareNum"`                //我邀请到的人数
 	ShareUserBocBonusStatus int        `json:"shareUserBocBonusStatus"` //未领取 2已领取
 	ShareUserBocBonusTime   model.Time `json:"shareUserBocBonusTime"`
+	Source                  string     `json:"source"` //用户来源 mio-dialog mio-banner mio-oa(297489) mio-poster(297549)  boc-sms(297108) boc-oa(297490) boc-app(297492)
 	CreatedAt               model.Time `json:"createAt"`
 	UpdatedAt               model.Time `json:"updatedAt"`
 }
