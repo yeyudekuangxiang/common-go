@@ -164,6 +164,11 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 
 	//已存在申请记录
 	if record.Id > 0 {
+		go func() {
+			if err := b.CheckBonusSend(param.UserId); err != nil {
+				app.Logger.Error("CheckBonusSend", param.UserId, err)
+			}
+		}()
 		return &record, nil
 	}
 
@@ -188,6 +193,40 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 	return &record, activityR.DefaultBocRecordRepository.Save(&record)
 }
 
+// CheckBonusSend 检查用户答题积分是否已经发放 未发放的重新发放
+func (b BocService) CheckBonusSend(userId int64) error {
+	if userId == 0 {
+		return nil
+	}
+
+	record, err := b.FindOrCreateApplyRecord(AddApplyRecordParam{
+		UserId: userId,
+	})
+	if err != nil {
+		return err
+	}
+	if !(record.AnswerStatus == 2 && record.AnswerBonusStatus == 1) {
+		return nil
+	}
+
+	mioUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMio, userId)
+	if err != nil {
+		return err
+	}
+
+	if mioUser.ID == 0 {
+		return errors.New("未绑定小程序,打开绿喵小程序绑定手机号后,打开小程序邀请记录页面将自动发放积分")
+	}
+
+	record.AnswerBonusStatus = 2
+	record.UpdatedAt = model.NewTime()
+	err = activityR.DefaultBocRecordRepository.Save(record)
+	if err != nil {
+		return err
+	}
+	return b.makeAnswerPointTransaction(userId)
+}
+
 // AnswerQuestion 回答问题
 func (b BocService) AnswerQuestion(userId int64, right int) error {
 	record, err := b.FindOrCreateApplyRecord(AddApplyRecordParam{
@@ -203,12 +242,25 @@ func (b BocService) AnswerQuestion(userId int64, right int) error {
 
 	record.AnswerStatus = right
 	record.UpdatedAt = model.NewTime()
-	record.AnswerBonusStatus = 2
 	err = activityR.DefaultBocRecordRepository.Save(record)
 	if err != nil {
 		return err
 	}
-	if right == 2 {
+
+	mioUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMio, userId)
+	if err != nil {
+		return err
+	}
+	if mioUser.ID == 0 {
+		return errors.New("未绑定小程序,打开绿喵小程序绑定手机号后,打开小程序邀请记录页面将自动发放积分")
+	}
+
+	if record.AnswerStatus == 2 {
+		record.AnswerBonusStatus = 2
+		err = activityR.DefaultBocRecordRepository.Save(record)
+		if err != nil {
+			return err
+		}
 		return b.makeAnswerPointTransaction(userId)
 	}
 	return nil
