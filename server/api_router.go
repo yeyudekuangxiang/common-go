@@ -16,11 +16,6 @@ func apiRouter(router *gin.Engine) {
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c").Use(auth2(), throttle())
 	{
-		//h5活动页调用
-		authRouter.POST("/activity/boc/record", format(activity.DefaultBocController.FindOrCreateRecord))
-		//小程序端调用
-		authRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
-		authRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
 
 		authRouter.GET("/product-item/list", format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", format(coupon.DefaultCouponController.CouponListOfOpenid))
@@ -34,11 +29,15 @@ func apiRouter(router *gin.Engine) {
 		authRouter.POST("/auth/oa/configsign", format(authCtr.DefaultOaController.Sign))
 
 		authRouter.POST("/tool/get-qrcode", format(api.DefaultToolController.GetQrcode))
+
+		//h5活动页调用
+		authRouter.POST("/activity/boc/record", format(activity.DefaultBocController.FindOrCreateRecord))
 	}
 
 	//必须登陆的路由
 	mustAuthRouter := router.Group("/api/mp2c").Use(mustAuth2(), throttle())
 	{
+
 		mustAuthRouter.GET("/user", format(api.DefaultUserController.GetUserInfo))
 		mustAuthRouter.GET("/mobile-user", format(api.DefaultUserController.GetMobileUserInfo))
 		mustAuthRouter.GET("/topic/share-qrcode", format(api.DefaultTopicController.GetShareWeappQrCode))
@@ -46,6 +45,10 @@ func apiRouter(router *gin.Engine) {
 
 		//h5活动页调用
 		mustAuthRouter.POST("/activity/boc/answer", format(activity.DefaultBocController.Answer))
+
+		//小程序端调用
+		mustAuthRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
+		mustAuthRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
 		mustAuthRouter.POST("/activity/bonus/apply", format(activity.DefaultBocController.ApplySendBonus))
 	}
 
