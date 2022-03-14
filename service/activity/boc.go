@@ -199,6 +199,16 @@ func (b BocService) CheckBonusSend(userId int64) error {
 		return nil
 	}
 
+	record, err := b.FindOrCreateApplyRecord(AddApplyRecordParam{
+		UserId: userId,
+	})
+	if err != nil {
+		return err
+	}
+	if !(record.AnswerStatus == 2 && record.AnswerBonusStatus == 1) {
+		return nil
+	}
+
 	mioUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMio, userId)
 	if err != nil {
 		return err
@@ -208,25 +218,13 @@ func (b BocService) CheckBonusSend(userId int64) error {
 		return errors.New("未绑定小程序,打开绿喵小程序绑定手机号后,打开小程序邀请记录页面将自动发放积分")
 	}
 
-	record, err := b.FindOrCreateApplyRecord(AddApplyRecordParam{
-		UserId: userId,
-	})
+	record.AnswerBonusStatus = 2
+	record.UpdatedAt = model.NewTime()
+	err = activityR.DefaultBocRecordRepository.Save(record)
 	if err != nil {
 		return err
 	}
-
-	if record.AnswerStatus == 2 && record.AnswerBonusStatus == 1 {
-		if record.AnswerStatus == 2 {
-			record.AnswerBonusStatus = 2
-			record.UpdatedAt = model.NewTime()
-			err = activityR.DefaultBocRecordRepository.Save(record)
-			if err != nil {
-				return err
-			}
-			return b.makeAnswerPointTransaction(userId)
-		}
-	}
-	return nil
+	return b.makeAnswerPointTransaction(userId)
 }
 
 // AnswerQuestion 回答问题
