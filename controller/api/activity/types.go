@@ -7,7 +7,8 @@ type GetBocRecordListForm struct {
 	controller.PageFrom
 }
 type AddBocRecordFrom struct {
-	ShareUserId int64 `json:"shareUserId" form:"shareUserId" binding:"gte=0" alias:"分享者ID"`
+	ShareUserId int64  `json:"shareUserId" form:"shareUserId" binding:"gte=0" alias:"分享者ID"`
+	Source      string `json:"source" form:"source" alias:"用户来源"`
 }
 
 type AnswerBocQuestionFrom struct {

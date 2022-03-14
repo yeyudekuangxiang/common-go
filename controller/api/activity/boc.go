@@ -53,10 +53,25 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	source := form.Source
+	switch form.ShareUserId {
+	case 297489:
+		source = "mio-oa"
+	case 297108:
+		source = "boc-sms"
+	case 297490:
+		source = "boc-oa"
+	case 297492:
+		source = "boc-app"
+	case 297549:
+		source = "mio-poster"
+	}
+
 	user := util.GetAuthUser(c)
 	record, err := activity.DefaultBocService.FindOrCreateApplyRecord(activity.AddApplyRecordParam{
 		UserId:      user.ID,
 		ShareUserId: form.ShareUserId,
+		Source:      source,
 	})
 
 	if err != nil {

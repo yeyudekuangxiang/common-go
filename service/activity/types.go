@@ -14,8 +14,9 @@ type GetRecordPageListParam struct {
 	Limit                   int   `json:"limit"`
 }
 type AddApplyRecordParam struct {
-	UserId      int64 `json:"userId"`
-	ShareUserId int64 `json:"shareUserId"` //分享者用户id
+	UserId      int64  `json:"userId"`
+	ShareUserId int64  `json:"shareUserId"` //分享者用户id
+	Source      string `json:"source"`
 }
 
 type BocRecordDetail struct {
