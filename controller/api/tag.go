@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/util"
+	"mio/model/entity"
 	"mio/repository"
 	"mio/service"
 )
@@ -18,9 +19,10 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	list, total, err := service.DefaultTagService.GetTagPageList(repository.GetTagPageListBy{
-		ID:     form.ID,
-		Offset: form.Offset(),
-		Limit:  form.Limit(),
+		ID:      form.ID,
+		Offset:  form.Offset(),
+		Limit:   form.Limit(),
+		OrderBy: entity.OrderByList{entity.OrderByTopicSortDesc},
 	})
 	if err != nil {
 		return nil, err
@@ -31,5 +33,4 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		"page":     form.Page,
 		"pageSize": form.PageSize,
 	}, nil
-
 }
