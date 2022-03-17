@@ -12,14 +12,14 @@ import (
 	"time"
 )
 
-var DefaultTopicUserFlowService = TopicUserFlowService{repo: repository.DefaultTopicUserFlowRepository}
+var DefaultTopicFlowService = TopicFlowService{repo: repository.DefaultTopicFlowRepository}
 
-type TopicUserFlowService struct {
-	repo repository.TopicUserFlowRepository
+type TopicFlowService struct {
+	repo repository.TopicFlowRepository
 }
 
 // CalculateSort 计算内容流排序 创建时间和更新时间未计算在内
-func (t TopicUserFlowService) CalculateSort(topic entity.Topic, flow entity.TopicUserFlow) int {
+func (t TopicFlowService) CalculateSort(topic entity.Topic, flow entity.TopicFlow) int {
 	//有权重的 而且未看过
 	if topic.Sort > 0 && flow.SeeCount == 0 {
 		return 9000 + topic.Sort
@@ -50,12 +50,12 @@ func (t TopicUserFlowService) CalculateSort(topic entity.Topic, flow entity.Topi
 var initUserFlowPool, _ = ants.NewPool(50)
 
 // InitUserFlow 同步用户内容流
-func (t TopicUserFlowService) InitUserFlow(userId int64) {
+func (t TopicFlowService) InitUserFlow(userId int64) {
 	if userId == 0 {
 		return
 	}
 	//防止多个多个应用副本同时初始化
-	limitKey := fmt.Sprintf(config.RedisKey.InitTopicUserFlowLimit, userId)
+	limitKey := fmt.Sprintf(config.RedisKey.InitTopicFlowLimit, userId)
 	ok, err := app.Redis.SetNX(context.Background(), limitKey, 1, time.Hour*24).Result()
 	if err != nil && !ok {
 		app.Logger.Info("limit", ok, err)
@@ -65,14 +65,14 @@ func (t TopicUserFlowService) InitUserFlow(userId int64) {
 	app.Logger.Error(`开始同步内容流`, userId)
 	topicList := make([]entity.Topic, 0)
 	app.DB.FindInBatches(&topicList, 500, func(tx *gorm.DB, batch int) error {
-		flowList := make([]entity.TopicUserFlow, 0)
+		flowList := make([]entity.TopicFlow, 0)
 		for _, topic := range topicList {
 			flow := t.repo.FindBy(repository.FindTopicFlowBy{
 				TopicId: topic.Id,
 				UserId:  userId,
 			})
 			if flow.ID == 0 {
-				flow = entity.TopicUserFlow{
+				flow = entity.TopicFlow{
 					UserId:         userId,
 					TopicId:        topic.Id,
 					SeeCount:       0,
@@ -97,7 +97,7 @@ func (t TopicUserFlowService) InitUserFlow(userId int64) {
 }
 
 // InitUserFlowByMq 同步用户内容流 前期用go携程同步 后期用消息队列同步
-func (t TopicUserFlowService) InitUserFlowByMq(userId int64) {
+func (t TopicFlowService) InitUserFlowByMq(userId int64) {
 	err := initUserFlowPool.Submit(func() {
 		t.InitUserFlow(userId)
 	})
@@ -105,12 +105,12 @@ func (t TopicUserFlowService) InitUserFlowByMq(userId int64) {
 		app.Logger.Error("提交初始化内容流任务失败", userId, err)
 	}
 }
-func (t TopicUserFlowService) UpdateUserFlowSort(topic entity.Topic, flow *entity.TopicUserFlow) error {
+func (t TopicFlowService) UpdateUserFlowSort(topic entity.Topic, flow *entity.TopicFlow) error {
 	flow.Sort = t.CalculateSort(topic, *flow)
 	return app.DB.Save(flow).Error
 }
 
-func (t TopicUserFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
+func (t TopicFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
 	}
@@ -132,7 +132,7 @@ func (t TopicUserFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 		app.Logger.Error("更新查看数量失败", err)
 	}
 }
-func (t TopicUserFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
+func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
 	}

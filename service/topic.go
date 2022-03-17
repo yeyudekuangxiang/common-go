@@ -67,9 +67,9 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 	return detailList, total, nil
 }
 
-// GetTopicUserFlowPageList1 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
-/*func (u TopicService) GetTopicUserFlowPageList1(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
-	flowList, total, err := DefaultTopicUserFlowService.GetPageList(repository.GetTopicUserFlowPageListBy{
+// GetTopicFlowPageList1 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
+/*func (u TopicService) GetTopicFlowPageList1(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+	flowList, total, err := DefaultTopicFlowService.GetPageList(repository.GetTopicFlowPageListBy{
 		UserId:     param.UserId,
 		Offset:     param.Offset,
 		Limit:      param.Limit,
@@ -81,7 +81,7 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 	}
 
 	if total == 0 {
-		DefaultTopicUserFlowService.InitUserFlowByMq(param.UserId)
+		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
 		return u.GetTopicDetailPageList(param)
 	}
 
@@ -112,8 +112,8 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 	}
 	return topicDetailList, total, nil
 }*/
-// GetTopicUserFlowPageList 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
-func (u TopicService) GetTopicUserFlowPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+// GetTopicFlowPageList 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
+func (u TopicService) GetTopicFlowPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
 	fmt.Printf("%+v\n", param)
 	topicList, total, err := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
@@ -127,7 +127,7 @@ func (u TopicService) GetTopicUserFlowPageList(param repository.GetTopicPageList
 		return nil, 0, err
 	}
 	if total == 0 {
-		DefaultTopicUserFlowService.InitUserFlowByMq(param.UserId)
+		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
 		return u.GetTopicDetailPageList(param)
 	}
 
@@ -156,7 +156,7 @@ func (u TopicService) UpdateTopicListSeeCount(topicId int64, userId int64) {
 			app.Logger.Error("更新topic查看次数失败", topicId, userId)
 			return
 		}
-		DefaultTopicUserFlowService.AddUserFlowSeeCount(userId, topicId)
+		DefaultTopicFlowService.AddUserFlowSeeCount(userId, topicId)
 	})
 	if err != nil {
 		app.Logger.Error("提交更新topic查看次数任务失败", userId, topicId, err)
@@ -165,7 +165,7 @@ func (u TopicService) UpdateTopicListSeeCount(topicId int64, userId int64) {
 func (u TopicService) UpdateTopicListShowCount(list []entity.Topic, userId int64) {
 	err := initUserFlowPool.Submit(func() {
 		for _, topic := range list {
-			DefaultTopicUserFlowService.AddUserFlowShowCount(userId, topic.Id)
+			DefaultTopicFlowService.AddUserFlowShowCount(userId, topic.Id)
 		}
 	})
 	if err != nil {

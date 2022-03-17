@@ -85,7 +85,7 @@ func (u TopicRepository) GetTopicList(by GetTopicListBy) []entity.Topic {
 }
 func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64, err error) {
 	list = make([]entity.Topic, 0)
-	db := u.DB.Table(fmt.Sprintf("%s as flow", entity.TopicUserFlow{}.TableName())).
+	db := u.DB.Table(fmt.Sprintf("%s as flow", entity.TopicFlow{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as topic on flow.topic_id = topic.id", entity.Topic{}.TableName())).
 		Joins(fmt.Sprintf("left join %s as tag on tag.topic_id = topic.id", entity.TopicTag{}.TableName()))
 

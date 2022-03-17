@@ -2,7 +2,7 @@ package entity
 
 import "mio/model"
 
-type TopicUserFlow struct {
+type TopicFlow struct {
 	ID             int64
 	UserId         int64
 	TopicId        int64
@@ -13,6 +13,6 @@ type TopicUserFlow struct {
 	TopicUpdatedAt model.Time
 }
 
-func (TopicUserFlow) TableName() string {
-	return "topic_user_flow"
+func (TopicFlow) TableName() string {
+	return "topic_flow"
 }
