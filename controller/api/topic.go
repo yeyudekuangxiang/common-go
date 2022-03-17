@@ -20,12 +20,12 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 
 	user := util.GetAuthUser(c)
 
-	list, total, err := service.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
+	list, total, err := service.DefaultTopicService.GetTopicFlowPageList(repository.GetTopicPageListBy{
 		ID:         form.ID,
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
-		UserId:     int(user.ID),
+		UserId:     user.ID,
 	})
 	if err != nil {
 		return nil, err

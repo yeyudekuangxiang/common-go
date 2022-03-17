@@ -5,3 +5,7 @@ type TopicTag struct {
 	TopicId int64 `json:"topicId"`
 	TagId   int64 `json:"tagId"`
 }
+
+func (TopicTag) TableName() string {
+	return "topic_tag"
+}

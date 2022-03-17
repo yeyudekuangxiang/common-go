@@ -24,6 +24,5 @@ func (u TagService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
 
 func (u TagService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error) {
 	list, total := u.r.GetTagPageList(param)
-
 	return list, total, nil
 }
