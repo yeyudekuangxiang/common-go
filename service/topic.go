@@ -43,8 +43,9 @@ func (u TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]T
 	detailList := make([]TopicDetail, 0)
 	for _, topic := range topicList {
 		detailList = append(detailList, TopicDetail{
-			Topic:  topic,
-			IsLike: topicLikeMap[topic.Id],
+			Topic:         topic,
+			IsLike:        topicLikeMap[topic.Id],
+			UpdatedAtDate: topic.UpdatedAt.Format("01-02"),
 		})
 	}
 
@@ -56,7 +57,7 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 	//更新曝光和查看次数
 	u.UpdateTopicListShowCount(list, param.UserId)
 	if param.ID != 0 && len(list) > 0 {
-		fmt.Println("更新查看次数", list[0].Id, param.UserId)
+		app.Logger.Info("更新查看次数", list[0].Id, param.UserId)
 		u.UpdateTopicListSeeCount(list[0].Id, param.UserId)
 	}
 
@@ -115,7 +116,6 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 // GetTopicFlowPageList 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
 func (u TopicService) GetTopicFlowPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
-	fmt.Printf("%+v\n", param)
 	topicList, total, err := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
 		Offset:     param.Offset,
 		Limit:      param.Limit,
@@ -133,8 +133,9 @@ func (u TopicService) GetTopicFlowPageList(param repository.GetTopicPageListBy) 
 
 	//更新曝光和查看次数
 	u.UpdateTopicListShowCount(topicList, param.UserId)
-	fmt.Println("更新查看数量更新查看数量更新查看数量", param.ID, len(topicList))
+
 	if param.ID != 0 && len(topicList) > 0 {
+		app.Logger.Info("更新查看次数", param.UserId, topicList[0].Id)
 		u.UpdateTopicListSeeCount(topicList[0].Id, param.UserId)
 	}
 
