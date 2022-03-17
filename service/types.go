@@ -7,7 +7,8 @@ import (
 
 type TopicDetail struct {
 	entity.Topic
-	IsLike bool `json:"isLike"`
+	IsLike        bool   `json:"isLike"`
+	UpdatedAtDate string `json:"updatedAtDate"` //03-01
 }
 
 type CreatePointTransactionParam struct {

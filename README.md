@@ -3,6 +3,7 @@
 ## 目录结构
 mp2c-go
 - build 项目部署相关文件
+- config 项目的全局配置目录 
 - controller 控制器目录
 - core 项目需要的全局对象以及初始化方法
 - internal 项目内部的用的包
@@ -24,4 +25,5 @@ mp2c-go
 5. 所有写的接口尽量在tests目录下写功能测试、有空余时间也可多写单元测试
 ## 项目开发流程
 1. 分支管理规范参考 <https://www.jianshu.com/p/7ae40a051cb8>
-2. 项目的部署 目前仅有develop和master分支有部署  代码合并到develop分支后会自动构建部署 代码合并到master后需要手动打tag才会构建部署
+2. 代码提交规范参考 <https://blog.csdn.net/github_39506988/article/details/90298780>
+3. 项目的部署 目前仅有develop和master分支有部署  代码合并到develop分支后会自动构建部署 代码合并到master后需要手动打tag才会构建部署

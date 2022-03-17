@@ -31,7 +31,17 @@ func (u TagRepository) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, t
 	if by.ID > 0 {
 		db.Where("id = ?", by.ID)
 	}
-	err := db.Count(&total).Offset(by.Offset).Limit(by.Limit).Order("sort desc").Find(&list).Error
+
+	for _, orderBy := range by.OrderBy {
+		switch orderBy {
+		case entity.OrderByTagSortAsc:
+			db.Order("tag asc")
+		case entity.OrderByTagSortDesc:
+			db.Order("tag desc")
+		}
+	}
+
+	err := db.Count(&total).Offset(by.Offset).Limit(by.Limit).Find(&list).Error
 	if err != nil {
 		panic(err)
 	}

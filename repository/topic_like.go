@@ -32,7 +32,10 @@ func (t TopicLikeRepository) GetListBy(by GetTopicLikeListBy) []entity.TopicLike
 	list := make([]entity.TopicLike, 0)
 	db := t.DB.Model(entity.TopicLike{})
 	if len(by.TopicIds) > 0 {
-		db.Where("topic_id in ?", by.TopicIds)
+		db.Where("topic_id in (?)", by.TopicIds)
+	}
+	if by.UserId > 0 {
+		db.Where("user_id = ?", by.UserId)
 	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)

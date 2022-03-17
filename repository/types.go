@@ -16,21 +16,23 @@ type FindTopicLikeBy struct {
 }
 type GetTopicLikeListBy struct {
 	TopicIds []int64
-	UserId   int
+	UserId   int64
 }
 
 type GetTopicPageListBy struct {
-	ID         int `json:"id"`
-	TopicTagId int `json:"topicTagId"`
-	Offset     int `json:"offset"`
-	Limit      int `json:"limit"`  //limit为0时不限制数量
-	UserId     int `json:"userId"` // 用于查询用户对帖子是否点赞
+	ID         int64              `json:"id"`
+	TopicTagId int                `json:"topicTagId"`
+	Offset     int                `json:"offset"`
+	Limit      int                `json:"limit"`  //limit为0时不限制数量
+	UserId     int64              `json:"userId"` // 用于查询用户对帖子是否点赞
+	OrderBy    entity.OrderByList `json:"orderBy"`
 }
 
 type GetTagPageListBy struct {
-	ID     int `json:"id"`
-	Offset int `json:"offset"`
-	Limit  int `json:"limit"` //limit为0时不限制数量
+	ID      int                `json:"id"`
+	Offset  int                `json:"offset"`
+	Limit   int                `json:"limit"` //limit为0时不限制数量
+	OrderBy entity.OrderByList `json:"orderBy"`
 }
 
 type GetUserListBy struct {
@@ -50,4 +52,18 @@ type FindPointTransactionCountLimitBy struct {
 	OpenId          string
 	TransactionType entity.PointTransactionType
 	TransactionDate model.Date
+}
+type GetTopicListBy struct {
+	TopicIds []int64
+}
+type FindTopicFlowBy struct {
+	TopicId int64
+	UserId  int64
+}
+type GetTopicFlowPageListBy struct {
+	Offset     int
+	Limit      int
+	UserId     int64
+	TopicId    int64
+	TopicTagId int
 }
