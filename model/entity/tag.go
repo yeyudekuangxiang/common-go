@@ -12,6 +12,7 @@ type Tag struct {
 	Description string `gorm:"size:1024" json:"description" form:"description"` // 描述
 	Img         string `gorm:"size:1024" json:"img" form:"img"`                 // 图标
 	Sort        int    `gorm:"index:idx_sort_" json:"sort" form:"sort"`         // 排序编号
+	Icon        string `gorm:"size:1024" json:"icon" form:"icon"`               // icon
 }
 
 func (Tag) TableName() string {
