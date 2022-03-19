@@ -23,7 +23,7 @@ func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds string) (
 	var res2 []Coupon.CouponRes
 	if err == nil {
 		for _, row := range res {
-			row.CouponType = "滴滴兑换券"
+			row.CouponType = "兑换券"
 			timeArr1 := strings.Split(row.UpdateTime, "T")
 			time1 := timeArr1[0]
 			timeArr2 := strings.Split(timeArr1[1], ".")
