@@ -8,7 +8,7 @@ import (
 var DefaultCouponRepository ICouponRepository = NewCouponRepository()
 
 type ICouponRepository interface {
-	CouponListOfOpenid(openid string, couponTypeIds string) ([]Coupon.CouponRes, error)
+	CouponListOfOpenid(openid string, couponTypeIds []string) ([]Coupon.CouponRes, error)
 }
 
 func NewCouponRepository() CouponRepository {
@@ -18,7 +18,7 @@ func NewCouponRepository() CouponRepository {
 type CouponRepository struct {
 }
 
-func (p CouponRepository) CouponListOfOpenid(openid string, couponTypeIds string) ([]Coupon.CouponRes, error) {
+func (p CouponRepository) CouponListOfOpenid(openid string, couponTypeIds []string) ([]Coupon.CouponRes, error) {
 	var Coupons []Coupon.CouponRes
 	if err := app.DB.Table("coupon").Where("Coupon_type_id in (?)", couponTypeIds).Where("openid = ?", openid).Where("redeemed = ?", "true").Find(&Coupons).Error; err != nil {
 		return nil, err
