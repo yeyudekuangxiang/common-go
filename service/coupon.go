@@ -18,7 +18,7 @@ type CouponService struct {
 	r repository.ICouponRepository
 }
 
-func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds string) ([]Coupon.CouponRes, error) {
+func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds []string) ([]Coupon.CouponRes, error) {
 	res, err := r.r.CouponListOfOpenid(openid, couponTypeIds)
 	var res2 []Coupon.CouponRes
 	if err == nil {
