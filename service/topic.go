@@ -22,6 +22,7 @@ type TopicService struct {
 	r repository.ITopicRepository
 }
 
+//将 entity.Topic 列表填充为 TopicDetail 列表
 func (u TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
 	//查询点赞信息
 	topicIds := make([]int64, 0)
@@ -51,14 +52,16 @@ func (u TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]T
 
 	return detailList, nil
 }
+
+// GetTopicDetailPageList 通过topic表直接查询获取内容列表
 func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 	list, total := u.r.GetTopicPageList(param)
 
 	//更新曝光和查看次数
-	u.UpdateTopicListShowCount(list, param.UserId)
+	u.UpdateTopicFlowListShowCount(list, param.UserId)
 	if param.ID != 0 && len(list) > 0 {
 		app.Logger.Info("更新查看次数", list[0].Id, param.UserId)
-		u.UpdateTopicListSeeCount(list[0].Id, param.UserId)
+		u.UpdateTopicSeeCount(list[0].Id, param.UserId)
 	}
 
 	detailList, err := u.fillTopicList(list, param.UserId)
@@ -68,53 +71,8 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 	return detailList, total, nil
 }
 
-// GetTopicFlowPageList1 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
-/*func (u TopicService) GetTopicFlowPageList1(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
-	flowList, total, err := DefaultTopicFlowService.GetPageList(repository.GetTopicFlowPageListBy{
-		UserId:     param.UserId,
-		Offset:     param.Offset,
-		Limit:      param.Limit,
-		TopicId:    param.ID,
-		TopicTagId: param.TopicTagId,
-	})
-	if err != nil {
-		return nil, 0, err
-	}
-
-	if total == 0 {
-		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
-		return u.GetTopicDetailPageList(param)
-	}
-
-	topicIds := make([]int64, 0)
-	for _, topicFlow := range flowList {
-		topicIds = append(topicIds, topicFlow.TopicId)
-	}
-
-	topicList := u.r.GetTopicList(repository.GetTopicListBy{
-		TopicIds: topicIds,
-	})
-	if err != nil {
-		return nil, 0, err
-	}
-
-	//更新曝光和查看次数
-	u.UpdateTopicListShowCount(topicList, param.UserId)
-	if param.ID != 0 && len(topicList) > 0 {
-		u.UpdateTopicListSeeCount(topicList[0].Id, param.UserId)
-	}
-
-	topicList = u.sortTopicListByIds(topicList, topicIds)
-
-	topicDetailList, err := u.fillTopicList(topicList, param.UserId)
-
-	if err != nil {
-		return nil, 0, err
-	}
-	return topicDetailList, total, nil
-}*/
-// GetTopicFlowPageList 获取用户内容流 如果没有数据则从topic表返回 同时进行初始化操作
-func (u TopicService) GetTopicFlowPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+// GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
+func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
 	topicList, total, err := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
 		Offset:     param.Offset,
@@ -132,11 +90,11 @@ func (u TopicService) GetTopicFlowPageList(param repository.GetTopicPageListBy) 
 	}
 
 	//更新曝光和查看次数
-	u.UpdateTopicListShowCount(topicList, param.UserId)
+	u.UpdateTopicFlowListShowCount(topicList, param.UserId)
 
 	if param.ID != 0 && len(topicList) > 0 {
 		app.Logger.Info("更新查看次数", param.UserId, topicList[0].Id)
-		u.UpdateTopicListSeeCount(topicList[0].Id, param.UserId)
+		u.UpdateTopicSeeCount(topicList[0].Id, param.UserId)
 	}
 
 	topicDetailList, err := u.fillTopicList(topicList, param.UserId)
@@ -146,7 +104,9 @@ func (u TopicService) GetTopicFlowPageList(param repository.GetTopicPageListBy) 
 	}
 	return topicDetailList, total, nil
 }
-func (u TopicService) UpdateTopicListSeeCount(topicId int64, userId int64) {
+
+// UpdateTopicSeeCount 更新内容的查看次数加1
+func (u TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
 	err := initUserFlowPool.Submit(func() {
 		topic := u.r.FindById(topicId)
 		if topic.Id == 0 {
@@ -158,12 +118,15 @@ func (u TopicService) UpdateTopicListSeeCount(topicId int64, userId int64) {
 			return
 		}
 		DefaultTopicFlowService.AddUserFlowSeeCount(userId, topicId)
+		DefaultTopicFlowService.AfterUpdateTopic(topicId)
 	})
 	if err != nil {
 		app.Logger.Error("提交更新topic查看次数任务失败", userId, topicId, err)
 	}
 }
-func (u TopicService) UpdateTopicListShowCount(list []entity.Topic, userId int64) {
+
+// UpdateTopicFlowListShowCount 更新内容流的曝光次数加1
+func (u TopicService) UpdateTopicFlowListShowCount(list []entity.Topic, userId int64) {
 	err := initUserFlowPool.Submit(func() {
 		for _, topic := range list {
 			DefaultTopicFlowService.AddUserFlowShowCount(userId, topic.Id)
@@ -173,6 +136,8 @@ func (u TopicService) UpdateTopicListShowCount(list []entity.Topic, userId int64
 		app.Logger.Error("提交更新topic曝光次数任务失败", userId, err)
 	}
 }
+
+//根据id列表对 entity.Topic 列表排序
 func (u TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []entity.Topic {
 	topicMap := make(map[int64]entity.Topic)
 	for _, topic := range list {
@@ -185,6 +150,8 @@ func (u TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []ent
 	}
 	return newList
 }
+
+// GetShareWeappQrCode 获取小程序端内容详情页分享小程序码
 func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
 	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
 		Scene:     fmt.Sprintf("topicId=%d&userId=%d", topicId, userId),
@@ -200,6 +167,23 @@ func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, stri
 	}
 	return resp.Buffer, resp.ContentType, nil
 }
+
+// FindById 根据id查询 entity.Topic
 func (u TopicService) FindById(topicId int64) entity.Topic {
 	return u.r.FindById(topicId)
+}
+
+// UpdateTopicSort 更新内容的排序权重
+func (u TopicService) UpdateTopicSort(topicId int64, sort int) error {
+	topic := u.r.FindById(topicId)
+	if topic.Id == 0 {
+		return errors.New("未查询到此内容")
+	}
+	topic.Sort = sort
+	err := u.r.Save(&topic)
+	if err != nil {
+		return err
+	}
+	DefaultTopicFlowService.AfterUpdateTopicByMq(topicId)
+	return nil
 }
