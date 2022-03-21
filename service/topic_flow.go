@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var initUserFlowPool, _ = ants.NewPool(50)
+
 var DefaultTopicFlowService = TopicFlowService{repo: repository.DefaultTopicFlowRepository}
 
 type TopicFlowService struct {
@@ -20,8 +22,8 @@ type TopicFlowService struct {
 
 // CalculateSort 计算内容流排序 创建时间和更新时间未计算在内
 func (t TopicFlowService) CalculateSort(topic entity.Topic, flow entity.TopicFlow) int {
-	//有权重的 而且未看过
-	if topic.Sort > 0 && flow.SeeCount == 0 {
+	//有权重的
+	if topic.Sort > 0 {
 		return 9000 + topic.Sort
 	}
 	//所有人未看过 而且对我曝光次数小于5次
@@ -31,10 +33,6 @@ func (t TopicFlowService) CalculateSort(topic entity.Topic, flow entity.TopicFlo
 	//对我曝光次数小于5次 而且未看过
 	if flow.ShowCount < 5 && flow.SeeCount == 0 {
 		return 7000
-	}
-	//我看过的 而且有权重的
-	if flow.SeeCount > 0 && topic.Sort > 0 {
-		return 6000 + topic.Sort
 	}
 	//我看过的
 	if flow.SeeCount > 0 {
@@ -46,8 +44,6 @@ func (t TopicFlowService) CalculateSort(topic entity.Topic, flow entity.TopicFlo
 	}
 	return 0
 }
-
-var initUserFlowPool, _ = ants.NewPool(50)
 
 // InitUserFlow 同步用户内容流
 func (t TopicFlowService) InitUserFlow(userId int64) {
@@ -105,11 +101,14 @@ func (t TopicFlowService) InitUserFlowByMq(userId int64) {
 		app.Logger.Error("提交初始化内容流任务失败", userId, err)
 	}
 }
+
+// UpdateUserFlowSort 更新内容权重后重新计算内容流排序
 func (t TopicFlowService) UpdateUserFlowSort(topic entity.Topic, flow *entity.TopicFlow) error {
 	flow.Sort = t.CalculateSort(topic, *flow)
 	return app.DB.Save(flow).Error
 }
 
+// AddUserFlowSeeCount 增加用户内容流查看次数
 func (t TopicFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
@@ -132,6 +131,8 @@ func (t TopicFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 		app.Logger.Error("更新查看数量失败", err)
 	}
 }
+
+// AddUserFlowShowCount 增加用户内容流曝光次数
 func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
@@ -152,5 +153,53 @@ func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 
 	if err := t.repo.Save(&flow); err != nil {
 		app.Logger.Error("更新查看数量失败", err)
+	}
+}
+
+// AfterUpdateTopic 新增topic 、更新topic权重、更新topic查看次数 后调用此方法 重新计算内容流排序
+func (t TopicFlowService) AfterUpdateTopic(topicId int64) {
+	topic := DefaultTopicService.FindById(topicId)
+	if topic.Id == 0 {
+		return
+	}
+	type UserIds struct {
+		UserId int64
+	}
+	userIds := make([]UserIds, 0)
+	app.DB.Table("(?) as t", app.DB.Model(entity.TopicFlow{}).Select("user_id").Group("user_id")).FindInBatches(&userIds, 200, func(tx *gorm.DB, batch int) error {
+		for _, item := range userIds {
+			topicFlow := entity.TopicFlow{}
+			app.DB.Where("user_id = ? and topic_id = ?", item.UserId, topicId).First(&topicFlow)
+			if topicFlow.ID != 0 {
+				topicFlow.Sort = t.CalculateSort(topic, topicFlow)
+				if err := app.DB.Save(&topicFlow).Error; err != nil {
+					app.Logger.Error("同步topic_flow失败", topicId, item.UserId, err)
+				}
+			} else {
+				topicFlow = entity.TopicFlow{
+					UserId:         item.UserId,
+					TopicId:        topicId,
+					SeeCount:       0,
+					ShowCount:      0,
+					TopicCreatedAt: topic.CreatedAt,
+					TopicUpdatedAt: topic.UpdatedAt,
+				}
+				topicFlow.Sort = t.CalculateSort(topic, topicFlow)
+				if err := app.DB.Create(&topicFlow).Error; err != nil {
+					app.Logger.Error("同步topic_flow失败", topicId, item.UserId, err)
+				}
+			}
+		}
+		return nil
+	})
+}
+
+// AfterUpdateTopicByMq 新增topic 、更新topic权重、更新topic查看次数 后调用此方法 重新计算内容流排序
+func (t TopicFlowService) AfterUpdateTopicByMq(topicId int64) {
+	err := initUserFlowPool.Submit(func() {
+		t.AfterUpdateTopic(topicId)
+	})
+	if err != nil {
+		app.Logger.Error("提交AfterUpdateTopicByMq任务失败", topicId, err)
 	}
 }
