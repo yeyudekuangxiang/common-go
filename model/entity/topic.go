@@ -27,6 +27,7 @@ type Topic struct {
 	SeeCount      int        `json:"seeCount"`                     //浏览次数
 	CreatedAt     model.Time `json:"createdAt"`
 	UpdatedAt     model.Time `json:"updatedAt"`
+	ImportId      int        `json:"-"`
 }
 
 func (Topic) TableName() string {

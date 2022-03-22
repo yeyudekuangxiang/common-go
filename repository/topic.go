@@ -43,7 +43,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
-		Order("sort desc").
+		Order("sort desc,created_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
 	if err != nil {
@@ -106,7 +106,7 @@ func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []enti
 	err = db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
-		Order("created_at desc").
+		Order("created_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
 	return
