@@ -10,9 +10,9 @@ import (
 var DefaultAdminService IAdminService = NewAdminService(repository.DefaultAdminRepository)
 
 type IAdminService interface {
-	//根据管理员id获取管理员信息
+	// GetAdminById 根据管理员id获取管理员信息
 	GetAdminById(int) (*entity.Admin, error)
-	//根据token获取管理员
+	// GetAdminByToken 根据token获取管理员
 	GetAdminByToken(string) (*entity.Admin, error)
 }
 
@@ -32,9 +32,11 @@ func (a AdminService) GetAdminByToken(token string) (*entity.Admin, error) {
 	if err != nil {
 		return nil, err
 	}
-	return a.r.GetAdminById(authAdmin.ID)
+	admin := a.r.GetAdminById(authAdmin.ID)
+	return &admin, nil
 }
 
 func (a AdminService) GetAdminById(id int) (*entity.Admin, error) {
-	return a.r.GetAdminById(id)
+	admin := a.r.GetAdminById(id)
+	return &admin, nil
 }

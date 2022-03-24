@@ -67,3 +67,10 @@ type GetTopicFlowPageListBy struct {
 	TopicId    int64
 	TopicTagId int
 }
+type GetProductItemListBy struct {
+	ItemIds []string
+}
+type CheckStockItem struct {
+	ItemId string
+	Count  int
+}

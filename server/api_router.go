@@ -50,6 +50,8 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
 		mustAuthRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
 		mustAuthRouter.POST("/activity/bonus/apply", format(activity.DefaultBocController.ApplySendBonus))
+
+		mustAuthRouter.POST("order/submit-from-green", formatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 	}
 
 }

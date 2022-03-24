@@ -37,3 +37,41 @@ var UnidianTypeId = unidianTypeId{
 	Test:     "10013", // 测试
 	FiveYuan: "10689", // 5元话费
 }
+
+type SubmitOrderParam struct {
+	Order SubmitOrder
+	Items []SubmitOrderItem
+}
+type SubmitOrder struct {
+	AddressId string
+	UserId    int64
+	OrderType entity.OrderType
+}
+type SubmitOrderItem struct {
+	ItemId string
+	Count  int
+}
+
+type submitOrderParam struct {
+	Order submitOrder
+	Items []submitOrderItem
+}
+type submitOrder struct {
+	AddressId string
+	UserId    int64
+	TotalCost int
+	OrderType entity.OrderType
+}
+type submitOrderItem struct {
+	ItemId string
+	Count  int
+	Cost   int
+}
+type SubmitOrderForGreenParam struct {
+	AddressId string
+	UserId    int64
+}
+type CalculateProductResult struct {
+	TotalCost int
+	ItemList  []submitOrderItem
+}

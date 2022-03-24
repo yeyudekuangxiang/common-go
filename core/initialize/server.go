@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"mio/config"
 	"mio/core/app"
 	"mio/server"
 	"net/http"
@@ -24,31 +25,20 @@ func InitServer() *http.Server {
 	return app.Server
 }
 
-type ServerConfig struct {
-	Port         int
-	ReadTimeout  int
-	WriteTimeout int
-}
-
 func RunServer() {
 	//gin.DefaultWriter = logger.NewZapLogger(*config.LogConfig)
-	var err error
-	var serverConfig ServerConfig
-	err = app.Ini.Section("http").MapTo(&serverConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	app.Server.Addr = fmt.Sprintf(":%d", serverConfig.Port)
-	app.Server.ReadTimeout = time.Duration(serverConfig.ReadTimeout) * time.Second
-	app.Server.WriteTimeout = time.Duration(serverConfig.WriteTimeout) * time.Second
+	configSetting := config.App.Http
+	app.Server.Addr = fmt.Sprintf(":%d", configSetting.Port)
+	app.Server.ReadTimeout = time.Duration(configSetting.ReadTimeout) * time.Second
+	app.Server.WriteTimeout = time.Duration(configSetting.WriteTimeout) * time.Second
 	app.Server.MaxHeaderBytes = 1 << 20
 
 	//启动
 	go func() {
 		// 服务连接
-		log.Println(fmt.Sprintf("listening: %d", serverConfig.Port))
-		if err = app.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Println(fmt.Sprintf("listening: %d", configSetting.Port))
+		if err := app.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Println(fmt.Sprintf("listen: %s\n", err))
 		}
 	}()

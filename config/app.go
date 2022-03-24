@@ -7,6 +7,7 @@ var App = app{
 	Log:      logSetting{},
 	Weapp:    wxSetting{},
 	Wxoa:     wxSetting{},
+	Redis:    redisSetting{},
 }
 
 type app struct {
@@ -16,9 +17,11 @@ type app struct {
 	Log      logSetting      `ini:"log"`
 	Weapp    wxSetting       `ini:"weapp"`
 	Wxoa     wxSetting       `ini:"wxoa"`
+	Redis    redisSetting    `ini:"redis"`
 }
 type appSetting struct {
 	TokenKey string
+	Debug    bool
 }
 type httpSetting struct {
 	Port         int
@@ -46,4 +49,10 @@ type logSetting struct {
 type wxSetting struct {
 	AppId  string
 	Secret string
+}
+type redisSetting struct {
+	Host     string
+	Port     int
+	Password string
+	DB       int
 }

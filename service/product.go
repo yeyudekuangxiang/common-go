@@ -18,5 +18,5 @@ type ProductService struct {
 }
 
 func (r ProductService) ProductList() ([]Product.Product, error) {
-	return r.r.ProductList()
+	return r.r.ProductList(), nil
 }

@@ -6,7 +6,11 @@ import (
 	"mio/model/entity"
 )
 
-var DefaultPointRepository = PointRepository{DB: app.DB}
+var DefaultPointRepository = NewPointRepository(app.DB)
+
+func NewPointRepository(db *gorm.DB) PointRepository {
+	return PointRepository{DB: db}
+}
 
 type PointRepository struct {
 	DB *gorm.DB

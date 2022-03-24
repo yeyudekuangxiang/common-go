@@ -74,16 +74,13 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
 func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
-	topicList, total, err := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
+	topicList, total := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
 		Offset:     param.Offset,
 		Limit:      param.Limit,
 		UserId:     param.UserId,
 		TopicId:    param.ID,
 		TopicTagId: param.TopicTagId,
 	})
-	if err != nil {
-		return nil, 0, err
-	}
 	if total == 0 {
 		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
 		return u.GetTopicDetailPageList(param)

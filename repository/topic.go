@@ -15,7 +15,7 @@ type ITopicRepository interface {
 	Save(topic *entity.Topic) error
 	AddTopicLikeCount(topicId int64, num int) error
 	GetTopicList(by GetTopicListBy) []entity.Topic
-	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64, err error)
+	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
 }
 
 func NewTopicRepository(db *gorm.DB) TopicRepository {
@@ -83,7 +83,7 @@ func (u TopicRepository) GetTopicList(by GetTopicListBy) []entity.Topic {
 	}
 	return list
 }
-func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64, err error) {
+func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
 	db := u.DB.Table(fmt.Sprintf("%s as flow", entity.TopicFlow{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as topic on flow.topic_id = topic.id", entity.Topic{}.TableName())).
@@ -103,11 +103,14 @@ func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []enti
 
 	db2 := u.DB.Table("(?) as t", db).Order("fsort desc")
 
-	err = db2.Count(&total).
+	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
 		Order("created_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
+	if err != nil {
+		panic(err)
+	}
 	return
 }

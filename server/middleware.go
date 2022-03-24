@@ -45,7 +45,7 @@ func auth() gin.HandlerFunc {
 		}
 
 		user, err := service.DefaultUserService.GetUserByToken(token)
-		if err != nil || user == nil {
+		if err != nil {
 			//ctx.AbortWithStatusJSON(200,http.ErrorResponse(http.NewBaseError(400,err.Error())))
 			ctx.Set("AuthUser", entity.User{})
 			return
@@ -80,7 +80,7 @@ func mustAuth() gin.HandlerFunc {
 		}
 
 		user, err := service.DefaultUserService.GetUserByToken(token)
-		if err != nil || user == nil {
+		if err != nil || user.ID == 0 {
 			app.Logger.Error("用户登陆验证失败", user, err)
 			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
 			return
@@ -96,7 +96,7 @@ func mustAuth2() gin.HandlerFunc {
 		var err error
 		if token := ctx.GetHeader("token"); token != "" {
 			user, err = service.DefaultUserService.GetUserByToken(token)
-			if err != nil || user == nil {
+			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth token err", token, err)
 				ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
 				return
