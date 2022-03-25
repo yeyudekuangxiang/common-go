@@ -11,3 +11,13 @@ type GetRecordListBy struct {
 	Offset                  int
 	Limit                   int
 }
+type FindGMRecordBy struct {
+	UserId int64
+}
+type FindGMQuesLogBy struct {
+	UserId int64
+}
+type FindGMInvitationRecordBy struct {
+	UserId        int64
+	InviteeUserId int64
+}

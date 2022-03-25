@@ -45,11 +45,18 @@ func apiRouter(router *gin.Engine) {
 
 		//h5活动页调用
 		mustAuthRouter.POST("/activity/boc/answer", format(activity.DefaultBocController.Answer))
-
 		//小程序端调用
 		mustAuthRouter.GET("/activity/boc/share/list", format(activity.DefaultBocController.GetRecordList))
 		mustAuthRouter.GET("/activity/boc/record/mini", format(activity.DefaultBocController.FindRecordOfMini))
 		mustAuthRouter.POST("/activity/bonus/apply", format(activity.DefaultBocController.ApplySendBonus))
+
+		//GreenMonday活动
+		mustAuthRouter.GET("/activity/gm/record", format(activity.DefaultGMController.GetGMRecord))
+		mustAuthRouter.POST("/activity/gm/invitation", format(activity.DefaultGMController.ReportInvitationRecord))
+		mustAuthRouter.POST("/activity/gm/exchange", formatInterface(activity.DefaultGMController.ExchangeGift))
+		mustAuthRouter.POST("/activity/gm/question", format(activity.DefaultGMController.AnswerQuestion))
+
+		mustAuthRouter.POST("order/submit-from-green", formatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 	}
 
 }

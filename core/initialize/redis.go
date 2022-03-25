@@ -3,25 +3,15 @@ package initialize
 import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"mio/config"
 	"mio/core/app"
 )
 
-type redisConfig struct {
-	Host     string
-	Port     string
-	Password string
-	DB       int
-}
-
 func InitRedis() {
-	c := redisConfig{}
-	if err := app.Ini.Section("redis").MapTo(&c); err != nil {
-		panic(err)
-	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", c.Host, c.Port),
-		Password: c.Password, // no password set
-		DB:       c.DB,       // use default DB
+		Addr:     fmt.Sprintf("%s:%d", config.App.Redis.Host, config.App.Redis.Port),
+		Password: config.App.Redis.Password, // no password set
+		DB:       config.App.Redis.DB,       // use default DB
 	})
 	*app.Redis = *rdb
 }

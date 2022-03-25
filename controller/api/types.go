@@ -25,3 +25,6 @@ type GetYZMForm struct {
 type CreateQrcodeForm struct {
 	Src string `json:"src" form:"src" binding:"required" alias:"跳转链接"`
 }
+type SubmitOrderForGreenForm struct {
+	AddressId string `json:"addressId" form:"addressId" binding:"required" alias:"地址"`
+}

@@ -9,8 +9,8 @@ import (
 var DefaultAdminRepository IAdminRepository = NewAdminRepository()
 
 type IAdminRepository interface {
-	//根据管理员id获取管理员信息
-	GetAdminById(int) (*entity.Admin, error)
+	// GetAdminById 根据管理员id获取管理员信息
+	GetAdminById(int) entity.Admin
 }
 
 func NewAdminRepository() AdminRepository {
@@ -20,13 +20,13 @@ func NewAdminRepository() AdminRepository {
 type AdminRepository struct {
 }
 
-func (a AdminRepository) GetAdminById(id int) (*entity.Admin, error) {
+func (a AdminRepository) GetAdminById(id int) entity.Admin {
 	var admin entity.Admin
 	if err := app.DB.First(&admin, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
 		}
-		return nil, err
+
 	}
-	return &admin, nil
+	return admin
 }

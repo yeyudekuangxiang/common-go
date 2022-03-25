@@ -30,11 +30,11 @@ type BocService struct {
 func (b BocService) GetApplyRecordPageList(param GetRecordPageListParam) (list []BocRecordDetail, total int64, err error) {
 	list = make([]BocRecordDetail, 0)
 	//获取用户信息
-	user, err := repository.DefaultUserRepository.GetUserById(param.UserId)
+	user, err := service.DefaultUserService.GetUserById(param.UserId)
 	if err != nil {
 		return
 	}
-	if user == nil {
+	if user.ID == 0 {
 		err = errors.New("用户不存在")
 		return
 	}
@@ -132,12 +132,11 @@ func (b BocService) FindApplyRecord(userId int64) (*activityM.BocRecord, error) 
 		return &defaultRecord, nil
 	}
 
-	user, err := repository.DefaultUserRepository.GetUserById(userId)
+	user, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return nil, err
 	}
-
-	if user == nil || user.PhoneNumber == "" {
+	if user.ID == 0 || user.PhoneNumber == "" {
 		return &defaultRecord, nil
 	}
 
@@ -268,11 +267,11 @@ func (b BocService) AnswerQuestion(userId int64, right int) error {
 
 //回答问题领积分
 func (b BocService) makeAnswerPointTransaction(userId int64) error {
-	user, err := repository.DefaultUserRepository.GetUserById(userId)
+	user, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return err
 	}
-	if user == nil || user.PhoneNumber == "" {
+	if user.ID == 0 || user.PhoneNumber == "" {
 		return errors.New("积分发放失败,用户不存在")
 	}
 

@@ -33,7 +33,8 @@ func (u UserService) GetUserById(id int64) (*entity.User, error) {
 	if id == 0 {
 		return &entity.User{}, nil
 	}
-	return u.r.GetUserById(id)
+	user := u.r.GetUserById(id)
+	return &user, nil
 }
 func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
 	user := u.r.GetUserBy(repository.GetUserBy{
@@ -50,14 +51,12 @@ func (u UserService) GetUserByToken(token string) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return u.r.GetUserById(authUser.Id)
+	user := u.r.GetUserById(authUser.Id)
+	return &user, nil
 }
 func (u UserService) CreateUserToken(id int64) (string, error) {
-	user, err := u.r.GetUserById(id)
-	if err != nil {
-		return "", err
-	}
-	if user == nil {
+	user := u.r.GetUserById(id)
+	if user.ID == 0 {
 		return "", errors.New("用户不存在")
 	}
 	return util.CreateToken(auth.User{
@@ -97,11 +96,9 @@ func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 
 // FindUserBySource 根据用户id 获取指定平台的用户
 func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
-	user, err := repository.DefaultUserRepository.GetUserById(userId)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil || user.PhoneNumber == "" {
+	user := repository.DefaultUserRepository.GetUserById(userId)
+
+	if user.ID == 0 || user.PhoneNumber == "" {
 		return &entity.User{}, nil
 	}
 

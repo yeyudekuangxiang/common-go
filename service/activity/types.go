@@ -33,3 +33,9 @@ type CreateBocShareBonusRecordParam struct {
 	Type  activityM.BocShareBonusType
 	Info  string
 }
+type AnswerGMQuestionParam struct {
+	UserId  int64
+	Title   string
+	Answer  string
+	IsRight bool
+}

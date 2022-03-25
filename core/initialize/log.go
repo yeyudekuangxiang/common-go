@@ -2,14 +2,16 @@ package initialize
 
 import (
 	"log"
+	"mio/config"
 	"mio/core/app"
+	"mio/internal/util"
 	"mio/internal/zap"
 )
 
 func InitLog() {
 	var loggerConfig zap.LoggerConfig
 	var err error
-	err = app.Ini.Section("log").MapTo(&loggerConfig)
+	err = util.MapTo(config.App.Log, &loggerConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

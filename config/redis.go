@@ -7,6 +7,7 @@ type redisKey struct {
 	UniDian            string
 	Limit1S            string
 	InitTopicFlowLimit string
+	Lock               string
 }
 
 var RedisKey = redisKey{
@@ -16,4 +17,5 @@ var RedisKey = redisKey{
 	UniDian:            "unidian:",                   // 拼接手机号
 	Limit1S:            "Limit1S:",                   // 拼接行数名称
 	InitTopicFlowLimit: "mp2c:initTopicFlowlimit:%d", //拼接用户id
+	Lock:               "mp2c:lock:%s",               //redis分布式锁  拼接key
 }

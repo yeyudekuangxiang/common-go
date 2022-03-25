@@ -2,13 +2,15 @@ package initialize
 
 import (
 	"log"
+	"mio/config"
 	"mio/core/app"
 	"mio/internal/db"
+	"mio/internal/util"
 )
 
 func InitDB() {
 	var conf db.Config
-	err := app.Ini.Section("database").MapTo(&conf)
+	err := util.MapTo(config.App.Database, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}

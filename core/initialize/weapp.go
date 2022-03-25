@@ -2,15 +2,10 @@ package initialize
 
 import (
 	"github.com/medivhzhan/weapp/v3"
-	"log"
+	"mio/config"
 	"mio/core/app"
 	"time"
 )
-
-type weappConfig struct {
-	AppId  string
-	Secret string
-}
 
 type noCache struct {
 }
@@ -24,10 +19,7 @@ func (noCache) Get(key string) (interface{}, bool) {
 }
 
 func InitWeapp() {
-	conf := weappConfig{}
-	if err := app.Ini.Section("weapp").MapTo(&conf); err != nil {
-		log.Panic("获取小程序配置文件失败", err)
-	}
-	c := weapp.NewClient(conf.AppId, conf.Secret, weapp.WithCache(noCache{}))
+	weappSetting := config.App.Weapp
+	c := weapp.NewClient(weappSetting.AppId, weappSetting.Secret, weapp.WithCache(noCache{}))
 	*app.Weapp = *c
 }
