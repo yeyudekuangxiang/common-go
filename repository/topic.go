@@ -37,6 +37,9 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 	if by.TopicTagId > 0 {
 		db.Where("topic_tag.tag_id = ?", by.TopicTagId)
 	}
+	if by.Status > 0 {
+		db.Where("status = ?", by.Status)
+	}
 	db.Select("topic.*").Group("topic.id")
 
 	db2 := u.DB.Table("(?) as t", db)
@@ -74,9 +77,11 @@ func (u TopicRepository) AddTopicLikeCount(topicId int64, num int) error {
 func (u TopicRepository) GetTopicList(by GetTopicListBy) []entity.Topic {
 	list := make([]entity.Topic, 0)
 	db := u.DB.Model(entity.Topic{})
-	fmt.Println("topic_ids", by.TopicIds)
 	if len(by.TopicIds) > 0 {
 		db.Where("id in (?)", by.TopicIds)
+	}
+	if by.Status > 0 {
+		db.Where("status = ?", by.Status)
 	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
@@ -97,6 +102,9 @@ func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []enti
 	}
 	if by.TopicId > 0 {
 		db.Where("topic.id = ?", by.TopicId)
+	}
+	if by.Status > 0 {
+		db.Where("topic.status = ?", by.Status)
 	}
 
 	db.Select("topic.*,max(flow.sort) as fsort").Group("topic.id")

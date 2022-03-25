@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/core/app"
 	"mio/internal/util"
+	"mio/model/entity"
 	"mio/repository"
 	"mio/service"
 )
@@ -27,6 +28,7 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
 		UserId:     user.ID,
+		Status:     entity.TopicStatusPublished,
 	})
 	if err != nil {
 		return nil, err

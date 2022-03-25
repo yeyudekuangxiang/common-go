@@ -88,6 +88,7 @@ func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPage
 		UserId:     param.UserId,
 		TopicId:    param.ID,
 		TopicTagId: param.TopicTagId,
+		Status:     entity.TopicStatusPublished,
 	})
 	if total == 0 {
 		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)

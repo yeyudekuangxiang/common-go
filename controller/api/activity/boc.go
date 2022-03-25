@@ -137,7 +137,7 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 func (b BocController) ApplySendBonus(c *gin.Context) (gin.H, error) {
-	form := ApplySendBonus{}
+	form := ApplySendBonusForm{}
 	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}

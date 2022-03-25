@@ -70,6 +70,7 @@ type submitOrderItem struct {
 type SubmitOrderForGreenParam struct {
 	AddressId string
 	UserId    int64
+	ItemId    string
 }
 type CalculateProductResult struct {
 	TotalCost int

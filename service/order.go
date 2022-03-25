@@ -208,8 +208,6 @@ func (srv OrderService) create(param submitOrder) (*entity.Order, error) {
 
 // SubmitOrderForGreenMonday 用于greenmonday活动用户下单
 func (srv OrderService) SubmitOrderForGreenMonday(param SubmitOrderForGreenParam) (*entity.Order, error) {
-	itemId := "cc41aabf-c0ca-455e-8a22-2a1ec40d1834"
-
 	return srv.SubmitOrder(SubmitOrderParam{
 		Order: SubmitOrder{
 			UserId:    param.UserId,
@@ -218,7 +216,7 @@ func (srv OrderService) SubmitOrderForGreenMonday(param SubmitOrderForGreenParam
 		},
 		Items: []SubmitOrderItem{
 			{
-				ItemId: itemId,
+				ItemId: param.ItemId,
 				Count:  1,
 			},
 		},
