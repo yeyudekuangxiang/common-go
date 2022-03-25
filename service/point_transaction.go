@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"gorm.io/gorm"
 	"mio/internal/util"
 	"mio/model"
 	"mio/model/entity"
@@ -8,9 +10,19 @@ import (
 	"time"
 )
 
-var DefaultPointTransactionService = PointTransactionService{}
+var DefaultPointTransactionService = NewPointTransactionService(repository.DefaultPointTransactionRepository)
+
+func NewPointTransactionService(repo repository.PointTransactionRepository) PointTransactionService {
+	return PointTransactionService{
+		repo: repo,
+	}
+}
+func NewPointTransactionServiceByDB(db *gorm.DB) PointTransactionService {
+	return NewPointTransactionService(repository.NewPointTransactionRepository(db))
+}
 
 type PointTransactionService struct {
+	repo repository.PointTransactionRepository
 }
 
 // Create 添加发放积分记录并且更新用户剩余积分
@@ -30,14 +42,15 @@ func (p PointTransactionService) Create(param CreatePointTransactionParam) (*ent
 		AdditionalInfo: param.AdditionInfo,
 	}
 
-	err = repository.DefaultPointTransactionRepository.Save(&transaction)
+	err = p.repo.Save(&transaction)
 	if err != nil {
 		return nil, err
 	}
 
-	err = DefaultPointService.RefreshBalance(param.OpenId)
+	fmt.Printf("保存tran %+v", transaction)
+	DefaultPointService.RefreshBalanceByMq(param.OpenId)
 
-	return &transaction, err
+	return &transaction, nil
 }
 
 // GetListBy 查询记录列表

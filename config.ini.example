@@ -1,5 +1,6 @@
 [app]
 TokenKey=
+Debug=false
 [http]
 Port=80
 ReadTimeout=10

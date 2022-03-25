@@ -35,7 +35,7 @@ type Config struct {
 	UserName     string
 	Password     string
 	Database     string
-	Port         string
+	Port         int
 	TablePrefix  string
 	MaxOpenConns int    //最大连接数 <=0表示不限制连接数
 	MaxIdleConns int    //最大空闲数 <=0表示不保留空闲连接
@@ -57,7 +57,7 @@ func NewDB(conf Config) (*gorm.DB, error) {
 // NewMysqlDB 创建Mysql数据库链接
 func NewMysqlDB(conf Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		conf.UserName,
 		conf.Password,
 		conf.Host,
@@ -91,7 +91,7 @@ func NewMysqlDB(conf Config) (*gorm.DB, error) {
 //NewPostgresDB 创建PostgreSQL数据库链接
 func NewPostgresDB(conf Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
 		conf.Host,
 		conf.UserName,
 		conf.Password,

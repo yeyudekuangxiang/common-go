@@ -15,6 +15,18 @@ type AnswerBocQuestionFrom struct {
 	Right int8 `json:"right" form:"right" binding:"oneof=2 3" alias:"答题结果"`
 }
 
-type ApplySendBonus struct {
+type ApplySendBonusForm struct {
 	Type string `json:"type" form:"type" binding:"oneof=apply bind boc" alias:"奖励类型"`
+}
+type ReportInvitationRecordForm struct {
+	UserId int64 `json:"userId" form:"userId"`
+}
+type ExchangeGiftForm struct {
+	AddressId string `json:"addressId" form:"addressId" binding:"required" alias:"地址"`
+}
+
+type GMAnswerQuestion struct {
+	Title   string `json:"title" form:"title" binding:"required" alias:"问题标题"`
+	IsRight bool   `json:"isRight" form:"isRight"`
+	Answer  string `json:"answer" form:"answer" binding:"required" alias:"答案"`
 }

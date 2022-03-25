@@ -8,7 +8,7 @@ import (
 var DefaultProductRepository IProductRepository = NewProductRepository()
 
 type IProductRepository interface {
-	ProductList() ([]Product.Product, error)
+	ProductList() []Product.Product
 }
 
 func NewProductRepository() ProductRepository {
@@ -18,10 +18,10 @@ func NewProductRepository() ProductRepository {
 type ProductRepository struct {
 }
 
-func (p ProductRepository) ProductList() ([]Product.Product, error) {
+func (p ProductRepository) ProductList() []Product.Product {
 	var products []Product.Product
 	if err := app.DB.Table("product_item").Where("active = ?", "true").Order("sort desc,remaining_count desc").Find(&products).Error; err != nil {
-		return nil, err
+		panic(err)
 	}
-	return products, nil
+	return products
 }

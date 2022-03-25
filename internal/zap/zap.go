@@ -29,7 +29,7 @@ func NewZapLogger(config LoggerConfig) *zap.Logger {
 	encoder := getEncoder()
 	writer := getWriter(config.Path, config.FileName, config.MaxSize)
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), zapcore.AddSync(writer), logLevel)
-	return zap.New(core, zap.AddCallerSkip(1))
+	return zap.New(core, zap.AddCaller())
 }
 func getEncoder() zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{
@@ -67,5 +67,5 @@ func DefaultLogger(level ...string) *zap.Logger {
 
 	encoder := getEncoder()
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), zapcore.AddSync(os.Stdout), lev)
-	return zap.New(core, zap.AddCallerSkip(1))
+	return zap.New(core, zap.AddCaller())
 }

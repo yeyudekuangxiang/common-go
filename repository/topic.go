@@ -15,7 +15,7 @@ type ITopicRepository interface {
 	Save(topic *entity.Topic) error
 	AddTopicLikeCount(topicId int64, num int) error
 	GetTopicList(by GetTopicListBy) []entity.Topic
-	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64, err error)
+	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
 }
 
 func NewTopicRepository(db *gorm.DB) TopicRepository {
@@ -36,6 +36,9 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 	}
 	if by.TopicTagId > 0 {
 		db.Where("topic_tag.tag_id = ?", by.TopicTagId)
+	}
+	if by.Status > 0 {
+		db.Where("status = ?", by.Status)
 	}
 	db.Select("topic.*").Group("topic.id")
 
@@ -74,16 +77,18 @@ func (u TopicRepository) AddTopicLikeCount(topicId int64, num int) error {
 func (u TopicRepository) GetTopicList(by GetTopicListBy) []entity.Topic {
 	list := make([]entity.Topic, 0)
 	db := u.DB.Model(entity.Topic{})
-	fmt.Println("topic_ids", by.TopicIds)
 	if len(by.TopicIds) > 0 {
 		db.Where("id in (?)", by.TopicIds)
+	}
+	if by.Status > 0 {
+		db.Where("status = ?", by.Status)
 	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
 	return list
 }
-func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64, err error) {
+func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
 	db := u.DB.Table(fmt.Sprintf("%s as flow", entity.TopicFlow{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as topic on flow.topic_id = topic.id", entity.Topic{}.TableName())).
@@ -98,16 +103,22 @@ func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []enti
 	if by.TopicId > 0 {
 		db.Where("topic.id = ?", by.TopicId)
 	}
+	if by.Status > 0 {
+		db.Where("topic.status = ?", by.Status)
+	}
 
 	db.Select("topic.*,max(flow.sort) as fsort").Group("topic.id")
 
 	db2 := u.DB.Table("(?) as t", db).Order("fsort desc")
 
-	err = db2.Count(&total).
+	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
 		Order("created_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
+	if err != nil {
+		panic(err)
+	}
 	return
 }

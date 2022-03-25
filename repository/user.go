@@ -11,7 +11,7 @@ var DefaultUserRepository IUserRepository = NewUserRepository()
 type IUserRepository interface {
 	Save(user *entity.User) error
 	// GetUserById 根据用id获取用户信息
-	GetUserById(int64) (*entity.User, error)
+	GetUserById(int64) entity.User
 	GetUserBy(by GetUserBy) entity.User
 	GetShortUserBy(by GetUserBy) entity.ShortUser
 	GetUserListBy(by GetUserListBy) []entity.User
@@ -28,15 +28,14 @@ type UserRepository struct {
 func (u UserRepository) Save(user *entity.User) error {
 	return app.DB.Save(user).Error
 }
-func (u UserRepository) GetUserById(id int64) (*entity.User, error) {
+func (u UserRepository) GetUserById(id int64) entity.User {
 	var user entity.User
 	if err := app.DB.First(&user, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
 		}
-		return nil, err
 	}
-	return &user, nil
+	return user
 }
 func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	user := entity.User{}
