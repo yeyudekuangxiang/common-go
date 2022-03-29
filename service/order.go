@@ -133,7 +133,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 		defer func() {
 			if orderSuccess == false {
 				//释放库存
-				err := productItemService.UnLockStock(checkStockItems)
+				err := DefaultProductItemService.UnLockStock(checkStockItems)
 				if err != nil {
 					app.Logger.Errorf("释放库存失败 %+v %+v", checkStockItems, err)
 				}
@@ -208,16 +208,18 @@ func (srv OrderService) create(param submitOrder) (*entity.Order, error) {
 
 // SubmitOrderForGreenMonday 用于greenmonday活动用户下单
 func (srv OrderService) SubmitOrderForGreenMonday(param SubmitOrderForGreenParam) (*entity.Order, error) {
-	return srv.SubmitOrder(SubmitOrderParam{
-		Order: SubmitOrder{
+	return srv.submitOrder(submitOrderParam{
+		Order: submitOrder{
 			UserId:    param.UserId,
 			AddressId: param.AddressId,
 			OrderType: entity.OrderTypePurchase,
+			TotalCost: 1,
 		},
-		Items: []SubmitOrderItem{
+		Items: []submitOrderItem{
 			{
 				ItemId: param.ItemId,
 				Count:  1,
+				Cost:   1,
 			},
 		},
 	})

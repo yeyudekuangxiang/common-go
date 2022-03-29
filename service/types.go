@@ -72,6 +72,12 @@ type SubmitOrderForGreenParam struct {
 	UserId    int64
 	ItemId    string
 }
+type SubmitOrderForActivityParam struct {
+	AddressId string
+	UserId    int64
+	ItemId    string
+	Activity  string
+}
 type CalculateProductResult struct {
 	TotalCost int
 	ItemList  []submitOrderItem
