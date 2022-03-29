@@ -160,7 +160,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 			return err
 		}
 		//创建订单
-		order, err = orderService.create(param.Order)
+		order, err = orderService.create(orderId, param.Order)
 		if err != nil {
 			return err
 		}
@@ -179,7 +179,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 	return order, nil
 }
 
-func (srv OrderService) create(param submitOrder) (*entity.Order, error) {
+func (srv OrderService) create(orderId string, param submitOrder) (*entity.Order, error) {
 	var addressId *string
 	if param.AddressId != "" {
 		addressId = &param.AddressId
@@ -194,7 +194,7 @@ func (srv OrderService) create(param submitOrder) (*entity.Order, error) {
 	}
 
 	order := &entity.Order{
-		OrderId:          util.UUID(),
+		OrderId:          orderId,
 		AddressId:        addressId,
 		OpenId:           user.OpenId,
 		TotalCost:        param.TotalCost,
