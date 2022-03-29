@@ -61,13 +61,13 @@ func (ctr GMController) AnswerQuestion(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := util.GetAuthUser(ctx)
-	num, err := activityS.DefaultGMService.AnswerQuestion(activityS.AnswerGMQuestionParam{
+	record, err := activityS.DefaultGMService.AnswerQuestion(activityS.AnswerGMQuestionParam{
 		UserId:  user.ID,
 		Title:   form.Title,
 		Answer:  form.Answer,
 		IsRight: form.IsRight,
 	})
 	return gin.H{
-		"availableQuesNum": num,
+		"record": record,
 	}, err
 }

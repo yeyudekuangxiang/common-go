@@ -57,13 +57,13 @@ func (srv GMService) Order(userId int64, addressId string) (*entity.Order, error
 	}
 	return nil, errors.New("状态错误,请联系管理员")
 }
-func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (int, error) {
+func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (*activity.GMRecord, error) {
 	record, err := srv.FindOrCreateGMRecord(param.UserId)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if record.AvailableQuesNum <= 0 {
-		return 0, errors.New("答题次数用光啦,快去邀请好友获取答题机会吧")
+		return nil, errors.New("答题次数用光啦,快去邀请好友获取答题机会吧")
 	}
 	record.UsedQuesNum++
 	if param.IsRight {
@@ -78,7 +78,7 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (int, error) {
 	err = activityR.DefaultGMRecordRepository.Save(record)
 	if err != nil {
 		app.Logger.Error("GM答题失败", param, err)
-		return 0, errors.New("答题失败,请稍后再试")
+		return nil, errors.New("答题失败,请稍后再试")
 	}
 	isRight := 1
 	if !param.IsRight {
@@ -97,17 +97,17 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (int, error) {
 	err = activityR.DefaultGMQuestionLogRepository.Save(&quesLog)
 	if err != nil {
 		app.Logger.Error("GM答题失败", param, err)
-		return 0, errors.New("答题失败,请稍后再试")
+		return nil, errors.New("答题失败,请稍后再试")
 	}
 
 	//发放答题积分
 	if param.IsRight {
 		err = srv.SendAnswerQuestionBonus(param.UserId, quesLog.ID)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
 	}
-	return record.AvailableQuesNum, nil
+	return record, nil
 }
 
 // SendAnswerQuestionBonus 发放积分
