@@ -56,6 +56,9 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/activity/gm/exchange", formatInterface(activity.DefaultGMController.ExchangeGift))
 		mustAuthRouter.POST("/activity/gm/question", format(activity.DefaultGMController.AnswerQuestion))
 
+		//OCR识别
+		mustAuthRouter.POST("/ocr/gm/ticket", format(api.DefaultOCRController.GmTicket))
+
 		mustAuthRouter.POST("order/submit-from-green", formatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 	}
 
