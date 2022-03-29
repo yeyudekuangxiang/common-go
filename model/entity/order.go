@@ -26,7 +26,7 @@ type Order struct {
 	AddressId        *string     `json:"addressId"`
 	OpenId           string      `gorm:"column:openid" json:"openid"`
 	TotalCost        int         `json:"totalCost"`
-	Status           OrderStatus `json:"status"`
+	Status           OrderStatus `json:"orderStatus"`
 	PaidTime         model.Time  `json:"paidTime"`
 	InTransitTime    model.Time  `json:"inTransitTime"`
 	CompletedTime    model.Time  `json:"completedTime"`
@@ -50,7 +50,7 @@ func (order Order) ShortOrder() ShortOrder {
 type ShortOrder struct {
 	OrderId          string      `json:"orderId"`
 	TotalCost        int         `json:"totalCost"`
-	Status           OrderStatus `json:"status"`
+	Status           OrderStatus `json:"orderStatus"`
 	PaidTime         model.Time  `json:"paidTime"`
 	TrackingNumber   string      `json:"trackingNumber"`
 	OrderReferenceId string      `json:"orderReferenceId"`

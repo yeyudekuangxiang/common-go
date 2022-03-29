@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	GMProductItemId  = ""
+	GMProductItemId  = "cc41aabf-c0ca-455e-8a22-2a1ec40d1834"
 	GMNewUserTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-25 15:00:00")
 	GMEndTime, _     = time.Parse("2006-01-02 15:04:05", "2022-03-25 15:00:00")
 )
@@ -40,21 +40,30 @@ func (srv GMService) Order(userId int64, addressId string) (*entity.Order, error
 		if err != nil {
 			return nil, err
 		}
-		return service.DefaultOrderService.SubmitOrderForGreenMonday(service.SubmitOrderForGreenParam{
+		order, err := service.DefaultOrderService.SubmitOrderForGreenMonday(service.SubmitOrderForGreenParam{
 			AddressId: addressId,
 			UserId:    userId,
-			ItemId:    "",
+			ItemId:    GMProductItemId,
 		})
+		if err != nil {
+			record.PrizeStatus = 2
+			err2 := activityR.DefaultGMRecordRepository.Save(record)
+			if err2 != nil {
+				app.Logger.Error("返还兑换机会失败", userId, addressId, err, err2)
+			}
+			return nil, err
+		}
+		return order, nil
 	}
 	return nil, errors.New("状态错误,请联系管理员")
 }
-func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) error {
+func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (*activity.GMRecord, error) {
 	record, err := srv.FindOrCreateGMRecord(param.UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if record.AvailableQuesNum <= 0 {
-		return errors.New("答题次数用光啦,快去邀请好友获取答题机会吧")
+		return nil, errors.New("答题次数用光啦,快去邀请好友获取答题机会吧")
 	}
 	record.UsedQuesNum++
 	if param.IsRight {
@@ -63,10 +72,13 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) error {
 		record.WrongQuesNum++
 	}
 	record.AvailableQuesNum--
+	if record.RightQuesNum >= 5 {
+		record.PrizeStatus = 2
+	}
 	err = activityR.DefaultGMRecordRepository.Save(record)
 	if err != nil {
 		app.Logger.Error("GM答题失败", param, err)
-		return errors.New("答题失败,请稍后再试")
+		return nil, errors.New("答题失败,请稍后再试")
 	}
 	isRight := 1
 	if !param.IsRight {
@@ -85,17 +97,17 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) error {
 	err = activityR.DefaultGMQuestionLogRepository.Save(&quesLog)
 	if err != nil {
 		app.Logger.Error("GM答题失败", param, err)
-		return errors.New("答题失败,请稍后再试")
+		return nil, errors.New("答题失败,请稍后再试")
 	}
 
 	//发放答题积分
 	if param.IsRight {
 		err = srv.SendAnswerQuestionBonus(param.UserId, quesLog.ID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return record, nil
 }
 
 // SendAnswerQuestionBonus 发放积分
@@ -186,7 +198,7 @@ func (srv GMService) FindOrCreateGMRecord(userId int64) (*activity.GMRecord, err
 
 	record = activity.GMRecord{
 		UserId:           userId,
-		AvailableQuesNum: 0,
+		AvailableQuesNum: 1,
 		UsedQuesNum:      0,
 		RightQuesNum:     0,
 		WrongQuesNum:     0,
