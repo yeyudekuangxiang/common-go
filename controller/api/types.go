@@ -28,3 +28,6 @@ type CreateQrcodeForm struct {
 type SubmitOrderForGreenForm struct {
 	AddressId string `json:"addressId" form:"addressId" binding:"required" alias:"地址"`
 }
+type GetOCRForm struct {
+	Src string `json:"src" form:"src" binding:"required" alias:"图片地址"`
+}
