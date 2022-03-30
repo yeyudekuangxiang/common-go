@@ -31,3 +31,10 @@ type SubmitOrderForGreenForm struct {
 type GetOCRForm struct {
 	Src string `json:"src" form:"src" binding:"required" alias:"图片地址"`
 }
+type GetChargeForm struct {
+	Ch         string  `json:"ch" form:"ch" binding:"required" alias:"渠道参数"`
+	Mobile     string  `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
+	OutTradeNo string  `json:"outTradeNo" form:"outTradeNo" binding:"required" alias:"唯一订单号"`
+	TotalPower float32 `json:"totalPower" form:"totalPower" binding:"required" alias:"总电量"`
+	Sign       string  `json:"sign" form:"sign" binding:"required" alias:"签名"`
+}
