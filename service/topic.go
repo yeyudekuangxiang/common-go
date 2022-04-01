@@ -160,7 +160,7 @@ func (u TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []ent
 // GetShareWeappQrCode 获取小程序端内容详情页分享小程序码
 func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
 	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
-		Scene:     fmt.Sprintf("topicId=%d&userId=%d", topicId, userId),
+		Scene:     fmt.Sprintf("topicId=%d&userId=%d&scene=poster", topicId, userId),
 		Page:      "pages/cool-mio/mio-detail/index",
 		Width:     100,
 		IsHyaline: true,
