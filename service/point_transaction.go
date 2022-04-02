@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"mio/internal/util"
 	"mio/model"
 	"mio/model/entity"
@@ -16,9 +15,6 @@ func NewPointTransactionService(repo repository.PointTransactionRepository) Poin
 	return PointTransactionService{
 		repo: repo,
 	}
-}
-func NewPointTransactionServiceByDB(db *gorm.DB) PointTransactionService {
-	return NewPointTransactionService(repository.NewPointTransactionRepository(db))
 }
 
 type PointTransactionService struct {
