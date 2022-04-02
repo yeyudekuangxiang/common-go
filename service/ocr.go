@@ -24,9 +24,7 @@ type OCRService struct {
 func (u OCRService) OCRForGm(openid string, src string) error {
 	res := util.OCRPush(src)
 	var orderNo, fee string
-	if res.WordsResultNum == 0 {
-		return errors.New("无法识别此账单,请重新上传,谢谢")
-	}
+
 	for k, v := range res.WordsResult {
 		if v.Words == "收款:" {
 			fee = res.WordsResult[k+1].Words
@@ -34,6 +32,9 @@ func (u OCRService) OCRForGm(openid string, src string) error {
 		if v.Words == "联系电话:021-62333696" {
 			orderNo = res.WordsResult[k+1].Words
 		}
+	}
+	if orderNo == "" || fee == "" {
+		return errors.New("无法识别此账单,请重新上传,谢谢")
 	}
 	fmt.Println("素食打卡账单:" + orderNo + ":" + fee)
 	cmd := app.Redis.SetNX(context.Background(), config.RedisKey.Lock+orderNo, "a", 36500*time.Second)
