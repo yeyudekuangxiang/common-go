@@ -1,7 +1,6 @@
 package service
 
 import (
-	"gorm.io/gorm"
 	"mio/model/entity"
 	"mio/repository"
 )
@@ -10,9 +9,6 @@ var DefaultOrderItemService = NewOrderItemService(repository.DefaultOrderItemRep
 
 func NewOrderItemService(repo repository.OrderItemRepository) OrderItemService {
 	return OrderItemService{repo: repo}
-}
-func NewOrderItemServiceByDB(db *gorm.DB) OrderItemService {
-	return NewOrderItemService(repository.NewOrderItemRepository(db))
 }
 
 type OrderItemService struct {

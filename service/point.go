@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"mio/core/app"
 	"mio/model/entity"
 	"mio/repository"
@@ -12,9 +11,6 @@ var DefaultPointService = NewPointService(repository.DefaultPointRepository)
 
 func NewPointService(repo repository.PointRepository) PointService {
 	return PointService{repo: repo}
-}
-func NewPointServiceByDB(db *gorm.DB) PointService {
-	return NewPointService(repository.NewPointRepository(db))
 }
 
 type PointService struct {

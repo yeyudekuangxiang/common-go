@@ -19,6 +19,16 @@ type OrderRepository struct {
 func (repo OrderRepository) Save(order *entity.Order) error {
 	return repo.DB.Save(order).Error
 }
-func (repo OrderRepository) Create(order *entity.Order) error {
-	return repo.DB.Create(order).Error
+
+// SubmitOrder 提交订单
+func (repo OrderRepository) SubmitOrder(order *entity.Order, orderItems *[]entity.OrderItem) error {
+	return repo.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(order).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(orderItems).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
