@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	GMProductItemId  = "cc41aabf-c0ca-455e-8a22-2a1ec40d1834"
-	GMNewUserTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-25 15:00:00")
+	GMProductItemId  = "146bc6b0-bea8-45ba-b75a-e0df19f3b5ca"
+	GMNewUserTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-25 15:00:00")
 	GMEndTime, _     = time.Parse("2006-01-02 15:04:05", "2022-03-25 15:00:00")
 )
 var DefaultGMService = GMService{}
