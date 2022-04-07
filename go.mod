@@ -1,6 +1,6 @@
 module mio
 
-go 1.15
+go 1.17
 
 require (
 	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
