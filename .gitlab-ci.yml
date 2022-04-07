@@ -25,12 +25,29 @@ package:
     - docker login -u $CI_BUILD_DOCKER_USER -p $CI_BUILD_TOKEN $CI_BUILD_DOCKER_URL
     - docker build -t $IMAGE_TAG -f ./build/Dockerfile .
     - docker push $IMAGE_TAG
-deploy:
+deploy-dev:
   stage: deploy
+  environment:
+    name: develop
+    url: https://godev-api.miotech.com
   tags:
     - k8s
   only:
     - develop
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+  script:
+    - sh ./build/deploy.sh $CI_COMMIT_REF_NAME
+
+deploy-prod:
+  stage: deploy
+  environment:
+    name: production
+    url: https://go-api.miotech.com
+  tags:
+    - k8s
+  only:
     - tags
   before_script:
     - mkdir -p $HOME/.kube
