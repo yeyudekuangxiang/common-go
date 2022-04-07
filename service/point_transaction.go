@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"mio/internal/util"
 	"mio/model"
 	"mio/model/entity"
@@ -43,8 +42,7 @@ func (p PointTransactionService) Create(param CreatePointTransactionParam) (*ent
 		return nil, err
 	}
 
-	fmt.Printf("保存tran %+v", transaction)
-	DefaultPointService.RefreshBalanceByMq(param.OpenId)
+	_ = DefaultPointService.RefreshBalance(param.OpenId)
 
 	return &transaction, nil
 }
@@ -52,4 +50,8 @@ func (p PointTransactionService) Create(param CreatePointTransactionParam) (*ent
 // GetListBy 查询记录列表
 func (p PointTransactionService) GetListBy(by repository.GetPointTransactionListBy) []entity.PointTransaction {
 	return repository.DefaultPointTransactionRepository.GetListBy(by)
+}
+func (p PointTransactionService) FindBy(by repository.FindPointTransactionBy) (*entity.PointTransaction, error) {
+	pt := p.repo.FindBy(by)
+	return &pt, nil
 }

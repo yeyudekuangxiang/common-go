@@ -1,6 +1,6 @@
 package config
 
-var App = app{
+var Config = app{
 	App:      appSetting{},
 	Http:     httpSetting{},
 	Database: databaseSetting{},
@@ -8,6 +8,7 @@ var App = app{
 	Weapp:    wxSetting{},
 	Wxoa:     wxSetting{},
 	Redis:    redisSetting{},
+	DuiBa:    duiBaSetting{},
 }
 
 type app struct {
@@ -18,6 +19,7 @@ type app struct {
 	Weapp    wxSetting       `ini:"weapp"`
 	Wxoa     wxSetting       `ini:"wxoa"`
 	Redis    redisSetting    `ini:"redis"`
+	DuiBa    duiBaSetting    `ini:"duiba"`
 }
 type appSetting struct {
 	TokenKey string
@@ -55,4 +57,9 @@ type redisSetting struct {
 	Port     int
 	Password string
 	DB       int
+}
+
+type duiBaSetting struct {
+	AppKey    string
+	AppSecret string
 }

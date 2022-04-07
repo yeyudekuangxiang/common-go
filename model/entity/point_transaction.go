@@ -17,6 +17,7 @@ const (
 	POINT_PARTNERSHIP PointTransactionType = "PARTNERSHIP" //合作活动
 	POINT_GREEN_TORCH PointTransactionType = "GREEN_TORCH" //绿炬人抽奖
 	POINT_ADJUSTMENT  PointTransactionType = "ADJUSTMENT"  //积分调整
+	POINT_DUIBA       PointTransactionType = "DUIBA"       //兑吧
 )
 
 var PointCollectValueMap = map[PointTransactionType]int{

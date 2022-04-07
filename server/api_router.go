@@ -35,6 +35,7 @@ func apiRouter(router *gin.Engine) {
 
 		//星星充电订单同步接口
 		authRouter.GET("/charge/push", format(api.DefaultChargeController.Push))
+
 	}
 
 	//必须登陆的路由
@@ -63,6 +64,19 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/ocr/gm/ticket", format(api.DefaultOCRController.GmTicket))
 
 		mustAuthRouter.POST("order/submit-from-green", formatInterface(api.DefaultOrderController.SubmitOrderForGreen))
+
+		mustAuthRouter.GET("duiba/autologin", format(api.DefaultDuiBaController.AutoLogin))
+	}
+
+	openApiRouter := router.Group("/api/mp2c")
+	{
+		openApiRouter.Any("/duiba/exchange/callback", func(context *gin.Context) {
+			context.JSON(200, api.DefaultDuiBaController.ExchangeCallback(context))
+		})
+
+		openApiRouter.Any("/duiba/exchange/result/notice/callback", func(context *gin.Context) {
+			context.JSON(200, api.DefaultDuiBaController.ExchangeCallback(context))
+		})
 	}
 
 }

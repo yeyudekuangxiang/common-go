@@ -82,3 +82,7 @@ type CalculateProductResult struct {
 	TotalCost int
 	ItemList  []submitOrderItem
 }
+type ExchangeCallbackResult struct {
+	BizId   string
+	Credits int
+}

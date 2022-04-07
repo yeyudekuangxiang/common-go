@@ -77,3 +77,6 @@ type CheckStockItem struct {
 	ItemId string
 	Count  int
 }
+type FindPointTransactionBy struct {
+	TransactionId string
+}

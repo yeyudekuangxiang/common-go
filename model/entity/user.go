@@ -1,6 +1,8 @@
 package entity
 
-import "mio/model"
+import (
+	"mio/model"
+)
 
 type UserSource string
 

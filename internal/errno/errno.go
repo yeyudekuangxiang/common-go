@@ -52,7 +52,7 @@ type Err struct {
 }
 
 func (err Err) Error() string {
-	return fmt.Sprintf("Err - code: %d, message: %s, error: %s", err.Code, err.Message, err.Errord)
+	return fmt.Sprintf("Err - code: %d, message: %s", err.Code, err.Message)
 }
 
 // 使用 错误码 和 error 创建新的 错误

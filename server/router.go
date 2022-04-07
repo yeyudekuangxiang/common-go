@@ -40,7 +40,7 @@ func format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
 func formatInterface(f func(*gin.Context) (interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := f(ctx)
-		if err != nil && config.App.App.Debug {
+		if err != nil && config.Config.App.Debug {
 			log.Printf("%+v\n", err)
 		}
 		ctx.JSON(200, formatErr(err, data))

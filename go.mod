@@ -22,7 +22,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/medivhzhan/weapp/v3 v3.6.6
-	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/mlogclub/simple v1.1.14
 	github.com/nacos-group/nacos-sdk-go v1.0.6
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect

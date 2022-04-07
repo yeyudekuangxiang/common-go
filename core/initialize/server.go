@@ -28,7 +28,7 @@ func InitServer() *http.Server {
 func RunServer() {
 	//gin.DefaultWriter = logger.NewZapLogger(*config.LogConfig)
 
-	configSetting := config.App.Http
+	configSetting := config.Config.Http
 	app.Server.Addr = fmt.Sprintf(":%d", configSetting.Port)
 	app.Server.ReadTimeout = time.Duration(configSetting.ReadTimeout) * time.Second
 	app.Server.WriteTimeout = time.Duration(configSetting.WriteTimeout) * time.Second

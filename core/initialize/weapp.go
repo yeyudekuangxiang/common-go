@@ -19,7 +19,7 @@ func (noCache) Get(key string) (interface{}, bool) {
 }
 
 func InitWeapp() {
-	weappSetting := config.App.Weapp
+	weappSetting := config.Config.Weapp
 	c := weapp.NewClient(weappSetting.AppId, weappSetting.Secret, weapp.WithCache(noCache{}))
 	*app.Weapp = *c
 }

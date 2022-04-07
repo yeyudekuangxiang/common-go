@@ -25,11 +25,11 @@ func (OaController) Sign(c *gin.Context) (gin.H, error) {
 
 	tickerServer := wxoa.TicketTokenServer{
 		TokenServer: &wxoa.AccessTokenServer{
-			AppId:  config.App.Wxoa.AppId,
-			Secret: config.App.Wxoa.Secret,
+			AppId:  config.Config.Wxoa.AppId,
+			Secret: config.Config.Wxoa.Secret,
 			Redis:  app.Redis,
 		},
-		AppId: config.App.Wxoa.AppId,
+		AppId: config.Config.Wxoa.AppId,
 		Redis: app.Redis,
 	}
 
@@ -43,7 +43,7 @@ func (OaController) Sign(c *gin.Context) (gin.H, error) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	sign := jssdk.WXConfigSign(ticker, nonceStr, timestamp, form.Url)
 	return gin.H{
-		"appId":     config.App.Wxoa.AppId,
+		"appId":     config.Config.Wxoa.AppId,
 		"timestamp": timestamp,
 		"nonceStr":  nonceStr,
 		"signature": sign,
