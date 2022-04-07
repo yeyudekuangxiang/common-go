@@ -34,3 +34,15 @@ func (p PointTransactionRepository) GetListBy(by GetPointTransactionListBy) []en
 	}
 	return list
 }
+func (p PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.PointTransaction {
+	pt := entity.PointTransaction{}
+	db := p.DB.Model(pt)
+	if by.TransactionId != "" {
+		db.Where("transaction_id", by.TransactionId)
+	}
+	err := db.First(&pt).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return pt
+}

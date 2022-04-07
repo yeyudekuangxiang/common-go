@@ -10,7 +10,7 @@ import (
 
 func InitDB() {
 	var conf db.Config
-	err := util.MapTo(config.App.Database, &conf)
+	err := util.MapTo(config.Config.Database, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}

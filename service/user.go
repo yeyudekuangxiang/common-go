@@ -73,8 +73,9 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user.Time = model.NewTime()
 	return &user, repository.DefaultUserRepository.Save(&user)
 }
-func (u UserService) GetUserBy(by repository.GetUserBy) entity.User {
-	return repository.DefaultUserRepository.GetUserBy(by)
+func (u UserService) GetUserBy(by repository.GetUserBy) (*entity.User, error) {
+	user := repository.DefaultUserRepository.GetUserBy(by)
+	return &user, nil
 }
 func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 	user := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{

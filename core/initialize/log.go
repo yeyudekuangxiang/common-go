@@ -11,7 +11,7 @@ import (
 func InitLog() {
 	var loggerConfig zap.LoggerConfig
 	var err error
-	err = util.MapTo(config.App.Log, &loggerConfig)
+	err = util.MapTo(config.Config.Log, &loggerConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

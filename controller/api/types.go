@@ -38,3 +38,7 @@ type GetChargeForm struct {
 	TotalPower float32 `json:"totalPower" form:"totalPower" binding:"required" alias:"总电量"`
 	Sign       string  `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
+
+type DuibaAutoLoginForm struct {
+	Path string `json:"path" form:"path"`
+}
