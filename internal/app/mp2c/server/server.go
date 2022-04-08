@@ -1,4 +1,4 @@
-package router
+package server
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"mio/config"
+	"mio/internal/app/mp2c/middleware"
+	"mio/internal/app/mp2c/router"
 	"net/http"
 	"time"
 )
@@ -18,8 +20,8 @@ func InitServer() *http.Server {
 
 	handler := gin.New()
 
-	middleware(handler)
-	Router(handler)
+	middleware.Middleware(handler)
+	router.Router(handler)
 
 	*Server = http.Server{
 		Handler: handler,

@@ -20,7 +20,7 @@ func MapTo(data interface{}, v interface{}) error {
 }
 func BuildQuery(params map[string]string) string {
 	kList := make([]string, 0)
-	for k, _ := range params {
+	for k := range params {
 		kList = append(kList, k)
 	}
 

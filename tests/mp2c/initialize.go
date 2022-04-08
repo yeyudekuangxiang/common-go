@@ -3,7 +3,7 @@ package mp2c
 import (
 	"github.com/gin-gonic/gin"
 	"log"
-	server "mio/internal/app/mp2c/router"
+	"mio/internal/app/mp2c/server"
 	"mio/internal/pkg/core/initialize"
 	auth2 "mio/internal/pkg/model/auth"
 	service2 "mio/internal/pkg/service"

@@ -1,4 +1,4 @@
-package router
+package middleware
 
 import (
 	"github.com/gin-contrib/cors"
@@ -11,20 +11,22 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	service2 "mio/internal/pkg/service"
-	util2 "mio/internal/pkg/util"
+	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"mio/pkg/zap"
 	"time"
 )
 
-func middleware(middleware *gin.Engine) {
+// Middleware 全局中间件
+func Middleware(middleware *gin.Engine) {
 	middleware.Use(corsM())
 	middleware.Use(gin.Recovery())
 	middleware.Use(access())
 }
+
 func access() gin.HandlerFunc {
 	//执行测试时 访问日志输出到控制台
-	if util2.IsTesting() {
+	if util.IsTesting() {
 		return ginzap.Ginzap(zap.DefaultLogger("info"), time.RFC3339, false)
 	}
 	logger := zap.NewZapLogger(zap.LoggerConfig{
@@ -53,18 +55,18 @@ func auth() gin.HandlerFunc {
 		ctx.Set("AuthUser", *user)
 	}
 }
-func authAdmin() gin.HandlerFunc {
+func AuthAdmin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		admin, err := service2.DefaultAdminService.GetAdminByToken(token)
 		if err != nil || admin == nil {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 
@@ -75,14 +77,14 @@ func mustAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		user, err := service2.DefaultUserService.GetUserByToken(token)
 		if err != nil || user.ID == 0 {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -90,7 +92,7 @@ func mustAuth() gin.HandlerFunc {
 }
 
 //临时使用openid作为登陆验证
-func mustAuth2() gin.HandlerFunc {
+func MustAuth2() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user *entity.User
 		var err error
@@ -98,7 +100,7 @@ func mustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByToken(token)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth token err", token, err)
-				ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
 				return
 			}
 		}
@@ -107,13 +109,13 @@ func mustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
 			if err != nil || user == nil {
 				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(200, formatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
 				return
 			}
 		}
 
 		if user == nil {
-			ctx.AbortWithStatusJSON(200, formatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -121,7 +123,7 @@ func mustAuth2() gin.HandlerFunc {
 }
 
 //临时使用openid作为登陆验证
-func auth2() gin.HandlerFunc {
+func Auth2() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user *entity.User
 		var err error
@@ -150,7 +152,7 @@ type ThrottleConfig struct {
 	Throttle string
 }
 
-func throttle() gin.HandlerFunc {
+func Throttle() gin.HandlerFunc {
 	throttleConfig := &struct {
 		Throttle string
 	}{}
@@ -168,7 +170,7 @@ func throttle() gin.HandlerFunc {
 	})
 
 	middleware := mgin.NewMiddleware(limiter.New(store, rate), mgin.WithKeyGetter(func(c *gin.Context) string {
-		return util2.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
+		return util.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
 	}))
 	return middleware
 }

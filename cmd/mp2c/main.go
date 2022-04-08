@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"mio/internal/app/mp2c/router"
+	"mio/internal/app/mp2c/server"
 	"mio/internal/pkg/core/initialize"
 	"os"
 	"os/signal"
@@ -17,12 +17,12 @@ func init() {
 
 	initialize.Initialize(*flagConf)
 
-	router.InitServer()
+	server.InitServer()
 }
 func main() {
-	router.RunServer()
+	server.RunServer()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	router.CloseServer()
+	server.CloseServer()
 }
