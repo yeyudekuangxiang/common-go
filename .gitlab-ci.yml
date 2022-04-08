@@ -39,7 +39,7 @@ deploy-dev:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/deploy.sh $CI_COMMIT_REF_NAME
+    - sh ./build/mp2c/deploy.sh $CI_COMMIT_REF_NAME
 
 deploy-prod:
   stage: deploy
@@ -54,4 +54,4 @@ deploy-prod:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/deploy.sh $CI_COMMIT_REF_NAME
+    - sh ./build/mp2c/deploy.sh $CI_COMMIT_REF_NAME
