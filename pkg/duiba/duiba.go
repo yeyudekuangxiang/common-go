@@ -2,7 +2,7 @@ package duiba
 
 import (
 	"github.com/pkg/errors"
-	"mio/internal/validator"
+	"mio/pkg/validator"
 	"strconv"
 	"time"
 )
