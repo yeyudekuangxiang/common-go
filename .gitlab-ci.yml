@@ -13,7 +13,7 @@ build:
     - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -o mio .
   artifacts:
     paths:
-      - mio
+      - ./cmd/mp2c/mio
 package:
   stage: package
   only:
