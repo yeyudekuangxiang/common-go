@@ -7,7 +7,7 @@ ENV GOARCH amd64
 
 WORKDIR /data/mio
 
-COPY . /data/mio
+COPY .. /data/mio
 
 RUN go mod download \
     && go build -o mio .
