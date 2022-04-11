@@ -32,3 +32,9 @@ type GMAnswerQuestion struct {
 	IsRight bool   `json:"isRight" form:"isRight"`
 	Answer  string `json:"answer" form:"answer" binding:"required" alias:"答案"`
 }
+type ZeroAutoLoginForm struct {
+	Short string `json:"short" form:"short"`
+}
+type ZeroStoreUrlForm struct {
+	Url string `json:"Url" form:"Url" binding:"required" alias:"url"`
+}

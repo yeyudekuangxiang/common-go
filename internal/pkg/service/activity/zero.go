@@ -1,9 +1,14 @@
 package activity
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
+	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"time"
 )
 
@@ -15,7 +20,7 @@ var DefaultZeroService = ZeroService{}
 type ZeroService struct {
 }
 
-func (srv ZeroService) AutoLogin(userId int64) (string, error) {
+func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	userInfo, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return "", err
@@ -27,11 +32,38 @@ func (srv ZeroService) AutoLogin(userId int64) (string, error) {
 	if userInfo.Time.After(ZeroActivityStartTime) {
 		isNewUser = 1
 	}
-	fmt.Println("asa", fmt.Sprintf("nickname=%snewUser=%d", userInfo.Nickname, isNewUser))
+	path := "https://88543.activity-12.m.duiba.com.cn/aaw/haggle/index?opId=194935804526281&dbnewopen&newChannelType=3"
+	if short != "" {
+		p, err := srv.GetUrlByShort(short)
+		if err != nil {
+			app.Logger.Error(userId, short, err)
+		}
+		if p != "" {
+			path = p
+		}
+	}
+
 	return service.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
 		UserId:  userId,
 		OpenId:  userInfo.OpenId,
-		Path:    "https://88543.activity-12.m.duiba.com.cn/wechat/access?apk=ngiGp48EcRUC9TjpXEYxdSSJhim&dbredirect=https%3A%2F%2F88543.activity-12.m.duiba.com.cn%2Faaw%2Fhaggle%2Findex%3FopId%3D194935804526281%26dbnewopen%26newChannelType%3D3",
-		DCustom: "newUser12=12",
+		Path:    path,
+		DCustom: fmt.Sprintf("avatar=%s&nickname=%snewUser=%d", userInfo.AvatarUrl, userInfo.Nickname, isNewUser),
 	})
+}
+func (srv ZeroService) StoreUrl(url string) (string, error) {
+	key := util.UUID()
+	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
+	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*7).Err()
+	if err != nil {
+		return "", err
+	}
+	return key, nil
+}
+func (srv ZeroService) GetUrlByShort(short string) (string, error) {
+	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, short)
+	u, err := app.Redis.Get(context.Background(), redisKey).Result()
+	if err != nil && err != redis.Nil {
+		return "", err
+	}
+	return u, nil
 }

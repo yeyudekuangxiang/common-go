@@ -8,6 +8,7 @@ type redisKey struct {
 	Limit1S            string
 	InitTopicFlowLimit string
 	Lock               string
+	DuiBaShortUrl      string
 }
 
 var RedisKey = redisKey{
@@ -18,4 +19,5 @@ var RedisKey = redisKey{
 	Limit1S:            "Limit1S:",                   // 拼接行数名称
 	InitTopicFlowLimit: "mp2c:initTopicFlowlimit:%d", //拼接用户id
 	Lock:               "mp2c:lock:%s",               //redis分布式锁  拼接key
+	DuiBaShortUrl:      "mp2c:duiba:shorturl:%s",     // 将对吧长链接存到redis中
 }
