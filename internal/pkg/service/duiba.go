@@ -30,19 +30,40 @@ type DuiBaService struct {
 }
 
 // AutoLogin 获取免登陆地址
-func (srv DuiBaService) AutoLogin(userId int64, path string) (string, error) {
-	userInfo, err := DefaultUserService.GetUserById(userId)
+func (srv DuiBaService) AutoLogin(param AutoLoginParam) (string, error) {
+	userInfo, err := DefaultUserService.GetUserById(param.UserId)
 	if err != nil {
 		return "", err
 	}
-	b, err := DefaultPointService.FindByUserId(userId)
+	b, err := DefaultPointService.FindByUserId(param.UserId)
 	if err != nil {
 		return "", err
 	}
 	return srv.client.AutoLogin(duiba.AutoLoginParam{
 		Uid:      userInfo.OpenId,
 		Credits:  int64(b.Balance),
-		Redirect: path,
+		Redirect: param.Path,
+		DCustom:  param.DCustom,
+		Transfer: param.Transfer,
+		SignKeys: param.SignKeys,
+	})
+}
+func (srv DuiBaService) AutoLoginOpenId(param AutoLoginOpenIdParam) (string, error) {
+	/*userInfo, err := DefaultUserService.GetUserById(param.UserId)
+	if err != nil {
+		return "", err
+	}*/
+	b, err := DefaultPointService.FindByUserId(param.UserId)
+	if err != nil {
+		return "", err
+	}
+	return srv.client.AutoLogin(duiba.AutoLoginParam{
+		Uid:      param.OpenId,
+		Credits:  int64(b.Balance),
+		Redirect: param.Path,
+		DCustom:  param.DCustom,
+		Transfer: param.Transfer,
+		SignKeys: param.SignKeys,
 	})
 }
 

@@ -28,6 +28,9 @@ func BuildQuery(params map[string]string) string {
 
 	query := strings.Builder{}
 	for _, k := range kList {
+		if params[k] == "" {
+			continue
+		}
 		query.WriteString(k)
 		query.WriteString("=")
 		query.WriteString(params[k])

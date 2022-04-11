@@ -15,6 +15,9 @@ func sign(params map[string]string) string {
 
 	signStr := ""
 	for _, k := range keyList {
+		if params[k] == "" {
+			continue
+		}
 		signStr += params[k]
 	}
 	return md5(signStr)

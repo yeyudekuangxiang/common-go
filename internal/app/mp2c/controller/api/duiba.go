@@ -19,7 +19,10 @@ func (DuiBaController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := util.GetAuthUser(ctx)
-	u, err := service.DefaultDuiBaService.AutoLogin(user.ID, form.Path)
+	u, err := service.DefaultDuiBaService.AutoLogin(service.AutoLoginParam{
+		UserId: user.ID,
+		Path:   form.Path,
+	})
 	if err != nil {
 		return nil, err
 	}

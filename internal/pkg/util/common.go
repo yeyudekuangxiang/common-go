@@ -49,8 +49,8 @@ func (res TOResult) Float64() float64 {
 	return res.val.(float64)
 }
 
-// TernaryOperator 三元运算
-func TernaryOperator(right bool, val1 interface{}, val2 interface{}) TOResult {
+// Ternary 三元运算
+func Ternary(right bool, val1 interface{}, val2 interface{}) TOResult {
 	if right {
 		return TOResult{val: val1}
 	}

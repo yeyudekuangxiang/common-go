@@ -3,6 +3,7 @@ package duiba
 import (
 	"github.com/pkg/errors"
 	"mio/pkg/validator"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -43,6 +44,16 @@ func (client Client) AutoLogin(param AutoLoginParam) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if dcustom := signParams["dcustom"]; dcustom != "" {
+		signParams["dcustom"] = url.QueryEscape(signParams["dcustom"])
+	}
+	if redirect := signParams["redirect"]; redirect != "" {
+		signParams["redirect"] = url.QueryEscape(signParams["redirect"])
+	}
+	if redirect := signParams["transfer"]; redirect != "" {
+		signParams["transfer"] = url.QueryEscape(signParams["transfer"])
+	}
+
 	return baseUrl + autoLoginPath + "?" + BuildQuery(signParams), nil
 }
 func (client Client) CheckSign(v Param) error {

@@ -86,3 +86,19 @@ type ExchangeCallbackResult struct {
 	BizId   string
 	Credits int
 }
+
+type AutoLoginParam struct {
+	UserId   int64
+	Path     string
+	DCustom  string
+	Transfer string
+	SignKeys string
+}
+type AutoLoginOpenIdParam struct {
+	UserId   int64
+	OpenId   string
+	Path     string
+	DCustom  string
+	Transfer string
+	SignKeys string
+}

@@ -21,8 +21,16 @@ type AutoLoginParam struct {
 }
 
 func (param AutoLoginParam) ToMap() map[string]string {
-	m := make(map[string]string)
-	_ = MapTo(param, &m)
-	m["credits"] = strconv.FormatInt(param.Credits, 10)
-	return m
+	return map[string]string{
+		"uid":      param.Uid,
+		"credits":  strconv.FormatInt(param.Credits, 10),
+		"redirect": param.Redirect,
+		"alipay":   param.Alipay,
+		"realname": param.RealName,
+		"qq":       param.QQ,
+		"phone":    param.Phone,
+		"dcustom":  param.DCustom,
+		"transfer": param.Transfer,
+		"signKeys": param.SignKeys,
+	}
 }

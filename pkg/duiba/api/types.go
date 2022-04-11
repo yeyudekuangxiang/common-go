@@ -1,7 +1,6 @@
 package api
 
 import (
-	"mio/pkg/duiba"
 	"strconv"
 )
 
@@ -42,13 +41,25 @@ type ExchangeForm struct {
 }
 
 func (form ExchangeForm) ToMap() map[string]string {
-	m := make(map[string]string)
-	_ = duiba.MapTo(form, &m)
-	m["credits"] = strconv.FormatInt(form.Credits, 10)
-	m["facePrice"] = strconv.Itoa(form.FacePrice)
-	m["actualPrice"] = strconv.Itoa(form.ActualPrice)
-	m["waitAudit"] = strconv.FormatBool(form.WaitAudit)
-	return m
+	return map[string]string{
+		"uid":         form.Uid,
+		"credits":     strconv.FormatInt(form.Credits, 10),
+		"itemCode":    form.ItemCode,
+		"appKey":      form.AppKey,
+		"timestamp":   form.Timestamp,
+		"description": form.Description,
+		"orderNum":    form.OrderNum,
+		"type":        string(form.Type),
+		"facePrice":   strconv.Itoa(form.FacePrice),
+		"actualPrice": strconv.Itoa(form.ActualPrice),
+		"ip":          form.IP,
+		"qq":          form.QQ,
+		"phone":       form.Phone,
+		"alipay":      form.Alipay,
+		"waitAudit":   strconv.FormatBool(form.WaitAudit),
+		"params":      form.Params,
+		"sign":        form.Sign,
+	}
 }
 
 // ExchangeResultForm 兑换结果通知 https://www.duiba.com.cn/tech_doc_book/server/servers/notify_api_2.html
@@ -64,8 +75,14 @@ type ExchangeResultForm struct {
 }
 
 func (form ExchangeResultForm) ToMap() map[string]string {
-	m := make(map[string]string)
-	_ = duiba.MapTo(form, &m)
-	m["Success"] = strconv.FormatBool(form.Success)
-	return m
+	return map[string]string{
+		"uid":          form.Uid,
+		"appKey":       form.AppKey,
+		"timestamp":    form.Timestamp,
+		"success":      strconv.FormatBool(form.Success),
+		"errorMessage": form.ErrorMessage,
+		"orderNum":     form.OrderNum,
+		"bizId":        form.BizId,
+		"sign":         form.Sign,
+	}
 }

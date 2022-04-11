@@ -61,6 +61,7 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/activity/gm/invitation", util.Format(activityApi.DefaultGMController.ReportInvitationRecord))
 		mustAuthRouter.POST("/activity/gm/exchange", util.FormatInterface(activityApi.DefaultGMController.ExchangeGift))
 		mustAuthRouter.POST("/activity/gm/question", util.Format(activityApi.DefaultGMController.AnswerQuestion))
+		mustAuthRouter.GET("/activity/zero/autologin", util.Format(activityApi.DefaultZeroController.AutoLogin))
 
 		//OCR识别
 		mustAuthRouter.POST("/ocr/gm/ticket", util.Format(api.DefaultOCRController.GmTicket))

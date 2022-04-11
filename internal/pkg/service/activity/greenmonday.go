@@ -162,7 +162,7 @@ func (srv GMService) AddInvitationRecord(userId, InviteeUserId int64) error {
 		record = activity.GMInvitationRecord{
 			UserId:           userId,
 			InviteeUserId:    InviteeUserId,
-			InviteeIsNewUser: util.TernaryOperator(isNewUser, 1, 2).Int(),
+			InviteeIsNewUser: util.Ternary(isNewUser, 1, 2).Int(),
 			CreatedAt:        model.NewTime(),
 			UpdatedAt:        model.NewTime(),
 		}
