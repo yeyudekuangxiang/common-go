@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	baseUrl       = "https://activity.m.duiba.com.cn"
+	baseUrl       = "https://88543.activity-12.m.duiba.com.cn"
 	autoLoginPath = "/autoLogin/autologin"
 )
 
