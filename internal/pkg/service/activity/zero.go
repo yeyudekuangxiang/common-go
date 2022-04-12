@@ -28,9 +28,11 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	if userInfo.ID == 0 {
 		return "", errors.New("未查询到用户信息")
 	}
-	isNewUser := 0
-	if userInfo.Time.After(ZeroActivityStartTime) {
-		isNewUser = 1
+
+	//此方法只能使用一次
+	isNewUser, err := srv.IsNewUser(userId, userInfo.Time.Time)
+	if err != nil {
+		return "", err
 	}
 	path := "https://88543.activity-12.m.duiba.com.cn/aaw/haggle/index?opId=194935804526281&dbnewopen&newChannelType=3"
 	if short != "" {
@@ -66,4 +68,20 @@ func (srv ZeroService) GetUrlByShort(short string) (string, error) {
 		return "", err
 	}
 	return u, nil
+}
+func (srv ZeroService) IsNewUser(userId int64, createTime time.Time) (int, error) {
+	//用户创建时间在活动开始时间之前
+	if createTime.Before(ZeroActivityStartTime) {
+		return 0, nil
+	}
+	return 1, nil
+
+	//兑吧自己有判断 不用我们记录了
+	//判断是否已经助力过
+	redisKey := fmt.Sprintf(config.RedisKey.ActivityZeroIsNewUser, userId)
+	result, err := app.Redis.SetNX(context.Background(), redisKey, time.Now().Unix(), time.Hour*24*30).Result()
+	if err != nil && err != redis.Nil {
+		return 0, err
+	}
+	return util.Ternary(result, 1, 0).Int(), nil
 }
