@@ -34,7 +34,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path := "https://88543.activity-12.m.duiba.com.cn/aaw/haggle/index?opId=194935804526281&dbnewopen&newChannelType=3"
+	path := "https://88543.activity-12.m.duiba.com.cn/aaw/haggle/index?opId=195298153253101&dbnewopen&newChannelType=3"
 	if short != "" {
 		p, err := srv.GetUrlByShort(short)
 		if err != nil {
