@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#$1 chart名称
-
 
 echo "package start"
 cd $(dirname $(readlink -f "$0"))/../
@@ -22,13 +20,13 @@ elif [ ${CI_COMMIT_REF_NAME:0:1} = "v" ]; then
   tag=$CI_COMMIT_REF_NAME
 elif [ ${CI_COMMIT_REF_NAME:0:8}  = "release-" ]; then
   namespace='prod'
-  container_name=${container_name}${1}
+  container_name=${container_name}${CI_COMMIT_REF_NAME}
 elif [ ${CI_COMMIT_REF_NAME:0:7} = "hotfix-" ]; then
   namespace='prod'
-  container_name=${container_name}${1}
+  container_name=${container_name}${CI_COMMIT_REF_NAME}
 elif [ ${CI_COMMIT_REF_NAME:0:8} = "feature-" ]; then
   namespace='dev'
-  container_name=${container_name}${1}
+  container_name=${container_name}${CI_COMMIT_REF_NAME}
 else
   echo "THIS CI_COMMIT_REF_NAME $CI_COMMIT_REF_NAME DOES NOT REQUIRE DEPLOYMENT"
   exit 1
