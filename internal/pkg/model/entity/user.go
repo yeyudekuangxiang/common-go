@@ -7,8 +7,10 @@ import (
 type UserSource string
 
 const (
-	UserSourceMio    UserSource = "mio"
-	UserSourceMobile UserSource = "mobile"
+	UserSourceMio      UserSource = "mio"
+	UserSourceMobile   UserSource = "mobile"
+	UserSourceMioSrvOA UserSource = "mio-srv-oa"
+	UserSourceMioSubOA UserSource = "mio-sub-oa"
 )
 
 type User struct {

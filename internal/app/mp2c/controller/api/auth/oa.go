@@ -1,15 +1,11 @@
 package auth
 
 import (
-	"github.com/chanxuehong/wechat/mp/jssdk"
 	"github.com/gin-gonic/gin"
-	"mio/config"
-	"mio/internal/pkg/core/app"
-	util2 "mio/internal/pkg/util"
-	"mio/pkg/errno"
-	wxoa2 "mio/pkg/wxoa"
-	"strconv"
-	"time"
+	"mio/internal/pkg/model/entity"
+	authSrv "mio/internal/pkg/service/auth"
+	"mio/internal/pkg/util"
+	"net/http"
 )
 
 var DefaultOaController = OaController{}
@@ -19,33 +15,73 @@ type OaController struct {
 
 func (OaController) Sign(c *gin.Context) (gin.H, error) {
 	form := ConfigSignForm{}
-	if err := util2.BindForm(c, &form); err != nil {
+	if err := util.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	tickerServer := wxoa2.TicketTokenServer{
-		TokenServer: &wxoa2.AccessTokenServer{
-			AppId:  config.Config.Wxoa.AppId,
-			Secret: config.Config.Wxoa.Secret,
-			Redis:  app.Redis,
-		},
-		AppId: config.Config.Wxoa.AppId,
-		Redis: app.Redis,
-	}
-
-	ticker, err := tickerServer.Ticket()
+	signResult, err := authSrv.OaService{Platform: entity.UserSource(form.Platform)}.Sign(form.Url)
 	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.InternalServerError
+		return nil, err
 	}
 
-	nonceStr := util2.Md5(time.Now().String())
-	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	sign := jssdk.WXConfigSign(ticker, nonceStr, timestamp, form.Url)
 	return gin.H{
-		"appId":     config.Config.Wxoa.AppId,
-		"timestamp": timestamp,
-		"nonceStr":  nonceStr,
-		"signature": sign,
+		"sign": signResult,
 	}, nil
+}
+
+// AutoLogin 手机端完成一次授权后 调用端state未改变 回直接回调到callback而不会经过此方法
+func (OaController) AutoLogin(c *gin.Context) {
+	form := AutoLoginForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+	}
+
+	oaService := authSrv.OaService{
+		Platform: entity.UserSource(form.Platform),
+	}
+	loginUrl, err := oaService.AutoLogin(form.RedirectUri, form.State)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	//使用301重定项时 后续的授权将会已相同的state直接进入callback函数 而不会经过本函数
+	//使用302重定向时 后续的授权将会同样先进入本函数 保存数据后进行授权然后进入callback函数
+	c.Redirect(http.StatusFound, loginUrl)
+	return
+}
+
+func (OaController) AutoLoginCallback(c *gin.Context) {
+	form := AutoLoginCallbackForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+	}
+
+	oaService := authSrv.OaService{
+		Platform: entity.UserSource(form.Platform),
+	}
+	redirectUri, err := oaService.AutoLoginCallback(form.Platform, form.State)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	//如果使用302重定向 浏览器点击返回上一页时 url会变成此方法url且会重新进入此方法报数据异常错误
+	//使用301重定向时 浏览器点击返回上一页时 url会变成此方法url但不会进入此方法 会已相同的code进入回调页
+	c.Redirect(http.StatusMovedPermanently, redirectUri)
+}
+
+func (OaController) Login(c *gin.Context) (gin.H, error) {
+	form := OaAuthForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	oaService := authSrv.OaService{
+		Platform: entity.UserSource(form.Platform),
+	}
+	token, err := oaService.LoginByCode(form.Code)
+	return gin.H{
+		"token": token,
+	}, err
 }

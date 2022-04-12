@@ -10,6 +10,7 @@ type redisKey struct {
 	Lock                  string
 	DuiBaShortUrl         string
 	ActivityZeroIsNewUser string
+	OaAuth                string
 }
 
 var RedisKey = redisKey{
@@ -22,4 +23,5 @@ var RedisKey = redisKey{
 	Lock:                  "mp2c:lock:%s",                    //redis分布式锁  拼接key
 	DuiBaShortUrl:         "mp2c:duiba:shorturl:%s",          // 将对吧长链接存到redis中
 	ActivityZeroIsNewUser: "mp2c:activity:zero:isnewuser:%d", //0元拿活动记录是否新用户
+	OaAuth:                "mp2c:oaauth:%s",                  //微信网页授权
 }

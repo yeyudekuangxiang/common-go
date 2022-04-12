@@ -1,6 +1,8 @@
 [app]
 TokenKey=
 Debug=false
+#项目域名
+Domain=
 [http]
 Port=80
 ReadTimeout=10
@@ -42,7 +44,13 @@ MaxSize=100
 AppId=
 Secret=
 
-[wxoa]
+#绿喵服务号配置
+[mioSubOa]
+AppId=wxe5be614362f42f73
+Secret=eeb571fe4dced59328926a4169f846d9
+
+#绿喵订阅号配置
+[mioSrvOa]
 AppId=
 Secret=
 

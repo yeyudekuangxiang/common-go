@@ -81,6 +81,19 @@ func apiRouter(router *gin.Engine) {
 		openApiRouter.Any("/duiba/exchange/result/notice/callback", func(context *gin.Context) {
 			context.JSON(200, api.DefaultDuiBaController.ExchangeCallback(context))
 		})
+
+		//微信公众号网页授权登陆
+		openApiRouter.GET("/oa/auth", func(context *gin.Context) {
+			authApi.DefaultOaController.AutoLogin(context)
+		})
+		//微信公众号网页授权登陆回调
+		openApiRouter.Any("/oa/auth/callback", func(context *gin.Context) {
+			authApi.DefaultOaController.AutoLoginCallback(context)
+		})
+		//微信公众号网页code登陆
+		openApiRouter.Any("/oa/login", util.Format(authApi.DefaultOaController.Login))
+		//微信网页授权
+		openApiRouter.POST("/oa/sign", util.Format(authApi.DefaultOaController.Sign))
 	}
 
 }
