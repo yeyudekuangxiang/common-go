@@ -67,8 +67,6 @@ deploy-feature:
   tags:
     - k8s
   only:
-    - /^release-.*$/
-    - /^hotfix-.*$/
     - /^feature-.*$/
   before_script:
     - mkdir -p $HOME/.kube
@@ -85,8 +83,6 @@ deploy-release:
     - k8s
   only:
     - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^feature-.*$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
@@ -95,15 +91,10 @@ deploy-release:
 deploy-hotfix:
   image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: https://go-api.miotech.com/$CI_COMMIT_REF_NAME/
   tags:
     - k8s
   only:
-    - /^release-.*$/
     - /^hotfix-.*$/
-    - /^feature-.*$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
