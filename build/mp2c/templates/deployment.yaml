@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          args:
+            - '-c=/app/config/config.ini'
+          imagePullPolicy: Always
+          name: {{ .Release.Name }}
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: mp2c-go-config
+              mountPath: "/app/config"
+      volumes:
+        - name: mp2c-go-config
+          secret:
+            secretName: mp2c-go-config
+      imagePullSecrets:
+        - name: miotech-registry-cn
+      restartPolicy: Always
