@@ -8,11 +8,11 @@ build:
   only:
     - develop
     - tags
-    - ^release-.*$/
-    - ^hotfix-.*$/
-    - ^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - /^feature-.*$/
   script:
-    - ./scripts/build.sh mp2c
+    - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
       - ./cmd/mp2c/mp2c
@@ -21,13 +21,13 @@ package:
   only:
     - develop
     - tags
-    - ^release-.*$/
-    - ^hotfix-.*$/
-    - ^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - /^feature-.*$/
   dependencies:
     - build
   script:
-    - ./scripts/package.sh mp2c
+    - sh ./scripts/package.sh mp2c
 deploy-dev:
   stage: deploy
   environment:
@@ -41,7 +41,7 @@ deploy-dev:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/mp2c/deploy.sh mp2c
+    - sh ./scripts/deploy.sh mp2c
 
 deploy-prod:
   stage: deploy
@@ -56,9 +56,27 @@ deploy-prod:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/mp2c/deploy.sh mp2c
+    - sh ./scripts/deploy.sh mp2c
 
-deploy-test:
+deploy-feature:
+  image: yeyudekuangxiang/helm:3.8.1
+  stage: deploy
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    url: https://godev-api.miotech.com/$CI_COMMIT_REF_NAME/
+  tags:
+    - k8s
+  only:
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - /^feature-.*$/
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+  script:
+    - sh ./scripts/deploy.sh mp2c
+deploy-release:
+  image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
   environment:
     name: $CI_COMMIT_REF_NAME
@@ -66,11 +84,28 @@ deploy-test:
   tags:
     - k8s
   only:
-    - ^release-.*$/
-    - ^hotfix-.*$/
-    - ^feature-.*$/
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - /^feature-.*$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/mp2c/deploy.sh mp2c2
+    - sh ./scripts/deploy.sh mp2c
+deploy-hotfix:
+  image: yeyudekuangxiang/helm:3.8.1
+  stage: deploy
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    url: https://go-api.miotech.com/$CI_COMMIT_REF_NAME/
+  tags:
+    - k8s
+  only:
+    - /^release-.*$/
+    - /^hotfix-.*$/
+    - /^feature-.*$/
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+  script:
+    - sh ./scripts/deploy.sh mp2c

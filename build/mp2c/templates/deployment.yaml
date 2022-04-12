@@ -23,12 +23,12 @@ spec:
           ports:
             - containerPort: 80
           volumeMounts:
-            - name: mp2c-config
+            - name: mp2c-go-config
               mountPath: "/app/config"
       volumes:
-        - name: mp2c-config
+        - name: mp2c-go-config
           secret:
-            secretName: mp2c-config
+            secretName: mp2c-go-config
       imagePullSecrets:
         - name: miotech-registry-cn
       restartPolicy: Always
