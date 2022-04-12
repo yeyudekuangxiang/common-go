@@ -8,26 +8,24 @@ build:
   only:
     - develop
     - tags
-    - ^release-.*$/
-    - ^hotfix-.*$/
-    - ^feature-.*$/
   script:
-    - ./scripts/build.sh mp2c
+    - cd ./cmd/mp2c
+    - env GOPROXY=https://goproxy.cn,https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -o mio .
   artifacts:
     paths:
-      - ./cmd/mp2c/mp2c
+      - ./cmd/mp2c/mio
 package:
   stage: package
   only:
     - develop
     - tags
-    - ^release-.*$/
-    - ^hotfix-.*$/
-    - ^feature-.*$/
   dependencies:
     - build
   script:
-    - ./scripts/package.sh mp2c
+    - export IMAGE_TAG=${CI_BUILD_DOCKER_URL}mioyingtech/mio-go:$CI_COMMIT_REF_NAME
+    - docker login -u $CI_BUILD_DOCKER_USER -p $CI_BUILD_TOKEN $CI_BUILD_DOCKER_URL
+    - docker build -t $IMAGE_TAG -f ./build/mp2c/Dockerfile ./cmd/mp2c
+    - docker push $IMAGE_TAG
 deploy-dev:
   stage: deploy
   environment:
@@ -41,7 +39,7 @@ deploy-dev:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/mp2c/deploy.sh mp2c
+    - sh ./build/mp2c/deploy.sh $CI_COMMIT_REF_NAME
 
 deploy-prod:
   stage: deploy
@@ -56,21 +54,4 @@ deploy-prod:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    - sh ./build/mp2c/deploy.sh mp2c
-
-deploy-test:
-  stage: deploy
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: https://go-api.miotech.com/$CI_COMMIT_REF_NAME/
-  tags:
-    - k8s
-  only:
-    - ^release-.*$/
-    - ^hotfix-.*$/
-    - ^feature-.*$/
-  before_script:
-    - mkdir -p $HOME/.kube
-    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
-  script:
-    - sh ./build/mp2c/deploy.sh mp2c2
+    - sh ./build/mp2c/deploy.sh $CI_COMMIT_REF_NAME

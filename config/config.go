@@ -1,12 +1,18 @@
 package config
 
+import (
+	"fmt"
+	"mio/internal/pkg/model/entity"
+)
+
 var Config = app{
 	App:      appSetting{},
 	Http:     httpSetting{},
 	Database: databaseSetting{},
 	Log:      logSetting{},
 	Weapp:    wxSetting{},
-	Wxoa:     wxSetting{},
+	MioSubOA: wxSetting{},
+	MioSrvOA: wxSetting{},
 	Redis:    redisSetting{},
 	DuiBa:    duiBaSetting{},
 }
@@ -17,12 +23,14 @@ type app struct {
 	Database databaseSetting `ini:"database"`
 	Log      logSetting      `ini:"log"`
 	Weapp    wxSetting       `ini:"weapp"`
-	Wxoa     wxSetting       `ini:"wxoa"`
+	MioSubOA wxSetting       `ini:"mioSubOa"` //绿喵订阅号配置
+	MioSrvOA wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
 	Redis    redisSetting    `ini:"redis"`
 	DuiBa    duiBaSetting    `ini:"duiba"`
 }
 type appSetting struct {
 	TokenKey string
+	Domain   string
 	Debug    bool
 }
 type httpSetting struct {
@@ -62,4 +70,15 @@ type redisSetting struct {
 type duiBaSetting struct {
 	AppKey    string
 	AppSecret string
+}
+
+func FindOaSetting(source entity.UserSource) wxSetting {
+	fmt.Println("source", source, Config.MioSubOA)
+	switch source {
+	case entity.UserSourceMioSrvOA:
+		return Config.MioSrvOA
+	case entity.UserSourceMioSubOA:
+		return Config.MioSubOA
+	}
+	return wxSetting{}
 }

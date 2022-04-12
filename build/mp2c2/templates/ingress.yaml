@@ -1,0 +1,89 @@
+{{ if hasPrefix "feature-" .Values.image.branch  }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    {{ if eq .Release.Namespace "prod" }}
+    - host: go-api.miotech.com
+    {{ else }}
+    - host: godev-api.miotech.com
+    {{ end }}
+      http:
+        paths:
+          - path: /{{ .Values.image.branch }}/(.*)/
+            {{ if and .Values.ingress.pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .Values.ingress.pathType }}
+            {{ end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ .Release.Name }}-svc
+                port:
+                  number: 80
+              {{- else }}
+              serviceName: {{ .Release.Name }}-svc
+              servicePort: 80
+              {{- end }}
+  tls:
+    - hosts:
+        {{ if eq .Release.Namespace "prod" }}
+        - go-api.miotech.com
+        {{ else }}
+        - godev-api.miotech.com
+        {{ end }}
+      secretName: default-tls
+{{ else }}
+
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+spec:
+  rules:
+    {{ if eq .Release.Namespace "prod" }}
+    - host: go-api.miotech.com
+    {{ else }}
+    - host: godev-api.miotech.com
+    {{ end }}
+      http:
+        paths:
+          - path: /
+            {{ if and .Values.ingress.pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .Values.ingress.pathType }}
+            {{ end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ .Release.Name }}-svc
+                port:
+                  number: 80
+              {{- else }}
+              serviceName: {{ .Release.Name }}-svc
+              servicePort: 80
+              {{- end }}
+  tls:
+    - hosts:
+        {{ if eq .Release.Namespace "prod" }}
+        - go-api.miotech.com
+        {{ else }}
+        - godev-api.miotech.com
+        {{ end }}
+      secretName: default-tls
+{{ end }}
+
