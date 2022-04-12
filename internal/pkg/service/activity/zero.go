@@ -51,7 +51,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	})
 }
 func (srv ZeroService) StoreUrl(url string) (string, error) {
-	key := util.UUID()
+	key := util.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*7).Err()
 	if err != nil {
