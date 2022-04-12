@@ -46,3 +46,6 @@ Secret=
 AppId=
 Secret=
 
+[duiba]
+AppKey=
+AppSecret=

@@ -3,8 +3,8 @@ package repository
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"mio/model/entity"
-	"mio/repository"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 )
 
 func NewUserMockRepository() UserMockRepository {
@@ -15,12 +15,17 @@ type UserMockRepository struct {
 	db *gorm.DB
 }
 
-func (u UserMockRepository) GetShortUserListBy(by repository.GetUserListBy) []entity.ShortUser {
+func (u UserMockRepository) Save(user *entity.User) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (u UserMockRepository) GetUserById(i int64) (*entity.User, error) {
+func (u UserMockRepository) GetUserById(i int64) entity.User {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (u UserMockRepository) GetShortUserListBy(by repository.GetUserListBy) []entity.ShortUser {
 	//TODO implement me
 	panic("implement me")
 }

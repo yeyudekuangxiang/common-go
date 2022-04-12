@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"mio/model/entity"
+	"mio/internal/pkg/model/entity"
 )
 
 func NewAdminMockRepository() AdminMockRepository {
@@ -14,10 +14,10 @@ type AdminMockRepository struct {
 	db *gorm.DB
 }
 
-func (a AdminMockRepository) GetAdminById(id int) (*entity.Admin, error) {
-	return &entity.Admin{
+func (a AdminMockRepository) GetAdminById(id int) entity.Admin {
+	return entity.Admin{
 		ID:       id,
 		UName:    fmt.Sprintf("mock%d", id),
 		RealName: fmt.Sprintf("mock%d", id),
-	}, nil
+	}
 }
