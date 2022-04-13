@@ -45,6 +45,7 @@ func apiRouter(router *gin.Engine) {
 	{
 
 		mustAuthRouter.GET("/user", util.Format(api.DefaultUserController.GetUserInfo))
+		mustAuthRouter.POST("/user/mobile/bind-by-code", util.Format(api.DefaultUserController.BindMobileByCode))
 		mustAuthRouter.GET("/mobile-user", util.Format(api.DefaultUserController.GetMobileUserInfo))
 		mustAuthRouter.GET("/topic/share-qrcode", util.Format(api.DefaultTopicController.GetShareWeappQrCode))
 		mustAuthRouter.POST("/topic/like/change", util.Format(api.DefaultTopicController.ChangeTopicLike))

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/medivhzhan/weapp/v3/phonenumber"
 	"github.com/pkg/errors"
 	"math/rand"
 	"mio/config"
@@ -13,6 +14,7 @@ import (
 	repository2 "mio/internal/pkg/repository"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -133,4 +135,41 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 	}
 
 	return false
+}
+func (u UserService) BindPhoneByCode(userId int64, code string) error {
+	userInfo := u.r.GetUserById(userId)
+	if userInfo.ID == 0 {
+		return errors.New("未查到用户信息")
+	}
+
+	phoneResult, err := app.Weapp.NewPhonenumber().GetPhoneNumber(&phonenumber.GetPhoneNumberRequest{
+		Code: code,
+	})
+	if err != nil {
+		return err
+	}
+	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
+	return u.r.Save(&userInfo)
+}
+func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
+	userInfo := u.r.GetUserById(param.UserId)
+	if userInfo.ID == 0 {
+		return errors.New("未查到用户信息")
+	}
+
+	session, err := DefaultSessionService.FindSessionByOpenId(userInfo.OpenId)
+
+	if err != nil {
+		return err
+	}
+	if session.ID == 0 {
+		return errno.ErrAuth
+	}
+
+	decryptResult, err := app.Weapp.DecryptMobile(session.SessionKey, param.EncryptedData, param.IV)
+	if err != nil {
+		return err
+	}
+	userInfo.PhoneNumber = decryptResult.PhoneNumber
+	return u.r.Save(&userInfo)
 }
