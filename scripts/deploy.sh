@@ -43,5 +43,5 @@ if [ -z $remoteAppVersion ]; then
   helm install --set image.tag=$tag --set image.branch=$CI_COMMIT_REF_NAME --set replicaCount=${replicaCount} $container_name ./build/$1 -n ${namespace}
 else
     echo "chart \"${container_name}\"  exists. prepare for upgrade"
-  helm upgrade --set image.tag=$tag --set image.branch=$CI_COMMIT_REF_NAME --set replicaCount=${replicaCount} --set restartTime=$(date +%s) $container_name ./build/$1 -n ${namespace}
+  helm upgrade --set image.tag=$tag --set image.branch=$CI_COMMIT_REF_NAME --set replicaCount=${replicaCount} --set restartTime="'$(date +%s)'" $container_name ./build/$1 -n ${namespace}
 fi
