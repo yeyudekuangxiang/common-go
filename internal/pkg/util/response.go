@@ -15,8 +15,8 @@ func Format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
 	}
 }
 func FormatErr(err error, data interface{}) gin.H {
-	if err != nil && config.Config.App.Debug {
-		log.Printf("%+v\n", err)
+	if config.Config.App.Debug {
+		log.Printf("data:%+v err:%+v\n", data, err)
 	}
 
 	code, message := errno.DecodeErr(err)
