@@ -104,3 +104,12 @@ func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
 		"user": mobileUser.ShortUser(),
 	}, nil
 }
+
+func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
+	form := BindMobileByCodeForm{}
+	if err := util.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := util.GetAuthUser(c)
+	return nil, service.DefaultUserService.BindPhoneByCode(user.ID, form.Code)
+}

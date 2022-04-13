@@ -44,3 +44,6 @@ type GetChargeForm struct {
 type DuibaAutoLoginForm struct {
 	Path string `json:"path" form:"path"`
 }
+type BindMobileByCodeForm struct {
+	Code string `json:"code" form:"code" binding:"required" alias:"code"`
+}
