@@ -15,14 +15,14 @@ import (
 )
 
 var LogLevelMap = map[string]logger.LogLevel{
-	"Silent": logger.Silent,
-	"Error":  logger.Error,
-	"Warn":   logger.Warn,
-	"Info":   logger.Info,
+	"silent": logger.Silent,
+	"error":  logger.Error,
+	"warn":   logger.Warn,
+	"info":   logger.Info,
 }
 
 func getLogLevel(level string) logger.LogLevel {
-	logLevel, ok := LogLevelMap[level]
+	logLevel, ok := LogLevelMap[strings.ToLower(level)]
 	if !ok {
 		logLevel = logger.Error
 	}
