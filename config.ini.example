@@ -3,6 +3,7 @@ TokenKey=
 Debug=false
 #项目域名
 Domain=
+
 [http]
 Port=80
 ReadTimeout=10

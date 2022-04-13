@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	ZeroActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-11 14:08:00")
+	ZeroActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-13 00:00:00")
 )
 var DefaultZeroService = ZeroService{}
 
@@ -34,7 +34,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path := "https://88543.activity-12.m.duiba.com.cn/aaw/haggle/index?opId=195298153253101&dbnewopen&newChannelType=3"
+	path := "https://88543.activity-12.m.duiba.com.cn/aaw/haggle/index?opId=195380425492081&dbnewopen&newChannelType=3"
 	if short != "" {
 		p, err := srv.GetUrlByShort(short)
 		if err != nil {
@@ -55,7 +55,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 func (srv ZeroService) StoreUrl(url string) (string, error) {
 	key := util.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
-	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*7).Err()
+	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
 		return "", err
 	}

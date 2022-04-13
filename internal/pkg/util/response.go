@@ -15,6 +15,10 @@ func Format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
 	}
 }
 func FormatErr(err error, data interface{}) gin.H {
+	if err != nil && config.Config.App.Debug {
+		log.Printf("%+v\n", err)
+	}
+
 	code, message := errno.DecodeErr(err)
 	if data == nil {
 		data = make(map[string]interface{})
@@ -40,9 +44,6 @@ func FormatErr(err error, data interface{}) gin.H {
 func FormatInterface(f func(*gin.Context) (interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := f(ctx)
-		if err != nil && config.Config.App.Debug {
-			log.Printf("%+v\n", err)
-		}
 		ctx.JSON(200, FormatErr(err, data))
 	}
 }
