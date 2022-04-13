@@ -26,8 +26,8 @@ MaxOpenConns=10
 MaxIdleConns=5
 #连接可重用时间 <=0表示永远可用(单位秒)
 MaxLifetime=50
-#控制台日志等级 Silent Error Warn Info
-LogLevel=Info
+#控制台日志等级 silent error warn info
+LogLevel=info
 
 [redis]
 Host=r-uf68v1lom3hv3bfksw.redis.rds.aliyuncs.com
