@@ -2,24 +2,24 @@
 > 项目描述
 ## 目录结构
 mp2c-go
-- build 各个项目部署相关文件
-- cmd 各个项目的启动目录
-- config 应用程序的全局配置目录 
-    - config.go 全局配置
-    - redis.go redis键配置列表
-- internal 各个项目的主要逻辑目录
-    - app 各个项目的实际应用代码
-    - pkg 各个项目公用的逻辑代码
-        - core 应用程序通用的客户端和初始化方法
-        - model 各种实体文件
-        - repository 数据库增删改查逻辑
-        - service 项目的逻辑处理
-        - util 工具目录
-- mock 用于测试时对数据库、Repository或者Service进行mock
-- pkg 外部应用程序可以使用的库代码
-- tests 功能测试
-- config.ini.example 配置文件模版
-- .gitlab-ci.yml  gitlab ci&cd文件
+- [build](build) 各个项目部署相关文件
+- [cmd](cmd) 各个项目的启动目录
+- [config](config) 应用程序的全局配置目录 
+    - [config.go](config/config.go) 全局配置
+    - [redis.go](config/redis.go) redis键配置列表
+- [internal](internal) 各个项目的主要逻辑目录
+    - [app](internal/app) 各个项目的实际应用代码
+    - [pkg](internal/pkg) 各个项目公用的逻辑代码
+        - [core](internal/pkg/core) 应用程序通用的客户端和初始化方法
+        - [model](internal/pkg/model) 各种实体文件
+        - [repository](internal/pkg/repository) 数据库增删改查逻辑
+        - [service](internal/pkg/service) 项目的逻辑处理
+        - [util](internal/pkg/util) 工具目录
+- [mock](mock) 用于测试时对数据库、Repository或者Service进行mock
+- [pkg](pkg) 外部应用程序可以使用的库代码
+- [tests](tests) 功能测试
+- [config.ini.example](config.ini.example) 配置文件模版
+- [.gitlab-ci.yml](.gitlab-ci.yml)  gitlab ci&cd文件
 
 ### 数据流动 controller->service->repository
 ## 编码风格
@@ -29,11 +29,17 @@ mp2c-go
 3. controller代码获取参数均使用 [gin binding](https://gin-gonic.com/zh-cn/docs/examples/multipart-urlencoded-binding/) 和 [go-playground/validator](https://github.com/go-playground/validator) 进行绑定和验证
 4. service和repository中的方法必须写在结构体中 controller不做必须要求但尽量也写成结构体的形式
 5. 所有写的接口尽量在tests目录下写功能测试、有空余时间也可多写单元测试
+6. 自己写的模块下要写readme文件以帮助其他同事使用
 ## 项目开发流程
-1. 分支管理规范参考 <https://www.jianshu.com/p/7ae40a051cb8>
+1. 分支管理规范参考 <https://www.jianshu.com/p/7ae40a051cb8> 
 2. 代码提交规范参考 <https://blog.csdn.net/github_39506988/article/details/90298780>
-3. 项目的部署 目前仅有develop和master分支有部署  代码合并到develop分支后会自动构建部署 代码合并到master后需要手动打tag才会构建部署
-
+3. 项目的部署 
+    1. 代码推送到 ^feature-(.+)$ 分支后会此分支代码自动部署到测试环境 部署成功后地址为 dev-domain/feature-(.+)
+    2. 代码推送到 ^release-(.+)$ 分支后会此分支代码自动部署到正式环境 部署成功后地址为 prod-domain/release-(.+)
+    3. 代码推送到 ^hotfix-(.+)$ 分支后会此分支代码自动部署到正式环境 部署成功后地址为 prod-domain/hotfix-(.+)
+    4. 代码合并到 develop 分支后会此分支代码自动部署到测试环境 部署成功后地址为 dev-domain
+    5. 推送tag后会此tag代码自动部署到正式环境 部署成功后地址为 prod-domain
+    
 ## 项目运行
 1. `git clone https://gitlab.miotech.com/miotech-application/backend/mp2c-go.git`
 2. 下载所需库文件 `go mod download`
