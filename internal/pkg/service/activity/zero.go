@@ -49,7 +49,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 		UserId:  userId,
 		OpenId:  userInfo.OpenId,
 		Path:    path,
-		DCustom: fmt.Sprintf("avatar=%s&nickname=%snewUser=%d", userInfo.AvatarUrl, userInfo.Nickname, isNewUser),
+		DCustom: fmt.Sprintf("avatar=%s&nickname=%s&newUser=%d", userInfo.AvatarUrl, userInfo.Nickname, isNewUser),
 	})
 }
 func (srv ZeroService) StoreUrl(url string) (string, error) {
@@ -71,7 +71,7 @@ func (srv ZeroService) GetUrlByShort(short string) (string, error) {
 }
 func (srv ZeroService) IsNewUser(userId int64, createTime time.Time) (int, error) {
 	//用户创建时间在活动开始时间之前
-	if createTime.After(ZeroActivityStartTime) {
+	if createTime.Before(ZeroActivityStartTime) {
 		return 0, nil
 	}
 	return 1, nil
