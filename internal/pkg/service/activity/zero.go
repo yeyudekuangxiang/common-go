@@ -71,7 +71,7 @@ func (srv ZeroService) GetUrlByShort(short string) (string, error) {
 }
 func (srv ZeroService) IsNewUser(userId int64, createTime time.Time) (int, error) {
 	//用户创建时间在活动开始时间之前
-	if createTime.Before(ZeroActivityStartTime) {
+	if createTime.After(ZeroActivityStartTime) {
 		return 0, nil
 	}
 	return 1, nil
