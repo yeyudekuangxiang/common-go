@@ -102,3 +102,8 @@ type AutoLoginOpenIdParam struct {
 	Transfer string
 	SignKeys string
 }
+type BindPhoneByIVParam struct {
+	UserId        int64
+	EncryptedData string
+	IV            string
+}

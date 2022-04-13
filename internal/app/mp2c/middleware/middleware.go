@@ -109,7 +109,7 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
 			if err != nil || user == nil {
 				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
 				return
 			}
 		}
