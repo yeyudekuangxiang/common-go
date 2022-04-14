@@ -2,6 +2,7 @@ stages:
   - build
   - package
   - deploy
+  - merge
 build:
   image: golang:1.17
   stage: build
@@ -153,3 +154,12 @@ stop-deploy-dev:
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
     -  helm uninstall $RELEASE_NAME -n dev
+
+auto-merge:
+  stage: merge
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  script:
+    - echo "合并请求"
+    - env
+    - git version
