@@ -34,9 +34,9 @@ mp2c-go
 1. 分支管理规范参考 <https://www.jianshu.com/p/7ae40a051cb8> 
 2. 代码提交规范参考 <https://blog.csdn.net/github_39506988/article/details/90298780>
 3. 项目的部署 
-    1. 代码推送到 ^feature-(.+)$ 分支后会此分支代码自动部署到测试环境 部署成功后地址为 dev-domain/feature-(.+)
-    2. 代码推送到 ^release-(.+)$ 分支后会此分支代码自动部署到正式环境 部署成功后地址为 prod-domain/release-(.+)
-    3. 代码推送到 ^hotfix-(.+)$ 分支后会此分支代码自动部署到正式环境 部署成功后地址为 prod-domain/hotfix-(.+)
+    1. 代码推送到 ^feature-(.+)$ 分支后会此分支代码自动部署到测试环境 部署成功后地址为 dev-domain/feature-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境
+    2. 代码推送到 ^release-(.+)$ 分支后会此分支代码自动部署到正式环境 部署成功后地址为 prod-domain/release-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境
+    3. 代码推送到 ^hotfix-(.+)$ 分支后会此分支代码自动部署到正式环境 部署成功后地址为 prod-domain/hotfix-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境
     4. 代码合并到 develop 分支后会此分支代码自动部署到测试环境 部署成功后地址为 dev-domain
     5. 推送tag后会此tag代码自动部署到正式环境 部署成功后地址为 prod-domain
     
