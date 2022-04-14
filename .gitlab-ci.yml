@@ -8,9 +8,9 @@ build:
   only:
     - develop
     - tags
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^feature-.*$/
+    - /^release-.+$/
+    - /^hotfix-.+$/
+    - /^feature-.+$/
   script:
     - sh ./scripts/build.sh mp2c
   artifacts:
@@ -21,9 +21,9 @@ package:
   only:
     - develop
     - tags
-    - /^release-.*$/
-    - /^hotfix-.*$/
-    - /^feature-.*$/
+    - /^release-.+$/
+    - /^hotfix-.+$/
+    - /^feature-.+$/
   dependencies:
     - build
   script:
@@ -67,11 +67,12 @@ deploy-feature:
   stage: deploy
   environment:
     name: $CI_COMMIT_REF_NAME
-    url: https://godev-api.miotech.com/$CI_COMMIT_REF_NAME/
+    url: https://godev-api.miotech.com/$CI_COMMIT_REF_SLUG/
+    on_stop: stop-deploy-dev
   tags:
     - k8s
   only:
-    - /^feature-.*$/
+    - /^feature-.+$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
@@ -83,11 +84,12 @@ deploy-release:
   stage: deploy
   environment:
     name: $CI_COMMIT_REF_NAME
-    url: https://go-api.miotech.com/$CI_COMMIT_REF_NAME/
+    url: https://go-api.miotech.com/$CI_COMMIT_REF_SLUG/
+    on_stop: stop-deploy-prod
   tags:
     - k8s
   only:
-    - /^release-.*$/
+    - /^release-.+$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
@@ -97,12 +99,57 @@ deploy-release:
 deploy-hotfix:
   image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    on_stop: stop-deploy-prod
   tags:
     - k8s
   only:
-    - /^hotfix-.*$/
+    - /^hotfix-.+$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
     - sh ./scripts/deploy.sh mp2c
+
+stop-deploy-prod:
+  image: yeyudekuangxiang/helm:3.8.1
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+    RELEASE_NAME: "mp2c-go${CI_COMMIT_REF_NAME}"
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    action: stop
+  tags:
+    - k8s
+  when: manual
+  only:
+    - /^release-.+$/
+    - /^hotfix-.+$/
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+  script:
+    -  env
+    -  helm uninstall $RELEASE_NAME  -n prod
+
+stop-deploy-dev:
+  image: yeyudekuangxiang/helm:3.8.1
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+    RELEASE_NAME: "mp2c-go${CI_COMMIT_REF_NAME}"
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    action: stop
+  tags:
+    - k8s
+  when: manual
+  only:
+    - /^feature-.+$/
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
+  script:
+    -  helm uninstall $RELEASE_NAME -n dev
