@@ -2,6 +2,7 @@ stages:
   - build
   - package
   - deploy
+  - merge
 build:
   image: golang:1.17
   stage: build
