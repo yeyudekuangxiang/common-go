@@ -160,6 +160,6 @@ auto-merge:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
   script:
-    - echo "合并请求"
+    - echo "合并请求 m2"
     - env
     - git version
