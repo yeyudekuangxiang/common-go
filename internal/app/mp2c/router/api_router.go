@@ -7,6 +7,7 @@ import (
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/product"
+	"mio/internal/app/mp2c/controller/api/system"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util"
 )
@@ -95,6 +96,8 @@ func apiRouter(router *gin.Engine) {
 		openApiRouter.Any("/oa/login", util.Format(authApi.DefaultOaController.Login))
 		//微信网页授权
 		openApiRouter.POST("/oa/sign", util.Format(authApi.DefaultOaController.Sign))
+
+		openApiRouter.Any("/gitlab/callback", util.Format(system.DefaultGitlabController.Callback))
 	}
 
 }
