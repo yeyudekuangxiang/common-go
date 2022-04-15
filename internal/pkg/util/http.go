@@ -3,7 +3,6 @@ package util
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
@@ -179,7 +178,6 @@ func (c HttpClient) OriginGet(url string, options ...HttpOption) (*HttpResult, e
 	if err != nil {
 		return &HttpResult{Response: res, Err: err}, errors.New("status:" + res.Status)
 	}
-	fmt.Println(url, body)
 	return &HttpResult{Response: res, Body: body}, nil
 }
 func (c HttpClient) encode(data map[string]string, options ...HttpOption) string {

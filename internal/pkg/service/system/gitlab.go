@@ -31,7 +31,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) bool 
 		target,
 		"系统自动合并：" + source + " -> " + target,
 	}
-	body, err := util.DefaultHttp.PostJson(url, &req)
+	body, err := util.DefaultHttp.PostJson(url, req)
 	if err != nil {
 		app.Logger.Error(err)
 		return false
@@ -76,4 +76,20 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) bool 
 		app.Logger.Error(mres.MergeStatus)
 		return false
 	}
+}
+func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, error) {
+	url := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests/" + strconv.Itoa(mergeRequestIId) + "?private_token=" + private_token
+
+	body, err := util.DefaultHttp.Get(url)
+	if err != nil {
+		return "", err
+	}
+	mergeRequest := MergeRequest{}
+
+	//fmt.Println(string(body))
+	err = json.Unmarshal(body, &mergeRequest)
+	if err != nil {
+		return "", err
+	}
+	return mergeRequest.State, err
 }
