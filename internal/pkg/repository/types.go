@@ -6,9 +6,10 @@ import (
 )
 
 type GetUserBy struct {
-	OpenId string
-	Source entity2.UserSource
-	Mobile string
+	OpenId  string
+	Source  entity2.UserSource
+	Mobile  string
+	UnionId string
 }
 type FindTopicLikeBy struct {
 	TopicId int

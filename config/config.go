@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"mio/internal/pkg/model/entity"
 )
 
@@ -73,7 +72,6 @@ type duiBaSetting struct {
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {
-	fmt.Println("source", source, Config.MioSubOA)
 	switch source {
 	case entity.UserSourceMioSrvOA:
 		return Config.MioSrvOA
