@@ -161,8 +161,8 @@ auto_merge:
   variables:
     RUN_MERGE: ""
   rules:
-    - if: "CI_PIPELINE_SOURCE ==  'merge_request_event'"
-    - when: always
+    - if: "$CI_PIPELINE_SOURCE ==  'merge_request_event'"
+      when: always
   before_script:
     - RUN_MERGE = `go run cmd/command/main.go gitlab merge state 294 111`
     - echo $RUN_MERGE
