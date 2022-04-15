@@ -67,13 +67,58 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 		CreatedAt: model.Time{Time: time.Now()},
 	})
 }
+
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
-	user := entity.User{}
+	user := u.r.GetUserBy(repository2.GetUserBy{
+		OpenId: param.OpenId,
+		Source: param.Source,
+	})
+	if user.ID != 0 {
+		return &user, nil
+	}
+
+	guid := ""
+	if param.UnionId != "" {
+		guid = u.r.GetGuid(param.UnionId)
+		if guid == "" {
+			guid = util2.UUID()
+		}
+	}
+
+	user = entity.User{}
 	if err := util2.MapTo(param, &user); err != nil {
 		return nil, err
 	}
+	user.GUID = guid
 	user.Time = model.NewTime()
+
+	if param.UnionId != "" {
+		app.DB.Where("unionid = ? and guid =''", param.UnionId).Update("guid", guid)
+	}
+
 	return &user, repository2.DefaultUserRepository.Save(&user)
+}
+func (u UserService) UpdateUserUnionId(id int64, unionid string) {
+	if unionid == "" {
+		return
+	}
+
+	user := u.r.GetUserById(id)
+	if user.ID == 0 {
+		return
+	}
+
+	guid := u.r.GetGuid(unionid)
+	if guid == "" {
+		guid = util2.UUID()
+	}
+
+	user.UnionId = unionid
+	user.GUID = guid
+	err := u.r.Save(&user)
+	if err != nil {
+		app.Logger.Error("更新unionid失败", id, unionid, err)
+	}
 }
 func (u UserService) GetUserBy(by repository2.GetUserBy) (*entity.User, error) {
 	user := repository2.DefaultUserRepository.GetUserBy(by)

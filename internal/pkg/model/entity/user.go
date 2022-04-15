@@ -24,6 +24,7 @@ type User struct {
 	Source      UserSource `gorm:"column:source" json:"source"` //用户来源 mio(绿喵小程序) mobile(手机号注册)
 	UnionId     string     `gorm:"column:unionid" json:"unionId"`
 	Time        model.Time `gorm:"time" json:"time"`
+	GUID        string     `gorm:"guid" json:"guid"`
 }
 
 func (u User) ShortUser() ShortUser {

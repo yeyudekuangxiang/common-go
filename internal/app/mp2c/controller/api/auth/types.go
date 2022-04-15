@@ -21,3 +21,6 @@ type OaAuthForm struct {
 	oa
 	Code string `json:"code" form:"code" binding:"required" alias:"code"`
 }
+type WeappAuthForm struct {
+	Code string `json:"code" form:"code" binding:"required" alias:"code"`
+}

@@ -84,6 +84,8 @@ func apiRouter(router *gin.Engine) {
 			context.JSON(200, api.DefaultDuiBaController.ExchangeCallback(context))
 		})
 
+		openApiRouter.POST("/weapp/auth", util.Format(authApi.DefaultWeappController.LoginByCode))
+
 		//微信公众号网页授权登陆
 		openApiRouter.GET("/oa/auth", func(context *gin.Context) {
 			authApi.DefaultOaController.AutoLogin(context)
