@@ -7,12 +7,14 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"mio/internal/pkg/core/app"
 	entity2 "mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
 	"mio/pkg/wxapp"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -194,6 +196,55 @@ func (u TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	return nil
 }
 
+func (u TopicService) ImportUser(filename string) error {
+
+	file, err := excelize.OpenFile(filename)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer file.Close()
+
+	if file.SheetCount == 0 {
+		return errors.New("没有数据")
+	}
+
+	rows, err := file.GetRows(file.GetSheetList()[0])
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		importId := row[0]
+		nickname := row[1]
+		//avatarImage := row[2]
+		wechat := row[3]
+		phone := row[4]
+		user := entity2.User{}
+		app.DB.Where("nick_name = ?", nickname).First(&user)
+		if user.ID != 0 {
+			if user.PhoneNumber != phone {
+				return errors.Errorf("存在同名但手机号不同用户 %s", nickname)
+			}
+			log.Println("用户已存在", user)
+			continue
+		}
+		_, err := DefaultUserService.CreateUser(CreateUserParam{
+			OpenId:      wechat,
+			AvatarUrl:   fmt.Sprintf("https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/kol/%s.jpg", importId),
+			Nickname:    nickname,
+			PhoneNumber: phone,
+			Source:      entity2.UserSourceMio,
+		})
+		if err != nil {
+			return errors.Errorf("创建用户失败 %s %v", nickname, err)
+		}
+	}
+	return nil
+}
+
 // ImportTopic 从xlsx中导入内容
 func (u TopicService) ImportTopic(filename string) error {
 	rand.Seed(time.Now().Unix())
@@ -220,7 +271,7 @@ func (u TopicService) ImportTopic(filename string) error {
 		if err != nil {
 			return errors.WithStack(err)
 		}
-		imageList, err := getTopicImage(importId)
+		imageList, err := getTopicImage(importId, path.Join(path.Dir(filename), "info"))
 		if err != nil {
 			return errors.WithMessagef(err, "获取topic%d图片失败", importId)
 		}
@@ -337,8 +388,8 @@ func (u TopicService) ImportTopic(filename string) error {
 
 	return nil
 }
-func getTopicImage(importId int) ([]string, error) {
-	files, err := ioutil.ReadDir("../cool/info/" + strconv.Itoa(importId))
+func getTopicImage(importId int, p string) ([]string, error) {
+	files, err := ioutil.ReadDir(path.Join(p, strconv.Itoa(importId)))
 	if err != nil {
 		return nil, err
 	}

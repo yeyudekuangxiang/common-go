@@ -3,7 +3,7 @@ package util
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -17,94 +17,80 @@ var DefaultHttp = HttpClient{Timeout: 10 * time.Second}
 type HttpClient struct {
 	Timeout time.Duration
 }
+type HttpResult struct {
+	Err      error
+	Response *http.Response
+	Body     []byte
+}
+type HttpOption func(req *http.Request)
 
-func (c HttpClient) PutJson(url string, data interface{}) ([]byte, error) {
+func HttpWithHeader(key, value string) HttpOption {
+	return func(req *http.Request) {
+		req.Header.Set(key, value)
+	}
+}
+
+func (c HttpClient) PutJson(url string, data interface{}, options ...HttpOption) ([]byte, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.PostJsonBytes(url, body)
+	result, err := c.OriginJson(url, "PUT", body, options...)
+	if err != nil {
+		return nil, err
+	}
+	return result.Body, nil
 }
-func (c HttpClient) PostJson(url string, data interface{}) ([]byte, error) {
+func (c HttpClient) PostJson(url string, data interface{}, options ...HttpOption) ([]byte, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	return c.PostJsonBytes(url, body, options...)
+}
+func (c HttpClient) PostJsonBytes(url string, data []byte, options ...HttpOption) ([]byte, error) {
+	result, err := c.OriginJson(url, "POST", data, options...)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("content-type", "application/json")
-
-	client := http.Client{
-		Timeout: c.Timeout,
-	}
-
-	res, err := client.Do(req)
-
-	if res.StatusCode != 200 {
-		return nil, errors.New("status:" + res.Status)
-	}
-
-	defer res.Body.Close()
-
-	return ioutil.ReadAll(res.Body)
+	return result.Body, nil
 }
-func (c HttpClient) PostJsonBytes(url string, data []byte) ([]byte, error) {
-
-	req, err := http.NewRequest("POST", url, bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("content-type", "application/json")
-
-	client := http.Client{
-		Timeout: c.Timeout,
-	}
-
-	res, err := client.Do(req)
-
-	if res.StatusCode != 200 {
-		return nil, errors.New("status:" + res.Status)
-	}
-
-	defer res.Body.Close()
-
-	return ioutil.ReadAll(res.Body)
-}
-func (c HttpClient) PostMapFrom(url string, data map[string]string) ([]byte, error) {
+func (c HttpClient) PostMapFrom(url string, data map[string]string, options ...HttpOption) ([]byte, error) {
 	body := c.encode(data)
-
-	req, err := http.NewRequest("POST", url, strings.NewReader(body))
+	result, err := c.OriginForm(url, "POST", []byte(body), options...)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("content-type", "application/x-www-form-urlencoded")
-
-	client := http.Client{
-		Timeout: c.Timeout,
-	}
-
-	res, err := client.Do(req)
-
-	if res.StatusCode != 200 {
-		return nil, errors.New("status:" + res.Status)
-	}
-
-	defer res.Body.Close()
-
-	return ioutil.ReadAll(res.Body)
+	return result.Body, nil
 }
-func (c HttpClient) PostFrom(url string, data url.Values) ([]byte, error) {
+func (c HttpClient) PostFrom(url string, data url.Values, options ...HttpOption) ([]byte, error) {
 	body := data.Encode()
 
-	req, err := http.NewRequest("POST", url, strings.NewReader(body))
+	result, err := c.OriginForm(url, "POST", []byte(body), options...)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("content-type", "application/x-www-form-urlencoded")
+	return result.Body, nil
+}
+func (c HttpClient) Get(url string, options ...HttpOption) ([]byte, error) {
+	result, err := c.OriginGet(url, options...)
+	if err != nil {
+		return nil, err
+	}
+	return result.Body, nil
+}
+
+func (c HttpClient) OriginJson(url string, method string, data []byte, options ...HttpOption) (*HttpResult, error) {
+	req, err := http.NewRequest(method, url, bytes.NewReader(data))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	req.Header.Set("content-type", "application/json")
+
+	for _, op := range options {
+		op(req)
+	}
 
 	client := http.Client{
 		Timeout: c.Timeout,
@@ -112,15 +98,89 @@ func (c HttpClient) PostFrom(url string, data url.Values) ([]byte, error) {
 
 	res, err := client.Do(req)
 
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	if res.StatusCode != 200 {
-		return nil, errors.New("status:" + res.Status)
+		return &HttpResult{Response: res, Err: errors.New("status:" + res.Status)}, errors.New("status:" + res.Status)
 	}
 
 	defer res.Body.Close()
 
-	return ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return &HttpResult{Response: res, Err: err}, errors.WithStack(err)
+	}
+
+	return &HttpResult{
+		Response: res,
+		Body:     body,
+	}, nil
 }
-func (c HttpClient) encode(data map[string]string) string {
+func (c HttpClient) OriginForm(url string, method string, data []byte, options ...HttpOption) (*HttpResult, error) {
+	req, err := http.NewRequest(method, url, bytes.NewReader(data))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	req.Header.Set("content-type", "application/x-www-form-urlencoded")
+	for _, op := range options {
+		op(req)
+	}
+
+	client := http.Client{
+		Timeout: c.Timeout,
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	if res.StatusCode != 200 {
+		return &HttpResult{Response: res, Err: errors.New("status:" + res.Status)}, errors.New("status:" + res.Status)
+	}
+
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return &HttpResult{Response: res, Err: err}, errors.WithStack(err)
+	}
+	return &HttpResult{Response: res, Body: body}, nil
+}
+func (c HttpClient) OriginGet(url string, options ...HttpOption) (*HttpResult, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	for _, op := range options {
+		op(req)
+	}
+
+	client := http.Client{
+		Timeout: c.Timeout,
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	if res.StatusCode != 200 {
+		return &HttpResult{Response: res, Err: errors.New("status:" + res.Status)}, errors.New("status:" + res.Status)
+	}
+
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return &HttpResult{Response: res, Err: err}, errors.New("status:" + res.Status)
+	}
+	return &HttpResult{Response: res, Body: body}, nil
+}
+func (c HttpClient) encode(data map[string]string, options ...HttpOption) string {
 	var buf strings.Builder
 	keys := make([]string, 0, len(data))
 	for k := range data {
@@ -136,23 +196,4 @@ func (c HttpClient) encode(data map[string]string) string {
 		buf.WriteString(url.QueryEscape(data[k]))
 	}
 	return buf.String()
-}
-func (c HttpClient) Get(url string) ([]byte, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	client := http.Client{
-		Timeout: c.Timeout,
-	}
-
-	res, err := client.Do(req)
-
-	if res.StatusCode != 200 {
-		return nil, errors.New("status:" + res.Status)
-	}
-
-	defer res.Body.Close()
-
-	return ioutil.ReadAll(res.Body)
 }
