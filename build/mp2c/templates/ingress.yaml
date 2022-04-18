@@ -58,22 +58,22 @@ metadata:
 spec:
   rules:
     - host: go-api.miotech.com
-    http:
-      paths:
-        - path: /pre-prod/(.*)
-          {{ if and .Values.ingress.pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-          pathType: {{ .Values.ingress.pathType }}
-          {{ end }}
-          backend:
-            {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
-            service:
-              name: {{ .Release.Name }}-svc
-              port:
-                number: 80
-            {{- else }}
-            serviceName: {{ .Release.Name }}-svc
-            servicePort: 80
-            {{- end }}
+      http:
+        paths:
+          - path: /pre-prod/(.*)
+            {{ if and .Values.ingress.pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .Values.ingress.pathType }}
+            {{ end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ .Release.Name }}-svc
+                port:
+                  number: 80
+              {{- else }}
+              serviceName: {{ .Release.Name }}-svc
+              servicePort: 80
+              {{- end }}
   tls:
     - hosts:
         - go-api.miotech.com
