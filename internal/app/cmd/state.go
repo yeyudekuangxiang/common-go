@@ -12,8 +12,8 @@ import (
 	"strconv"
 )
 
-// statusCmd represents the status command
-var statusCmd = &cobra.Command{
+// stateCmd represents the status command
+var stateCmd = &cobra.Command{
 	Use:   "state",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -48,7 +48,8 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	mergeCmd.AddCommand(statusCmd)
+	stateCmd.PersistentFlags()
+	mergeCmd.AddCommand(stateCmd)
 
 	// Here you will define your flags and configuration settings.
 
