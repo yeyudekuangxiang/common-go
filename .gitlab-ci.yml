@@ -8,8 +8,8 @@ build:
   stage: build
   only:
     - develop
+    - master
     - tags
-    - /^release-.+$/
     - /^hotfix-.+$/
     - /^feature-.+$/
   script:
@@ -21,8 +21,8 @@ package:
   stage: package
   only:
     - develop
+    - master
     - tags
-    - /^release-.+$/
     - /^hotfix-.+$/
     - /^feature-.+$/
   dependencies:
@@ -80,17 +80,16 @@ deploy-feature:
   script:
     - sh ./scripts/deploy.sh mp2c
 
-deploy-release:
+deploy-pre-prod:
   image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
   environment:
-    name: $CI_COMMIT_REF_NAME
-    url: https://go-api.miotech.com/$CI_COMMIT_REF_SLUG/
-    on_stop: stop-deploy-prod
+    name: pre-prod
+    url: https://go-api.miotech.com/pre-prod/
   tags:
     - k8s
   only:
-    - /^release-.+$/
+    - master
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
@@ -126,13 +125,11 @@ stop-deploy-prod:
     - k8s
   when: manual
   only:
-    - /^release-.+$/
     - /^hotfix-.+$/
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    -  env
     -  helm uninstall $RELEASE_NAME  -n prod
 
 stop-deploy-dev:
@@ -158,13 +155,8 @@ stop-deploy-dev:
 auto_merge:
   image: golang:1.17
   stage: auto_merge
-  variables:
-    RUN_MERGE: ""
   rules:
-    - if: "$CI_PIPELINE_SOURCE ==  'merge_request_event'"
+    - if: "$CI_PIPELINE_SOURCE ==  'merge_request_event' && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^(release-|hotfix-).+$/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
       when: always
-  before_script:
-    - RUN_MERGE=`go run cmd/command/main.go gitlab merge state $CI_MERGE_REQUEST_PROJECT_ID $CI_MERGE_REQUEST_IID`
-    - echo $RUN_MERGE
   script:
-    - echo $RUN_MERGE
+    - go run cmd/command/main.go gitlab merge auto $CI_MERGE_REQUEST_PROJECT_ID $CI_MERGE_REQUEST_IID $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
