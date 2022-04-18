@@ -2,6 +2,7 @@ package system
 
 import (
 	"encoding/json"
+	"errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util"
 	"strconv"
@@ -16,7 +17,7 @@ const private_token = "yoQqAi__rVuZj8kRwgfh"
 const base_url = "https://gitlab.miotech.com/api/v4"
 
 // MergeBranch 合并
-func (srv GitlabService) MergeBranch(projectId int, source, target string) bool {
+func (srv GitlabService) MergeBranch(projectId int, source, target string) error {
 
 	//创建合并
 	url := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests?private_token=" + private_token
@@ -31,10 +32,10 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) bool 
 		target,
 		"系统自动合并：" + source + " -> " + target,
 	}
-	body, err := util.DefaultHttp.PostJson(url, &req)
+	body, err := util.DefaultHttp.PostJson(url, req)
 	if err != nil {
 		app.Logger.Error(err)
-		return false
+		return err
 	}
 	res := struct {
 		Iid int `json:"iid"`
@@ -43,7 +44,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) bool 
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		app.Logger.Error(err)
-		return false
+		return err
 	}
 
 	//time.Sleep(5 * time.Second)
@@ -59,7 +60,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) bool 
 	mergeBody, err := util.DefaultHttp.PutJson(url2, req2)
 	if err != nil {
 		app.Logger.Error(err)
-		return false
+		return err
 	}
 
 	mres := struct {
@@ -68,12 +69,28 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) bool 
 	err = json.Unmarshal(mergeBody, &mres)
 	if err != nil {
 		app.Logger.Error(err)
-		return false
+		return err
 	}
 	if mres.MergeStatus == "can_be_merged" {
-		return true
+		return nil
 	} else {
 		app.Logger.Error(mres.MergeStatus)
-		return false
+		return errors.New(mres.MergeStatus)
 	}
+}
+func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, error) {
+	url := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests/" + strconv.Itoa(mergeRequestIId) + "?private_token=" + private_token
+
+	body, err := util.DefaultHttp.Get(url)
+	if err != nil {
+		return "", err
+	}
+	mergeRequest := MergeRequest{}
+
+	//fmt.Println(string(body))
+	err = json.Unmarshal(body, &mergeRequest)
+	if err != nil {
+		return "", err
+	}
+	return mergeRequest.State, err
 }

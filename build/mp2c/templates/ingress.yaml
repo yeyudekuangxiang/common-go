@@ -1,4 +1,4 @@
-{{- if regexMatch "^(release-|feature-|hotfix-).+$" .Values.image.branch -}}
+{{- if regexMatch "^(feature-|hotfix-).+$" .Values.image.branch -}}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -42,8 +42,43 @@ spec:
         - godev-api.miotech.com
         {{ end }}
       secretName: default-tls
+{{ else if  eq .Values.image.branch "master" }}
+  {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+  {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+  {{- else -}}
+apiVersion: extensions/v1beta1
+  {{- end }}
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: go-api.miotech.com
+    http:
+      paths:
+        - path: /pre-prod/(.*)
+          {{ if and .Values.ingress.pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+          pathType: {{ .Values.ingress.pathType }}
+          {{ end }}
+          backend:
+            {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+            service:
+              name: {{ .Release.Name }}-svc
+              port:
+                number: 80
+            {{- else }}
+            serviceName: {{ .Release.Name }}-svc
+            servicePort: 80
+            {{- end }}
+  tls:
+    - hosts:
+        - go-api.miotech.com
+      secretName: default-tls
 {{ else }}
-
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
