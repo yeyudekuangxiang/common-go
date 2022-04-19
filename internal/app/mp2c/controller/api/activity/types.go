@@ -38,3 +38,15 @@ type ZeroAutoLoginForm struct {
 type ZeroStoreUrlForm struct {
 	Url string `json:"Url" form:"Url" binding:"required" alias:"url"`
 }
+type DuiBaAutoLoginForm struct {
+	ActivityId string `json:"activityId" form:"activityId" `
+	Short      string `json:"short" form:"short"`
+}
+type DuiBaStoreUrlForm struct {
+	ActivityId string `json:"activityId" form:"activityId" `
+	Url        string `json:"Url" form:"Url" binding:"required" alias:"url"`
+}
+type GetDuiBaActivityQrForm struct {
+	ActivityId string `json:"activityId" form:"activityId" binding:"required" alias:"activityId"`
+	Password   string `json:"password" form:"password" binding:"required" alias:"password"`
+}

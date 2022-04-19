@@ -107,3 +107,8 @@ type BindPhoneByIVParam struct {
 	EncryptedData string
 	IV            string
 }
+type FindStepHistoryBy struct {
+	Day     model.Time
+	OpenId  string
+	OrderBy entity2.OrderByList
+}
