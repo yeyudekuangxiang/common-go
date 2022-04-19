@@ -1,10 +1,10 @@
 package service
 
 import (
-	"errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
+	"mio/pkg/errno"
 )
 
 var DefaultPointService = NewPointService(repository2.DefaultPointRepository)
@@ -60,7 +60,7 @@ func (srv PointService) FindByUserId(userId int64) (*entity.Point, error) {
 		return nil, err
 	}
 	if user.OpenId == "" {
-		return nil, errors.New("用户不存在")
+		return &entity.Point{}, errno.ErrUserNotFound
 	}
 	point := srv.repo.FindBy(repository2.FindPointBy{
 		OpenId: user.OpenId,

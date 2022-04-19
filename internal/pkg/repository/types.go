@@ -48,7 +48,11 @@ type FindPointBy struct {
 	OpenId string
 }
 type GetPointTransactionListBy struct {
-	OpenId string
+	OpenId    string
+	StartTime model.Time
+	EndTime   model.Time
+	OrderBy   entity2.OrderByList
+	Type      entity2.PointTransactionType
 }
 type FindPointTransactionCountLimitBy struct {
 	OpenId          string
@@ -80,4 +84,16 @@ type CheckStockItem struct {
 }
 type FindPointTransactionBy struct {
 	TransactionId string
+}
+type FindStepHistoryBy struct {
+	OpenId  string
+	Day     model.Time
+	OrderBy entity2.OrderByList
+}
+type FindStepBy struct {
+	OpenId string
+}
+type GetStepListBy struct {
+	OpenId       string
+	RecordedTime model.Time
 }

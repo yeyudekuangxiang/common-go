@@ -66,6 +66,13 @@ func (t *Time) Date() Date {
 func (t *Time) String() string {
 	return t.Format(timeFormat)
 }
+func (t Time) StartOfDay() Time {
+	return Time{Time: time.Date(t.Time.Year(), t.Time.Month(), t.Time.Day(), 0, 0, 0, 0, time.Local)}
+}
+func (t Time) EndOfDay() Time {
+	t2 := Time{Time: t.Time.Add(time.Hour * 24)}
+	return Time{Time: t2.StartOfDay().Add(-time.Nanosecond)}
+}
 
 func NewDate(date string) (Date, error) {
 	t, err := time.Parse(dateFormat, date)
@@ -117,6 +124,9 @@ func (d *Date) Scan(value interface{}) error {
 }
 func (d Date) String() string {
 	return d.Time.Format(dateFormat)
+}
+func (d Date) FullString() string {
+	return d.Time.Format(dateFormat) + " 00:00:00"
 }
 
 //json时格式化日期为2016-01-02 15:04:05的格式 并且获取值时如果为初始时间则赋值当前时间

@@ -67,6 +67,19 @@ func (srv DuiBaService) AutoLoginOpenId(param AutoLoginOpenIdParam) (string, err
 	})
 }
 
+var duibaTypeToPointType = map[duibaApi.ExchangeType]entity.PointTransactionType{
+	duibaApi.ExchangeTypeAlipay:    entity.POINT_DUIBA_ALIPAY,
+	duibaApi.ExchangeTypeQB:        entity.POINT_DUIBA_QB,
+	duibaApi.ExchangeTypeCoupon:    entity.POINT_DUIBA_COUPON,
+	duibaApi.ExchangeTypeObject:    entity.POINT_DUIBA_OBJECT,
+	duibaApi.ExchangeTypePhoneBill: entity.POINT_DUIBA_PHONEBILL,
+	duibaApi.ExchangeTypePhoneFlow: entity.POINT_DUIBA_PHONEFLOW,
+	duibaApi.ExchangeTypeVirtual:   entity.POINT_DUIBA_VIRTUAL,
+	duibaApi.ExchangeTypeGame:      entity.POINT_DUIBA_GAME,
+	duibaApi.ExchangeTypeHdTool:    entity.POINT_DUIBA_HDTOOL,
+	duibaApi.ExchangeTypeHdSign:    entity.POINT_DUIBA_SIGN,
+}
+
 // ExchangeCallback 扣积分回调
 func (srv DuiBaService) ExchangeCallback(form duibaApi.ExchangeForm) (*ExchangeCallbackResult, error) {
 	err := srv.client.CheckSign(form)
@@ -87,9 +100,12 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.ExchangeForm) (*ExchangeC
 		app.Logger.Errorf("%+v %v", form, err)
 		return nil, errors.New("系统异常,请联系管理员")
 	}
+
+	pointType := duibaTypeToPointType[form.Type]
+
 	pointTran, err := DefaultPointTransactionService.Create(CreatePointTransactionParam{
 		OpenId:       form.Uid,
-		Type:         entity.POINT_DUIBA,
+		Type:         pointType,
 		Value:        int(-form.Credits),
 		AdditionInfo: string(data),
 	})
@@ -145,7 +161,7 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 
 	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
 		OpenId:       form.Uid,
-		Type:         entity.POINT_DUIBA,
+		Type:         pt.Type,
 		Value:        -pt.Value,
 		AdditionInfo: string(data),
 	})

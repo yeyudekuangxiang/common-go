@@ -29,9 +29,29 @@ func (p PointTransactionRepository) GetListBy(by GetPointTransactionListBy) []en
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
+
+	if !by.StartTime.IsZero() {
+		db.Where("create_time >= ?", by.StartTime.Time)
+	}
+	if !by.EndTime.IsZero() {
+		db.Where("create_time <= ?", by.EndTime.Time)
+	}
+
+	if by.Type != "" {
+		db.Where("type = ?", by.Type)
+	}
+
+	for _, orderBy := range by.OrderBy {
+		switch orderBy {
+		case entity.OrderByPointTranCTDESC:
+			db.Order("create_time desc")
+		}
+	}
+
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
+
 	return list
 }
 func (p PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.PointTransaction {
