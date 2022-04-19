@@ -47,6 +47,8 @@ func apiRouter(router *gin.Engine) {
 
 		mustAuthRouter.GET("/user", util.Format(api.DefaultUserController.GetUserInfo))
 		mustAuthRouter.POST("/user/mobile/bind-by-code", util.Format(api.DefaultUserController.BindMobileByCode))
+		mustAuthRouter.GET("/user/summary", util.Format(api.DefaultUserController.GetUserSummary))
+
 		mustAuthRouter.GET("/mobile-user", util.Format(api.DefaultUserController.GetMobileUserInfo))
 		mustAuthRouter.GET("/topic/share-qrcode", util.Format(api.DefaultTopicController.GetShareWeappQrCode))
 		mustAuthRouter.POST("/topic/like/change", util.Format(api.DefaultTopicController.ChangeTopicLike))
@@ -65,13 +67,18 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/activity/gm/question", util.Format(activityApi.DefaultGMController.AnswerQuestion))
 		mustAuthRouter.POST("/activity/zero/autologin", util.Format(activityApi.DefaultZeroController.AutoLogin))
 		mustAuthRouter.POST("/activity/zero/storeurl", util.Format(activityApi.DefaultZeroController.StoreUrl))
+		mustAuthRouter.POST("/activity/duiba/autologin", util.Format(activityApi.DefaultZeroController.DuiBaAutoLogin))
+		mustAuthRouter.POST("/activity/duiba/storeurl", util.Format(activityApi.DefaultZeroController.DuiBaStoreUrl))
 
 		//OCR识别
 		mustAuthRouter.POST("/ocr/gm/ticket", util.Format(api.DefaultOCRController.GmTicket))
 
-		mustAuthRouter.POST("order/submit-from-green", util.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
+		mustAuthRouter.POST("/order/submit-from-green", util.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 
-		mustAuthRouter.GET("duiba/autologin", util.Format(api.DefaultDuiBaController.AutoLogin))
+		mustAuthRouter.GET("/duiba/autologin", util.Format(api.DefaultDuiBaController.AutoLogin))
+
+		mustAuthRouter.Any("/point/list", util.Format(api.DefaultPointController.GetPointTransactionList))
+		mustAuthRouter.GET("/point", util.Format(api.DefaultPointController.GetPoint))
 	}
 
 	openApiRouter := router.Group("/api/mp2c")
@@ -100,6 +107,12 @@ func apiRouter(router *gin.Engine) {
 		openApiRouter.POST("/oa/sign", util.Format(authApi.DefaultOaController.Sign))
 
 		openApiRouter.Any("/gitlab/callback", util.Format(system.DefaultGitlabController.Callback))
+
+		openApiRouter.GET("/activity/duiba/qr", func(context *gin.Context) {
+			if err := activityApi.DefaultZeroController.GetActivityMiniQR(context); err != nil {
+				context.String(400, err.Error())
+			}
+		})
 	}
 
 }

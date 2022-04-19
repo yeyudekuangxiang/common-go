@@ -218,3 +218,158 @@ func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 	userInfo.PhoneNumber = decryptResult.PhoneNumber
 	return u.r.Save(&userInfo)
 }
+
+type Summery struct {
+	CurrentSteps        int `json:"currentSteps"`
+	RedeemedPointsToday int `json:"redeemedPointsToday"`
+	BalanceOfPoints     int `json:"balanceOfPoints"`
+	SavedCO2            int `json:"savedCO2"`
+	PendingPoints       int `json:"pendingPoints"`
+	StepDiff            int `json:"stepDiff"`
+}
+
+func (u UserService) UserSummary(userId int64) (*Summery, error) {
+	summery := Summery{}
+
+	userInfo := u.r.GetUserById(userId)
+	if userInfo.ID == 0 {
+		return &summery, nil
+	}
+
+	lastStepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId:  userInfo.OpenId,
+		Day:     model.NewTime().StartOfDay(),
+		OrderBy: entity.OrderByList{entity.OrderByStepHistoryCountDesc},
+	})
+	if err != nil {
+		return nil, err
+	}
+	summery.CurrentSteps = lastStepHistory.Count
+
+	todayStepPoint, err := u.calculateStepPointsOfToday(userId)
+	if err != nil {
+		return nil, err
+	}
+	summery.RedeemedPointsToday = todayStepPoint
+
+	point, err := DefaultPointService.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	summery.BalanceOfPoints = point.Balance
+
+	summery.SavedCO2 = DefaultCarbonNeutralityService.calculateCO2ByStep(lastStepHistory.Count)
+
+	pendingPoints, err := u.calculatePendingStepPoints(userId)
+	if err != nil {
+		return nil, err
+	}
+	summery.PendingPoints = int(pendingPoints)
+
+	stepDiff, err := u.getStepDiffFromDates(userId, model.NewTime().StartOfDay(), model.Time{Time: model.NewTime().Add(-time.Hour * 24)}.StartOfDay())
+	if err != nil {
+		return nil, err
+	}
+	summery.StepDiff = stepDiff
+	return &summery, nil
+}
+
+//获取用户今日已领取步行积分
+func (u UserService) calculateStepPointsOfToday(userId int64) (int, error) {
+	userInfo := u.r.GetUserById(userId)
+	if userInfo.ID == 0 {
+		return 0, nil
+	}
+
+	t := model.NewTime()
+	list := DefaultPointTransactionService.GetListBy(repository2.GetPointTransactionListBy{
+		OpenId:    userInfo.OpenId,
+		StartTime: t.StartOfDay(),
+		EndTime:   t.EndOfDay(),
+		Type:      entity.POINT_STEP,
+	})
+	total := 0
+	for _, item := range list {
+		total += item.Value
+	}
+	return total, nil
+}
+func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
+	userinfo := u.r.GetUserById(userId)
+	if userinfo.ID == 0 {
+		return 0, nil
+	}
+	userStep, err := DefaultStepService.FindOrCreateStep(userId)
+	if err != nil {
+		return 0, err
+	}
+
+	stepUpperLimit := ScoreUpperLimit * StepToScoreConvertRatio
+
+	if userStep.LastCheckTime.Equal(time.Now()) && userStep.LastCheckCount > stepUpperLimit {
+		return 0, nil
+	}
+
+	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId: userinfo.OpenId,
+		Day:    model.NewTime().StartOfDay(),
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	stepCount := u.computePendingHistoryStep(*stepHistory, *userStep)
+	if stepCount > stepUpperLimit {
+		stepCount = stepUpperLimit
+	}
+	return int64(stepCount / StepToScoreConvertRatio), nil
+}
+
+// history 今天的步行历史 step 步行总历史
+func (u UserService) computePendingHistoryStep(history entity.StepHistory, step entity.Step) int {
+	// date check is moved outside
+	lastCheckedSteps := 0
+	stepUpperLimit := StepToScoreConvertRatio * ScoreUpperLimit
+
+	fmt.Printf("%+v %+v\n", history, step)
+	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
+	if step.LastCheckTime.IsZero() || !step.LastCheckTime.Equal(model.NewTime().StartOfDay().Time) {
+		lastCheckedSteps = 0
+	} else {
+		lastCheckedSteps = step.LastCheckCount
+		if lastCheckedSteps > stepUpperLimit {
+			return 0
+		}
+	}
+	fmt.Println("lastCheckedSteps", lastCheckedSteps, stepUpperLimit)
+
+	currentStep := util2.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
+	fmt.Println("currentStep", currentStep, lastCheckedSteps)
+	fmt.Println("result", currentStep-lastCheckedSteps, lastCheckedSteps%StepToScoreConvertRatio)
+	result := currentStep - lastCheckedSteps + lastCheckedSteps%StepToScoreConvertRatio
+
+	return util2.Ternary(result > 0, result, 0).Int()
+}
+func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 model.Time) (int, error) {
+	userinfo := u.r.GetUserById(userId)
+	if userinfo.ID == 0 {
+		return 0, nil
+	}
+
+	stepHistory1, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		Day:    day1,
+		OpenId: userinfo.OpenId,
+	})
+	if err != nil {
+		return 0, err
+	}
+	stepHistory2, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		Day:    day2,
+		OpenId: userinfo.OpenId,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return stepHistory1.Count - stepHistory2.Count, nil
+}

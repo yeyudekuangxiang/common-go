@@ -85,3 +85,92 @@ func (srv ZeroService) IsNewUser(userId int64, createTime time.Time) (int, error
 	}
 	return util.Ternary(result, 1, 0).Int(), nil
 }
+
+type DuiBaActivity struct {
+	ActivityId  string
+	ActivityUrl string
+	StartTime   time.Time
+	EndTime     time.Time
+}
+
+const DUIBAIndex = ""
+
+func (srv ZeroService) DuiBaStoreUrl(activityId string, url string) (string, error) {
+	key := activityId + "_" + util.Md5(url)
+	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
+	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
+	if err != nil {
+		return "", err
+	}
+	return key, nil
+}
+func (srv ZeroService) GetDuiBaUrlByShort(short string) (string, error) {
+	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, short)
+	u, err := app.Redis.Get(context.Background(), redisKey).Result()
+	if err != nil && err != redis.Nil {
+		return "", err
+	}
+	return u, nil
+}
+func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short string) (string, error) {
+	userInfo, err := service.DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return "", err
+	}
+	if userInfo.ID == 0 {
+		return "", errors.New("未查询到用户信息")
+	}
+
+	path := DUIBAIndex
+	isNewUser := false
+
+	activity, err := service.DefaultDuiBaActivityService.FindActivity(activityId)
+	if err != nil {
+		return "", err
+	}
+
+	if activity.ID != 0 {
+		isNewUser, err = srv.IsDuiBaActivityNewUser(activityId, userId)
+		if err != nil {
+			return "", err
+		}
+
+		path = activity.ActivityUrl
+
+		if short != "" {
+			p, err := srv.GetDuiBaUrlByShort(short)
+			if err != nil {
+				app.Logger.Error(userId, short, err)
+			}
+			if p != "" {
+				path = p
+			}
+		}
+	}
+
+	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()
+	return service.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
+		UserId:  userId,
+		OpenId:  userInfo.OpenId,
+		Path:    path,
+		DCustom: fmt.Sprintf("avatar=%s&nickname=%s&newUser=%d", userInfo.AvatarUrl, userInfo.Nickname, isNewUserInt),
+	})
+}
+func (srv ZeroService) IsDuiBaActivityNewUser(activityId string, userId int64) (bool, error) {
+	userInfo, err := service.DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return false, err
+	}
+	if userInfo.ID == 0 {
+		return false, errors.New("未查询到用户信息")
+	}
+	activity, err := service.DefaultDuiBaActivityService.FindActivity(activityId)
+	if err != nil {
+		return false, err
+	}
+	if activity.ID == 0 {
+		return false, errors.New("活动不存在")
+	}
+
+	return userInfo.Time.After(activity.StartTime.Time), nil
+}

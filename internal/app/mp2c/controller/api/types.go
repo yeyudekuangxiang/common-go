@@ -2,6 +2,7 @@ package api
 
 import (
 	"mio/internal/app/mp2c/controller"
+	"time"
 )
 
 type GetWeappQrCodeFrom struct {
@@ -46,4 +47,8 @@ type DuibaAutoLoginForm struct {
 }
 type BindMobileByCodeForm struct {
 	Code string `json:"code" form:"code" binding:"required" alias:"code"`
+}
+type GetPointTransactionListForm struct {
+	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 }
