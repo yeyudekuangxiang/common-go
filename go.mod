@@ -14,6 +14,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
+	github.com/jszwec/csvutil v1.6.0
 	github.com/medivhzhan/weapp/v3 v3.6.6
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/mlogclub/simple v1.1.14

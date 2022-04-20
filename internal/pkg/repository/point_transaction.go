@@ -66,3 +66,38 @@ func (p PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.Poi
 	}
 	return pt
 }
+func (p PointTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.PointTransaction, int64) {
+	list := make([]entity.PointTransaction, 0)
+
+	db := p.DB.Model(entity.PointTransaction{})
+	if len(by.OpenIds) > 0 {
+		db.Where("openid in (?)", by.OpenIds)
+	}
+
+	if !by.StartTime.IsZero() {
+		db.Where("create_time >= ?", by.StartTime.Time)
+	}
+	if !by.EndTime.IsZero() {
+		db.Where("create_time <= ?", by.EndTime.Time)
+	}
+
+	if by.Type != "" {
+		db.Where("type = ?", by.Type)
+	}
+
+	for _, orderBy := range by.OrderBy {
+		switch orderBy {
+		case entity.OrderByPointTranCTDESC:
+			db.Order("create_time desc")
+		}
+	}
+
+	var total int64
+	db.Count(&total).Limit(by.Limit).Offset(by.Offset)
+
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+
+	return list, total
+}

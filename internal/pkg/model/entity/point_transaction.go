@@ -2,9 +2,51 @@ package entity
 
 import (
 	"mio/internal/pkg/model"
+	duibaApi "mio/pkg/duiba/api"
 )
 
 type PointTransactionType string
+
+// Text 获取积分类型的中文名称
+func (p PointTransactionType) Text() string {
+	switch p {
+	case POINT_STEP:
+		return "步行"
+	case POINT_COFFEE_CUP:
+		return "自带咖啡杯"
+	case POINT_PURCHASE:
+		return "兑换"
+	case POINT_INVITE:
+		return "邀请好友"
+	case POINT_CHECK_IN:
+		return "每日签到"
+	case POINT_BIKE_RIDE:
+		return "骑行"
+	case POINT_ECAR:
+		return "电动车主"
+	case POINT_COUPON:
+		return "券码兑换"
+	case POINT_QUIZ:
+		return "答题活动"
+	case POINT_PARTNERSHIP:
+		return "合作活动"
+	case POINT_GREEN_TORCH:
+		return "绿炬人抽奖"
+	case POINT_ADJUSTMENT:
+		return "积分调整"
+	case POINT_DUIBA_HDTOOL:
+		return "活动抽奖"
+	case POINT_DUIBA_GAME:
+		return "游戏"
+	case POINT_DUIBA_SIGN:
+		return "活动奖励"
+	case POINT_DUIBA_ALIPAY, POINT_DUIBA_QB, POINT_DUIBA_COUPON, POINT_DUIBA_OBJECT, POINT_DUIBA_PHONEBILL, POINT_DUIBA_PHONEFLOW, POINT_DUIBA_VIRTUAL:
+		return "积分兑换"
+	case POINT_DUIBA_REFUND:
+		return "积分退还"
+	}
+	return "未知积分"
+}
 
 const (
 	POINT_STEP            PointTransactionType = "STEP"            //步行
@@ -19,17 +61,44 @@ const (
 	POINT_PARTNERSHIP     PointTransactionType = "PARTNERSHIP"     //合作活动
 	POINT_GREEN_TORCH     PointTransactionType = "GREEN_TORCH"     //绿炬人抽奖
 	POINT_ADJUSTMENT      PointTransactionType = "ADJUSTMENT"      //积分调整
-	POINT_DUIBA_ALIPAY    PointTransactionType = "DUIBA_ALIPAY"    //兑吧支付宝
-	POINT_DUIBA_QB        PointTransactionType = "DUIBA_QB"        //兑吧支付宝
-	POINT_DUIBA_COUPON    PointTransactionType = "DUIBA_COUPON"    //兑吧支付宝
-	POINT_DUIBA_OBJECT    PointTransactionType = "DUIBA_OBJECT"    //兑吧支付宝
-	POINT_DUIBA_PHONEBILL PointTransactionType = "DUIBA_PHONEBILL" //兑吧支付宝
-	POINT_DUIBA_PHONEFLOW PointTransactionType = "DUIBA_PHONEFLOW" //兑吧支付宝
-	POINT_DUIBA_VIRTUAL   PointTransactionType = "DUIBA_VIRTUAL"   //兑吧支付宝
-	POINT_DUIBA_GAME      PointTransactionType = "DUIBA_GAME"      //兑吧支付宝
-	POINT_DUIBA_HDTOOL    PointTransactionType = "DUIBA_HDTOOL"    //兑吧支付宝
-	POINT_DUIBA_SIGN      PointTransactionType = "DUIBA_SIGN"      //兑吧支付宝
+	POINT_DUIBA_ALIPAY    PointTransactionType = "DUIBA_ALIPAY"    //积分兑换
+	POINT_DUIBA_QB        PointTransactionType = "DUIBA_QB"        //积分兑换
+	POINT_DUIBA_COUPON    PointTransactionType = "DUIBA_COUPON"    //积分兑换
+	POINT_DUIBA_OBJECT    PointTransactionType = "DUIBA_OBJECT"    //积分兑换
+	POINT_DUIBA_PHONEBILL PointTransactionType = "DUIBA_PHONEBILL" //积分兑换
+	POINT_DUIBA_PHONEFLOW PointTransactionType = "DUIBA_PHONEFLOW" //积分兑换
+	POINT_DUIBA_VIRTUAL   PointTransactionType = "DUIBA_VIRTUAL"   //积分兑换
+	POINT_DUIBA_GAME      PointTransactionType = "DUIBA_GAME"      //游戏
+	POINT_DUIBA_HDTOOL    PointTransactionType = "DUIBA_HDTOOL"    //活动抽奖
+	POINT_DUIBA_SIGN      PointTransactionType = "DUIBA_SIGN"      //活动奖励
+	POINT_DUIBA_REFUND    PointTransactionType = "DUIBA_REFUND"    //积分退还
 )
+
+var PointTransactionTypeList = []PointTransactionType{
+	POINT_STEP,
+	POINT_COFFEE_CUP,
+	POINT_PURCHASE,
+	POINT_INVITE,
+	POINT_CHECK_IN,
+	POINT_BIKE_RIDE,
+	POINT_ECAR,
+	POINT_COUPON,
+	POINT_QUIZ,
+	POINT_PARTNERSHIP,
+	POINT_GREEN_TORCH,
+	POINT_ADJUSTMENT,
+	POINT_DUIBA_ALIPAY,
+	POINT_DUIBA_QB,
+	POINT_DUIBA_COUPON,
+	POINT_DUIBA_OBJECT,
+	POINT_DUIBA_PHONEBILL,
+	POINT_DUIBA_PHONEFLOW,
+	POINT_DUIBA_VIRTUAL,
+	POINT_DUIBA_GAME,
+	POINT_DUIBA_HDTOOL,
+	POINT_DUIBA_SIGN,
+	POINT_DUIBA_REFUND,
+}
 
 const (
 	OrderByPointTranCTDESC OrderBy = "order_by_point_ct_desc"
@@ -49,11 +118,25 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 }
 
 type PointTransaction struct {
-	Id             int64                `json:"id"`
+	ID             int64                `json:"id"`
 	OpenId         string               `gorm:"column:openid" json:"openId"`
 	TransactionId  string               `json:"transactionId"`
 	Type           PointTransactionType `json:"type"`
 	Value          int                  `json:"value"`
 	CreateTime     model.Time           `json:"createTime"`
-	AdditionalInfo string               `json:"additionalInfo"`
+	AdditionalInfo AdditionalInfo       `json:"additionalInfo"`
+}
+type AdditionalInfo string
+
+type PointPurchaseInfo struct {
+}
+
+func (info AdditionalInfo) ToDuiBa() duibaApi.ExchangeForm {
+	return duibaApi.ExchangeForm{}
+}
+func (info AdditionalInfo) ToDuiBaRefund() duibaApi.ExchangeResultForm {
+	return duibaApi.ExchangeResultForm{}
+}
+func (info AdditionalInfo) ToPurchase() PointPurchaseInfo {
+	return PointPurchaseInfo{}
 }

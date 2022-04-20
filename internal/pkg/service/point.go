@@ -67,3 +67,14 @@ func (srv PointService) FindByUserId(userId int64) (*entity.Point, error) {
 	})
 	return &point, nil
 }
+
+// FindByOpenId 获取用户积分
+func (srv PointService) FindByOpenId(openId string) (*entity.Point, error) {
+	if openId == "" {
+		return &entity.Point{}, errno.ErrUserNotFound
+	}
+	point := srv.repo.FindBy(repository2.FindPointBy{
+		OpenId: openId,
+	})
+	return &point, nil
+}
