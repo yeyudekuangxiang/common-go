@@ -22,7 +22,7 @@ func (ctr FileExportController) GetFileExportPageList(ctx *gin.Context) (gin.H, 
 
 	list, total, err := service.DefaultFileExportService.GetPageList(repository.GetFileExportPageListBy{
 		Type:           form.Type,
-		AdminId:        0,
+		AdminId:        form.AdminId,
 		Status:         form.Status,
 		StartCreatedAt: model.Time{Time: form.StartCreatedAt},
 		EndCreatedAt:   model.Time{Time: form.EndCreatedAt},

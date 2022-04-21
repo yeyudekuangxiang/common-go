@@ -15,6 +15,8 @@ type CreatePointTransactionParam struct {
 	OpenId       string
 	Type         entity.PointTransactionType
 	Value        int
+	AdminId      int
+	Note         string
 	AdditionInfo string
 }
 type CreateUserParam struct {
@@ -120,6 +122,7 @@ type GetPointTransactionPageListBy struct {
 	StartTime model.Time
 	EndTime   model.Time
 	Type      entity.PointTransactionType
+	Types     []entity.PointTransactionType
 	Offset    int
 	Limit     int
 }
@@ -132,6 +135,8 @@ type PointRecord struct {
 	CreateTime     model.Time                  `json:"createTime"`
 	AdditionalInfo string                      `json:"additionalInfo"`
 	User           entity.User                 `json:"user"`
+	Note           string                      `json:"note"` //操作备注
+	Admin          entity.SystemAdmin          `json:"admin"`
 }
 type PointTransactionTypeInfo struct {
 	Type     entity.PointTransactionType `json:"type"`
@@ -143,7 +148,7 @@ type FileExportRecord struct {
 	TypeText   string `json:"typeText"`
 }
 type AddFileExportParam struct {
-	AdminId int64                 `json:"adminId"`
+	AdminId int                   `json:"adminId"`
 	Params  string                `json:"params"`
 	Type    entity.FileExportType `json:"type"`
 }
@@ -165,4 +170,28 @@ type FileExportStatus struct {
 type FileExportType struct {
 	Type     entity.FileExportType `json:"type"`
 	TypeText string                `json:"typeText"`
+}
+
+type AdminAdjustUserPointParam struct {
+	OpenId string
+	Phone  string
+	Type   entity.PointTransactionType
+	Value  int
+	Note   string
+}
+type GetPointAdjustRecordPageListParam struct {
+	OpenId string
+	Phone  string
+	Type   entity.PointTransactionType
+	Offset int
+	Limit  int
+}
+type PointAdjustRecord struct {
+	ID         int                         `json:"id"`
+	User       entity.User                 `json:"user"`
+	Admin      entity.SystemAdmin          `json:"admin"`
+	Type       entity.PointTransactionType `json:"type"`
+	Note       string                      `json:"note"`
+	Value      int                         `json:"value"`
+	CreateTime model.Time                  `json:"createTime"`
 }

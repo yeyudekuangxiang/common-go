@@ -57,7 +57,7 @@ const (
 
 type FileExport struct {
 	ID        int64            `json:"id"`
-	AdminId   int64            `json:"adminId"`
+	AdminId   int              `json:"adminId"`
 	Url       string           `json:"url"`
 	Params    string           `json:"params"`
 	Status    FileExportStatus `json:"status"` //1 未开始 2进行中 3导出成功 4导出失败

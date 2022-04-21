@@ -6,10 +6,11 @@ import (
 )
 
 type GetUserBy struct {
-	OpenId  string
-	Source  entity.UserSource
-	Mobile  string
-	UnionId string
+	OpenId     string
+	Source     entity.UserSource
+	Mobile     string //手机号精确匹配
+	LikeMobile string //手机号模糊匹配
+	UnionId    string
 }
 type FindTopicLikeBy struct {
 	TopicId int
@@ -64,6 +65,7 @@ type GetPointTransactionPageListBy struct {
 	EndTime   model.Time
 	OrderBy   entity.OrderByList
 	Type      entity.PointTransactionType
+	Types     []entity.PointTransactionType
 	Offset    int
 	Limit     int
 }
@@ -119,4 +121,9 @@ type GetFileExportPageListBy struct {
 	OrderBy        entity.OrderByList
 	Offset         int
 	Limit          int
+}
+type GetAdminListBy struct {
+}
+type FindAdminBy struct {
+	Account string
 }

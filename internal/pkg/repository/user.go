@@ -49,6 +49,9 @@ func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	if by.Mobile != "" {
 		db.Where("phone_number = ?", by.Mobile)
 	}
+	if by.LikeMobile != "" {
+		db.Where("phone_number like ?", "%"+by.LikeMobile+"%")
+	}
 	if by.UnionId != "" {
 		db.Where("unionid = ?", by.UnionId)
 	}

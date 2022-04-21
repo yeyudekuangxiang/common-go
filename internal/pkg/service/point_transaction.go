@@ -1,31 +1,32 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/jszwec/csvutil"
-	"io/ioutil"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
-var DefaultPointTransactionService = NewPointTransactionService(repository2.DefaultPointTransactionRepository)
+var DefaultPointTransactionService = NewPointTransactionService(repository.DefaultPointTransactionRepository)
 
-func NewPointTransactionService(repo repository2.PointTransactionRepository) PointTransactionService {
+func NewPointTransactionService(repo repository.PointTransactionRepository) PointTransactionService {
 	return PointTransactionService{
 		repo: repo,
 	}
 }
 
 type PointTransactionService struct {
-	repo repository2.PointTransactionRepository
+	repo repository.PointTransactionRepository
 }
 
 // Create 添加发放积分记录并且更新用户剩余积分
-func (p PointTransactionService) Create(param CreatePointTransactionParam) (*entity.PointTransaction, error) {
+func (srv PointTransactionService) Create(param CreatePointTransactionParam) (*entity.PointTransaction, error) {
 
 	err := DefaultPointTransactionCountLimitService.CheckLimitAndUpdate(param.Type, param.OpenId)
 	if err != nil {
@@ -39,9 +40,11 @@ func (p PointTransactionService) Create(param CreatePointTransactionParam) (*ent
 		Value:          param.Value,
 		CreateTime:     model.Time{Time: time.Now()},
 		AdditionalInfo: entity.AdditionalInfo(param.AdditionInfo),
+		AdminId:        param.AdminId,
+		Note:           param.Note,
 	}
 
-	err = p.repo.Save(&transaction)
+	err = srv.repo.Save(&transaction)
 	if err != nil {
 		return nil, err
 	}
@@ -52,16 +55,16 @@ func (p PointTransactionService) Create(param CreatePointTransactionParam) (*ent
 }
 
 // GetListBy 查询记录列表
-func (p PointTransactionService) GetListBy(by repository2.GetPointTransactionListBy) []entity.PointTransaction {
-	return repository2.DefaultPointTransactionRepository.GetListBy(by)
+func (srv PointTransactionService) GetListBy(by repository.GetPointTransactionListBy) []entity.PointTransaction {
+	return repository.DefaultPointTransactionRepository.GetListBy(by)
 }
-func (p PointTransactionService) FindBy(by repository2.FindPointTransactionBy) (*entity.PointTransaction, error) {
-	pt := p.repo.FindBy(by)
+func (srv PointTransactionService) FindBy(by repository.FindPointTransactionBy) (*entity.PointTransaction, error) {
+	pt := srv.repo.FindBy(by)
 	return &pt, nil
 }
-func (p PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy) ([]PointRecord, int64, error) {
+func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy) ([]PointRecord, int64, error) {
 	recordList := make([]PointRecord, 0)
-	isEmptyCondition, openIds, err := p.getOpenIds(by)
+	isEmptyCondition, openIds, err := srv.getOpenIds(by)
 	if err != nil {
 		return recordList, 0, err
 	}
@@ -71,12 +74,13 @@ func (p PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy)
 		return recordList, 0, nil
 	}
 
-	pointTranList, total := p.repo.GetPageListBy(repository2.GetPointTransactionPageListBy{
+	pointTranList, total := srv.repo.GetPageListBy(repository.GetPointTransactionPageListBy{
 		OpenIds:   openIds,
 		StartTime: by.StartTime,
 		EndTime:   by.EndTime,
 		OrderBy:   entity.OrderByList{entity.OrderByPointTranCTDESC},
 		Type:      by.Type,
+		Types:     by.Types,
 		Offset:    by.Offset,
 		Limit:     by.Limit,
 	})
@@ -92,6 +96,11 @@ func (p PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy)
 			return nil, 0, err
 		}
 
+		admin, err := DefaultSystemAdminService.GetAdminById(point.AdminId)
+		if err != nil {
+			return nil, 0, err
+		}
+
 		pointRecord := PointRecord{
 			ID:             point.ID,
 			User:           *user,
@@ -101,12 +110,14 @@ func (p PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy)
 			Value:          point.Value,
 			CreateTime:     point.CreateTime,
 			AdditionalInfo: string(point.AdditionalInfo),
+			Note:           point.Note,
+			Admin:          *admin,
 		}
 		recordList = append(recordList, pointRecord)
 	}
 	return recordList, total, nil
 }
-func (p PointTransactionService) getOpenIds(by GetPointTransactionPageListBy) (isEmptyCondition bool, openIds []string, err error) {
+func (srv PointTransactionService) getOpenIds(by GetPointTransactionPageListBy) (isEmptyCondition bool, openIds []string, err error) {
 	openIds = make([]string, 0)
 
 	if by.UserId == 0 && by.Nickname == "" && by.OpenId == "" && by.Phone == "" {
@@ -114,7 +125,7 @@ func (p PointTransactionService) getOpenIds(by GetPointTransactionPageListBy) (i
 		return
 	}
 
-	userList, err := DefaultUserService.GetUserListBy(repository2.GetUserListBy{
+	userList, err := DefaultUserService.GetUserListBy(repository.GetUserListBy{
 		LikeMobile: by.Phone,
 		OpenId:     by.OpenId,
 		Nickname:   by.Nickname,
@@ -129,7 +140,7 @@ func (p PointTransactionService) getOpenIds(by GetPointTransactionPageListBy) (i
 	}
 	return
 }
-func (p PointTransactionService) GetPointTransactionTypeList() []PointTransactionTypeInfo {
+func (srv PointTransactionService) GetPointTransactionTypeList() []PointTransactionTypeInfo {
 	list := make([]PointTransactionTypeInfo, 0)
 	for _, t := range entity.PointTransactionTypeList {
 		list = append(list, PointTransactionTypeInfo{
@@ -139,7 +150,7 @@ func (p PointTransactionService) GetPointTransactionTypeList() []PointTransactio
 	}
 	return list
 }
-func (p PointTransactionService) ExportPointTransactionList(adminId int64, by GetPointTransactionPageListBy) error {
+func (srv PointTransactionService) ExportPointTransactionList(adminId int, by GetPointTransactionPageListBy) error {
 	param, err := json.Marshal(by)
 	if err != nil {
 		return err
@@ -176,7 +187,7 @@ func (p PointTransactionService) ExportPointTransactionList(adminId int64, by Ge
 		}
 		csvList := make([]csv, 0)
 		for {
-			list, _, err := p.GetPageListBy(by)
+			list, _, err := srv.GetPageListBy(by)
 			if err != nil {
 				_, err := DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 					Status:  entity.FileExportStatusFailed,
@@ -219,8 +230,8 @@ func (p PointTransactionService) ExportPointTransactionList(adminId int64, by Ge
 			return
 		}
 
-		url := util.UUID() + ".csv"
-		err = ioutil.WriteFile(url, data, 0755)
+		fileName := util.UUID() + ".csv"
+		link, err := DefaultOssService.PutObject("static/mp2c/images/file-export/point/"+fileName, bytes.NewReader(data))
 		if err != nil {
 			_, err := DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 				Status:  entity.FileExportStatusFailed,
@@ -233,7 +244,7 @@ func (p PointTransactionService) ExportPointTransactionList(adminId int64, by Ge
 		}
 		_, err = DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 			Status: entity.FileExportStatusSuccess,
-			Url:    url,
+			Url:    link,
 		})
 		if err != nil {
 			app.Logger.Error("更新导出状态失败", fileExport.ID, err)
@@ -241,4 +252,55 @@ func (p PointTransactionService) ExportPointTransactionList(adminId int64, by Ge
 		return
 	}()
 	return nil
+}
+func (srv PointTransactionService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserPointParam) error {
+	user, err := DefaultUserService.GetUserBy(repository.GetUserBy{
+		OpenId:     param.OpenId,
+		LikeMobile: param.Phone,
+	})
+	if err != nil {
+		return err
+	}
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
+		OpenId:  param.OpenId,
+		Type:    param.Type,
+		Value:   param.Value,
+		AdminId: adminId,
+		Note:    param.Note,
+	})
+	return err
+}
+func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustRecordPageListParam) ([]PointRecord, int64, error) {
+	types := make([]entity.PointTransactionType, 0)
+	if param.Type != "" {
+		types = append(types, param.Type)
+	} else {
+		types = []entity.PointTransactionType{
+			entity.POINT_SYSTEM_REDUCE,
+			entity.POINT_SYSTEM_ADD,
+		}
+	}
+	return DefaultPointTransactionService.GetPageListBy(GetPointTransactionPageListBy{
+		OpenId: param.OpenId,
+		Phone:  param.Phone,
+		Types:  types,
+		Offset: param.Offset,
+		Limit:  param.Limit,
+	})
+}
+
+func (srv PointTransactionService) GetAdjustPointTransactionTypeList() []PointTransactionTypeInfo {
+	return []PointTransactionTypeInfo{
+		{
+			Type:     entity.POINT_SYSTEM_REDUCE,
+			TypeText: entity.POINT_SYSTEM_REDUCE.Text(),
+		},
+		{
+			Type:     entity.POINT_SYSTEM_ADD,
+			TypeText: entity.POINT_SYSTEM_ADD.Text(),
+		},
+	}
 }

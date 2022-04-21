@@ -44,6 +44,10 @@ func (p PointTransactionType) Text() string {
 		return "积分兑换"
 	case POINT_DUIBA_REFUND:
 		return "积分退还"
+	case POINT_SYSTEM_REDUCE:
+		return "系统扣减"
+	case POINT_SYSTEM_ADD:
+		return "系统补发"
 	}
 	return "未知积分"
 }
@@ -72,6 +76,8 @@ const (
 	POINT_DUIBA_HDTOOL    PointTransactionType = "DUIBA_HDTOOL"    //活动抽奖
 	POINT_DUIBA_SIGN      PointTransactionType = "DUIBA_SIGN"      //活动奖励
 	POINT_DUIBA_REFUND    PointTransactionType = "DUIBA_REFUND"    //积分退还
+	POINT_SYSTEM_REDUCE   PointTransactionType = "SYSTEM_REDUCE"   //系统扣减
+	POINT_SYSTEM_ADD      PointTransactionType = "SYSTEM_ADD"      //系统补发
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -98,6 +104,8 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_DUIBA_HDTOOL,
 	POINT_DUIBA_SIGN,
 	POINT_DUIBA_REFUND,
+	POINT_SYSTEM_REDUCE,
+	POINT_SYSTEM_ADD,
 }
 
 const (
@@ -125,6 +133,8 @@ type PointTransaction struct {
 	Value          int                  `json:"value"`
 	CreateTime     model.Time           `json:"createTime"`
 	AdditionalInfo AdditionalInfo       `json:"additionalInfo"`
+	AdminId        int                  `json:"adminId"`
+	Note           string               `json:"note"`
 }
 type AdditionalInfo string
 

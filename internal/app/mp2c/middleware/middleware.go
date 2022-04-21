@@ -63,7 +63,7 @@ func AuthAdmin() gin.HandlerFunc {
 			return
 		}
 
-		admin, err := service2.DefaultAdminService.GetAdminByToken(token)
+		admin, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || admin == nil {
 			app.Logger.Error("用户登陆验证失败", admin, err)
 			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))

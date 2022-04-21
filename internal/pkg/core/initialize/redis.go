@@ -1,8 +1,10 @@
 package initialize
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 )
@@ -14,4 +16,7 @@ func InitRedis() {
 		DB:       config.Config.Redis.DB,       // use default DB
 	})
 	*app.Redis = *rdb
+	if err := app.Redis.Ping(context.Background()).Err(); err != nil {
+		log.Fatal(err)
+	}
 }

@@ -84,6 +84,9 @@ func (p PointTransactionRepository) GetPageListBy(by GetPointTransactionPageList
 	if by.Type != "" {
 		db.Where("type = ?", by.Type)
 	}
+	if len(by.Types) > 0 {
+		db.Where("type in (?)", by.Types)
+	}
 
 	for _, orderBy := range by.OrderBy {
 		switch orderBy {

@@ -14,6 +14,7 @@ var Config = app{
 	MioSrvOA: wxSetting{},
 	Redis:    redisSetting{},
 	DuiBa:    duiBaSetting{},
+	OSS:      ossSetting{},
 }
 
 type app struct {
@@ -26,6 +27,7 @@ type app struct {
 	MioSrvOA wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
 	Redis    redisSetting    `ini:"redis"`
 	DuiBa    duiBaSetting    `ini:"duiba"`
+	OSS      ossSetting      `ini:"oss"`
 }
 type appSetting struct {
 	TokenKey string
@@ -69,6 +71,11 @@ type redisSetting struct {
 type duiBaSetting struct {
 	AppKey    string
 	AppSecret string
+}
+type ossSetting struct {
+	Endpoint     string
+	AccessKey    string
+	AccessSecret string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {
