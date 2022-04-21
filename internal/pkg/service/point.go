@@ -3,23 +3,23 @@ package service
 import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository"
 	"mio/pkg/errno"
 )
 
-var DefaultPointService = NewPointService(repository2.DefaultPointRepository)
+var DefaultPointService = NewPointService(repository.DefaultPointRepository)
 
-func NewPointService(repo repository2.PointRepository) PointService {
+func NewPointService(repo repository.PointRepository) PointService {
 	return PointService{repo: repo}
 }
 
 type PointService struct {
-	repo repository2.PointRepository
+	repo repository.PointRepository
 }
 
 // RefreshBalance 根据积分发放记录更新用户剩余积分
 func (srv PointService) RefreshBalance(openId string) error {
-	transactionList := DefaultPointTransactionService.GetListBy(repository2.GetPointTransactionListBy{
+	transactionList := DefaultPointTransactionService.GetListBy(repository.GetPointTransactionListBy{
 		OpenId: openId,
 	})
 	balance := 0
@@ -27,7 +27,7 @@ func (srv PointService) RefreshBalance(openId string) error {
 		balance += t.Value
 	}
 
-	point := srv.repo.FindBy(repository2.FindPointBy{
+	point := srv.repo.FindBy(repository.FindPointBy{
 		OpenId: openId,
 	})
 	if point.Id == 0 {
@@ -38,7 +38,7 @@ func (srv PointService) RefreshBalance(openId string) error {
 		balance = 0
 	}
 	point.Balance = balance
-	return repository2.DefaultPointRepository.Save(&point)
+	return repository.DefaultPointRepository.Save(&point)
 }
 func (srv PointService) RefreshBalanceByMq(openId string) {
 	err := initUserFlowPool.Submit(func() {
@@ -62,8 +62,19 @@ func (srv PointService) FindByUserId(userId int64) (*entity.Point, error) {
 	if user.OpenId == "" {
 		return &entity.Point{}, errno.ErrUserNotFound
 	}
-	point := srv.repo.FindBy(repository2.FindPointBy{
+	point := srv.repo.FindBy(repository.FindPointBy{
 		OpenId: user.OpenId,
+	})
+	return &point, nil
+}
+
+// FindByOpenId 获取用户积分
+func (srv PointService) FindByOpenId(openId string) (*entity.Point, error) {
+	if openId == "" {
+		return &entity.Point{}, errno.ErrUserNotFound
+	}
+	point := srv.repo.FindBy(repository.FindPointBy{
+		OpenId: openId,
 	})
 	return &point, nil
 }

@@ -2,14 +2,15 @@ package repository
 
 import (
 	"mio/internal/pkg/model"
-	entity2 "mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity"
 )
 
 type GetUserBy struct {
-	OpenId  string
-	Source  entity2.UserSource
-	Mobile  string
-	UnionId string
+	OpenId     string
+	Source     entity.UserSource
+	Mobile     string //手机号精确匹配
+	LikeMobile string //手机号模糊匹配
+	UnionId    string
 }
 type FindTopicLikeBy struct {
 	TopicId int
@@ -21,27 +22,31 @@ type GetTopicLikeListBy struct {
 }
 
 type GetTopicPageListBy struct {
-	ID         int64               `json:"id"`
-	TopicTagId int                 `json:"topicTagId"`
-	Offset     int                 `json:"offset"`
-	Status     int                 `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
-	Limit      int                 `json:"limit"`  //limit为0时不限制数量
-	UserId     int64               `json:"userId"` // 用于查询用户对帖子是否点赞
-	OrderBy    entity2.OrderByList `json:"orderBy"`
+	ID         int64              `json:"id"`
+	TopicTagId int                `json:"topicTagId"`
+	Offset     int                `json:"offset"`
+	Status     int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
+	Limit      int                `json:"limit"`  //limit为0时不限制数量
+	UserId     int64              `json:"userId"` // 用于查询用户对帖子是否点赞
+	OrderBy    entity.OrderByList `json:"orderBy"`
 }
 
 type GetTagPageListBy struct {
-	ID      int                 `json:"id"`
-	Offset  int                 `json:"offset"`
-	Limit   int                 `json:"limit"` //limit为0时不限制数量
-	OrderBy entity2.OrderByList `json:"orderBy"`
+	ID      int                `json:"id"`
+	Offset  int                `json:"offset"`
+	Limit   int                `json:"limit"` //limit为0时不限制数量
+	OrderBy entity.OrderByList `json:"orderBy"`
 }
 
 type GetUserListBy struct {
-	Mobile  string
-	Mobiles []string
-	Source  entity2.UserSource
-	UserIds []int64
+	Mobile     string
+	Mobiles    []string
+	Source     entity.UserSource
+	UserIds    []int64
+	Nickname   string //模糊查询
+	LikeMobile string //手机号模糊查询
+	UserId     int64
+	OpenId     string
 }
 
 type FindPointBy struct {
@@ -51,12 +56,22 @@ type GetPointTransactionListBy struct {
 	OpenId    string
 	StartTime model.Time
 	EndTime   model.Time
-	OrderBy   entity2.OrderByList
-	Type      entity2.PointTransactionType
+	OrderBy   entity.OrderByList
+	Type      entity.PointTransactionType
+}
+type GetPointTransactionPageListBy struct {
+	OpenIds   []string
+	StartTime model.Time
+	EndTime   model.Time
+	OrderBy   entity.OrderByList
+	Type      entity.PointTransactionType
+	Types     []entity.PointTransactionType
+	Offset    int
+	Limit     int
 }
 type FindPointTransactionCountLimitBy struct {
 	OpenId          string
-	TransactionType entity2.PointTransactionType
+	TransactionType entity.PointTransactionType
 	TransactionDate model.Date
 }
 type GetTopicListBy struct {
@@ -73,7 +88,7 @@ type GetTopicFlowPageListBy struct {
 	UserId     int64
 	TopicId    int64
 	TopicTagId int
-	Status     entity2.TopicStatus `json:"status"` //直接传0值表示全部
+	Status     entity.TopicStatus `json:"status"` //直接传0值表示全部
 }
 type GetProductItemListBy struct {
 	ItemIds []string
@@ -88,7 +103,7 @@ type FindPointTransactionBy struct {
 type FindStepHistoryBy struct {
 	OpenId  string
 	Day     model.Time
-	OrderBy entity2.OrderByList
+	OrderBy entity.OrderByList
 }
 type FindStepBy struct {
 	OpenId string
@@ -96,4 +111,19 @@ type FindStepBy struct {
 type GetStepListBy struct {
 	OpenId       string
 	RecordedTime model.Time
+}
+type GetFileExportPageListBy struct {
+	Type           entity.FileExportType
+	AdminId        int64
+	Status         entity.FileExportStatus
+	StartCreatedAt model.Time
+	EndCreatedAt   model.Time
+	OrderBy        entity.OrderByList
+	Offset         int
+	Limit          int
+}
+type GetAdminListBy struct {
+}
+type FindAdminBy struct {
+	Account string
 }

@@ -14,8 +14,8 @@ type AdminMockRepository struct {
 	db *gorm.DB
 }
 
-func (a AdminMockRepository) GetAdminById(id int) entity.Admin {
-	return entity.Admin{
+func (a AdminMockRepository) GetAdminById(id int) entity.SystemAdmin {
+	return entity.SystemAdmin{
 		ID:       id,
 		UName:    fmt.Sprintf("mock%d", id),
 		RealName: fmt.Sprintf("mock%d", id),

@@ -373,3 +373,6 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 	}
 	return stepHistory1.Count - stepHistory2.Count, nil
 }
+func (u UserService) GetUserListBy(by repository2.GetUserListBy) ([]entity.User, error) {
+	return u.r.GetUserListBy(by), nil
+}

@@ -7,4 +7,5 @@ func Initialize(configPath string) {
 	InitRedis()
 	InitValidator()
 	InitWeapp()
+	initOss()
 }
