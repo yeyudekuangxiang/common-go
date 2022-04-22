@@ -150,7 +150,7 @@ func (srv PointTransactionService) GetPointTransactionTypeList() []PointTransact
 	}
 	return list
 }
-func (srv PointTransactionService) ExportPointTransactionList(adminId int, by GetPointTransactionPageListBy) error {
+func (srv PointTransactionService) ExportPointTransactionList(adminId int, by ExportPointTransactionListBy) error {
 	param, err := json.Marshal(by)
 	if err != nil {
 		return err
@@ -171,8 +171,14 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ge
 		if err != nil {
 			app.Logger.Error("更新导出状态失败", fileExport.ID, err)
 		}
-		by.Offset = 0
-		by.Limit = 100
+
+		getPageListBy := GetPointTransactionPageListBy{}
+		err = util.MapTo(by, &getPageListBy)
+		if err != nil {
+			return
+		}
+		getPageListBy.Offset = 0
+		getPageListBy.Limit = 100
 		type csv struct {
 			ID             int64  `csv:"编号"`
 			UserId         int64  `csv:"用户ID"`
@@ -187,7 +193,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ge
 		}
 		csvList := make([]csv, 0)
 		for {
-			list, _, err := srv.GetPageListBy(by)
+			list, _, err := srv.GetPageListBy(getPageListBy)
 			if err != nil {
 				_, err := DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 					Status:  entity.FileExportStatusFailed,
@@ -215,7 +221,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ge
 					Info:           item.AdditionalInfo,
 				})
 			}
-			by.Offset += by.Limit
+			getPageListBy.Offset += getPageListBy.Limit
 		}
 
 		data, err := csvutil.Marshal(csvList)
