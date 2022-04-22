@@ -46,13 +46,13 @@ func (ctr PointController) GetPointTypeList(ctx *gin.Context) (gin.H, error) {
 	}, nil
 }
 func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error) {
-	var form GetPointRecordPageListFrom
+	var form ExportPointRecordListFrom
 	if err := util.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
 	admin := util.GetAuthAdmin(ctx)
-	err := service.DefaultPointTransactionService.ExportPointTransactionList(admin.ID, service.GetPointTransactionPageListBy{
+	err := service.DefaultPointTransactionService.ExportPointTransactionList(admin.ID, service.ExportPointTransactionListBy{
 		UserId:    form.UserId,
 		Nickname:  form.Nickname,
 		OpenId:    form.OpenId,
@@ -60,8 +60,6 @@ func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error
 		StartTime: model.Time{Time: form.StartTime},
 		EndTime:   model.Time{Time: form.EndTime},
 		Type:      form.Type,
-		Offset:    form.Offset(),
-		Limit:     form.Limit(),
 	})
 	return nil, err
 }

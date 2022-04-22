@@ -126,6 +126,16 @@ type GetPointTransactionPageListBy struct {
 	Offset    int
 	Limit     int
 }
+type ExportPointTransactionListBy struct {
+	UserId    int64
+	Nickname  string
+	OpenId    string
+	Phone     string
+	StartTime model.Time
+	EndTime   model.Time
+	Type      entity.PointTransactionType
+	Types     []entity.PointTransactionType
+}
 type PointRecord struct {
 	ID             int64                       `json:"id"`
 	BalanceOfPoint int                         `json:"balanceOfPoint"`
