@@ -66,7 +66,7 @@ func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error
 	return nil, err
 }
 func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, error) {
-	var form GetPointRecordPageListFrom
+	var form GetAdjustRecordPageListForm
 	if err := util.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}

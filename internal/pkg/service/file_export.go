@@ -40,10 +40,15 @@ func (srv FileExportService) GetPageList(by repository.GetFileExportPageListBy) 
 
 	recordList := make([]FileExportRecord, 0)
 	for _, fileExport := range list {
+		admin, err := DefaultSystemAdminService.GetAdminById(fileExport.AdminId)
+		if err != nil {
+			return nil, 0, err
+		}
 		recordList = append(recordList, FileExportRecord{
 			FileExport: fileExport,
 			TypeText:   fileExport.Type.Text(),
 			StatusText: fileExport.Status.Text(),
+			Admin:      *admin,
 		})
 	}
 	return recordList, total, nil

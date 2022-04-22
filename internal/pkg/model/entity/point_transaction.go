@@ -7,7 +7,7 @@ import (
 
 type PointTransactionType string
 
-// Text 获取积分类型的中文名称
+// Text 获取积分类型的中文名称(给用户看的)
 func (p PointTransactionType) Text() string {
 	switch p {
 	case POINT_STEP:
@@ -52,6 +52,30 @@ func (p PointTransactionType) Text() string {
 	return "未知积分"
 }
 
+// RealText 获取积分类型的中文名称(给管理员看的)
+func (p PointTransactionType) RealText() string {
+	switch p {
+	case POINT_DUIBA_ALIPAY:
+		return "兑吧支付宝"
+	case POINT_DUIBA_QB:
+		return "兑吧qb"
+	case POINT_DUIBA_COUPON:
+		return "兑吧优惠券"
+	case POINT_DUIBA_OBJECT:
+		return "兑吧实物"
+	case POINT_DUIBA_PHONEBILL:
+		return "兑吧话费"
+	case POINT_DUIBA_PHONEFLOW:
+		return "兑吧流量"
+	case POINT_DUIBA_VIRTUAL:
+		return "兑吧虚拟商品"
+	case POINT_DUIBA_REFUND:
+		return "兑吧积分退还"
+
+	}
+	return p.Text()
+}
+
 const (
 	POINT_STEP            PointTransactionType = "STEP"            //步行
 	POINT_COFFEE_CUP      PointTransactionType = "COFFEE_CUP"      //自带咖啡杯
@@ -65,17 +89,17 @@ const (
 	POINT_PARTNERSHIP     PointTransactionType = "PARTNERSHIP"     //合作活动
 	POINT_GREEN_TORCH     PointTransactionType = "GREEN_TORCH"     //绿炬人抽奖
 	POINT_ADJUSTMENT      PointTransactionType = "ADJUSTMENT"      //积分调整
-	POINT_DUIBA_ALIPAY    PointTransactionType = "DUIBA_ALIPAY"    //积分兑换
-	POINT_DUIBA_QB        PointTransactionType = "DUIBA_QB"        //积分兑换
-	POINT_DUIBA_COUPON    PointTransactionType = "DUIBA_COUPON"    //积分兑换
-	POINT_DUIBA_OBJECT    PointTransactionType = "DUIBA_OBJECT"    //积分兑换
-	POINT_DUIBA_PHONEBILL PointTransactionType = "DUIBA_PHONEBILL" //积分兑换
-	POINT_DUIBA_PHONEFLOW PointTransactionType = "DUIBA_PHONEFLOW" //积分兑换
-	POINT_DUIBA_VIRTUAL   PointTransactionType = "DUIBA_VIRTUAL"   //积分兑换
-	POINT_DUIBA_GAME      PointTransactionType = "DUIBA_GAME"      //游戏
-	POINT_DUIBA_HDTOOL    PointTransactionType = "DUIBA_HDTOOL"    //活动抽奖
-	POINT_DUIBA_SIGN      PointTransactionType = "DUIBA_SIGN"      //活动奖励
-	POINT_DUIBA_REFUND    PointTransactionType = "DUIBA_REFUND"    //积分退还
+	POINT_DUIBA_ALIPAY    PointTransactionType = "DUIBA_ALIPAY"    //兑吧支付宝 积分兑换
+	POINT_DUIBA_QB        PointTransactionType = "DUIBA_QB"        //兑吧qb 积分兑换
+	POINT_DUIBA_COUPON    PointTransactionType = "DUIBA_COUPON"    //兑吧优惠券 积分兑换
+	POINT_DUIBA_OBJECT    PointTransactionType = "DUIBA_OBJECT"    //兑吧实物 积分兑换
+	POINT_DUIBA_PHONEBILL PointTransactionType = "DUIBA_PHONEBILL" //兑吧话费 积分兑换
+	POINT_DUIBA_PHONEFLOW PointTransactionType = "DUIBA_PHONEFLOW" //兑吧流量 积分兑换
+	POINT_DUIBA_VIRTUAL   PointTransactionType = "DUIBA_VIRTUAL"   //兑吧虚拟商品 积分兑换
+	POINT_DUIBA_GAME      PointTransactionType = "DUIBA_GAME"      //兑吧游戏 游戏
+	POINT_DUIBA_HDTOOL    PointTransactionType = "DUIBA_HDTOOL"    //兑吧活动抽奖 活动抽奖
+	POINT_DUIBA_SIGN      PointTransactionType = "DUIBA_SIGN"      //兑吧签到 活动奖励
+	POINT_DUIBA_REFUND    PointTransactionType = "DUIBA_REFUND"    //兑吧积分退还 积分退还
 	POINT_SYSTEM_REDUCE   PointTransactionType = "SYSTEM_REDUCE"   //系统扣减
 	POINT_SYSTEM_ADD      PointTransactionType = "SYSTEM_ADD"      //系统补发
 )

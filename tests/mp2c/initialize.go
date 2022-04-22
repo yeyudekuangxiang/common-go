@@ -38,7 +38,7 @@ func SetupMock() {
 	//real 真实环境 mock mock环境测试
 	if TestEnv != "real" {
 		onceMock.Do(func() {
-			service2.DefaultAdminService = service2.NewAdminService(mock_repository.NewAdminMockRepository())
+			service2.DefaultSystemAdminService = service2.NewSystemAdminService(mock_repository.NewAdminMockRepository())
 			service2.DefaultUserService = service2.NewUserService(mock_repository.NewUserMockRepository())
 		})
 	}

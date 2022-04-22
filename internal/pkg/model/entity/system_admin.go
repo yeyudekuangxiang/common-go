@@ -9,7 +9,7 @@ type SystemAdmin struct {
 	Avatar    string     `json:"avatar"`
 	Status    int        `json:"status"` //1正常 2已停用(已离职)
 	Account   string     `json:"account"`
-	Password  string     `json:"password"`
+	Password  string     `json:"-"`
 	Phone     string     `json:"phone"`
 	CreatedAt model.Time `json:"createdAt"`
 	UpdatedAt model.Time `json:"updatedAt"`
