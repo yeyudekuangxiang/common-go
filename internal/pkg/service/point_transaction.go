@@ -106,7 +106,7 @@ func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListB
 			User:           *user,
 			BalanceOfPoint: userPoint.Balance,
 			Type:           point.Type,
-			TypeText:       point.Type.Text(),
+			TypeText:       point.Type.RealText(),
 			Value:          point.Value,
 			CreateTime:     point.CreateTime,
 			AdditionalInfo: string(point.AdditionalInfo),
@@ -145,7 +145,7 @@ func (srv PointTransactionService) GetPointTransactionTypeList() []PointTransact
 	for _, t := range entity.PointTransactionTypeList {
 		list = append(list, PointTransactionTypeInfo{
 			Type:     t,
-			TypeText: t.Text(),
+			TypeText: t.RealText(),
 		})
 	}
 	return list
@@ -296,11 +296,11 @@ func (srv PointTransactionService) GetAdjustPointTransactionTypeList() []PointTr
 	return []PointTransactionTypeInfo{
 		{
 			Type:     entity.POINT_SYSTEM_REDUCE,
-			TypeText: entity.POINT_SYSTEM_REDUCE.Text(),
+			TypeText: entity.POINT_SYSTEM_REDUCE.RealText(),
 		},
 		{
 			Type:     entity.POINT_SYSTEM_ADD,
-			TypeText: entity.POINT_SYSTEM_ADD.Text(),
+			TypeText: entity.POINT_SYSTEM_ADD.RealText(),
 		},
 	}
 }

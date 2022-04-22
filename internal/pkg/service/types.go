@@ -144,8 +144,9 @@ type PointTransactionTypeInfo struct {
 }
 type FileExportRecord struct {
 	entity.FileExport
-	StatusText string `json:"statusText"`
-	TypeText   string `json:"typeText"`
+	StatusText string             `json:"statusText"`
+	TypeText   string             `json:"typeText"`
+	Admin      entity.SystemAdmin `json:"admin"`
 }
 type AddFileExportParam struct {
 	AdminId int                   `json:"adminId"`
