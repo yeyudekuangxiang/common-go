@@ -12,8 +12,8 @@ type TopicDetail struct {
 }
 
 type CreatePointTransactionParam struct {
-	OpenId       string
-	Type         entity.PointTransactionType
+	OpenId       string                      `binding:"required"`
+	Type         entity.PointTransactionType `binding:"required"`
 	Value        int
 	AdminId      int
 	Note         string
@@ -184,11 +184,11 @@ type FileExportType struct {
 }
 
 type AdminAdjustUserPointParam struct {
-	OpenId string
-	Phone  string
-	Type   entity.PointTransactionType
-	Value  int
-	Note   string
+	OpenId string                      `binding:"required"`
+	Phone  string                      `binding:"required"`
+	Type   entity.PointTransactionType `binding:"oneof=SYSTEM_ADD SYSTEM_REDUCE"` //只能时 SYSTEM_ADD 和 SYSTEM_REDUCE 两种类型
+	Value  int                         `binding:"gt=0"`                           //调整积分数量必须大于0 系统会根据类型自动判断加或者减少
+	Note   string                      `binding:"required"`
 }
 type GetPointAdjustRecordPageListParam struct {
 	OpenId string

@@ -27,7 +27,10 @@ type PointTransactionService struct {
 
 // Create 添加发放积分记录并且更新用户剩余积分
 func (srv PointTransactionService) Create(param CreatePointTransactionParam) (*entity.PointTransaction, error) {
-
+	if err := util.ValidatorStruct(param); err != nil {
+		app.Logger.Error(param, err)
+		return nil, err
+	}
 	err := DefaultPointTransactionCountLimitService.CheckLimitAndUpdate(param.Type, param.OpenId)
 	if err != nil {
 		return nil, err
@@ -260,6 +263,12 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 	return nil
 }
 func (srv PointTransactionService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserPointParam) error {
+
+	if err := util.ValidatorStruct(param); err != nil {
+		app.Logger.Error(param, err)
+		return err
+	}
+
 	user, err := DefaultUserService.GetUserBy(repository.GetUserBy{
 		OpenId:     param.OpenId,
 		LikeMobile: param.Phone,
@@ -270,10 +279,14 @@ func (srv PointTransactionService) AdminAdjustUserPoint(adminId int, param Admin
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+	value := param.Value
+	if param.Type == entity.POINT_SYSTEM_REDUCE {
+		value = -value
+	}
 	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
 		OpenId:  param.OpenId,
 		Type:    param.Type,
-		Value:   param.Value,
+		Value:   value,
 		AdminId: adminId,
 		Note:    param.Note,
 	})

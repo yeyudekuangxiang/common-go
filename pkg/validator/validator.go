@@ -17,6 +17,7 @@ type defaultValidator struct {
 	validate *validator.Validate
 }
 
+//类型校验
 var _ binding.StructValidator = &defaultValidator{}
 
 func (v *defaultValidator) ValidateStruct(obj interface{}) error {
