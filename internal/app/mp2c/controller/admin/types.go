@@ -46,8 +46,8 @@ type AdjustUserPointForm struct {
 	OpenId string                      `json:"openId" form:"openId" binding:"required" alias:"openId"`
 	Phone  string                      `json:"phone" form:"phone" binding:"required" alias:"手机号"`
 	Type   entity.PointTransactionType `json:"type" form:"type" binding:"oneof=SYSTEM_REDUCE SYSTEM_ADD" alias:"变动类型"`
-	Value  int                         `json:"value" form:"value" alias:"变动积分数量"`
-	Note   string                      `json:"note" form:"note" binding:"lte=200" alias:"操作备注"`
+	Value  int                         `json:"value" form:"value" binding:"gt=0" alias:"变动积分数量"`
+	Note   string                      `json:"note" form:"note" binding:"gt=0,lte=200" alias:"操作备注"`
 }
 type AdminLoginForm struct {
 	Account  string `json:"account" form:"account" binding:"required" alias:"账号"`
