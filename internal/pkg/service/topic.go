@@ -251,14 +251,18 @@ func (u TopicService) ImportUser(filename string) error {
 }
 
 func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
-
 	file, err := os.Open(filepath)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("上传头像", filepath, file.Name())
+
+	_, fileName := path.Split(filepath)
+
+	fmt.Println("上传头像", filepath, fmt.Sprintf("static/mp2c/images/topic/kol/%s", fileName))
+
 	defer file.Close()
-	return DefaultOssService.PutObject(fmt.Sprintf("static/mp2c/images/topic/kol/%s", file.Name()), file)
+
+	return DefaultOssService.PutObject(fmt.Sprintf("static/mp2c/images/topic/kol/%s", fileName), file)
 }
 
 func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
