@@ -151,12 +151,3 @@ stop-deploy-dev:
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
     -  helm uninstall $RELEASE_NAME -n dev
-
-auto_merge:
-  image: golang:1.17
-  stage: auto_merge
-  rules:
-    - if: "$CI_PIPELINE_SOURCE ==  'merge_request_event' && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^(release-|hotfix-).+$/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
-      when: always
-  script:
-    - go run cmd/command/main.go gitlab merge auto $CI_MERGE_REQUEST_PROJECT_ID $CI_MERGE_REQUEST_IID $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME

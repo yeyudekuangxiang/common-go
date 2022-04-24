@@ -14,6 +14,7 @@ import (
 	entity2 "mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
 	"mio/pkg/wxapp"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -231,9 +232,13 @@ func (u TopicService) ImportUser(filename string) error {
 			log.Println("用户已存在", user)
 			continue
 		}
-		_, err := DefaultUserService.CreateUser(CreateUserParam{
+		avatar, err := u.uploadImportUserAvatar(path.Join(path.Dir(filename), "kol", importId+".jpg"))
+		if err != nil {
+			return errors.WithMessage(err, "上传头像失败"+importId)
+		}
+		_, err = DefaultUserService.CreateUser(CreateUserParam{
 			OpenId:      wechat,
-			AvatarUrl:   fmt.Sprintf("https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/kol/%s.jpg", importId),
+			AvatarUrl:   avatar,
 			Nickname:    nickname,
 			PhoneNumber: phone,
 			Source:      entity2.UserSourceMio,
@@ -243,6 +248,41 @@ func (u TopicService) ImportUser(filename string) error {
 		}
 	}
 	return nil
+}
+
+func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
+
+	file, err := os.Open(filepath)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("上传头像", filepath, file.Name())
+	defer file.Close()
+	return DefaultOssService.PutObject(fmt.Sprintf("static/mp2c/images/topic/kol/%s", file.Name()), file)
+}
+
+func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
+	fileInfos, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	images := make([]string, 0)
+	for _, fileInfo := range fileInfos {
+
+		file, err := os.Open(path.Join(dirPath, fileInfo.Name()))
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("上传内容图片", fmt.Sprintf("static/mp2c/images/topic/info/%s/%s", path.Base(dirPath), fileInfo.Name()))
+
+		u, err := DefaultOssService.PutObject(fmt.Sprintf("static/mp2c/images/topic/info/%s/%s", path.Base(dirPath), fileInfo.Name()), file)
+		if err != nil {
+			file.Close()
+			return nil, err
+		}
+		images = append(images, u)
+	}
+	return images, nil
 }
 
 // ImportTopic 从xlsx中导入内容
@@ -271,10 +311,7 @@ func (u TopicService) ImportTopic(filename string) error {
 		if err != nil {
 			return errors.WithStack(err)
 		}
-		imageList, err := getTopicImage(importId, path.Join(path.Dir(filename), "info"))
-		if err != nil {
-			return errors.WithMessagef(err, "获取topic%d图片失败", importId)
-		}
+
 		nickname := row[1]
 		title := row[2]
 		content := row[3]
@@ -286,10 +323,18 @@ func (u TopicService) ImportTopic(filename string) error {
 
 		users := make([]entity2.User, 0)
 
-		err = app.DB.Where("nick_name = ?", nickname).Find(&users).Error
-		if err != nil {
-			return errors.WithStack(err)
+		if nickname == "咚的一声不响" {
+			err = app.DB.Where("phone_number = ?", "19988433595").Find(&users).Error
+			if err != nil {
+				return errors.WithStack(err)
+			}
+		} else {
+			err = app.DB.Where("nick_name = ?", nickname).Find(&users).Error
+			if err != nil {
+				return errors.WithStack(err)
+			}
 		}
+
 		if len(users) == 0 {
 			return errors.New("未查询到用户`" + nickname + "`,请先导入用户")
 		}
@@ -304,7 +349,7 @@ func (u TopicService) ImportTopic(filename string) error {
 			err = app.DB.Where("name = ?", tag1Text).First(&tag1).Error
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
-					return errors.New("为查询到话题`" + tag1Text + "`,请先导入话题")
+					return errors.New("未查询到话题`" + tag1Text + "`,请先导入话题")
 				}
 				return errors.WithStack(err)
 			}
@@ -326,6 +371,11 @@ func (u TopicService) ImportTopic(filename string) error {
 		topicTag = strings.TrimRight(topicTag, ",")
 		topicTagId = strings.TrimRight(topicTagId, ",")
 
+		imageList, err := u.UploadImportTopicImage(path.Join(path.Dir(filename), "info", row[0]))
+		if err != nil {
+			return errors.WithMessagef(err, "获取topic%d图片失败", importId)
+		}
+
 		topic := entity2.Topic{
 			TopicTag:   topicTag,
 			UserId:     users[0].ID,
@@ -336,6 +386,7 @@ func (u TopicService) ImportTopic(filename string) error {
 			TopicTagId: topicTagId,
 			ImportId:   importId,
 			ImageList:  strings.Join(imageList, ","),
+			Status:     3,
 		}
 		err = app.DB.Where("import_id = ?", importId).First(&topic).Error
 		if err != nil && err != gorm.ErrRecordNotFound {

@@ -7,7 +7,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"log"
-	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/service"
 )
 
@@ -22,8 +21,24 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		initialize.Initialize("./config-prod.ini")
-		err := service.DefaultTopicService.ImportTopic("../cool/mio-topic2.xlsx")
+		//initialize.Initialize("./config-prod.ini")
+
+		err := cmd.ParseFlags(args)
+		if err != nil {
+			log.Fatal(err)
+		}
+		topicPath := cmd.Flag("topic").Value.String()
+		userPath := cmd.Flag("user").Value.String()
+		if topicPath == "" || userPath == "" {
+			log.Fatal("参数错误")
+		}
+
+		err = service.DefaultTopicService.ImportUser(userPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = service.DefaultTopicService.ImportTopic(topicPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -32,6 +47,9 @@ to quickly create a Cobra application.`,
 
 func init() {
 	topicCmd.AddCommand(importCmd)
+
+	importCmd.Flags().StringP("topic", "t", "", "topic file path")
+	importCmd.Flags().StringP("user", "u", "", "user file path")
 
 	// Here you will define your flags and configuration settings.
 
