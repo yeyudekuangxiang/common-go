@@ -8,7 +8,6 @@ import (
 	"github.com/chanxuehong/wechat/mp/jssdk"
 	mpoauth2 "github.com/chanxuehong/wechat/mp/oauth2"
 	"github.com/chanxuehong/wechat/oauth2"
-	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -45,6 +44,7 @@ func (srv OaService) LoginByCode(code string) (string, error) {
 	if err != nil {
 		return "", nil
 	}
+
 	sexStr := ""
 	if userinfo.Sex == 1 {
 		sexStr = " MALE"
@@ -88,7 +88,7 @@ func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, u string) bo
 func (srv OaService) AutoLoginCallback(code string, state string) (string, error) {
 
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, state)
-	log.Println(redisKey, redisKey)
+
 	dataStr, err := app.Redis.Get(context.Background(), redisKey).Result()
 	if err != nil {
 		app.Logger.Error(err)
@@ -101,22 +101,24 @@ func (srv OaService) AutoLoginCallback(code string, state string) (string, error
 	if err != nil {
 		return "", err
 	}
+
 	var redirectUri string
 	if index := strings.Index(data["RedirectUri"], "?"); index >= 0 {
 		prefix := data["RedirectUri"][:index+1]
 		last := data["RedirectUri"][index+1:]
-		redirectUri = fmt.Sprintf("%scode=%s&state=%s&platform=%s&%s", prefix, code, state, data["App"], last)
+		redirectUri = fmt.Sprintf("%scode=%s&state=%s&platform=%s&%s", prefix, code, url.QueryEscape(data["State"]), data["App"], last)
 	} else if index := strings.Index(data["RedirectUri"], "#"); index >= 0 {
 		prefix := data["RedirectUri"][:index]
 		last := data["RedirectUri"][index:]
-		redirectUri = fmt.Sprintf("%s?code=%s&state=%s&platform=%s%s", prefix, code, state, data["App"], last)
+		redirectUri = fmt.Sprintf("%s?code=%s&state=%s&platform=%s%s", prefix, code, url.QueryEscape(data["State"]), data["App"], last)
 	} else {
-		redirectUri = fmt.Sprintf("%s?code=%s&state=%s&platform=%s", data["RedirectUri"], code, state, data["App"])
+		redirectUri = fmt.Sprintf("%s?code=%s&state=%s&platform=%s", data["RedirectUri"], code, url.QueryEscape(data["State"]), data["App"])
 	}
 
 	app.Redis.Del(context.Background(), redisKey)
 
 	app.Logger.Info("授权回调:", redirectUri)
+
 	//如果使用302重定向 浏览器点击返回上一页时 url会变成此方法url且会重新进入此方法报数据异常错误
 	//使用301重定向时 浏览器点击返回上一页时 url会变成此方法url但不会进入此方法 会已相同的code进入回调页
 	//c.Redirect(http.StatusMovedPermanently, redirectUri)
@@ -134,6 +136,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 		"State":       state,
 		"App":         string(srv.Platform),
 	}
+
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		return "", err
@@ -143,7 +146,6 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, key)
 
-	log.Println(redisKey, redisKey)
 	err = app.Redis.Set(context.Background(), redisKey, string(dataBytes), 30*time.Second).Err()
 	if err != nil {
 		return "", err
@@ -152,6 +154,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 	escapeUrl := url.QueryEscape(jumpUrl)
 	loginUrl := fmt.Sprintf(LoginUrl, setting.AppId, escapeUrl, key)
 	app.Logger.Info("跳转登陆url", loginUrl)
+
 	//使用301重定项时 后续的授权将会已相同的state直接进入callback函数 而不会经过本函数
 	//使用302重定向时 后续的授权将会同样先进入本函数 保存数据后进行授权然后进入callback函数
 	//c.Redirect(http.StatusFound, loginUrl)
