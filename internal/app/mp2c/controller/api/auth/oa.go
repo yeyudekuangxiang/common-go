@@ -57,10 +57,8 @@ func (OaController) AutoLoginCallback(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 	}
 
-	oaService := authSrv.OaService{
-		Platform: entity.UserSource(form.Platform),
-	}
-	redirectUri, err := oaService.AutoLoginCallback(form.Platform, form.State)
+	oaService := authSrv.OaService{}
+	redirectUri, err := oaService.AutoLoginCallback(form.Code, form.State)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return

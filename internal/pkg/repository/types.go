@@ -127,3 +127,8 @@ type GetAdminListBy struct {
 type FindAdminBy struct {
 	Account string
 }
+
+type FindOaAuthWhiteBy struct {
+	Domain string
+	AppId  string
+}
