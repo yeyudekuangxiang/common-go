@@ -49,6 +49,9 @@ func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	if by.Mobile != "" {
 		db.Where("phone_number = ?", by.Mobile)
 	}
+	if by.LikeMobile != "" {
+		db.Where("phone_number like ?", "%"+by.LikeMobile+"%")
+	}
 	if by.UnionId != "" {
 		db.Where("unionid = ?", by.UnionId)
 	}
@@ -76,6 +79,18 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	}
 	if by.Source != "" {
 		db.Where("source = ?", by.Source)
+	}
+	if by.Nickname != "" {
+		db.Where("nick_name like ?", "%"+by.Nickname+"%")
+	}
+	if by.LikeMobile != "" {
+		db.Where("phone_number like ?", "%"+by.LikeMobile+"%")
+	}
+	if by.UserId != 0 {
+		db.Where("id = ?", by.UserId)
+	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
 	}
 
 	if err := db.Find(&list).Error; err != nil {

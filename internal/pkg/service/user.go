@@ -39,6 +39,9 @@ func (u UserService) GetUserById(id int64) (*entity.User, error) {
 	return &user, nil
 }
 func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
+	if openId == "" {
+		return &entity.User{}, nil
+	}
 	user := u.r.GetUserBy(repository2.GetUserBy{
 		OpenId: openId,
 	})
@@ -57,10 +60,15 @@ func (u UserService) GetUserByToken(token string) (*entity.User, error) {
 	return &user, nil
 }
 func (u UserService) CreateUserToken(id int64) (string, error) {
+	if id == 0 {
+		return "", errno.ErrUserNotFound
+	}
+
 	user := u.r.GetUserById(id)
 	if user.ID == 0 {
-		return "", errors.New("用户不存在")
+		return "", errno.ErrUserNotFound
 	}
+
 	return util2.CreateToken(auth.User{
 		Id:        user.ID,
 		Mobile:    user.PhoneNumber,
@@ -99,7 +107,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	return &user, repository2.DefaultUserRepository.Save(&user)
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {
-	if unionid == "" {
+	if unionid == "" || id == 0 {
 		return
 	}
 
@@ -125,6 +133,9 @@ func (u UserService) GetUserBy(by repository2.GetUserBy) (*entity.User, error) {
 	return &user, nil
 }
 func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
+	if mobile == "" {
+		return nil, errors.New("手机号不能为空")
+	}
 	user := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{
 		Mobile: mobile,
 		Source: entity.UserSourceMobile,
@@ -144,6 +155,10 @@ func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 
 // FindUserBySource 根据用户id 获取指定平台的用户
 func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
+	if userId == 0 {
+		return &entity.User{}, nil
+	}
+
 	user := repository2.DefaultUserRepository.GetUserById(userId)
 
 	if user.ID == 0 || user.PhoneNumber == "" {
@@ -372,4 +387,7 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 		return 0, err
 	}
 	return stepHistory1.Count - stepHistory2.Count, nil
+}
+func (u UserService) GetUserListBy(by repository2.GetUserListBy) ([]entity.User, error) {
+	return u.r.GetUserListBy(by), nil
 }

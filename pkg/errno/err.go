@@ -29,9 +29,12 @@ var (
 	ErrTokenInvalid = Err{code: 20203, message: "jwt 是无效的"}
 
 	// 用户错误, 前缀为 203
-	ErrUserNotFound      = Err{code: 20301, message: "用户没找到"}
+	ErrUserNotFound      = Err{code: 20301, message: "未查询到用户信息"}
 	ErrPasswordIncorrect = Err{code: 20302, message: "密码错误"}
 	ErrNotBindMobile     = Err{code: 20303, message: "未授权手机号码"}
+
+	//管理员错误 前缀204
+	ErrAdminNotFound = Err{code: 20401, message: "未查询到管理员信息"}
 )
 
 func NewBindErr(err error) Err {

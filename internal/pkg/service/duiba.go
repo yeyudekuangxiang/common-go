@@ -150,7 +150,7 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 	if err != nil {
 		return err
 	}
-	if pt.Id == 0 {
+	if pt.ID == 0 {
 		return nil
 	}
 
@@ -161,7 +161,7 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 
 	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
 		OpenId:       form.Uid,
-		Type:         pt.Type,
+		Type:         entity.POINT_DUIBA_REFUND,
 		Value:        -pt.Value,
 		AdditionInfo: string(data),
 	})

@@ -15,6 +15,11 @@ type UserMockRepository struct {
 	db *gorm.DB
 }
 
+func (u UserMockRepository) GetGuid(unionId string) string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (u UserMockRepository) Save(user *entity.User) error {
 	//TODO implement me
 	panic("implement me")

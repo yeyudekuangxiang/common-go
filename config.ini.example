@@ -58,3 +58,8 @@ Secret=
 [duiba]
 AppKey=
 AppSecret=
+
+[oss]
+Endpoint=
+AccessKey=
+AccessSecret=
