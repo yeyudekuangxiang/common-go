@@ -8,6 +8,7 @@ import (
 	"github.com/chanxuehong/wechat/mp/jssdk"
 	mpoauth2 "github.com/chanxuehong/wechat/mp/oauth2"
 	"github.com/chanxuehong/wechat/oauth2"
+	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -86,7 +87,8 @@ func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, u string) bo
 }
 func (srv OaService) AutoLoginCallback(code string, state string) (string, error) {
 
-	redisKey := fmt.Sprintf("%s%s", config.RedisKey.OaAuth, state)
+	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, state)
+	log.Println(redisKey, redisKey)
 	dataStr, err := app.Redis.Get(context.Background(), redisKey).Result()
 	if err != nil {
 		app.Logger.Error(err)
@@ -139,8 +141,9 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 
 	key := util.Md5(fmt.Sprintf("%s%s", setting.AppId, util.UUID()))
 
-	redisKey := fmt.Sprintf("%s%s", config.RedisKey.OaAuth, key)
+	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, key)
 
+	log.Println(redisKey, redisKey)
 	err = app.Redis.Set(context.Background(), redisKey, string(dataBytes), 30*time.Second).Err()
 	if err != nil {
 		return "", err
