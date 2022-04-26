@@ -37,12 +37,12 @@ func (srv OaService) LoginByCode(code string) (string, error) {
 	}
 	token, err := oauth2Client.ExchangeToken(code)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	userinfo, err := mpoauth2.GetUserInfo(token.AccessToken, token.OpenId, "", nil)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	sexStr := ""
