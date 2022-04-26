@@ -1,7 +1,7 @@
 package auth
 
 type oa struct {
-	Platform string `json:"platform" form:"platform" binding:"required,oneof=mio-srv-oa mio-sub-oa" alias:"platform"`
+	Platform string `json:"platform" form:"platform" binding:"oneof=mio-srv-oa mio-sub-oa" alias:"platform"`
 }
 type ConfigSignForm struct {
 	oa
@@ -13,7 +13,6 @@ type AutoLoginForm struct {
 	State       string `json:"state" form:"state"`
 }
 type AutoLoginCallbackForm struct {
-	oa
 	Code  string `json:"code" form:"code" binding:"required" alias:"code"`
 	State string `json:"state" form:"code" binding:"required" alias:"code"`
 }

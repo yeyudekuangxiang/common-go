@@ -63,7 +63,25 @@ func (srv OaService) LoginByCode(code string) (string, error) {
 	}
 	return service.DefaultUserService.CreateUserToken(user.ID)
 }
-func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, url string) bool {
+func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, u string) bool {
+	parse, err := url.Parse(u)
+	if err != nil {
+		app.Logger.Error(err)
+		return false
+	}
+	setting := config.FindOaSetting(platform)
+
+	white, err := DefaultOaAuthWhiteService.FindBy(FindOaAuthWhiteBy{
+		AppId:  setting.AppId,
+		Domain: parse.Hostname(),
+	})
+	if err != nil {
+		app.Logger.Error(err)
+		return false
+	}
+	if white.ID == 0 {
+		return false
+	}
 	return true
 }
 func (srv OaService) AutoLoginCallback(code string, state string) (string, error) {
@@ -119,8 +137,8 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 		return "", err
 	}
 
-	t := time.Now().UnixNano()
-	key := util.Md5(fmt.Sprintf("%s%d", setting.AppId, t))
+	key := util.Md5(fmt.Sprintf("%s%s", setting.AppId, util.UUID()))
+
 	redisKey := fmt.Sprintf("%s%s", config.RedisKey.OaAuth, key)
 
 	err = app.Redis.Set(context.Background(), redisKey, string(dataBytes), 30*time.Second).Err()

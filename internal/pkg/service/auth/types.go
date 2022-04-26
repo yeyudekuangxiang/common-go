@@ -6,3 +6,8 @@ type OaSignResult struct {
 	NonceStr  string `json:"nonceStr"`
 	Signature string `json:"signature"`
 }
+
+type FindOaAuthWhiteBy struct {
+	Domain string
+	AppId  string
+}
