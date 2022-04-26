@@ -88,7 +88,7 @@ func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, u string) bo
 func (srv OaService) AutoLoginCallback(code string, state string) (string, error) {
 
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, state)
-	log.Println(redisKey, redisKey)
+	log.Println("callback", redisKey)
 	dataStr, err := app.Redis.Get(context.Background(), redisKey).Result()
 	if err != nil {
 		app.Logger.Error(err)
@@ -143,7 +143,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, key)
 
-	log.Println(redisKey, redisKey)
+	log.Println("login", redisKey)
 	err = app.Redis.Set(context.Background(), redisKey, string(dataBytes), 30*time.Second).Err()
 	if err != nil {
 		return "", err
