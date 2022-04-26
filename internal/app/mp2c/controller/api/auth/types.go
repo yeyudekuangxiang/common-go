@@ -14,7 +14,7 @@ type AutoLoginForm struct {
 }
 type AutoLoginCallbackForm struct {
 	Code  string `json:"code" form:"code" binding:"required" alias:"code"`
-	State string `json:"state" form:"code" binding:"required" alias:"code"`
+	State string `json:"state" form:"state" binding:"required" alias:"state"`
 }
 type OaAuthForm struct {
 	oa
