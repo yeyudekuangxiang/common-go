@@ -116,6 +116,7 @@ type FindStepHistoryBy struct {
 }
 type GetPointTransactionPageListBy struct {
 	UserId    int64
+	AdminId   int
 	Nickname  string
 	OpenId    string
 	Phone     string
@@ -191,11 +192,14 @@ type AdminAdjustUserPointParam struct {
 	Note   string                      `binding:"required"`
 }
 type GetPointAdjustRecordPageListParam struct {
-	OpenId string
-	Phone  string
-	Type   entity.PointTransactionType
-	Offset int
-	Limit  int
+	OpenId   string
+	Phone    string
+	Type     entity.PointTransactionType
+	UserId   int64
+	Nickname string
+	AdminId  int
+	Offset   int
+	Limit    int
 }
 type PointAdjustRecord struct {
 	ID         int                         `json:"id"`
@@ -205,4 +209,10 @@ type PointAdjustRecord struct {
 	Note       string                      `json:"note"`
 	Value      int                         `json:"value"`
 	CreateTime model.Time                  `json:"createTime"`
+}
+type FilterPointRecordOpenIds struct {
+	OpenId   string
+	UserId   int64
+	Phone    string
+	Nickname string
 }

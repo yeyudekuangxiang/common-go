@@ -67,7 +67,12 @@ func (srv PointTransactionService) FindBy(by repository.FindPointTransactionBy) 
 }
 func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy) ([]PointRecord, int64, error) {
 	recordList := make([]PointRecord, 0)
-	isEmptyCondition, openIds, err := srv.getOpenIds(by)
+	isEmptyCondition, openIds, err := srv.filterPointRecordOpenIds(FilterPointRecordOpenIds{
+		OpenId:   by.OpenId,
+		Nickname: by.Nickname,
+		Phone:    by.Phone,
+		UserId:   by.UserId,
+	})
 	if err != nil {
 		return recordList, 0, err
 	}
@@ -78,6 +83,7 @@ func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListB
 	}
 
 	pointTranList, total := srv.repo.GetPageListBy(repository.GetPointTransactionPageListBy{
+		AdminId:   by.AdminId,
 		OpenIds:   openIds,
 		StartTime: by.StartTime,
 		EndTime:   by.EndTime,
@@ -120,7 +126,7 @@ func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListB
 	}
 	return recordList, total, nil
 }
-func (srv PointTransactionService) getOpenIds(by GetPointTransactionPageListBy) (isEmptyCondition bool, openIds []string, err error) {
+func (srv PointTransactionService) filterPointRecordOpenIds(by FilterPointRecordOpenIds) (isEmptyCondition bool, openIds []string, err error) {
 	openIds = make([]string, 0)
 
 	if by.UserId == 0 && by.Nickname == "" && by.OpenId == "" && by.Phone == "" {
@@ -302,12 +308,16 @@ func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustR
 			entity.POINT_SYSTEM_ADD,
 		}
 	}
+
 	return DefaultPointTransactionService.GetPageListBy(GetPointTransactionPageListBy{
-		OpenId: param.OpenId,
-		Phone:  param.Phone,
-		Types:  types,
-		Offset: param.Offset,
-		Limit:  param.Limit,
+		UserId:   param.UserId,
+		AdminId:  param.AdminId,
+		Nickname: param.Nickname,
+		OpenId:   param.OpenId,
+		Phone:    param.Phone,
+		Types:    types,
+		Offset:   param.Offset,
+		Limit:    param.Limit,
 	})
 }
 

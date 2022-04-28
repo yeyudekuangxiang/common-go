@@ -37,9 +37,12 @@ type GetFileExportPageListForm struct {
 	controller.PageFrom
 }
 type GetAdjustRecordPageListForm struct {
-	OpenId string                      `json:"openId" form:"openId" alias:"openId"`
-	Phone  string                      `json:"phone" form:"phone" alias:"phone"`
-	Type   entity.PointTransactionType `json:"type" form:"type" alias:"type"`
+	UserId   int64                       `json:"userId" form:"userId" alias:"userId"`
+	Nickname string                      `json:"nickname" form:"nickname" alias:"nickname"`
+	OpenId   string                      `json:"openId" form:"openId" alias:"openId"`
+	Phone    string                      `json:"phone" form:"phone" alias:"phone"`
+	Type     entity.PointTransactionType `json:"type" form:"type" alias:"type"`
+	AdminId  int                         `json:"adminId" form:"adminId" alias:"adminId"`
 	controller.PageFrom
 }
 type AdjustUserPointForm struct {

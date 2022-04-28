@@ -60,6 +60,7 @@ type GetPointTransactionListBy struct {
 	Type      entity.PointTransactionType
 }
 type GetPointTransactionPageListBy struct {
+	AdminId   int
 	OpenIds   []string
 	StartTime model.Time
 	EndTime   model.Time
