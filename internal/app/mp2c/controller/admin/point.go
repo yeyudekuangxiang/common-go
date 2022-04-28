@@ -70,11 +70,14 @@ func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, err
 	}
 
 	list, total, err := service.DefaultPointTransactionService.GetAdjustRecordPageList(service.GetPointAdjustRecordPageListParam{
-		OpenId: form.OpenId,
-		Phone:  form.Phone,
-		Type:   form.Type,
-		Offset: form.Offset(),
-		Limit:  form.Limit(),
+		OpenId:   form.OpenId,
+		Phone:    form.Phone,
+		Type:     form.Type,
+		AdminId:  form.AdminId,
+		Nickname: form.Nickname,
+		UserId:   form.UserId,
+		Offset:   form.Offset(),
+		Limit:    form.Limit(),
 	})
 	if err != nil {
 		return nil, err
