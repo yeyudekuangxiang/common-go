@@ -24,8 +24,8 @@ type ExportPointRecordListFrom struct {
 	Nickname  string                      `json:"nickname" form:"nickname" binding:"lte=30" alias:"用户昵称"`
 	OpenId    string                      `json:"openId" form:"openId" binding:"lte=50" alias:"openId"`
 	Phone     string                      `json:"phone" form:"phone" binding:"lte=30" alias:"手机号"`
-	StartTime time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
-	EndTime   time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+	StartTime time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime   time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
 	Type      entity.PointTransactionType `json:"type" form:"type" alias:"积分类型"`
 }
 type GetFileExportPageListForm struct {
@@ -37,12 +37,14 @@ type GetFileExportPageListForm struct {
 	controller.PageFrom
 }
 type GetAdjustRecordPageListForm struct {
-	UserId   int64                       `json:"userId" form:"userId" alias:"userId"`
-	Nickname string                      `json:"nickname" form:"nickname" alias:"nickname"`
-	OpenId   string                      `json:"openId" form:"openId" alias:"openId"`
-	Phone    string                      `json:"phone" form:"phone" alias:"phone"`
-	Type     entity.PointTransactionType `json:"type" form:"type" alias:"type"`
-	AdminId  int                         `json:"adminId" form:"adminId" alias:"adminId"`
+	UserId    int64                       `json:"userId" form:"userId" alias:"userId"`
+	Nickname  string                      `json:"nickname" form:"nickname" alias:"nickname"`
+	OpenId    string                      `json:"openId" form:"openId" alias:"openId"`
+	Phone     string                      `json:"phone" form:"phone" alias:"phone"`
+	Type      entity.PointTransactionType `json:"type" form:"type" alias:"type"`
+	AdminId   int                         `json:"adminId" form:"adminId" alias:"adminId"`
+	StartTime time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime   time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
 	controller.PageFrom
 }
 type AdjustUserPointForm struct {

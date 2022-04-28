@@ -310,14 +310,16 @@ func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustR
 	}
 
 	return DefaultPointTransactionService.GetPageListBy(GetPointTransactionPageListBy{
-		UserId:   param.UserId,
-		AdminId:  param.AdminId,
-		Nickname: param.Nickname,
-		OpenId:   param.OpenId,
-		Phone:    param.Phone,
-		Types:    types,
-		Offset:   param.Offset,
-		Limit:    param.Limit,
+		UserId:    param.UserId,
+		AdminId:   param.AdminId,
+		Nickname:  param.Nickname,
+		OpenId:    param.OpenId,
+		Phone:     param.Phone,
+		Types:     types,
+		StartTime: model.Time{Time: param.StartTime},
+		EndTime:   model.Time{Time: param.EndTime},
+		Offset:    param.Offset,
+		Limit:     param.Limit,
 	})
 }
 

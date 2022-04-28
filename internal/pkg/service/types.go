@@ -3,6 +3,7 @@ package service
 import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
+	"time"
 )
 
 type TopicDetail struct {
@@ -192,14 +193,16 @@ type AdminAdjustUserPointParam struct {
 	Note   string                      `binding:"required"`
 }
 type GetPointAdjustRecordPageListParam struct {
-	OpenId   string
-	Phone    string
-	Type     entity.PointTransactionType
-	UserId   int64
-	Nickname string
-	AdminId  int
-	Offset   int
-	Limit    int
+	OpenId    string
+	Phone     string
+	Type      entity.PointTransactionType
+	UserId    int64
+	Nickname  string
+	StartTime time.Time
+	EndTime   time.Time
+	AdminId   int
+	Offset    int
+	Limit     int
 }
 type PointAdjustRecord struct {
 	ID         int                         `json:"id"`
