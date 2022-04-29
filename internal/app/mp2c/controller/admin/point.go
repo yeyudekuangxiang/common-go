@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
+	"time"
 )
 
 var DefaultPointController = PointController{}
@@ -24,7 +25,7 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 		OpenId:    form.OpenId,
 		Phone:     form.Phone,
 		StartTime: model.Time{Time: form.StartTime},
-		EndTime:   model.Time{Time: form.EndTime},
+		EndTime:   model.Time{Time: form.EndTime.Add(time.Hour*24 - time.Nanosecond)},
 		Type:      form.Type,
 		Offset:    form.Offset(),
 		Limit:     form.Limit(),
@@ -58,7 +59,7 @@ func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error
 		OpenId:    form.OpenId,
 		Phone:     form.Phone,
 		StartTime: model.Time{Time: form.StartTime},
-		EndTime:   model.Time{Time: form.EndTime},
+		EndTime:   model.Time{Time: form.EndTime.Add(time.Hour*24 - time.Nanosecond)},
 		Type:      form.Type,
 	})
 	return nil, err
@@ -77,7 +78,7 @@ func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, err
 		Nickname:  form.Nickname,
 		UserId:    form.UserId,
 		StartTime: form.StartTime,
-		EndTime:   form.EndTime,
+		EndTime:   form.EndTime.Add(time.Hour*24 - time.Nanosecond),
 		Offset:    form.Offset(),
 		Limit:     form.Limit(),
 	})
