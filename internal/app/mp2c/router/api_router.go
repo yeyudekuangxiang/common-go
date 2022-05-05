@@ -8,12 +8,12 @@ import (
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/middleware"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 func apiRouter(router *gin.Engine) {
 
-	router.GET("/newUser", util.Format(api.DefaultUserController.GetNewUser))
+	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
@@ -22,26 +22,26 @@ func apiRouter(router *gin.Engine) {
 
 		userRouter := authRouter.Group("/user")
 		{
-			userRouter.GET("/get-yzm", util.Format(api.DefaultUserController.GetYZM))     //获取验证码
-			userRouter.GET("/check-yzm", util.Format(api.DefaultUserController.CheckYZM)) //校验验证码
+			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))     //获取验证码
+			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM)) //校验验证码
 		}
 
-		authRouter.GET("/product-item/list", util.Format(product.DefaultProductController.ProductList))
-		authRouter.GET("/openid-coupon/list", util.Format(coupon.DefaultCouponController.CouponListOfOpenid))
-		authRouter.POST("/tag/list", util.Format(api.DefaultTagController.List))
-		authRouter.POST("/topic/list", util.Format(api.DefaultTopicController.List))
+		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
+		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
+		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
+		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
 
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 
-		authRouter.POST("/auth/oa/configsign", util.Format(authApi.DefaultOaController.Sign))
+		authRouter.POST("/auth/oa/configsign", apiutil.Format(authApi.DefaultOaController.Sign))
 
-		authRouter.POST("/tool/get-qrcode", util.Format(api.DefaultToolController.GetQrcode))
+		authRouter.POST("/tool/get-qrcode", apiutil.Format(api.DefaultToolController.GetQrcode))
 
 		//h5活动页调用
-		authRouter.POST("/activity/boc/record", util.Format(activityApi.DefaultBocController.FindOrCreateRecord))
+		authRouter.POST("/activity/boc/record", apiutil.Format(activityApi.DefaultBocController.FindOrCreateRecord))
 
 		//星星充电订单同步接口
-		authRouter.GET("/charge/push", util.Format(api.DefaultChargeController.Push))
+		authRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
 
 	}
 
@@ -52,54 +52,63 @@ func apiRouter(router *gin.Engine) {
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
-			userRouter.GET("/", util.Format(api.DefaultUserController.GetUserInfo))
-			userRouter.POST("/mobile/bind-by-code", util.Format(api.DefaultUserController.BindMobileByCode))
-			userRouter.GET("/summary", util.Format(api.DefaultUserController.GetUserSummary))
+			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
+			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
+			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 		}
 
 		//活动相关路由
 		activityRouter := mustAuthRouter.Group("/activity")
 		{
 			//h5活动页调用
-			activityRouter.POST("/boc/answer", util.Format(activityApi.DefaultBocController.Answer))
+			activityRouter.POST("/boc/answer", apiutil.Format(activityApi.DefaultBocController.Answer))
 			//小程序端调用
-			activityRouter.GET("/boc/share/list", util.Format(activityApi.DefaultBocController.GetRecordList))
-			activityRouter.GET("/boc/record/mini", util.Format(activityApi.DefaultBocController.FindRecordOfMini))
-			activityRouter.POST("/bonus/apply", util.Format(activityApi.DefaultBocController.ApplySendBonus))
+			activityRouter.GET("/boc/share/list", apiutil.Format(activityApi.DefaultBocController.GetRecordList))
+			activityRouter.GET("/boc/record/mini", apiutil.Format(activityApi.DefaultBocController.FindRecordOfMini))
+			activityRouter.POST("/bonus/apply", apiutil.Format(activityApi.DefaultBocController.ApplySendBonus))
 
 			//GreenMonday活动
-			activityRouter.GET("/gm/record", util.Format(activityApi.DefaultGMController.GetGMRecord))
-			activityRouter.POST("/gm/invitation", util.Format(activityApi.DefaultGMController.ReportInvitationRecord))
-			activityRouter.POST("/gm/exchange", util.FormatInterface(activityApi.DefaultGMController.ExchangeGift))
-			activityRouter.POST("/gm/question", util.Format(activityApi.DefaultGMController.AnswerQuestion))
-			activityRouter.POST("/zero/autologin", util.Format(activityApi.DefaultZeroController.AutoLogin))
-			activityRouter.POST("/zero/storeurl", util.Format(activityApi.DefaultZeroController.StoreUrl))
-			activityRouter.POST("/duiba/autologin", util.Format(activityApi.DefaultZeroController.DuiBaAutoLogin))
-			activityRouter.POST("/duiba/storeurl", util.Format(activityApi.DefaultZeroController.DuiBaStoreUrl))
+			activityRouter.GET("/gm/record", apiutil.Format(activityApi.DefaultGMController.GetGMRecord))
+			activityRouter.POST("/gm/invitation", apiutil.Format(activityApi.DefaultGMController.ReportInvitationRecord))
+			activityRouter.POST("/gm/exchange", apiutil.FormatInterface(activityApi.DefaultGMController.ExchangeGift))
+			activityRouter.POST("/gm/question", apiutil.Format(activityApi.DefaultGMController.AnswerQuestion))
+			activityRouter.POST("/zero/autologin", apiutil.Format(activityApi.DefaultZeroController.AutoLogin))
+			activityRouter.POST("/zero/storeurl", apiutil.Format(activityApi.DefaultZeroController.StoreUrl))
+			activityRouter.POST("/duiba/autologin", apiutil.Format(activityApi.DefaultZeroController.DuiBaAutoLogin))
+			activityRouter.POST("/duiba/storeurl", apiutil.Format(activityApi.DefaultZeroController.DuiBaStoreUrl))
 		}
 
 		//酷喵圈相关路由
 		topicRouter := mustAuthRouter.Group("/topic")
 		{
-			topicRouter.GET("/share-qrcode", util.Format(api.DefaultTopicController.GetShareWeappQrCode))
-			topicRouter.POST("/like/change", util.Format(api.DefaultTopicController.ChangeTopicLike))
+			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
+			topicRouter.POST("/like/change", apiutil.Format(api.DefaultTopicController.ChangeTopicLike))
 		}
 
 		//积分相关路由
 		pointRouter := mustAuthRouter.Group("/point")
 		{
-			pointRouter.Any("/list", util.Format(api.DefaultPointController.GetPointTransactionList))
-			pointRouter.GET("/", util.Format(api.DefaultPointController.GetPoint))
+			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
+			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
 		}
 
-		mustAuthRouter.GET("/mobile-user", util.Format(api.DefaultUserController.GetMobileUserInfo))
+		//步行相关的路由
+		stepRouter := mustAuthRouter.Group("/step")
+		{
+			//更新用户步数历史记录
+			stepRouter.POST("/update", apiutil.Format(api.DefaultStepController.UpdateStepTotal))
+			//获取最近7天内步行数据
+			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
+		}
+
+		mustAuthRouter.GET("/mobile-user", apiutil.Format(api.DefaultUserController.GetMobileUserInfo))
 
 		//OCR识别
-		mustAuthRouter.POST("/ocr/gm/ticket", util.Format(api.DefaultOCRController.GmTicket))
+		mustAuthRouter.POST("/ocr/gm/ticket", apiutil.Format(api.DefaultOCRController.GmTicket))
 
-		mustAuthRouter.POST("/order/submit-from-green", util.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
+		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 
-		mustAuthRouter.GET("/duiba/autologin", util.Format(api.DefaultDuiBaController.AutoLogin))
+		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 
 	}
 

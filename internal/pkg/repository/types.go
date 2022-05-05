@@ -102,12 +102,13 @@ type FindPointTransactionBy struct {
 	TransactionId string
 }
 type FindStepHistoryBy struct {
-	OpenId  string
-	Day     model.Time
-	OrderBy entity.OrderByList
+	UserId        int64
+	Day           model.Time
+	RecordedEpoch int64
+	OrderBy       entity.OrderByList
 }
 type FindStepBy struct {
-	OpenId string
+	UserId int64
 }
 type GetStepListBy struct {
 	OpenId       string
@@ -132,4 +133,16 @@ type FindAdminBy struct {
 type FindOaAuthWhiteBy struct {
 	Domain string
 	AppId  string
+}
+type GetStepHistoryListBy struct {
+	UserId            int64
+	RecordedEpochs    []int64
+	StartRecordedTime model.Time // >=
+	EndRecordedTime   model.Time //<=
+	OrderBy           entity.OrderByList
+}
+type GetStepHistoryPageListBy struct {
+	GetStepHistoryListBy
+	Limit  int
+	Offset int
 }

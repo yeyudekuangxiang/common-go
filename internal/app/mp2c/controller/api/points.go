@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultPointController = PointsController{}
@@ -16,11 +16,11 @@ type PointsController struct {
 
 func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error) {
 	form := GetPointTransactionListForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(ctx)
+	user := apiutil.GetAuthUser(ctx)
 	list := service.DefaultPointTransactionService.GetListBy(repository.GetPointTransactionListBy{
 		OpenId:    user.OpenId,
 		StartTime: model.Time{Time: form.StartTime},
@@ -33,7 +33,7 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 	}, nil
 }
 func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
-	user := util.GetAuthUser(ctx)
+	user := apiutil.GetAuthUser(ctx)
 	point, err := service.DefaultPointService.FindByUserId(user.ID)
 	if err != nil {
 		return nil, err

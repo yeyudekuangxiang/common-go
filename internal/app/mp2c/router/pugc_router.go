@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api/pugc"
 	"mio/internal/app/mp2c/middleware"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 func pugcRouter(router *gin.Engine) {
@@ -12,7 +12,7 @@ func pugcRouter(router *gin.Engine) {
 	pugcRouter.Use(middleware.Throttle())
 	//pugcRouter.Use(mustAuth())
 	{
-		pugcRouter.GET("/addPugc", util.Format(pugc.DefaultPugcController.AddPugc))
-		pugcRouter.POST("/ex", util.Format(pugc.DefaultPugcController.ExportExcel))
+		pugcRouter.GET("/addPugc", apiutil.Format(pugc.DefaultPugcController.AddPugc))
+		pugcRouter.POST("/ex", apiutil.Format(pugc.DefaultPugcController.ExportExcel))
 	}
 }

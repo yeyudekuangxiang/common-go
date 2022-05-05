@@ -52,3 +52,7 @@ type GetPointTransactionListForm struct {
 	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 }
+type UpdateStepTotalForm struct {
+	EncryptedData string `json:"encryptedData" form:"encryptedData" binding:"required" alias:"encryptedData"`
+	IV            string `json:"iv" form:"iv" binding:"required" alias:"iv"`
+}

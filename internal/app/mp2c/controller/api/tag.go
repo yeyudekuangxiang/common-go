@@ -5,7 +5,7 @@ import (
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultTagController = TagController{}
@@ -15,7 +15,7 @@ type TagController struct {
 
 func (TagController) List(c *gin.Context) (gin.H, error) {
 	form := GetTagForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	list, total, err := service.DefaultTagService.GetTagPageList(repository.GetTagPageListBy{

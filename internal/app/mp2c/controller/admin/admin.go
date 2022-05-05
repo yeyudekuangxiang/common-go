@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultAdminController = AdminController{}
@@ -21,7 +21,7 @@ func (AdminController) GetAdminList(ctx *gin.Context) (gin.H, error) {
 }
 func (AdminController) Login(ctx *gin.Context) (gin.H, error) {
 	var form AdminLoginForm
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 	token, err := service.DefaultSystemAdminService.Login(form.Account, form.Password)
@@ -30,7 +30,7 @@ func (AdminController) Login(ctx *gin.Context) (gin.H, error) {
 	}, err
 }
 func (AdminController) GetLoginAdminInfo(ctx *gin.Context) (gin.H, error) {
-	admin := util.GetAuthAdmin(ctx)
+	admin := apiutil.GetAuthAdmin(ctx)
 	return gin.H{
 		"admin": admin,
 	}, nil

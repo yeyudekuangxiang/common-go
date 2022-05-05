@@ -1,4 +1,4 @@
-package util
+package apiutil
 
 import (
 	"github.com/gin-gonic/gin"
@@ -32,6 +32,7 @@ func FormatErr(err error, data interface{}) gin.H {
 				data = make(map[string]interface{})
 			}
 		case reflect.Struct:
+		case reflect.Ptr:
 		default:
 			panic("不支持的数据类型")
 		}

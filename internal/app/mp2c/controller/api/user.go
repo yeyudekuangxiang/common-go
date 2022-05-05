@@ -7,7 +7,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultUserController = UserController{}
@@ -52,13 +52,13 @@ func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 
 func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	return gin.H{
-		"user": util.GetAuthUser(c),
+		"user": apiutil.GetAuthUser(c),
 	}, nil
 }
 
 func (UserController) GetYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	_, err := service.DefaultUserService.GetYZM(form.Mobile)
@@ -72,7 +72,7 @@ func (UserController) GetYZM(c *gin.Context) (gin.H, error) {
 
 func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
@@ -95,7 +95,7 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 }
 
 func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 	mobileUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMobile, user.ID)
 	if err != nil {
 		return nil, err
@@ -107,14 +107,14 @@ func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
 
 func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	form := BindMobileByCodeForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 	return nil, service.DefaultUserService.BindPhoneByCode(user.ID, form.Code)
 }
 func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 	summary, err := service.DefaultUserService.UserSummary(user.ID)
 	if err != nil {
 		return nil, err

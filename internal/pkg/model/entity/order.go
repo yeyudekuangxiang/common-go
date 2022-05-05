@@ -11,7 +11,7 @@ const (
 	OrderStatusPending   = "PENDING"    //
 	OrderStatusInTransit = "IN_TRANSIT" //已发货
 	OrderStatusComplete  = "COMPLETED"  //已完成
-	OrderStatusError     = "ERROR"      //错误
+	OrderStatusError     = "ERROR"      //订单异常
 )
 
 type OrderType string

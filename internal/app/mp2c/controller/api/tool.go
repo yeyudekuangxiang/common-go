@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	qrcode "github.com/skip2/go-qrcode"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultToolController = ToolController{}
@@ -13,7 +13,7 @@ type ToolController struct {
 
 func (ToolController) GetQrcode(c *gin.Context) (gin.H, error) {
 	form := CreateQrcodeForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	var png []byte

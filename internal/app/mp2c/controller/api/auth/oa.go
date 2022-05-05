@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/model/entity"
 	authSrv "mio/internal/pkg/service/auth"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 	"net/http"
 )
 
@@ -15,7 +15,7 @@ type OaController struct {
 
 func (OaController) Sign(c *gin.Context) (gin.H, error) {
 	form := ConfigSignForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
@@ -32,7 +32,7 @@ func (OaController) Sign(c *gin.Context) (gin.H, error) {
 // AutoLogin 手机端完成一次授权后 调用端state未改变 回直接回调到callback而不会经过此方法
 func (OaController) AutoLogin(c *gin.Context) {
 	form := AutoLoginForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 	}
 
@@ -53,7 +53,7 @@ func (OaController) AutoLogin(c *gin.Context) {
 
 func (OaController) AutoLoginCallback(c *gin.Context) {
 	form := AutoLoginCallbackForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 	}
 
@@ -71,7 +71,7 @@ func (OaController) AutoLoginCallback(c *gin.Context) {
 
 func (OaController) Login(c *gin.Context) (gin.H, error) {
 	form := OaAuthForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 

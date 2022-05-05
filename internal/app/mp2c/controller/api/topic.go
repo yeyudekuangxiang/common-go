@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	service2 "mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultTopicController = TopicController{}
@@ -16,11 +16,11 @@ type TopicController struct {
 
 func (TopicController) List(c *gin.Context) (gin.H, error) {
 	form := GetTopicPageListForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 
 	list, total, err := service2.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
 		ID:         form.ID,
@@ -49,11 +49,11 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 
 func (TopicController) ListFlow(c *gin.Context) (gin.H, error) {
 	form := GetTopicPageListForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 
 	list, total, err := service2.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
 		ID:         form.ID,
@@ -80,11 +80,11 @@ func (TopicController) ListFlow(c *gin.Context) (gin.H, error) {
 }
 func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	form := GetWeappQrCodeFrom{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 
 	buffers, contType, err := service2.DefaultTopicService.GetShareWeappQrCode(int(user.ID), form.TopicId)
 	if err != nil {
@@ -97,11 +97,11 @@ func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 }
 func (TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicLikeForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 
 	like, err := service2.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID))
 	if err != nil {

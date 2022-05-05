@@ -6,7 +6,7 @@ import (
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/api/system"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 func openRouter(router *gin.Engine) {
@@ -35,13 +35,13 @@ func openRouter(router *gin.Engine) {
 				authApi.DefaultOaController.AutoLoginCallback(context)
 			})
 			//微信公众号网页code登陆
-			oaRouter.Any("/login", util.Format(authApi.DefaultOaController.Login))
+			oaRouter.Any("/login", apiutil.Format(authApi.DefaultOaController.Login))
 			//微信网页授权
-			oaRouter.POST("/sign", util.Format(authApi.DefaultOaController.Sign))
+			oaRouter.POST("/sign", apiutil.Format(authApi.DefaultOaController.Sign))
 		}
 
-		openRouter.POST("/weapp/auth", util.Format(authApi.DefaultWeappController.LoginByCode))
-		openRouter.Any("/gitlab/callback", util.Format(system.DefaultGitlabController.Callback))
+		openRouter.POST("/weapp/auth", apiutil.Format(authApi.DefaultWeappController.LoginByCode))
+		openRouter.Any("/gitlab/callback", apiutil.Format(system.DefaultGitlabController.Callback))
 		openRouter.GET("/activity/duiba/qr", func(context *gin.Context) {
 			if err := activityApi.DefaultZeroController.GetActivityMiniQR(context); err != nil {
 				context.String(400, err.Error())

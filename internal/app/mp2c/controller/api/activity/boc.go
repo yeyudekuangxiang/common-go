@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	activityM "mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/service/activity"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 	"time"
 )
 
@@ -17,11 +17,11 @@ var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-31 23:59:59")
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	form := GetBocRecordListForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 
 	if user.ID == 0 {
 		return gin.H{
@@ -49,7 +49,7 @@ func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 }
 func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 	form := AddBocRecordFrom{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +67,7 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 		source = "mio-poster"
 	}
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 	record, err := activity2.DefaultBocService.FindOrCreateApplyRecord(activity2.AddApplyRecordParam{
 		UserId:      user.ID,
 		ShareUserId: form.ShareUserId,
@@ -100,17 +100,17 @@ func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
 }
 func (b BocController) Answer(c *gin.Context) (gin.H, error) {
 	form := AnswerBocQuestionFrom{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 
 	err := activity2.DefaultBocService.AnswerQuestion(user.ID, int(form.Right))
 	return nil, err
 }
 func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 	record, err := activity2.DefaultBocService.FindApplyRecord(user.ID)
 	if err != nil {
 		return nil, err
@@ -138,10 +138,10 @@ func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 }
 func (b BocController) ApplySendBonus(c *gin.Context) (gin.H, error) {
 	form := ApplySendBonusForm{}
-	if err := util.BindForm(c, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user := util.GetAuthUser(c)
+	user := apiutil.GetAuthUser(c)
 	switch form.Type {
 	case "apply":
 		return nil, activity2.DefaultBocService.ApplySendApplyBonus(user.ID)

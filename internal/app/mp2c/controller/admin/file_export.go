@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultFileExportController = FileExportController{}
@@ -16,7 +16,7 @@ type FileExportController struct {
 
 func (ctr FileExportController) GetFileExportPageList(ctx *gin.Context) (gin.H, error) {
 	var form GetFileExportPageListForm
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 

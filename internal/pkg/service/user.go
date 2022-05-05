@@ -235,14 +235,15 @@ func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 }
 
 type Summery struct {
-	CurrentSteps        int `json:"currentSteps"`
-	RedeemedPointsToday int `json:"redeemedPointsToday"`
-	BalanceOfPoints     int `json:"balanceOfPoints"`
-	SavedCO2            int `json:"savedCO2"`
-	PendingPoints       int `json:"pendingPoints"`
-	StepDiff            int `json:"stepDiff"`
+	CurrentSteps        int     `json:"currentSteps"`
+	RedeemedPointsToday int     `json:"redeemedPointsToday"`
+	BalanceOfPoints     int     `json:"balanceOfPoints"`
+	SavedCO2            float64 `json:"savedCO2"`
+	PendingPoints       int     `json:"pendingPoints"`
+	StepDiff            int     `json:"stepDiff"`
 }
 
+// UserSummary 获取用户步行相关的数据统计
 func (u UserService) UserSummary(userId int64) (*Summery, error) {
 	summery := Summery{}
 
@@ -252,7 +253,7 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 	}
 
 	lastStepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
-		OpenId:  userInfo.OpenId,
+		UserId:  userId,
 		Day:     model.NewTime().StartOfDay(),
 		OrderBy: entity.OrderByList{entity.OrderByStepHistoryCountDesc},
 	})
@@ -273,7 +274,7 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 	}
 	summery.BalanceOfPoints = point.Balance
 
-	summery.SavedCO2 = DefaultCarbonNeutralityService.calculateCO2ByStep(lastStepHistory.Count)
+	summery.SavedCO2 = DefaultCarbonNeutralityService.calculateCO2ByStep(int64(lastStepHistory.Count))
 
 	pendingPoints, err := u.calculatePendingStepPoints(userId)
 	if err != nil {
@@ -319,14 +320,14 @@ func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
 		return 0, err
 	}
 
-	stepUpperLimit := ScoreUpperLimit * StepToScoreConvertRatio
+	stepUpperLimit := StepScoreUpperLimit * StepToScoreConvertRatio
 
 	if userStep.LastCheckTime.Equal(time.Now()) && userStep.LastCheckCount > stepUpperLimit {
 		return 0, nil
 	}
 
 	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
-		OpenId: userinfo.OpenId,
+		UserId: userId,
 		Day:    model.NewTime().StartOfDay(),
 	})
 
@@ -345,7 +346,7 @@ func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
 func (u UserService) computePendingHistoryStep(history entity.StepHistory, step entity.Step) int {
 	// date check is moved outside
 	lastCheckedSteps := 0
-	stepUpperLimit := StepToScoreConvertRatio * ScoreUpperLimit
+	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
 
 	fmt.Printf("%+v %+v\n", history, step)
 	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
@@ -374,14 +375,14 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 
 	stepHistory1, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
 		Day:    day1,
-		OpenId: userinfo.OpenId,
+		UserId: userId,
 	})
 	if err != nil {
 		return 0, err
 	}
 	stepHistory2, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
 		Day:    day2,
-		OpenId: userinfo.OpenId,
+		UserId: userId,
 	})
 	if err != nil {
 		return 0, err
