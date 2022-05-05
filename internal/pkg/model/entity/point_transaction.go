@@ -2,7 +2,7 @@ package entity
 
 import (
 	"mio/internal/pkg/model"
-	duibaApi "mio/pkg/duiba/api"
+	duibaApi "mio/pkg/duiba/api/model"
 )
 
 type PointTransactionType string
@@ -165,11 +165,11 @@ type AdditionalInfo string
 type PointPurchaseInfo struct {
 }
 
-func (info AdditionalInfo) ToDuiBa() duibaApi.ExchangeForm {
-	return duibaApi.ExchangeForm{}
+func (info AdditionalInfo) ToDuiBa() duibaApi.Exchange {
+	return duibaApi.Exchange{}
 }
-func (info AdditionalInfo) ToDuiBaRefund() duibaApi.ExchangeResultForm {
-	return duibaApi.ExchangeResultForm{}
+func (info AdditionalInfo) ToDuiBaRefund() duibaApi.ExchangeResult {
+	return duibaApi.ExchangeResult{}
 }
 func (info AdditionalInfo) ToPurchase() PointPurchaseInfo {
 	return PointPurchaseInfo{}

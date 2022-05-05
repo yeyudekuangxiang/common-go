@@ -8,7 +8,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/pkg/duiba"
-	duibaApi "mio/pkg/duiba/api"
+	duibaApi "mio/pkg/duiba/api/model"
 )
 
 var DefaultDuiBaService DuiBaService
@@ -81,7 +81,7 @@ var duibaTypeToPointType = map[duibaApi.ExchangeType]entity.PointTransactionType
 }
 
 // ExchangeCallback 扣积分回调
-func (srv DuiBaService) ExchangeCallback(form duibaApi.ExchangeForm) (*ExchangeCallbackResult, error) {
+func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*ExchangeCallbackResult, error) {
 	err := srv.client.CheckSign(form)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.ExchangeForm) (*ExchangeC
 }
 
 // ExchangeResultNoticeCallback 积分兑换结果回调
-func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResultForm) error {
+func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResult) error {
 	err := srv.client.CheckSign(form)
 	if err != nil {
 		return err

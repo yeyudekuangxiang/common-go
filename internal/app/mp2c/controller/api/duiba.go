@@ -5,7 +5,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
-	duibaApi "mio/pkg/duiba/api"
+	duibaApi "mio/pkg/duiba/api/model"
 )
 
 var DefaultDuiBaController = DuiBaController{}
@@ -32,7 +32,7 @@ func (DuiBaController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 }
 
 func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
-	form := duibaApi.ExchangeForm{}
+	form := duibaApi.Exchange{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return gin.H{
 			"status":       "fail",
@@ -57,7 +57,7 @@ func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
 }
 
 func (DuiBaController) ExchangeResultNoticeCallback(ctx *gin.Context) string {
-	form := duibaApi.ExchangeResultForm{}
+	form := duibaApi.ExchangeResult{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		app.Logger.Error("ExchangeResultNoticeCallback 参数获取失败", ctx, err)
 		return "ok"
