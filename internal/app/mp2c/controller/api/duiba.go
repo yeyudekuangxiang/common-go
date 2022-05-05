@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 	duibaApi "mio/pkg/duiba/api"
 )
 
@@ -15,10 +15,10 @@ type DuiBaController struct {
 
 func (DuiBaController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 	form := DuibaAutoLoginForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	user := util.GetAuthUser(ctx)
+	user := apiutil.GetAuthUser(ctx)
 	u, err := service.DefaultDuiBaService.AutoLogin(service.AutoLoginParam{
 		UserId: user.ID,
 		Path:   form.Path,
@@ -33,7 +33,7 @@ func (DuiBaController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 
 func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
 	form := duibaApi.ExchangeForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return gin.H{
 			"status":       "fail",
 			"errorMessage": err.Error(),
@@ -58,7 +58,7 @@ func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
 
 func (DuiBaController) ExchangeResultNoticeCallback(ctx *gin.Context) string {
 	form := duibaApi.ExchangeResultForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		app.Logger.Error("ExchangeResultNoticeCallback 参数获取失败", ctx, err)
 		return "ok"
 	}

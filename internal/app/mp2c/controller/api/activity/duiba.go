@@ -9,7 +9,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 	"strconv"
 )
 
@@ -20,11 +20,11 @@ type ZeroController struct {
 
 func (ctr ZeroController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 	form := ZeroAutoLoginForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(ctx)
+	user := apiutil.GetAuthUser(ctx)
 
 	loginUrl, err := activity.DefaultZeroService.AutoLogin(user.ID, form.Short)
 	return gin.H{
@@ -33,7 +33,7 @@ func (ctr ZeroController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 }
 func (ctr ZeroController) StoreUrl(ctx *gin.Context) (gin.H, error) {
 	form := ZeroStoreUrlForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
@@ -45,11 +45,11 @@ func (ctr ZeroController) StoreUrl(ctx *gin.Context) (gin.H, error) {
 
 func (ctr ZeroController) DuiBaAutoLogin(ctx *gin.Context) (gin.H, error) {
 	form := DuiBaAutoLoginForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
-	user := util.GetAuthUser(ctx)
+	user := apiutil.GetAuthUser(ctx)
 
 	loginUrl, err := activity.DefaultZeroService.DuiBaAutoLogin(user.ID, form.ActivityId, form.Short)
 
@@ -60,7 +60,7 @@ func (ctr ZeroController) DuiBaAutoLogin(ctx *gin.Context) (gin.H, error) {
 
 func (ctr ZeroController) DuiBaStoreUrl(ctx *gin.Context) (gin.H, error) {
 	form := DuiBaStoreUrlForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
@@ -71,7 +71,7 @@ func (ctr ZeroController) DuiBaStoreUrl(ctx *gin.Context) (gin.H, error) {
 }
 func (ctr ZeroController) GetActivityMiniQR(ctx *gin.Context) error {
 	form := GetDuiBaActivityQrForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return err
 	}
 	if form.Password != "greencatniubi123..." {

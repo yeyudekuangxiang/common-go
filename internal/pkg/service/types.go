@@ -112,7 +112,7 @@ type BindPhoneByIVParam struct {
 }
 type FindStepHistoryBy struct {
 	Day     model.Time
-	OpenId  string
+	UserId  int64
 	OrderBy entity.OrderByList
 }
 type GetPointTransactionPageListBy struct {
@@ -212,6 +212,49 @@ type PointAdjustRecord struct {
 	Note       string                      `json:"note"`
 	Value      int                         `json:"value"`
 	CreateTime model.Time                  `json:"createTime"`
+}
+type UpdateStepHistoryByEncryptedParam struct {
+	UserId        int64
+	EncryptedData string
+	IV            string
+}
+type updateStepHistoryItem struct {
+	Count         int
+	RecordedEpoch int64
+}
+type GetStepHistoryListBy struct {
+	UserId            int64
+	StartRecordedTime model.Time // >=
+	EndRecordedTime   model.Time //<=
+	RecordEpochs      []int64
+	OrderBy           entity.OrderByList
+}
+type GetStepHistoryPageListBy struct {
+	UserId            int64
+	StartRecordedTime model.Time // >=
+	EndRecordedTime   model.Time //<=
+	RecordEpochs      []int64
+	OrderBy           entity.OrderByList
+	Limit             int
+	Offset            int
+}
+type CreateOrUpdateStepHistoryParam struct {
+	UserId        int64
+	Count         int
+	RecordedTime  model.Time
+	RecordedEpoch int64
+}
+type WeeklyHistoryInfo struct {
+	AveragePerWeeklyCo2 float64             `json:"averagePerWeeklyCo2"` //平均每周减少co2
+	LifeSavedCo2        float64             `json:"lifeSavedCo2"`        //累计步行减少co2
+	LifeSteps           int64               `json:"lifeSteps"`           //累计步行数量
+	SevenDaysCo2        float64             `json:"sevenDaysCo2"`        //最近7天减少的co2
+	StepList            []WeeklyHistoryStep `json:"stepList"`            //最近7天步行历史数据
+}
+type WeeklyHistoryStep struct {
+	Count     int        `json:"count"`
+	Time      model.Time `json:"time"`
+	Timestamp int64      `json:"timestamp"`
 }
 type FilterPointRecordOpenIds struct {
 	OpenId   string

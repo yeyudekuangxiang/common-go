@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"mio/pkg/zap"
 	"time"
@@ -59,14 +60,14 @@ func AuthAdmin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		admin, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || admin == nil {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 
@@ -77,14 +78,14 @@ func mustAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		user, err := service2.DefaultUserService.GetUserByToken(token)
 		if err != nil || user.ID == 0 {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -100,7 +101,7 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByToken(token)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth token err", token, err)
-				ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
 				return
 			}
 		}
@@ -109,13 +110,13 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
 			if err != nil || user == nil {
 				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
+				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
 				return
 			}
 		}
 
 		if user == nil {
-			ctx.AbortWithStatusJSON(200, util.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)

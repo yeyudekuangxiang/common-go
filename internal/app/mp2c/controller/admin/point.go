@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 	"time"
 )
 
@@ -15,7 +15,7 @@ type PointController struct {
 
 func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, error) {
 	var form GetPointRecordPageListFrom
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
@@ -48,11 +48,11 @@ func (ctr PointController) GetPointTypeList(ctx *gin.Context) (gin.H, error) {
 }
 func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error) {
 	var form ExportPointRecordListFrom
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
-	admin := util.GetAuthAdmin(ctx)
+	admin := apiutil.GetAuthAdmin(ctx)
 	err := service.DefaultPointTransactionService.ExportPointTransactionList(admin.ID, service.ExportPointTransactionListBy{
 		UserId:    form.UserId,
 		Nickname:  form.Nickname,
@@ -66,7 +66,7 @@ func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error
 }
 func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, error) {
 	var form GetAdjustRecordPageListForm
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
@@ -100,10 +100,10 @@ func (ctr PointController) GetAdjustPointTransactionTypeList(ctx *gin.Context) (
 }
 func (ctr PointController) AdjustUserPoint(ctx *gin.Context) (gin.H, error) {
 	var form AdjustUserPointForm
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	admin := util.GetAuthAdmin(ctx)
+	admin := apiutil.GetAuthAdmin(ctx)
 
 	err := service.DefaultPointTransactionService.AdminAdjustUserPoint(admin.ID, service.AdminAdjustUserPointParam{
 		OpenId: form.OpenId,

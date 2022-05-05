@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/auth"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultWeappController = WeappController{}
@@ -14,7 +14,7 @@ type WeappController struct {
 
 func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 	form := WeappAuthForm{}
-	if err := util.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
