@@ -22,6 +22,13 @@ const (
 	OrderTypeGreenTorch = "GREEN_TORCH"
 )
 
+type OrderSource string
+
+const (
+	OrderSourceMio   OrderSource = "mio"
+	OrderSourceDuiBa OrderSource = "duiba"
+)
+
 type Order struct {
 	ID               int64       `gorm:"primary_key" json:"id"`
 	OrderId          string      `json:"orderId"`
@@ -35,6 +42,8 @@ type Order struct {
 	TrackingNumber   string      `json:"trackingNumber"`
 	OrderReferenceId string      `json:"orderReferenceId"`
 	OrderType        OrderType   `json:"orderType"`
+	Source           OrderSource `json:"source"`
+	ThirdOrderNo     string      `json:"thirdOrderNo"`
 }
 
 func (order Order) ShortOrder() ShortOrder {

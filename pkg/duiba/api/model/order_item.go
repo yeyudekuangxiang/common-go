@@ -5,9 +5,9 @@ type OrderItem struct {
 	IsSelf              string `json:"isSelf" form:"isSelf" alias:"isSelf"`
 	SmallImage          string `json:"smallImage" form:"smallImage" alias:"smallImage"`
 	MerchantCode        string `json:"merchantCode" form:"merchantCode" alias:"merchantCode"`
-	PerCredit           string `json:"perCredit" form:"perCredit" alias:"perCredit"`
+	PerCredit           IntStr `json:"perCredit" form:"perCredit" alias:"perCredit"`
 	PerPrice            string `json:"perPrice" form:"perPrice" alias:"perPrice"`
-	Quantity            string `json:"quantity" form:"quantity" alias:"quantity"`
+	Quantity            IntStr `json:"quantity" form:"quantity" alias:"quantity"`
 	Code                string `json:"code" form:"code" alias:"code"`
 	Password            string `json:"password" form:"password" alias:"password"`
 	CardBeginTime       string `json:"cardBeginTime" form:"cardBeginTime" alias:"cardBeginTime"`

@@ -33,8 +33,9 @@ func init() {
 		TestEnv = "mock"
 		_ = os.Setenv("TEST_ENV", TestEnv)
 	}
+	setupMock()
 }
-func SetupMock() {
+func setupMock() {
 	//real 真实环境 mock mock环境测试
 	if TestEnv != "real" {
 		onceMock.Do(func() {
@@ -45,7 +46,7 @@ func SetupMock() {
 }
 func SetupServer() *gin.Engine {
 	once.Do(func() {
-		initialize.InitIni("../../config.ini")
+		initialize.InitIni("../../../config.ini")
 		if TestEnv == "real" {
 			initialize.InitDB()
 		}

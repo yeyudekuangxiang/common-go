@@ -2,6 +2,8 @@ package model
 
 import (
 	"encoding/json"
+	"log"
+	"strconv"
 )
 
 type OrderStatus string
@@ -29,10 +31,10 @@ type OrderInfo struct {
 	Base
 	OrderNum         string             `json:"orderNum" form:"orderNum" binding:"required" alias:"orderNum"`
 	DevelopBizId     string             `json:"developBizId" form:"developBizId"`
-	CreateTime       string             `json:"createTime" form:"createTime" binding:"required" alias:"createTime"`
-	FinishTime       string             `json:"finishTime" form:"finishTime" binding:"required" alias:"finishTime"`
-	TotalCredits     string             `json:"totalCredits" form:"totalCredits"  alias:"totalCredits"`
-	ConsumerPayPrice string             `json:"consumerPayPrice" form:"consumerPayPrice" binding:"required" alias:"consumerPayPrice"`
+	CreateTime       IntStr             `json:"createTime" form:"createTime" binding:"required" alias:"createTime"`
+	FinishTime       IntStr             `json:"finishTime" form:"finishTime" binding:"required" alias:"finishTime"`
+	TotalCredits     IntStr             `json:"totalCredits" form:"totalCredits"  alias:"totalCredits"`
+	ConsumerPayPrice FloatStr           `json:"consumerPayPrice" form:"consumerPayPrice" binding:"required" alias:"consumerPayPrice"`
 	Source           string             `json:"source" form:"source" binding:"required" alias:"source"`
 	OrderStatus      OrderStatus        `json:"orderStatus" form:"orderStatus" binding:"required" alias:"orderStatus"`
 	ErrorMsg         string             `json:"errorMsg" form:"errorMsg"`
@@ -51,10 +53,10 @@ func (o OrderInfo) ToMap() map[string]string {
 		"sign":             o.Sign,
 		"orderNum":         o.OrderNum,
 		"developBizId":     o.DevelopBizId,
-		"createTime":       o.CreateTime,
-		"finishTime":       o.FinishTime,
-		"totalCredits":     o.TotalCredits,
-		"consumerPayPrice": o.ConsumerPayPrice,
+		"createTime":       string(o.CreateTime),
+		"finishTime":       string(o.FinishTime),
+		"totalCredits":     string(o.TotalCredits),
+		"consumerPayPrice": string(o.ConsumerPayPrice),
 		"source":           o.Source,
 		"orderStatus":      string(o.OrderStatus),
 		"errorMsg":         o.ErrorMsg,
@@ -68,7 +70,17 @@ func (o OrderInfo) ToMap() map[string]string {
 
 type OrderItemListStr string
 
-func (o OrderItemListStr) OrderItemList() ([]OrderItem, error) {
+func (o OrderItemListStr) OrderItemList() []OrderItem {
+	list := make([]OrderItem, 0)
+	if o == "" {
+		return list
+	}
+
+	err := json.Unmarshal([]byte(o), &list)
+	log.Println(err)
+	return list
+}
+func (o OrderItemListStr) OrderItemListE() ([]OrderItem, error) {
 	list := make([]OrderItem, 0)
 	if o == "" {
 		return list, nil
@@ -90,4 +102,24 @@ func (r ReceiveAddrInfoStr) ReceiveAddrInfo() (*OrderAddressInfo, error) {
 	}
 
 	return &address, json.Unmarshal([]byte(r), &address)
+}
+
+type FloatStr string
+
+func (f FloatStr) ToFloat() float64 {
+	data, _ := strconv.ParseFloat(string(f), 64)
+	return data
+}
+func (f FloatStr) ToFloatE() (float64, error) {
+	return strconv.ParseFloat(string(f), 64)
+}
+
+type IntStr string
+
+func (i IntStr) ToInt() int64 {
+	data, _ := strconv.ParseInt(string(i), 10, 64)
+	return data
+}
+func (i IntStr) ToIntE() (int64, error) {
+	return strconv.ParseInt(string(i), 10, 64)
 }

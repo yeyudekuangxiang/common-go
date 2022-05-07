@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/httputil"
 	"time"
 )
 
@@ -24,14 +24,14 @@ type WeappService struct {
 
 func (srv WeappService) LoginByCode(code string) (*entity.User, string, error) {
 	//调用java那边登陆接口
-	result, err := util.DefaultHttp.OriginJson(javaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
+	result, err := httputil.OriginJson(javaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
 		return nil, "", err
 	}
 
 	//获取用户信息
 	cookie := result.Response.Header.Get("Set-Cookie")
-	whoAmiResult, err := util.DefaultHttp.OriginGet(javaWhoAmi, util.HttpWithHeader("Cookie", cookie))
+	whoAmiResult, err := httputil.OriginGet(javaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
 	if err != nil {
 		return nil, "", err
 	}

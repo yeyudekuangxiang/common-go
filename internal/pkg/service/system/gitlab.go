@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/httputil"
 	"strconv"
 )
 
@@ -32,7 +32,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 		target,
 		"系统自动合并：" + source + " -> " + target,
 	}
-	body, err := util.DefaultHttp.PostJson(url, req)
+	body, err := httputil.PostJson(url, req)
 	if err != nil {
 		app.Logger.Error(err)
 		return err
@@ -57,7 +57,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 		res.Iid,
 	}
 	url2 := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests/" + strconv.Itoa(res.Iid) + "/merge?private_token=" + private_token
-	mergeBody, err := util.DefaultHttp.PutJson(url2, req2)
+	mergeBody, err := httputil.PutJson(url2, req2)
 	if err != nil {
 		app.Logger.Error(err)
 		return err
@@ -81,7 +81,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, error) {
 	url := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests/" + strconv.Itoa(mergeRequestIId) + "?private_token=" + private_token
 
-	body, err := util.DefaultHttp.Get(url)
+	body, err := httputil.Get(url)
 	if err != nil {
 		return "", err
 	}

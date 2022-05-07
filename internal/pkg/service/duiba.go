@@ -7,8 +7,10 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
+	"mio/pkg/errno"
 )
 
 var DefaultDuiBaService DuiBaService
@@ -82,10 +84,6 @@ var duibaTypeToPointType = map[duibaApi.ExchangeType]entity.PointTransactionType
 
 // ExchangeCallback 扣积分回调
 func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*ExchangeCallbackResult, error) {
-	err := srv.client.CheckSign(form)
-	if err != nil {
-		return nil, err
-	}
 	userInfo, err := DefaultUserService.GetUserBy(repository.GetUserBy{
 		OpenId: form.Uid,
 	})
@@ -126,10 +124,6 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*ExchangeCallb
 
 // ExchangeResultNoticeCallback 积分兑换结果回调
 func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResult) error {
-	err := srv.client.CheckSign(form)
-	if err != nil {
-		return err
-	}
 	if form.Success {
 		return nil
 	}
@@ -166,4 +160,42 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		AdditionInfo: string(data),
 	})
 	return err
+}
+
+func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
+	user, err := DefaultUserService.GetUserByOpenId(form.Uid)
+	if err != nil {
+		return err
+	}
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+
+	orderId := form.DevelopBizId
+	if orderId == "" {
+		orderId = util.UUID()
+	}
+
+	orderItemList := form.OrderItemList.OrderItemList()
+	for _, orderItem := range orderItemList {
+		_, err := DefaultProductItemService.CreateOrUpdateProductItem(CreateOrUpdateProductItemParam{
+			ItemId:   "duiba-" + orderItem.MerchantCode,
+			Virtual:  false,
+			Title:    orderItem.Title,
+			Cost:     int(orderItem.PerCredit.ToInt()),
+			ImageUrl: orderItem.SmallImage,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	_, err = DefaultDuiBaOrderService.CreateOrUpdate(orderId, form)
+	if err != nil {
+		return err
+	}
+	_, err = DefaultOrderService.CreateOrUpdateOrderOfDuiBa(orderId, form)
+	return err
+}
+func (srv DuiBaService) CheckSign(param duiba.Param) error {
+	return srv.client.CheckSign(param)
 }
