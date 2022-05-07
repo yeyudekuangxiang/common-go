@@ -23,5 +23,5 @@ func TestDuiBaOrderCallback(t *testing.T) {
 
 	assert.Equal(t, 200, recorder.Code)
 
-	assert.Equal(t, "\"ok\"", recorder.Body.String())
+	assert.Equal(t, "ok", recorder.Body.String())
 }
