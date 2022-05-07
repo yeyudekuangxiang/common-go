@@ -3,7 +3,7 @@ package repository
 import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
-	entity2 "mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity"
 )
 
 var DefaultOrderRepository = NewOrderRepository(app.DB)
@@ -16,12 +16,12 @@ type OrderRepository struct {
 	DB *gorm.DB
 }
 
-func (repo OrderRepository) Save(order *entity2.Order) error {
+func (repo OrderRepository) Save(order *entity.Order) error {
 	return repo.DB.Save(order).Error
 }
 
 // SubmitOrder 提交订单
-func (repo OrderRepository) SubmitOrder(order *entity2.Order, orderItems *[]entity2.OrderItem) error {
+func (repo OrderRepository) SubmitOrder(order *entity.Order, orderItems *[]entity.OrderItem) error {
 	return repo.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(order).Error; err != nil {
 			return err
@@ -31,4 +31,12 @@ func (repo OrderRepository) SubmitOrder(order *entity2.Order, orderItems *[]enti
 		}
 		return nil
 	})
+}
+func (repo OrderRepository) FindByOrderId(orderId string) entity.Order {
+	order := entity.Order{}
+	err := repo.DB.Where("order_id = ?", orderId).First(&order).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return order
 }

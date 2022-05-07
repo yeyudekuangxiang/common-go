@@ -10,7 +10,6 @@ import (
 )
 
 func TestGetUserInfo(t *testing.T) {
-	mp2c.SetupMock()
 	router := mp2c.SetupServer()
 	param := url.Values{
 		"id": {"1"},

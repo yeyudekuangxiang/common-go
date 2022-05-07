@@ -31,6 +31,14 @@ func (repo ProductItemRepository) FindById(id int) entity.ProductItem {
 	}
 	return product
 }
+func (repo ProductItemRepository) FindByItemId(itemId string) entity.ProductItem {
+	product := entity.ProductItem{}
+	err := repo.DB.Where("product_item_id = ?", itemId).First(&product).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return product
+}
 func (repo ProductItemRepository) GetListBy(by GetProductItemListBy) []entity.ProductItem {
 	list := make([]entity.ProductItem, 0)
 

@@ -9,7 +9,6 @@ import (
 )
 
 func TestGetUserInfo(t *testing.T) {
-	mp2c.SetupMock()
 	router := mp2c.SetupServer()
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", "/api/user", nil)

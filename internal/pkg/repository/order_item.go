@@ -25,3 +25,11 @@ func (repo OrderItemRepository) Create(item *entity.OrderItem) error {
 func (repo OrderItemRepository) CreateBatch(item *[]entity.OrderItem) error {
 	return repo.DB.Create(item).Error
 }
+func (repo OrderItemRepository) GetListByOrderId(orderId string) []entity.OrderItem {
+	list := make([]entity.OrderItem, 0)
+	err := repo.DB.Where("order_id = ?", orderId).Find(&list).Error
+	if err != nil {
+		panic(err)
+	}
+	return list
+}

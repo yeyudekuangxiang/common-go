@@ -27,3 +27,6 @@ func (srv OrderItemService) CreateOrderItems(orderId string, submitOrderItems []
 	}
 	return srv.repo.CreateBatch(&orderItems)
 }
+func (srv OrderItemService) GetOrderItemListByOrderId(orderId string) ([]entity.OrderItem, error) {
+	return srv.repo.GetListByOrderId(orderId), nil
+}

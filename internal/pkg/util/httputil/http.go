@@ -1,4 +1,4 @@
-package util
+package httputil
 
 import (
 	"bytes"
@@ -196,4 +196,32 @@ func (c HttpClient) encode(data map[string]string, options ...HttpOption) string
 		buf.WriteString(url.QueryEscape(data[k]))
 	}
 	return buf.String()
+}
+
+func PutJson(url string, data interface{}, options ...HttpOption) ([]byte, error) {
+	return DefaultHttp.PutJson(url, data, options...)
+}
+func PostJson(url string, data interface{}, options ...HttpOption) ([]byte, error) {
+	return DefaultHttp.PostJson(url, data, options...)
+}
+func PostJsonBytes(url string, data []byte, options ...HttpOption) ([]byte, error) {
+	return DefaultHttp.PostJsonBytes(url, data, options...)
+}
+func PostMapFrom(url string, data map[string]string, options ...HttpOption) ([]byte, error) {
+	return DefaultHttp.PostMapFrom(url, data, options...)
+}
+func PostFrom(url string, data url.Values, options ...HttpOption) ([]byte, error) {
+	return DefaultHttp.PostFrom(url, data, options...)
+}
+func Get(url string, options ...HttpOption) ([]byte, error) {
+	return DefaultHttp.Get(url, options...)
+}
+func OriginJson(url string, method string, data []byte, options ...HttpOption) (*HttpResult, error) {
+	return DefaultHttp.OriginJson(url, method, data, options...)
+}
+func OriginForm(url string, method string, data []byte, options ...HttpOption) (*HttpResult, error) {
+	return DefaultHttp.OriginForm(url, method, data, options...)
+}
+func OriginGet(url string, options ...HttpOption) (*HttpResult, error) {
+	return DefaultHttp.OriginGet(url, options...)
 }
