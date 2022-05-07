@@ -20,11 +20,11 @@ func openRouter(router *gin.Engine) {
 			})
 
 			duibaRouter.Any("/exchange/result/notice/callback", func(context *gin.Context) {
-				context.JSON(200, api.DefaultDuiBaController.ExchangeCallback(context))
+				context.String(200, api.DefaultDuiBaController.ExchangeResultNoticeCallback(context))
 			})
 
 			duibaRouter.Any("/order/callback", func(context *gin.Context) {
-				context.JSON(200, api.DefaultDuiBaController.OrderCallback(context))
+				context.String(200, api.DefaultDuiBaController.OrderCallback(context))
 			})
 		}
 
