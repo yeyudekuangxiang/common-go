@@ -109,6 +109,7 @@ type FindStepHistoryBy struct {
 }
 type FindStepBy struct {
 	UserId int64
+	OpenId string
 }
 type GetStepListBy struct {
 	OpenId       string

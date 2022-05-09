@@ -26,14 +26,6 @@ type StepService struct {
 
 // FindOrCreateStep 查询或者创建步行记录
 func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
-	step := srv.repo.FindBy(repository.FindStepBy{
-		UserId: userId,
-	})
-
-	if step.ID != 0 {
-		return &step, nil
-	}
-
 	user, err := DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return nil, err
@@ -41,6 +33,15 @@ func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
 	if user.ID == 0 {
 		return nil, errno.ErrUserNotFound
 	}
+
+	step := srv.repo.FindBy(repository.FindStepBy{
+		OpenId: user.OpenId,
+	})
+
+	if step.ID != 0 {
+		return &step, nil
+	}
+
 	step = entity.Step{
 		UserId:         userId,
 		OpenId:         user.OpenId,
