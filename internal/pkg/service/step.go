@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -33,8 +34,16 @@ func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
 		return &step, nil
 	}
 
+	user, err := DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+	if user.ID == 0 {
+		return nil, errno.ErrUserNotFound
+	}
 	step = entity.Step{
 		UserId:         userId,
+		OpenId:         user.OpenId,
 		Total:          0,
 		LastCheckTime:  model.NewTime().StartOfDay(),
 		LastCheckCount: 0,
