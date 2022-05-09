@@ -18,6 +18,9 @@ func (repo StepRepository) FindBy(by FindStepBy) entity.Step {
 	if by.UserId != 0 {
 		db.Where("user_id = ?", by.UserId)
 	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
 
 	err := db.First(&step).Error
 	if err != nil && err != gorm.ErrRecordNotFound {

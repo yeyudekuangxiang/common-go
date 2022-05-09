@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -25,8 +26,16 @@ type StepService struct {
 
 // FindOrCreateStep 查询或者创建步行记录
 func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
+	user, err := DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+	if user.ID == 0 {
+		return nil, errno.ErrUserNotFound
+	}
+
 	step := srv.repo.FindBy(repository.FindStepBy{
-		UserId: userId,
+		OpenId: user.OpenId,
 	})
 
 	if step.ID != 0 {
@@ -35,6 +44,7 @@ func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
 
 	step = entity.Step{
 		UserId:         userId,
+		OpenId:         user.OpenId,
 		Total:          0,
 		LastCheckTime:  model.NewTime().StartOfDay(),
 		LastCheckCount: 0,
