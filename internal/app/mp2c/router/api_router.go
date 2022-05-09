@@ -56,6 +56,12 @@ func apiRouter(router *gin.Engine) {
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 		}
+		//拉新
+		inviteRouter := mustAuthRouter.Group("/invite")
+		{
+			inviteRouter.GET("/qrcode", apiutil.Format(api.DefaultInviteController.GetShareQrCode))
+			inviteRouter.GET("/list", apiutil.Format(api.DefaultInviteController.GetInviteList))
+		}
 
 		//活动相关路由
 		activityRouter := mustAuthRouter.Group("/activity")

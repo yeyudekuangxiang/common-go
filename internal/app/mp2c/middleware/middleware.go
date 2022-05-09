@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
-	"github.com/ulule/limiter/v3/drivers/store/memory"
+	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"log"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -166,9 +166,12 @@ func Throttle() gin.HandlerFunc {
 		log.Fatal(err)
 	}
 
-	store := memory.NewStoreWithOptions(limiter.StoreOptions{
-		Prefix: "throttle",
+	store, err := redis.NewStoreWithOptions(app.Redis, limiter.StoreOptions{
+		Prefix: "mp2c:throttle",
 	})
+	if err != nil {
+		log.Fatal("创建limit失败", err)
+	}
 
 	middleware := mgin.NewMiddleware(limiter.New(store, rate), mgin.WithKeyGetter(func(c *gin.Context) string {
 		return util.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
