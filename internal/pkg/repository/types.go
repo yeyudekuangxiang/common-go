@@ -3,6 +3,7 @@ package repository
 import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
+	"time"
 )
 
 type GetUserBy struct {
@@ -47,6 +48,8 @@ type GetUserListBy struct {
 	LikeMobile string //手机号模糊查询
 	UserId     int64
 	OpenId     string
+	StartTime  time.Time
+	EndTime    time.Time
 }
 
 type FindPointBy struct {
@@ -146,4 +149,11 @@ type GetStepHistoryPageListBy struct {
 	GetStepHistoryListBy
 	Limit  int
 	Offset int
+}
+type FindCouponBy struct {
+	CouponTypeId string
+	CouponId     string
+}
+type FindCouponTypeBy struct {
+	CouponTypeId string
 }

@@ -257,3 +257,24 @@ type UserLike struct {
 	EntityId   int64  `gorm:"not null;uniqueIndex:idx_user_like_unique;index:idx_user_like_entity;" json:"topicId" form:"topicId"`               // 实体编号
 	CreateTime int64  `json:"createTime" form:"createTime"`                                                                                      // 创建时间
 }
+
+type NullString string
+
+func (d NullString) Value() (driver.Value, error) {
+	if d == "" {
+		return nil, nil
+	}
+	return d, nil
+}
+func (d *NullString) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	t, ok := value.(string)
+	if !ok {
+		return errors.New("NullString type error")
+	}
+	*d = NullString(t)
+	return nil
+}

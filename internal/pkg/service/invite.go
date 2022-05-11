@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util"
 )
@@ -81,4 +82,23 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 		})
 	}
 	return infoList, nil
+}
+func (srv InviteService) AddInvite(openid, InvitedByOpenId string) (*entity.Invite, bool, error) {
+	invite := entity.Invite{}
+	err := app.DB.Where("new_user_openid = ? and invited_by_openid <> ''", openid).First(&invite).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	if invite.ID != 0 {
+		return &invite, false, nil
+	}
+
+	invite = entity.Invite{
+		InvitedByOpenId: InvitedByOpenId,
+		NewUserOpenId:   openid,
+		Time:            model.NewTime(),
+		InviteType:      entity.InviteTypeRegular,
+		InviteCode:      "",
+	}
+	return &invite, true, app.DB.Create(&invite).Error
 }
