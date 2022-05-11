@@ -19,6 +19,9 @@ func (repo StepHistoryRepository) FindBy(by FindStepHistoryBy) entity.StepHistor
 	if by.UserId != 0 {
 		db.Where("user_id = ?", by.UserId)
 	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
 	if !by.Day.IsZero() {
 		db.Where("recorded_time = ?", by.Day)
 	}

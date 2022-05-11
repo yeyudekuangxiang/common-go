@@ -92,6 +92,12 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
+	if !by.StartTime.IsZero() {
+		db.Where("time >= ?", by.StartTime)
+	}
+	if !by.EndTime.IsZero() {
+		db.Where("time <= ?", by.EndTime)
+	}
 
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)

@@ -333,6 +333,9 @@ func (u TopicService) ImportTopic(filename string) error {
 				return errors.WithStack(err)
 			}
 		} else {
+			if nickname == "阿斌啊" {
+				nickname = "阿斌啊哦"
+			}
 			err = app.DB.Where("nick_name = ?", nickname).Find(&users).Error
 			if err != nil {
 				return errors.WithStack(err)

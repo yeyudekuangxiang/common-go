@@ -18,7 +18,7 @@ func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	user, cookie, err := auth.DefaultWeappService.LoginByCode(form.Code)
+	user, cookie, err := auth.DefaultWeappService.LoginByCode(form.Code, "")
 	if err != nil {
 		return nil, err
 	}

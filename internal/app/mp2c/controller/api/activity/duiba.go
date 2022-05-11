@@ -84,7 +84,7 @@ func (ctr ZeroController) GetActivityMiniQR(ctx *gin.Context) error {
 	}
 
 	res, err1, err2 := app.Weapp.GetQRCode(&weapp.QRCode{
-		Path: fmt.Sprintf("pages/activity/common/index?activityId=%s", activity.ActivityId),
+		Path: fmt.Sprintf("pages/duiba/index?activityId=%s", activity.ActivityId),
 	})
 	if err2 != nil {
 		return err2

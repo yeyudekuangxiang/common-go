@@ -111,6 +111,7 @@ type BindPhoneByIVParam struct {
 	IV            string
 }
 type FindStepHistoryBy struct {
+	OpenId  string
 	Day     model.Time
 	UserId  int64
 	OrderBy entity.OrderByList
@@ -282,4 +283,17 @@ type InviteInfo struct {
 	Nickname  string     `json:"nickname"`
 	AvatarUrl string     `json:"avatarUrl"`
 	Time      model.Date `json:"time"`
+}
+type GetPromotionPromotionListBy struct {
+	Partnership entity.PartnershipType
+	Trigger     entity.PartnershipPromotionTrigger
+}
+type FindCouponBy struct {
+	CouponTypeId string
+}
+type FindCouponTypeBy struct {
+	CouponTypeId string
+}
+type RedeemCouponParam struct {
+	CouponId string
 }

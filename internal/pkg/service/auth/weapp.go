@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/httputil"
@@ -22,7 +23,7 @@ type WeappService struct {
 	client *weapp.Client
 }
 
-func (srv WeappService) LoginByCode(code string) (*entity.User, string, error) {
+func (srv WeappService) LoginByCode(code string, invitedBy string) (*entity.User, string, error) {
 	//调用java那边登陆接口
 	result, err := httputil.OriginJson(javaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
@@ -80,4 +81,33 @@ func (srv WeappService) LoginByCode(code string) (*entity.User, string, error) {
 	}
 
 	return user, cookie, nil
+}
+
+func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {
+	_, err := service.DefaultStepService.FindOrCreateStep(user.ID)
+	if err != nil {
+		app.Logger.Error(user, invitedBy, err)
+	}
+
+	if invitedBy != "" {
+		_, isNew, err := service.DefaultInviteService.AddInvite(user.OpenId, invitedBy)
+		if err != nil {
+			app.Logger.Error(user, invitedBy, err)
+		} else if isNew {
+			//发放积分奖励
+			_, err := service.DefaultPointTransactionService.Create(service.CreatePointTransactionParam{
+				OpenId:       invitedBy,
+				Type:         entity.POINT_INVITE,
+				Value:        entity.PointCollectValueMap[entity.POINT_INVITE],
+				AdditionInfo: fmt.Sprintf("invite %s", user.OpenId),
+			})
+			if err != nil {
+				app.Logger.Error("发放邀请积分失败", err)
+			}
+		}
+	}
+
+	if partnershipType != "" {
+
+	}
 }
