@@ -283,3 +283,16 @@ type InviteInfo struct {
 	AvatarUrl string     `json:"avatarUrl"`
 	Time      model.Date `json:"time"`
 }
+type GetPromotionPromotionListBy struct {
+	Partnership entity.PartnershipType
+	Trigger     entity.PartnershipPromotionTrigger
+}
+type FindCouponBy struct {
+	CouponTypeId string
+}
+type FindCouponTypeBy struct {
+	CouponTypeId string
+}
+type RedeemCouponParam struct {
+	CouponId string
+}

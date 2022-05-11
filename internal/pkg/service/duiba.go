@@ -7,7 +7,6 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/util"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
@@ -128,6 +127,11 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		return nil
 	}
 
+	if form.BizId == "" {
+		app.Logger.Error("订单异常", form)
+		return nil
+	}
+
 	userInfo, err := DefaultUserService.GetUserBy(repository.GetUserBy{
 		OpenId: form.Uid,
 	})
@@ -173,7 +177,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 
 	orderId := form.DevelopBizId
 	if orderId == "" {
-		orderId = util.UUID()
+		orderId = "db-" + form.OrderNum
 	}
 
 	orderItemList := form.OrderItemList.OrderItemList()
