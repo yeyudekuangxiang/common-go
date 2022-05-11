@@ -106,6 +106,7 @@ type FindPointTransactionBy struct {
 }
 type FindStepHistoryBy struct {
 	UserId        int64
+	OpenId        string
 	Day           model.Time
 	RecordedEpoch int64
 	OrderBy       entity.OrderByList

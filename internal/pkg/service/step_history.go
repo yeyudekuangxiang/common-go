@@ -22,6 +22,7 @@ type StepHistoryService struct {
 func (srv StepHistoryService) FindStepHistory(by FindStepHistoryBy) (*entity.StepHistory, error) {
 	step := srv.repo.FindBy(repository.FindStepHistoryBy{
 		UserId:  by.UserId,
+		OpenId:  by.OpenId,
 		Day:     by.Day,
 		OrderBy: by.OrderBy,
 	})
