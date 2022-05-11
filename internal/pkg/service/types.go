@@ -111,6 +111,7 @@ type BindPhoneByIVParam struct {
 	IV            string
 }
 type FindStepHistoryBy struct {
+	OpenId  string
 	Day     model.Time
 	UserId  int64
 	OrderBy entity.OrderByList

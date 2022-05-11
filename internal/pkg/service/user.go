@@ -253,15 +253,17 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 	}
 
 	lastStepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
-		UserId:  userId,
+		OpenId:  userInfo.OpenId,
 		Day:     model.NewTime().StartOfDay(),
 		OrderBy: entity.OrderByList{entity.OrderByStepHistoryCountDesc},
 	})
 	if err != nil {
 		return nil, err
 	}
+	//今日步数
 	summery.CurrentSteps = lastStepHistory.Count
 
+	//获取用户今日已领取步行积分
 	todayStepPoint, err := u.calculateStepPointsOfToday(userId)
 	if err != nil {
 		return nil, err
@@ -310,6 +312,8 @@ func (u UserService) calculateStepPointsOfToday(userId int64) (int, error) {
 	}
 	return total, nil
 }
+
+//计算待领取积分数
 func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
 	userinfo := u.r.GetUserById(userId)
 	if userinfo.ID == 0 {
@@ -327,7 +331,7 @@ func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
 	}
 
 	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
-		UserId: userId,
+		OpenId: userinfo.OpenId,
 		Day:    model.NewTime().StartOfDay(),
 	})
 
@@ -367,6 +371,8 @@ func (u UserService) computePendingHistoryStep(history entity.StepHistory, step 
 
 	return util2.Ternary(result > 0, result, 0).Int()
 }
+
+//比昨天减少
 func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 model.Time) (int, error) {
 	userinfo := u.r.GetUserById(userId)
 	if userinfo.ID == 0 {
@@ -375,14 +381,14 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 
 	stepHistory1, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
 		Day:    day1,
-		UserId: userId,
+		OpenId: userinfo.OpenId,
 	})
 	if err != nil {
 		return 0, err
 	}
 	stepHistory2, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
 		Day:    day2,
-		UserId: userId,
+		OpenId: userinfo.OpenId,
 	})
 	if err != nil {
 		return 0, err
