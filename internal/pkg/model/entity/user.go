@@ -40,14 +40,16 @@ func (u User) ShortUser() ShortUser {
 		AvatarUrl: u.AvatarUrl,
 		Gender:    u.Gender,
 		Nickname:  u.Nickname,
+		Position:  u.Position,
 	}
 }
 
 type ShortUser struct {
-	ID        int64  `gorm:"primary_key;column:id" json:"id"`
-	AvatarUrl string `gorm:"column:avatar_url" json:"avatarUrl"`
-	Gender    string `gorm:"column:gender" json:"gender"`
-	Nickname  string `gorm:"column:nick_name" json:"nickname"`
+	ID        int64        `gorm:"primary_key;column:id" json:"id"`
+	AvatarUrl string       `gorm:"column:avatar_url" json:"avatarUrl"`
+	Gender    string       `gorm:"column:gender" json:"gender"`
+	Nickname  string       `gorm:"column:nick_name" json:"nickname"`
+	Position  UserPosition `json:"position"`
 }
 
 func (ShortUser) TableName() string {
