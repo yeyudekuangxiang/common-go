@@ -264,7 +264,7 @@ func (d NullString) Value() (driver.Value, error) {
 	if d == "" {
 		return nil, nil
 	}
-	return d, nil
+	return string(d), nil
 }
 func (d *NullString) Scan(value interface{}) error {
 	if value == nil {
