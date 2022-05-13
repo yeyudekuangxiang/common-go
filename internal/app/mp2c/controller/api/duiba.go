@@ -96,11 +96,12 @@ func (DuiBaController) OrderCallback(ctx *gin.Context) string {
 		app.Logger.Error("OrderCallback 参数验证失败", form, err)
 		return err.Error()
 	}
-	err = service.DefaultDuiBaService.OrderCallback(form)
+
+	/*err = service.DefaultDuiBaService.OrderCallback(form)
 	if err != nil {
 		app.Logger.Error("OrderCallback 同步订单失败", form, err)
 		return err.Error()
-	}
+	}*/
 	return "ok"
 }
 func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
