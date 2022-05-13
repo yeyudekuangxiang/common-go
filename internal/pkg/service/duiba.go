@@ -178,7 +178,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 
 	orderId := form.DevelopBizId
 	if orderId == "" {
-		orderId = "db-" + form.OrderNum
+		orderId = "duiba-" + form.OrderNum
 	}
 
 	orderItemList := form.OrderItemList.OrderItemList()
