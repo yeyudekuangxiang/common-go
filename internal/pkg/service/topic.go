@@ -54,10 +54,15 @@ func (u TopicService) fillTopicList(topicList []entity2.Topic, userId int64) ([]
 	//整理数据
 	detailList := make([]TopicDetail, 0)
 	for _, topic := range topicList {
+		user, err := DefaultUserService.GetUserById(topic.UserId)
+		if err != nil {
+			return nil, err
+		}
 		detailList = append(detailList, TopicDetail{
 			Topic:         topic,
 			IsLike:        topicLikeMap[topic.Id],
 			UpdatedAtDate: topic.UpdatedAt.Format("01-02"),
+			User:          user.ShortUser(),
 		})
 	}
 
