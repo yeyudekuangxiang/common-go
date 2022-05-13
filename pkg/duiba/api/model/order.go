@@ -49,7 +49,7 @@ func (o OrderInfo) ToMap() map[string]string {
 	return map[string]string{
 		"uid":              o.Uid,
 		"appKey":           o.AppKey,
-		"timestamp":        o.Timestamp,
+		"timestamp":        string(o.Timestamp),
 		"sign":             o.Sign,
 		"orderNum":         o.OrderNum,
 		"developBizId":     o.DevelopBizId,

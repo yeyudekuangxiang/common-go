@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
@@ -21,13 +22,26 @@ import (
 // Middleware 全局中间件
 func Middleware(middleware *gin.Engine) {
 	middleware.Use(corsM())
-	middleware.Use(gin.Recovery())
+	middleware.Use(recovery())
 	middleware.Use(access())
 }
+func recovery() gin.HandlerFunc {
+	return gin.CustomRecovery(func(c *gin.Context, err interface{}) {
+		e, ok := err.(error)
+		if ok {
+			c.JSON(200, apiutil.FormatErr(e, nil))
+		} else {
+			c.JSON(200, apiutil.FormatResponse(errno.InternalServerError.Code(), nil, fmt.Sprintf("%v", err)))
+		}
+	})
+}
+func access2() {
 
+}
 func access() gin.HandlerFunc {
 	//执行测试时 访问日志输出到控制台
 	if util.IsTesting() {
+		return Access(zap.DefaultLogger("info"), time.RFC3339, false)
 		return ginzap.Ginzap(zap.DefaultLogger("info"), time.RFC3339, false)
 	}
 	logger := zap.NewZapLogger(zap.LoggerConfig{
@@ -36,6 +50,7 @@ func access() gin.HandlerFunc {
 		FileName: "access.log",
 		MaxSize:  100,
 	})
+	return Access(logger, time.RFC3339, false)
 	return ginzap.Ginzap(logger, time.RFC3339, false)
 }
 func auth() gin.HandlerFunc {

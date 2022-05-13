@@ -1,8 +1,7 @@
 package duiba
 
 import (
-	mmd5 "crypto/md5"
-	"fmt"
+	"mio/pkg/duiba/util"
 	"sort"
 )
 
@@ -20,8 +19,5 @@ func sign(params map[string]string) string {
 		}
 		signStr += params[k]
 	}
-	return md5(signStr)
-}
-func md5(str string) string {
-	return fmt.Sprintf("%x", mmd5.Sum([]byte(str)))
+	return util.Md5(signStr)
 }

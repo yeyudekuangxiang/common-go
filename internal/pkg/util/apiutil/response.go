@@ -38,6 +38,9 @@ func FormatErr(err error, data interface{}) gin.H {
 		}
 	}
 
+	return FormatResponse(code, data, message)
+}
+func FormatResponse(code int, data interface{}, message string) gin.H {
 	return gin.H{
 		"code":    code,
 		"message": message,

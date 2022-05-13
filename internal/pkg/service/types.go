@@ -3,6 +3,7 @@ package service
 import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
+	duibaApi "mio/pkg/duiba/api/model"
 	"time"
 )
 
@@ -296,4 +297,34 @@ type FindCouponTypeBy struct {
 }
 type RedeemCouponParam struct {
 	CouponId string
+}
+type FindDuiBaPointAddLogBy struct {
+	OrderNum string
+}
+type CreateDuiBaPointAddLog struct {
+	Uid           string
+	Credits       int64
+	Type          duibaApi.PointAddType
+	OrderNum      string
+	SubOrderNum   string
+	Timestamp     int64
+	Description   string
+	Ip            string
+	Sign          string
+	AppKey        string
+	TransactionId string
+}
+type UpdateDuiBaPointAddLog struct {
+	ID            string
+	Uid           string
+	Credits       int64
+	Type          duibaApi.PointAddType
+	OrderNum      string
+	SubOrderNum   string
+	Timestamp     string
+	Description   string
+	Ip            string
+	Sign          string
+	AppKey        string
+	TransactionId string
 }
