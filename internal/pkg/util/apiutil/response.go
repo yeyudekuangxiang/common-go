@@ -40,7 +40,7 @@ func FormatErr(err error, data interface{}) gin.H {
 		}
 	}
 
-	if code != 200 {
+	if code != 200 && code != errno.ErrAuth.Code() {
 		go func() {
 			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
 				Content: fmt.Sprintf("**来源:**响应 \n\n**消息:**%+v", err),
