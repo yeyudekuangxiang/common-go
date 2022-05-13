@@ -32,7 +32,7 @@ type OrderInfo struct {
 	OrderNum         string             `json:"orderNum" form:"orderNum" binding:"required" alias:"orderNum"`
 	DevelopBizId     string             `json:"developBizId" form:"developBizId"`
 	CreateTime       IntStr             `json:"createTime" form:"createTime" binding:"required" alias:"createTime"`
-	FinishTime       IntStr             `json:"finishTime" form:"finishTime" binding:"required" alias:"finishTime"`
+	FinishTime       IntStr             `json:"finishTime" form:"finishTime"  alias:"finishTime"`
 	TotalCredits     IntStr             `json:"totalCredits" form:"totalCredits"  alias:"totalCredits"`
 	ConsumerPayPrice FloatStr           `json:"consumerPayPrice" form:"consumerPayPrice" binding:"required" alias:"consumerPayPrice"`
 	Source           string             `json:"source" form:"source" binding:"required" alias:"source"`
@@ -40,7 +40,7 @@ type OrderInfo struct {
 	ErrorMsg         string             `json:"errorMsg" form:"errorMsg"`
 	Type             OrderType          `json:"type" form:"type" binding:"required" alias:"type"`
 	ExpressPrice     string             `json:"expressPrice" form:"expressPrice"`
-	Account          string             `json:"account" form:"account" binding:"required" alias:"account"`
+	Account          string             `json:"account" form:"account"  alias:"account"`
 	OrderItemList    OrderItemListStr   `json:"orderItemList" form:"orderItemList" binding:"required" alias:"orderItemList"`
 	ReceiveAddrInfo  ReceiveAddrInfoStr `json:"receiveAddrInfo" form:"receiveAddrInfo"`
 }
