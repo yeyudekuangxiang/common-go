@@ -202,7 +202,7 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		TotalCost:        param.Order.TotalCost,
 		Status:           entity.OrderStatusPaid,
 		PaidTime:         model.NewTime(),
-		OrderReferenceId: fmt.Sprintf("%d%d", time.Now().Unix(), int(rand.Float64()*10000)),
+		OrderReferenceId: model.NullString(fmt.Sprintf("%d%d", time.Now().Unix(), int(rand.Float64()*10000))),
 		OrderType:        param.Order.OrderType,
 	}
 
@@ -265,15 +265,17 @@ func (srv OrderService) UpdateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 	return &order, srv.repo.Save(&order)
 }
 func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderInfo) (*entity.Order, error) {
+	rand.Seed(time.Now().Unix())
 	order := entity.Order{
-		OrderId:      orderId,
-		OpenId:       info.Uid,
-		TotalCost:    int(info.TotalCredits.ToInt()),
-		Status:       duiBaOrderStatusMap[info.OrderStatus],
-		PaidTime:     model.Time{Time: time.UnixMilli(info.CreateTime.ToInt())},
-		OrderType:    entity.OrderTypePurchase,
-		Source:       entity.OrderSourceDuiBa,
-		ThirdOrderNo: info.OrderNum,
+		OrderId:          orderId,
+		OpenId:           info.Uid,
+		TotalCost:        int(info.TotalCredits.ToInt()),
+		Status:           duiBaOrderStatusMap[info.OrderStatus],
+		PaidTime:         model.Time{Time: time.UnixMilli(info.CreateTime.ToInt())},
+		OrderType:        entity.OrderTypePurchase,
+		Source:           entity.OrderSourceDuiBa,
+		ThirdOrderNo:     info.OrderNum,
+		OrderReferenceId: model.NullString(fmt.Sprintf("%d%d", time.Now().Unix(), int(rand.Float64()*10000))),
 	}
 	if (order.Status == entity.OrderStatusInTransit || order.Status == entity.OrderStatusComplete) && order.InTransitTime.IsZero() {
 		order.InTransitTime = model.NewTime()
