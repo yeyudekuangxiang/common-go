@@ -116,8 +116,18 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 		}
 	}
 
-	tranId, err := service.DefaultDuiBaService.PointAddCallback(form)
 	userPoint, _ := service.DefaultPointService.FindByOpenId(form.Uid)
+	err := service.DefaultDuiBaService.CheckSign(form)
+	if err != nil {
+		return gin.H{
+			"status":       "fail",
+			"errorMessage": err.Error(),
+			"credits":      userPoint.Balance,
+		}
+	}
+
+	tranId, err := service.DefaultDuiBaService.PointAddCallback(form)
+	userPoint, _ = service.DefaultPointService.FindByOpenId(form.Uid)
 	if err != nil {
 		return gin.H{
 			"status":       "fail",
