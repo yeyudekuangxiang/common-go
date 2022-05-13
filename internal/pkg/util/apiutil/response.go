@@ -1,11 +1,13 @@
 package apiutil
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/pkg/errno"
+	"mio/pkg/wxwork"
 	"reflect"
 )
 
@@ -36,6 +38,17 @@ func FormatErr(err error, data interface{}) gin.H {
 		default:
 			panic("不支持的数据类型")
 		}
+	}
+
+	if code != 200 {
+		go func() {
+			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
+				Content: fmt.Sprintf("**来源:**响应 \n\n**消息:**%+v", err),
+			})
+			if err != nil {
+				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
+			}
+		}()
 	}
 
 	return FormatResponse(code, data, message)
