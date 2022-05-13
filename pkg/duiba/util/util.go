@@ -1,6 +1,8 @@
-package duiba
+package util
 
 import (
+	mmd5 "crypto/md5"
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"sort"
@@ -37,4 +39,17 @@ func BuildQuery(params map[string]string) string {
 		query.WriteString("&")
 	}
 	return strings.TrimRight(query.String(), "&")
+}
+func Assign(m1 map[string]string, m2 map[string]string) map[string]string {
+	m := make(map[string]string)
+	for k, v := range m1 {
+		m[k] = v
+	}
+	for k, v := range m2 {
+		m[k] = v
+	}
+	return m
+}
+func Md5(str string) string {
+	return fmt.Sprintf("%x", mmd5.Sum([]byte(str)))
 }

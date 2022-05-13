@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -202,4 +203,50 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 }
 func (srv DuiBaService) CheckSign(param duiba.Param) error {
 	return srv.client.CheckSign(param)
+}
+func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string, err error) {
+	log, err := DefaultDuiBaPointAddLogService.FindBy(FindDuiBaPointAddLogBy{
+		OrderNum: form.OrderNum,
+	})
+	if err != nil {
+		return
+	}
+
+	if log.TransactionId != "" {
+		return log.TransactionId, nil
+	}
+
+	newLog, err := DefaultDuiBaPointAddLogService.CreateLog(CreateDuiBaPointAddLog{
+		Uid:         form.Uid,
+		Credits:     form.Credits.ToInt(),
+		Type:        form.Type,
+		OrderNum:    form.OrderNum,
+		SubOrderNum: form.SubOrderNum,
+		Timestamp:   form.Timestamp.ToInt(),
+		Description: form.Description,
+		Ip:          form.IP,
+		Sign:        form.Sign,
+		AppKey:      form.AppKey,
+	})
+	if err != nil {
+		return
+	}
+
+	tran, err := DefaultPointTransactionService.Create(CreatePointTransactionParam{
+		OpenId:       form.Uid,
+		Type:         entity.POINT_ADJUSTMENT,
+		Value:        int(form.Credits.ToInt()),
+		AdminId:      0,
+		AdditionInfo: fmt.Sprintf("log %d", newLog.ID),
+	})
+	if err != nil {
+		return
+	}
+
+	err = DefaultDuiBaPointAddLogService.UpdateLogTransaction(newLog.ID, tran.TransactionId)
+	if err != nil {
+		app.Logger.Errorf("更新DuiBaPointAddLog失败 %d %s", newLog.ID, tran.TransactionId)
+	}
+
+	return tran.TransactionId, nil
 }

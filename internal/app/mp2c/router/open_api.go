@@ -26,6 +26,10 @@ func openRouter(router *gin.Engine) {
 			duibaRouter.Any("/order/callback", func(context *gin.Context) {
 				context.String(200, api.DefaultDuiBaController.OrderCallback(context))
 			})
+
+			duibaRouter.Any("/point/add/callback", func(context *gin.Context) {
+				context.JSON(200, api.DefaultDuiBaController.PointAddLogCallback(context))
+			})
 		}
 
 		oaRouter := openRouter.Group("/oa")
