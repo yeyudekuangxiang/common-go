@@ -30,20 +30,20 @@ const (
 )
 
 type Order struct {
-	ID               int64       `gorm:"primary_key" json:"id"`
-	OrderId          string      `json:"orderId"`
-	AddressId        *string     `json:"addressId"`
-	OpenId           string      `gorm:"column:openid" json:"openid"`
-	TotalCost        int         `json:"totalCost"`
-	Status           OrderStatus `json:"orderStatus"`
-	PaidTime         model.Time  `json:"paidTime"`
-	InTransitTime    model.Time  `json:"inTransitTime"`
-	CompletedTime    model.Time  `json:"completedTime"`
-	TrackingNumber   string      `json:"trackingNumber"`
-	OrderReferenceId string      `json:"orderReferenceId"`
-	OrderType        OrderType   `json:"orderType"`
-	Source           OrderSource `json:"source"`
-	ThirdOrderNo     string      `json:"thirdOrderNo"`
+	ID               int64            `gorm:"primary_key" json:"id"`
+	OrderId          string           `json:"orderId"`
+	AddressId        *string          `json:"addressId"`
+	OpenId           string           `gorm:"column:openid" json:"openid"`
+	TotalCost        int              `json:"totalCost"`
+	Status           OrderStatus      `json:"orderStatus"`
+	PaidTime         model.Time       `json:"paidTime"`
+	InTransitTime    model.Time       `json:"inTransitTime"`
+	CompletedTime    model.Time       `json:"completedTime"`
+	TrackingNumber   string           `json:"trackingNumber"`
+	OrderReferenceId model.NullString `json:"orderReferenceId"`
+	OrderType        OrderType        `json:"orderType"`
+	Source           OrderSource      `json:"source"`
+	ThirdOrderNo     string           `json:"thirdOrderNo"`
 }
 
 func (order Order) ShortOrder() ShortOrder {
@@ -59,11 +59,11 @@ func (order Order) ShortOrder() ShortOrder {
 }
 
 type ShortOrder struct {
-	OrderId          string      `json:"orderId"`
-	TotalCost        int         `json:"totalCost"`
-	Status           OrderStatus `json:"orderStatus"`
-	PaidTime         model.Time  `json:"paidTime"`
-	TrackingNumber   string      `json:"trackingNumber"`
-	OrderReferenceId string      `json:"orderReferenceId"`
-	OrderType        OrderType   `json:"orderType"`
+	OrderId          string           `json:"orderId"`
+	TotalCost        int              `json:"totalCost"`
+	Status           OrderStatus      `json:"orderStatus"`
+	PaidTime         model.Time       `json:"paidTime"`
+	TrackingNumber   string           `json:"trackingNumber"`
+	OrderReferenceId model.NullString `json:"orderReferenceId"`
+	OrderType        OrderType        `json:"orderType"`
 }
