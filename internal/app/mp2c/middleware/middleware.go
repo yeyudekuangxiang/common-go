@@ -15,7 +15,9 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"mio/pkg/wxwork"
 	"mio/pkg/zap"
+	"runtime"
 	"time"
 )
 
@@ -33,11 +35,21 @@ func recovery() gin.HandlerFunc {
 		} else {
 			c.JSON(200, apiutil.FormatResponse(errno.InternalServerError.Code(), nil, fmt.Sprintf("%v", err)))
 		}
+		go func() {
+			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
+				Content: fmt.Sprintf("**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", err, stack()),
+			})
+			if sendErr != nil {
+				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
+			}
+		}()
 	})
 }
-func access2() {
-
+func stack() string {
+	var buf [3 << 10]byte
+	return string(buf[:runtime.Stack(buf[:], true)])
 }
+
 func access() gin.HandlerFunc {
 	//执行测试时 访问日志输出到控制台
 	if util.IsTesting() {
