@@ -286,9 +286,10 @@ type InviteInfo struct {
 	AvatarUrl string     `json:"avatarUrl"`
 	Time      model.Date `json:"time"`
 }
-type GetPromotionPromotionListBy struct {
-	Partnership entity.PartnershipType
-	Trigger     entity.PartnershipPromotionTrigger
+type GetPartnershipPromotionListBy struct {
+	Partnership  entity.PartnershipType
+	PartnerShips []entity.PartnershipType
+	Trigger      entity.PartnershipPromotionTrigger
 }
 type FindCouponBy struct {
 	CouponTypeId string
@@ -297,7 +298,43 @@ type FindCouponTypeBy struct {
 	CouponTypeId string
 }
 type RedeemCouponParam struct {
-	CouponId string
+	OpenId    string
+	CouponId  string
+	OrderType entity.OrderType
+}
+type RedeemCouponWithTransactionParam struct {
+	OpenId               string
+	CouponId             string
+	OrderType            entity.OrderType
+	PointTransactionType entity.PointTransactionType
+}
+type FindProductItemBy struct {
+	ItemId string
+}
+type SubmitOrderFromRedeemCodeParam struct {
+	UserId           int64
+	DefaultAddressId string
+	ProductItemId    string
+	Count            int
+	Partnership      entity.PartnershipType
+	OrderType        entity.OrderType
+}
+type RedeemCouponWithTransactionResult struct {
+	Point   int    `json:"point"`
+	OrderId string `json:"orderId"`
+}
+type GenerateCouponBatchParam struct {
+	CouponTypeId       string
+	BatchSize          int
+	GenerateRedeemCode bool
+}
+
+type ProcessPromotionInformationInfo struct {
+	PromotionId string     `json:"promotionId"`
+	CouponId    string     `json:"couponId"`
+	Time        model.Date `json:"time"`
+	OpenId      string     `json:"openid"`
+	OrderId     string     `json:"orderId"`
 }
 type FindDuiBaPointAddLogBy struct {
 	OrderNum string

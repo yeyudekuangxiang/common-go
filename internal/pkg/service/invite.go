@@ -83,7 +83,11 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 	}
 	return infoList, nil
 }
-func (srv InviteService) AddInvite(openid, InvitedByOpenId string) (*entity.Invite, bool, error) {
+func (srv InviteService) AddInvite(openid, invitedByOpenId string) (*entity.Invite, bool, error) {
+	if invitedByOpenId == "" {
+		return &entity.Invite{}, false, nil
+	}
+
 	invite := entity.Invite{}
 	err := app.DB.Where("new_user_openid = ? and invited_by_openid <> ''", openid).First(&invite).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -94,11 +98,33 @@ func (srv InviteService) AddInvite(openid, InvitedByOpenId string) (*entity.Invi
 	}
 
 	invite = entity.Invite{
-		InvitedByOpenId: InvitedByOpenId,
+		InvitedByOpenId: invitedByOpenId,
 		NewUserOpenId:   openid,
 		Time:            model.NewTime(),
 		InviteType:      entity.InviteTypeRegular,
 		InviteCode:      "",
 	}
 	return &invite, true, app.DB.Create(&invite).Error
+}
+func (srv InviteService) Invite(openid, InvitedByOpenId string) error {
+	app.Logger.Info("添加邀请关系", openid, InvitedByOpenId)
+	_, isNew, err := srv.AddInvite(openid, InvitedByOpenId)
+	if err != nil {
+		return err
+	}
+	if !isNew {
+		return nil
+	}
+	app.Logger.Info("发放邀请积分", openid, InvitedByOpenId, entity.PointCollectValueMap[entity.POINT_INVITE])
+	//发放积分奖励
+	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
+		OpenId:       InvitedByOpenId,
+		Type:         entity.POINT_INVITE,
+		Value:        entity.PointCollectValueMap[entity.POINT_INVITE],
+		AdditionInfo: fmt.Sprintf("invite %s", openid),
+	})
+	if err != nil {
+		app.Logger.Error("发放邀请积分失败", err)
+	}
+	return err
 }

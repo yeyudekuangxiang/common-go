@@ -2,9 +2,11 @@ package auth
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/auth"
 	"mio/internal/pkg/util/apiutil"
+	"strings"
 )
 
 var DefaultWeappController = WeappController{}
@@ -18,7 +20,8 @@ func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	user, cookie, err := auth.DefaultWeappService.LoginByCode(form.Code, "")
+	partnershipWith := entity.PartnershipType(strings.ToUpper(form.PartnershipWith))
+	user, cookie, err := auth.DefaultWeappService.LoginByCode(form.Code, form.InvitedBy, partnershipWith)
 	if err != nil {
 		return nil, err
 	}

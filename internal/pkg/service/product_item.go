@@ -52,3 +52,7 @@ func (srv ProductItemService) CreateOrUpdateProductItem(param CreateOrUpdateProd
 	item.Sort = param.Sort
 	return &item, srv.repo.Save(&item)
 }
+func (srv ProductItemService) FindProductByItemId(itemId string) (*entity.ProductItem, error) {
+	item := srv.repo.FindByItemId(itemId)
+	return &item, nil
+}

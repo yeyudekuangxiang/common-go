@@ -278,3 +278,24 @@ func (d *NullString) Scan(value interface{}) error {
 	*d = NullString(t)
 	return nil
 }
+
+type NullInt int64
+
+func (d NullInt) Value() (driver.Value, error) {
+	if d == 0 {
+		return nil, nil
+	}
+	return int64(d), nil
+}
+func (d *NullInt) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	t, ok := value.(int64)
+	if !ok {
+		return errors.New("NullInt type error")
+	}
+	*d = NullInt(t)
+	return nil
+}

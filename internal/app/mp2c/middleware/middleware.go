@@ -136,7 +136,7 @@ func MustAuth2() gin.HandlerFunc {
 
 		if openId := ctx.GetHeader("openid"); openId != "" {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
-			if err != nil || user == nil {
+			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth openid err", openId, err)
 				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
 				return

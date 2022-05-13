@@ -11,6 +11,8 @@ var DefaultCouponRepository ICouponRepository = NewCouponRepository(app.DB)
 type ICouponRepository interface {
 	CouponListOfOpenid(openid string, couponTypeIds []string) ([]coupon.CouponRes, error)
 	FindCoupon(by FindCouponBy) coupon.Coupon
+	Save(coupon2 *coupon.Coupon) error
+	CreateBatch(list *[]coupon.Coupon) error
 }
 
 func NewCouponRepository(DB *gorm.DB) CouponRepository {
@@ -44,4 +46,10 @@ func (p CouponRepository) FindCoupon(by FindCouponBy) coupon.Coupon {
 		panic(err)
 	}
 	return cp
+}
+func (p CouponRepository) Save(coupon2 *coupon.Coupon) error {
+	return p.DB.Save(coupon2).Error
+}
+func (p CouponRepository) CreateBatch(list *[]coupon.Coupon) error {
+	return p.DB.Create(list).Error
 }
