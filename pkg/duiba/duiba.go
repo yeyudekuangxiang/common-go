@@ -2,6 +2,7 @@ package duiba
 
 import (
 	"github.com/pkg/errors"
+	"mio/pkg/duiba/util"
 	"mio/pkg/validator"
 	"net/url"
 	"strconv"
@@ -54,7 +55,7 @@ func (client Client) AutoLogin(param AutoLoginParam) (string, error) {
 		signParams["transfer"] = url.QueryEscape(signParams["transfer"])
 	}
 
-	return baseUrl + autoLoginPath + "?" + BuildQuery(signParams), nil
+	return baseUrl + autoLoginPath + "?" + util.BuildQuery(signParams), nil
 }
 func (client Client) CheckSign(v Param) error {
 	err := validator.NewValidator().ValidateStruct(v)

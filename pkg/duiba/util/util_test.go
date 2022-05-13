@@ -1,4 +1,4 @@
-package duiba
+package util
 
 import (
 	"github.com/stretchr/testify/assert"

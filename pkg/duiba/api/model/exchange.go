@@ -43,7 +43,7 @@ func (form Exchange) ToMap() map[string]string {
 		"credits":     strconv.FormatInt(form.Credits, 10),
 		"itemCode":    form.ItemCode,
 		"appKey":      form.AppKey,
-		"timestamp":   form.Timestamp,
+		"timestamp":   string(form.Timestamp),
 		"description": form.Description,
 		"orderNum":    form.OrderNum,
 		"type":        string(form.Type),
@@ -72,7 +72,7 @@ func (form ExchangeResult) ToMap() map[string]string {
 	return map[string]string{
 		"uid":          form.Uid,
 		"appKey":       form.AppKey,
-		"timestamp":    form.Timestamp,
+		"timestamp":    string(form.Timestamp),
 		"success":      strconv.FormatBool(form.Success),
 		"errorMessage": form.ErrorMessage,
 		"orderNum":     form.OrderNum,

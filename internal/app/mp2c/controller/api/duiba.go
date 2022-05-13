@@ -66,7 +66,6 @@ func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
 		"credits":      result.Credits,
 	}
 }
-
 func (DuiBaController) ExchangeResultNoticeCallback(ctx *gin.Context) string {
 	form := duibaApi.ExchangeResult{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
@@ -86,6 +85,7 @@ func (DuiBaController) ExchangeResultNoticeCallback(ctx *gin.Context) string {
 	return "ok"
 }
 func (DuiBaController) OrderCallback(ctx *gin.Context) string {
+
 	form := duibaApi.OrderInfo{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		app.Logger.Error("OrderCallback 参数获取失败", ctx, err)
@@ -102,4 +102,34 @@ func (DuiBaController) OrderCallback(ctx *gin.Context) string {
 		return err.Error()
 	}
 	return "ok"
+}
+func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
+	/*d, err := ioutil.ReadAll(ctx.Request.Body)
+	fmt.Println(string(d), err)*/
+
+	form := duibaApi.PointAdd{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return gin.H{
+			"status":       "fail",
+			"errorMessage": err.Error(),
+			"credits":      0,
+		}
+	}
+
+	tranId, err := service.DefaultDuiBaService.PointAddCallback(form)
+	userPoint, _ := service.DefaultPointService.FindByOpenId(form.Uid)
+	if err != nil {
+		return gin.H{
+			"status":       "fail",
+			"errorMessage": err.Error(),
+			"credits":      userPoint.Balance,
+		}
+	}
+
+	return gin.H{
+		"status":       "ok",
+		"errorMessage": "",
+		"bizId":        tranId,
+		"credits":      userPoint.Balance,
+	}
 }
