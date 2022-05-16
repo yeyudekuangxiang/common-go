@@ -111,7 +111,7 @@ func (b BocController) Answer(c *gin.Context) (gin.H, error) {
 func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
-	record, err := activity2.DefaultBocService.FindApplyRecord(user.ID)
+	record, err := activity2.DefaultBocService.FindApplyRecordMini(user.ID)
 	if err != nil {
 		return nil, err
 	}
