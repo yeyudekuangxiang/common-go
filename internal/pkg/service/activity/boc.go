@@ -126,8 +126,8 @@ func (b BocService) AddShareNum(userId int64) error {
 	return activity.DefaultBocRecordRepository.Save(&record)
 }
 
-// FindApplyRecord 查询用户参与的中行活动记录
-func (b BocService) FindApplyRecord(userId int64) (*activity2.BocRecord, error) {
+// FindApplyRecordMini 小程序查询用户参与的中行活动记录
+func (b BocService) FindApplyRecordMini(userId int64) (*activity2.BocRecord, error) {
 	defaultRecord := activity2.NewBocRecord()
 	if userId == 0 {
 		return &defaultRecord, nil
@@ -161,6 +161,20 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 	record := activity.DefaultBocRecordRepository.FindBy(activity.FindRecordBy{
 		UserId: param.UserId,
 	})
+
+	//已存在申请记录
+	if record.Id > 0 {
+		//奖励未发放
+		if record.AnswerStatus == 2 && record.AnswerBonusStatus == 1 {
+			go func() {
+				if err := b.SendAnswerBonus(param.UserId); err != nil {
+					app.Logger.Error("SendAnswerBonus", param.UserId, err)
+				}
+			}()
+		}
+
+		return &record, nil
+	}
 
 	record = activity2.BocRecord{
 		UserId:                param.UserId,
@@ -262,7 +276,7 @@ func (b BocService) AnswerQuestion(userId int64, right int) error {
 		return err
 	}
 
-	if record.AnswerStatus == 2 {
+	if record.AnswerStatus == 2 && record.AnswerBonusStatus == 1 {
 		err := b.SendAnswerBonus(userId)
 		if err != nil {
 			return err
