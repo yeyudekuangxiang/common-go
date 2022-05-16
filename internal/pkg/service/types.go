@@ -366,3 +366,11 @@ type UpdateDuiBaPointAddLog struct {
 	AppKey        string
 	TransactionId string
 }
+type ParticipateEventParam struct {
+	ProductItemId string
+	Count         int
+}
+
+type FindEventBy struct {
+	ProductItemId string
+}

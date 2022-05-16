@@ -172,27 +172,29 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 	}()
 
 	//创建订单
-	order, err := srv.create(orderId, param)
+	order, orderItems, err := srv.create(orderId, param)
 	if err != nil {
 		return nil, err
 	}
+
+	srv.afterCreateOrder(user, order, orderItems)
 
 	orderSuccess = true
 	return order, nil
 }
 
 //直接创建订单 不会扣除积分(请勿使用此方法创建订单 请使用 OrderService.SubmitOrder 方法创建订单)
-func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.Order, error) {
+func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.Order, []entity.OrderItem, error) {
 	var addressId *string
 	if param.Order.AddressId != "" {
 		addressId = &param.Order.AddressId
 	}
 	user, err := DefaultUserService.GetUserById(param.Order.UserId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if user.ID == 0 || user.OpenId == "" {
-		return nil, errors.New("未查找到用户信息,请联系管理员")
+		return nil, nil, errors.New("未查找到用户信息,请联系管理员")
 	}
 
 	order := &entity.Order{
@@ -216,7 +218,14 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		})
 	}
 
-	return order, srv.repo.SubmitOrder(order, &orderItems)
+	err = srv.repo.SubmitOrder(order, &orderItems)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	srv.afterCreateOrder(user, order, orderItems)
+
+	return order, orderItems, nil
 }
 
 // SubmitOrderForGreenMonday 用于greenmonday活动用户下单
@@ -296,4 +305,17 @@ func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 	}
 
 	return &order, srv.repo.SubmitOrder(&order, &orderItemList)
+}
+func (srv OrderService) afterCreateOrder(user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+	participateEventParams := make([]ParticipateEventParam, 0)
+	for _, orderItem := range orderItems {
+		participateEventParams = append(participateEventParams, ParticipateEventParam{
+			ProductItemId: orderItem.ItemId,
+			Count:         orderItem.Count,
+		})
+	}
+	err := DefaultEventParticipationService.ParticipateEvent(user.ID, participateEventParams)
+	if err != nil {
+		app.Logger.Errorf("下订单后参加活动参与失败 %d %+v", user.ID, participateEventParams)
+	}
 }
