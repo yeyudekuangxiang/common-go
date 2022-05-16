@@ -23,4 +23,5 @@ func InitIni(source interface{}) {
 
 func afterInitIni() {
 	service.InitDefaultDuibaService()
+	service.InitDefaultOssService()
 }

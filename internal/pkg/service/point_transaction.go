@@ -246,7 +246,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 		}
 
 		fileName := util.UUID() + ".csv"
-		link, err := DefaultOssService.PutObject("static/mp2c/images/file-export/point/"+fileName, bytes.NewReader(data))
+		link, err := DefaultOssService.PutObject("images/file-export/point/"+fileName, bytes.NewReader(data))
 		if err != nil {
 			_, err := DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 				Status:  entity.FileExportStatusFailed,
