@@ -63,3 +63,4 @@ AppSecret=
 Endpoint=
 AccessKey=
 AccessSecret=
+BasePath=static/mp2c

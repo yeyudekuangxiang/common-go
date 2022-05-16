@@ -229,7 +229,12 @@ func (u TopicService) ImportUser(filename string) error {
 		wechat := row[3]
 		phone := row[4]
 		user := entity2.User{}
-		app.DB.Where("nick_name = ?", nickname).First(&user)
+		if nickname == "星星充电" {
+			app.DB.Where("openid = ?", wechat).First(&user)
+		} else {
+			app.DB.Where("nick_name = ?", nickname).First(&user)
+		}
+
 		if user.ID != 0 {
 			if user.PhoneNumber != phone {
 				return errors.Errorf("存在同名但手机号不同用户 %s", nickname)
@@ -237,7 +242,8 @@ func (u TopicService) ImportUser(filename string) error {
 			log.Println("用户已存在", user)
 			continue
 		}
-		avatar, err := u.uploadImportUserAvatar(path.Join(path.Dir(filename), "kol", importId+".jpg"))
+
+		avatar, err := u.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".png"))
 		if err != nil {
 			return errors.WithMessage(err, "上传头像失败"+importId)
 		}
@@ -263,11 +269,13 @@ func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 
 	_, fileName := path.Split(filepath)
 
-	fmt.Println("上传头像", filepath, fmt.Sprintf("static/mp2c/images/topic/kol/%s", fileName))
+	name := fmt.Sprintf("images/topic/%s/%s", path.Base(path.Dir(filepath)), fileName)
+
+	fmt.Println("上传头像", filepath, name)
 
 	defer file.Close()
 
-	return DefaultOssService.PutObject(fmt.Sprintf("static/mp2c/images/topic/kol/%s", fileName), file)
+	return DefaultOssService.PutObject(name, file)
 }
 
 func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
@@ -282,9 +290,11 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("上传内容图片", fmt.Sprintf("static/mp2c/images/topic/info/%s/%s", path.Base(dirPath), fileInfo.Name()))
 
-		u, err := DefaultOssService.PutObject(fmt.Sprintf("static/mp2c/images/topic/info/%s/%s", path.Base(dirPath), fileInfo.Name()), file)
+		name := fmt.Sprintf("images/topic/%s/%s/%s", path.Base(path.Dir(dirPath)), path.Base(dirPath), fileInfo.Name())
+
+		fmt.Println("上传内容图片", path.Join(dirPath, fileInfo.Name()), name)
+		u, err := DefaultOssService.PutObject(name, file)
 		if err != nil {
 			file.Close()
 			return nil, err
@@ -295,7 +305,7 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 }
 
 // ImportTopic 从xlsx中导入内容
-func (u TopicService) ImportTopic(filename string) error {
+func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 	rand.Seed(time.Now().Unix())
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
@@ -323,17 +333,22 @@ func (u TopicService) ImportTopic(filename string) error {
 
 		nickname := row[1]
 		title := row[2]
-		content := row[3]
-		tag1Text := row[6]
+		content := strings.Trim(row[3], " ")
+		tag1Text := strings.Trim(row[6], " ")
 		tag2Text := ""
 		if len(row) >= 8 {
-			tag2Text = row[7]
+			tag2Text = strings.Trim(row[7], " ")
 		}
 
 		users := make([]entity2.User, 0)
 
 		if nickname == "咚的一声不响" {
 			err = app.DB.Where("phone_number = ?", "19988433595").Find(&users).Error
+			if err != nil {
+				return errors.WithStack(err)
+			}
+		} else if nickname == "星星充电" {
+			err = app.DB.Where("openid = ?", "XXCD_2022").Find(&users).Error
 			if err != nil {
 				return errors.WithStack(err)
 			}
@@ -383,7 +398,7 @@ func (u TopicService) ImportTopic(filename string) error {
 		topicTag = strings.TrimRight(topicTag, ",")
 		topicTagId = strings.TrimRight(topicTagId, ",")
 
-		imageList, err := u.UploadImportTopicImage(path.Join(path.Dir(filename), "info", row[0]))
+		imageList, err := u.UploadImportTopicImage(path.Join(strings.Split(filename, "_")[0], row[0]))
 		if err != nil {
 			return errors.WithMessagef(err, "获取topic%d图片失败", importId)
 		}
@@ -396,11 +411,11 @@ func (u TopicService) ImportTopic(filename string) error {
 			Avatar:     users[0].AvatarUrl,
 			Nickname:   users[0].Nickname,
 			TopicTagId: topicTagId,
-			ImportId:   importId,
+			ImportId:   importId + baseImportId,
 			ImageList:  strings.Join(imageList, ","),
 			Status:     3,
 		}
-		err = app.DB.Where("import_id = ?", importId).First(&topic).Error
+		err = app.DB.Where("import_id = ?", importId+baseImportId).First(&topic).Error
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return errors.WithStack(err)
 		}

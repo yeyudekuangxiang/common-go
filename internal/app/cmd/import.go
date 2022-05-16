@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"mio/internal/pkg/service"
+	"strconv"
 )
 
 // importCmd represents the import command
@@ -33,12 +34,18 @@ to quickly create a Cobra application.`,
 			log.Fatal("参数错误")
 		}
 
+		importIdStr := cmd.Flag("importId").Value.String()
+		importId, err := strconv.Atoi(importIdStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		err = service.DefaultTopicService.ImportUser(userPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = service.DefaultTopicService.ImportTopic(topicPath)
+		err = service.DefaultTopicService.ImportTopic(topicPath, importId)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -50,6 +57,7 @@ func init() {
 
 	importCmd.Flags().StringP("topic", "t", "", "topic file path")
 	importCmd.Flags().StringP("user", "u", "", "user file path")
+	importCmd.Flags().StringP("importId", "i", "", "base importId")
 
 	// Here you will define your flags and configuration settings.
 
