@@ -41,7 +41,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 		return nil, errors.New(comErr.ErrMSG)
 	}
 	defer resp.Body.Close()
-	imageUrl, err := DefaultOssService.PutObject(fmt.Sprintf("mp2c/qrcode/share/%s.png", util.UUID()), resp.Body)
+	imageUrl, err := DefaultOssService.PubObjectAbsolutePath(fmt.Sprintf("mp2c/qrcode/share/%s.png", util.UUID()), resp.Body)
 	if err != nil {
 		return nil, err
 	}

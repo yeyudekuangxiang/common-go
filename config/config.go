@@ -76,6 +76,7 @@ type ossSetting struct {
 	Endpoint     string
 	AccessKey    string
 	AccessSecret string
+	BasePath     string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {
