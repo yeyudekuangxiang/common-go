@@ -258,6 +258,11 @@ func (b BocService) SendAnswerBonus(userId int64) error {
 
 // AnswerQuestion 回答问题
 func (b BocService) AnswerQuestion(userId int64, right int) error {
+	util.DefaultLock.LockWait(fmt.Sprintf("BocAnswerQuestion%d", userId), 5*time.Second)
+	defer func() {
+		util.DefaultLock.UnLock(fmt.Sprintf("BocAnswerQuestion%d", userId))
+	}()
+
 	record, err := b.FindOrCreateApplyRecord(AddApplyRecordParam{
 		UserId: userId,
 	})
