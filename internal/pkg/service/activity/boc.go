@@ -13,6 +13,7 @@ import (
 	repository2 "mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/activity"
 	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"strconv"
 	"time"
 )
@@ -161,16 +162,6 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 		UserId: param.UserId,
 	})
 
-	//已存在申请记录
-	if record.Id > 0 {
-		go func() {
-			if err := b.CheckBonusSend(param.UserId); err != nil {
-				app.Logger.Error("CheckBonusSend", param.UserId, err)
-			}
-		}()
-		return &record, nil
-	}
-
 	record = activity2.BocRecord{
 		UserId:                param.UserId,
 		ShareUserId:           param.ShareUserId,
@@ -192,8 +183,13 @@ func (b BocService) FindOrCreateApplyRecord(param AddApplyRecordParam) (*activit
 	return &record, activity.DefaultBocRecordRepository.Save(&record)
 }
 
-// CheckBonusSend 检查用户答题积分是否已经发放 未发放的重新发放
-func (b BocService) CheckBonusSend(userId int64) error {
+// SendAnswerBonus 发放用户积分
+func (b BocService) SendAnswerBonus(userId int64) error {
+	util.DefaultLock.LockWait(fmt.Sprintf("BocSendAnswerBonus%d", userId), 5*time.Second)
+	defer func() {
+		util.DefaultLock.UnLock(fmt.Sprintf("BocSendAnswerBonus%d", userId))
+	}()
+
 	if userId == 0 {
 		return nil
 	}
@@ -214,7 +210,8 @@ func (b BocService) CheckBonusSend(userId int64) error {
 	}
 
 	if mioUser.ID == 0 {
-		return errors.New("未绑定小程序,打开绿喵小程序绑定手机号后,打开小程序邀请记录页面将自动发放积分")
+		app.Logger.Warn("未绑定小程序,打开绿喵小程序绑定手机号后,打开小程序邀请记录页面将自动发放积分", userId)
+		return nil
 	}
 
 	record.AnswerBonusStatus = 2
@@ -223,7 +220,26 @@ func (b BocService) CheckBonusSend(userId int64) error {
 	if err != nil {
 		return err
 	}
-	return b.makeAnswerPointTransaction(userId)
+
+	var (
+		value        int
+		additionInfo string
+	)
+	if b.IsOldUser(mioUser.Time.Time) {
+		value = 500
+		additionInfo = "老用户答题得500积分"
+	} else {
+		value = 2500
+		additionInfo = "新用户答题得2500积分"
+	}
+
+	_, err = service2.DefaultPointTransactionService.Create(service2.CreatePointTransactionParam{
+		OpenId:       mioUser.OpenId,
+		Type:         entity2.POINT_QUIZ,
+		Value:        value,
+		AdditionInfo: additionInfo,
+	})
+	return err
 }
 
 // AnswerQuestion 回答问题
@@ -246,62 +262,13 @@ func (b BocService) AnswerQuestion(userId int64, right int) error {
 		return err
 	}
 
-	mioUser, err := service2.DefaultUserService.FindUserBySource(entity2.UserSourceMio, userId)
-	if err != nil {
-		return err
-	}
-	if mioUser.ID == 0 {
-		return errors.New("未绑定小程序,打开绿喵小程序绑定手机号后,打开小程序邀请记录页面将自动发放积分")
-	}
-
 	if record.AnswerStatus == 2 {
-		record.AnswerBonusStatus = 2
-		err = activity.DefaultBocRecordRepository.Save(record)
+		err := b.SendAnswerBonus(userId)
 		if err != nil {
 			return err
 		}
-		return b.makeAnswerPointTransaction(userId)
 	}
 	return nil
-}
-
-//回答问题领积分
-func (b BocService) makeAnswerPointTransaction(userId int64) error {
-	user, err := service2.DefaultUserService.GetUserById(userId)
-	if err != nil {
-		return err
-	}
-	if user.ID == 0 || user.PhoneNumber == "" {
-		return errors.New("积分发放失败,用户不存在")
-	}
-
-	mioUser := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{
-		Mobile: user.PhoneNumber,
-		Source: entity2.UserSourceMio,
-	})
-
-	if mioUser.ID == 0 {
-		return errors.New("积分发放失败,小程序未绑定手机号,请在小程序端绑定手机号")
-	}
-
-	var (
-		value        int
-		additionInfo string
-	)
-	if b.IsOldUser(mioUser.Time.Time) {
-		value = 500
-		additionInfo = "老用户答题得500积分"
-	} else {
-		value = 2500
-		additionInfo = "新用户答题得2500积分"
-	}
-	_, err = service2.DefaultPointTransactionService.Create(service2.CreatePointTransactionParam{
-		OpenId:       mioUser.OpenId,
-		Type:         entity2.POINT_QUIZ,
-		Value:        value,
-		AdditionInfo: additionInfo,
-	})
-	return err
 }
 
 // IsOldUser 是否老用户
