@@ -44,8 +44,9 @@ var UnidianTypeId = unidianTypeId{
 }
 
 type SubmitOrderParam struct {
-	Order SubmitOrder
-	Items []SubmitOrderItem
+	Order           SubmitOrder
+	Items           []SubmitOrderItem
+	PartnershipType entity.PartnershipType
 }
 type SubmitOrder struct {
 	AddressId string
@@ -58,8 +59,9 @@ type SubmitOrderItem struct {
 }
 
 type submitOrderParam struct {
-	Order submitOrder
-	Items []submitOrderItem
+	Order           submitOrder
+	Items           []submitOrderItem
+	PartnershipType entity.PartnershipType
 }
 type submitOrder struct {
 	AddressId string
@@ -373,4 +375,15 @@ type ParticipateEventParam struct {
 
 type FindEventBy struct {
 	ProductItemId string
+}
+type FindCertificateBy struct {
+	ProductItemId string
+	CertificateId string
+}
+type GenerateBadgeParam struct {
+	OpenId        string
+	CertificateId string
+	ProductItemId string
+	OrderId       string
+	Partnership   entity.PartnershipType
 }

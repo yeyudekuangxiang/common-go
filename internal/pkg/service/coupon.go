@@ -132,7 +132,7 @@ func (r CouponService) RedeemCouponWithTransaction(param RedeemCouponWithTransac
 			return nil, err
 		}
 	} else if contentType.ProductItemId != "" {
-		order, err := r.RedeemCouponToItems(param.OpenId, param.OrderType, *contentType)
+		order, err := r.RedeemCouponToItems(param.OpenId, param.OrderType, *contentType, entity.PartnershipType(contentType.Partnership))
 		if err != nil {
 			return nil, err
 		}
@@ -174,7 +174,7 @@ func (r CouponService) RedeemCouponToPoints(openId string, value int, couponId s
 }
 
 // RedeemCouponToItems 将优惠券兑换成订单
-func (r CouponService) RedeemCouponToItems(openId string, orderType entity.OrderType, couponType coupon.CouponType) (*entity.Order, error) {
+func (r CouponService) RedeemCouponToItems(openId string, orderType entity.OrderType, couponType coupon.CouponType, partnership entity.PartnershipType) (*entity.Order, error) {
 	user, err := DefaultUserService.GetUserByOpenId(openId)
 
 	if err != nil {
@@ -212,6 +212,7 @@ func (r CouponService) RedeemCouponToItems(openId string, orderType entity.Order
 				Count:  int(couponType.ProductItemCount),
 			},
 		},
+		PartnershipType: partnership,
 	})
 }
 

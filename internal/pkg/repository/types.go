@@ -161,3 +161,7 @@ type FindCouponTypeBy struct {
 type FindDuiBaPointAddLogBy struct {
 	OrderNum string
 }
+type FindCertificateBy struct {
+	ProductItemId string
+	CertificateId string
+}

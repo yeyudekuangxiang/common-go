@@ -1,8 +1,8 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"math/rand"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -93,7 +93,8 @@ func (srv OrderService) SubmitOrder(param SubmitOrderParam) (*entity.Order, erro
 			TotalCost: calculateResult.TotalCost,
 			OrderType: entity.OrderTypePurchase,
 		},
-		Items: calculateResult.ItemList,
+		Items:           calculateResult.ItemList,
+		PartnershipType: param.PartnershipType,
 	})
 }
 
@@ -177,7 +178,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 		return nil, err
 	}
 
-	srv.afterCreateOrder(user, order, orderItems)
+	srv.afterCreateOrder(param, user, order, orderItems)
 
 	orderSuccess = true
 	return order, nil
@@ -223,7 +224,7 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		return nil, nil, err
 	}
 
-	srv.afterCreateOrder(user, order, orderItems)
+	srv.afterCreateOrder(param, user, order, orderItems)
 
 	return order, orderItems, nil
 }
@@ -306,7 +307,11 @@ func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 
 	return &order, srv.repo.SubmitOrder(&order, &orderItemList)
 }
-func (srv OrderService) afterCreateOrder(user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+func (srv OrderService) afterCreateOrder(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+	participateEvent(param, user, order, orderItems)
+	generateBadgeFromOrderItems(param, user, order, orderItems)
+}
+func participateEvent(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
 	participateEventParams := make([]ParticipateEventParam, 0)
 	for _, orderItem := range orderItems {
 		participateEventParams = append(participateEventParams, ParticipateEventParam{
@@ -317,5 +322,34 @@ func (srv OrderService) afterCreateOrder(user *entity.User, order *entity.Order,
 	err := DefaultEventParticipationService.ParticipateEvent(user.ID, participateEventParams)
 	if err != nil {
 		app.Logger.Errorf("下订单后参加活动参与失败 %d %+v", user.ID, participateEventParams)
+	}
+}
+func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+	for _, orderItem := range orderItems {
+		cert, err := DefaultCertificateService.FindCertificate(FindCertificateBy{
+			ProductItemId: orderItem.ItemId,
+		})
+		if err != nil {
+			app.Logger.Error("发放证书失败 查询证书异常", orderItem.ItemId, err)
+			continue
+		}
+
+		if cert.ID == 0 {
+			continue
+		}
+
+		for i := 0; i < orderItem.Count; i++ {
+			_, err := DefaultBadgeService.GenerateBadge(GenerateBadgeParam{
+				OpenId:        user.OpenId,
+				CertificateId: cert.CertificateId,
+				ProductItemId: orderItem.ItemId,
+				OrderId:       order.OrderId,
+				Partnership:   param.PartnershipType,
+			})
+			if err != nil {
+				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
+				continue
+			}
+		}
 	}
 }
