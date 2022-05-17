@@ -13,7 +13,7 @@ var DefaultBocController = BocController{}
 type BocController struct {
 }
 
-var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-31 23:59:59")
+var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-10-10 23:59:59")
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	form := GetBocRecordListForm{}
