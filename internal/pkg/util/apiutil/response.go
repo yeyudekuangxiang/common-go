@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
+	"os"
 	"reflect"
 )
 
@@ -43,9 +44,9 @@ func FormatErr(err error, data interface{}) gin.H {
 	if code != 200 && code != errno.ErrAuth.Code() {
 		go func() {
 			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
-				Content: fmt.Sprintf("**来源:**响应 \n\n**消息:**%+v", err),
+				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**响应 \n\n**消息:**%+v", os.Getenv("HOSTNAME"), err),
 			})
-			if err != nil {
+			if sendErr != nil {
 				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
 			}
 		}()
