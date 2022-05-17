@@ -19,7 +19,7 @@ import (
 )
 
 //活动开始时间 用户判断是否老用户
-var bocActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-03-09 00:00:00")
+var bocActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-05-17 00:00:00")
 
 var DefaultBocService = BocService{repo: activity.DefaultBocRecordRepository}
 
@@ -229,6 +229,7 @@ func (b BocService) SendAnswerBonus(userId int64) error {
 	}
 
 	record.AnswerBonusStatus = 2
+	record.AnswerBonusTime = model.NewTime()
 	record.UpdatedAt = model.NewTime()
 	err = activity.DefaultBocRecordRepository.Save(record)
 	if err != nil {
@@ -302,7 +303,7 @@ func (b BocService) IsOldUserById(userId int64) (bool, error) {
 	return b.IsOldUser(mioUser.Time.Time), nil
 }
 
-// SendApplyBonus 发放申请卡片奖励(拿到中行列表后 根据中行列表和活动参与记录执行)
+// SendApplyBonus 发放申请卡片奖励(拿到中行列表后 根据中行列表和活动参与记录执行) userId为mobile user id
 func (b BocService) SendApplyBonus(userId int64) error {
 	//防止并发
 	cmd := app.Redis.GetEx(context.Background(), config.RedisKey.Limit1S+strconv.Itoa(int(userId)), 1*time.Second)
@@ -360,7 +361,7 @@ func (b BocService) SendApplyBonus(userId int64) error {
 	return nil
 }
 
-// SendBindWechatBonus 发放绑定微信奖励(拿到中行列表后 根据中行列表和活动参与记录执行)
+// SendBindWechatBonus (活动结束后发放)发放绑定微信奖励(拿到中行列表后 根据中行列表和活动参与记录执行) userId为mobile user id
 func (b BocService) SendBindWechatBonus(userId int64) error {
 	//更改奖励发放状态
 	record := activity.DefaultBocRecordRepository.FindBy(activity.FindRecordBy{
@@ -369,13 +370,20 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 	if record.Id == 0 {
 		return errors.New("未查询到活动参与记录")
 	}
-	if record.ApplyBonusStatus == 2 {
-		return errors.New("审核中")
-	} else if record.ApplyBonusStatus == 3 {
+	if record.ApplyStatus != 3 {
+		return errors.New("卡片暂未审核通过")
+	}
+	if record.BindWechatStatus != 2 {
+		return errors.New("卡片暂未绑定微信")
+	}
+	if record.BindWechatBonusStatus == 1 {
+		return errors.New("请先去小程序中提交申请,申请通过后将会发放奖励")
+	}
+	if record.BindWechatBonusStatus == 3 {
 		return errors.New("奖励已经发放过了")
 	}
-	record.BindWechatStatus = 2
-	record.BindWechatBonusStatus = 2
+
+	record.BindWechatBonusStatus = 3
 	record.BindWechatBonusTime = model.NewTime()
 	record.UpdatedAt = model.NewTime()
 	err := activity.DefaultBocRecordRepository.Save(&record)
@@ -403,7 +411,7 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 		return err
 	}
 
-	//后续进行实际话费充值操作
+	//活动结束后发放
 
 	return nil
 }
@@ -427,6 +435,7 @@ func (b BocService) ApplySendApplyBonus(userId int64) error {
 		return errors.New("奖励已申请")
 	}
 	record.ApplyBonusStatus = 2
+	record.ApplyBonusTime = model.NewTime()
 	err = activity.DefaultBocRecordRepository.Save(&record)
 	if err != nil {
 		app.Logger.Error(userId, err)
@@ -434,7 +443,7 @@ func (b BocService) ApplySendApplyBonus(userId int64) error {
 	}
 
 	//话费的无需审核直接充值
-	return b.SendApplyBonus(userId)
+	return b.SendApplyBonus(mobileUser.ID)
 }
 
 // ApplySendBindWechatBonus 申请发放10圆奖励
@@ -461,6 +470,11 @@ func (b BocService) ApplySendBindWechatBonus(userId int64) error {
 
 // ApplySendBocBonus 申请发放中行奖励金
 func (b BocService) ApplySendBocBonus(userId int64) error {
+	util.DefaultLock.LockWait(fmt.Sprintf("BocApplySendBocBonus%d", userId), time.Second*3)
+	defer func() {
+		util.DefaultLock.UnLock(fmt.Sprintf("BocApplySendBocBonus%d", userId))
+	}()
+
 	list, _, err := b.GetApplyRecordPageList(GetRecordPageListParam{
 		UserId:                  userId,
 		ApplyStatus:             3,
