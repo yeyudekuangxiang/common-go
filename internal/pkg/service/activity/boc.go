@@ -461,6 +461,11 @@ func (b BocService) ApplySendBindWechatBonus(userId int64) error {
 
 // ApplySendBocBonus 申请发放中行奖励金
 func (b BocService) ApplySendBocBonus(userId int64) error {
+	util.DefaultLock.LockWait(fmt.Sprintf("BocApplySendBocBonus%d", userId), time.Second*3)
+	defer func() {
+		util.DefaultLock.UnLock(fmt.Sprintf("BocApplySendBocBonus%d", userId))
+	}()
+
 	list, _, err := b.GetApplyRecordPageList(GetRecordPageListParam{
 		UserId:                  userId,
 		ApplyStatus:             3,
