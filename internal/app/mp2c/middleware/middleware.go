@@ -17,6 +17,7 @@ import (
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
 	"mio/pkg/zap"
+	"os"
 	"runtime"
 	"time"
 )
@@ -37,7 +38,7 @@ func recovery() gin.HandlerFunc {
 		}
 		go func() {
 			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
-				Content: fmt.Sprintf("**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", err, stack()),
+				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, stack()),
 			})
 			if sendErr != nil {
 				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
