@@ -8,6 +8,7 @@ import (
 	zh_translations "github.com/go-playground/validator/v10/translations/zh"
 	"github.com/pkg/errors"
 	"log"
+	"mio/internal/pkg/core/app"
 	"reflect"
 	"sync"
 )
@@ -46,7 +47,11 @@ func (v *defaultValidator) lazyinit() {
 		registerTagName(v.validate)
 		zh := zhongwen.New()
 		uni := ut.New(zh, zh)
-		trans, _ = uni.GetTranslator("zh")
+		found := false
+		trans, found = uni.GetTranslator("zh")
+		if !found {
+			app.Logger.Error("未找到validator中文翻译")
+		}
 		err := zh_translations.RegisterDefaultTranslations(v.validate, trans)
 
 		if err != nil {
@@ -103,6 +108,7 @@ func Translate(err error) []string {
 	for _, err := range errs {
 		errStrList = append(errStrList, err.Translate(trans))
 	}
+	app.Logger.Infof("翻译validator验证信息 %+v %+v", err, errStrList)
 	return errStrList
 }
 func IsValidationErrors(err error) bool {
@@ -116,5 +122,6 @@ func TranslateError(err error) error {
 	if IsValidationErrors(err) {
 		return errors.New(Translate(err)[0])
 	}
+	app.Logger.Errorf("不是validator错误 %+v %+v", err, reflect.TypeOf(err))
 	return err
 }
