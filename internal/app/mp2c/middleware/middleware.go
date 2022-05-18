@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
@@ -19,6 +20,7 @@ import (
 	"mio/pkg/zap"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -36,9 +38,12 @@ func recovery() gin.HandlerFunc {
 		} else {
 			c.JSON(200, apiutil.FormatResponse(errno.InternalServerError.Code(), nil, fmt.Sprintf("%v", err)))
 		}
+		c.Abort()
+
+		callers := callers()
 		go func() {
 			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
-				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, stack()),
+				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
 			})
 			if sendErr != nil {
 				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
@@ -46,9 +51,17 @@ func recovery() gin.HandlerFunc {
 		}()
 	})
 }
-func stack() string {
-	var buf [3 << 10]byte
-	return string(buf[:runtime.Stack(buf[:], true)])
+func callers() string {
+	const depth = 32
+	var pcs [depth]uintptr
+	n := runtime.Callers(5, pcs[:])
+
+	s := strings.Builder{}
+	for _, pc := range pcs[0:n] {
+		f := errors.Frame(pc)
+		s.WriteString(fmt.Sprintf("\n%+v", f))
+	}
+	return s.String()
 }
 
 func access() gin.HandlerFunc {
