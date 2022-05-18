@@ -2,6 +2,7 @@ package activity
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	activityM "mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
@@ -13,7 +14,7 @@ var DefaultBocController = BocController{}
 type BocController struct {
 }
 
-var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-10-10 23:59:59")
+var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-06-30 23:59:59")
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	form := GetBocRecordListForm{}
@@ -48,6 +49,8 @@ func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 func (b BocController) FindOrCreateRecord(c *gin.Context) (gin.H, error) {
+	log.Println("活动结束时间", bocEndTime, time.Now(), bocEndTime.Before(time.Now()))
+
 	form := AddBocRecordFrom{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -109,7 +112,7 @@ func (b BocController) Answer(c *gin.Context) (gin.H, error) {
 	return nil, err
 }
 func (b BocController) FindRecordOfMini(c *gin.Context) (gin.H, error) {
-
+	log.Println("活动结束时间", bocEndTime, time.Now(), bocEndTime.Before(time.Now()))
 	user := apiutil.GetAuthUser(c)
 	record, err := activity2.DefaultBocService.FindApplyRecordMini(user.ID)
 	if err != nil {
