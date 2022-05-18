@@ -55,5 +55,8 @@ func openRouter(router *gin.Engine) {
 				context.String(400, err.Error())
 			}
 		})
+
+		//星星充电订单同步接口
+		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
 	}
 }

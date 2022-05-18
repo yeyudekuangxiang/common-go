@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -15,5 +16,6 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	fmt.Println(&form)
 	return gin.H{}, nil
 }
