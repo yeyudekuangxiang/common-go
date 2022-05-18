@@ -107,6 +107,13 @@ func apiRouter(router *gin.Engine) {
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
 		}
 
+		//签到相关路由
+		checkinRouter := mustAuthRouter.Group("/checkin")
+		{
+			checkinRouter.GET("/info", apiutil.Format(api.DefaultCheckinController.GetCheckinInfo))
+			checkinRouter.POST("/collect", apiutil.Format(api.DefaultCheckinController.Checkin))
+		}
+
 		mustAuthRouter.GET("/mobile-user", apiutil.Format(api.DefaultUserController.GetMobileUserInfo))
 
 		//OCR识别
