@@ -40,9 +40,6 @@ func apiRouter(router *gin.Engine) {
 		//h5活动页调用
 		authRouter.POST("/activity/boc/record", apiutil.Format(activityApi.DefaultBocController.FindOrCreateRecord))
 
-		//星星充电订单同步接口
-		authRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
-
 	}
 
 	//必须登陆的路由
