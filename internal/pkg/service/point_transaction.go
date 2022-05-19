@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/jszwec/csvutil"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -27,6 +28,9 @@ type PointTransactionService struct {
 
 // Create 添加发放积分记录并且更新用户剩余积分
 func (srv PointTransactionService) Create(param CreatePointTransactionParam) (*entity.PointTransaction, error) {
+	util.DefaultLock.LockWait(fmt.Sprintf("PointTransactionCreate%s", param.OpenId), time.Second*5)
+	defer util.DefaultLock.UnLock(fmt.Sprintf("PointTransactionCreate%s", param.OpenId))
+
 	if err := util.ValidatorStruct(param); err != nil {
 		app.Logger.Error(param, err)
 		return nil, err
