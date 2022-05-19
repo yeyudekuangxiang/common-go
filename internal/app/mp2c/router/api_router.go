@@ -114,6 +114,18 @@ func apiRouter(router *gin.Engine) {
 			checkinRouter.POST("/collect", apiutil.Format(api.DefaultCheckinController.Checkin))
 		}
 
+		//答题相关路由
+		quizRouter := mustAuthRouter.Group("/quiz")
+		{
+			quizRouter.GET("/daily-questions", apiutil.Format(api.DefaultQuizController.GetDailyQuestions))
+			quizRouter.GET("/availability", apiutil.Format(api.DefaultQuizController.Availability))
+			quizRouter.GET("/check", apiutil.Format(api.DefaultQuizController.AnswerQuestion))
+			quizRouter.GET("/submit", apiutil.Format(api.DefaultQuizController.Submit))
+			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
+			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
+
+		}
+
 		mustAuthRouter.GET("/mobile-user", apiutil.Format(api.DefaultUserController.GetMobileUserInfo))
 
 		//OCR识别

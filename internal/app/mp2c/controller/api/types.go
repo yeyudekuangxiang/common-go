@@ -56,3 +56,8 @@ type UpdateStepTotalForm struct {
 	EncryptedData string `json:"encryptedData" form:"encryptedData" binding:"required" alias:"encryptedData"`
 	IV            string `json:"iv" form:"iv" binding:"required" alias:"iv"`
 }
+
+type AnswerQuizQuestionForm struct {
+	QuestionId string `json:"questionId" form:"questionId" binding:"required" alias:"questionId"`
+	Choice     string `json:"choice" form:"choice" binding:"required" alias:"choice"`
+}
