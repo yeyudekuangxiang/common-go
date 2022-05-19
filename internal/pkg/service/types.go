@@ -329,3 +329,9 @@ type UpdateDuiBaPointAddLog struct {
 	AppKey        string
 	TransactionId string
 }
+type UpdateUserInfoParam struct {
+	UserId   int64
+	Nickname string
+	Avatar   string
+	Gender   entity.UserGender
+}
