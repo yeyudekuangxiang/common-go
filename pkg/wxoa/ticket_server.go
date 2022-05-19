@@ -49,7 +49,7 @@ func (srv *TicketTokenServer) getTicket() (*Ticket, error) {
 func (srv *TicketTokenServer) Ticket() (ticket string, err error) {
 	//return srv.RefreshTicket("")
 	ticket, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		app.Logger.Error(err)
 	}
 	if ticket != "" {
@@ -68,7 +68,7 @@ func (srv *TicketTokenServer) Ticket() (ticket string, err error) {
 }
 func (srv *TicketTokenServer) RefreshTicket(currentTicket string) (ticket string, err error) {
 	ticket, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		app.Logger.Error(err)
 	}
 	if ticket != "" && currentTicket != "" && ticket != currentTicket {

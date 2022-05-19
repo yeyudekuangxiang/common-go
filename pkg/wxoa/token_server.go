@@ -46,7 +46,7 @@ func (srv *AccessTokenServer) getToken() (*AccessToken, error) {
 func (srv *AccessTokenServer) Token() (token string, err error) {
 	//return srv.RefreshToken("")
 	token, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		app.Logger.Error(err)
 	}
 	if token != "" {
@@ -65,7 +65,7 @@ func (srv *AccessTokenServer) Token() (token string, err error) {
 }
 func (srv *AccessTokenServer) RefreshToken(currentToken string) (token string, err error) {
 	token, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		app.Logger.Error(err)
 	}
 	if token != "" && currentToken != "" && token != currentToken {
