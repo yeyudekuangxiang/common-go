@@ -56,3 +56,9 @@ type UpdateStepTotalForm struct {
 	EncryptedData string `json:"encryptedData" form:"encryptedData" binding:"required" alias:"encryptedData"`
 	IV            string `json:"iv" form:"iv" binding:"required" alias:"iv"`
 }
+
+type UpdateUserInfoForm struct {
+	Nickname string `json:"nickname" form:"nickname"`
+	Avatar   string `json:"avatar" form:"avatar"`
+	Gender   int    `json:"gender" form:"gender" binding:"oneof=0 1 2"`
+}

@@ -123,3 +123,25 @@ func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 		"summary": summary,
 	}, nil
 }
+
+func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
+	form := UpdateUserInfoForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+
+	var gender entity.UserGender
+	if form.Gender == 1 {
+		gender = entity.UserGenderMale
+	} else if form.Gender == 2 {
+		gender = entity.UserGenderFemale
+	}
+	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+		UserId:   user.ID,
+		Nickname: form.Nickname,
+		Avatar:   form.Avatar,
+		Gender:   gender,
+	})
+	return nil, err
+}

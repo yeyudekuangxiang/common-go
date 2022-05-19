@@ -19,11 +19,18 @@ const (
 	UserPositionBlue UserPosition = "blue" //蓝v
 )
 
+type UserGender string
+
+const (
+	UserGenderMale   UserGender = "MALE"
+	UserGenderFemale UserGender = "FEMALE"
+)
+
 type User struct {
 	ID           int64        `gorm:"primary_key;column:id" json:"id"`
 	OpenId       string       `gorm:"column:openid" json:"openId"`
 	AvatarUrl    string       `gorm:"column:avatar_url" json:"avatarUrl"`
-	Gender       string       `gorm:"column:gender" json:"gender"`
+	Gender       UserGender   `gorm:"column:gender" json:"gender"`
 	Nickname     string       `gorm:"column:nick_name" json:"nickname"`
 	Birthday     model.Date   `gorm:"column:birthday" json:"birthday"`
 	PhoneNumber  string       `gorm:"column:phone_number" json:"phoneNumber"`
@@ -49,7 +56,7 @@ func (u User) ShortUser() ShortUser {
 type ShortUser struct {
 	ID           int64        `gorm:"primary_key;column:id" json:"id"`
 	AvatarUrl    string       `gorm:"column:avatar_url" json:"avatarUrl"`
-	Gender       string       `gorm:"column:gender" json:"gender"`
+	Gender       UserGender   `gorm:"column:gender" json:"gender"`
 	Nickname     string       `gorm:"column:nick_name" json:"nickname"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`

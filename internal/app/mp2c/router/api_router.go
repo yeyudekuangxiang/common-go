@@ -52,6 +52,7 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
+			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 		}
 		//拉新
 		inviteRouter := mustAuthRouter.Group("/invite")
