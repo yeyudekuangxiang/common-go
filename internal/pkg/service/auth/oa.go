@@ -8,6 +8,7 @@ import (
 	"github.com/chanxuehong/wechat/mp/jssdk"
 	mpoauth2 "github.com/chanxuehong/wechat/mp/oauth2"
 	"github.com/chanxuehong/wechat/oauth2"
+	"github.com/go-redis/redis/v8"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -90,7 +91,7 @@ func (srv OaService) AutoLoginCallback(code string, state string) (string, error
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, state)
 
 	dataStr, err := app.Redis.Get(context.Background(), redisKey).Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		app.Logger.Error(err)
 	}
 	if dataStr == "" {
