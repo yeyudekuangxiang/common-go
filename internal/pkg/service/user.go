@@ -398,3 +398,13 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 func (u UserService) GetUserListBy(by repository2.GetUserListBy) ([]entity.User, error) {
 	return u.r.GetUserListBy(by), nil
 }
+func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	user.AvatarUrl = param.Avatar
+	user.Nickname = param.Nickname
+	user.Gender = param.Gender
+	return u.r.Save(&user)
+}
