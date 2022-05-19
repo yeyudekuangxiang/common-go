@@ -7,6 +7,7 @@ import (
 	"gitlab.com/rwxrob/uniq"
 	"mio/internal/pkg/model/entity/pugc"
 	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/util/wxamp"
 	"strconv"
 	"time"
 )
@@ -46,8 +47,8 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 }
 
 func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
-
-	service2.DefaultUnidianService.SendPrize(service2.UnidianTypeId.FiveYuan, "13817715315")
+	cas := wxamp.BatchGetUserRiskCase([]string{"oy_BA5A8mSIeu8EWeWsSphYVNs9c", "oy_BA5O7LpS3iBbOOCuhZFRShqJU"})
+	fmt.Println(cas)
 	//os.Exit(0)
 	return nil, nil
 	f := excelize.NewFile()
