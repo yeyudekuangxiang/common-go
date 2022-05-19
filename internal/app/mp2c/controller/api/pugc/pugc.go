@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
-	"gitlab.com/rwxrob/uniq"
 	"mio/internal/pkg/model/entity/pugc"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/util/wxamp"
@@ -47,24 +46,24 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 }
 
 func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
-	cas := wxamp.BatchGetUserRiskCase([]string{"oy_BA5A8mSIeu8EWeWsSphYVNs9c", "oy_BA5O7LpS3iBbOOCuhZFRShqJU"})
-	fmt.Println(cas)
-	//os.Exit(0)
-	return nil, nil
-	f := excelize.NewFile()
-	index := f.NewSheet("code")
-	f.SetCellValue("code", "A1", "绿喵0积分")
+	f, err := excelize.OpenFile("/Users/leo/Desktop/10元话费充值名单test.xlsx")
 
-	for i := 0; i <= 10000; i++ {
-		println(uniq.Hex(6))
-		f.SetCellValue("code", "A"+strconv.Itoa(i+2), uniq.Hex(6))
-	}
-	f.SetActiveSheet(index)
-	// Save spreadsheet by the given path.
-	if err := f.SaveAs("/Users/leo/Downloads/绿喵0积分.xlsx"); err != nil {
+	// Get all the rows in the Sheet1.
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
 		fmt.Println(err)
 	}
-	return gin.H{
-		"Pugc": "",
-	}, nil
+	fmt.Println(rows)
+	var openidArr []string
+	for _, row := range rows {
+		openidArr = append(openidArr, row[0])
+	}
+	cas := wxamp.BatchGetUserRiskCase(openidArr)
+	fmt.Println(cas)
+
+	//openid 一次最多传十个
+	//cas := wxamp.BatchGetUserRiskCase([]string{"oy_BA5A8mSIeu8EWeWsSphYVNs9c", "oy_BA5O7LpS3iBbOOCuhZFRShqJU"})
+
+	//os.Exit(0)
+	return nil, nil
 }
