@@ -289,7 +289,7 @@ func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 	for _, duibaOrderItem := range duibaOrderItemList {
 		orderItemList = append(orderItemList, entity.OrderItem{
 			OrderId: orderId,
-			ItemId:  "duiba-" + duibaOrderItem.MerchantCode,
+			ItemId:  duibaOrderItem.MerchantCode,
 			Count:   int(duibaOrderItem.Quantity.ToInt()),
 			Cost:    int(duibaOrderItem.PerCredit.ToInt()),
 		})
