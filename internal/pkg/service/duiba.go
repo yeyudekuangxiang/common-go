@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
@@ -182,9 +183,17 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 	}
 
 	orderItemList := form.OrderItemList.OrderItemList()
-	for _, orderItem := range orderItemList {
+	for i, orderItem := range orderItemList {
+		itemId := ""
+		if orderItem.MerchantCode != "" {
+			itemId = "duiba-" + orderItem.MerchantCode
+		} else {
+			itemId = "duiba-" + form.OrderNum + "-" + util.Md5(orderItem.Title)
+		}
+		orderItemList[i].MerchantCode = itemId
+
 		_, err := DefaultProductItemService.CreateOrUpdateProductItem(CreateOrUpdateProductItemParam{
-			ItemId:   "duiba-" + orderItem.MerchantCode,
+			ItemId:   itemId,
 			Virtual:  false,
 			Title:    orderItem.Title,
 			Cost:     int(orderItem.PerCredit.ToInt()),
@@ -194,6 +203,12 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 			return err
 		}
 	}
+	orderItemData, err := json.Marshal(orderItemList)
+	if err != nil {
+		return err
+	}
+	form.OrderItemList = duibaApi.OrderItemListStr(orderItemData)
+
 	_, err = DefaultDuiBaOrderService.CreateOrUpdate(orderId, form)
 	if err != nil {
 		return err
