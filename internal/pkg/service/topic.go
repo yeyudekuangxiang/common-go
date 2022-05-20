@@ -126,8 +126,10 @@ func (u TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
 		if topic.Id == 0 {
 			return
 		}
-		topic.SeeCount++
-		if err := u.r.Save(&topic); err != nil {
+
+		seeCount := topic.SeeCount + 1
+
+		if err := u.r.UpdateColumn(topic.Id, "see_count", seeCount); err != nil {
 			app.Logger.Error("更新topic查看次数失败", topicId, userId)
 			return
 		}
@@ -193,8 +195,7 @@ func (u TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	if topic.Id == 0 {
 		return errors.New("未查询到此内容")
 	}
-	topic.Sort = sort
-	err := u.r.Save(&topic)
+	err := u.r.UpdateColumn(topicId, "sort", sort)
 	if err != nil {
 		return err
 	}

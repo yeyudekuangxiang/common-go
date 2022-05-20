@@ -16,6 +16,7 @@ type ITopicRepository interface {
 	AddTopicLikeCount(topicId int64, num int) error
 	GetTopicList(by GetTopicListBy) []entity2.Topic
 	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity2.Topic, total int64)
+	UpdateColumn(id int64, key string, value interface{}) error
 }
 
 func NewTopicRepository(db *gorm.DB) TopicRepository {
@@ -46,7 +47,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity2
 	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
-		Order("sort desc,created_at desc,id desc").
+		Order("sort desc,updated_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
 	if err != nil {
@@ -121,4 +122,7 @@ func (u TopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []enti
 		panic(err)
 	}
 	return
+}
+func (u TopicRepository) UpdateColumn(id int64, key string, value interface{}) error {
+	return u.DB.Model(entity2.Topic{}).Where("id = ?", id).UpdateColumn(key, value).Error
 }
