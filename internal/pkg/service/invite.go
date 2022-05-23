@@ -28,6 +28,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 			OpenId:      qrcode.OpenId,
 			ImageUrl:    qrcode.ImageUrl,
 			Description: qrcode.Description,
+			QrCodeType:  qrcode.QrCodeType,
 		}, nil
 	}
 
@@ -78,7 +79,7 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 			OpenId:    user.OpenId,
 			Nickname:  user.Nickname,
 			AvatarUrl: user.AvatarUrl,
-			Time:      user.Time.Date(),
+			Time:      user.Time,
 		})
 	}
 	return infoList, nil

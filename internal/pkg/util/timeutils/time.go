@@ -3,6 +3,7 @@ package timeutils
 import "time"
 
 const defaultTimeFormat = "2006-01-02 15:03:04"
+const defaultDateFormat = "2006-01-02"
 
 func Now() Time {
 	return Time{
@@ -17,10 +18,10 @@ type Time struct {
 }
 
 func (t Time) StartOfDay() Time {
-	return Time{Time: StartOfDay(t.Time)}
+	return Time{Time: StartOfDay(t.Time), Format: t.Format}
 }
 func (t Time) EndOfDay() Time {
-	return Time{Time: EndOfDay(t.Time)}
+	return Time{Time: EndOfDay(t.Time), Format: t.Format}
 }
 func (t Time) String() string {
 	return t.Time.Format(t.Format)

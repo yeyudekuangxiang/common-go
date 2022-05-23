@@ -119,8 +119,8 @@ func apiRouter(router *gin.Engine) {
 		{
 			quizRouter.GET("/daily-questions", apiutil.Format(api.DefaultQuizController.GetDailyQuestions))
 			quizRouter.GET("/availability", apiutil.Format(api.DefaultQuizController.Availability))
-			quizRouter.GET("/check", apiutil.Format(api.DefaultQuizController.AnswerQuestion))
-			quizRouter.GET("/submit", apiutil.Format(api.DefaultQuizController.Submit))
+			quizRouter.POST("/check", apiutil.Format(api.DefaultQuizController.AnswerQuestion))
+			quizRouter.POST("/submit", apiutil.Format(api.DefaultQuizController.Submit))
 			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
 			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
 
