@@ -275,7 +275,7 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 
 	summery.SavedCO2 = DefaultCarbonNeutralityService.calculateCO2ByStep(int64(lastStepHistory.Count))
 
-	pendingPoints, err := u.calculatePendingStepPoints(userId)
+	pendingPoints, _, err := DefaultStepService.ComputePendingPoint(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -310,46 +310,12 @@ func (u UserService) calculateStepPointsOfToday(userId int64) (int, error) {
 	return total, nil
 }
 
-//计算待领取积分数
-func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
-	userinfo := u.r.GetUserById(userId)
-	if userinfo.ID == 0 {
-		return 0, nil
-	}
-	userStep, err := DefaultStepService.FindOrCreateStep(userId)
-	if err != nil {
-		return 0, err
-	}
-
-	stepUpperLimit := StepScoreUpperLimit * StepToScoreConvertRatio
-
-	if userStep.LastCheckTime.Equal(time.Now()) && userStep.LastCheckCount > stepUpperLimit {
-		return 0, nil
-	}
-
-	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
-		OpenId: userinfo.OpenId,
-		Day:    model.NewTime().StartOfDay(),
-	})
-
-	if err != nil {
-		return 0, err
-	}
-
-	stepCount := u.computePendingHistoryStep(*stepHistory, *userStep)
-	if stepCount > stepUpperLimit {
-		stepCount = stepUpperLimit
-	}
-	return int64(stepCount / StepToScoreConvertRatio), nil
-}
-
 // history 今天的步行历史 step 步行总历史
 func (u UserService) computePendingHistoryStep(history entity.StepHistory, step entity.Step) int {
 	// date check is moved outside
 	lastCheckedSteps := 0
 	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
 
-	fmt.Printf("%+v %+v\n", history, step)
 	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
 	if step.LastCheckTime.IsZero() || !step.LastCheckTime.Equal(model.NewTime().StartOfDay().Time) {
 		lastCheckedSteps = 0
@@ -359,11 +325,8 @@ func (u UserService) computePendingHistoryStep(history entity.StepHistory, step 
 			return 0
 		}
 	}
-	fmt.Println("lastCheckedSteps", lastCheckedSteps, stepUpperLimit)
 
 	currentStep := util2.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
-	fmt.Println("currentStep", currentStep, lastCheckedSteps)
-	fmt.Println("result", currentStep-lastCheckedSteps, lastCheckedSteps%StepToScoreConvertRatio)
 	result := currentStep - lastCheckedSteps + lastCheckedSteps%StepToScoreConvertRatio
 
 	return util2.Ternary(result > 0, result, 0).Int()

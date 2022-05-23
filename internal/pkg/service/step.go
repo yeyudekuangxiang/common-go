@@ -1,9 +1,11 @@
 package service
 
 import (
+	"fmt"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"time"
@@ -137,4 +139,108 @@ func (srv StepService) formatWeeklyHistoryStepList(list []entity.StepHistory) []
 		})
 	}
 	return stepList
+}
+
+// RedeemPointFromPendingSteps 领取步行积分
+func (srv StepService) RedeemPointFromPendingSteps(userId int64) (int, error) {
+	util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%d", userId), time.Second*5)
+	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemPointFromPendingSteps%d", userId))
+
+	user, err := DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return 0, err
+	}
+	if user.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
+	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId: user.OpenId,
+		Day:    model.NewTime().StartOfDay(),
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	pendingPoint, pendingStep, err := srv.ComputePendingPoint(userId)
+	if err != nil {
+		return 0, err
+	}
+
+	if pendingPoint == 0 {
+		return 0, nil
+	}
+
+	step, err := srv.FindOrCreateStep(userId)
+	if err != nil {
+		return 0, err
+	}
+	step.LastCheckCount = step.LastCheckCount + pendingStep
+	step.LastCheckTime = stepHistory.RecordedTime
+	err = srv.repo.Save(step)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
+		Value:        int(pendingPoint),
+		Type:         entity.POINT_STEP,
+		OpenId:       user.OpenId,
+		AdditionInfo: fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
+	})
+	return int(pendingPoint), err
+}
+
+// computePendingStep 计算未领取积分的步行步数
+func (srv StepService) computePendingStep(history entity.StepHistory, step entity.Step) int {
+	// date check is moved outside
+	lastCheckedSteps := 0
+	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
+
+	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
+	if step.LastCheckTime.IsZero() || !step.LastCheckTime.Equal(model.NewTime().StartOfDay().Time) {
+		lastCheckedSteps = 0
+	} else {
+		lastCheckedSteps = step.LastCheckCount
+		if lastCheckedSteps > stepUpperLimit {
+			return 0
+		}
+	}
+
+	currentStep := util.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
+
+	result := currentStep - lastCheckedSteps
+
+	return util.Ternary(result > 0, result, 0).Int()
+}
+
+// computePendingStep 计算可领取的积分数量 和 步行数量
+func (srv StepService) computePendingPoint(history entity.StepHistory, step entity.Step) (point int64, stepNum int) {
+	pendingStep := srv.computePendingStep(history, step)
+	pendingPoint := pendingStep / StepToScoreConvertRatio
+	return int64(pendingPoint), pendingPoint * StepToScoreConvertRatio
+}
+
+func (srv StepService) ComputePendingPoint(userId int64) (point int64, step int, err error) {
+	userinfo, err := DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return 0, 0, err
+	}
+	if userinfo.ID == 0 {
+		return 0, 0, nil
+	}
+	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId: userinfo.OpenId,
+		Day:    model.NewTime().StartOfDay(),
+	})
+	if err != nil {
+		return 0, 0, err
+	}
+	userStep, err := DefaultStepService.FindOrCreateStep(userId)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	pointNum, stepNum := srv.computePendingPoint(*stepHistory, *userStep)
+	return pointNum, stepNum, nil
 }

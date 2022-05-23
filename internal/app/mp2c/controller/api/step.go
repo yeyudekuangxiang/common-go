@@ -30,3 +30,10 @@ func (StepController) WeeklyHistory(ctx *gin.Context) (interface{}, error) {
 	user := apiutil.GetAuthUser(ctx)
 	return service.DefaultStepService.WeeklyHistory(user.ID)
 }
+func (StepController) Collect(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
+	points, err := service.DefaultStepService.RedeemPointFromPendingSteps(user.ID)
+	return gin.H{
+		"points": points,
+	}, err
+}

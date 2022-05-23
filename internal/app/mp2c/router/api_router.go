@@ -56,7 +56,7 @@ func apiRouter(router *gin.Engine) {
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 		}
-		//拉新
+		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
 		{
 			inviteRouter.GET("/qrcode", apiutil.Format(api.DefaultInviteController.GetShareQrCode))
@@ -105,6 +105,7 @@ func apiRouter(router *gin.Engine) {
 			stepRouter.POST("/update", apiutil.Format(api.DefaultStepController.UpdateStepTotal))
 			//获取最近7天内步行数据
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
+			stepRouter.POST("/collect", apiutil.Format(api.DefaultStepController.Collect))
 		}
 
 		//签到相关路由
