@@ -195,7 +195,6 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		return nil, errors.New("未查找到用户信息,请联系管理员")
 	}
 
-	rand.Seed(time.Now().UnixMilli())
 	order := &entity.Order{
 		OrderId:          orderId,
 		AddressId:        addressId,
@@ -266,7 +265,6 @@ func (srv OrderService) UpdateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 	return &order, srv.repo.Save(&order)
 }
 func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderInfo) (*entity.Order, error) {
-	rand.Seed(time.Now().UnixMilli())
 	order := entity.Order{
 		OrderId:          orderId,
 		OpenId:           info.Uid,

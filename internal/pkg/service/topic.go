@@ -307,7 +307,6 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 
 // ImportTopic 从xlsx中导入内容
 func (u TopicService) ImportTopic(filename string, baseImportId int) error {
-	rand.Seed(time.Now().Unix())
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
 		return errors.WithStack(err)
