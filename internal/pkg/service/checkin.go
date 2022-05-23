@@ -36,13 +36,15 @@ func (srv CheckinService) GetCheckInfo(openId string) (*CheckinInfo, error) {
 		IsChecked: isCheckedToday,
 	}
 
+	checkinInfo.CheckedNumber = history.CheckedNumber
+
 	if isCheckedToday {
-		checkinInfo.NthDayToCheck = history.CheckedNumber
+		checkinInfo.TodayCheckIndex = history.CheckedNumber
 	} else {
-		checkinInfo.NthDayToCheck = srv.nextCheckinDay(history.CheckedNumber)
+		checkinInfo.TodayCheckIndex = srv.nextCheckinDay(history.CheckedNumber)
 	}
 
-	checkinInfo.QuickCheckin = srv.getQuickCheckin(checkinInfo.NthDayToCheck)
+	checkinInfo.QuickCheckin = srv.getQuickCheckin(checkinInfo.CheckedNumber)
 	checkinInfo.Rule = CheckInPointRule
 	return &checkinInfo, nil
 }

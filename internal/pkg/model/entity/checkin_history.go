@@ -7,10 +7,10 @@ const (
 )
 
 type CheckinHistory struct {
-	Id            int64
-	OpenId        string
-	CheckedNumber int
-	Time          model.Time
+	Id            int64      `json:"id"`
+	OpenId        string     `gorm:"column:openid"`
+	CheckedNumber int        `json:"checkedNumber"`
+	Time          model.Time `json:"time"`
 }
 
 func (CheckinHistory) TableName() string {
