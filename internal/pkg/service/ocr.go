@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/httputil"
 	"time"
 )
 
@@ -21,7 +23,7 @@ type OCRService struct {
 }
 
 // OCRForGm 素食打卡
-func (u OCRService) OCRForGm(openid string, src string) error {
+func (srv OCRService) OCRForGm(openid string, src string) error {
 	res := util.OCRPush(src)
 	var orderNo, fee string
 
@@ -51,4 +53,23 @@ func (u OCRService) OCRForGm(openid string, src string) error {
 	})
 
 	return err
+}
+func (srv OCRService) Scan(imgUrl string) ([]string, error) {
+	url := "https://aip.baidubce.com/rest/2.0/ocr/v1/webimage?access_token=24.6157c4c9729181acc1bac04d6bd5ecbe.2592000.1650680140.282335-25833266"
+	body, err := httputil.PostMapFrom(url, map[string]string{"url": imgUrl})
+	if err != nil {
+		return nil, err
+	}
+	var o OCRResult
+	err = json.Unmarshal(body, &o)
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]string, 0)
+	for _, word := range o.WordsResult {
+		results = append(results, word.Words)
+	}
+	return results, nil
 }

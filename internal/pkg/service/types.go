@@ -387,3 +387,10 @@ type GenerateBadgeParam struct {
 	OrderId       string
 	Partnership   entity.PartnershipType
 }
+type OCRResult struct {
+	WordsResult []struct {
+		Words string `json:"words"`
+	} `json:"words_result"`
+	WordsResultNum int   `json:"words_result_num"`
+	LogID          int64 `json:"log_id"`
+}
