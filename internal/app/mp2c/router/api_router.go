@@ -129,7 +129,7 @@ func apiRouter(router *gin.Engine) {
 		//扫小票得积分相关路由
 		pointCollectRouter := mustAuthRouter.Group("/point-collect")
 		{
-			pointCollectRouter.POST("/", apiutil.Format(api.DefaultPointCollectController.Collect))
+			pointCollectRouter.POST("", apiutil.Format(api.DefaultPointCollectController.Collect))
 		}
 
 		//上传文件相关路由
