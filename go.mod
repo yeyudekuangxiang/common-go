@@ -27,7 +27,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/xuri/excelize/v2 v2.5.0
-	gitlab.com/rwxrob/uniq v0.0.0-20200325203910-f771e6779384
 	go.uber.org/zap v1.16.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -117,6 +116,7 @@ require (
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
 	github.com/xuri/efp v0.0.0-20210322160811-ab561f5b45e3 // indirect
 	github.com/yosssi/ace v0.0.5 // indirect
+	gitlab.com/rwxrob/uniq v0.0.0-20200325203910-f771e6779384 // indirect
 	go.uber.org/atomic v1.6.0 // indirect
 	go.uber.org/multierr v1.5.0 // indirect
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
