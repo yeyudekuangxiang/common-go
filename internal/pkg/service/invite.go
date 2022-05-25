@@ -31,7 +31,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 		return &QrCodeInfo{
 			QrCodeId:    qrcode.QrCodeId,
 			OpenId:      qrcode.OpenId,
-			ImageUrl:    qrcode.ImageUrl,
+			ImageUrl:    imgUrl,
 			Description: qrcode.Description,
 			QrCodeType:  qrcode.QrCodeType,
 		}, nil
