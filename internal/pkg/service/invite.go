@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util"
+	"strings"
 )
 
 var DefaultInviteService = InviteService{}
@@ -23,6 +24,10 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 		panic(err)
 	}
 	if qrcode.ID != 0 {
+		imgUrl := qrcode.ImageUrl
+		if strings.Index(imgUrl, "http") == -1 {
+			imgUrl = OssDomain + imgUrl
+		}
 		return &QrCodeInfo{
 			QrCodeId:    qrcode.QrCodeId,
 			OpenId:      qrcode.OpenId,
