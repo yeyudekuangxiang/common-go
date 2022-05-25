@@ -28,6 +28,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/xuri/excelize/v2 v2.5.0
+	github.com/yeyudekuangxiang/go-utils v0.0.0-20220525021653-ad60831016e9
 	gitlab.com/rwxrob/uniq v0.0.0-20200325203910-f771e6779384
 	go.uber.org/zap v1.16.0
 	gopkg.in/ini.v1 v1.62.0

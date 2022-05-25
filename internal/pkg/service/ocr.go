@@ -2,24 +2,33 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/httputil"
+	"mio/pkg/baidu"
 	"time"
 )
 
-var DefaultOCRService = NewOCRService()
+var DefaultOCRService OCRService
 
-func NewOCRService() OCRService {
-	return OCRService{}
+func InitDefaultOCRService() {
+	DefaultOCRService = OCRService{
+		imageClient: &baidu.ImageClient{
+			AccessToken: baidu.NewAccessToken(baidu.AccessTokenConfig{
+				RedisClient: app.Redis,
+				Prefix:      config.RedisKey.BaiDu,
+				AppKey:      config.Config.BaiDu.AppKey,
+				AppSecret:   config.Config.BaiDu.AppSecret,
+			}),
+		},
+	}
 }
 
 type OCRService struct {
+	imageClient *baidu.ImageClient
 }
 
 // OCRForGm 素食打卡
@@ -55,20 +64,19 @@ func (srv OCRService) OCRForGm(openid string, src string) error {
 	return err
 }
 func (srv OCRService) Scan(imgUrl string) ([]string, error) {
-	url := "https://aip.baidubce.com/rest/2.0/ocr/v1/webimage?access_token=24.6157c4c9729181acc1bac04d6bd5ecbe.2592000.1650680140.282335-25833266"
-	body, err := httputil.PostMapFrom(url, map[string]string{"url": "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/test/ocr/coffee_cup/greencat/65e2166e-708f-4298-921d-d0b314970a0f.jpg"})
+	rest, err := srv.imageClient.WebImage(baidu.WebImageParam{
+		ImageUrl: imgUrl,
+	})
+	fmt.Printf("%+v %+v\n", rest, err)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(body), err)
-	var o OCRResult
-	err = json.Unmarshal(body, &o)
-	if err != nil {
-		return nil, err
+	if !rest.IsSuccess() {
+		return nil, errors.New(rest.ErrorDescription)
 	}
 
 	results := make([]string, 0)
-	for _, word := range o.WordsResult {
+	for _, word := range rest.WordsResult {
 		results = append(results, word.Words)
 	}
 	return results, nil

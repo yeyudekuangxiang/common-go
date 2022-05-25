@@ -15,6 +15,7 @@ var Config = app{
 	Redis:    redisSetting{},
 	DuiBa:    duiBaSetting{},
 	OSS:      ossSetting{},
+	BaiDu:    baiDuSetting{},
 }
 
 type app struct {
@@ -28,6 +29,7 @@ type app struct {
 	Redis    redisSetting    `ini:"redis"`
 	DuiBa    duiBaSetting    `ini:"duiba"`
 	OSS      ossSetting      `ini:"oss"`
+	BaiDu    baiDuSetting    `ini:"baidu"`
 }
 type appSetting struct {
 	TokenKey string
@@ -77,6 +79,10 @@ type ossSetting struct {
 	AccessKey    string
 	AccessSecret string
 	BasePath     string
+}
+type baiDuSetting struct {
+	AppKey    string
+	AppSecret string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {

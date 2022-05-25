@@ -24,19 +24,20 @@ func (p PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointTra
 		TransactionType: t,
 		TransactionDate: model.Date{Time: time.Now()},
 	})
+
 	if limit.Id == 0 {
-		_, err := p.createLimitOfToday(t, openId)
+		newLimit, err := p.createLimitOfToday(t, openId)
 		if err != nil {
 			return err
 		}
-		return nil
+		limit = *newLimit
 	}
 
 	if limit.CurrentCount >= limitNum {
 		return errors.New("达到当日该类别最大积分限制")
 	}
 
-	limit.MaxCount++
+	limit.CurrentCount++
 	err := repository2.DefaultPointTransactionCountLimitRepository.Save(&limit)
 	if err != nil {
 		return err
@@ -50,7 +51,7 @@ func (p PointTransactionCountLimitService) createLimitOfToday(transactionType en
 		OpenId:          openId,
 		TransactionType: transactionType,
 		MaxCount:        entity.PointCollectLimitMap[transactionType],
-		CurrentCount:    1,
+		CurrentCount:    0,
 		UpdateTime:      model.Time{Time: time.Now()},
 		TransactionDate: model.Date{Time: time.Now()},
 	}
@@ -61,17 +62,18 @@ func (p PointTransactionCountLimitService) CheckLimit(transactionType entity.Poi
 	if !ok {
 		return true, nil
 	}
+
 	limit := repository2.DefaultPointTransactionCountLimitRepository.FindBy(repository2.FindPointTransactionCountLimitBy{
 		OpenId:          openId,
 		TransactionType: transactionType,
 		TransactionDate: model.Date{Time: time.Now()},
 	})
 	if limit.Id == 0 {
-		_, err := p.createLimitOfToday(transactionType, openId)
+		newLimit, err := p.createLimitOfToday(transactionType, openId)
 		if err != nil {
 			return false, err
 		}
-		return true, nil
+		limit = *newLimit
 	}
 
 	return limit.CurrentCount < limitNum, nil
