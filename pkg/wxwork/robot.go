@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -34,8 +33,6 @@ func SendRobotMessage(key string, v interface{}) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(string(data))
 
 	resp, err := http.Post("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="+key, "application/json", bytes.NewReader(data))
 	if err != nil {

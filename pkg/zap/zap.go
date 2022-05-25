@@ -7,6 +7,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"log"
+	setting "mio/config"
 	"mio/pkg/wxwork"
 	"os"
 	"path/filepath"
@@ -34,6 +35,9 @@ func NewZapLogger(config LoggerConfig) *zap.Logger {
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), zapcore.AddSync(writer), logLevel)
 	return zap.New(core, zap.AddCaller(), zap.Hooks(func(entry zapcore.Entry) error {
 		if entry.Level >= zapcore.ErrorLevel {
+			if setting.Config.App.Env != "prod" {
+				return nil
+			}
 			err := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
 				Content: fmt.Sprintf(
 					"**容器:**%s \n\n**来源:**日志 \n\n**level:**%s \n\n**time**:%s \n\n**message**:%s \n\n**caller**:%+v \n\n**stack**:%s", os.Getenv("HOSTNAME"), entry.Level, entry.Time.Format("2006-01-02 15:04:05"), entry.Message, entry.Caller, entry.Stack),

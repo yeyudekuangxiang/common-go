@@ -3,6 +3,8 @@ TokenKey=
 Debug=false
 #项目域名
 Domain=
+#prod dev local
+Env=
 
 [http]
 Port=80
