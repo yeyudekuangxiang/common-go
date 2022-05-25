@@ -10,6 +10,7 @@ import (
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"log"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	service2 "mio/internal/pkg/service"
@@ -42,6 +43,10 @@ func recovery() gin.HandlerFunc {
 
 		callers := callers()
 		go func() {
+			if config.Config.App.Env != "prod" {
+				return
+			}
+
 			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
 				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
 			})

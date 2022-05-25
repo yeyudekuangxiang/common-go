@@ -33,6 +33,8 @@ type appSetting struct {
 	TokenKey string
 	Domain   string
 	Debug    bool
+	//prod dev local
+	Env string
 }
 type httpSetting struct {
 	Port         int
