@@ -31,6 +31,14 @@ var (
 )
 var DefaultPointCollectService = PointCollectService{}
 
+type PointCollectType string
+
+const (
+	PointCollectCoffeeCupType PointCollectType = "COFFEE_CUP"
+	PointCollectBikeRideType  PointCollectType = "BIKE_RIDE"
+	PointCollectDiDiType      PointCollectType = "DIDI"
+)
+
 type PointCollectService struct {
 }
 
@@ -99,6 +107,7 @@ func (srv PointCollectService) validatePointRule(texts []string, rules []string)
 }
 func (srv PointCollectService) validateBikeRideImage(imageUrl string) (bool, []string, error) {
 	results, err := DefaultOCRService.Scan(imageUrl)
+	fmt.Println(results, err)
 	if err != nil {
 		return false, nil, err
 	}

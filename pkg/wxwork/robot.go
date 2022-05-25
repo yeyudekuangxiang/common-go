@@ -11,6 +11,7 @@ import (
 )
 
 func SendRobotMessage(key string, v interface{}) error {
+	return nil
 	var msgType MsgType
 	switch v.(type) {
 	case Text:

@@ -124,7 +124,18 @@ func apiRouter(router *gin.Engine) {
 			quizRouter.POST("/submit", apiutil.Format(api.DefaultQuizController.Submit))
 			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
 			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
+		}
 
+		//扫小票得积分相关路由
+		pointCollectRouter := mustAuthRouter.Group("/point-collect")
+		{
+			pointCollectRouter.POST("/", apiutil.Format(api.DefaultPointCollectController.Collect))
+		}
+
+		//上传文件相关路由
+		uploadRouter := mustAuthRouter.Group("/upload")
+		{
+			uploadRouter.Any("/point-collect", apiutil.Format(api.DefaultUploadController.UploadPointCollectImage))
 		}
 
 		mustAuthRouter.GET("/mobile-user", apiutil.Format(api.DefaultUserController.GetMobileUserInfo))
