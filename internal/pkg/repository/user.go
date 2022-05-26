@@ -152,6 +152,9 @@ func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, 
 	if !by.EndTime.IsZero() {
 		db.Where("time <= ?", by.EndTime)
 	}
+	if by.Risk != 0 {
+		db.Where("risk = ?", by.Risk)
+	}
 
 	if err := db.Count(&count).Limit(bp.Limit).Offset(bp.Offset).Order(bp.OrderBy).Find(&list).Error; err != nil {
 		panic(err)

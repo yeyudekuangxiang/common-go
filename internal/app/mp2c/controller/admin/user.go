@@ -49,12 +49,16 @@ func GetUserPageListBy(c *gin.Context) (gin.H, error) {
 func UpdateUserRisk(c *gin.Context) (gin.H, error) {
 	i := 0
 	for {
-		list, count := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
+		list, _ := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
 			Limit:   10,
-			Offset:  i * 10,
+			Offset:  i,
 			OrderBy: "id desc",
+			User:    repository.GetUserListBy{Risk: -1},
 		})
-
+		if len(list) == 0 {
+			break
+		}
+		i += len(list)
 		var ids []string
 		for _, v := range list {
 			if strings.Contains(v.OpenId, "oy_") {
@@ -65,9 +69,9 @@ func UpdateUserRisk(c *gin.Context) (gin.H, error) {
 		//openid 一次最多传十个
 		cas := wxamp.BatchGetUserRiskCase(ids)
 		if cas == nil {
-			i++
 			continue
 		}
+		i -= len(cas.List)
 		//保存risk
 		for _, v := range list {
 			for _, c := range cas.List {
@@ -77,14 +81,11 @@ func UpdateUserRisk(c *gin.Context) (gin.H, error) {
 						UserId: v.ID,
 						Risk:   c.RiskRank,
 					})
+
 				}
 			}
 		}
-
-		i++
-		if i*10 >= int(count) {
-			break
-		}
+		fmt.Println("risk i ", i)
 
 	}
 

@@ -50,6 +50,7 @@ type GetUserListBy struct {
 	OpenId     string
 	StartTime  time.Time
 	EndTime    time.Time
+	Risk       int
 }
 
 type GetUserPageListBy struct {
