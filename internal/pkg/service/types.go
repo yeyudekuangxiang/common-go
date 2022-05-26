@@ -335,3 +335,8 @@ type UpdateUserInfoParam struct {
 	Avatar   string
 	Gender   entity.UserGender
 }
+
+type UpdateUserRiskParam struct {
+	UserId int64
+	Risk   int
+}

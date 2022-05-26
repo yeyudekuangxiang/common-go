@@ -34,4 +34,6 @@ func adminRouter(router *gin.Engine) {
 			fileExportRouter.GET("/options", apiutil.FormatInterface(admin.DefaultFileExportController.GetFileExportOptions))
 		}
 	}
+	adminRouter.POST("/user/list", apiutil.Format(admin.GetUserPageListBy))
+	adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))
 }
