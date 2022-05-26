@@ -408,3 +408,7 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	user.Gender = param.Gender
 	return u.r.Save(&user)
 }
+
+func (u UserService) GetUserPageListBy(by repository2.GetUserPageListBy) ([]entity.User, int64) {
+	return u.r.GetUserPageListBy(by)
+}

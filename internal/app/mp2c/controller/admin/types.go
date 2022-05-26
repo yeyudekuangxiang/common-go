@@ -58,3 +58,11 @@ type AdminLoginForm struct {
 	Account  string `json:"account" form:"account" binding:"required" alias:"账号"`
 	Password string `json:"password" form:"password" binding:"required" alias:"密码"`
 }
+
+type UserPageListForm struct {
+	Mobile    string    `json:"mobile" form:"mobile" alias:"手机号码"`
+	Nickname  string    `json:"nickname" form:"nickname"`
+	ID        int64     `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
+	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+}

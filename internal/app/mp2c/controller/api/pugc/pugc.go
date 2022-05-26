@@ -5,7 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"mio/internal/pkg/model/entity/pugc"
-	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/wxamp"
 	"strconv"
 	"time"
@@ -33,7 +34,7 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 		p.UserId, _ = strconv.Atoi(row[0])
 		p.Title = row[1]
 		p.CreatedTime = time.Now()
-		service2.DefaultPugcService.InsertPugc(&p)
+		service.DefaultPugcService.InsertPugc(&p)
 		fmt.Println()
 	}
 
@@ -46,24 +47,40 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 }
 
 func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
-	f, err := excelize.OpenFile("/Users/leo/Desktop/10元话费充值名单test.xlsx")
+	//f, err := excelize.OpenFile("/Users/leo/Desktop/10元话费充值名单test.xlsx")
+	//
+	//// Get all the rows in the Sheet1.
+	//rows, err := f.GetRows("Sheet1")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(rows)
+	//var openidArr []string
+	//for _, row := range rows {
+	//	openidArr = append(openidArr, row[0])
+	//}
+	//cas := wxamp.BatchGetUserRiskCase(openidArr)
+	//fmt.Println(cas)
 
-	// Get all the rows in the Sheet1.
-	rows, err := f.GetRows("Sheet1")
-	if err != nil {
-		fmt.Println(err)
+	list, _ := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
+		Limit:   10,
+		Offset:  0,
+		OrderBy: "id desc",
+	})
+
+	var ids []string
+	for _, v := range list {
+		ids = append(ids, v.OpenId)
 	}
-	fmt.Println(rows)
-	var openidArr []string
-	for _, row := range rows {
-		openidArr = append(openidArr, row[0])
-	}
-	cas := wxamp.BatchGetUserRiskCase(openidArr)
-	fmt.Println(cas)
 
 	//openid 一次最多传十个
-	//cas := wxamp.BatchGetUserRiskCase([]string{"oy_BA5A8mSIeu8EWeWsSphYVNs9c", "oy_BA5O7LpS3iBbOOCuhZFRShqJU"})
-
+	cas := wxamp.BatchGetUserRiskCase(ids)
+	//保存risk
+	for _, v := range list {
+		for _,c := range {
+			
+		}
+	}
 	//os.Exit(0)
 	return nil, nil
 }

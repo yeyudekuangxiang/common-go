@@ -15,6 +15,7 @@ type IUserRepository interface {
 	GetUserBy(by GetUserBy) entity.User
 	GetUserListBy(by GetUserListBy) []entity.User
 	GetGuid(unionId string) string
+	GetUserPageListBy(by GetUserPageListBy) ([]entity.User, int64)
 }
 
 func NewUserRepository() UserRepository {
@@ -114,4 +115,46 @@ func (u UserRepository) GetGuid(unionId string) string {
 		panic(err)
 	}
 	return user.GUID
+}
+
+func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, int64) {
+	list := make([]entity.User, 0)
+	var count int64
+	db := app.DB.Model(entity.User{})
+	by := bp.User
+	if by.Mobile != "" {
+		db.Where("phone_number = ?", by.Mobile)
+	}
+	if len(by.UserIds) > 0 {
+		db.Where("id in (?)", by.UserIds)
+	}
+	if len(by.Mobiles) > 0 {
+		db.Where("phone_number in (?)", by.Mobiles)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
+	if by.Nickname != "" {
+		db.Where("nick_name like ?", "%"+by.Nickname+"%")
+	}
+	if by.LikeMobile != "" {
+		db.Where("phone_number like ?", "%"+by.LikeMobile+"%")
+	}
+	if by.UserId != 0 {
+		db.Where("id = ?", by.UserId)
+	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
+	if !by.StartTime.IsZero() {
+		db.Where("time >= ?", by.StartTime)
+	}
+	if !by.EndTime.IsZero() {
+		db.Where("time <= ?", by.EndTime)
+	}
+
+	if err := db.Find(&list).Limit(bp.Limit).Offset(bp.Offset).Order(bp.OrderBy).Count(&count).Error; err != nil {
+		panic(err)
+	}
+	return list, count
 }
