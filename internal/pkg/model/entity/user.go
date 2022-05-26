@@ -40,6 +40,7 @@ type User struct {
 	GUID         string       `gorm:"guid" json:"guid"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
+	Risk         int          `json:"risk"`
 }
 
 func (u User) ShortUser() ShortUser {

@@ -52,6 +52,13 @@ type GetUserListBy struct {
 	EndTime    time.Time
 }
 
+type GetUserPageListBy struct {
+	User    GetUserListBy
+	Offset  int    `json:"offset"`
+	Limit   int    `json:"limit"` //limit为0时不限制数量
+	OrderBy string `json:"orderBy"`
+}
+
 type FindPointBy struct {
 	OpenId string
 }
