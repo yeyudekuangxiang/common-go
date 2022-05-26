@@ -77,8 +77,10 @@ func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 	cas := wxamp.BatchGetUserRiskCase(ids)
 	//保存risk
 	for _, v := range list {
-		for _,c := range {
-			
+		for _, c := range cas.List {
+			if v.OpenId == c.Openid {
+
+			}
 		}
 	}
 	//os.Exit(0)
