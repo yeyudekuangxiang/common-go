@@ -30,7 +30,7 @@ to quickly create a Cobra application.`,
 		}
 		topicPath := cmd.Flag("topic").Value.String()
 		userPath := cmd.Flag("user").Value.String()
-		if topicPath == "" || userPath == "" {
+		if topicPath == "" {
 			log.Fatal("参数错误")
 		}
 
@@ -40,9 +40,11 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		err = service.DefaultTopicService.ImportUser(userPath)
-		if err != nil {
-			log.Fatal(err)
+		if userPath != "" {
+			err = service.DefaultTopicService.ImportUser(userPath)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		err = service.DefaultTopicService.ImportTopic(topicPath, importId)

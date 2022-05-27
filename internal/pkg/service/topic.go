@@ -244,7 +244,7 @@ func (u TopicService) ImportUser(filename string) error {
 			continue
 		}
 
-		avatar, err := u.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".png"))
+		avatar, err := u.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
 		if err != nil {
 			return errors.WithMessage(err, "上传头像失败"+importId)
 		}
@@ -425,8 +425,8 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 				return errors.WithMessagef(err, "创建topic%d失败", importId)
 			}
 			app.DB.Model(entity2.Topic{}).Where("id = ?", topic.Id).Updates(map[string]interface{}{
-				"created_at": time.Now().Add(time.Duration(int64(math.Ceil(rand.Float64()*-2500))) * time.Hour),
-				"updated_at": time.Now().Add(time.Duration(int64(math.Ceil(rand.Float64()*-2500))) * time.Hour),
+				"created_at": time.Now().Add(time.Duration(int64(math.Ceil(rand.Float64()*-1200))) * time.Hour),
+				"updated_at": time.Now().Add(time.Duration(int64(math.Ceil(rand.Float64()*-1200))) * time.Hour),
 			})
 		}
 
