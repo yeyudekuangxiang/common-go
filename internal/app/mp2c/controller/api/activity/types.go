@@ -41,6 +41,7 @@ type ZeroStoreUrlForm struct {
 type DuiBaAutoLoginForm struct {
 	ActivityId string `json:"activityId" form:"activityId" `
 	Short      string `json:"short" form:"short"`
+	ThirdParty string `json:"thirdParty" form:"thirdParty"`
 }
 type DuiBaStoreUrlForm struct {
 	ActivityId string `json:"activityId" form:"activityId" `

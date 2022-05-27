@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -93,7 +94,7 @@ type DuiBaActivity struct {
 	EndTime     time.Time
 }
 
-const DUIBAIndex = ""
+const DUIBAIndex = "https://88543.activity-12.m.duiba.com.cn/chw/visual-editor/skins?id=239935"
 
 func (srv ZeroService) DuiBaStoreUrl(activityId string, url string) (string, error) {
 	key := activityId + "_" + util.Md5(url)
@@ -112,13 +113,13 @@ func (srv ZeroService) GetDuiBaUrlByShort(short string) (string, error) {
 	}
 	return u, nil
 }
-func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short string) (string, error) {
+func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdParty string) (string, error) {
 	userInfo, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return "", err
 	}
 	if userInfo.ID == 0 {
-		return "", errors.New("未查询到用户信息")
+		return "", errno.ErrUserNotFound
 	}
 
 	path := DUIBAIndex
@@ -148,11 +149,17 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short string) (s
 		}
 	}
 
+	vip := 0
+	if thirdParty == "thirdParty" && isNewUser {
+		vip = 2
+	}
+
 	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()
 	return service.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
 		UserId:  userId,
 		OpenId:  userInfo.OpenId,
 		Path:    path,
+		Vip:     vip,
 		DCustom: fmt.Sprintf("avatar=%s&nickname=%s&newUser=%d", userInfo.AvatarUrl, userInfo.Nickname, isNewUserInt),
 	})
 }
@@ -162,15 +169,7 @@ func (srv ZeroService) IsDuiBaActivityNewUser(activityId string, userId int64) (
 		return false, err
 	}
 	if userInfo.ID == 0 {
-		return false, errors.New("未查询到用户信息")
+		return false, errno.ErrUserNotFound
 	}
-	activity, err := service.DefaultDuiBaActivityService.FindActivity(activityId)
-	if err != nil {
-		return false, err
-	}
-	if activity.ID == 0 {
-		return false, errors.New("活动不存在")
-	}
-
-	return userInfo.Time.After(activity.StartTime.Time), nil
+	return !userInfo.Time.IsZero() && userInfo.Time.Add(time.Hour*24).Before(time.Now()), nil
 }
