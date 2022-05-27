@@ -287,6 +287,10 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 	images := make([]string, 0)
 	for _, fileInfo := range fileInfos {
 
+		if strings.Contains(fileInfo.Name(), "DS_Store") {
+			continue
+		}
+
 		file, err := os.Open(path.Join(dirPath, fileInfo.Name()))
 		if err != nil {
 			return nil, err
