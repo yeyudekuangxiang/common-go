@@ -101,6 +101,7 @@ type AutoLoginParam struct {
 }
 type AutoLoginOpenIdParam struct {
 	UserId   int64
+	Vip      int
 	OpenId   string
 	Path     string
 	DCustom  string

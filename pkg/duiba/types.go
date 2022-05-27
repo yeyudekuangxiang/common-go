@@ -15,6 +15,7 @@ type AutoLoginParam struct {
 	RealName string `json:"realname"`               //支付宝实名（如启用支付宝账号锁定则必填，URL中需进行utf-8编码）
 	QQ       string `json:"qq"`                     //QQ号（如启用Q币账号锁定则必填）
 	Phone    string `json:"phone"`                  //手机号码（如启用话费账号锁定则必填
+	Vip      int    `json:"vip"`                    //vip等级 0-59
 	DCustom  string `json:"dcustom"`                //自定义参数
 	Transfer string `json:"transfer"`               //自定义参数
 	SignKeys string `json:"signKeys"`               //自定义参数
@@ -29,6 +30,7 @@ func (param AutoLoginParam) ToMap() map[string]string {
 		"realname": param.RealName,
 		"qq":       param.QQ,
 		"phone":    param.Phone,
+		"vip":      strconv.Itoa(param.Vip),
 		"dcustom":  param.DCustom,
 		"transfer": param.Transfer,
 		"signKeys": param.SignKeys,
