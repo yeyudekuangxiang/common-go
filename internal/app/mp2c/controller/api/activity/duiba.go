@@ -51,7 +51,7 @@ func (ctr ZeroController) DuiBaAutoLogin(ctx *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(ctx)
 
-	loginUrl, err := activity.DefaultZeroService.DuiBaAutoLogin(user.ID, form.ActivityId, form.Short)
+	loginUrl, err := activity.DefaultZeroService.DuiBaAutoLogin(user.ID, form.ActivityId, form.Short, form.ThirdParty)
 
 	return gin.H{
 		"loginUrl": loginUrl,

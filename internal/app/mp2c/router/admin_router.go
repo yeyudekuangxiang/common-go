@@ -35,5 +35,5 @@ func adminRouter(router *gin.Engine) {
 		}
 	}
 	adminRouter.POST("/user/list", apiutil.Format(admin.GetUserPageListBy))
-	adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))
+	//adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))
 }
