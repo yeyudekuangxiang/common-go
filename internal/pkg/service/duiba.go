@@ -67,6 +67,7 @@ func (srv DuiBaService) AutoLoginOpenId(param AutoLoginOpenIdParam) (string, err
 		DCustom:  param.DCustom,
 		Transfer: param.Transfer,
 		SignKeys: param.SignKeys,
+		Vip:      param.Vip,
 	})
 }
 
