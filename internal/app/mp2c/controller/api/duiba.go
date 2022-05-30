@@ -2,10 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
+	"net/http"
 )
 
 var DefaultDuiBaController = DuiBaController{}
@@ -143,4 +146,33 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 		"bizId":        tranId,
 		"credits":      userPoint.Balance,
 	}
+}
+func (DuiBaController) DuiBaNoLoginH5(ctx *gin.Context) {
+	form := DuiBaNoLoginH5Form{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		ctx.Status(404)
+		return
+	}
+	activity, err := service.DefaultDuiBaActivityService.FindActivity(form.ActivityId)
+	if err != nil {
+		app.Logger.Error("DuiBaNoLoginH5", form, err)
+		ctx.Status(404)
+		return
+	}
+	if activity.ID == 0 {
+		ctx.Status(404)
+		return
+	}
+	client := duiba.NewClient(config.Config.DuiBa.AppKey, config.Config.DuiBa.AppSecret)
+	url, err := client.AutoLogin(duiba.AutoLoginParam{
+		Uid:      "not_login",
+		Redirect: activity.ActivityUrl,
+	})
+	if err != nil {
+		app.Logger.Error("DuiBaNoLoginH5", form, err)
+		ctx.Status(404)
+		return
+	}
+	ctx.Redirect(http.StatusFound, url)
+	return
 }
