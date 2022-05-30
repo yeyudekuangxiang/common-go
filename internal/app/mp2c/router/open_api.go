@@ -30,6 +30,7 @@ func openRouter(router *gin.Engine) {
 			duibaRouter.Any("/point/add/callback", func(context *gin.Context) {
 				context.JSON(200, api.DefaultDuiBaController.PointAddLogCallback(context))
 			})
+			duibaRouter.GET("/h5", api.DefaultDuiBaController.DuiBaNoLoginH5)
 		}
 
 		oaRouter := openRouter.Group("/oa")
@@ -58,5 +59,6 @@ func openRouter(router *gin.Engine) {
 
 		//星星充电订单同步接口
 		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
+
 	}
 }
