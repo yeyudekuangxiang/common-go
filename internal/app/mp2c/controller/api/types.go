@@ -62,3 +62,6 @@ type UpdateUserInfoForm struct {
 	Avatar   string `json:"avatar" form:"avatar"`
 	Gender   int    `json:"gender" form:"gender" binding:"oneof=0 1 2"`
 }
+type DuiBaNoLoginH5Form struct {
+	ActivityId string `json:"activityId" form:"activityId" `
+}
