@@ -2,9 +2,18 @@ package business
 
 import "mio/internal/pkg/model"
 
+type CarbonType string
+
+const (
+	CarbonTypeOnlineMeeting        CarbonType = "OnlineMeeting"        //线上会议
+	CarbonTypeSaveWaterElectricity CarbonType = "SaveWaterElectricity" //节水节电
+	CarbonTypePublicTransport      CarbonType = "PublicTransport"      //公交地铁
+	CarbonTypeEvCar                CarbonType = "EvCar"                //电动车 电车充电
+)
+
 type CarbonScene struct {
 	ID            int        `json:"id" gorm:"primaryKey;not null;type:serial4;comment:低碳场景表"`
-	Type          string     `json:"type" gorm:"not null;type:varchar(20);comment:低碳场景类型"`
+	Type          CarbonType `json:"type" gorm:"not null;type:varchar(50);comment:低碳场景类型"`
 	PointSetting  string     `json:"pointSetting" gorm:"not null;type:varchar(1000);comment:积分获取配置"`
 	CarbonSetting string     `json:"carbonSetting" gorm:"not null;type:varchar(1000);comment:碳积分获取配置"`
 	Title         string     `json:"title" gorm:"not null;type:varchar(100);comment:场景标题"`
