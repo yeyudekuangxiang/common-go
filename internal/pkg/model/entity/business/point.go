@@ -2,6 +2,15 @@ package business
 
 import "mio/internal/pkg/model"
 
+type PointType string
+
+const (
+	PointTypeOnlineMeeting        CarbonType = "OnlineMeeting"        //线上会议
+	PointTypeSaveWaterElectricity CarbonType = "SaveWaterElectricity" //节水节电
+	PointTypePublicTransport      CarbonType = "PublicTransport"      //公交地铁
+	PointTypeEvCar                CarbonType = "EvCar"                //电动车 电车充电
+)
+
 type Point struct {
 	ID        int64      `json:"id" gorm:"primaryKey;not null;type:serial8;comment:积分账户表"`
 	BUserId   int64      `json:"-" gorm:"not null;type:int8;comment:企业用户表主键"`
