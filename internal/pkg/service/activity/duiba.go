@@ -171,5 +171,5 @@ func (srv ZeroService) IsDuiBaActivityNewUser(activityId string, userId int64) (
 	if userInfo.ID == 0 {
 		return false, errno.ErrUserNotFound
 	}
-	return !userInfo.Time.IsZero() && userInfo.Time.Add(time.Hour*24).Before(time.Now()), nil
+	return !userInfo.Time.IsZero() && userInfo.Time.Add(time.Hour*24).After(time.Now()), nil
 }
