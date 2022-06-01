@@ -1,11 +1,12 @@
 package mp2c
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"mio/internal/app/mp2c/server"
 	"mio/internal/pkg/core/initialize"
-	auth2 "mio/internal/pkg/model/auth"
+	"mio/internal/pkg/model/auth"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	mock_repository "mio/mock/repository"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Response struct {
@@ -46,9 +48,9 @@ func setupMock() {
 }
 func SetupServer() *gin.Engine {
 	once.Do(func() {
-		initialize.InitIni("../../../config.ini")
 		if TestEnv == "real" {
-			initialize.InitDB()
+			fmt.Println(os.Getenv("Config"))
+			initialize.Initialize(os.Getenv("Config"))
 		}
 		initialize.InitValidator()
 
@@ -65,8 +67,21 @@ func AddUserToken(req *http.Request) {
 func AddAdminToken(req *http.Request) {
 	req.Header.Set("Token", createAdminToken())
 }
+func AddBusinessToken(req *http.Request) {
+	req.Header.Set("Token", createBusinessUserToken())
+}
+func createBusinessUserToken() string {
+	token, err := util.CreateToken(auth.BusinessUser{
+		Uid:       "test",
+		CreatedAt: time.Now(),
+	})
+	if err != nil {
+		log.Fatal("create token err:", err)
+	}
+	return token
+}
 func createUserToken() string {
-	token, err := util.CreateToken(auth2.User{
+	token, err := util.CreateToken(auth.User{
 		Id: 1,
 	})
 	if err != nil {
@@ -75,7 +90,7 @@ func createUserToken() string {
 	return token
 }
 func createAdminToken() string {
-	token, err := util.CreateToken(auth2.Admin{
+	token, err := util.CreateToken(auth.Admin{
 		ID: 1,
 	})
 	if err != nil {

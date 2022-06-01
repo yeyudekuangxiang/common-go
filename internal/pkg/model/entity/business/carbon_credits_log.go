@@ -3,6 +3,11 @@ package business
 import (
 	"github.com/shopspring/decimal"
 	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity"
+)
+
+const (
+	OrderByCarbonCreditsLogCtDesc entity.OrderBy = "order_by_business_carbon_credits_log_ct_desc"
 )
 
 type CarbonCreditsLog struct {

@@ -15,6 +15,11 @@ type UserMockRepository struct {
 	db *gorm.DB
 }
 
+func (u UserMockRepository) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (u UserMockRepository) GetGuid(unionId string) string {
 	//TODO implement me
 	panic("implement me")

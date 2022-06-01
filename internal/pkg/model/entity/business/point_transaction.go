@@ -1,6 +1,13 @@
 package business
 
-import "mio/internal/pkg/model"
+import (
+	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity"
+)
+
+const (
+	OrderByPointTranCTDESC entity.OrderBy = "order_by_business_point_ct_desc" //创建时间倒叙
+)
 
 type PointTransaction struct {
 	ID        int64      `json:"id" gorm:"primaryKey;not null;type:serial8;comment:积分变动表"`
