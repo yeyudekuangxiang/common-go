@@ -35,7 +35,7 @@ func GetAuthBusinessUser(c *gin.Context) business.User {
 	return business.User{
 		ID:            1,
 		Uid:           "test",
-		BDepartId:     1,
+		BDepartmentId: 1,
 		BCompanyId:    1,
 		Nickname:      "测试用户",
 		Mobile:        "13000000000",
