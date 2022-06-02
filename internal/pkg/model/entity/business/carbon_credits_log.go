@@ -23,3 +23,12 @@ type CarbonCreditsLog struct {
 func (CarbonCreditsLog) TableName() string {
 	return "business_carbon_credits_log"
 }
+
+type UserCarbonRank struct {
+	UserId int64
+	Value  decimal.Decimal
+}
+type DepartCarbonRank struct {
+	DepartmentId int64
+	Value        decimal.Decimal
+}

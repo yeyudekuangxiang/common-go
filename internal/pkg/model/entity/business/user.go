@@ -5,7 +5,7 @@ import "mio/internal/pkg/model"
 type User struct {
 	ID            int64      `json:"-" gorm:"primaryKey;not null;type:serial8;comment:企业用户表"`
 	Uid           string     `json:"uid" gorm:"not null;type:varchar(100);comment:uuid"`
-	BDepartId     int        `json:"bDepartId" gorm:"not null;type:int4;comment:所属企业版部门id"`
+	BDepartmentId int        `json:"bDepartmentId" gorm:"not null;type:int4;comment:所属企业版部门id"`
 	BCompanyId    int        `json:"bCompanyId" gorm:"not null;type:int4;comment:所属企业版企业表主键id"`
 	Nickname      string     `json:"nickname" gorm:"not null;type:varchar(100);comment:昵称"`
 	Mobile        string     `json:"mobile" gorm:"not null;type:varchar(20);comment:手机号"`

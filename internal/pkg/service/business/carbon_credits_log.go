@@ -41,3 +41,23 @@ func (srv CarbonCreditsLogService) GetCarbonCreditLogInfoList(param GetCarbonCre
 	}
 	return infoList
 }
+func (srv CarbonCreditsLogService) GetUserCarbonRank(param GetUserCarbonRankParam) ([]business.UserCarbonRank, int64, error) {
+	return srv.repo.GetUserCarbonRank(brepo.GetUserCarbonRankBy{
+		StartTime: param.StartTime,
+		EndTime:   param.EndTime,
+		UserId:    param.UserId,
+		CompanyId: param.CompanyId,
+		Limit:     param.Limit,
+		Offset:    param.Offset,
+	})
+}
+func (srv CarbonCreditsLogService) GetDepartmentCarbonRank(param GetDepartmentCarbonRankParam) ([]business.DepartCarbonRank, int64, error) {
+	return srv.repo.GetDepartmentCarbonRank(brepo.GetDepartmentCarbonRankBy{
+		StartTime:    param.StartTime,
+		EndTime:      param.EndTime,
+		DepartmentId: param.DepartmentId,
+		CompanyId:    param.CompanyId,
+		Limit:        param.Limit,
+		Offset:       param.Offset,
+	})
+}
