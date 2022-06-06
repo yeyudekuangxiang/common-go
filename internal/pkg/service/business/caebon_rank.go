@@ -1,6 +1,7 @@
 package business
 
 import (
+	"errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"
@@ -13,6 +14,40 @@ var DefaultCarbonRankService = CarbonRankService{}
 
 type CarbonRankService struct {
 	repo rbusiness.CarbonRankRepository
+}
+
+// ChangeLikeStatus 排行榜点赞
+func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*business.CarbonRankLikeLog, error) {
+	start, _ := param.DateType.ParseLastTime()
+
+	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
+		Pid:        param.Pid,
+		ObjectType: param.ObjectType,
+		DateType:   param.DateType,
+		TimePoint:  start,
+	})
+	if rank.ID == 0 {
+		return nil, errors.New("排行信息不存在")
+	}
+
+	like, err := DefaultCarbonRankLikeLogService.ChangeLikeStatus(CarbonRankLikeLogParam{
+		Pid:        param.Pid,
+		UserId:     param.UserId,
+		DateType:   param.DateType,
+		ObjectType: param.ObjectType,
+		TimePoint:  start,
+	})
+	if err != nil {
+		return nil, err
+	}
+	likeNumStep := -1
+	if like.Status.IsLike() {
+		likeNumStep = 1
+	}
+
+	rank.LikeNum += likeNumStep
+
+	return like, srv.repo.Save(&rank)
 }
 
 // UserRankList 用户碳积分排行榜
@@ -37,21 +72,6 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 		userIds = append(userIds, item.Pid)
 	}
 
-	//查询点赞数量信息
-	likeNumList, err := DefaultCarbonRankLikeNumService.GetLikeNumList(GetCarbonRankLikeNumListParam{
-		PIds:       userIds,
-		ObjectType: business.RankObjectTypeUser,
-		DateType:   param.DateType,
-		TimePoint:  start,
-	})
-	if err != nil {
-		return nil, 0, err
-	}
-	likeNumMap := make(map[int64]int)
-	for _, likeNum := range likeNumList {
-		likeNumMap[likeNum.Pid] = likeNum.LikeNum
-	}
-
 	//查询当前用户是否点赞信息
 	likeStatusList, err := DefaultCarbonRankLikeLogService.GetLikeLogList(GetCarbonRankLikeLogListParam{
 		PIds:       userIds,
@@ -65,7 +85,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 	}
 	likeStatusMap := make(map[int64]bool)
 	for _, likeStatus := range likeStatusList {
-		likeStatusMap[likeStatus.BUserId] = likeStatus.Status == 1
+		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
 	}
 
 	//需要查询用户信息方法
@@ -74,9 +94,10 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 	infoList := make([]UserRankInfo, 0)
 	for _, item := range list {
 		infoList = append(infoList, UserRankInfo{
-			User:    userMap[item.Pid],
-			LikeNum: likeNumMap[item.Pid],
+			User:    userMap[item.Pid].ShortUser(),
+			LikeNum: item.LikeNum,
 			IsLike:  likeStatusMap[item.Pid],
+			Rank:    item.Rank,
 			Value:   item.Value,
 		})
 	}
@@ -84,21 +105,45 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 	return infoList, total, nil
 }
 
-/*func (srv CarbonRankService) GetMyRank(param GetMyRankParam) (*UserRankInfo, error) {
-	start, end := srv.ParseDateType(param.DateType)
+// FindUserRank 获取指定用户的排行榜信息
+func (srv CarbonRankService) FindUserRank(param GetMyRankParam) (*UserRankInfo, error) {
+	start, _ := param.DateType.ParseLastTime()
 
-	list, _, err := DefaultCarbonCreditsLogService.GetUserCarbonRank(GetUserCarbonRankParam{
-		StartTime: start,
-		EndTime:   end,
-		CompanyId: param.CompanyId,
-		Limit:     1,
-		Offset:    0,
+	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
+		Pid:        param.UserId,
+		ObjectType: business.RankObjectTypeUser,
+		DateType:   param.DateType,
+		TimePoint:  start,
+	})
+
+	if rank.ID == 0 {
+		rank.Rank = 9999
+	}
+
+	//需要方法-查询用户信息
+	user := business.User{}
+
+	//isLike
+	likeStatus, err := DefaultCarbonRankLikeLogService.FindLikeStatus(CarbonRankLikeLogParam{
+		Pid:        param.UserId,
+		UserId:     param.UserId,
+		DateType:   param.DateType,
+		ObjectType: business.RankObjectTypeUser,
+		TimePoint:  start,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-}*/
+	return &UserRankInfo{
+		User:    user.ShortUser(),
+		Value:   rank.Value,
+		LikeNum: rank.LikeNum,
+		Rank:    rank.Rank,
+		IsLike:  likeStatus.IsLike(),
+	}, nil
+
+}
 
 // InitUserRank 生成用户排名信息
 func (srv CarbonRankService) InitUserRank(dateType business.RankDateType) {

@@ -39,10 +39,10 @@ func (srv CarbonRankLikeLogService) ChangeLikeStatus(param CarbonRankLikeLogPara
 	if err != nil {
 		return nil, err
 	}
-	log.Status = (log.Status % 2) + 1
+	log.Status = log.Status.Reverse()
 	return log, srv.repo.Save(log)
 }
-func (srv CarbonRankLikeLogService) FindLikeStatus(param CarbonRankLikeLogParam) (int8, error) {
+func (srv CarbonRankLikeLogService) FindLikeStatus(param CarbonRankLikeLogParam) (ebusiness.CarbonRankLikeStatus, error) {
 	log := srv.repo.FindLikeLog(rbusiness.FindCarbonRankLikeLogBy{
 		Pid:        param.Pid,
 		UserId:     param.UserId,
@@ -53,7 +53,7 @@ func (srv CarbonRankLikeLogService) FindLikeStatus(param CarbonRankLikeLogParam)
 	if log.ID != 0 {
 		return log.Status, nil
 	}
-	return 2, nil
+	return ebusiness.CarbonRankLikeStatusNotLike, nil
 }
 func (srv CarbonRankLikeLogService) GetLikeLogList(param GetCarbonRankLikeLogListParam) ([]ebusiness.CarbonRankLikeLog, error) {
 	list := srv.repo.GetLikeLogList(rbusiness.GetCarbonRankLikeLogListBy{
