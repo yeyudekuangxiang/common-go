@@ -46,27 +46,26 @@ type UpdateCarbonRankLikeNumParam struct {
 	TimePoint  time.Time
 	Num        int
 }
-type GetUserCarbonRankParam struct {
+type GetActualUserCarbonRankParam struct {
 	StartTime time.Time
 	EndTime   time.Time
-	UserId    int64
 	CompanyId int
 	Limit     int
 	Offset    int
 }
-type GetDepartmentCarbonRankParam struct {
-	StartTime    time.Time
-	EndTime      time.Time
-	DepartmentId int
-	CompanyId    int
-	Limit        int
-	Offset       int
+type GetActualDepartmentCarbonRankParam struct {
+	StartTime time.Time
+	EndTime   time.Time
+	CompanyId int
+	Limit     int
+	Offset    int
 }
 type UserRankInfo struct {
-	User    business.User   `json:"user"`
-	IsLike  bool            `json:"isLike"`
-	LikeNum int             `json:"likeNum"`
-	Value   decimal.Decimal `json:"value"`
+	User    business.ShortUser `json:"user"`
+	IsLike  bool               `json:"isLike"`
+	LikeNum int                `json:"likeNum"`
+	Rank    int                `json:"rank"`
+	Value   decimal.Decimal    `json:"value"`
 }
 type GetUserRankListParam struct {
 	UserId    int64
@@ -74,4 +73,15 @@ type GetUserRankListParam struct {
 	CompanyId int
 	Limit     int
 	Offset    int
+}
+type GetMyRankParam struct {
+	UserId    int64
+	DateType  business.RankDateType
+	CompanyId int
+}
+type ChangeLikeStatusParam struct {
+	Pid        int64
+	ObjectType business.RankObjectType
+	DateType   business.RankDateType
+	UserId     int64
 }

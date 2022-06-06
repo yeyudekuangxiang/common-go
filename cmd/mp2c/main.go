@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"math/rand"
+	"mio/internal/app/cron"
 	"mio/internal/app/mp2c/server"
 	"mio/internal/pkg/core/initialize"
 	"os"
@@ -22,6 +23,8 @@ func init() {
 	server.InitServer()
 }
 func main() {
+	cron.Run()
+
 	rand.Seed(time.Now().UnixMilli())
 	server.RunServer()
 	quit := make(chan os.Signal)

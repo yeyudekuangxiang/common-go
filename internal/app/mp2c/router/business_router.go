@@ -22,6 +22,7 @@ func BusinessRouter(router *gin.Engine) {
 			carbonRouter.GET("/record/list", apiutil.Format(business.DefaultCarbonCreditsController.GetCarbonCreditLogInfoList))
 
 			carbonRouter.GET("/rank/user/list", apiutil.Format(business.DefaultCarbonRankController.GetUserRankList))
+			carbonRouter.POST("/rank/like/status/change", apiutil.Format(business.DefaultCarbonRankController.ChangeUserLikeStatus))
 		}
 
 		pointRouter := authRouter.Group("/point")

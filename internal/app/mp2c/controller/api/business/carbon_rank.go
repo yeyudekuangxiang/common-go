@@ -37,3 +37,23 @@ func (CarbonRankController) GetUserRankList(ctx *gin.Context) (gin.H, error) {
 		"pageSize": form.PageSize,
 	}, nil
 }
+func (CarbonRankController) ChangeUserLikeStatus(ctx *gin.Context) (gin.H, error) {
+	form := ChangeUserLikeStatusForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthBusinessUser(ctx)
+	like, err := business.DefaultCarbonRankService.ChangeLikeStatus(business.ChangeLikeStatusParam{
+		Pid:        form.Pid,
+		ObjectType: form.ObjectType,
+		DateType:   form.DateType,
+		UserId:     user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"likeStatus": like.Status.IsLike(),
+	}, nil
+}
