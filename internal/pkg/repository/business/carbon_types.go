@@ -14,21 +14,28 @@ type GetCarbonCreditsLogListBy struct {
 	Type      ebusiness.CarbonType
 }
 
-type GetUserCarbonRankBy struct {
+type GetActualDepartmentCarbonRankBy struct {
 	StartTime time.Time
 	EndTime   time.Time
-	UserId    int64
 	CompanyId int
 	Limit     int
 	Offset    int
 }
-type GetDepartmentCarbonRankBy struct {
-	StartTime    time.Time
-	EndTime      time.Time
-	DepartmentId int
-	CompanyId    int
-	Limit        int
-	Offset       int
+
+type GetActualUserCarbonRankBy struct {
+	StartTime time.Time
+	EndTime   time.Time
+	CompanyId int
+	Limit     int
+	Offset    int
+}
+type GetCarbonRankBy struct {
+	TimePoint  time.Time
+	DateType   ebusiness.RankDateType
+	ObjectType ebusiness.RankObjectType
+	CompanyId  int
+	Limit      int
+	Offset     int
 }
 
 type GetCarbonRankLikeNumListBy struct {
@@ -53,6 +60,12 @@ type FindCarbonRankLikeLogBy struct {
 type GetCarbonRankLikeLogListBy struct {
 	PIds       []int64
 	UserId     int64
+	ObjectType ebusiness.RankObjectType
+	DateType   ebusiness.RankDateType
+	TimePoint  time.Time
+}
+type FindCarbonRankBy struct {
+	Pid        int64
 	ObjectType ebusiness.RankObjectType
 	DateType   ebusiness.RankDateType
 	TimePoint  time.Time

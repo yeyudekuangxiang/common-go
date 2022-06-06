@@ -1,6 +1,10 @@
 package business
 
-import "mio/internal/pkg/model"
+import (
+	"mio/internal/pkg/model"
+	"mio/internal/pkg/util/timeutils"
+	"time"
+)
 
 type RankDateType string
 
@@ -9,6 +13,24 @@ const (
 	RankDateTypeWeek  RankDateType = "week"
 	RankDateTypeMonth RankDateType = "month"
 )
+
+// ParseLastTime 昨天开始和结束 上周开始和结束 上个月开始和结束
+func (rdt RankDateType) ParseLastTime() (time.Time, time.Time) {
+	t := timeutils.Now()
+	var start, end time.Time
+	switch rdt {
+	case RankDateTypeDay:
+		start = t.AddDay(-1).StartOfDay().Time
+		end = t.AddDay(-1).EndOfDay().Time
+	case RankDateTypeWeek:
+		start = t.AddWeek(-1).StartOfWeek().Time
+		end = t.AddWeek(-1).EndOfWeek().Time
+	case RankDateTypeMonth:
+		start = t.AddMonth(-1).StartOfMonth().Time
+		end = t.AddMonth(-1).EndOfMonth().Time
+	}
+	return start, end
+}
 
 type RankObjectType string
 

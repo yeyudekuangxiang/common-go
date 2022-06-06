@@ -50,14 +50,11 @@ func (repo CarbonCreditsLogRepository) GetListBy(by GetCarbonCreditsLogListBy) [
 	return list
 }
 
-// GetUserCarbonRank 获取用户碳积分排行榜
-func (repo CarbonCreditsLogRepository) GetUserCarbonRank(by GetUserCarbonRankBy) ([]business.UserCarbonRank, int64, error) {
+// GetActualUserCarbonRank 获取用户碳积分排行榜
+func (repo CarbonCreditsLogRepository) GetActualUserCarbonRank(by GetActualUserCarbonRankBy) ([]business.UserCarbonRank, int64, error) {
 	db := repo.DB.Table(fmt.Sprintf("%s as log", business.CarbonCreditsLog{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as \"buser\" on log.b_user_id = buser.id", business.User{}.TableName()))
 
-	if by.UserId != 0 {
-		db.Where("buser.id = ?", by.UserId)
-	}
 	if by.CompanyId != 0 {
 		db.Where("buser.b_company_id = ?", by.CompanyId)
 	}
@@ -79,14 +76,11 @@ func (repo CarbonCreditsLogRepository) GetUserCarbonRank(by GetUserCarbonRankBy)
 	return list, total, err
 }
 
-// GetDepartmentCarbonRank 获取部门排行榜
-func (repo CarbonCreditsLogRepository) GetDepartmentCarbonRank(by GetDepartmentCarbonRankBy) ([]business.DepartCarbonRank, int64, error) {
+// GetActualDepartmentCarbonRank 获取部门排行榜
+func (repo CarbonCreditsLogRepository) GetActualDepartmentCarbonRank(by GetActualDepartmentCarbonRankBy) ([]business.DepartCarbonRank, int64, error) {
 	db := repo.DB.Table(fmt.Sprintf("%s as log", business.CarbonCreditsLog{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as \"buser\" on log.b_user_id = buser.id", business.User{}.TableName()))
 
-	if by.DepartmentId != 0 {
-		db.Where("buser.b_department_id = ?", by.DepartmentId)
-	}
 	if by.CompanyId != 0 {
 		db.Where("buser.b_company_id = ?", by.CompanyId)
 	}

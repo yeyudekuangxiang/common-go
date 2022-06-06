@@ -42,6 +42,7 @@ to quickly create a Cobra application.`,
 			&business.PointLimitLog{},
 			&business.PointTransaction{},
 			&business.User{},
+			&business.CarbonRank{},
 		)
 	},
 }

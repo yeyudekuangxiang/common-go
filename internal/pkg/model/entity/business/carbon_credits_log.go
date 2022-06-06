@@ -32,3 +32,6 @@ type DepartCarbonRank struct {
 	DepartmentId int64
 	Value        decimal.Decimal
 }
+type MyCarbonValue struct {
+	Value decimal.Decimal
+}
