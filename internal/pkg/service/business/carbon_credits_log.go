@@ -60,3 +60,13 @@ func (srv CarbonCreditsLogService) GetActualDepartmentCarbonRank(param GetActual
 		Offset:    param.Offset,
 	})
 }
+func (srv CarbonCreditsLogService) CreateCarbonCreditLog(param CreateCarbonCreditLogParam) (*business.CarbonCreditsLog, error) {
+	log := business.CarbonCreditsLog{
+		TransactionId: param.TransactionId,
+		BUserId:       param.UserId,
+		Type:          param.Type,
+		Value:         param.Value,
+		Info:          business.CarbonTypeInfo(param.Info),
+	}
+	return &log, srv.repo.Create(&log)
+}

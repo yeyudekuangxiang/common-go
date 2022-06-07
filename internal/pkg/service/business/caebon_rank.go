@@ -5,22 +5,22 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"
-	rbusiness "mio/internal/pkg/repository/business"
+	brepo "mio/internal/pkg/repository/business"
 	"mio/internal/pkg/util"
 	"time"
 )
 
-var DefaultCarbonRankService = CarbonRankService{}
+var DefaultCarbonRankService = CarbonRankService{repo: brepo.DefaultCarbonRankRepository}
 
 type CarbonRankService struct {
-	repo rbusiness.CarbonRankRepository
+	repo brepo.CarbonRankRepository
 }
 
 // ChangeLikeStatus 排行榜点赞
 func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*business.CarbonRankLikeLog, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
+	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
 		Pid:        param.Pid,
 		ObjectType: param.ObjectType,
 		DateType:   param.DateType,
@@ -54,7 +54,7 @@ func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*bus
 func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRankInfo, int64, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	list, total, err := srv.repo.GetCarbonRankList(rbusiness.GetCarbonRankBy{
+	list, total, err := srv.repo.GetCarbonRankList(brepo.GetCarbonRankBy{
 		TimePoint:  start,
 		CompanyId:  param.CompanyId,
 		Limit:      param.Limit,
@@ -109,7 +109,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 func (srv CarbonRankService) FindUserRank(param GetMyRankParam) (*UserRankInfo, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
+	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
 		Pid:        param.UserId,
 		ObjectType: business.RankObjectTypeUser,
 		DateType:   param.DateType,
@@ -189,7 +189,7 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 		}
 
 		for _, item := range list {
-			rankInfo := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
+			rankInfo := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
 				Pid:        item.UserId,
 				ObjectType: business.RankObjectTypeUser,
 				DateType:   dateType,

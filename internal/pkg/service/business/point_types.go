@@ -47,3 +47,10 @@ type GetCarbonCreditLogInfoListParam struct {
 	StartTime time.Time
 	EndTime   time.Time
 }
+type CreateCarbonCreditLogParam struct {
+	TransactionId string
+	UserId        int64
+	Type          business.CarbonType
+	Value         decimal.Decimal
+	Info          string
+}

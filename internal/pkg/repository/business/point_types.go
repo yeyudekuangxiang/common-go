@@ -13,3 +13,16 @@ type GetPointTransactionListBy struct {
 	OrderBy   entity.OrderByList
 	Type      business.PointType
 }
+type FindPointLimitLogBy struct {
+	TimePoint time.Time
+	Type      business.PointType
+	UserId    int64
+}
+type FindCarbonCreditsLimitLogBy struct {
+	TimePoint time.Time
+	Type      business.CarbonType
+	UserId    int64
+}
+type FindPointBy struct {
+	UserId int64
+}

@@ -1,6 +1,8 @@
 package business
 
-import "mio/internal/pkg/model"
+import (
+	"mio/internal/pkg/model"
+)
 
 type PointType string
 
@@ -39,6 +41,34 @@ func (t PointType) RealText() string {
 		return "电车充电"
 	}
 	return "未知类型"
+}
+func (t PointType) CarbonType() CarbonType {
+	switch t {
+	case PointTypeOnlineMeeting:
+		return CarbonTypeOnlineMeeting
+	case PointTypeSaveWaterElectricity:
+		return CarbonTypeSaveWaterElectricity
+	case PointTypePublicTransport:
+		return CarbonTypePublicTransport
+	case PointTypeEvCar:
+		return CarbonTypeEvCar
+	}
+	return ""
+}
+
+// UnitNum 计算积分发放单位数
+func (t PointType) UnitNum(value float64) int {
+	panic("请配置我")
+	switch t {
+	case PointTypeOnlineMeeting:
+		return 1
+	case PointTypeSaveWaterElectricity:
+		return 1
+	case PointTypePublicTransport:
+		return 1
+	case PointTypeEvCar:
+	}
+	return 0
 }
 
 type Point struct {

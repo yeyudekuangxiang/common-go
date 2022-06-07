@@ -16,7 +16,9 @@ type CarbonCreditsLogRepository struct {
 func (repo CarbonCreditsLogRepository) Save(log *business.CarbonCreditsLog) error {
 	return repo.DB.Save(log).Error
 }
-
+func (repo CarbonCreditsLogRepository) Create(log *business.CarbonCreditsLog) error {
+	return repo.DB.Create(log).Error
+}
 func (repo CarbonCreditsLogRepository) GetListBy(by GetCarbonCreditsLogListBy) []business.CarbonCreditsLog {
 	list := make([]business.CarbonCreditsLog, 0)
 
