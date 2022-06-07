@@ -88,7 +88,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
 	}
 
-	//需要查询用户信息方法
+	//需要方法-查询用户信息列表方法
 	userMap := make(map[int64]business.User)
 
 	infoList := make([]UserRankInfo, 0)
@@ -106,7 +106,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 }
 
 // FindUserRank 获取指定用户的排行榜信息
-func (srv CarbonRankService) FindUserRank(param GetMyRankParam) (*UserRankInfo, error) {
+func (srv CarbonRankService) FindUserRank(param FindUserRankParam) (*UserRankInfo, error) {
 	start, _ := param.DateType.ParseLastTime()
 
 	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
@@ -141,6 +141,108 @@ func (srv CarbonRankService) FindUserRank(param GetMyRankParam) (*UserRankInfo, 
 		LikeNum: rank.LikeNum,
 		Rank:    rank.Rank,
 		IsLike:  likeStatus.IsLike(),
+	}, nil
+
+}
+
+// DepartmentRankList 部门碳积分排行榜
+func (srv CarbonRankService) DepartmentRankList(param GetDepartmentRankListParam) ([]DepartmentRankInfo, int64, error) {
+	start, _ := param.DateType.ParseLastTime()
+
+	list, total, err := srv.repo.GetCarbonRankList(brepo.GetCarbonRankBy{
+		TimePoint:  start,
+		CompanyId:  param.CompanyId,
+		Limit:      param.Limit,
+		Offset:     param.Offset,
+		DateType:   param.DateType,
+		ObjectType: business.RankObjectTypeDepartment,
+	})
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	departmentIds := make([]int64, 0)
+	for _, item := range list {
+		departmentIds = append(departmentIds, item.Pid)
+	}
+
+	//查询当前用户是否点赞信息
+	likeStatusList, err := DefaultCarbonRankLikeLogService.GetLikeLogList(GetCarbonRankLikeLogListParam{
+		PIds:       departmentIds,
+		UserId:     param.UserId,
+		DateType:   param.DateType,
+		ObjectType: business.RankObjectTypeDepartment,
+		TimePoint:  start,
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	likeStatusMap := make(map[int64]bool)
+	for _, likeStatus := range likeStatusList {
+		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
+	}
+
+	//需要方法-查询部门列表
+	departmentMap := make(map[int64]business.Department)
+
+	infoList := make([]DepartmentRankInfo, 0)
+	for _, item := range list {
+		infoList = append(infoList, DepartmentRankInfo{
+			Department: departmentMap[item.Pid],
+			LikeNum:    item.LikeNum,
+			IsLike:     likeStatusMap[item.Pid],
+			Rank:       item.Rank,
+			Value:      item.Value,
+		})
+	}
+
+	return infoList, total, nil
+}
+
+// FindDepartmentRank 获取指定部门的排行榜信息
+func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (*DepartmentRankInfo, error) {
+	if param.DepartmentId == 0 {
+		return &DepartmentRankInfo{
+			Department: business.Department{},
+			Rank:       9999,
+		}, nil
+	}
+
+	start, _ := param.DateType.ParseLastTime()
+
+	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+		Pid:        int64(param.DepartmentId),
+		ObjectType: business.RankObjectTypeDepartment,
+		DateType:   param.DateType,
+		TimePoint:  start,
+	})
+
+	if rank.ID == 0 {
+		rank.Rank = 9999
+	}
+
+	//需要方法-查询部门信息
+	department := business.Department{}
+
+	//isLike
+	likeStatus, err := DefaultCarbonRankLikeLogService.FindLikeStatus(CarbonRankLikeLogParam{
+		Pid:        int64(param.DepartmentId),
+		UserId:     param.UserId,
+		DateType:   param.DateType,
+		ObjectType: business.RankObjectTypeUser,
+		TimePoint:  start,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &DepartmentRankInfo{
+		Department: department,
+		Value:      rank.Value,
+		LikeNum:    rank.LikeNum,
+		Rank:       rank.Rank,
+		IsLike:     likeStatus.IsLike(),
 	}, nil
 
 }
@@ -210,6 +312,90 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 				Value:      item.Value,
 				Rank:       rank,
 				Pid:        item.UserId,
+				LikeNum:    0,
+				TimePoint:  model.Time{Time: start},
+			}
+			err = srv.repo.Create(&rankInfo)
+			if err != nil {
+				app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+				break
+			}
+			rank++
+		}
+
+		offset += limit
+	}
+}
+
+// InitDepartmentRank 生成部门排名信息
+func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) {
+	if !util.DefaultLock.Lock(string("InitDepartmentRank_"+dateType), time.Hour*20) {
+		app.Logger.Info("20个小时内已经有一个线程初始化过")
+		return
+	}
+
+	companyIds := make([]int, 0)
+	for _, companyId := range companyIds {
+		srv.InitCompanyDepartmentRank(companyId, dateType)
+	}
+}
+
+// InitCompanyDepartmentRank 生成公司部门碳积分排行榜
+func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType business.RankDateType) {
+	limit := 500
+	offset := 0
+	rank := 1
+	start, end := dateType.ParseLastTime()
+
+	defer func() {
+		err := recover()
+		if err != nil {
+			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+		}
+	}()
+
+	for {
+		list, _, err := DefaultCarbonCreditsLogService.GetActualDepartmentCarbonRank(GetActualDepartmentCarbonRankParam{
+			StartTime: start,
+			EndTime:   end,
+			CompanyId: companyId,
+			Limit:     limit,
+			Offset:    offset,
+		})
+		if err != nil {
+			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+			break
+		}
+		if len(list) == 0 {
+			break
+		}
+
+		for _, item := range list {
+			//部门等于0跳过
+			if item.DepartmentId == 0 {
+				continue
+			}
+			rankInfo := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+				Pid:        item.DepartmentId,
+				ObjectType: business.RankObjectTypeDepartment,
+				DateType:   dateType,
+				TimePoint:  start,
+			})
+			if rankInfo.ID != 0 {
+				rankInfo.Rank = rank
+				err = srv.repo.Save(&rankInfo)
+				if err != nil {
+					app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+					break
+				}
+				continue
+			}
+			rankInfo = business.CarbonRank{
+				DateType:   dateType,
+				ObjectType: business.RankObjectTypeDepartment,
+				Value:      item.Value,
+				Rank:       rank,
+				Pid:        item.DepartmentId,
 				LikeNum:    0,
 				TimePoint:  model.Time{Time: start},
 			}

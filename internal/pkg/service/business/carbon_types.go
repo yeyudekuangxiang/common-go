@@ -67,17 +67,35 @@ type UserRankInfo struct {
 	Rank    int                `json:"rank"`
 	Value   decimal.Decimal    `json:"value"`
 }
+type DepartmentRankInfo struct {
+	Department business.Department
+	IsLike     bool            `json:"isLike"`
+	LikeNum    int             `json:"likeNum"`
+	Rank       int             `json:"rank"`
+	Value      decimal.Decimal `json:"value"`
+}
 type GetUserRankListParam struct {
-	UserId    int64
+	UserId    int64 //用于判断对排行榜是否点赞
 	DateType  business.RankDateType
 	CompanyId int
 	Limit     int
 	Offset    int
 }
-type GetMyRankParam struct {
-	UserId    int64
+type GetDepartmentRankListParam struct {
+	UserId    int64 //用于判断对排行榜是否点赞
 	DateType  business.RankDateType
 	CompanyId int
+	Limit     int
+	Offset    int
+}
+type FindUserRankParam struct {
+	UserId   int64
+	DateType business.RankDateType
+}
+type FindDepartmentRankParam struct {
+	UserId       int64 //用于判断当前用户是否对部门点赞
+	DepartmentId int
+	DateType     business.RankDateType
 }
 type ChangeLikeStatusParam struct {
 	Pid        int64

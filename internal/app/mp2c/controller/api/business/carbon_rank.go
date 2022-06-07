@@ -30,11 +30,56 @@ func (CarbonRankController) GetUserRankList(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	myRank, err := business.DefaultCarbonRankService.FindUserRank(business.FindUserRankParam{
+		UserId:   user.ID,
+		DateType: ebusiness.RankDateType(form.DateType),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return gin.H{
 		"list":     list,
+		"myRank":   myRank,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,
+	}, nil
+}
+func (CarbonRankController) GetDepartmentRankList(ctx *gin.Context) (gin.H, error) {
+	form := GetDepartmentRankListForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthBusinessUser(ctx)
+
+	list, total, err := business.DefaultCarbonRankService.DepartmentRankList(business.GetDepartmentRankListParam{
+		UserId:    user.ID,
+		DateType:  ebusiness.RankDateType(form.DateType),
+		CompanyId: user.BCompanyId,
+		Limit:     form.Limit(),
+		Offset:    form.Offset(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	myDepartmentRank, err := business.DefaultCarbonRankService.FindDepartmentRank(business.FindDepartmentRankParam{
+		UserId:       user.ID,
+		DepartmentId: user.BDepartmentId,
+		DateType:     ebusiness.RankDateType(form.DateType),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"list":             list,
+		"myDepartmentRank": myDepartmentRank,
+		"total":            total,
+		"page":             form.Page,
+		"pageSize":         form.PageSize,
 	}, nil
 }
 func (CarbonRankController) ChangeUserLikeStatus(ctx *gin.Context) (gin.H, error) {
