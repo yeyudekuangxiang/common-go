@@ -31,17 +31,19 @@ to quickly create a Cobra application.`,
 		initialize.Initialize(conPath)
 		app.DB.AutoMigrate(
 			&business.CarbonCredits{},
+			&business.CarbonCreditsLimitLog{},
 			&business.CarbonCreditsLog{},
+			&business.CarbonRank{},
 			&business.CarbonRankLikeLog{},
 			&business.CarbonScene{},
 			&business.Company{},
 			&business.CompanyCarbonScene{},
 			&business.Department{},
 			&business.Point{},
+			&business.PointCollectHistory{},
 			&business.PointLimitLog{},
 			&business.PointTransaction{},
 			&business.User{},
-			&business.CarbonRank{},
 		)
 	},
 }

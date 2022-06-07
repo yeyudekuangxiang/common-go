@@ -85,3 +85,33 @@ type ChangeLikeStatusParam struct {
 	DateType   business.RankDateType
 	UserId     int64
 }
+type FindCompanyCarbonSceneParam struct {
+	CompanyId     int
+	CarbonSceneId int
+}
+type FindCarbonCreditsLimitLogParam struct {
+	TimePoint time.Time
+	Type      business.CarbonType
+	UserId    int64
+}
+type UpdateOrCreateCarbonCreditsLimitLogParam struct {
+	Type            business.CarbonType
+	UserId          int64
+	AddCurrentValue decimal.Decimal //增加的积分数量
+	TimePoint       time.Time
+}
+type createOrUpdateCarbonCreditParam struct {
+	UserId    int64
+	AddCredit decimal.Decimal
+}
+type SendCarbonCreditParam struct {
+	UserId        int64
+	AddCredit     decimal.Decimal
+	Info          string
+	Type          business.CarbonType
+	TransactionId string
+}
+
+//发放碳积分
+type SendCarbonCreditEvCarParam struct {
+}

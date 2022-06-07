@@ -3,8 +3,11 @@ package business
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity/business"
 )
+
+var DefaultCarbonRankRepository = CarbonRankRepository{DB: app.DB}
 
 type CarbonRankRepository struct {
 	DB *gorm.DB

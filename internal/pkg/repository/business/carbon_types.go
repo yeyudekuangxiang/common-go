@@ -70,3 +70,7 @@ type FindCarbonRankBy struct {
 	DateType   ebusiness.RankDateType
 	TimePoint  time.Time
 }
+type FindCompanyCarbonSceneBy struct {
+	CompanyId     int
+	CarbonSceneId int
+}
