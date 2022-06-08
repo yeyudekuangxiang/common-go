@@ -19,7 +19,7 @@ func (PointController) GetPointRecordList(ctx *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthBusinessUser(ctx)
 
-	infoList := business.DefaultPointTransactionService.GetPointTransactionInfoList(business.GetPointTransactionInfoListParam{
+	infoList := business.DefaultPointLogService.GetPointLogInfoList(business.GetPointLogInfoListParam{
 		UserId:    user.ID,
 		StartTime: form.Date,
 		EndTime:   form.Date.AddDate(0, 1, 0).Add(-time.Nanosecond),

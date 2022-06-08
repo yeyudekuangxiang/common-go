@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	OrderByPointTranCTDESC entity.OrderBy = "order_by_business_point_ct_desc" //创建时间倒叙
+	OrderByPointLogCTDESC entity.OrderBy = "order_by_business_point_ct_desc" //创建时间倒叙
 )
 
-type PointTransaction struct {
+type PointLog struct {
 	ID            int64      `json:"id" gorm:"primaryKey;not null;type:serial8;comment:积分变动表"`
 	TransactionId string     `json:"transactionId" gorm:"not null;type:varchar(100);comment:过程id"`
 	BUserId       int64      `json:"-" gorm:"not null;type:int8;comment:企业用户表主键"`
@@ -21,6 +21,6 @@ type PointTransaction struct {
 	UpdatedAt     model.Time `json:"updatedAt" gorm:"not null;type:timestamptz"`
 }
 
-func (PointTransaction) TableName() string {
-	return "business_point_transaction"
+func (PointLog) TableName() string {
+	return "business_point_log"
 }

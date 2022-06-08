@@ -3,17 +3,17 @@ package business
 import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/business"
-	brepo "mio/internal/pkg/repository/business"
+	rbusiness "mio/internal/pkg/repository/business"
 )
 
-var DefaultCarbonCreditsLogService = CarbonCreditsLogService{repo: brepo.DefaultCarbonCreditsLogRepository}
+var DefaultCarbonCreditsLogService = CarbonCreditsLogService{repo: rbusiness.DefaultCarbonCreditsLogRepository}
 
 type CarbonCreditsLogService struct {
-	repo brepo.CarbonCreditsLogRepository
+	repo rbusiness.CarbonCreditsLogRepository
 }
 
 func (srv CarbonCreditsLogService) GetCarbonCreditLogList(param GetCarbonCreditLogListParam) []business.CarbonCreditsLog {
-	return srv.repo.GetListBy(brepo.GetCarbonCreditsLogListBy{
+	return srv.repo.GetListBy(rbusiness.GetCarbonCreditsLogListBy{
 		UserId:    param.UserId,
 		StartTime: param.StartTime,
 		EndTime:   param.EndTime,
@@ -42,7 +42,7 @@ func (srv CarbonCreditsLogService) GetCarbonCreditLogInfoList(param GetCarbonCre
 	return infoList
 }
 func (srv CarbonCreditsLogService) GetActualUserCarbonRank(param GetActualUserCarbonRankParam) ([]business.UserCarbonRank, int64, error) {
-	return srv.repo.GetActualUserCarbonRank(brepo.GetActualUserCarbonRankBy{
+	return srv.repo.GetActualUserCarbonRank(rbusiness.GetActualUserCarbonRankBy{
 		StartTime: param.StartTime,
 		EndTime:   param.EndTime,
 		CompanyId: param.CompanyId,
@@ -52,7 +52,7 @@ func (srv CarbonCreditsLogService) GetActualUserCarbonRank(param GetActualUserCa
 }
 
 func (srv CarbonCreditsLogService) GetActualDepartmentCarbonRank(param GetActualDepartmentCarbonRankParam) ([]business.DepartCarbonRank, int64, error) {
-	return srv.repo.GetActualDepartmentCarbonRank(brepo.GetActualDepartmentCarbonRankBy{
+	return srv.repo.GetActualDepartmentCarbonRank(rbusiness.GetActualDepartmentCarbonRankBy{
 		StartTime: param.StartTime,
 		EndTime:   param.EndTime,
 		CompanyId: param.CompanyId,

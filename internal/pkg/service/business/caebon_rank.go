@@ -5,22 +5,22 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"
-	brepo "mio/internal/pkg/repository/business"
+	rbusiness "mio/internal/pkg/repository/business"
 	"mio/internal/pkg/util"
 	"time"
 )
 
-var DefaultCarbonRankService = CarbonRankService{repo: brepo.DefaultCarbonRankRepository}
+var DefaultCarbonRankService = CarbonRankService{repo: rbusiness.DefaultCarbonRankRepository}
 
 type CarbonRankService struct {
-	repo brepo.CarbonRankRepository
+	repo rbusiness.CarbonRankRepository
 }
 
 // ChangeLikeStatus 排行榜点赞
 func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*business.CarbonRankLikeLog, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
 		Pid:        param.Pid,
 		ObjectType: param.ObjectType,
 		DateType:   param.DateType,
@@ -54,7 +54,7 @@ func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*bus
 func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRankInfo, int64, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	list, total, err := srv.repo.GetCarbonRankList(brepo.GetCarbonRankBy{
+	list, total, err := srv.repo.GetCarbonRankList(rbusiness.GetCarbonRankBy{
 		TimePoint:  start,
 		CompanyId:  param.CompanyId,
 		Limit:      param.Limit,
@@ -109,7 +109,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 func (srv CarbonRankService) FindUserRank(param FindUserRankParam) (*UserRankInfo, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
 		Pid:        param.UserId,
 		ObjectType: business.RankObjectTypeUser,
 		DateType:   param.DateType,
@@ -149,7 +149,7 @@ func (srv CarbonRankService) FindUserRank(param FindUserRankParam) (*UserRankInf
 func (srv CarbonRankService) DepartmentRankList(param GetDepartmentRankListParam) ([]DepartmentRankInfo, int64, error) {
 	start, _ := param.DateType.ParseLastTime()
 
-	list, total, err := srv.repo.GetCarbonRankList(brepo.GetCarbonRankBy{
+	list, total, err := srv.repo.GetCarbonRankList(rbusiness.GetCarbonRankBy{
 		TimePoint:  start,
 		CompanyId:  param.CompanyId,
 		Limit:      param.Limit,
@@ -211,7 +211,7 @@ func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (
 
 	start, _ := param.DateType.ParseLastTime()
 
-	rank := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+	rank := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
 		Pid:        int64(param.DepartmentId),
 		ObjectType: business.RankObjectTypeDepartment,
 		DateType:   param.DateType,
@@ -291,7 +291,7 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 		}
 
 		for _, item := range list {
-			rankInfo := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+			rankInfo := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
 				Pid:        item.UserId,
 				ObjectType: business.RankObjectTypeUser,
 				DateType:   dateType,
@@ -375,7 +375,7 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 			if item.DepartmentId == 0 {
 				continue
 			}
-			rankInfo := srv.repo.FindCarbonRank(brepo.FindCarbonRankBy{
+			rankInfo := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
 				Pid:        item.DepartmentId,
 				ObjectType: business.RankObjectTypeDepartment,
 				DateType:   dateType,

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type GetPointTransactionListBy struct {
+type GetPointLogListBy struct {
 	UserId    int64
 	StartTime time.Time
 	EndTime   time.Time

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type GetPointTransactionListParam struct {
+type GetPointLogListParam struct {
 	UserId    int64
 	StartTime time.Time
 	EndTime   time.Time
@@ -15,14 +15,14 @@ type GetPointTransactionListParam struct {
 	Type      business.PointType
 }
 
-type PointTransactionInfo struct {
+type PointLogInfo struct {
 	ID       int64              `json:"id"`
 	Type     business.PointType `json:"type"`
 	TypeText string             `json:"typeText"`
 	TimeStr  string             `json:"timeStr"`
 	Value    int                `json:"value"`
 }
-type GetPointTransactionInfoListParam struct {
+type GetPointLogInfoListParam struct {
 	UserId    int64
 	StartTime time.Time
 	EndTime   time.Time
