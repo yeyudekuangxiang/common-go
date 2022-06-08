@@ -60,6 +60,22 @@ func (t CarbonType) PointType() PointType {
 	return ""
 }
 
+//MaxDayCarbonCredit 获取低碳场景每日最多获得多少碳积分
+func (t CarbonType) MaxDayCarbonCredit() decimal.Decimal {
+	panic("请配置我")
+	switch t {
+	case CarbonTypeOnlineMeeting:
+		return decimal.Decimal{}
+	case CarbonTypeSaveWaterElectricity:
+		return decimal.Decimal{}
+	case CarbonTypePublicTransport:
+		return decimal.Decimal{}
+	case CarbonTypeEvCar:
+		return decimal.Decimal{}
+	}
+	return decimal.Decimal{}
+}
+
 // CalcOnlineMeeting 根据会议时长计算获得多少碳积分
 func (t CarbonType) CalcOnlineMeeting(m time.Duration) decimal.Decimal {
 	panic("请配置我")
@@ -106,12 +122,12 @@ type CarbonTypeInfoOnlineMeeting struct {
 	EndTime         model.Time    `json:"endTime"`
 }
 
-func (c CarbonTypeInfoOnlineMeeting) JSON() string {
+func (c CarbonTypeInfoOnlineMeeting) JSON() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
-	return string(data)
+	return CarbonTypeInfo(data)
 }
 
 type CarbonTypeInfoSaveWaterElectricity struct {
@@ -119,12 +135,12 @@ type CarbonTypeInfoSaveWaterElectricity struct {
 	Electricity int64 `json:"electricity"` //电量 度
 }
 
-func (c CarbonTypeInfoSaveWaterElectricity) JSON() string {
+func (c CarbonTypeInfoSaveWaterElectricity) JSON() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
-	return string(data)
+	return CarbonTypeInfo(data)
 }
 
 type CarbonTypeInfoPublicTransport struct {
@@ -132,22 +148,22 @@ type CarbonTypeInfoPublicTransport struct {
 	Metro int64 //公里
 }
 
-func (c CarbonTypeInfoPublicTransport) JSON() string {
+func (c CarbonTypeInfoPublicTransport) JSON() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
-	return string(data)
+	return CarbonTypeInfo(data)
 }
 
 type CarbonTypeInfoEvCar struct {
 	Electricity int64 //度
 }
 
-func (c CarbonTypeInfoEvCar) JSON() string {
+func (c CarbonTypeInfoEvCar) JSON() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
-	return string(data)
+	return CarbonTypeInfo(data)
 }

@@ -125,11 +125,13 @@ type createOrUpdateCarbonCreditParam struct {
 type SendCarbonCreditParam struct {
 	UserId        int64
 	AddCredit     decimal.Decimal
-	Info          string
+	Info          business.CarbonTypeInfo
 	Type          business.CarbonType
 	TransactionId string
 }
-
-//发放碳积分
-type SendCarbonCreditEvCarParam struct {
+type CompanySceneSetting struct {
+	PointSetting    int
+	MaxCount        int
+	MaxPoint        int
+	MaxCarbonCredit decimal.Decimal
 }

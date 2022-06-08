@@ -28,7 +28,14 @@ func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity int64) erro
 		_, err = DefaultCarbonCreditsService.CarbonCreditEvCar(userId, electricity, transactionId)
 	}
 
-	//发放积分
+	_, _, ok, err = DefaultPointLimitService.CheckLimit(userId, ebusiness.PointTypeEvCar)
+	if err != nil {
+		return err
+	}
+	if ok {
+		_, err = DefaultPointService.PointEvCar(userId, electricity, transactionId)
+	}
+
 	return nil
 }
 
@@ -41,7 +48,7 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, duration time.D
 	defer util.DefaultLock.UnLock(lockKey)
 
 	transactionId := util.UUID()
-	_, _, ok, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeEvCar)
+	_, _, ok, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeOnlineMeeting)
 	if err != nil {
 		return err
 	}
@@ -49,7 +56,13 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, duration time.D
 		_, err = DefaultCarbonCreditsService.CarbonCreditOnlineMeeting(userId, duration, start, end, transactionId)
 	}
 
-	//发放积分
+	_, _, ok, err = DefaultPointLimitService.CheckLimit(userId, ebusiness.PointTypeOnlineMeeting)
+	if err != nil {
+		return err
+	}
+	if ok {
+		_, err = DefaultPointService.PointOnlineMeeting(userId, duration, start, end, transactionId)
+	}
 	return nil
 }
 
@@ -62,7 +75,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 	defer util.DefaultLock.UnLock(lockKey)
 
 	transactionId := util.UUID()
-	_, _, ok, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeEvCar)
+	_, _, ok, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeSaveWaterElectricity)
 	if err != nil {
 		return err
 	}
@@ -70,7 +83,13 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 		_, err = DefaultCarbonCreditsService.CarbonCreditSaveWaterElectricity(userId, water, electricity, transactionId)
 	}
 
-	//发放积分
+	_, _, ok, err = DefaultPointLimitService.CheckLimit(userId, ebusiness.PointTypeSaveWaterElectricity)
+	if err != nil {
+		return err
+	}
+	if ok {
+		_, err = DefaultPointService.PointSaveWaterElectricity(userId, water, electricity, transactionId)
+	}
 	return nil
 }
 
@@ -83,7 +102,7 @@ func (srv CarbonService) CarbonCreditSavePublicTransport(userId int64, bus int64
 	defer util.DefaultLock.UnLock(lockKey)
 
 	transactionId := util.UUID()
-	_, _, ok, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeEvCar)
+	_, _, ok, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypePublicTransport)
 	if err != nil {
 		return err
 	}
@@ -91,6 +110,12 @@ func (srv CarbonService) CarbonCreditSavePublicTransport(userId int64, bus int64
 		_, err = DefaultCarbonCreditsService.CarbonCreditSavePublicTransport(userId, bus, metro, transactionId)
 	}
 
-	//发放积分
+	_, _, ok, err = DefaultPointLimitService.CheckLimit(userId, ebusiness.PointTypePublicTransport)
+	if err != nil {
+		return err
+	}
+	if ok {
+		_, err = DefaultPointService.PointPublicTransport(userId, bus, metro, transactionId)
+	}
 	return nil
 }
