@@ -92,7 +92,7 @@ func (t CarbonType) CalcPublicTransport(bus int64, metro int64) decimal.Decimal 
 }
 
 // CalcEvCar 根绝电车充电量计算获得多少碳积分 单位度
-func (t CarbonType) CalcEvCar(electricity int64) decimal.Decimal {
+func (t CarbonType) CalcEvCar(electricity float64) decimal.Decimal {
 	panic("请配置我")
 }
 
@@ -157,7 +157,7 @@ func (c CarbonTypeInfoPublicTransport) JSON() CarbonTypeInfo {
 }
 
 type CarbonTypeInfoEvCar struct {
-	Electricity int64 //度
+	Electricity float64 //度
 }
 
 func (c CarbonTypeInfoEvCar) JSON() CarbonTypeInfo {

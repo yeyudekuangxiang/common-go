@@ -71,7 +71,7 @@ func (srv CarbonCreditsService) createOrUpdateCarbonCredit(param createOrUpdateC
 }
 
 // CarbonCreditEvCar 充电得碳积分
-func (srv CarbonCreditsService) CarbonCreditEvCar(userId int64, electricity int64, TransactionId string) (decimal.Decimal, error) {
+func (srv CarbonCreditsService) CarbonCreditEvCar(userId int64, electricity float64, TransactionId string) (decimal.Decimal, error) {
 	credits := ebusiness.CarbonTypeEvCar.CalcEvCar(electricity)
 	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
 		UserId:        userId,

@@ -26,6 +26,7 @@ func (u User) ShortUser() ShortUser {
 		Uid:      u.Uid,
 		Nickname: u.Nickname,
 		Realname: u.Realname,
+		Avatar:   u.Avatar,
 	}
 }
 
@@ -34,6 +35,7 @@ type ShortUser struct {
 	Uid      string `json:"uid" gorm:"not null;type:varchar(100);comment:uuid"`
 	Nickname string `json:"nickname" gorm:"not null;type:varchar(100);comment:昵称"`
 	Realname string `json:"realname" gorm:"not null;type:varchar(20);default:'';comment:真实姓名"`
+	Avatar   string `json:"avatar" gorm:"not null;type:varchar(500);default:'';comment:头像链接"`
 }
 
 func (ShortUser) TableName() string {

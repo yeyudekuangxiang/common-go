@@ -14,7 +14,7 @@ type CarbonService struct {
 }
 
 // CarbonCreditEvCar 电测充电
-func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity int64) error {
+func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity float64) error {
 	lockKey := fmt.Sprintf("CarbonCreditEvCar%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
 		return errors.New("操作频率过快,请稍后再试")

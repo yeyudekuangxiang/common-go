@@ -82,16 +82,38 @@ func (CarbonRankController) GetDepartmentRankList(ctx *gin.Context) (gin.H, erro
 		"pageSize":         form.PageSize,
 	}, nil
 }
-func (CarbonRankController) ChangeUserLikeStatus(ctx *gin.Context) (gin.H, error) {
-	form := ChangeUserLikeStatusForm{}
+func (CarbonRankController) ChangeUserRankLikeStatus(ctx *gin.Context) (gin.H, error) {
+	form := ChangeUserRankLikeStatusForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	//需要方法-查询用户信息
+	likeUser := ebusiness.User{}
+	user := apiutil.GetAuthBusinessUser(ctx)
+	like, err := business.DefaultCarbonRankService.ChangeLikeStatus(business.ChangeLikeStatusParam{
+		Pid:        likeUser.ID,
+		ObjectType: ebusiness.RankObjectTypeUser,
+		DateType:   form.DateType,
+		UserId:     user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"likeStatus": like.Status.IsLike(),
+	}, nil
+}
+func (CarbonRankController) ChangeDepartmentRankLikeStatus(ctx *gin.Context) (gin.H, error) {
+	form := ChangeDepartmentRankLikeStatusForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
 
 	user := apiutil.GetAuthBusinessUser(ctx)
 	like, err := business.DefaultCarbonRankService.ChangeLikeStatus(business.ChangeLikeStatusParam{
-		Pid:        form.Pid,
-		ObjectType: form.ObjectType,
+		Pid:        form.DepartmentId,
+		ObjectType: ebusiness.RankObjectTypeDepartment,
 		DateType:   form.DateType,
 		UserId:     user.ID,
 	})
