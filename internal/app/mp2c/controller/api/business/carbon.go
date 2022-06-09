@@ -26,7 +26,7 @@ func (CarbonController) CollectOnlineMeeting(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	duration := time.Duration(float64(time.Hour) * form.Duration)
+	duration := time.Duration(float64(time.Hour) * form.OnlineDuration)
 
 	start := time.Now()
 

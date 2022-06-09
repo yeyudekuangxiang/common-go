@@ -24,7 +24,7 @@ func BusinessRouter(router *gin.Engine) {
 			carbonRouter.GET("/rank/user/list", apiutil.Format(business.DefaultCarbonRankController.GetUserRankList))
 			carbonRouter.GET("/rank/department/list", apiutil.Format(business.DefaultCarbonRankController.GetDepartmentRankList))
 			carbonRouter.POST("/rank/user/like/status/change", apiutil.Format(business.DefaultCarbonRankController.ChangeUserRankLikeStatus))
-			carbonRouter.POST("/rank/department/like/status/change", apiutil.Format(business.DefaultCarbonRankController.ChangeUserRankLikeStatus))
+			carbonRouter.POST("/rank/department/like/status/change", apiutil.Format(business.DefaultCarbonRankController.ChangeDepartmentRankLikeStatus))
 
 			carbonRouter.POST("/collect/evcar", apiutil.Format(business.DefaultCarbonController.CollectEvCar))
 			carbonRouter.POST("/collect/online-meeting", apiutil.Format(business.DefaultCarbonController.CollectOnlineMeeting))

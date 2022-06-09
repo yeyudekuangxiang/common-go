@@ -20,7 +20,8 @@ type CarbonCollectEvCarForm struct {
 	Electricity float64 `json:"electricity" form:"electricity" required:"gte=0" alias:"电量"`
 }
 type CarbonCollectOnlineMeetingForm struct {
-	Duration float64 `json:"duration" form:"duration" required:"gt=0" alias:"会议时长"`
+	OnlineDuration  float64 `json:"duration" form:"duration" required:"gt=0" alias:"异地会议"`
+	OfflineDuration float64 `json:"offlineDuration" form:"offlineDuration" required:"gt=0" alias:"同城会议"`
 }
 type CarbonCollectSaveWaterElectricityForm struct {
 	Water       int64 `json:"water" form:"water" `
