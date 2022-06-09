@@ -42,3 +42,14 @@ func (srv PointLogService) GetPointLogInfoList(param GetPointLogInfoListParam) [
 	}
 	return infoList
 }
+func (srv PointLogService) CreatePointLog(param CreatePointLogParam) (*business.PointLog, error) {
+	log := business.PointLog{
+		TransactionId: param.TransactionId,
+		BUserId:       param.UserId,
+		Type:          param.Type,
+		Value:         param.Value,
+		OrderId:       param.OrderId,
+		Info:          business.PointTypeInfo(param.Info),
+	}
+	return &log, srv.repo.Create(&log)
+}

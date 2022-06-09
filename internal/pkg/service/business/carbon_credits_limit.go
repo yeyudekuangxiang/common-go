@@ -47,7 +47,7 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 	}
 
 	if limitLog.ID == 0 {
-		return companyCarbonScene.MaxCount, carbonScene.MaxCarbonCredits, true, nil
+		return companyCarbonScene.MaxCount, t.MaxDayCarbonCredit(), true, nil
 	}
 
 	count := companyCarbonScene.MaxCount - limitLog.CurrentCount
@@ -55,7 +55,7 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 		return 0, decimal.Decimal{}, false, nil
 	}
 
-	credits := carbonScene.MaxCarbonCredits.Sub(limitLog.CurrentValue)
+	credits := t.MaxDayCarbonCredit().Sub(limitLog.CurrentValue)
 	if credits.LessThanOrEqual(decimal.Zero) {
 		return 0, decimal.Decimal{}, false, nil
 	}

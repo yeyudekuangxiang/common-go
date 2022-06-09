@@ -66,7 +66,7 @@ func (srv CarbonCreditsLogService) CreateCarbonCreditLog(param CreateCarbonCredi
 		BUserId:       param.UserId,
 		Type:          param.Type,
 		Value:         param.Value,
-		Info:          business.CarbonTypeInfo(param.Info),
+		Info:          param.Info,
 	}
 	return &log, srv.repo.Create(&log)
 }

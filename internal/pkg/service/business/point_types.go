@@ -52,5 +52,37 @@ type CreateCarbonCreditLogParam struct {
 	UserId        int64
 	Type          business.CarbonType
 	Value         decimal.Decimal
-	Info          string
+	Info          business.CarbonTypeInfo
+}
+type FindPointLimitLogParam struct {
+	TimePoint time.Time
+	Type      business.PointType
+	UserId    int64
+}
+type UpdateOrCreatePointLimitLogParam struct {
+	Type            business.PointType
+	UserId          int64
+	AddCurrentValue int //增加的积分数量
+	TimePoint       time.Time
+}
+type CreatePointLogParam struct {
+	TransactionId string
+	UserId        int64
+	Type          business.PointType
+	Value         int
+	Info          business.PointTypeInfo
+	OrderId       string
+}
+
+type SendPointParam struct {
+	UserId        int64
+	AddPoint      int
+	Info          business.PointTypeInfo
+	Type          business.PointType
+	OrderId       string
+	TransactionId string
+}
+type createOrUpdatePointParam struct {
+	UserId   int64
+	AddPoint int
 }
