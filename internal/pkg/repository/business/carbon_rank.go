@@ -55,7 +55,7 @@ func (repo CarbonRankRepository) Create(rank *business.CarbonRank) error {
 // GetCarbonRankList 获取碳积分排行榜
 func (repo CarbonRankRepository) GetCarbonRankList(by GetCarbonRankBy) ([]business.CarbonRank, int64, error) {
 	db := repo.DB.Table(fmt.Sprintf("%s as rank", business.CarbonRank{}.TableName())).
-		Joins(fmt.Sprintf("inner join %s as \"buser\" on rank.b_user_id = buser.id", business.User{}.TableName()))
+		Joins(fmt.Sprintf("inner join %s as \"buser\" on rank.pid = buser.id", business.User{}.TableName()))
 
 	if by.DateType != "" {
 		db.Where("rank.date_type = ?", by.DateType)

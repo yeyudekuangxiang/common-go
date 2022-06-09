@@ -74,7 +74,7 @@ func (srv PointService) createOrUpdatePoint(param createOrUpdatePointParam) (*eb
 }
 
 // PointEvCar 充电得碳积分
-func (srv PointService) PointEvCar(userId int64, electricity int64, TransactionId string) (int, error) {
+func (srv PointService) PointEvCar(userId int64, electricity float64, TransactionId string) (int, error) {
 
 	//需要方法-查询用户信息
 	userInfo := ebusiness.User{}
