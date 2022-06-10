@@ -81,6 +81,18 @@ func business(db *gorm.DB) {
 			Avatar:        "mock-avatar-2",
 			Status:        1,
 		},
+		{
+			ID:            3,
+			Uid:           "mock-uid-3",
+			BCompanyId:    1,
+			BDepartmentId: 2,
+			Nickname:      "greencat",
+			Mobile:        "13000000000",
+			TelephoneCode: "86",
+			Realname:      "绿喵",
+			Avatar:        "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/mio-kol/mio-avatar.jpg",
+			Status:        1,
+		},
 	})
 	db.Create([]ebusiness.CarbonScene{
 		{

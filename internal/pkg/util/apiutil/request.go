@@ -33,14 +33,15 @@ func GetAuthBusinessUser(c *gin.Context) business.User {
 		return user.(business.User)
 	}
 	return business.User{
-		ID:            1,
-		Uid:           "test",
-		BDepartmentId: 1,
+		ID:            3,
+		Uid:           "mock-uid-3",
 		BCompanyId:    1,
-		Nickname:      "测试用户",
+		BDepartmentId: 2,
+		Nickname:      "greencat",
 		Mobile:        "13000000000",
 		TelephoneCode: "86",
-		Realname:      "真实姓名",
+		Realname:      "绿喵",
+		Avatar:        "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/mio-kol/mio-avatar.jpg",
 		Status:        1,
 		CreatedAt:     model.NewTime(),
 		UpdatedAt:     model.NewTime(),
