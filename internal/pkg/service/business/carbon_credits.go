@@ -3,7 +3,6 @@ package business
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
-	"mio/internal/pkg/model"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
 	"mio/internal/pkg/util"
@@ -23,7 +22,7 @@ func (srv CarbonCreditsService) SendCarbonCredit(param SendCarbonCreditParam) (*
 	defer util.DefaultLock.UnLock(lockKey)
 
 	//检测是否超过发放限制
-	_, availableValue, err := DefaultCarbonCreditsLimitService.CheckLimitAndUpdate(param.UserId, param.AddCredit, param.Type)
+	_, err := DefaultCarbonCreditsLimitService.CheckLimitAndUpdate(param.UserId, param.AddCredit, param.Type)
 	if err != nil {
 		return nil, decimal.Decimal{}, err
 	}
@@ -33,7 +32,7 @@ func (srv CarbonCreditsService) SendCarbonCredit(param SendCarbonCreditParam) (*
 		TransactionId: param.TransactionId,
 		UserId:        param.UserId,
 		Type:          param.Type,
-		Value:         availableValue,
+		Value:         param.AddCredit,
 		Info:          param.Info,
 	})
 	if err != nil {
@@ -43,12 +42,12 @@ func (srv CarbonCreditsService) SendCarbonCredit(param SendCarbonCreditParam) (*
 	//发放碳积分
 	carbonCredit, err := srv.createOrUpdateCarbonCredit(createOrUpdateCarbonCreditParam{
 		UserId:    param.UserId,
-		AddCredit: availableValue,
+		AddCredit: param.AddCredit,
 	})
 	if err != nil {
 		return nil, decimal.Decimal{}, err
 	}
-	return carbonCredit, availableValue, nil
+	return carbonCredit, param.AddCredit, nil
 }
 
 //创建或者更新用户碳积分账户
@@ -70,69 +69,94 @@ func (srv CarbonCreditsService) createOrUpdateCarbonCredit(param createOrUpdateC
 	return &credit, srv.repo.Create(&credit)
 }
 
-// CarbonCreditEvCar 充电得碳积分
-func (srv CarbonCreditsService) CarbonCreditEvCar(userId int64, electricity float64, TransactionId string) (decimal.Decimal, error) {
-	credits := ebusiness.CarbonTypeEvCar.CalcEvCar(electricity)
-	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
-		UserId:        userId,
+// SendCarbonCreditEvCar 充电得碳积分
+func (srv CarbonCreditsService) SendCarbonCreditEvCar(param SendCarbonCreditEvCarParam) (*CarbonCreditEvCarResult, error) {
+	//计算碳积分
+	credits := DefaultCarbonCreditCalculatorService.CalcEvCar(param.Electricity)
+
+	//发放碳积分
+	_, credits, err := DefaultCarbonCreditsService.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
 		AddCredit:     credits,
 		Type:          ebusiness.CarbonTypeEvCar,
-		TransactionId: TransactionId,
+		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoEvCar{
-			Electricity: electricity,
-		}.JSON(),
+			Electricity: param.Electricity,
+		}.CarbonTypeInfo(),
 	})
-	return credits, err
+	if err != nil {
+		return nil, err
+	}
+	return &CarbonCreditEvCarResult{Credit: credits}, nil
 }
 
-//CarbonCreditOnlineMeeting 在线会议得碳积分
-func (srv CarbonCreditsService) CarbonCreditOnlineMeeting(userId int64, duration time.Duration, start, end time.Time, TransactionId string) (decimal.Decimal, error) {
-	credits := ebusiness.CarbonTypeOnlineMeeting.CalcOnlineMeeting(duration)
+//SendCarbonCreditOnlineMeeting 在线会议得碳积分
+func (srv CarbonCreditsService) SendCarbonCreditOnlineMeeting(param SendCarbonCreditOnlineMeetingParam) (*SendCarbonCreditOnlineMeetingResult, error) {
+	oneCityCredit := DefaultCarbonCreditCalculatorService.CalcOnlineMeetingOneCity(param.OneCityDuration)
+	manyCityCredit := DefaultCarbonCreditCalculatorService.CalcOnlineMeetingManyCity(param.ManyCityDuration)
 
-	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
-		UserId:        userId,
-		AddCredit:     credits,
-		Type:          ebusiness.CarbonTypeEvCar,
-		TransactionId: TransactionId,
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     oneCityCredit.Add(manyCityCredit),
+		Type:          ebusiness.CarbonTypeOnlineMeeting,
+		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoOnlineMeeting{
-			MeetingDuration: duration,
-			StartTime:       model.Time{Time: start},
-			EndTime:         model.Time{Time: end},
-		}.JSON(),
+			OneCityDuration:  param.OneCityDuration,
+			ManyCityDuration: param.ManyCityDuration,
+		}.CarbonTypeInfo(),
 	})
-	return credits, err
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditOnlineMeetingResult{
+		OneCityCredit:  oneCityCredit,
+		ManyCityCredit: manyCityCredit,
+	}, nil
 }
 
-//CarbonCreditSaveWaterElectricity 节水节电得积分
-func (srv CarbonCreditsService) CarbonCreditSaveWaterElectricity(userId int64, water, electricity int64, TransactionId string) (decimal.Decimal, error) {
-	credits := ebusiness.CarbonTypeSaveWaterElectricity.CalcSaveWaterElectricity(water, electricity)
-
-	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
-		UserId:        userId,
-		AddCredit:     credits,
-		Type:          ebusiness.CarbonTypeEvCar,
-		TransactionId: TransactionId,
+//SendCarbonCreditSaveWaterElectricity 节水节电得积分
+func (srv CarbonCreditsService) SendCarbonCreditSaveWaterElectricity(param SendCarbonCreditSaveWaterElectricityParam) (*SendCarbonCreditSaveWaterElectricityResult, error) {
+	waterCredit := DefaultCarbonCreditCalculatorService.CalcSaveWater(param.Water)
+	electricityCredit := DefaultCarbonCreditCalculatorService.CalcSaveElectricity(param.Electricity)
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     waterCredit.Add(electricityCredit),
+		Type:          ebusiness.CarbonTypeSaveWaterElectricity,
+		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoSaveWaterElectricity{
-			Water:       water,
-			Electricity: electricity,
-		}.JSON(),
+			Water:       param.Water,
+			Electricity: param.Electricity,
+		}.CarbonTypeInfo(),
 	})
-	return credits, err
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditSaveWaterElectricityResult{
+		WaterCredit:       waterCredit,
+		ElectricityCredit: electricityCredit,
+	}, nil
 }
 
-//CarbonCreditSavePublicTransport 乘坐公交地铁得积分
-func (srv CarbonCreditsService) CarbonCreditSavePublicTransport(userId int64, bus int64, metro int64, TransactionId string) (decimal.Decimal, error) {
-	credits := ebusiness.CarbonTypePublicTransport.CalcPublicTransport(bus, metro)
+//SendCarbonCreditSavePublicTransport 乘坐公交地铁得积分
+func (srv CarbonCreditsService) SendCarbonCreditSavePublicTransport(param SendCarbonCreditSavePublicTransportParam) (*SendCarbonCreditSavePublicTransportResult, error) {
+	busCredits := DefaultCarbonCreditCalculatorService.CalcBus(param.Bus)
+	metroCredits := DefaultCarbonCreditCalculatorService.CalcMetro(param.Metro)
 
-	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
-		UserId:        userId,
-		AddCredit:     credits,
-		Type:          ebusiness.CarbonTypeEvCar,
-		TransactionId: TransactionId,
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     busCredits.Add(metroCredits),
+		Type:          ebusiness.CarbonTypePublicTransport,
+		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoPublicTransport{
-			Bus:   bus,
-			Metro: metro,
-		}.JSON(),
+			Bus:   param.Bus,
+			Metro: param.Metro,
+		}.CarbonTypeInfo(),
 	})
-	return credits, err
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditSavePublicTransportResult{
+		BusCredits:   busCredits,
+		MetroCredits: metroCredits,
+	}, err
 }

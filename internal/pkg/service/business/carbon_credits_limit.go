@@ -15,26 +15,26 @@ var DefaultCarbonCreditsLimitService = CarbonCreditsLimitService{}
 type CarbonCreditsLimitService struct {
 }
 
-//检测是否超出限制 返回还可领取次数 还可领取积分值 是否超出
-func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.CarbonType) (int, decimal.Decimal, bool, error) {
+//检测是否超出限制 返回还可领取次数
+func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.CarbonType) (int, error) {
 
 	//需要方法 根据用户id查询用户信息
 	userInfo := ebusiness.User{}
 	carbonScene, err := DefaultCarbonSceneService.FindScene(t)
 	if err != nil {
-		return 0, decimal.Decimal{}, false, err
+		return 0, err
 	}
 	if carbonScene.ID == 0 {
-		return 0, decimal.Decimal{}, false, errors.New("未查询到此低碳场景")
+		return 0, errors.New("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
 		CompanyId: userInfo.BCompanyId,
 	})
 	if err != nil {
-		return 0, decimal.Decimal{}, false, err
+		return 0, err
 	}
 	if companyCarbonScene.ID == 0 {
-		return 0, decimal.Decimal{}, false, errors.New("未查询到此低碳场景")
+		return 0, errors.New("未查询到此低碳场景")
 	}
 
 	limitLog, err := DefaultCarbonCreditsLimitLogService.FindLimitLog(FindCarbonCreditsLimitLogParam{
@@ -43,49 +43,40 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 		UserId:    userId,
 	})
 	if err != nil {
-		return 0, decimal.Decimal{}, false, err
+		return 0, err
 	}
 
 	if limitLog.ID == 0 {
-		return companyCarbonScene.MaxCount, t.MaxDayCarbonCredit(), true, nil
+		return companyCarbonScene.MaxCount, nil
 	}
 
 	count := companyCarbonScene.MaxCount - limitLog.CurrentCount
 	if count <= 0 {
-		return 0, decimal.Decimal{}, false, nil
+		return 0, nil
 	}
 
-	credits := t.MaxDayCarbonCredit().Sub(limitLog.CurrentValue)
-	if credits.LessThanOrEqual(decimal.Zero) {
-		return 0, decimal.Decimal{}, false, nil
-	}
-
-	return count, credits, true, nil
+	return count, nil
 }
 
 // CheckLimit 加读写锁检测是否超出限制 返回还可领取次数 还可领取积分值 是否超出
-func (srv CarbonCreditsLimitService) CheckLimit(userId int64, t ebusiness.CarbonType) (int, decimal.Decimal, bool, error) {
+func (srv CarbonCreditsLimitService) CheckLimit(userId int64, t ebusiness.CarbonType) (int, error) {
 	lockKey := fmt.Sprintf("CheckCarbonLimit%d%s", userId, t)
 	util.DefaultLock.LockWait(lockKey, time.Second*5)
 	defer util.DefaultLock.UnLock(lockKey)
 	return srv.checkLimit(userId, t)
 }
 
-//CheckLimitAndUpdate 加读写锁检测是否超出限制并且修改值 返回记录 以及实际新增的积分数量
-func (srv CarbonCreditsLimitService) CheckLimitAndUpdate(userId int64, value decimal.Decimal, t ebusiness.CarbonType) (*ebusiness.CarbonCreditsLimitLog, decimal.Decimal, error) {
+//CheckLimitAndUpdate 加读写锁检测是否超出限制并且修改值 返回记录
+func (srv CarbonCreditsLimitService) CheckLimitAndUpdate(userId int64, value decimal.Decimal, t ebusiness.CarbonType) (*ebusiness.CarbonCreditsLimitLog, error) {
 	lockKey := fmt.Sprintf("CheckCarbonLimit%d%s", userId, t)
 	util.DefaultLock.LockWait(lockKey, time.Second*5)
 	defer util.DefaultLock.UnLock(lockKey)
-	_, credits, ok, err := srv.checkLimit(userId, t)
+	count, err := srv.checkLimit(userId, t)
 	if err != nil {
-		return nil, decimal.Decimal{}, err
+		return nil, err
 	}
-	if !ok {
-		return nil, decimal.Decimal{}, errors.New("已经达到当日最大限制")
-	}
-
-	if value.GreaterThan(credits) {
-		value = credits
+	if count <= 0 {
+		return nil, errors.New("已经达到当日最大限制")
 	}
 
 	log, err := DefaultCarbonCreditsLimitLogService.UpdateOrCreateLimitLog(UpdateOrCreateCarbonCreditsLimitLogParam{
@@ -94,5 +85,5 @@ func (srv CarbonCreditsLimitService) CheckLimitAndUpdate(userId int64, value dec
 		AddCurrentValue: value,
 		TimePoint:       timeutils.StartOfDay(time.Now()),
 	})
-	return log, value, err
+	return log, err
 }

@@ -22,9 +22,6 @@ func (srv CompanyCarbonSceneService) FindCompanyScene(param FindCompanyCarbonSce
 
 //FindCompanySceneSetting 查询公司低碳场景积分和碳积分限制
 func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carbonType ebusiness.CarbonType) (*CompanySceneSetting, error) {
-	//需要方法-查询用户信息
-	userInfo := ebusiness.User{}
-
 	carbonScene, err := DefaultCarbonSceneService.FindScene(carbonType)
 	if err != nil {
 		return nil, err
@@ -33,7 +30,7 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 		return nil, errors.New("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
-		CompanyId: userInfo.BCompanyId,
+		CompanyId: companyId,
 	})
 	if err != nil {
 		return nil, err
@@ -43,9 +40,7 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 	}
 
 	return &CompanySceneSetting{
-		PointSetting:    companyCarbonScene.PointSetting,
-		MaxPoint:        companyCarbonScene.MaxPoint,
-		MaxCount:        companyCarbonScene.MaxCount,
-		MaxCarbonCredit: carbonType.MaxDayCarbonCredit(),
+		PointSetting: companyCarbonScene.PointSetting,
+		MaxCount:     companyCarbonScene.MaxCount,
 	}, nil
 }

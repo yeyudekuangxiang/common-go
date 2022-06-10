@@ -18,21 +18,32 @@ func (CarbonController) CollectEvCar(ctx *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthBusinessUser(ctx)
-	err := business.DefaultCarbonService.CarbonCreditEvCar(user.ID, form.Electricity)
-	return nil, err
+	result, err := business.DefaultCarbonService.CarbonCreditEvCar(user.ID, form.Electricity)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"carbonCredit": result.Credit,
+		"point":        result.Point,
+	}, err
 }
 func (CarbonController) CollectOnlineMeeting(ctx *gin.Context) (gin.H, error) {
 	form := CarbonCollectOnlineMeetingForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	duration := time.Duration(float64(time.Hour) * form.OnlineDuration)
-
-	start := time.Now()
+	oneCityDuration := time.Duration(float64(time.Hour) * form.OneCityDuration)
+	manyCityDuration := time.Duration(float64(time.Hour) * form.ManyCityDuration)
 
 	user := apiutil.GetAuthBusinessUser(ctx)
-	err := business.DefaultCarbonService.CarbonCreditOnlineMeeting(user.ID, duration, start, start.Add(duration))
-	return nil, err
+	result, err := business.DefaultCarbonService.CarbonCreditOnlineMeeting(user.ID, oneCityDuration, manyCityDuration)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"carbonCredit": result.Credit,
+		"point":        result.Point,
+	}, err
 }
 func (CarbonController) CollectSaveWaterElectricity(ctx *gin.Context) (gin.H, error) {
 	form := CarbonCollectSaveWaterElectricityForm{}
@@ -41,8 +52,14 @@ func (CarbonController) CollectSaveWaterElectricity(ctx *gin.Context) (gin.H, er
 	}
 
 	user := apiutil.GetAuthBusinessUser(ctx)
-	err := business.DefaultCarbonService.CarbonCreditSaveWaterElectricity(user.ID, form.Water, form.Electricity)
-	return nil, err
+	result, err := business.DefaultCarbonService.CarbonCreditSaveWaterElectricity(user.ID, form.Water, form.Electricity)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"carbonCredit": result.Credit,
+		"point":        result.Point,
+	}, err
 }
 func (CarbonController) CollectPublicTransport(ctx *gin.Context) (gin.H, error) {
 	form := CarbonCollectPublicTransportForm{}
@@ -51,6 +68,12 @@ func (CarbonController) CollectPublicTransport(ctx *gin.Context) (gin.H, error) 
 	}
 
 	user := apiutil.GetAuthBusinessUser(ctx)
-	err := business.DefaultCarbonService.CarbonCreditPublicTransport(user.ID, form.Bus, form.Metro)
-	return nil, err
+	result, err := business.DefaultCarbonService.CarbonCreditPublicTransport(user.ID, form.Bus, form.Metro)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"carbonCredit": result.Credit,
+		"point":        result.Point,
+	}, err
 }
