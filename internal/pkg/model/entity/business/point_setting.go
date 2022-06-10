@@ -70,5 +70,5 @@ func (o PointRate) PointRateSetting() PointRateSetting {
 
 // Calc 根据碳积分计算可得积分
 func (o PointRate) Calc(carbonCredit decimal.Decimal) int {
-	return int(carbonCredit.Div(carbonCredit).Mul(decimal.NewFromInt(int64(o.Point))).IntPart())
+	return int(carbonCredit.Div(o.CarbonCredit).Mul(decimal.NewFromInt(int64(o.Point))).IntPart())
 }
