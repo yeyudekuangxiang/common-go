@@ -13,8 +13,8 @@ type CarbonScene struct {
 	Desc             string           `json:"desc" gorm:"not null;type:varchar(255);comment:场景描述"`
 	MaxCount         int              `json:"maxCount" gorm:"not null;type:int4;comment:每日最多获取积分次数"`
 	MaxPoint         int              `json:"maxPoint" gorm:"not null;type:int4;comment:每日最多获取积分值"`
-	CreatedAt        model.Time       `json:"createdAt" gorm:"not null;type:timestamptz"`
-	UpdatedAt        model.Time       `json:"updatedAt" gorm:"not null;type:timestamptz"`
+	CreatedAt        model.Time       `json:"createdAt" gorm:"not null;type:timestamp"`
+	UpdatedAt        model.Time       `json:"updatedAt" gorm:"not null;type:timestamp"`
 }
 
 func (CarbonScene) TableName() string {

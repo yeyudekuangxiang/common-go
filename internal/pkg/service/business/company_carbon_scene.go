@@ -30,7 +30,8 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 		return nil, errors.New("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
-		CompanyId: companyId,
+		CompanyId:     companyId,
+		CarbonSceneId: carbonScene.ID,
 	})
 	if err != nil {
 		return nil, err

@@ -64,7 +64,7 @@ func (repo CarbonCreditsLogRepository) GetActualUserCarbonRank(by GetActualUserC
 		db.Where("log.created_at >= ?", by.StartTime)
 	}
 	if !by.EndTime.IsZero() {
-		db.Where("log.created_at <= ?", by.StartTime)
+		db.Where("log.created_at <= ?", by.EndTime)
 	}
 
 	db.Select("log.b_user_id user_id,sum(log.value) \"value\"").Group("log.b_user_id")
@@ -90,7 +90,7 @@ func (repo CarbonCreditsLogRepository) GetActualDepartmentCarbonRank(by GetActua
 		db.Where("log.created_at >= ?", by.StartTime)
 	}
 	if !by.EndTime.IsZero() {
-		db.Where("log.created_at <= ?", by.StartTime)
+		db.Where("log.created_at <= ?", by.EndTime)
 	}
 
 	db.Select("buser.b_department_id department_id,sum(log.value) \"value\"").Group("buser.b_department_id")

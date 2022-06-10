@@ -8,8 +8,8 @@ type Department struct {
 	BCompanyId int        `json:"-" gorm:"not null;type:int4;comment:部门所属企业id"`
 	Pid        int        `json:"pid" gorm:"not null;type:int4;default:0;comment:上级部门id 0表示没有上级"`
 	Icon       string     `json:"icon" gorm:"not null;type:varchar(500);comment:部门图标"`
-	CreatedAt  model.Time `json:"createdAt" gorm:"not null;type:timestamptz"`
-	UpdatedAt  model.Time `json:"updatedAt" gorm:"not null;type:timestamptz"`
+	CreatedAt  model.Time `json:"createdAt" gorm:"not null;type:timestamp"`
+	UpdatedAt  model.Time `json:"updatedAt" gorm:"not null;type:timestamp"`
 }
 
 func (Department) TableName() string {

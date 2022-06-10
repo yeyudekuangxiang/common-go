@@ -17,8 +17,8 @@ type PointLog struct {
 	Type          PointType     `json:"type" gorm:"not null;type:varchar(50);comment:积分类型"`
 	OrderId       string        `json:"orderId" gorm:"not null;type:varchar(255);default:'';comment:相关订单id"`
 	Info          PointTypeInfo `json:"info" gorm:"not null;type:varchar(1000);default:'';comment:附带信息 json object 同一个type的info格式必须统一"`
-	CreatedAt     model.Time    `json:"createdAt" gorm:"not null;type:timestamptz"`
-	UpdatedAt     model.Time    `json:"updatedAt" gorm:"not null;type:timestamptz"`
+	CreatedAt     model.Time    `json:"createdAt" gorm:"not null;type:timestamp"`
+	UpdatedAt     model.Time    `json:"updatedAt" gorm:"not null;type:timestamp"`
 }
 
 func (PointLog) TableName() string {

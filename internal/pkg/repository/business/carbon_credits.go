@@ -16,7 +16,7 @@ func (repo CarbonCreditsRepository) Create(credit *business.CarbonCredits) error
 	return repo.DB.Create(credit).Error
 }
 func (repo CarbonCreditsRepository) Save(credit *business.CarbonCredits) error {
-	return repo.DB.Create(credit).Error
+	return repo.DB.Save(credit).Error
 }
 func (repo CarbonCreditsRepository) FindCredits(userId int64) business.CarbonCredits {
 	credit := business.CarbonCredits{}

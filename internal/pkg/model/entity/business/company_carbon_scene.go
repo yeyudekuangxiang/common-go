@@ -11,8 +11,8 @@ type CompanyCarbonScene struct {
 	PointRateSetting PointRateSetting `json:"pointSetting" gorm:"not null;type:varchar(500);comment:每个单位或者每次获取的积分值"`
 	MaxCount         int              `json:"maxCount" gorm:"not null;type:int4;comment:单日最大积分数量"`
 	MaxPoint         int              `json:"maxPoint" gorm:"not null;type:int4;comment:单日最大积分值"`
-	CreatedAt        model.Time       `json:"createdAt" gorm:"not null;type:timestamptz"`
-	UpdatedAt        model.Time       `json:"updatedAt" gorm:"not null;type:timestamptz"`
+	CreatedAt        model.Time       `json:"createdAt" gorm:"not null;type:timestamp"`
+	UpdatedAt        model.Time       `json:"updatedAt" gorm:"not null;type:timestamp"`
 }
 
 func (CompanyCarbonScene) TableName() string {
