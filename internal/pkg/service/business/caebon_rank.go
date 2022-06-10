@@ -88,7 +88,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
 	}
 
-	//需要方法-查询用户信息列表方法
+	//需要方法-根据id列表查询用户信息列表方法
 	userMap := make(map[int64]business.User)
 
 	infoList := make([]UserRankInfo, 0)
@@ -120,7 +120,7 @@ func (srv CarbonRankService) FindUserRank(param FindUserRankParam) (*UserRankInf
 		rank.Rank = 9999
 	}
 
-	//需要方法-查询用户信息
+	//需要方法-根据用户id查询用户信息
 	user := business.User{}
 
 	//isLike
@@ -183,7 +183,7 @@ func (srv CarbonRankService) DepartmentRankList(param GetDepartmentRankListParam
 		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
 	}
 
-	//需要方法-查询部门列表
+	//需要方法-根据部门id列表查询部门列表
 	departmentMap := make(map[int64]business.Department)
 
 	infoList := make([]DepartmentRankInfo, 0)
@@ -222,7 +222,7 @@ func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (
 		rank.Rank = 9999
 	}
 
-	//需要方法-查询部门信息
+	//需要方法-根据部门id查询部门信息
 	department := business.Department{}
 
 	//isLike

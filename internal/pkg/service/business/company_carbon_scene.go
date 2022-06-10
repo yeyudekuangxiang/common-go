@@ -40,7 +40,7 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 	}
 
 	return &CompanySceneSetting{
-		PointSetting: companyCarbonScene.PointSetting,
-		MaxCount:     companyCarbonScene.MaxCount,
+		PointRateSetting: companyCarbonScene.PointRateSetting,
+		MaxCount:         companyCarbonScene.MaxCount,
 	}, nil
 }

@@ -5,35 +5,35 @@ import (
 	ebusiness "mio/internal/pkg/model/entity/business"
 )
 
-var DefaultPointSettingService = PointSettingService{}
+var DefaultPointRateSettingService = PointRateSettingService{}
 
-type PointSettingService struct {
+type PointRateSettingService struct {
 }
 
-func (srv PointSettingService) ParseSaveWaterElectricityRate(setting ebusiness.PointSetting) (*ebusiness.SaveWaterElectricityExchangeRate, error) {
-	rate := ebusiness.SaveWaterElectricityExchangeRate{}
+func (srv PointRateSettingService) ParseSaveWaterElectricityRate(setting ebusiness.PointRateSetting) (*ebusiness.PointRateSaveWaterElectricity, error) {
+	rate := ebusiness.PointRateSaveWaterElectricity{}
 	err := json.Unmarshal([]byte(setting), &rate)
 	return &rate, err
 }
-func (srv PointSettingService) ParsePublicTransportRate(setting ebusiness.PointSetting) (*ebusiness.PublicTransportExchangeRate, error) {
-	rate := ebusiness.PublicTransportExchangeRate{}
+func (srv PointRateSettingService) ParsePublicTransportRate(setting ebusiness.PointRateSetting) (*ebusiness.PointRatePublicTransport, error) {
+	rate := ebusiness.PointRatePublicTransport{}
 	err := json.Unmarshal([]byte(setting), &rate)
 	return &rate, err
 }
-func (srv PointSettingService) ParseOnlineMeetingRate(setting ebusiness.PointSetting) (*ebusiness.OnlineMeetingExchangeRate, error) {
-	rate := ebusiness.OnlineMeetingExchangeRate{}
+func (srv PointRateSettingService) ParseOnlineMeetingRate(setting ebusiness.PointRateSetting) (*ebusiness.PointRateOnlineMeeting, error) {
+	rate := ebusiness.PointRateOnlineMeeting{}
 	err := json.Unmarshal([]byte(setting), &rate)
 	return &rate, err
 }
-func (srv PointSettingService) ParsePointExchangeRate(setting ebusiness.PointSetting) (*ebusiness.PointExchangeRate, error) {
-	rate := ebusiness.PointExchangeRate{}
+func (srv PointRateSettingService) ParsePointExchangeRate(setting ebusiness.PointRateSetting) (*ebusiness.PointRate, error) {
+	rate := ebusiness.PointRate{}
 	err := json.Unmarshal([]byte(setting), &rate)
 	return &rate, err
 }
-func (srv PointSettingService) EncodePointExchangeRate(rate ebusiness.PointSettingRate) ebusiness.PointSetting {
+func (srv PointRateSettingService) EncodePointExchangeRate(rate ebusiness.PointRate) ebusiness.PointRateSetting {
 	data, err := json.Marshal(rate)
 	if err != nil {
 		panic(err)
 	}
-	return ebusiness.PointSetting(data)
+	return ebusiness.PointRateSetting(data)
 }

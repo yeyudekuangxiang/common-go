@@ -22,7 +22,7 @@ func (srv PointLimitService) checkLimit(userId int64, t ebusiness.PointType) (in
 		return 1, 9999, true, nil
 	}
 
-	//需要方法 根据用户id查询用户信息
+	//需要方法-根据用户ID查询用户信息
 	userInfo := ebusiness.User{}
 	carbonScene, err := DefaultCarbonSceneService.FindScene(carbonType)
 	if err != nil {
