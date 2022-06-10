@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
-	"mio/internal/pkg/model/entity/business"
+	ebusiness "mio/internal/pkg/model/entity/business"
 )
 
 // migrateCmd represents the migrate command
@@ -30,19 +30,19 @@ to quickly create a Cobra application.`,
 		conPath := cmd.Flag("config").Value.String()
 		initialize.Initialize(conPath)
 		app.DB.AutoMigrate(
-			&business.CarbonCredits{},
-			&business.CarbonCreditsLimitLog{},
-			&business.CarbonCreditsLog{},
-			&business.CarbonRank{},
-			&business.CarbonRankLikeLog{},
-			&business.CarbonScene{},
-			&business.Company{},
-			&business.CompanyCarbonScene{},
-			&business.Department{},
-			&business.Point{},
-			&business.PointLimitLog{},
-			&business.PointLog{},
-			&business.User{},
+			&ebusiness.CarbonCredits{},
+			&ebusiness.CarbonCreditsLimitLog{},
+			&ebusiness.CarbonCreditsLog{},
+			&ebusiness.CarbonRank{},
+			&ebusiness.CarbonRankLikeLog{},
+			&ebusiness.CarbonScene{},
+			&ebusiness.Company{},
+			&ebusiness.CompanyCarbonScene{},
+			&ebusiness.Department{},
+			&ebusiness.Point{},
+			&ebusiness.PointLimitLog{},
+			&ebusiness.PointLog{},
+			&ebusiness.User{},
 		)
 	},
 }

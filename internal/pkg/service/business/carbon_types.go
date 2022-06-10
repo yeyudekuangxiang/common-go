@@ -130,8 +130,8 @@ type SendCarbonCreditParam struct {
 	TransactionId string
 }
 type CompanySceneSetting struct {
-	PointSetting business.PointSetting
-	MaxCount     int
+	PointRateSetting business.PointRateSetting
+	MaxCount         int
 }
 
 type SendCarbonCreditEvCarParam struct {

@@ -88,7 +88,7 @@ func (CarbonRankController) ChangeUserRankLikeStatus(ctx *gin.Context) (gin.H, e
 		return nil, err
 	}
 
-	//需要方法-查询用户信息
+	//需要方法-根据uid查询用户信息
 	likeUser := ebusiness.User{}
 	user := apiutil.GetAuthBusinessUser(ctx)
 	like, err := business.DefaultCarbonRankService.ChangeLikeStatus(business.ChangeLikeStatusParam{
