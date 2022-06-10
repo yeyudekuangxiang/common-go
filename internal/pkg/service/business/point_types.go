@@ -86,3 +86,33 @@ type createOrUpdatePointParam struct {
 	UserId   int64
 	AddPoint int
 }
+type SendPointEvCarParam struct {
+	UserId        int64
+	CarbonCredits decimal.Decimal
+	Electricity   float64
+	TransactionId string
+}
+type SendPointOnlineMeetingParam struct {
+	UserId           int64
+	OneCityDuration  time.Duration
+	manyCityDuration time.Duration
+	OneCityCredit    decimal.Decimal
+	ManyCityCredit   decimal.Decimal
+	TransactionId    string
+}
+type SendPointSaveWaterElectricityParam struct {
+	UserId            int64
+	Water             int64
+	Electricity       int64
+	WaterCredit       decimal.Decimal
+	ElectricityCredit decimal.Decimal
+	TransactionId     string
+}
+type SendPointPublicTransportParam struct {
+	UserId        int64
+	Bus           int64
+	Metro         int64
+	BusCredit     decimal.Decimal
+	MetroCredit   decimal.Decimal
+	TransactionId string
+}

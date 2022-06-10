@@ -1,8 +1,9 @@
 package business
 
 import (
+	"errors"
 	"fmt"
-	"mio/internal/pkg/model"
+	"mio/internal/pkg/core/app"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
 	"mio/internal/pkg/util"
@@ -16,39 +17,39 @@ type PointService struct {
 }
 
 // SendPoint 发放碳积分 返回用户积分账户 本次实际发放的碳积分数量
-func (srv PointService) SendPoint(param SendPointParam) (*ebusiness.Point, int, error) {
+func (srv PointService) SendPoint(param SendPointParam) (*ebusiness.Point, error) {
 	lockKey := fmt.Sprintf("SendPoint%d", param.UserId)
 	util.DefaultLock.LockWait(lockKey, time.Second*10)
 	defer util.DefaultLock.UnLock(lockKey)
 
-	//检测是否超过发放限制
+	/*//检测是否超过发放限制
 	_, availableValue, err := DefaultPointLimitService.CheckLimitAndUpdate(param.UserId, param.AddPoint, param.Type)
 	if err != nil {
 		return nil, 0, err
-	}
+	}*/
 
 	//添加发放积分记录
-	_, err = DefaultPointLogService.CreatePointLog(CreatePointLogParam{
+	_, err := DefaultPointLogService.CreatePointLog(CreatePointLogParam{
 		TransactionId: param.TransactionId,
 		UserId:        param.UserId,
 		Type:          param.Type,
-		Value:         availableValue,
+		Value:         param.AddPoint,
 		Info:          param.Info,
 		OrderId:       param.OrderId,
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	//发放碳积分
 	point, err := srv.createOrUpdatePoint(createOrUpdatePointParam{
 		UserId:   param.UserId,
-		AddPoint: availableValue,
+		AddPoint: param.AddPoint,
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return point, availableValue, nil
+	return point, nil
 }
 
 //创建或者更新用户碳积分账户
@@ -73,8 +74,8 @@ func (srv PointService) createOrUpdatePoint(param createOrUpdatePointParam) (*eb
 	return &point, srv.repo.Create(&point)
 }
 
-// PointEvCar 充电得碳积分
-func (srv PointService) PointEvCar(userId int64, electricity float64, TransactionId string) (int, error) {
+// SendPointEvCar 充电得碳积分
+func (srv PointService) SendPointEvCar(param SendPointEvCarParam) (int, error) {
 
 	//需要方法-查询用户信息
 	userInfo := ebusiness.User{}
@@ -83,83 +84,119 @@ func (srv PointService) PointEvCar(userId int64, electricity float64, Transactio
 		return 0, err
 	}
 
-	addPoint := int(electricity/100) * sceneSetting.PointSetting
+	//获取碳积分和积分汇率
+	pointRate, err := DefaultPointSettingService.ParsePointExchangeRate(sceneSetting.PointSetting)
+	if err != nil {
+		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointSetting, err)
+		return 0, errors.New("系统异常,请稍后再试")
+	}
 
-	_, point, err := srv.SendPoint(SendPointParam{
-		UserId:        userId,
+	addPoint := pointRate.Calc(param.CarbonCredits)
+
+	_, err = srv.SendPoint(SendPointParam{
+		UserId:        param.UserId,
 		AddPoint:      addPoint,
 		Type:          ebusiness.PointTypeEvCar,
-		TransactionId: TransactionId,
-		Info: ebusiness.PointTypeInfo(ebusiness.CarbonTypeInfoEvCar{
-			Electricity: electricity,
-		}.JSON()),
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoEvCar{
+			Electricity: param.Electricity,
+		}.PointTypeInfo(),
 	})
-	return point, err
+	return addPoint, err
 }
 
-//PointOnlineMeeting 在线会议得碳积分
-func (srv PointService) PointOnlineMeeting(userId int64, duration time.Duration, start, end time.Time, TransactionId string) (int, error) {
+//SendPointOnlineMeeting 在线会议得碳积分
+func (srv PointService) SendPointOnlineMeeting(param SendPointOnlineMeetingParam) (int, error) {
+
 	//需要方法-查询用户信息
 	userInfo := ebusiness.User{}
-	_, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeOnlineMeeting)
+	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeOnlineMeeting)
 	if err != nil {
 		return 0, err
 	}
 
-	_, point, err := srv.SendPoint(SendPointParam{
-		UserId:        userId,
-		AddPoint:      0,
+	//获取碳积分和积分汇率
+	pointRate, err := DefaultPointSettingService.ParseOnlineMeetingRate(sceneSetting.PointSetting)
+	if err != nil {
+		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointSetting, err)
+		return 0, errors.New("系统异常,请稍后再试")
+	}
+
+	addPoint := pointRate.OneCity.Calc(param.OneCityCredit)
+	addPoint += pointRate.ManyCity.Calc(param.ManyCityCredit)
+
+	_, err = srv.SendPoint(SendPointParam{
+		UserId:        param.UserId,
+		AddPoint:      addPoint,
 		Type:          ebusiness.PointTypeOnlineMeeting,
-		TransactionId: TransactionId,
-		Info: ebusiness.PointTypeInfo(ebusiness.CarbonTypeInfoOnlineMeeting{
-			StartTime:       model.Time{Time: start},
-			EndTime:         model.Time{Time: end},
-			MeetingDuration: duration,
-		}.JSON()),
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoOnlineMeeting{
+			OneCityDuration:  param.OneCityDuration,
+			ManyCityDuration: param.manyCityDuration,
+		}.PointTypeInfo(),
 	})
-	return point, err
+	return addPoint, err
 }
 
-//PointSaveWaterElectricity 节水节电得积分
-func (srv PointService) PointSaveWaterElectricity(userId int64, water, electricity int64, TransactionId string) (int, error) {
+//SendPointSaveWaterElectricity 节水节电得积分
+func (srv PointService) SendPointSaveWaterElectricity(param SendPointSaveWaterElectricityParam) (int, error) {
 	//需要方法-查询用户信息
 	userInfo := ebusiness.User{}
-	_, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeSaveWaterElectricity)
+	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeSaveWaterElectricity)
 	if err != nil {
 		return 0, err
 	}
 
-	_, point, err := srv.SendPoint(SendPointParam{
-		UserId:        userId,
-		AddPoint:      0,
+	//获取碳积分和积分汇率
+	pointRate, err := DefaultPointSettingService.ParseSaveWaterElectricityRate(sceneSetting.PointSetting)
+	if err != nil {
+		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointSetting, err)
+		return 0, errors.New("系统异常,请稍后再试")
+	}
+	addPoint := pointRate.Water.Calc(param.WaterCredit)
+	addPoint += pointRate.Electricity.Calc(param.ElectricityCredit)
+
+	_, err = srv.SendPoint(SendPointParam{
+		UserId:        param.UserId,
+		AddPoint:      addPoint,
 		Type:          ebusiness.PointTypeSaveWaterElectricity,
-		TransactionId: TransactionId,
-		Info: ebusiness.PointTypeInfo(ebusiness.CarbonTypeInfoSaveWaterElectricity{
-			Water:       water,
-			Electricity: electricity,
-		}.JSON()),
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoSaveWaterElectricity{
+			Water:       param.Water,
+			Electricity: param.Electricity,
+		}.PointTypeInfo(),
 	})
-	return point, err
+	return addPoint, err
 }
 
-//PointPublicTransport 乘坐公交地铁得积分
-func (srv PointService) PointPublicTransport(userId int64, bus int64, metro int64, TransactionId string) (int, error) {
+//SendPointPublicTransport 乘坐公交地铁得积分
+func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportParam) (int, error) {
 	//需要方法-查询用户信息
 	userInfo := ebusiness.User{}
-	_, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypePublicTransport)
+	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypePublicTransport)
 	if err != nil {
 		return 0, err
 	}
 
-	_, point, err := srv.SendPoint(SendPointParam{
-		UserId:        userId,
-		AddPoint:      0,
+	//获取碳积分和积分汇率
+	pointRate, err := DefaultPointSettingService.ParsePublicTransportRate(sceneSetting.PointSetting)
+	if err != nil {
+		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointSetting, err)
+		return 0, errors.New("系统异常,请稍后再试")
+	}
+
+	addPoint := pointRate.Bus.Calc(param.BusCredit)
+	addPoint += pointRate.Bus.Calc(param.MetroCredit)
+
+	_, err = srv.SendPoint(SendPointParam{
+		UserId:        param.UserId,
+		AddPoint:      addPoint,
 		Type:          ebusiness.PointTypePublicTransport,
-		TransactionId: TransactionId,
-		Info: ebusiness.PointTypeInfo(ebusiness.CarbonTypeInfoPublicTransport{
-			Bus:   bus,
-			Metro: metro,
-		}.JSON()),
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoPublicTransport{
+			Bus:   param.Bus,
+			Metro: param.Metro,
+		}.PointTypeInfo(),
 	})
-	return point, err
+	return addPoint, err
 }

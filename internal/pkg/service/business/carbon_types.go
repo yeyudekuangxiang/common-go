@@ -130,8 +130,50 @@ type SendCarbonCreditParam struct {
 	TransactionId string
 }
 type CompanySceneSetting struct {
-	PointSetting    int
-	MaxCount        int
-	MaxPoint        int
-	MaxCarbonCredit decimal.Decimal
+	PointSetting business.PointSetting
+	MaxCount     int
+}
+
+type SendCarbonCreditEvCarParam struct {
+	UserId        int64
+	Electricity   float64
+	TransactionId string
+}
+type CarbonCreditEvCarResult struct {
+	Credit decimal.Decimal
+}
+type SendCarbonCreditOnlineMeetingParam struct {
+	UserId           int64
+	OneCityDuration  time.Duration
+	ManyCityDuration time.Duration
+	TransactionId    string
+}
+type SendCarbonCreditOnlineMeetingResult struct {
+	OneCityCredit  decimal.Decimal
+	ManyCityCredit decimal.Decimal
+}
+
+type SendCarbonCreditSaveWaterElectricityParam struct {
+	UserId        int64
+	Water         int64
+	Electricity   int64
+	TransactionId string
+}
+type SendCarbonCreditSaveWaterElectricityResult struct {
+	WaterCredit       decimal.Decimal
+	ElectricityCredit decimal.Decimal
+}
+type SendCarbonCreditSavePublicTransportParam struct {
+	UserId        int64
+	Bus           int64
+	Metro         int64
+	TransactionId string
+}
+type SendCarbonCreditSavePublicTransportResult struct {
+	BusCredits   decimal.Decimal
+	MetroCredits decimal.Decimal
+}
+type CarbonResult struct {
+	Credit decimal.Decimal
+	Point  int
 }

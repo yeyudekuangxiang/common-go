@@ -2,9 +2,7 @@ package business
 
 import (
 	"encoding/json"
-	"github.com/shopspring/decimal"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/model"
 	"time"
 )
 
@@ -60,42 +58,6 @@ func (t CarbonType) PointType() PointType {
 	return ""
 }
 
-//MaxDayCarbonCredit 获取低碳场景每日最多获得多少碳积分
-func (t CarbonType) MaxDayCarbonCredit() decimal.Decimal {
-	panic("请配置我")
-	switch t {
-	case CarbonTypeOnlineMeeting:
-		return decimal.Decimal{}
-	case CarbonTypeSaveWaterElectricity:
-		return decimal.Decimal{}
-	case CarbonTypePublicTransport:
-		return decimal.Decimal{}
-	case CarbonTypeEvCar:
-		return decimal.Decimal{}
-	}
-	return decimal.Decimal{}
-}
-
-// CalcOnlineMeeting 根据会议时长计算获得多少碳积分
-func (t CarbonType) CalcOnlineMeeting(m time.Duration) decimal.Decimal {
-	panic("请配置我")
-}
-
-// CalcSaveWaterElectricity 根绝节水和节电量计算获得多少碳积分 水的单位升 电的单位度
-func (t CarbonType) CalcSaveWaterElectricity(water int64, electricity int64) decimal.Decimal {
-	panic("请配置我")
-}
-
-// CalcPublicTransport 根绝公交和地铁的距离计算获得多少碳积分 单位都是公里
-func (t CarbonType) CalcPublicTransport(bus int64, metro int64) decimal.Decimal {
-	panic("请配置我")
-}
-
-// CalcEvCar 根绝电车充电量计算获得多少碳积分 单位度
-func (t CarbonType) CalcEvCar(electricity float64) decimal.Decimal {
-	panic("请配置我")
-}
-
 type CarbonTypeInfo string
 
 func (info CarbonTypeInfo) OnlineMeeting() (CarbonTypeInfoOnlineMeeting, error) {
@@ -117,17 +79,23 @@ func (info CarbonTypeInfo) EvCar() (CarbonTypeInfoEvCar, error) {
 
 // CarbonTypeInfoOnlineMeeting 会议信息
 type CarbonTypeInfoOnlineMeeting struct {
-	MeetingDuration time.Duration `json:"meetingDuration"` //会议时长
-	StartTime       model.Time    `json:"startTime"`
-	EndTime         model.Time    `json:"endTime"`
+	OneCityDuration  time.Duration `json:"OneCityDuration"`  //同城在线会议时长
+	ManyCityDuration time.Duration `json:"manyCityDuration"` //异地在线会议时长
 }
 
-func (c CarbonTypeInfoOnlineMeeting) JSON() CarbonTypeInfo {
+func (c CarbonTypeInfoOnlineMeeting) CarbonTypeInfo() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
 	return CarbonTypeInfo(data)
+}
+func (c CarbonTypeInfoOnlineMeeting) PointTypeInfo() PointTypeInfo {
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	return PointTypeInfo(data)
 }
 
 type CarbonTypeInfoSaveWaterElectricity struct {
@@ -135,12 +103,19 @@ type CarbonTypeInfoSaveWaterElectricity struct {
 	Electricity int64 `json:"electricity"` //电量 度
 }
 
-func (c CarbonTypeInfoSaveWaterElectricity) JSON() CarbonTypeInfo {
+func (c CarbonTypeInfoSaveWaterElectricity) CarbonTypeInfo() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
 	return CarbonTypeInfo(data)
+}
+func (c CarbonTypeInfoSaveWaterElectricity) PointTypeInfo() PointTypeInfo {
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	return PointTypeInfo(data)
 }
 
 type CarbonTypeInfoPublicTransport struct {
@@ -148,22 +123,36 @@ type CarbonTypeInfoPublicTransport struct {
 	Metro int64 //公里
 }
 
-func (c CarbonTypeInfoPublicTransport) JSON() CarbonTypeInfo {
+func (c CarbonTypeInfoPublicTransport) CarbonTypeInfo() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
 	return CarbonTypeInfo(data)
+}
+func (c CarbonTypeInfoPublicTransport) PointTypeInfo() PointTypeInfo {
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	return PointTypeInfo(data)
 }
 
 type CarbonTypeInfoEvCar struct {
 	Electricity float64 //度
 }
 
-func (c CarbonTypeInfoEvCar) JSON() CarbonTypeInfo {
+func (c CarbonTypeInfoEvCar) CarbonTypeInfo() CarbonTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)
 	}
 	return CarbonTypeInfo(data)
+}
+func (c CarbonTypeInfoEvCar) PointTypeInfo() PointTypeInfo {
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	return PointTypeInfo(data)
 }
