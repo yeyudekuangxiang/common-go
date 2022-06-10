@@ -56,21 +56,6 @@ func (t PointType) CarbonType() CarbonType {
 	return ""
 }
 
-// UnitNum 计算积分发放单位数
-func (t PointType) UnitNum(value float64) int {
-	panic("请配置我")
-	switch t {
-	case PointTypeOnlineMeeting:
-		return 1
-	case PointTypeSaveWaterElectricity:
-		return 1
-	case PointTypePublicTransport:
-		return 1
-	case PointTypeEvCar:
-	}
-	return 0
-}
-
 type Point struct {
 	ID        int64      `json:"id" gorm:"primaryKey;not null;type:serial8;comment:积分账户表"`
 	BUserId   int64      `json:"-" gorm:"not null;type:int8;comment:企业用户表主键"`
