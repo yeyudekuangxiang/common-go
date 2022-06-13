@@ -56,3 +56,36 @@ func (p PointLogRepository) GetListBy(by GetPointLogListBy) []business.PointLog 
 
 	return list
 }
+
+//func (p PointTransactionRepository) GetSortListBy(by GetPointTransactionListBy) []business.PointTransaction {
+//	list := make([]business.PointTransaction, 0)
+//
+//	db := p.DB.Model(business.PointTransaction{})
+//	if by.UserId != 0 {
+//		db.Where("b_user_id = ?", by.UserId)
+//	}
+//
+//	if !by.StartTime.IsZero() {
+//		db.Where("created_at >= ?", by.StartTime)
+//	}
+//	if !by.EndTime.IsZero() {
+//		db.Where("updated_at <= ?", by.EndTime)
+//	}
+//
+//	if by.Type != "" {
+//		db.Where("type = ?", by.Type)
+//	}
+//
+//	for _, orderBy := range by.OrderBy {
+//		switch orderBy {
+//		case business.OrderByPointTranCTDESC:
+//			db.Order("created_at desc")
+//		}
+//	}
+//
+//	if err := db.Select("sum(value) as total ,type ").Group("type").Order("total desc").Find(&list).Error; err != nil {
+//		panic(err)
+//	}
+//
+//	return list
+//}

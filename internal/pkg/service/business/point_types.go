@@ -116,3 +116,8 @@ type SendPointPublicTransportParam struct {
 	MetroCredit   decimal.Decimal
 	TransactionId string
 }
+type GetCarbonCreditLogSortedListParam struct {
+	UserId    int64
+	StartTime time.Time
+	EndTime   time.Time
+}

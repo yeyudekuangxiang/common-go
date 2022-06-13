@@ -1,10 +1,14 @@
 package auth
 
-import "time"
+import (
+	"mio/internal/pkg/model"
+)
 
 type BusinessUser struct {
+	ID        int64  `json:"id"`
+	Mobile    string `json:"mobile"`
 	Uid       string `json:"uid"`
-	CreatedAt time.Time
+	CreatedAt model.Time
 }
 
 func (au BusinessUser) Valid() error {

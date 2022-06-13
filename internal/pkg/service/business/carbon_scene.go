@@ -15,3 +15,7 @@ func (srv CarbonSceneService) FindScene(t ebusiness.CarbonType) (*ebusiness.Carb
 	scene := srv.repo.FindScene(t)
 	return &scene, nil
 }
+
+func (srv CarbonSceneService) GetBusinessCarbonSceneListBy(param rbusiness.GetCarbonSceneListBy) []ebusiness.CarbonScene {
+	return srv.repo.GetCarbonSceneListBy(param)
+}

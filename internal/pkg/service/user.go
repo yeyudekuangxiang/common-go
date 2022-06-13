@@ -56,7 +56,7 @@ func (u UserService) GetUserByToken(token string) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	user := u.r.GetUserById(authUser.Id)
+	user := u.r.GetUserById(authUser.ID)
 	return &user, nil
 }
 func (u UserService) CreateUserToken(id int64) (string, error) {
@@ -70,7 +70,7 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 	}
 
 	return util2.CreateToken(auth.User{
-		Id:        user.ID,
+		ID:        user.ID,
 		Mobile:    user.PhoneNumber,
 		CreatedAt: model.Time{Time: time.Now()},
 	})

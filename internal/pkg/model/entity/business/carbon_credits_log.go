@@ -15,7 +15,7 @@ type CarbonCreditsLog struct {
 	TransactionId string          `json:"transactionId" gorm:"not null;type:varchar(100);comment:过程id"`
 	BUserId       int64           `json:"-" gorm:"not null;type:int8;comment:企业用户表主键"`
 	Type          CarbonType      `json:"type" gorm:"not null;type:varchar(50);comment:减碳场景类型"`
-	Value         decimal.Decimal `json:"value" gorm:"not null;type:decimal(10,2);comment:获取到的碳积分数量"`
+	Value         decimal.Decimal `json:"value" gorm:"default 0;type:int;comment:获取到的碳积分数量"`
 	Info          CarbonTypeInfo  `json:"info" gorm:"not null;type:varchar(1000);default:'';comment:附带信息 json object 同一个type的info格式必须统一"`
 	CreatedAt     model.Time      `json:"createdAt" gorm:"not null;type:timestamp"`
 	UpdatedAt     model.Time      `json:"updatedAt" gorm:"not null;type:timestamp"`

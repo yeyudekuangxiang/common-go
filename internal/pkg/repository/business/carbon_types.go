@@ -74,3 +74,22 @@ type FindCompanyCarbonSceneBy struct {
 	CompanyId     int
 	CarbonSceneId int
 }
+
+type GetCarbonCreditsLogSortedListBy struct {
+	UserId    int64
+	StartTime time.Time
+	EndTime   time.Time
+}
+
+type CarbonCreditsLogSortedList struct {
+	Total          string
+	BCarbonSceneId int
+	Type           ebusiness.CarbonType
+}
+
+type CarbonCreditsLogListHistory struct {
+	Total string
+	Month string
+	Type  ebusiness.CarbonType
+	Title string
+}

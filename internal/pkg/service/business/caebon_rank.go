@@ -412,3 +412,23 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 		offset += limit
 	}
 }
+
+// DepartmentRankListByCid 根据公司id查询当月排行记录
+func (srv CarbonRankService) DepartmentRankListByCid(cid int) ([]business.CarbonRank, error) {
+	start, _ := business.RankDateTypeMonth.ParseLastTime()
+
+	list, _, err := srv.repo.GetCarbonRankList(rbusiness.GetCarbonRankBy{
+		TimePoint:  start,
+		CompanyId:  cid,
+		Limit:      1000,
+		Offset:     0,
+		DateType:   business.RankDateTypeMonth,
+		ObjectType: business.RankObjectTypeDepartment,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}

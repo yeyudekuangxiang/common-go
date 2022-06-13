@@ -45,3 +45,13 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 		MaxCount:         companyCarbonScene.MaxCount,
 	}, nil
 }
+
+func (srv CompanyCarbonSceneService) GetBusinessCompanyCarbonSceneListBy(param rbusiness.GetCompanyCarbonSceneListBy) []ebusiness.CarbonScene {
+	companyCarbonSceneList := srv.repo.GetCompanyCarbonSceneListBy(param)
+	var ids []int
+	for _, v := range companyCarbonSceneList {
+		ids = append(ids, v.CarbonSceneId)
+	}
+	businessCompanyCarbonSceneList := DefaultCarbonSceneService.GetBusinessCarbonSceneListBy(rbusiness.GetCarbonSceneListBy{Ids: ids})
+	return businessCompanyCarbonSceneList
+}
