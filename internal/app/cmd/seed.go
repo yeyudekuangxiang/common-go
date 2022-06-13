@@ -9,7 +9,10 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
+	"mio/internal/pkg/model"
 	ebusiness "mio/internal/pkg/model/entity/business"
+	sbusiness "mio/internal/pkg/service/business"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -56,6 +59,8 @@ func business(db *gorm.DB) {
 	db.Where("1=1").Delete(&ebusiness.Company{})
 	db.Where("1=1").Delete(&ebusiness.CompanyCarbonScene{})
 	db.Where("1=1").Delete(&ebusiness.Department{})
+	db.Where("1=1").Delete(&ebusiness.CarbonCreditsLog{})
+	db.Where("1=1").Delete(&ebusiness.CarbonRank{})
 	db.Create([]ebusiness.User{
 		{
 			ID:            1,
@@ -73,7 +78,7 @@ func business(db *gorm.DB) {
 			ID:            2,
 			Uid:           "mock-uid-2",
 			BCompanyId:    1,
-			BDepartmentId: 2,
+			BDepartmentId: 1,
 			Nickname:      "mock-nickname-2",
 			Mobile:        "mock-mobile-2",
 			TelephoneCode: "86",
@@ -233,4 +238,135 @@ func business(db *gorm.DB) {
 			Icon:       "",
 		},
 	})
+	db.Create([]ebusiness.CarbonCreditsLog{
+		{
+			ID:            1,
+			TransactionId: "mock-transaction-id1",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeOnlineMeeting,
+			Value:         decimal.NewFromInt(100),
+			Info:          "{\"OneCityDuration\":3600000000000,\"manyCityDuration\":3600000000000}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+		},
+		{
+			ID:            2,
+			TransactionId: "mock-transaction-id2",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeEvCar,
+			Value:         decimal.NewFromInt(200),
+			Info:          "{\"Electricity\":34}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+		},
+		{
+			ID:            3,
+			TransactionId: "mock-transaction-id3",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeOnlineMeeting,
+			Value:         decimal.NewFromInt(100),
+			Info:          "{\"OneCityDuration\":3600000000000,\"manyCityDuration\":3600000000000}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+		},
+		{
+			ID:            4,
+			TransactionId: "mock-transaction-id4",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeEvCar,
+			Value:         decimal.NewFromInt(200),
+			Info:          "{\"Electricity\":34}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+		},
+		{
+			ID:            5,
+			TransactionId: "mock-transaction-id5",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeOnlineMeeting,
+			Value:         decimal.NewFromInt(200),
+			Info:          "{\"OneCityDuration\":3600000000000,\"manyCityDuration\":3600000000000}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+		},
+		{
+			ID:            6,
+			TransactionId: "mock-transaction-id6",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeEvCar,
+			Value:         decimal.NewFromInt(200),
+			Info:          "{\"Electricity\":34}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+		},
+
+		{
+			ID:            7,
+			TransactionId: "mock-transaction-id7",
+			BUserId:       2,
+			Type:          ebusiness.CarbonTypeOnlineMeeting,
+			Value:         decimal.NewFromFloat(50.12),
+			Info:          "{\"OneCityDuration\":3600000000000,\"manyCityDuration\":3600000000000}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+		},
+		{
+			ID:            8,
+			TransactionId: "mock-transaction-id8",
+			BUserId:       2,
+			Type:          ebusiness.CarbonTypeEvCar,
+			Value:         decimal.NewFromFloat(38.99),
+			Info:          "{\"Electricity\":34}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -1)},
+		},
+		{
+			ID:            9,
+			TransactionId: "mock-transaction-id9",
+			BUserId:       2,
+			Type:          ebusiness.CarbonTypeOnlineMeeting,
+			Value:         decimal.NewFromFloat(99.66),
+			Info:          "{\"OneCityDuration\":3600000000000,\"manyCityDuration\":3600000000000}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+		},
+		{
+			ID:            10,
+			TransactionId: "mock-transaction-id10",
+			BUserId:       2,
+			Type:          ebusiness.CarbonTypeEvCar,
+			Value:         decimal.NewFromFloat(88.88),
+			Info:          "{\"Electricity\":34}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, 0, -7)},
+		},
+		{
+			ID:            11,
+			TransactionId: "mock-transaction-id11",
+			BUserId:       2,
+			Type:          ebusiness.CarbonTypeOnlineMeeting,
+			Value:         decimal.NewFromFloat(33.33).Round(2),
+			Info:          "{\"OneCityDuration\":3600000000000,\"manyCityDuration\":3600000000000}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+		},
+		{
+			ID:            12,
+			TransactionId: "mock-transaction-id6",
+			BUserId:       3,
+			Type:          ebusiness.CarbonTypeEvCar,
+			Value:         decimal.NewFromFloat(199.99).Round(2),
+			Info:          "{\"Electricity\":34}",
+			CreatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+			UpdatedAt:     model.Time{Time: time.Now().AddDate(0, -1, 0)},
+		},
+	})
+
+	sbusiness.DefaultCarbonRankService.InitCompanyUserRank(1, ebusiness.RankDateTypeDay)
+	sbusiness.DefaultCarbonRankService.InitCompanyUserRank(1, ebusiness.RankDateTypeWeek)
+	sbusiness.DefaultCarbonRankService.InitCompanyUserRank(1, ebusiness.RankDateTypeMonth)
+
+	sbusiness.DefaultCarbonRankService.InitCompanyDepartmentRank(1, ebusiness.RankDateTypeDay)
+	sbusiness.DefaultCarbonRankService.InitCompanyDepartmentRank(1, ebusiness.RankDateTypeWeek)
+	sbusiness.DefaultCarbonRankService.InitCompanyDepartmentRank(1, ebusiness.RankDateTypeMonth)
 }

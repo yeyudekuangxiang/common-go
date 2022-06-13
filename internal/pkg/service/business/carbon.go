@@ -92,6 +92,7 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, oneCityDuration
 		manyCityDuration: manyCityDuration,
 		OneCityCredit:    sendCarbonResult.OneCityCredit,
 		ManyCityCredit:   sendCarbonResult.ManyCityCredit,
+		TransactionId:    transactionId,
 	})
 
 	if err != nil {

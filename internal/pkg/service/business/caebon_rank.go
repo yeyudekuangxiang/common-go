@@ -254,6 +254,7 @@ func (srv CarbonRankService) InitUserRank(dateType business.RankDateType) {
 		return
 	}
 
+	//需要方法-查询企业id列表
 	companyIds := make([]int, 0)
 	for _, companyId := range companyIds {
 		srv.InitCompanyUserRank(companyId, dateType)
@@ -334,6 +335,7 @@ func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) 
 		return
 	}
 
+	//需要方法 查询企业列表
 	companyIds := make([]int, 0)
 	for _, companyId := range companyIds {
 		srv.InitCompanyDepartmentRank(companyId, dateType)
