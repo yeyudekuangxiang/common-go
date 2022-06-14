@@ -35,7 +35,14 @@ func (UserController) GetToken(ctx *gin.Context) (gin.H, error) {
 		}, nil
 	}
 	//创建token
-	token, _ := business.DefaultUserService.CreateBusinessUserToken(user)
+	token, err := business.DefaultUserService.CreateBusinessUserToken(user)
+	if err != nil {
+		fmt.Println("GetToken 创建token失败", err.Error())
+		return gin.H{
+			"token": "",
+		}, nil
+	}
+
 	return gin.H{
 		"token": token,
 	}, nil

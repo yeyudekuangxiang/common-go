@@ -13,7 +13,7 @@ type CompanyController struct{}
 func (CompanyController) GetCompanyInfo(ctx *gin.Context) (gin.H, error) {
 	//先拿token,然后拿到公司id
 	user := apiutil.GetAuthBusinessUser(ctx)
-	Company, _ := business.DefaultCompanyService.GetCompanyById(user.BCompanyId)
+	Company := business.DefaultCompanyService.GetCompanyById(user.BCompanyId)
 	//企业碳减排信息
 	Carbon := business.DefaultCompanyService.GetCompanyCarbon(user.BCompanyId)
 	return gin.H{

@@ -12,12 +12,12 @@ type CompanyService struct {
 	repo brepo.CompanyRepository
 }
 
-func (u CompanyService) GetCompanyById(id int) (*business.Company, error) {
+func (u CompanyService) GetCompanyById(id int) *business.Company {
 	if id == 0 {
-		return &business.Company{}, nil
+		return &business.Company{}
 	}
 	company := u.repo.GetCompanyById(id)
-	return &company, nil
+	return &company
 }
 
 // GetCompanyCarbon 当月企业碳减排综合
