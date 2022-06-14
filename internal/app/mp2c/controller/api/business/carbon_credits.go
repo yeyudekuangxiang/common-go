@@ -34,8 +34,12 @@ func (CarbonCreditsController) GetCarbonCreditLogSortedList(ctx *gin.Context) (g
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
+	//查询该用户所在公司
+	user := apiutil.GetAuthBusinessUser(ctx)
+	cid := user.BCompanyId
 	//查询减碳排行
-	list := business.DefaultCarbonCreditsLogService.GetCarbonCreditLogSortedList(business.GetCarbonCreditLogSortedListParam{
+	list := business.DefaultCarbonCreditsLogService.GetCarbonCreditLogSortedListByCid(business.GetCarbonCreditLogSortedListByCidParam{
+		Cid:       cid,
 		StartTime: form.StartTime,
 		EndTime:   form.EndTime.Add(time.Hour*24 - time.Nanosecond),
 	})

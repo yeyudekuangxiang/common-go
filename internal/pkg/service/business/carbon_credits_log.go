@@ -80,6 +80,25 @@ func (srv CarbonCreditsLogService) GetCarbonCreditLogSortedList(param GetCarbonC
 	})
 }
 
+func (srv CarbonCreditsLogService) GetCarbonCreditLogSortedListByCid(param GetCarbonCreditLogSortedListByCidParam) []rbusiness.CarbonCreditsLogSortedList {
+	if param.Cid > 0 {
+		userList := DefaultUserService.GetBusinessUserListByCid(param.Cid)
+		if len(userList) == 0 || userList[0].ID == 0 {
+			return []rbusiness.CarbonCreditsLogSortedList{}
+		}
+		var ids []int64
+		for _, v := range userList {
+			ids = append(ids, v.ID)
+		}
+		return srv.repo.GetSortedListBy(rbusiness.GetCarbonCreditsLogSortedListBy{
+			UserIds:   ids,
+			StartTime: param.StartTime,
+			EndTime:   param.EndTime,
+		})
+	}
+	return []rbusiness.CarbonCreditsLogSortedList{}
+}
+
 func (srv CarbonCreditsLogService) FormatCarbonCreditLogList(list []rbusiness.CarbonCreditsLogSortedList) []CarbonCreditsLogSortedListResponse {
 	var res []CarbonCreditsLogSortedListResponse
 	//查询减碳场景

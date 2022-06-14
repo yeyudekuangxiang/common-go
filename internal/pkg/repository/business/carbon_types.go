@@ -77,6 +77,7 @@ type FindCompanyCarbonSceneBy struct {
 
 type GetCarbonCreditsLogSortedListBy struct {
 	UserId    int64
+	UserIds   []int64
 	StartTime time.Time
 	EndTime   time.Time
 }

@@ -18,7 +18,7 @@ func (u DepartmentService) GetBusinessDepartmentById(id int) (*business.Departme
 	if Department.ID != 0 {
 		return &Department, nil
 	}
-	return nil, errors.New("非企业用户,请联系管理员开通企业版权限")
+	return &business.Department{}, errors.New("非企业用户,请联系管理员开通企业版权限")
 }
 
 // GetBusinessDepartmentByIds 批量查询部门信息

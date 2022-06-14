@@ -23,12 +23,15 @@ func (u UserRepository) Save(user *business.User) error {
 func (u UserRepository) GetUserBy(by GetUserBy) business.User {
 	user := business.User{}
 	db := app.DB.Model(user)
-	
+
 	if by.Uid != "" {
 		db.Where("uid = ?", by.Uid)
 	}
 	if by.ID > 0 {
 		db.Where("id = ?", by.ID)
+	}
+	if by.Mobile != "" {
+		db.Where("mobile = ?", by.Mobile)
 	}
 
 	if err := db.First(&user).Error; err != nil {
@@ -44,6 +47,9 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []business.User {
 	db := app.DB.Model(business.User{})
 	if len(by.Ids) > 0 {
 		db.Where("id in (?)", by.Ids)
+	}
+	if by.CId > 0 {
+		db.Where("b_company_id = ?", by.CId)
 	}
 
 	if err := db.Find(&list).Error; err != nil {

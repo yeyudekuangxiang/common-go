@@ -2,6 +2,7 @@ package business
 
 import (
 	"errors"
+	"fmt"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity/business"
@@ -59,6 +60,7 @@ func (u UserService) CreateBusinessUserToken(user *business.User) (string, error
 func (u UserService) GetBusinessUserByToken(token string) (*business.User, error) {
 	var user auth.BusinessUser
 	err := util2.ParseToken(token, &user)
+	fmt.Println("shoujihao ", user.Mobile)
 	if err != nil {
 		return nil, err
 	}
@@ -67,4 +69,10 @@ func (u UserService) GetBusinessUserByToken(token string) (*business.User, error
 		return &newInfo, nil
 	}
 	return nil, nil
+}
+
+// GetBusinessUserListByCid 批量查询用户信息
+func (u UserService) GetBusinessUserListByCid(cid int) []business.User {
+	users := u.repo.GetUserListBy(brepo.GetUserListBy{CId: cid})
+	return users
 }
