@@ -47,7 +47,7 @@ func (srv GDdbService) CreateUser(userId, inviteId int64) (*entity.GDDonationBoo
 func (srv GDdbService) HomePage(userId, inviteId int64) (*GDDbHomePageResponse, error) {
 	//返回用户信息
 	var userAnswerRes repoactivity.GDDbHomePageUserInfo
-
+	schoolRes := make([]entity.GDDbSchoolRank, 0)
 	if userId != 0 {
 		userInfo, err := srv.CreateUser(userId, inviteId)
 		if err != nil {
@@ -60,7 +60,7 @@ func (srv GDdbService) HomePage(userId, inviteId int64) (*GDDbHomePageResponse, 
 	}
 
 	//返回学校捐赠排行
-	schoolRes := repoactivity.DefaultGDDbSchoolRankRepository.GetRank()
+	schoolRes = repoactivity.DefaultGDDbSchoolRankRepository.GetRank()
 	//组装数据
 	record := &GDDbHomePageResponse{
 		User:   userAnswerRes,
@@ -72,7 +72,7 @@ func (srv GDdbService) HomePage(userId, inviteId int64) (*GDDbHomePageResponse, 
 // GetUser 用于返回首页数据
 func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoactivity.GDDbHomePageUserInfo, error) {
 	var userResult, inviteResult repoactivity.GDDbUserInfo
-	var invitedResult []repoactivity.GDDbUserInfo
+	invitedResult := make([]repoactivity.GDDbUserInfo, 0)
 	userRepo := repository.NewUserRepository()
 	//用户是被邀请人
 	if userRecord.InviteType != 0 {
@@ -229,25 +229,33 @@ func (srv GDdbService) IncrRank(schoolId int64) error {
 }
 
 func (srv GDdbService) GetCityList() []entity.GDDbCity {
-	return repoactivity.DefaultGDDbCityRepository.FindAll()
+	list := make([]entity.GDDbCity, 0)
+	list = repoactivity.DefaultGDDbCityRepository.FindAll()
+	return list
 }
 
 // GetGradeList 获取年级列表
 func (srv GDdbService) GetGradeList() []entity.GDDbGrade {
-	return repoactivity.DefaultGDDbGradeRepository.FindAll()
+	list := make([]entity.GDDbGrade, 0)
+	list = repoactivity.DefaultGDDbGradeRepository.FindAll()
+	return list
 }
 
 // GetSchoolList 获取学校列表
 func (srv GDdbService) GetSchoolList(schoolName string, cityId, gradeId int64) []entity.GDDbSchool {
+	list := make([]entity.GDDbSchool, 0)
+	gradeInfo := entity.GDDbGrade{}
 	//获取年级类型
-	gradeInfo := repoactivity.DefaultGDDbGradeRepository.FindById(gradeId)
+	if gradeId > 0 {
+		gradeInfo = repoactivity.DefaultGDDbGradeRepository.FindById(gradeId)
+	}
 	find := repoactivity.FindSchoolBy{
 		CityId:     cityId,
 		SchoolName: schoolName,
 		GradeType:  gradeInfo.Type,
 	}
-
-	return repoactivity.DefaultGDDbSchoolRepository.FindAllBy(find)
+	list = repoactivity.DefaultGDDbSchoolRepository.FindAllBy(find)
+	return list
 }
 
 // CreateSchool  新建学校信息

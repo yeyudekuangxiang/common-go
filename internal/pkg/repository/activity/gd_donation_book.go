@@ -150,7 +150,7 @@ func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 		db.Where("school_name = ?", by.SchoolName)
 	}
 	if by.GradeType > 0 {
-		db.Where("type = ?", by.GradeType)
+		db.Where("type = ?", by.GradeType).Or("type = ?", 0)
 	}
 	if by.CityId != 0 {
 		db.Where("city_id = ?", by.CityId)
@@ -170,7 +170,7 @@ func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchoo
 		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
 	}
 	if by.GradeType > 0 {
-		db.Where("type = ?", by.GradeType)
+		db.Where("type = ?", by.GradeType).Or("type = ?", 0)
 	}
 	if by.CityId != 0 {
 		db.Where("city_id = ?", by.CityId)
