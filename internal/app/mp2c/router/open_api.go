@@ -27,6 +27,10 @@ func openRouter(router *gin.Engine) {
 				context.String(200, api.DefaultDuiBaController.OrderCallback(context))
 			})
 
+			duibaRouter.Any("/virtual-good/callback", func(context *gin.Context) {
+				context.JSON(200, api.DefaultDuiBaController.VirtualGoodCallback(context))
+			})
+
 			duibaRouter.Any("/point/add/callback", func(context *gin.Context) {
 				context.JSON(200, api.DefaultDuiBaController.PointAddLogCallback(context))
 			})
