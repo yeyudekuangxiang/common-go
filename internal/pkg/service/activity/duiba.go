@@ -149,6 +149,8 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		}
 	}
 
+	//检测用户风险等级
+
 	vip := 0
 	if thirdParty == "thirdParty" && isNewUser {
 		vip = 2
