@@ -49,7 +49,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 		return nil, errors.New("题目不存在")
 	}
 
-	isRight := util.InArray(question.Choices, answer)
+	isRight := question.AnswerStatement == answer
 	_, err = DefaultQuizSingleRecordService.CreateSingleRecord(CreateSingleRecordParam{
 		OpenId:     openid,
 		QuestionId: questionId,
