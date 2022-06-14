@@ -103,3 +103,36 @@ func (repo CarbonCreditsLogRepository) GetActualDepartmentCarbonRank(by GetActua
 	err := db.Count(&total).Limit(by.Limit).Offset(by.Offset).Order("value desc").Find(&list).Error
 	return list, total, err
 }
+func (repo CarbonCreditsLogRepository) GetSortedListBy(by GetCarbonCreditsLogSortedListBy) []CarbonCreditsLogSortedList {
+	list := make([]CarbonCreditsLogSortedList, 0)
+
+	db := repo.DB.Model(business.CarbonCreditsLog{})
+	if by.UserId != 0 {
+		db.Where("b_user_id = ?", by.UserId)
+	}
+	if !by.StartTime.IsZero() {
+		db.Where("created_at >= ?", by.StartTime)
+	}
+	//纠正了已出错误 updated_at
+	if !by.EndTime.IsZero() {
+		db.Where("created_at <= ?", by.EndTime)
+	}
+
+	if err := db.Select("sum(value) as total ,type ").Group("type").Order("total desc").Find(&list).Error; err != nil {
+		panic(err)
+	}
+
+	return list
+}
+
+func (repo CarbonCreditsLogRepository) GetCarbonCreditsLogListHistory(by GetCarbonCreditsLogSortedListBy) []CarbonCreditsLogListHistory {
+	list := make([]CarbonCreditsLogListHistory, 0)
+	db := repo.DB.Model(business.CarbonCreditsLog{})
+	if by.UserId != 0 {
+		db.Where("b_user_id = ?", by.UserId)
+	}
+	if err := db.Select("sum(\"value\") as total ,substring(cast(created_at as varchar),1,7) as month,type").Group("month,type").Order("month desc,total desc").Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}

@@ -11,6 +11,9 @@ var DefaultCompanyCarbonSceneRepository = CompanyCarbonSceneRepository{DB: app.D
 type CompanyCarbonSceneRepository struct {
 	DB *gorm.DB
 }
+type ICompanyCarbonSceneRepository interface {
+	Save(CompanyCarbonScene *business.CompanyCarbonScene) error
+}
 
 func (repo CompanyCarbonSceneRepository) FindCompanyScene(by FindCompanyCarbonSceneBy) business.CompanyCarbonScene {
 	scene := business.CompanyCarbonScene{}
@@ -27,4 +30,18 @@ func (repo CompanyCarbonSceneRepository) FindCompanyScene(by FindCompanyCarbonSc
 		panic(err)
 	}
 	return scene
+}
+
+func (repo CompanyCarbonSceneRepository) GetCompanyCarbonSceneListBy(by GetCompanyCarbonSceneListBy) []business.CompanyCarbonScene {
+	list := make([]business.CompanyCarbonScene, 0)
+	db := app.DB.Model(business.CompanyCarbonScene{})
+	if by.Status > 0 {
+		db.Where("status = ?", by.Status)
+	}
+
+	if err := db.Find(&list).Order("sort desc").Error; err != nil {
+		panic(err)
+	}
+
+	return list
 }

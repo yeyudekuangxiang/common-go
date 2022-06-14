@@ -1,9 +1,11 @@
 package business
 
 import (
+	"fmt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
+	"strconv"
 )
 
 var DefaultCarbonCreditsLogService = CarbonCreditsLogService{repo: rbusiness.DefaultCarbonCreditsLogRepository}
@@ -69,4 +71,65 @@ func (srv CarbonCreditsLogService) CreateCarbonCreditLog(param CreateCarbonCredi
 		Info:          param.Info,
 	}
 	return &log, srv.repo.Create(&log)
+}
+func (srv CarbonCreditsLogService) GetCarbonCreditLogSortedList(param GetCarbonCreditLogSortedListParam) []rbusiness.CarbonCreditsLogSortedList {
+	return srv.repo.GetSortedListBy(rbusiness.GetCarbonCreditsLogSortedListBy{
+		UserId:    param.UserId,
+		StartTime: param.StartTime,
+		EndTime:   param.EndTime,
+	})
+}
+
+func (srv CarbonCreditsLogService) FormatCarbonCreditLogList(list []rbusiness.CarbonCreditsLogSortedList) []CarbonCreditsLogSortedListResponse {
+	var res []CarbonCreditsLogSortedListResponse
+	//查询减碳场景
+	companyCarbonSceneList := DefaultCompanyCarbonSceneService.GetBusinessCompanyCarbonSceneListBy(rbusiness.GetCompanyCarbonSceneListBy{Status: 1, BCompanyId: 1})
+	//最终组合
+	for _, v := range companyCarbonSceneList {
+		var item CarbonCreditsLogSortedListResponse
+		item.Title = v.Title
+		item.Type = v.Type
+		item.Icon = v.Icon
+		for _, l := range list {
+			if v.Type == l.Type {
+				item.Total = l.Total
+			}
+		}
+		res = append(res, item)
+	}
+	//排序
+	for k, v := range list {
+		for k2, l := range res {
+			if v.Type == l.Type {
+				t := res[k]
+				res[k] = res[k2]
+				res[k2] = t
+				break
+			}
+		}
+	}
+	return res
+}
+
+func (srv CarbonCreditsLogService) GetCarbonCreditLogListHistoryBy(by rbusiness.GetCarbonCreditsLogSortedListBy) map[string]CarbonCreditLogListHistoryResponse {
+	var CarbonCreditLogListHistoryResponseMap map[string]CarbonCreditLogListHistoryResponse
+	CarbonCreditLogListHistoryResponseMap = make(map[string]CarbonCreditLogListHistoryResponse)
+	listHistory := srv.repo.GetCarbonCreditsLogListHistory(by)
+
+	for _, v := range listHistory {
+		v.Title = v.Type.Text()
+		if _, ok := CarbonCreditLogListHistoryResponseMap[v.Month]; !ok {
+			var detail []rbusiness.CarbonCreditsLogListHistory
+			detail = append(detail, v)
+			CarbonCreditLogListHistoryResponseMap[v.Month] = CarbonCreditLogListHistoryResponse{Total: v.Total, Month: v.Month, Detail: detail}
+		} else {
+			newDetail := append(CarbonCreditLogListHistoryResponseMap[v.Month].Detail, v)
+			lastTotal, _ := strconv.ParseFloat(CarbonCreditLogListHistoryResponseMap[v.Month].Total, 64)
+			thisTotal, _ := strconv.ParseFloat(v.Total, 64)
+			newTotal := strconv.Itoa(int(lastTotal + thisTotal))
+			fmt.Println(CarbonCreditLogListHistoryResponseMap[v.Month].Total, lastTotal, lastTotal, lastTotal)
+			CarbonCreditLogListHistoryResponseMap[v.Month] = CarbonCreditLogListHistoryResponse{Total: newTotal, Month: v.Month, Detail: newDetail}
+		}
+	}
+	return CarbonCreditLogListHistoryResponseMap
 }

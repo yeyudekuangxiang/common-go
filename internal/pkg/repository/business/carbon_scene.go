@@ -20,3 +20,21 @@ func (repo CarbonSceneRepository) FindScene(t business.CarbonType) business.Carb
 	}
 	return scene
 }
+
+type ICarbonSceneRepository interface {
+	Save(CarbonScene *business.CarbonScene) error
+}
+
+func (repo CarbonSceneRepository) GetCarbonSceneListBy(by GetCarbonSceneListBy) []business.CarbonScene {
+	list := make([]business.CarbonScene, 0)
+	db := app.DB.Model(business.CarbonScene{})
+	if len(by.Ids) > 0 {
+		db.Where("id in (?)", by.Ids)
+	}
+
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+
+	return list
+}
