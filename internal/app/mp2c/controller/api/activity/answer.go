@@ -2,9 +2,13 @@ package activity
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
+	"strconv"
+	"time"
 )
 
 var DefaultAnswerController = AnswerController{}
@@ -28,6 +32,34 @@ func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 	return gin.H{
 		"record": res,
 	}, err
+}
+
+func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
+	t, _ := strconv.Atoi(ctx.PostForm("type"))
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return nil, err
+	}
+	if file.Size > 5*1024*1024 {
+		return nil, errors.New("上传失败，请调整文件大小！")
+	}
+	open, err := file.Open()
+	if err != nil {
+		return nil, err
+	}
+	object, err := service.DefaultOssService.PutObject(fmt.Sprintf("/activity/gd/%d_%d", user.ID, time.Now().Unix()), open)
+	if err != nil {
+		return nil, err
+	}
+	// 更新
+	err = activity.DefaultGDdbService.UpdateActivityUser(user.ID, t, object)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"object": object,
+	}, nil
 }
 
 //StartQuestion 开始答题
@@ -54,14 +86,15 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	// 用户用户身份更新状态及学校排名
+	//todo 答题完成，生成称号
+
+	// 检测成团状态
 	err = activity.DefaultGDdbService.CheckActivityStatus(user.ID, form.SchoolId)
 	if err != nil {
-		//用户已更新为团长，生成称号
 		return nil, err
 	}
-	// 受邀者 or 邀请者 答题完成后赠书+1
-	err = activity.DefaultGDdbService.IncrRank(form.SchoolId)
+	// 受邀者 答题完成后赠书+1
+	err = activity.DefaultGDdbService.IncrRank(user.ID)
 	if err != nil {
 		return nil, err
 	}

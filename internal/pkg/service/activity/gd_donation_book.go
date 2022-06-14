@@ -133,9 +133,24 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 	return res, nil
 }
 
+// UpdateActivityUser 更新证书链接地址
+func (srv GDdbService) UpdateActivityUser(userId int64, t int, url string) error {
+	record := srv.repo.FindBy(repoactivity.FindRecordBy{UserId: userId})
+	if record.ID == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	if t == 1 {
+		record.TitleUrl = url
+	} else {
+		record.CertificateUrl = url
+	}
+	return srv.repo.Save(&record)
+}
+
 // CheckActivityStatus 检测成团状态
 func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 	var userInfo, inviteInfo entity.GDDonationBookRecord
+	var err error
 	userInfo = srv.repo.FindBy(repoactivity.FindRecordBy{
 		UserId: userId,
 	})
@@ -153,9 +168,14 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 			}
 			return errors.New("慢了一步，好友已和他人完成共同捐赠")
 		}
+
+		//更新学校排名
+		inviteSchoolRes := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: inviteInfo.UserId})
+		_ = srv.IncrRank(schoolId)                 //当前用户
+		_ = srv.IncrRank(inviteSchoolRes.SchoolId) //邀请者
 	}
 
-	return nil
+	return err
 }
 
 func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId int64, classNumber uint32) error {
