@@ -6,12 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/medivhzhan/weapp/v3"
 	"io/ioutil"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/wxapp"
 	"strconv"
 )
 
@@ -52,22 +50,8 @@ func (ctr ZeroController) DuiBaAutoLogin(ctx *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(ctx)
-	//检测用户风险等级
-	resp, err := service.DefaultUserService.CheckUserRisk(wxapp.UserRiskRankParam{
-		AppId:    config.Config.Weapp.AppId,
-		OpenId:   user.OpenId,
-		Scene:    0,
-		ClientIp: ctx.ClientIP(),
-	})
-	if err != nil {
-		fmt.Println("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
-	}
-	if resp.RiskRank > 1 {
-		return gin.H{
-			"loginUrl": "",
-		}, errors.New("该活动仅限部分地区用户参与,请看看其他活动")
-	}
-	loginUrl, err := activity.DefaultZeroService.DuiBaAutoLogin(user.ID, form.ActivityId, form.Short, form.ThirdParty)
+
+	loginUrl, err := activity.DefaultZeroService.DuiBaAutoLogin(user.ID, form.ActivityId, form.Short, form.ThirdParty, ctx.ClientIP())
 
 	return gin.H{
 		"loginUrl": loginUrl,
