@@ -136,6 +136,31 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 	}, nil
 }
 
+func (srv GDdbService) GetUserSchool(userId int64) (repoactivity.GDDbUserSchool, error) {
+	resp := repoactivity.GDDbUserSchool{}
+	userRepo := repository.NewUserRepository()
+	donationBookResult := srv.repo.GetUserBy(repoactivity.FindRecordBy{UserId: userId})
+	user := userRepo.GetUserById(donationBookResult.UserId)
+	userSchool := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
+	if userSchool.ID != 0 {
+		school := repoactivity.DefaultGDDbSchoolRepository.FindById(userSchool.SchoolId)
+		grade := repoactivity.DefaultGDDbGradeRepository.FindById(userSchool.GradeId)
+		city := repoactivity.DefaultGDDbCityRepository.FindById(school.CityId)
+		resp = repoactivity.GDDbUserSchool{
+			GDDbUserInfo: repoactivity.GDDbUserInfo{
+				GDDonationBookRecord: donationBookResult,
+				AvatarUrl:            user.AvatarUrl,
+				Nickname:             user.Nickname,
+			},
+			UserName:    userSchool.UserName,
+			CityName:    city.CityName,
+			GradeName:   grade.Grade,
+			ClassNumber: userSchool.ClassNumber,
+		}
+	}
+	return resp, nil
+}
+
 // UpdateActivityUser 更新证书链接地址
 func (srv GDdbService) UpdateActivityUser(userId int64, t int, url string) error {
 	record := srv.repo.FindBy(repoactivity.FindRecordBy{UserId: userId})

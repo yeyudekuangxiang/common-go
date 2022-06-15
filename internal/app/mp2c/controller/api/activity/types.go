@@ -53,7 +53,8 @@ type GetDuiBaActivityQrForm struct {
 }
 
 type GDDbActivityHomePageForm struct {
-	UserId int64 `json:"userId" form:"userId" alias:"userId"`
+	//UserId   int64 `json:"userId" form:"userId" alias:"userId"`
+	InviteId int64 `json:"inviteId" form:"inviteId" alias:"inviteId"`
 }
 
 type GDDbActivitySchoolForm struct {
@@ -73,7 +74,7 @@ type GDDbSelectSchoolForm struct {
 }
 
 type GDDbCreateSchoolForm struct {
-	SchoolName string `json:"schoolName" form:"schoolName" alias:"schoolName"`
-	CityId     int64  `json:"cityId" form:"cityId" binding:"number" alias:"cityId"`
-	GradeType  int    `json:"gradeType" form:"gradeType" binding:"number" alias:"gradeType"`
+	SchoolName string `json:"schoolName" form:"schoolName" binding:"required" alias:"schoolName"`
+	CityId     int64  `json:"cityId" form:"cityId" binding:"required,number" alias:"cityId"`
+	GradeType  int    `json:"gradeType" form:"gradeType" binding:"required,number" alias:"gradeType"`
 }

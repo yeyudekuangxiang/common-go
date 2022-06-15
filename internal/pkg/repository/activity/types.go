@@ -36,6 +36,14 @@ type GDDbUserInfo struct {
 	Nickname  string `json:"nickname"`
 }
 
+type GDDbUserSchool struct {
+	GDDbUserInfo
+	UserName    string `json:"userName"`
+	CityName    string `json:"cityName"`
+	GradeName   string `json:"gradeName"`
+	ClassNumber uint32 `json:"classNumber"`
+}
+
 type FindSchoolBy struct {
 	SchoolName string `json:"schoolName"`
 	GradeType  int    `json:"gradeType"`

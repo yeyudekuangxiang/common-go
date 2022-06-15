@@ -25,13 +25,25 @@ func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	res, err := activity.DefaultGDdbService.HomePage(user.ID, form.UserId)
+	res, err := activity.DefaultGDdbService.HomePage(user.ID, form.InviteId)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
 		"record": res,
 	}, err
+}
+
+// GetUserSchool 获取用户及学校信息
+func (ctr AnswerController) GetUserSchool(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
+	school, err := activity.DefaultGDdbService.GetUserSchool(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"record": school,
+	}, nil
 }
 
 func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {

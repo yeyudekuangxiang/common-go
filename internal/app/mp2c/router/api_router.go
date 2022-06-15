@@ -90,6 +90,7 @@ func apiRouter(router *gin.Engine) {
 			authRouter.GET("/activity/answer/get-school-list", apiutil.Format(activityApi.DefaultAnswerController.GetSchoolList))
 			authRouter.GET("/activity/answer/get-achievement", apiutil.Format(activityApi.DefaultAnswerController.GetAchievement))
 			authRouter.POST("/activity/answer/put-file", apiutil.Format(activityApi.DefaultAnswerController.PutFile))
+			authRouter.GET("/activity/answer/get-user-school", apiutil.Format(activityApi.DefaultAnswerController.GetUserSchool))
 
 		}
 

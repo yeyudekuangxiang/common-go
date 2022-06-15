@@ -202,6 +202,7 @@ func (repo GDDbUserSchoolRepository) FindById(id int64) activity.GDDbUserSchool 
 	}
 	return record
 }
+
 func (repo GDDbUserSchoolRepository) FindBy(by FindRecordBy) activity.GDDbUserSchool {
 	record := activity.GDDbUserSchool{}
 	db := app.DB.Model(activity.GDDbUserSchool{})
@@ -223,6 +224,16 @@ type GDDbCityRepository struct {
 func (repo GDDbCityRepository) FindAll() []activity.GDDbCity {
 	var record []activity.GDDbCity
 	if err := app.DB.Model(activity.GDDbCity{}).Find(&record).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return record
+}
+
+func (repo GDDbCityRepository) FindById(id int64) activity.GDDbCity {
+	record := activity.GDDbCity{}
+	if err := repo.DB.First(&record, id).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
