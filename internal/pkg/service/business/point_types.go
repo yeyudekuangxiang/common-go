@@ -121,3 +121,9 @@ type GetCarbonCreditLogSortedListParam struct {
 	StartTime time.Time
 	EndTime   time.Time
 }
+
+type GetCarbonCreditLogSortedListByCidParam struct {
+	Cid       int
+	StartTime time.Time
+	EndTime   time.Time
+}

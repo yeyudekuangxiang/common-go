@@ -3,6 +3,7 @@ package business
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -13,14 +14,20 @@ type UserController struct{}
 
 func (UserController) GetUserInfo(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthBusinessUser(ctx)
-	//先拿token,然后通过手机号和公司id差信息
+	//获取部门名称
+	department, err := business.DefaultDepartmentService.GetBusinessDepartmentById(user.BDepartmentId)
+	if err != nil {
+		app.Logger.Error("部门信息查询失败", user)
+	}
 	return gin.H{
-		"info": user,
+		"info":       user,
+		"department": department,
 	}, nil
 }
 
 func (UserController) GetToken(ctx *gin.Context) (gin.H, error) {
 	originInfo := apiutil.GetAuthUser(ctx)
+	fmt.Println(originInfo)
 	if originInfo.PhoneNumber == "" {
 		return gin.H{
 			"token": "",
@@ -34,6 +41,7 @@ func (UserController) GetToken(ctx *gin.Context) (gin.H, error) {
 			"token": "",
 		}, nil
 	}
+	fmt.Println("user is ", user)
 	//创建token
 	token, err := business.DefaultUserService.CreateBusinessUserToken(user)
 	if err != nil {

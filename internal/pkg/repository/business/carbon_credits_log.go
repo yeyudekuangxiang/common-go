@@ -117,6 +117,9 @@ func (repo CarbonCreditsLogRepository) GetSortedListBy(by GetCarbonCreditsLogSor
 	if !by.EndTime.IsZero() {
 		db.Where("created_at <= ?", by.EndTime)
 	}
+	if len(by.UserIds) > 0 {
+		db.Where("b_user_id in (?)", by.UserIds)
+	}
 
 	if err := db.Select("sum(value) as total ,type ").Group("type").Order("total desc").Find(&list).Error; err != nil {
 		panic(err)

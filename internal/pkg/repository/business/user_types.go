@@ -10,6 +10,7 @@ type GetUserBy struct {
 
 type GetUserListBy struct {
 	Ids []int64
+	CId int
 }
 
 type GetUserImportBy struct {

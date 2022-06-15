@@ -15,9 +15,9 @@ func (CompanyController) GetCompanyInfo(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthBusinessUser(ctx)
 	Company := business.DefaultCompanyService.GetCompanyById(user.BCompanyId)
 	//企业碳减排信息
-	Carbon := business.DefaultCompanyService.GetCompanyCarbon(user.BCompanyId)
+	//Carbon := business.DefaultCompanyService.GetCompanyCarbon(user.BCompanyId)
 	return gin.H{
-		"info":   Company,
-		"carbon": Carbon.String(),
+		"info": Company,
+		//"carbon": Carbon.String(),
 	}, nil
 }
