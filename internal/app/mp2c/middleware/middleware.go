@@ -248,6 +248,6 @@ func Throttle() gin.HandlerFunc {
 func corsM() gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AddAllowHeaders("x-token", "token", "authorization", "openid")
+	config.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid")
 	return cors.New(config)
 }
