@@ -102,6 +102,7 @@ const (
 	POINT_DUIBA_REFUND    PointTransactionType = "DUIBA_REFUND"    //兑吧积分退还 积分退还
 	POINT_SYSTEM_REDUCE   PointTransactionType = "SYSTEM_REDUCE"   //系统扣减
 	POINT_SYSTEM_ADD      PointTransactionType = "SYSTEM_ADD"      //系统补发
+	POINT_JHX             PointTransactionType = "JHX"             //金华行
 )
 
 var PointTransactionTypeList = []PointTransactionType{
