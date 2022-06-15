@@ -376,6 +376,7 @@ func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) 
 		for _, company := range list {
 			srv.InitCompanyDepartmentRank(company.ID, dateType)
 		}
+		offset += 100
 	}
 }
 

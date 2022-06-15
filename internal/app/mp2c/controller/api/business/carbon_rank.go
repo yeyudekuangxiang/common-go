@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/service/business"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -66,9 +67,10 @@ func (CarbonRankController) GetDepartmentRankList(ctx *gin.Context) (gin.H, erro
 		return nil, err
 	}
 
+	myDepartment, err := business.DefaultDepartmentService.GetBusinessDepartmentById(user.BDepartmentId)
 	myDepartmentRank, err := business.DefaultCarbonRankService.FindDepartmentRank(business.FindDepartmentRankParam{
 		UserId:       user.ID,
-		DepartmentId: user.BDepartmentId,
+		DepartmentId: util.Ternary(myDepartment.TopId > 0, myDepartment.TopId, myDepartment.ID).Int(),
 		DateType:     ebusiness.RankDateType(form.DateType),
 	})
 	if err != nil {
