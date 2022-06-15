@@ -122,9 +122,12 @@ func (ctr AnswerController) CreateSchool(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, form); err != nil {
 		return nil, err
 	}
-	schoolList := activity.DefaultGDdbService.CreateSchool(form.SchoolName, form.CityId, form.GradeType)
+	id, err := activity.DefaultGDdbService.CreateSchool(form.SchoolName, form.CityId, form.GradeType)
+	if err != nil {
+		return nil, err
+	}
 	return gin.H{
-		"record": schoolList,
+		"schoolId": id,
 	}, nil
 }
 

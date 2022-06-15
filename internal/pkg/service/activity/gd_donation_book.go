@@ -282,7 +282,7 @@ func (srv GDdbService) GetSchoolList(schoolName string, cityId, gradeId int64) [
 }
 
 // CreateSchool  新建学校信息
-func (srv GDdbService) CreateSchool(schoolName string, cityId int64, gradeType int) error {
+func (srv GDdbService) CreateSchool(schoolName string, cityId int64, gradeType int) (int64, error) {
 	//获取年级类型
 	schoolRes := repoactivity.DefaultGDDbSchoolRepository.FindBy(repoactivity.FindSchoolBy{
 		CityId:     cityId,
@@ -290,19 +290,20 @@ func (srv GDdbService) CreateSchool(schoolName string, cityId int64, gradeType i
 		SchoolName: schoolName,
 	})
 	if schoolRes.ID != 0 {
-		return errors.New("学校已存在")
+		return 0, errors.New("学校已存在")
 	}
-	err := repoactivity.DefaultGDDbSchoolRepository.Create(&entity.GDDbSchool{
+	school := &entity.GDDbSchool{
 		CityId:     cityId,
 		Type:       gradeType,
 		SchoolName: schoolName,
 		CreatedAt:  model.Time{},
 		UpdatedAt:  model.Time{},
-	})
-	if err != nil {
-		return err
 	}
-	return nil
+	err := repoactivity.DefaultGDDbSchoolRepository.Create(school)
+	if err != nil {
+		return 0, err
+	}
+	return school.ID, nil
 }
 
 // GetAchievement 获取我的成就
