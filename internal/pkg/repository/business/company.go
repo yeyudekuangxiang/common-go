@@ -30,3 +30,9 @@ func (u CompanyRepository) GetCompanyById(id int) business.Company {
 	}
 	return Company
 }
+func (u CompanyRepository) GetCompanyPageList(by GetCompanyPageListBy) ([]business.Company, int64, error) {
+	list := make([]business.Company, 0)
+	var total int64
+	err := u.DB.Model(business.Company{}).Offset(by.Offset).Count(&total).Limit(by.Limit).Find(&list).Error
+	return list, total, err
+}

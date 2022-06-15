@@ -33,3 +33,9 @@ func (u CompanyService) GetCompanyCarbon(cid int) decimal.Decimal {
 	}
 	return a
 }
+func (u CompanyService) GetCompanyPageList(param GetCompanyPageListParam) ([]business.Company, int64, error) {
+	return u.repo.GetCompanyPageList(brepo.GetCompanyPageListBy{
+		Limit:  param.Limit,
+		Offset: param.Offset,
+	})
+}

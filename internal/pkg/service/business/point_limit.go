@@ -6,6 +6,7 @@ import (
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -22,8 +23,14 @@ func (srv PointLimitService) checkLimit(userId int64, t ebusiness.PointType) (in
 		return 1, 9999, true, nil
 	}
 
-	//需要方法-根据用户ID查询用户信息
-	userInfo := ebusiness.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(userId)
+	if err != nil {
+		return 0, 0, false, err
+	}
+	if userInfo.ID == 0 {
+		return 0, 0, false, errno.ErrUserNotFound
+	}
+
 	carbonScene, err := DefaultCarbonSceneService.FindScene(carbonType)
 	if err != nil {
 		return 0, 0, false, err

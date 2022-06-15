@@ -7,6 +7,7 @@ import (
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -18,8 +19,14 @@ type CarbonCreditsLimitService struct {
 //检测是否超出限制 返回还可领取次数
 func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.CarbonType) (int, error) {
 
-	//需要方法 根据用户id查询用户信息
-	userInfo := ebusiness.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(userId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
 	carbonScene, err := DefaultCarbonSceneService.FindScene(t)
 	if err != nil {
 		return 0, err

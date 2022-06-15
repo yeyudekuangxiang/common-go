@@ -7,6 +7,7 @@ import (
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -77,8 +78,14 @@ func (srv PointService) createOrUpdatePoint(param createOrUpdatePointParam) (*eb
 // SendPointEvCar 充电得碳积分
 func (srv PointService) SendPointEvCar(param SendPointEvCarParam) (int, error) {
 
-	//需要方法-根据用户ID查询用户信息
-	userInfo := ebusiness.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeEvCar)
 	if err != nil {
 		return 0, err
@@ -108,8 +115,14 @@ func (srv PointService) SendPointEvCar(param SendPointEvCarParam) (int, error) {
 //SendPointOnlineMeeting 在线会议得碳积分
 func (srv PointService) SendPointOnlineMeeting(param SendPointOnlineMeetingParam) (int, error) {
 
-	//需要方法-根据用户ID查询用户信息
-	userInfo := ebusiness.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeOnlineMeeting)
 	if err != nil {
 		return 0, err
@@ -140,8 +153,14 @@ func (srv PointService) SendPointOnlineMeeting(param SendPointOnlineMeetingParam
 
 //SendPointSaveWaterElectricity 节水节电得积分
 func (srv PointService) SendPointSaveWaterElectricity(param SendPointSaveWaterElectricityParam) (int, error) {
-	//需要方法-根据用户ID查询用户信息
-	userInfo := ebusiness.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeSaveWaterElectricity)
 	if err != nil {
 		return 0, err
@@ -171,8 +190,14 @@ func (srv PointService) SendPointSaveWaterElectricity(param SendPointSaveWaterEl
 
 //SendPointPublicTransport 乘坐公交地铁得积分
 func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportParam) (int, error) {
-	//需要方法-根据用户ID查询用户信息
-	userInfo := ebusiness.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypePublicTransport)
 	if err != nil {
 		return 0, err

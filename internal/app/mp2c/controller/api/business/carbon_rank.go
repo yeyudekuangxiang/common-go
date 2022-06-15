@@ -1,6 +1,7 @@
 package business
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/service/business"
@@ -88,8 +89,14 @@ func (CarbonRankController) ChangeUserRankLikeStatus(ctx *gin.Context) (gin.H, e
 		return nil, err
 	}
 
-	//需要方法-根据uid查询用户信息
-	likeUser := ebusiness.User{}
+	likeUser, err := business.DefaultUserService.GetBusinessUserByUid(form.Uid)
+	if err != nil {
+		return nil, err
+	}
+	if likeUser.ID == 0 {
+		return nil, errors.New("未查询到点赞对象")
+	}
+
 	user := apiutil.GetAuthBusinessUser(ctx)
 	like, err := business.DefaultCarbonRankService.ChangeLikeStatus(business.ChangeLikeStatusParam{
 		Pid:        likeUser.ID,
