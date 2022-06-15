@@ -88,8 +88,11 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
 	}
 
-	//需要方法-根据id列表查询用户信息列表方法
+	userList := DefaultUserService.GetBusinessUserByIds(userIds)
 	userMap := make(map[int64]business.User)
+	for _, user := range userList {
+		userMap[user.ID] = user
+	}
 
 	infoList := make([]UserRankInfo, 0)
 	for _, item := range list {
@@ -120,8 +123,10 @@ func (srv CarbonRankService) FindUserRank(param FindUserRankParam) (*UserRankInf
 		rank.Rank = 9999
 	}
 
-	//需要方法-根据用户id查询用户信息
-	user := business.User{}
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return nil, err
+	}
 
 	//isLike
 	likeStatus, err := DefaultCarbonRankLikeLogService.FindLikeStatus(CarbonRankLikeLogParam{
@@ -136,7 +141,7 @@ func (srv CarbonRankService) FindUserRank(param FindUserRankParam) (*UserRankInf
 	}
 
 	return &UserRankInfo{
-		User:    user.ShortUser(),
+		User:    userInfo.ShortUser(),
 		Value:   rank.Value,
 		LikeNum: rank.LikeNum,
 		Rank:    rank.Rank,
@@ -163,8 +168,10 @@ func (srv CarbonRankService) DepartmentRankList(param GetDepartmentRankListParam
 	}
 
 	departmentIds := make([]int64, 0)
+	departmentIdsInt := make([]int, 0)
 	for _, item := range list {
 		departmentIds = append(departmentIds, item.Pid)
+		departmentIdsInt = append(departmentIdsInt, int(item.Pid))
 	}
 
 	//查询当前用户是否点赞信息
@@ -183,8 +190,11 @@ func (srv CarbonRankService) DepartmentRankList(param GetDepartmentRankListParam
 		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
 	}
 
-	//需要方法-根据部门id列表查询部门列表
+	departmentList := DefaultDepartmentService.GetBusinessDepartmentByIds(departmentIdsInt)
 	departmentMap := make(map[int64]business.Department)
+	for _, department := range departmentList {
+		departmentMap[int64(department.ID)] = department
+	}
 
 	infoList := make([]DepartmentRankInfo, 0)
 	for _, item := range list {
@@ -222,8 +232,10 @@ func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (
 		rank.Rank = 9999
 	}
 
-	//需要方法-根据部门id查询部门信息
-	department := business.Department{}
+	department, err := DefaultDepartmentService.GetBusinessDepartmentById(param.DepartmentId)
+	if err != nil {
+		return nil, err
+	}
 
 	//isLike
 	likeStatus, err := DefaultCarbonRankLikeLogService.FindLikeStatus(CarbonRankLikeLogParam{
@@ -238,13 +250,12 @@ func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (
 	}
 
 	return &DepartmentRankInfo{
-		Department: department,
+		Department: *department,
 		Value:      rank.Value,
 		LikeNum:    rank.LikeNum,
 		Rank:       rank.Rank,
 		IsLike:     likeStatus.IsLike(),
 	}, nil
-
 }
 
 // InitUserRank 生成用户排名信息
@@ -254,10 +265,23 @@ func (srv CarbonRankService) InitUserRank(dateType business.RankDateType) {
 		return
 	}
 
-	//需要方法-查询企业id列表
-	companyIds := make([]int, 0)
-	for _, companyId := range companyIds {
-		srv.InitCompanyUserRank(companyId, dateType)
+	offset := 0
+	for {
+		list, _, err := DefaultCompanyService.GetCompanyPageList(GetCompanyPageListParam{
+			Offset: offset,
+			Limit:  100,
+		})
+		if err != nil {
+			app.Logger.Error("查询公司列表异常", err)
+			break
+		}
+		if len(list) == 0 {
+			break
+		}
+		for _, company := range list {
+			srv.InitCompanyUserRank(company.ID, dateType)
+		}
+		offset += 100
 	}
 }
 
@@ -334,11 +358,25 @@ func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) 
 		app.Logger.Info("20个小时内已经有一个线程初始化过")
 		return
 	}
+	offset := 0
+	for {
+		list, _, err := DefaultCompanyService.GetCompanyPageList(GetCompanyPageListParam{
+			Offset: offset,
+			Limit:  100,
+		})
 
-	//需要方法 查询企业列表
-	companyIds := make([]int, 0)
-	for _, companyId := range companyIds {
-		srv.InitCompanyDepartmentRank(companyId, dateType)
+		if err != nil {
+			app.Logger.Error("查询公司列表异常", err)
+			break
+		}
+		if len(list) == 0 {
+			break
+		}
+
+		for _, company := range list {
+			srv.InitCompanyDepartmentRank(company.ID, dateType)
+		}
+		offset += 100
 	}
 }
 

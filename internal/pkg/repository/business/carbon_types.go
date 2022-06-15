@@ -94,3 +94,7 @@ type CarbonCreditsLogListHistory struct {
 	Type  ebusiness.CarbonType
 	Title string
 }
+type GetCompanyPageListBy struct {
+	Limit  int
+	Offset int
+}

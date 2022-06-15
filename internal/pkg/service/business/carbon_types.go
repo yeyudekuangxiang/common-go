@@ -177,3 +177,7 @@ type CarbonResult struct {
 	Credit decimal.Decimal
 	Point  int
 }
+type GetCompanyPageListParam struct {
+	Limit  int
+	Offset int
+}

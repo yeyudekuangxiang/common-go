@@ -80,22 +80,21 @@ func (repo CarbonCreditsLogRepository) GetActualUserCarbonRank(by GetActualUserC
 
 // GetActualDepartmentCarbonRank 获取部门排行榜
 func (repo CarbonCreditsLogRepository) GetActualDepartmentCarbonRank(by GetActualDepartmentCarbonRankBy) ([]business.DepartCarbonRank, int64, error) {
-	db := repo.DB.Table(fmt.Sprintf("%s as log", business.CarbonCreditsLog{}.TableName())).
-		Joins(fmt.Sprintf("inner join %s as \"buser\" on log.b_user_id = buser.id", business.User{}.TableName()))
-
-	if by.CompanyId != 0 {
-		db.Where("buser.b_company_id = ?", by.CompanyId)
-	}
-	if !by.StartTime.IsZero() {
-		db.Where("log.created_at >= ?", by.StartTime)
-	}
-	if !by.EndTime.IsZero() {
-		db.Where("log.created_at <= ?", by.EndTime)
-	}
-
-	db.Select("buser.b_department_id department_id,sum(log.value) \"value\"").Group("buser.b_department_id")
-
-	db = repo.DB.Table("(?) t", db)
+	db := repo.DB.Table("(SELECT depart.top_id  department_id,sum(log.value) \"value\" "+
+		"FROM business_carbon_credits_log AS log "+
+		"INNER JOIN business_user AS buser ON log.b_user_id = buser.ID "+
+		"INNER JOIN business_department as depart on buser.b_department_id = depart.id "+
+		"where depart.top_id <> 0 and buser.b_company_id = ? and log.created_at >= ? and log.created_at <= ? "+
+		"GROUP BY depart.top_id "+
+		"UNION SELECT depart.id as department_id,sum(log.value) \"value\" "+
+		"FROM business_carbon_credits_log AS log I"+
+		"NNER JOIN business_user AS buser ON log.b_user_id = buser.ID "+
+		"INNER JOIN business_department as depart on buser.b_department_id = depart.id  "+
+		"where depart.top_id = 0 and buser.b_company_id = ? and log.created_at >= ? and log.created_at <= ? "+
+		"GROUP BY depart.id) t",
+		by.CompanyId, by.StartTime, by.EndTime,
+		by.CompanyId, by.StartTime, by.EndTime,
+	)
 
 	list := make([]business.DepartCarbonRank, 0)
 	var total int64
