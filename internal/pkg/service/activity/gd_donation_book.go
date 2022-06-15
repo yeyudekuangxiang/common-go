@@ -46,8 +46,13 @@ func (srv GDdbService) CreateUser(userId, inviteId int64) (*entity.GDDonationBoo
 // HomePage 首页返回数据
 func (srv GDdbService) HomePage(userId, inviteId int64) (*GDDbHomePageResponse, error) {
 	//返回用户信息
-	var userAnswerRes repoactivity.GDDbHomePageUserInfo
+	userAnswerRes := repoactivity.GDDbHomePageUserInfo{
+		UserInfo:    repoactivity.GDDbUserInfo{},
+		InviteInfo:  repoactivity.GDDbUserInfo{},
+		InvitedInfo: make([]repoactivity.GDDbUserInfo, 0),
+	}
 	schoolRes := make([]entity.GDDbSchoolRank, 0)
+
 	if userId != 0 {
 		userInfo, err := srv.CreateUser(userId, inviteId)
 		if err != nil {
@@ -124,13 +129,11 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 		})
 	}
 	//返回数据
-	res := repoactivity.GDDbHomePageUserInfo{
+	return repoactivity.GDDbHomePageUserInfo{
 		UserInfo:    userResult,
 		InviteInfo:  inviteResult,
 		InvitedInfo: invitedResult,
-	}
-
-	return res, nil
+	}, nil
 }
 
 // UpdateActivityUser 更新证书链接地址
