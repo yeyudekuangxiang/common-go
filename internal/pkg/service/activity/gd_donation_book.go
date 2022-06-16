@@ -8,6 +8,7 @@ import (
 	entity "mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/repository"
 	repoactivity "mio/internal/pkg/repository/activity"
+	"mio/internal/pkg/service"
 )
 
 var DefaultGDdbService = GDdbService{repo: repoactivity.DefaultGDDonationBookRepository}
@@ -138,9 +139,8 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 
 func (srv GDdbService) GetUserSchool(userId int64) (repoactivity.GDDbUserSchool, error) {
 	resp := repoactivity.GDDbUserSchool{}
-	userRepo := repository.NewUserRepository()
 	donationBookResult := srv.repo.GetUserBy(repoactivity.FindRecordBy{UserId: userId})
-	user := userRepo.GetUserById(donationBookResult.UserId)
+	user, _ := service.DefaultUserService.GetUserById(donationBookResult.UserId)
 	userSchool := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	if userSchool.ID != 0 {
 		school := repoactivity.DefaultGDDbSchoolRepository.FindById(userSchool.SchoolId)
@@ -215,6 +215,11 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 	}
 	record := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	if record.ID != 0 {
+		//更新
+		record.SchoolId = schoolId
+		record.ClassNumber = classNumber
+		err = repoactivity.DefaultGDDbUserSchoolRepository.Save(&record)
+	} else {
 		//创建
 		req := &entity.GDDbUserSchool{
 			UserId:      userId,
@@ -226,11 +231,6 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 			UpdatedAt:   model.Time{},
 		}
 		err = repoactivity.DefaultGDDbUserSchoolRepository.Create(req)
-	} else {
-		//更新
-		record.SchoolId = schoolId
-		record.ClassNumber = classNumber
-		err = repoactivity.DefaultGDDbUserSchoolRepository.Save(&record)
 	}
 	if err != nil {
 		return err

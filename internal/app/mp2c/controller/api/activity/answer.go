@@ -98,7 +98,6 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	// 检测成团状态
 	err = activity.DefaultGDdbService.CheckActivityStatus(user.ID, form.SchoolId)
 	if err != nil {
