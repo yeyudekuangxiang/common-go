@@ -50,7 +50,7 @@ func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 
 	resp, _ := service.DefaultUserService.CheckUserRisk(wxapp.UserRiskRankParam{
 		AppId:    config.Config.Weapp.AppId,
-		OpenId:   "oy_BA5NnXKPCf9SVxxO5mhz3ikHM",
+		OpenId:   "oy_BA5Is69X-X2hlNn9HxRH3lOhI",
 		Scene:    0,
 		ClientIp: c.ClientIP(),
 	})
