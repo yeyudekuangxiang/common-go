@@ -189,7 +189,7 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 		})
 		if inviteInfo.IsSuccess == 1 && userInfo.IsSuccess == 0 {
 			//更新用户状态
-			userInfo.InviteId = 0
+			//userInfo.InviteId = 0
 			userInfo.InviteType = 0
 			err := srv.repo.Save(&userInfo)
 			if err != nil {
