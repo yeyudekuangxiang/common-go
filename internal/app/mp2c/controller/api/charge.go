@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"strconv"
 	"time"
@@ -38,6 +39,13 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 
+	//避开重放
+	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return gin.H{}, nil
+	}
+
 	//通过手机号查询用户
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile})
 	if userInfo.ID <= 0 {
@@ -48,9 +56,9 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 		key := timeStr + scene.Ch + form.Mobile
 		cmd := app.Redis.Get(c, key)
 		lastPoint, _ := strconv.Atoi(cmd.Val())
-		thisPoint0, _ := strconv.ParseFloat(form.TotalPower, 32)
+		thisPoint0, _ := strconv.ParseFloat(form.TotalPower, 64)
 
-		thisPoint := int(thisPoint0) * scene.Override
+		thisPoint := int(thisPoint0 * float64(scene.Override))
 		totalPoint := lastPoint + thisPoint
 		fmt.Println("charge 累计积分 ", form, totalPoint)
 		if lastPoint >= scene.PointLimit {
