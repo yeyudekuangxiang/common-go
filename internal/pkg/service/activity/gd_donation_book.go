@@ -156,6 +156,7 @@ func (srv GDdbService) GetUserSchool(userId int64) (repoactivity.GDDbUserSchool,
 			CityName:    city.CityName,
 			GradeName:   grade.Grade,
 			ClassNumber: userSchool.ClassNumber,
+			SchoolName:  school.SchoolName,
 		}
 	}
 	return resp, nil
