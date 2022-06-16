@@ -154,7 +154,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	resp, err := service.DefaultUserService.CheckUserRisk(wxapp.UserRiskRankParam{
 		AppId:    config.Config.Weapp.AppId,
 		OpenId:   userInfo.OpenId,
-		Scene:    0,
+		Scene:    1,
 		ClientIp: cip,
 	})
 	if err != nil {
