@@ -68,11 +68,11 @@ type UserRankInfo struct {
 	Value   decimal.Decimal    `json:"value"`
 }
 type DepartmentRankInfo struct {
-	Department business.Department
-	IsLike     bool            `json:"isLike"`
-	LikeNum    int             `json:"likeNum"`
-	Rank       int             `json:"rank"`
-	Value      decimal.Decimal `json:"value"`
+	Department business.Department `json:"department"`
+	IsLike     bool                `json:"isLike"`
+	LikeNum    int                 `json:"likeNum"`
+	Rank       int                 `json:"rank"`
+	Value      decimal.Decimal     `json:"value"`
 }
 type GetUserRankListParam struct {
 	UserId    int64 //用于判断对排行榜是否点赞
