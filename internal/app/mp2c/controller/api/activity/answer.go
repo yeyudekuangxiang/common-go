@@ -100,7 +100,7 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	// 保存学校信息，更新答题状态
 	err := activity.DefaultGDdbService.SaveSchoolInfo(form.UserName, form.SchoolId, form.GradeId, user.ID, form.ClassNumber)
 	if err != nil {
-		return nil, errors.New("保存学校信息失败")
+		return nil, errors.New("学校信息保存失败")
 	}
 	// 检测成团状态
 	err = activity.DefaultGDdbService.CheckActivityStatus(user.ID, form.SchoolId)
