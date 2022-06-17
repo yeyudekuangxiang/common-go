@@ -96,6 +96,8 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 		if invite.IsSuccess == 1 && userRecord.IsSuccess == 0 {
 			//更新成团长
 			userRecord.InviteType = 0
+			userRecord.InviteId = 0
+			inviteResult = repoactivity.GDDbUserInfo{}
 			err := srv.repo.Save(userRecord)
 			if err != nil {
 				return repoactivity.GDDbHomePageUserInfo{}, err
