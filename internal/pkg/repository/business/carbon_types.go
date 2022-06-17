@@ -98,3 +98,7 @@ type GetCompanyPageListBy struct {
 	Limit  int
 	Offset int
 }
+
+type GetUserTotalCarbonCredits struct {
+	Total string
+}

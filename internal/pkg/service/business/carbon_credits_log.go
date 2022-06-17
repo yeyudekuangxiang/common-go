@@ -152,3 +152,7 @@ func (srv CarbonCreditsLogService) GetCarbonCreditLogListHistoryBy(by rbusiness.
 	}
 	return CarbonCreditLogListHistoryResponseMap
 }
+
+func (srv CarbonCreditsLogService) GetUserTotalCarbonCreditsByUserId(userId int64) rbusiness.GetUserTotalCarbonCredits {
+	return srv.repo.GetUserTotalCarbonCredits(rbusiness.GetCarbonCreditsLogSortedListBy{UserId: userId})
+}

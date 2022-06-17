@@ -138,3 +138,15 @@ func (repo CarbonCreditsLogRepository) GetCarbonCreditsLogListHistory(by GetCarb
 	}
 	return list
 }
+
+func (repo CarbonCreditsLogRepository) GetUserTotalCarbonCredits(by GetCarbonCreditsLogSortedListBy) GetUserTotalCarbonCredits {
+	list := GetUserTotalCarbonCredits{}
+	db := repo.DB.Model(business.CarbonCreditsLog{})
+	if by.UserId != 0 {
+		db.Where("b_user_id = ?", by.UserId)
+	}
+	if err := db.Select("sum(\"value\") as total").Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}

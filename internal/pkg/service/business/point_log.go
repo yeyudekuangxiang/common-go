@@ -53,3 +53,7 @@ func (srv PointLogService) CreatePointLog(param CreatePointLogParam) (*business.
 	}
 	return &log, srv.repo.Create(&log)
 }
+
+func (srv PointLogService) GetUserTotalPointsByUserId(userId int64) rbusiness.GetUserTotalCarbonCredits {
+	return srv.repo.GetUserTotalPoints(rbusiness.GetCarbonCreditsLogSortedListBy{UserId: userId})
+}
