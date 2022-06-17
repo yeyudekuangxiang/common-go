@@ -214,7 +214,9 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 	record := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	if record.ID != 0 {
 		//更新
+		record.UserName = userName
 		record.SchoolId = schoolId
+		record.GradeId = gradeId
 		record.ClassNumber = classNumber
 		err = repoactivity.DefaultGDDbUserSchoolRepository.Save(&record)
 	} else {
