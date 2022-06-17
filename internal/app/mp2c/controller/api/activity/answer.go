@@ -20,9 +20,10 @@ type AnswerController struct {
 func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 	//当前登陆用户信息
 	user := apiutil.GetAuthUser(ctx)
-	if time.Now().Add(-24 * time.Hour).After(user.Time.Time) {
+	if user.ID != 0 && time.Now().Add(-24*time.Hour).After(user.Time.Time) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
+
 	form := &GDDbActivityHomePageForm{}
 	if err := apiutil.BindForm(ctx, form); err != nil {
 		return nil, err
