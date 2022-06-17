@@ -184,7 +184,7 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 	userInfo = srv.repo.FindBy(repoactivity.FindRecordBy{
 		UserId: userId,
 	})
-	if userInfo.InviteId != 0 {
+	if userInfo.InviteId != 0 && userInfo.ID != 0 {
 		inviteInfo = srv.repo.FindBy(repoactivity.FindRecordBy{
 			UserId: userInfo.InviteId,
 		})
@@ -200,18 +200,8 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 			return errors.New("慢了一步，好友已和他人完成共同捐赠")
 		}
 		//正常答题 更新状态
-		err = app.DB.Transaction(func(tx *gorm.DB) error {
-			userInfo.IsSuccess = 1
-			if err = srv.repo.Save(&userInfo); err != nil {
-				return err
-			}
-			inviteInfo.IsSuccess = 1
-			if err = srv.repo.Save(&inviteInfo); err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
+		ids := []int64{userInfo.UserId, userInfo.InviteId}
+		if err = app.DB.Model(entity.GDDonationBookRecord{}).Where("user_id in ?", ids).Updates(entity.GDDonationBookRecord{IsSuccess: 1}).Error; err != nil {
 			return err
 		}
 		//更新学校排名
