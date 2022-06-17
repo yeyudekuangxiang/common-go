@@ -19,9 +19,13 @@ func (UserController) GetUserInfo(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Error("部门信息查询失败", user)
 	}
+	totalCarbonReduce := business.DefaultCarbonCreditsLogService.GetUserTotalCarbonCreditsByUserId(user.ID)
+	totalPoints := business.DefaultPointLogService.GetUserTotalPointsByUserId(user.ID)
 	return gin.H{
-		"info":       user,
-		"department": department,
+		"info":              user,
+		"department":        department,
+		"totalCarbonReduce": totalCarbonReduce.Total,
+		"totalPoints":       totalPoints.Total,
 	}, nil
 }
 

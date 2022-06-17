@@ -57,6 +57,18 @@ func (p PointLogRepository) GetListBy(by GetPointLogListBy) []business.PointLog 
 	return list
 }
 
+func (p PointLogRepository) GetUserTotalPoints(by GetCarbonCreditsLogSortedListBy) GetUserTotalCarbonCredits {
+	list := GetUserTotalCarbonCredits{}
+	db := p.DB.Model(business.PointLog{})
+	if by.UserId != 0 {
+		db.Where("b_user_id = ?", by.UserId)
+	}
+	if err := db.Select("sum(\"value\") as total").Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}
+
 //func (p PointTransactionRepository) GetSortListBy(by GetPointTransactionListBy) []business.PointTransaction {
 //	list := make([]business.PointTransaction, 0)
 //
