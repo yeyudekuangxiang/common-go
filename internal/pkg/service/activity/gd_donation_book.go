@@ -251,8 +251,8 @@ func (srv GDdbService) UpdateAnswerStatus(userId int64, status int) error {
 	return srv.repo.Save(&record)
 }
 
-// IncrRank  学校捐赠书+1
-func (srv GDdbService) IncrRank(userId int64) error {
+// IncrRankBack IncrRank  学校捐赠书+1 废弃
+func (srv GDdbService) IncrRankBack(userId int64) error {
 	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	if activityUser.ID != 0 && activityUser.InviteType == 1 && activityUser.IsSuccess == 1 {
 		//获取学校id
@@ -293,6 +293,37 @@ func (srv GDdbService) IncrRank(userId int64) error {
 		}
 	}
 
+	return nil
+}
+
+// IncrRank  学校捐赠书+1
+func (srv GDdbService) IncrRank(userId int64) error {
+	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
+	var err error
+	if activityUser.ID != 0 && activityUser.InviteType == 1 && activityUser.IsSuccess == 1 {
+		//获取学校id
+		inviteSchool := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: activityUser.InviteId})
+		//获取学校信息
+		schoolInfo := repoactivity.DefaultGDDbSchoolRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: inviteSchool.SchoolId})
+		rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: inviteSchool.SchoolId})
+		if rankInfo.ID != 0 {
+			rankInfo.DonateNumber++
+			err = repoactivity.DefaultGDDbSchoolRankRepository.Save(&rankInfo)
+		} else {
+			insertReq := entity.GDDbSchoolRank{
+				SchoolId:     schoolInfo.ID,
+				SchoolName:   schoolInfo.SchoolName,
+				DonateNumber: 1,
+				CreatedAt:    model.Time{},
+				UpdatedAt:    model.Time{},
+			}
+			err = repoactivity.DefaultGDDbSchoolRankRepository.Create(&insertReq)
+		}
+		if err != nil {
+			fmt.Printf("error:%e", err)
+			return err
+		}
+	}
 	return nil
 }
 

@@ -105,7 +105,7 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	// 检测成团状态
 	err = activity.DefaultGDdbService.CheckActivityStatus(user.ID, form.SchoolId)
 	if err != nil {
-		return nil, errors.New("检测成团信息失败")
+		return nil, err
 	}
 	// 受邀者 答题完成后赠书+1
 	err = activity.DefaultGDdbService.IncrRank(user.ID)
