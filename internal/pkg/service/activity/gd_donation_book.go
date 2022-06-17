@@ -2,6 +2,7 @@ package activity
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -180,7 +181,6 @@ func (srv GDdbService) UpdateActivityUser(userId int64, t int, url string) error
 // CheckActivityStatus 检测成团状态
 func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 	var userInfo, inviteInfo entity.GDDonationBookRecord
-	var err error
 	userInfo = srv.repo.FindBy(repoactivity.FindRecordBy{
 		UserId: userId,
 	})
@@ -193,23 +193,16 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 			//更新用户状态
 			//userInfo.InviteId = 0
 			userInfo.InviteType = 0
-			err := srv.repo.Save(&userInfo)
-			if err != nil {
-				return err
-			}
+			_ = srv.repo.Save(&userInfo)
 			return errors.New("慢了一步，好友已和他人完成共同捐赠")
 		}
 		//正常答题 更新状态
 		ids := []int64{userInfo.UserId, userInfo.InviteId}
-		if err = app.DB.Model(entity.GDDonationBookRecord{}).Where("user_id in ?", ids).Updates(entity.GDDonationBookRecord{IsSuccess: 1}).Error; err != nil {
+		if err := app.DB.Model(entity.GDDonationBookRecord{}).Where("user_id in ?", ids).Updates(entity.GDDonationBookRecord{IsSuccess: 1}).Error; err != nil {
 			return err
 		}
-		//更新学校排名
-		_ = srv.IncrRank(userInfo.ID)       //当前用户
-		_ = srv.IncrRank(userInfo.InviteId) //邀请者
 	}
-
-	return err
+	return nil
 }
 
 func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId int64, classNumber uint32) error {
@@ -259,12 +252,11 @@ func (srv GDdbService) UpdateAnswerStatus(userId int64, status int) error {
 // IncrRank  学校捐赠书+1
 func (srv GDdbService) IncrRank(userId int64) error {
 	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
-	var err error
 	if activityUser.ID != 0 && activityUser.InviteType == 1 && activityUser.IsSuccess == 1 {
 		//获取学校id
 		var userSchoolList []entity.GDDbUserSchool
 		schoolIds := make([]int64, 0)
-		err = app.DB.Model(entity.GDDbUserSchool{}).Where("user_id = ? or user_id = ?", activityUser.UserId, activityUser.InviteId).Find(userSchoolList).Error
+		err := app.DB.Model(entity.GDDbUserSchool{}).Where("user_id = ? or user_id = ?", activityUser.UserId, activityUser.InviteId).Find(&userSchoolList).Error
 		if err != nil {
 			return err
 		}
@@ -294,6 +286,7 @@ func (srv GDdbService) IncrRank(userId int64) error {
 			err = app.DB.Model(entity.GDDbSchoolRank{}).Create(&insertReq).Error
 		}
 		if err != nil {
+			fmt.Printf("error:%e", err)
 			return err
 		}
 	}
