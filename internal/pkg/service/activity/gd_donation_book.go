@@ -205,9 +205,8 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 			return err
 		}
 		//更新学校排名
-		inviteSchoolRes := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: inviteInfo.UserId})
-		_ = srv.IncrRank(schoolId)                 //当前用户
-		_ = srv.IncrRank(inviteSchoolRes.SchoolId) //邀请者
+		_ = srv.IncrRank(userInfo.ID)       //当前用户
+		_ = srv.IncrRank(userInfo.InviteId) //邀请者
 	}
 
 	return err
@@ -265,7 +264,7 @@ func (srv GDdbService) IncrRank(userId int64) error {
 		//获取学校id
 		var userSchoolList []entity.GDDbUserSchool
 		schoolIds := make([]int64, 0)
-		err = app.DB.Where("user_id = ?", activityUser.UserId).Or("user_id = ?", activityUser.InviteId).Find(userSchoolList).Error
+		err = app.DB.Model(entity.GDDbUserSchool{}).Where("user_id = ? or user_id = ?", activityUser.UserId, activityUser.InviteId).Find(userSchoolList).Error
 		if err != nil {
 			return err
 		}
@@ -292,7 +291,7 @@ func (srv GDdbService) IncrRank(userId int64) error {
 					UpdatedAt:    model.Time{},
 				})
 			}
-			err = app.DB.Create(&insertReq).Error
+			err = app.DB.Model(entity.GDDbSchoolRank{}).Create(&insertReq).Error
 		}
 		if err != nil {
 			return err
