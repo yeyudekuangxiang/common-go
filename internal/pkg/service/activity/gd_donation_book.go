@@ -313,17 +313,17 @@ func (srv GDdbService) GetGradeList() []entity.GDDbGrade {
 // GetSchoolList 获取学校列表
 func (srv GDdbService) GetSchoolList(schoolName string, cityId, gradeId int64) []entity.GDDbSchool {
 	list := make([]entity.GDDbSchool, 0)
-	gradeInfo := entity.GDDbGrade{}
-	//获取年级类型
 	if gradeId > 0 {
-		gradeInfo = repoactivity.DefaultGDDbGradeRepository.FindById(gradeId)
+		gradeInfo := repoactivity.DefaultGDDbGradeRepository.FindById(gradeId)
+		if gradeInfo.ID != 0 {
+			find := repoactivity.FindSchoolBy{
+				CityId:     cityId,
+				SchoolName: schoolName,
+				GradeType:  gradeInfo.Type,
+			}
+			list = repoactivity.DefaultGDDbSchoolRepository.FindAllBy(find)
+		}
 	}
-	find := repoactivity.FindSchoolBy{
-		CityId:     cityId,
-		SchoolName: schoolName,
-		GradeType:  gradeInfo.Type,
-	}
-	list = repoactivity.DefaultGDDbSchoolRepository.FindAllBy(find)
 	return list
 }
 

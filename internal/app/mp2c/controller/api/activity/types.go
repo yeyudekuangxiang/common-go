@@ -69,8 +69,8 @@ type GDDbActivitySchoolForm struct {
 
 type GDDbSelectSchoolForm struct {
 	SchoolName string `json:"schoolName" form:"schoolName" alias:"schoolName"`
-	CityId     int64  `json:"cityId" form:"cityId" binding:"number" alias:"cityId"`
-	GradeId    int64  `json:"gradeId" form:"gradeId" binding:"number" alias:"gradeId"`
+	CityId     int64  `json:"cityId" form:"cityId" binding:"gte=0" alias:"cityId"`
+	GradeId    int64  `json:"gradeId" form:"gradeId" binding:"gte=0" alias:"gradeId"`
 }
 
 type GDDbCreateSchoolForm struct {

@@ -166,7 +166,7 @@ func (repo GDDbSchoolRepository) FindById(id int64) activity.GDDbSchool {
 func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 	record := activity.GDDbSchool{}
 	db := app.DB.Model(activity.GDDbSchool{})
-	if len(by.SchoolIds) < 1 {
+	if len(by.SchoolIds) > 0 {
 		db.Where("id in ?", by.SchoolIds)
 	}
 	if by.SchoolName != "" {
@@ -189,7 +189,7 @@ func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchool {
 	record := make([]activity.GDDbSchool, 0)
 	db := app.DB.Model(activity.GDDbSchool{})
-	if len(by.SchoolIds) < 1 {
+	if len(by.SchoolIds) > 0 {
 		db.Where("id in ?", by.SchoolIds)
 	}
 	if by.SchoolName != "" {
