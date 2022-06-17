@@ -122,7 +122,7 @@ func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbS
 	if by.SchoolName != "" {
 		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
 	}
-	if err := db.Find(&record).Error; err != nil {
+	if err := db.Order("donate_number desc").Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
@@ -201,7 +201,8 @@ func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchoo
 	if by.CityId != 0 {
 		db.Where("city_id = ?", by.CityId)
 	}
-	if err := db.Find(&record).Error; err != nil {
+
+	if err := db.Order("id asc").Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
@@ -249,7 +250,7 @@ type GDDbCityRepository struct {
 
 func (repo GDDbCityRepository) FindAll() []activity.GDDbCity {
 	record := make([]activity.GDDbCity, 0)
-	if err := app.DB.Model(activity.GDDbCity{}).Find(&record).Error; err != nil {
+	if err := app.DB.Model(activity.GDDbCity{}).Order("id asc").Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
@@ -273,7 +274,7 @@ type GDDbGradeRepository struct {
 
 func (repo GDDbGradeRepository) FindAll() []activity.GDDbGrade {
 	record := make([]activity.GDDbGrade, 0)
-	if err := app.DB.Model(activity.GDDbGrade{}).Find(&record).Error; err != nil {
+	if err := app.DB.Model(activity.GDDbGrade{}).Order("id asc").Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
