@@ -188,6 +188,7 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 		inviteInfo = srv.repo.FindBy(repoactivity.FindRecordBy{
 			UserId: userInfo.InviteId,
 		})
+		// 答题晚了
 		if inviteInfo.IsSuccess == 1 && userInfo.IsSuccess == 0 {
 			//更新用户状态
 			//userInfo.InviteId = 0
@@ -198,7 +199,21 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 			}
 			return errors.New("慢了一步，好友已和他人完成共同捐赠")
 		}
-
+		//正常答题 更新状态
+		err = app.DB.Transaction(func(tx *gorm.DB) error {
+			userInfo.IsSuccess = 1
+			if err = srv.repo.Save(&userInfo); err != nil {
+				return err
+			}
+			inviteInfo.IsSuccess = 1
+			if err = srv.repo.Save(&inviteInfo); err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
 		//更新学校排名
 		inviteSchoolRes := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: inviteInfo.UserId})
 		_ = srv.IncrRank(schoolId)                 //当前用户
@@ -254,13 +269,13 @@ func (srv GDdbService) UpdateAnswerStatus(userId int64, status int) error {
 
 // IncrRank  学校捐赠书+1
 func (srv GDdbService) IncrRank(userId int64) error {
-	donationBookRes := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
+	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	var err error
-	if donationBookRes.ID != 0 && donationBookRes.InviteType == 1 && donationBookRes.IsSuccess == 1 {
+	if activityUser.ID != 0 && activityUser.InviteType == 1 && activityUser.IsSuccess == 1 {
 		//获取学校id
 		var userSchoolList []entity.GDDbUserSchool
 		schoolIds := make([]int64, 0)
-		err = app.DB.Where("user_id = ?", donationBookRes.UserId).Or("user_id = ?", donationBookRes.InviteId).Find(userSchoolList).Error
+		err = app.DB.Where("user_id = ?", activityUser.UserId).Or("user_id = ?", activityUser.InviteId).Find(userSchoolList).Error
 		if err != nil {
 			return err
 		}
