@@ -64,7 +64,7 @@ type GDDbActivitySchoolForm struct {
 	CityId int64 `json:"cityId" form:"cityId" binding:"required" alias:"cityId"` //市id
 	//AreaId      int64  `json:"areaId" form:"areaId" binding:"required" alias:"areaId"`                               //区id
 	GradeId     int64  `json:"gradeId" form:"gradeId" binding:"required" alias:"gradeId"`                            //年级id
-	ClassNumber uint32 `json:"classNumber" form:"classNumber" binding:"required,max=1000,min=0" alias:"classNumber"` //班级号码
+	ClassNumber uint32 `json:"classNumber" form:"classNumber" binding:"required,max=1000,min=1" alias:"classNumber"` //班级号码
 }
 
 type GDDbSelectSchoolForm struct {
@@ -76,5 +76,5 @@ type GDDbSelectSchoolForm struct {
 type GDDbCreateSchoolForm struct {
 	SchoolName string `json:"schoolName" form:"schoolName" binding:"required" alias:"schoolName"`
 	CityId     int64  `json:"cityId" form:"cityId" binding:"required,number" alias:"cityId"`
-	GradeType  int    `json:"gradeType" form:"gradeType" binding:"required,number" alias:"gradeType"`
+	GradeType  int    `json:"gradeType" form:"gradeType" binding:"gte=0" alias:"gradeType"`
 }

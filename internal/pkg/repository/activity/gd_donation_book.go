@@ -64,7 +64,7 @@ func (repo GDDonationBookRepository) GetUserBy(by FindRecordBy) activity.GDDonat
 
 // GetInvitedBy 获取用户活动及个人信息
 func (repo GDDonationBookRepository) GetInvitedBy(by FindRecordBy) []activity.GDDonationBookRecord {
-	var record []activity.GDDonationBookRecord
+	record := make([]activity.GDDonationBookRecord, 0)
 	db := app.DB.Model(activity.GDDonationBookRecord{})
 	if by.UserId > 0 {
 		db.Where("gd_donation_book.invite_id = ?", by.UserId)
@@ -114,7 +114,7 @@ func (repo GDDbSchoolRankRepository) FindBy(by FindSchoolBy) activity.GDDbSchool
 }
 
 func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchoolRank {
-	var record []activity.GDDbSchoolRank
+	record := make([]activity.GDDbSchoolRank, 0)
 	db := app.DB.Model(activity.GDDbSchoolRank{})
 	if len(by.SchoolIds) > 0 {
 		db.Where("school_id in ?", by.SchoolIds)
@@ -131,7 +131,7 @@ func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbS
 }
 
 func (repo GDDbSchoolRankRepository) GetRank() []activity.GDDbSchoolRank {
-	var record []activity.GDDbSchoolRank
+	record := make([]activity.GDDbSchoolRank, 0)
 	db := app.DB.Model(activity.GDDbSchoolRank{}).Order("donate_number desc").Limit(20)
 	if err := db.Scan(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -187,7 +187,7 @@ func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 }
 
 func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchool {
-	var record []activity.GDDbSchool
+	record := make([]activity.GDDbSchool, 0)
 	db := app.DB.Model(activity.GDDbSchool{})
 	if len(by.SchoolIds) < 1 {
 		db.Where("id in ?", by.SchoolIds)
@@ -248,7 +248,7 @@ type GDDbCityRepository struct {
 }
 
 func (repo GDDbCityRepository) FindAll() []activity.GDDbCity {
-	var record []activity.GDDbCity
+	record := make([]activity.GDDbCity, 0)
 	if err := app.DB.Model(activity.GDDbCity{}).Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
@@ -272,7 +272,7 @@ type GDDbGradeRepository struct {
 }
 
 func (repo GDDbGradeRepository) FindAll() []activity.GDDbGrade {
-	var record []activity.GDDbGrade
+	record := make([]activity.GDDbGrade, 0)
 	if err := app.DB.Model(activity.GDDbGrade{}).Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
