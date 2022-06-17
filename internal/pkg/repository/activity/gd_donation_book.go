@@ -96,13 +96,33 @@ func (repo GDDbSchoolRankRepository) FindById(id int64) activity.GDDbSchoolRank 
 	}
 	return record
 }
-func (repo GDDbSchoolRankRepository) FindBy(by FindRecordBy) activity.GDDbSchoolRank {
+func (repo GDDbSchoolRankRepository) FindBy(by FindSchoolBy) activity.GDDbSchoolRank {
 	record := activity.GDDbSchoolRank{}
 	db := app.DB.Model(activity.GDDbSchoolRank{})
-	if by.UserId > 0 {
-		db.Where("school_id = ?", by.UserId)
+	if len(by.SchoolIds) > 0 {
+		db.Where("school_id in ?", by.SchoolIds)
+	}
+	if by.SchoolName != "" {
+		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
 	}
 	if err := db.First(&record).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return record
+}
+
+func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchoolRank {
+	var record []activity.GDDbSchoolRank
+	db := app.DB.Model(activity.GDDbSchoolRank{})
+	if len(by.SchoolIds) > 0 {
+		db.Where("school_id in ?", by.SchoolIds)
+	}
+	if by.SchoolName != "" {
+		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
+	}
+	if err := db.Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
@@ -146,8 +166,11 @@ func (repo GDDbSchoolRepository) FindById(id int64) activity.GDDbSchool {
 func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 	record := activity.GDDbSchool{}
 	db := app.DB.Model(activity.GDDbSchool{})
+	if len(by.SchoolIds) < 1 {
+		db.Where("id in ?", by.SchoolIds)
+	}
 	if by.SchoolName != "" {
-		db.Where("school_name = ?", by.SchoolName)
+		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
 	}
 	if by.GradeType > 0 {
 		db.Where("type = ?", by.GradeType).Or("type = ?", 0)
@@ -166,6 +189,9 @@ func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchool {
 	var record []activity.GDDbSchool
 	db := app.DB.Model(activity.GDDbSchool{})
+	if len(by.SchoolIds) < 1 {
+		db.Where("id in ?", by.SchoolIds)
+	}
 	if by.SchoolName != "" {
 		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
 	}

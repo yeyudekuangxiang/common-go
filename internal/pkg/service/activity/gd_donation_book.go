@@ -3,6 +3,7 @@ package activity
 import (
 	"errors"
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	entity2 "mio/internal/pkg/model/entity"
 	entity "mio/internal/pkg/model/entity/activity"
@@ -252,28 +253,47 @@ func (srv GDdbService) UpdateAnswerStatus(userId int64, status int) error {
 }
 
 // IncrRank  学校捐赠书+1
-func (srv GDdbService) IncrRank(schoolId int64) error {
-	rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindBy(repoactivity.FindRecordBy{UserId: schoolId})
+func (srv GDdbService) IncrRank(userId int64) error {
+	donationBookRes := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	var err error
-	if rankInfo.ID == 0 {
-		schoolInfo := repoactivity.DefaultGDDbSchoolRepository.FindById(schoolId)
-		//新增
-		req := &entity.GDDbSchoolRank{
-			SchoolId:     schoolInfo.ID,
-			SchoolName:   schoolInfo.SchoolName,
-			DonateNumber: 1,
-			CreatedAt:    model.Time{},
-			UpdatedAt:    model.Time{},
+	if donationBookRes.ID != 0 && donationBookRes.InviteType == 1 && donationBookRes.IsSuccess == 1 {
+		//获取学校id
+		var userSchoolList []entity.GDDbUserSchool
+		schoolIds := make([]int64, 0)
+		err = app.DB.Where("user_id = ?", donationBookRes.UserId).Or("user_id = ?", donationBookRes.InviteId).Find(userSchoolList).Error
+		if err != nil {
+			return err
 		}
-		err = repoactivity.DefaultGDDbSchoolRankRepository.Create(req)
-	} else {
-		//更新
-		rankInfo.DonateNumber++
-		err = repoactivity.DefaultGDDbSchoolRankRepository.Save(&rankInfo)
+		for _, userSchool := range userSchoolList {
+			schoolIds = append(schoolIds, userSchool.SchoolId)
+		}
+		//获取学校信息
+		schoolList := repoactivity.DefaultGDDbSchoolRepository.FindAllBy(repoactivity.FindSchoolBy{SchoolIds: schoolIds})
+		rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindAllBy(repoactivity.FindSchoolBy{SchoolIds: schoolIds})
+		if len(rankInfo) > 1 {
+			updateReq := make([]entity.GDDbSchoolRank, 0)
+			for _, rank := range rankInfo {
+				updateReq = append(updateReq, entity.GDDbSchoolRank{DonateNumber: rank.DonateNumber + 1})
+			}
+			err = app.DB.Model(entity.GDDbSchoolRank{}).Where("school_id in ?", schoolIds).Updates(&rankInfo).Error
+		} else {
+			insertReq := make([]entity.GDDbSchoolRank, 0)
+			for _, school := range schoolList {
+				insertReq = append(insertReq, entity.GDDbSchoolRank{
+					SchoolId:     school.ID,
+					SchoolName:   school.SchoolName,
+					DonateNumber: 1,
+					CreatedAt:    model.Time{},
+					UpdatedAt:    model.Time{},
+				})
+			}
+			err = app.DB.Create(&insertReq).Error
+		}
+		if err != nil {
+			return err
+		}
 	}
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 

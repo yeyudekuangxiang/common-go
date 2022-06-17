@@ -46,7 +46,8 @@ type GDDbUserSchool struct {
 }
 
 type FindSchoolBy struct {
-	SchoolName string `json:"schoolName"`
-	GradeType  int    `json:"gradeType"`
-	CityId     int64  `json:"cityId"`
+	SchoolIds  []int64 `json:"schoolIds"`
+	SchoolName string  `json:"schoolName"`
+	GradeType  int     `json:"gradeType"`
+	CityId     int64   `json:"cityId"`
 }
