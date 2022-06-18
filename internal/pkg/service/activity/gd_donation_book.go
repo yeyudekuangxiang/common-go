@@ -191,7 +191,6 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 		// 答题晚了
 		if inviteInfo.IsSuccess == 1 && userInfo.IsSuccess == 0 {
 			//更新用户状态
-			//userInfo.InviteId = 0
 			userInfo.InviteType = 0
 			_ = srv.repo.Save(&userInfo)
 			return errors.New("慢了一步，好友已和他人完成共同捐赠")

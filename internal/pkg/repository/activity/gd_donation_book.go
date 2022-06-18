@@ -169,7 +169,7 @@ func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 	if len(by.SchoolIds) > 0 {
 		db.Where("id in ?", by.SchoolIds)
 	} else if by.SchoolId != 0 {
-		db.Where("id = ?", by.SchoolIds)
+		db.Where("id = ?", by.SchoolId)
 	}
 	if by.SchoolName != "" {
 		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
