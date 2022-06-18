@@ -1,6 +1,7 @@
 package activity
 
 import (
+	"errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/activity"
@@ -58,3 +59,5 @@ type GDDbHomePageResponse struct {
 //	CreatedAt    model.Time `json:"createdAt"`
 //	UpdatedAt    model.Time `json:"updatedAt"`
 //}
+
+var NotInvite error = errors.New("not invite")

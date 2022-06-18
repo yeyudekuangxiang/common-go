@@ -20,9 +20,9 @@ type AnswerController struct {
 func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 	//当前登陆用户信息
 	user := apiutil.GetAuthUser(ctx)
-	//if user.ID != 0 && time.Now().Add(-24*time.Hour).After(user.Time.Time) {
-	//	return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
-	//}
+	if user.ID != 0 && time.Now().Add(-24*time.Hour).After(user.Time.Time) {
+		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+	}
 
 	form := &GDDbActivityHomePageForm{}
 	if err := apiutil.BindForm(ctx, form); err != nil {
@@ -106,11 +106,6 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	err = activity.DefaultGDdbService.CheckActivityStatus(user.ID, form.SchoolId)
 	if err != nil {
 		return nil, err
-	}
-	// 受邀者 答题完成后赠书+1
-	err = activity.DefaultGDdbService.IncrRank(user.ID)
-	if err != nil {
-		return nil, errors.New("学校排名更新失败")
 	}
 	return nil, nil
 }
