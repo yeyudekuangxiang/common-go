@@ -1,5 +1,7 @@
 package activity
 
+import "mio/internal/pkg/model/entity/activity"
+
 type FindRecordBy struct {
 	UserId int64
 }
@@ -20,4 +22,33 @@ type FindGMQuesLogBy struct {
 type FindGMInvitationRecordBy struct {
 	UserId        int64
 	InviteeUserId int64
+}
+
+type GDDbHomePageUserInfo struct {
+	UserInfo    GDDbUserInfo
+	InviteInfo  GDDbUserInfo
+	InvitedInfo []GDDbUserInfo
+}
+
+type GDDbUserInfo struct {
+	activity.GDDonationBookRecord
+	AvatarUrl string `json:"avatarUrl"`
+	Nickname  string `json:"nickname"`
+}
+
+type GDDbUserSchool struct {
+	GDDbUserInfo
+	SchoolName  string `json:"schoolName"`
+	UserName    string `json:"userName"`
+	CityName    string `json:"cityName"`
+	GradeName   string `json:"gradeName"`
+	ClassNumber uint32 `json:"classNumber"`
+}
+
+type FindSchoolBy struct {
+	SchoolId   int64   `json:"schoolId"`
+	SchoolIds  []int64 `json:"schoolIds"`
+	SchoolName string  `json:"schoolName"`
+	GradeType  int     `json:"gradeType"`
+	CityId     int64   `json:"cityId"`
 }
