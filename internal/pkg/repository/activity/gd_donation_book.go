@@ -103,7 +103,7 @@ func (repo GDDbSchoolRankRepository) FindBy(by FindSchoolBy) activity.GDDbSchool
 		db.Where("school_id in ?", by.SchoolIds)
 	}
 	if by.SchoolName != "" {
-		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
+		db.Where("school_name like ?", strings.Join([]string{"%", by.SchoolName, "%"}, ""))
 	}
 	if err := db.First(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -120,7 +120,7 @@ func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbS
 		db.Where("school_id in ?", by.SchoolIds)
 	}
 	if by.SchoolName != "" {
-		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
+		db.Where("school_name like ?", strings.Join([]string{"%", by.SchoolName, "%"}, ""))
 	}
 	if err := db.Order("donate_number desc").Find(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -172,7 +172,7 @@ func (repo GDDbSchoolRepository) FindBy(by FindSchoolBy) activity.GDDbSchool {
 		db.Where("id = ?", by.SchoolId)
 	}
 	if by.SchoolName != "" {
-		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
+		db.Where("school_name like ?", strings.Join([]string{"%", by.SchoolName, "%"}, ""))
 	}
 	if by.GradeType > 0 {
 		db.Where("type = ? or type = ?", by.GradeType, 0)
@@ -198,7 +198,7 @@ func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchoo
 		db.Where("city_id = ?", by.CityId)
 	}
 	if by.SchoolName != "" {
-		db.Where("school_name like ?", strings.Join([]string{by.SchoolName, "%"}, ""))
+		db.Where("school_name like ?", strings.Join([]string{"%", by.SchoolName, "%"}, ""))
 	}
 	if by.GradeType > 0 {
 		db.Where("type = ? or type = ?", by.GradeType, 0)
