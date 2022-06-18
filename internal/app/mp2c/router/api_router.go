@@ -39,7 +39,8 @@ func apiRouter(router *gin.Engine) {
 
 		//h5活动页调用
 		authRouter.POST("/activity/boc/record", apiutil.Format(activityApi.DefaultBocController.FindOrCreateRecord))
-
+		//广东小学图书馆公益捐书活动
+		authRouter.POST("/activity/answer/homepage", apiutil.Format(activityApi.DefaultAnswerController.HomePage))
 	}
 
 	//必须登陆的路由
@@ -80,6 +81,17 @@ func apiRouter(router *gin.Engine) {
 			activityRouter.POST("/zero/storeurl", apiutil.Format(activityApi.DefaultZeroController.StoreUrl))
 			activityRouter.POST("/duiba/autologin", apiutil.Format(activityApi.DefaultZeroController.DuiBaAutoLogin))
 			activityRouter.POST("/duiba/storeurl", apiutil.Format(activityApi.DefaultZeroController.DuiBaStoreUrl))
+			//广东小学图书馆公益捐书活动
+			authRouter.POST("/activity/answer/start-question", apiutil.Format(activityApi.DefaultAnswerController.StartQuestion))
+			authRouter.POST("/activity/answer/end-question", apiutil.Format(activityApi.DefaultAnswerController.EndQuestion))
+			authRouter.POST("/activity/answer/create-school", apiutil.Format(activityApi.DefaultAnswerController.CreateSchool))
+			authRouter.GET("/activity/answer/get-city-list", apiutil.Format(activityApi.DefaultAnswerController.GetCityList))
+			authRouter.GET("/activity/answer/get-grade-list", apiutil.Format(activityApi.DefaultAnswerController.GetGradeList))
+			authRouter.GET("/activity/answer/get-school-list", apiutil.Format(activityApi.DefaultAnswerController.GetSchoolList))
+			authRouter.GET("/activity/answer/get-achievement", apiutil.Format(activityApi.DefaultAnswerController.GetAchievement))
+			authRouter.POST("/activity/answer/put-file", apiutil.Format(activityApi.DefaultAnswerController.PutFile))
+			authRouter.GET("/activity/answer/get-user-school", apiutil.Format(activityApi.DefaultAnswerController.GetUserSchool))
+			authRouter.POST("/activity/answer/close-late-tips", apiutil.Format(activityApi.DefaultAnswerController.CloseLateTips))
 		}
 
 		//酷喵圈相关路由
