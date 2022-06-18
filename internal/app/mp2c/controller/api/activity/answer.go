@@ -163,6 +163,15 @@ func (ctr AnswerController) GetAchievement(ctx *gin.Context) (gin.H, error) {
 }
 
 // GetIntegral 获取积分
-func (ctr AnswerController) GetIntegral(ctx *gin.Context) error {
-	return nil
+func (ctr AnswerController) GetIntegral(ctx *gin.Context) (gin.H, error) {
+	return nil, nil
+}
+
+// CloseLateTips 关闭提示
+func (ctr AnswerController) CloseLateTips(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
+	if err := activity.DefaultGDdbService.CloseLateTips(user.ID); err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

@@ -388,3 +388,15 @@ func (srv GDdbService) CreateSchool(schoolName string, cityId int64, gradeType i
 func (srv GDdbService) GetAchievement(userId int64) entity.GDDonationBookRecord {
 	return srv.repo.FindBy(repoactivity.FindRecordBy{UserId: userId})
 }
+
+func (srv GDdbService) CloseLateTips(userId int64) error {
+	record := srv.repo.FindBy(repoactivity.FindRecordBy{UserId: userId})
+	if record.ID == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	if record.InviteId == 0 {
+		return nil
+	}
+	record.InviteId = 0
+	return srv.repo.Save(&record)
+}
