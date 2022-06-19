@@ -116,14 +116,23 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 	user := userRepo.GetUserById(userRecord.UserId)
 	//受邀者用户活动记录
 	invitedRes := srv.repo.GetInvitedBy(repoactivity.FindRecordBy{UserId: userRecord.UserId})
-	invitedIds := make([]int64, 0)
-	for _, invited := range invitedRes {
-		invitedIds = append(invitedIds, invited.UserId)
-	}
-	invitedUsers := userRepo.GetUserListBy(repository.GetUserListBy{UserIds: invitedIds})
-	invitedUsersMap := make(map[int64]entity2.User)
-	for _, invited := range invitedUsers {
-		invitedUsersMap[invited.ID] = invited
+	if len(invitedRes) > 0 {
+		invitedIds := make([]int64, 0)
+		for _, invited := range invitedRes {
+			invitedIds = append(invitedIds, invited.UserId)
+		}
+		invitedUsers := userRepo.GetUserListBy(repository.GetUserListBy{UserIds: invitedIds})
+		invitedUsersMap := make(map[int64]entity2.User)
+		for _, invited := range invitedUsers {
+			invitedUsersMap[invited.ID] = invited
+		}
+		for _, invited := range invitedRes {
+			invitedResult = append(invitedResult, repoactivity.GDDbUserInfo{
+				GDDonationBookRecord: invited,
+				AvatarUrl:            invitedUsersMap[invited.UserId].AvatarUrl,
+				Nickname:             invitedUsersMap[invited.UserId].Nickname,
+			})
+		}
 	}
 	//组装数据
 	userResult = repoactivity.GDDbUserInfo{
@@ -131,13 +140,7 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 		AvatarUrl:            user.AvatarUrl,
 		Nickname:             user.Nickname,
 	}
-	for _, invited := range invitedRes {
-		invitedResult = append(invitedResult, repoactivity.GDDbUserInfo{
-			GDDonationBookRecord: invited,
-			AvatarUrl:            invitedUsersMap[invited.UserId].AvatarUrl,
-			Nickname:             invitedUsersMap[invited.UserId].Nickname,
-		})
-	}
+
 	//返回数据
 	return repoactivity.GDDbHomePageUserInfo{
 		UserInfo:    userResult,

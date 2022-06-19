@@ -41,7 +41,7 @@ func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 // GetUserSchool 获取用户及学校信息
 func (ctr AnswerController) GetUserSchool(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	school, err := activity.DefaultGDdbService.GetUserSchool(user.ID)
@@ -55,7 +55,7 @@ func (ctr AnswerController) GetUserSchool(ctx *gin.Context) (gin.H, error) {
 
 func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	t, _ := strconv.Atoi(ctx.PostForm("type"))
@@ -88,7 +88,7 @@ func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) StartQuestion(ctx *gin.Context) (gin.H, error) {
 	// 更新答题状态
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	err := activity.DefaultGDdbService.UpdateAnswerStatus(user.ID, 1)
@@ -101,7 +101,7 @@ func (ctr AnswerController) StartQuestion(ctx *gin.Context) (gin.H, error) {
 //EndQuestion 答题完成
 func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	form := &GDDbActivitySchoolForm{}
@@ -125,7 +125,7 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 // GetCityList 获取城市列表
 func (ctr AnswerController) GetCityList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	cityList := activity.DefaultGDdbService.GetCityList()
@@ -137,7 +137,7 @@ func (ctr AnswerController) GetCityList(ctx *gin.Context) (gin.H, error) {
 // GetGradeList 获取年级列表
 func (ctr AnswerController) GetGradeList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	gradeList := activity.DefaultGDdbService.GetGradeList()
@@ -148,7 +148,7 @@ func (ctr AnswerController) GetGradeList(ctx *gin.Context) (gin.H, error) {
 
 func (ctr AnswerController) CreateSchool(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	form := &GDDbCreateSchoolForm{}
@@ -167,7 +167,7 @@ func (ctr AnswerController) CreateSchool(ctx *gin.Context) (gin.H, error) {
 // GetSchoolList 获取学校列表
 func (ctr AnswerController) GetSchoolList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	form := &GDDbSelectSchoolForm{}
@@ -183,7 +183,7 @@ func (ctr AnswerController) GetSchoolList(ctx *gin.Context) (gin.H, error) {
 // GetAchievement 获取我的成就
 func (ctr AnswerController) GetAchievement(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	res := activity.DefaultGDdbService.GetAchievement(user.ID)
@@ -201,7 +201,7 @@ func (ctr AnswerController) GetIntegral(ctx *gin.Context) (gin.H, error) {
 // CloseLateTips 关闭提示
 func (ctr AnswerController) CloseLateTips(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
 	if err := activity.DefaultGDdbService.CloseLateTips(user.ID); err != nil {
