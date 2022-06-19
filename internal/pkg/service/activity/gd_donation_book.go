@@ -26,7 +26,7 @@ func (srv GDdbService) CreateUser(userId, inviteId int64) (entity.GDDonationBook
 		UserId: userId,
 	})
 	if record.ID != 0 {
-		return entity.GDDonationBookRecord{}, nil
+		return record, nil
 	}
 	if userId == inviteId {
 		inviteId = 0
