@@ -20,13 +20,16 @@ type GDdbService struct {
 }
 
 //CreateUser 创建活动用户
-func (srv GDdbService) CreateUser(userId, inviteId int64) (*entity.GDDonationBookRecord, error) {
+func (srv GDdbService) CreateUser(userId, inviteId int64) (entity.GDDonationBookRecord, error) {
 	//检查是否已经存在
 	record := srv.repo.FindBy(repoactivity.FindRecordBy{
 		UserId: userId,
 	})
 	if record.ID != 0 {
-		return &record, nil
+		return record, nil
+	}
+	if userId == inviteId {
+		inviteId = 0
 	}
 	record = entity.GDDonationBookRecord{
 		UserId:       userId,
@@ -41,13 +44,14 @@ func (srv GDdbService) CreateUser(userId, inviteId int64) (*entity.GDDonationBoo
 	}
 	err := srv.repo.Create(&record)
 	if err != nil {
-		return nil, err
+		return entity.GDDonationBookRecord{}, err
 	}
-	return &record, nil
+	return record, nil
 }
 
 // HomePage 首页返回数据
-func (srv GDdbService) HomePage(userId, inviteId int64) (*GDDbHomePageResponse, error) {
+func (srv GDdbService) HomePage(userId, inviteId int64) (GDDbHomePageResponse, error) {
+
 	//返回用户信息
 	userAnswerRes := repoactivity.GDDbHomePageUserInfo{
 		UserInfo:    repoactivity.GDDbUserInfo{},
@@ -55,22 +59,25 @@ func (srv GDdbService) HomePage(userId, inviteId int64) (*GDDbHomePageResponse, 
 		InvitedInfo: make([]repoactivity.GDDbUserInfo, 0),
 	}
 	schoolRes := make([]entity.GDDbSchoolRank, 0)
-
+	record := GDDbHomePageResponse{
+		User:   userAnswerRes,
+		School: schoolRes,
+	}
 	if userId != 0 {
 		userInfo, err := srv.CreateUser(userId, inviteId)
 		if err != nil {
-			return nil, err
+			return record, err
 		}
-		userAnswerRes, err = srv.GetUser(userInfo)
+		userAnswerRes, err = srv.GetUser(&userInfo)
 		if err != nil {
-			return nil, err
+			return record, err
 		}
 	}
 
 	//返回学校捐赠排行
 	schoolRes = repoactivity.DefaultGDDbSchoolRankRepository.GetRank()
 	//组装数据
-	record := &GDDbHomePageResponse{
+	record = GDDbHomePageResponse{
 		User:   userAnswerRes,
 		School: schoolRes,
 	}
