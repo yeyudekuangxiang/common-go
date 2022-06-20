@@ -6,7 +6,6 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
 	"io/ioutil"
-	"mio/internal/pkg/util"
 	"mio/pkg/wxapp/httputil"
 )
 
@@ -63,19 +62,22 @@ func (c Client) GetUserRiskRank(param UserRiskRankParam, recursiveCount ...int) 
 	}
 	if resp.ErrCode == 40001 || resp.ErrCode == 41001 || resp.ErrCode == 42001 {
 
-		recursiveCount := util.Ternary(len(recursiveCount) > 0, recursiveCount[0], 0).Int()
+		count := 0
+		if len(recursiveCount) > 0 {
+			count = recursiveCount[0]
+		}
 
-		if recursiveCount >= 3 {
+		if count >= 3 {
 			return &resp, nil
 		}
-		recursiveCount++
+		count++
 
 		token, err := c.AccessToken()
 		if err != nil {
 			return nil, err
 		}
 		accessToken = token
-		return c.GetUserRiskRank(param, recursiveCount)
+		return c.GetUserRiskRank(param, count)
 	}
 	return &resp, nil
 }
