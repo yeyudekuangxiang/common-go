@@ -426,6 +426,9 @@ func (u UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
 // CheckUserRisk 检测用户风险等级
 func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRiskRankResponse, error) {
 	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(param)
+	if err != nil {
+		return nil, err
+	}
 	//创建记录
 	err2 := DefaultUserRiskLogService.Create(&entity.UserRiskLog{
 		OpenId:   param.OpenId,
