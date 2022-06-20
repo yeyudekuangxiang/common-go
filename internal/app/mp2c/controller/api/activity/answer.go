@@ -20,7 +20,8 @@ type AnswerController struct {
 func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 	//当前登陆用户信息
 	user := apiutil.GetAuthUser(ctx)
-	if user.ID != 0 && time.Now().Add(-24*time.Hour).After(user.Time.Time) {
+	stringToTime, _ := time.Parse("2006-01-02 15:04:05", "2022-06-19 00:00:00")
+	if user.ID != 0 && stringToTime.After(user.Time.Time) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 
