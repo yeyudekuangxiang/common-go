@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
@@ -111,7 +112,10 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	}
 
 	// 保存学校信息，更新答题状态
+	app.Logger.Info("答题完成，保存学校信息start")
 	err := activity.DefaultGDdbService.SaveSchoolInfo(form.UserName, form.SchoolId, form.GradeId, user.ID, form.ClassNumber)
+	app.Logger.Info("答题完成，保存学校信息end")
+
 	if err != nil {
 		return nil, errors.New("学校信息保存失败")
 	}

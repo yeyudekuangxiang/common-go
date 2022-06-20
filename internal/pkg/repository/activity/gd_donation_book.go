@@ -101,6 +101,8 @@ func (repo GDDbSchoolRankRepository) FindBy(by FindSchoolBy) activity.GDDbSchool
 	db := app.DB.Model(activity.GDDbSchoolRank{})
 	if len(by.SchoolIds) > 0 {
 		db.Where("school_id in ?", by.SchoolIds)
+	} else if by.SchoolId != 0 {
+		db.Where("school_id = ?", by.SchoolId)
 	}
 	if by.SchoolName != "" {
 		db.Where("school_name like ?", strings.Join([]string{"%", by.SchoolName, "%"}, ""))
@@ -118,6 +120,8 @@ func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbS
 	db := app.DB.Model(activity.GDDbSchoolRank{})
 	if len(by.SchoolIds) > 0 {
 		db.Where("school_id in ?", by.SchoolIds)
+	} else if by.SchoolId != 0 {
+		db.Where("school_id = ?", by.SchoolId)
 	}
 	if by.SchoolName != "" {
 		db.Where("school_name like ?", strings.Join([]string{"%", by.SchoolName, "%"}, ""))
@@ -193,6 +197,8 @@ func (repo GDDbSchoolRepository) FindAllBy(by FindSchoolBy) []activity.GDDbSchoo
 	db := app.DB.Model(activity.GDDbSchool{})
 	if len(by.SchoolIds) > 0 {
 		db.Where("id in ?", by.SchoolIds)
+	} else if by.SchoolId != 0 {
+		db.Where("id = ?", by.SchoolId)
 	}
 	if by.CityId != 0 {
 		db.Where("city_id = ?", by.CityId)
