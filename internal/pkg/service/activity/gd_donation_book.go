@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/repository"
 	repoactivity "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/service"
+	"runtime"
 )
 
 var DefaultGDdbService = GDdbService{repo: repoactivity.DefaultGDDonationBookRepository}
@@ -233,9 +234,11 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 		record.GradeId = gradeId
 		record.ClassNumber = classNumber
 		err = repoactivity.DefaultGDDbUserSchoolRepository.Save(&record)
+		_, file, line, _ := runtime.Caller(1)
+		app.Logger.Infof("学校信息更新:%v;file:%s_line:%d", record, file, line)
 	} else {
 		//创建
-		req := &entity.GDDbUserSchool{
+		req := entity.GDDbUserSchool{
 			UserId:      userId,
 			UserName:    userName,
 			SchoolId:    schoolId,
@@ -244,7 +247,9 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 			CreatedAt:   model.Time{},
 			UpdatedAt:   model.Time{},
 		}
-		err = repoactivity.DefaultGDDbUserSchoolRepository.Create(req)
+		err = repoactivity.DefaultGDDbUserSchoolRepository.Create(&req)
+		_, file, line, _ := runtime.Caller(1)
+		app.Logger.Infof("学校信息绑定:%v;file:%s_line:%d", req, file, line)
 	}
 	if err != nil {
 		return err
@@ -320,9 +325,12 @@ func (srv GDdbService) IncrRank(userId int64) error {
 		//获取学校信息
 		schoolInfo := repoactivity.DefaultGDDbSchoolRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: USchool.SchoolId})
 		rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: USchool.SchoolId})
+
 		if rankInfo.ID != 0 {
 			rankInfo.DonateNumber++
 			err = repoactivity.DefaultGDDbSchoolRankRepository.Save(&rankInfo)
+			_, file, line, _ := runtime.Caller(1)
+			app.Logger.Infof("更新排行榜信息:rankInfo:%v;schoolInfo:%v,file:%s_line:%d", rankInfo, schoolInfo, file, line)
 		} else {
 			insertReq := entity.GDDbSchoolRank{
 				SchoolId:     schoolInfo.ID,
@@ -332,6 +340,8 @@ func (srv GDdbService) IncrRank(userId int64) error {
 				UpdatedAt:    model.Time{},
 			}
 			err = repoactivity.DefaultGDDbSchoolRankRepository.Create(&insertReq)
+			_, file, line, _ := runtime.Caller(1)
+			app.Logger.Infof("新建排行榜信息:rankInfo:%v;schoolInfo:%v,file:%s_line:%d", insertReq, schoolInfo, file, line)
 		}
 		if err != nil {
 			return err
