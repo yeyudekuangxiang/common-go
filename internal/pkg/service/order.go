@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
 	"mio/internal/pkg/service/event"
+	"mio/internal/pkg/service/product"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
 	"strconv"
@@ -34,7 +35,7 @@ func (srv OrderService) CalculateAndCheck(items []repository2.CheckStockItem) (*
 		itemMap[item.ItemId] = item
 	}
 
-	productItems := DefaultProductItemService.GetListBy(repository2.GetProductItemListBy{
+	productItems := product.DefaultProductItemService.GetListBy(product.GetProductItemListParam{
 		ItemIds: itemIds,
 	})
 	if len(productItems) != len(itemIds) {
@@ -135,7 +136,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 			Count:  item.Count,
 		})
 	}
-	err = DefaultProductItemService.CheckAndLockStock(checkStockItems)
+	err = product.DefaultProductItemService.CheckAndLockStock(checkStockItems)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +144,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 	defer func() {
 		if orderSuccess == false {
 			//释放库存
-			err := DefaultProductItemService.UnLockStock(checkStockItems)
+			err := product.DefaultProductItemService.UnLockStock(checkStockItems)
 			if err != nil {
 				app.Logger.Errorf("释放库存失败 %+v %+v", checkStockItems, err)
 			}

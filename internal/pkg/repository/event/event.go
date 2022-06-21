@@ -28,6 +28,9 @@ func (repo EventRepository) FindEvent(by FindEventBy) (event.Event, error) {
 	if by.EventId != "" {
 		db.Where("event_id = ?", by.EventId)
 	}
+	if by.Active.Valid {
+		db.Where("active = ?", by.Active.Bool)
+	}
 
 	err := db.Take(&ev).Error
 
@@ -71,6 +74,9 @@ func (repo EventRepository) GetEventList(by GetEventListBy) (list []event.Event,
 
 	if by.EventCategoryId != "" {
 		db.Where("event_category_id = ?", by.EventCategoryId)
+	}
+	if by.Active.Valid {
+		db.Where("active = ?", by.Active.Bool)
 	}
 
 	err = db.Find(&list).Error

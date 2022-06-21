@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/coupon"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/product"
 
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -188,7 +189,7 @@ func (r CouponService) RedeemCouponToItems(openId string, orderType entity.Order
 	if couponType.ProductItemId == "" {
 		return nil, errors.New("invalid product item")
 	}
-	productItem, err := DefaultProductItemService.FindProductByItemId(string(couponType.ProductItemId))
+	productItem, err := product.DefaultProductItemService.FindProductByItemId(string(couponType.ProductItemId))
 	if err != nil {
 		return nil, err
 	}

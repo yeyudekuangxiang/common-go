@@ -14,5 +14,6 @@ type EventCategoryService struct {
 func (srv EventCategoryService) GetEventCategoryList(param GetEventCategoryListParam) ([]eevent.EventCategory, error) {
 	return srv.repo.GetEventCategoryList(revent.GetEventCategoryListBy{
 		OrderBy: param.OrderBy,
+		Active:  param.Active,
 	})
 }

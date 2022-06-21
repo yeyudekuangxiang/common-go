@@ -21,5 +21,9 @@ func (repo EventCategoryRepository) GetEventCategoryList(by GetEventCategoryList
 			db.Order("sort desc")
 		}
 	}
+	if by.Active.Valid {
+		db.Where("active = ?", by.Active.Bool)
+	}
+
 	return list, db.Find(&list).Error
 }

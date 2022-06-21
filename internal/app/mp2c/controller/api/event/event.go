@@ -1,6 +1,8 @@
 package event
 
 import (
+	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/model/entity"
 	eevent "mio/internal/pkg/model/entity/event"
@@ -29,7 +31,10 @@ func (EventController) GetEventFullDetail(ctx *gin.Context) (gin.H, error) {
 func (EventController) GetEventCategoryList(ctx *gin.Context) (gin.H, error) {
 	categoryList, err := event.DefaultEventCategoryService.GetEventCategoryList(event.GetEventCategoryListParam{
 		OrderBy: entity.OrderByList{eevent.OrderByEventCategorySortDesc},
+		Active:  sql.NullBool{Bool: true, Valid: true},
 	})
+	fmt.Printf("%+v\n", categoryList)
+
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +45,10 @@ func (EventController) GetEventCategoryList(ctx *gin.Context) (gin.H, error) {
 			EventCategoryId: category.EventCategoryId,
 			Title:           category.Title,
 			ImageUrl:        category.ImageUrl,
+			Icon:            category.Icon,
 		})
 	}
+
 	return gin.H{
 		"categoryList": infoList,
 	}, nil
@@ -52,7 +59,7 @@ func (EventController) GetEventList(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	list, err := event.DefaultEventService.GetEventList(event.GetEventListParam{
+	list, err := event.DefaultEventService.GetEventShortInfoList(event.GetEventListParam{
 		EventCategoryId: form.EventCategoryId,
 		OrderBy:         entity.OrderByList{eevent.OrderByEventSortDesc},
 	})
@@ -60,18 +67,7 @@ func (EventController) GetEventList(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	infoList := make([]EventInfo, 0)
-	for _, item := range list {
-		infoList = append(infoList, EventInfo{
-			EventId:           item.EventId,
-			EventTemplateType: item.EventTemplateType,
-			Title:             item.Title,
-			Subtitle:          item.Subtitle,
-			CoverImageUrl:     item.CoverImageUrl,
-		})
-	}
-
 	return gin.H{
-		"eventList": infoList,
+		"eventList": list,
 	}, nil
 }

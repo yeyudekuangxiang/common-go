@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/product"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
@@ -183,7 +184,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 
 	orderItemList := form.OrderItemList.OrderItemList()
 	for _, orderItem := range orderItemList {
-		_, err := DefaultProductItemService.CreateOrUpdateProductItem(CreateOrUpdateProductItemParam{
+		_, err := product.DefaultProductItemService.CreateOrUpdateProductItem(product.CreateOrUpdateProductItemParam{
 			ItemId:   "duiba-" + orderItem.MerchantCode,
 			Virtual:  false,
 			Title:    orderItem.Title,

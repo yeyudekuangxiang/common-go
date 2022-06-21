@@ -8,6 +8,7 @@ type EventCategoryInfo struct {
 	EventCategoryId string `json:"eventCategoryId"`
 	Title           string `json:"title"`
 	ImageUrl        string `json:"imageUrl"`
+	Icon            string `json:"icon"`
 }
 type EventInfo struct {
 	EventId           string                   `json:"eventId" gorm:"type:varchar(255);not null;comment:公益活动标识"`

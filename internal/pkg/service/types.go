@@ -267,14 +267,7 @@ type FilterPointRecordOpenIds struct {
 	Phone    string
 	Nickname string
 }
-type CreateOrUpdateProductItemParam struct {
-	ItemId   string
-	Virtual  bool
-	Title    string
-	Cost     int
-	ImageUrl string
-	Sort     int
-}
+
 type QrCodeInfo struct {
 	QrCodeId    string            `json:"qrCodeId"`
 	OpenId      string            `json:"openid"`

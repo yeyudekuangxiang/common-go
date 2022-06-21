@@ -24,7 +24,7 @@ type Event struct {
 	ParticipationSubtitle string               `json:"participationSubtitle" gorm:"type:varchar(255);default:'';comment:用于展示支持次数或者co2"`
 	Sort                  int                  `json:"sort" gorm:"type:int4;default:0;comment:排序 从小到大排序"`
 	Tag                   model.ArrayString    `json:"tag" gorm:"type:varchar(255);default:'';comment:标签,多个标签用英文逗号隔开"`
-	TemplateSetting       EventTemplateSetting `json:"templateSetting" gorm:"type:varchar(2000);not null;default:'';comment:'公益活动模版配置'"`
+	TemplateSetting       EventTemplateSetting `json:"templateSetting" gorm:"type:varchar(2000);not null;default:'';comment:公益活动模版配置"`
 }
 
 func (Event) TableName() string {
