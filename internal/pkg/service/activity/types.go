@@ -43,8 +43,9 @@ type AnswerGMQuestionParam struct {
 }
 
 type GDDbHomePageResponse struct {
-	User   activity2.GDDbHomePageUserInfo
-	School []activity.GDDbSchoolRank
+	User      activity2.GDDbHomePageUserInfo
+	School    []activity.GDDbSchoolRank
+	IsNewUser bool
 }
 
 //
