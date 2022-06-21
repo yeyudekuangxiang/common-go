@@ -65,7 +65,9 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 	}, nil
 }
 func (srv QuizService) Submit(openId string) error {
-	util.DefaultLock.Lock(fmt.Sprintf("QUIZ_Ssubmit%s", openId), time.Second*5)
+	if !util.DefaultLock.Lock(fmt.Sprintf("QUIZ_Ssubmit%s", openId), time.Second*10) {
+		return errors.New("操作频繁,请稍后再试")
+	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId)

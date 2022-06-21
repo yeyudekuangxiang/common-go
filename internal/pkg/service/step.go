@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -143,7 +144,9 @@ func (srv StepService) formatWeeklyHistoryStepList(list []entity.StepHistory) []
 
 // RedeemPointFromPendingSteps 领取步行积分
 func (srv StepService) RedeemPointFromPendingSteps(userId int64) (int, error) {
-	util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%d", userId), time.Second*5)
+	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%d", userId), time.Second*5) {
+		return 0, errors.New("操作频繁,请稍后再试")
+	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemPointFromPendingSteps%d", userId))
 
 	user, err := DefaultUserService.GetUserById(userId)

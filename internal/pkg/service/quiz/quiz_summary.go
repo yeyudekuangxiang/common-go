@@ -5,6 +5,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/util/timeutils"
+	"time"
 )
 
 var DefaultQuizSummaryService = QuizSummaryService{}
@@ -20,6 +22,7 @@ func (srv QuizSummaryService) UpdateTodaySummary(param UpdateSummaryParam) error
 
 	summary.TotalAnsweredNum += param.TodayAnsweredNum
 	summary.TotalCorrectNum += param.TodayCorrectNum
+	summary.LastUpdateDate = model.Date{Time: timeutils.StartOfDay(time.Now())}
 	return app.DB.Save(&summary).Error
 }
 func (srv QuizSummaryService) FindOrCreateSummary(openId string) (*entity.QuizSummary, error) {
