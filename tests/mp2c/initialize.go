@@ -6,6 +6,7 @@ import (
 	"log"
 	"mio/internal/app/mp2c/server"
 	"mio/internal/pkg/core/initialize"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/util"
@@ -14,7 +15,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 )
 
 type Response struct {
@@ -73,7 +73,7 @@ func AddBusinessToken(req *http.Request) {
 func createBusinessUserToken() string {
 	token, err := util.CreateToken(auth.BusinessUser{
 		Uid:       "test",
-		CreatedAt: time.Now(),
+		CreatedAt: model.NewTime(),
 	})
 	if err != nil {
 		log.Fatal("create token err:", err)
@@ -82,7 +82,7 @@ func createBusinessUserToken() string {
 }
 func createUserToken() string {
 	token, err := util.CreateToken(auth.User{
-		Id: 1,
+		ID: 1,
 	})
 	if err != nil {
 		log.Fatal("create token err:", err)

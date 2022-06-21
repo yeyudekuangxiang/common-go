@@ -41,6 +41,7 @@ func (UserController) GetToken(ctx *gin.Context) (gin.H, error) {
 			"token": "",
 		}, nil
 	}
+	_ = business.DefaultUserService.UpdateBusinessUserAvatar(user.ID, originInfo.AvatarUrl)
 	fmt.Println("user is ", user)
 	//创建token
 	token, err := business.DefaultUserService.CreateBusinessUserToken(user)

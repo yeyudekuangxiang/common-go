@@ -76,3 +76,14 @@ func (u UserService) GetBusinessUserListByCid(cid int) []business.User {
 	users := u.repo.GetUserListBy(brepo.GetUserListBy{CId: cid})
 	return users
 }
+func (u UserService) UpdateBusinessUserAvatar(userId int64, avatar string) error {
+	user := u.repo.GetUserBy(brepo.GetUserBy{
+		ID: userId,
+	})
+	if user.ID == 0 {
+		return nil
+	}
+
+	user.Avatar = avatar
+	return u.repo.Save(&user)
+}
