@@ -12,6 +12,7 @@ import (
 	repoactivity "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/service"
 	"runtime"
+	"time"
 )
 
 var DefaultGDdbService = GDdbService{repo: repoactivity.DefaultGDDonationBookRepository}
@@ -52,7 +53,6 @@ func (srv GDdbService) CreateUser(userId, inviteId int64) (entity.GDDonationBook
 
 // HomePage 首页返回数据
 func (srv GDdbService) HomePage(userId, inviteId int64) (GDDbHomePageResponse, error) {
-
 	//返回用户信息
 	userAnswerRes := repoactivity.GDDbHomePageUserInfo{
 		UserInfo:    repoactivity.GDDbUserInfo{},
@@ -69,7 +69,7 @@ func (srv GDdbService) HomePage(userId, inviteId int64) (GDDbHomePageResponse, e
 		if err != nil {
 			return record, err
 		}
-		userAnswerRes, err = srv.GetUser(&userInfo)
+		userAnswerRes, err = srv.GetInviteUser(&userInfo)
 		if err != nil {
 			return record, err
 		}
@@ -85,16 +85,63 @@ func (srv GDdbService) HomePage(userId, inviteId int64) (GDDbHomePageResponse, e
 	return record, nil
 }
 
-// GetUser 用于返回首页数据
-func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoactivity.GDDbHomePageUserInfo, error) {
-	var userResult, inviteResult repoactivity.GDDbUserInfo
+func (srv GDdbService) IsNewUser(uTime time.Time) bool {
+	stringToTime, _ := time.Parse("2006-01-02 15:04:05", "2022-06-19 00:00:00")
+	if stringToTime.After(uTime) {
+		return false
+	}
+	return true
+}
+
+func (srv GDdbService) HomePageUser(userId, inviteId int64, isNewUser bool) (repoactivity.GDDbHomePageUserInfo, error) {
+	//初始化response
+	userAnswerRes := repoactivity.GDDbHomePageUserInfo{
+		UserInfo:    repoactivity.GDDbUserInfo{},
+		InviteInfo:  repoactivity.GDDbUserInfo{},
+		InvitedInfo: make([]repoactivity.GDDbUserInfo, 0),
+	}
+
+	//新用户处理
+	if isNewUser {
+		userInfo, err := srv.CreateUser(userId, inviteId)
+		if err != nil {
+			return userAnswerRes, err
+		}
+		//获取邀请者和被邀请者信息
+		userAnswerRes, err = srv.GetInviteUser(&userInfo)
+		if err != nil {
+			return userAnswerRes, err
+		}
+	}
+	//登陆用户活动记录
+	userInfo := srv.repo.FindBy(repoactivity.FindRecordBy{
+		UserId: userId,
+	})
+	user := repository.DefaultUserRepository.GetUserById(userId)
+	userAnswerRes.UserInfo = repoactivity.GDDbUserInfo{
+		GDDonationBookRecord: userInfo,
+		AvatarUrl:            user.AvatarUrl,
+		Nickname:             user.Nickname,
+	}
+
+	return userAnswerRes, nil
+}
+
+func (srv GDdbService) HomePageSchool() ([]entity.GDDbSchoolRank, error) {
+	//返回学校捐赠排行
+	schoolRes := repoactivity.DefaultGDDbSchoolRankRepository.GetRank()
+	return schoolRes, nil
+}
+
+// GetInviteUser 用于返回首页数据
+func (srv GDdbService) GetInviteUser(userRecord *entity.GDDonationBookRecord) (repoactivity.GDDbHomePageUserInfo, error) {
+	inviteResult := repoactivity.GDDbUserInfo{}
 	invitedResult := make([]repoactivity.GDDbUserInfo, 0)
-	userRepo := repository.NewUserRepository()
 	//用户是被邀请人
 	if userRecord.InviteType != 0 {
 		//获取邀请人信息
 		invite := srv.repo.GetUserBy(repoactivity.FindRecordBy{UserId: userRecord.InviteId})
-		inviteUser := userRepo.GetUserById(userRecord.InviteId)
+		inviteUser := repository.DefaultUserRepository.GetUserById(userRecord.InviteId)
 		inviteResult = repoactivity.GDDbUserInfo{
 			GDDonationBookRecord: invite,
 			AvatarUrl:            inviteUser.AvatarUrl,
@@ -113,8 +160,6 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 		}
 	}
 
-	//当前用户活动记录
-	user := userRepo.GetUserById(userRecord.UserId)
 	//受邀者用户活动记录
 	invitedRes := srv.repo.GetInvitedBy(repoactivity.FindRecordBy{UserId: userRecord.UserId})
 	if len(invitedRes) > 0 {
@@ -122,7 +167,7 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 		for _, invited := range invitedRes {
 			invitedIds = append(invitedIds, invited.UserId)
 		}
-		invitedUsers := userRepo.GetUserListBy(repository.GetUserListBy{UserIds: invitedIds})
+		invitedUsers := repository.DefaultUserRepository.GetUserListBy(repository.GetUserListBy{UserIds: invitedIds})
 		invitedUsersMap := make(map[int64]entity2.User)
 		for _, invited := range invitedUsers {
 			invitedUsersMap[invited.ID] = invited
@@ -135,16 +180,10 @@ func (srv GDdbService) GetUser(userRecord *entity.GDDonationBookRecord) (repoact
 			})
 		}
 	}
-	//组装数据
-	userResult = repoactivity.GDDbUserInfo{
-		GDDonationBookRecord: *userRecord,
-		AvatarUrl:            user.AvatarUrl,
-		Nickname:             user.Nickname,
-	}
 
 	//返回数据
 	return repoactivity.GDDbHomePageUserInfo{
-		UserInfo:    userResult,
+		//UserInfo:    userResult,
 		InviteInfo:  inviteResult,
 		InvitedInfo: invitedResult,
 	}, nil
