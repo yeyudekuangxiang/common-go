@@ -79,3 +79,16 @@ func (srv BadgeService) GenerateRuleCode() string {
 	code.WriteString("0001")
 	return code.String()
 }
+func (srv BadgeService) GetUserCertCount(openId string) (int64, error) {
+	return srv.repo.FindUserCertCount(openId)
+}
+func (srv BadgeService) GetUserCertCountById(userId int64) (int64, error) {
+	user, err := DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return 0, err
+	}
+	if user.ID == 0 {
+		return 0, nil
+	}
+	return srv.GetUserCertCount(user.OpenId)
+}

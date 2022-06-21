@@ -358,3 +358,19 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 func (u UserService) GetUserListBy(by repository2.GetUserListBy) ([]entity.User, error) {
 	return u.r.GetUserListBy(by), nil
 }
+
+// AccountInfo 用户账户信息
+func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
+	point, err := DefaultPointService.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	certCount, err := DefaultBadgeService.GetUserCertCountById(userId)
+	if err != nil {
+		return nil, err
+	}
+	return &UserAccountInfo{
+		Balance: point.Balance,
+		CertNum: int(certCount),
+	}, nil
+}

@@ -131,6 +131,7 @@ func (srv EventService) GetEventShortInfoList(param GetEventListParam) ([]EventS
 		OrderBy:         param.OrderBy,
 		Active:          sql.NullBool{Bool: true, Valid: true},
 	})
+	fmt.Printf("%+v\n", eventList)
 	if err != nil {
 		return nil, err
 	}

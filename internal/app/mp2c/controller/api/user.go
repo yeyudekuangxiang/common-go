@@ -123,3 +123,13 @@ func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 		"summary": summary,
 	}, nil
 }
+func (UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(c)
+	accountInfo, err := service.DefaultUserService.AccountInfo(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"accountInfo": accountInfo,
+	}, nil
+}

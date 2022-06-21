@@ -68,3 +68,6 @@ type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
 	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE" alias:"类型"`
 }
+type GetGetBannerListForm struct {
+	Type string `json:"type" form:"type" binding:"oneof=home event topic" alias:"banner类型"`
+}

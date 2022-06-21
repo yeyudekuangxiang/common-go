@@ -380,3 +380,7 @@ type OCRResult struct {
 	WordsResultNum int   `json:"words_result_num"`
 	LogID          int64 `json:"log_id"`
 }
+type UserAccountInfo struct {
+	Balance int `json:"balance"` //积分余额
+	CertNum int `json:"certNum"` //证书数量
+}

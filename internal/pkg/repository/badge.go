@@ -27,3 +27,7 @@ func (repo BadgeRepository) FindLastWithType(t entity.CertType) entity.Badge {
 func (repo BadgeRepository) Create(badge *entity.Badge) error {
 	return repo.DB.Create(badge).Error
 }
+func (repo BadgeRepository) FindUserCertCount(openid string) (int64, error) {
+	var total int64
+	return total, repo.DB.Model(entity.Badge{}).Where("openid = ?", openid).Count(&total).Error
+}

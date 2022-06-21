@@ -20,7 +20,6 @@ func apiRouter(router *gin.Engine) {
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
 	{
-
 		userRouter := authRouter.Group("/user")
 		{
 			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))     //获取验证码
@@ -50,6 +49,8 @@ func apiRouter(router *gin.Engine) {
 			eventRouter.GET("/list", apiutil.Format(event.DefaultEventController.GetEventList))
 			eventRouter.GET("detail", apiutil.Format(event.DefaultEventController.GetEventFullDetail))
 		}
+
+		authRouter.GET("banner/list", apiutil.Format(api.DefaultBannerController.GetBannerList))
 	}
 
 	//必须登陆的路由
@@ -62,6 +63,7 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
+			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
