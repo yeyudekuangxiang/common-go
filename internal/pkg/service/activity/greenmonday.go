@@ -8,7 +8,7 @@ import (
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/repository/activity"
-	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"time"
 )
@@ -40,7 +40,7 @@ func (srv GMService) Order(userId int64, addressId string) (*entity2.Order, erro
 		if err != nil {
 			return nil, err
 		}
-		order, err := service2.DefaultOrderService.SubmitOrderForGreenMonday(service2.SubmitOrderForGreenParam{
+		order, err := service.DefaultOrderService.SubmitOrderForGreenMonday(service.SubmitOrderForGreenParam{
 			AddressId: addressId,
 			UserId:    userId,
 			ItemId:    GMProductItemId,
@@ -112,7 +112,7 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (*activity.GMRe
 
 // SendAnswerQuestionBonus 发放积分
 func (srv GMService) SendAnswerQuestionBonus(userId int64, logId int) error {
-	user, err := service2.DefaultUserService.GetUserById(userId)
+	user, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (srv GMService) SendAnswerQuestionBonus(userId int64, logId int) error {
 		return err
 	}
 
-	_, err = service2.DefaultPointTransactionService.Create(service2.CreatePointTransactionParam{
+	_, err = service.DefaultPointTransactionService.Create(service.CreatePointTransactionParam{
 		OpenId:       user.OpenId,
 		Type:         entity2.POINT_QUIZ,
 		Value:        50,
@@ -146,7 +146,7 @@ func (srv GMService) SendAnswerQuestionBonus(userId int64, logId int) error {
 }
 func (srv GMService) AddInvitationRecord(userId, InviteeUserId int64) error {
 
-	InviteeUser, err := service2.DefaultUserService.GetUserById(InviteeUserId)
+	InviteeUser, err := service.DefaultUserService.GetUserById(InviteeUserId)
 	if err != nil {
 		return err
 	}

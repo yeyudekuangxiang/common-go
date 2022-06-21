@@ -212,12 +212,12 @@ func (as ArrayString) Value() (driver.Value, error) {
 	return strings.Join(as, ","), nil
 }
 func (as *ArrayString) Scan(value interface{}) error {
-	v, ok := value.([]byte)
+	v, ok := value.(string)
 	if !ok {
 		return errors.New("ArrayString type error")
 	}
 	if len(v) > 0 {
-		*as = strings.Split(string(v), ",")
+		*as = strings.Split(v, ",")
 	} else {
 		*as = make([]string, 0)
 	}

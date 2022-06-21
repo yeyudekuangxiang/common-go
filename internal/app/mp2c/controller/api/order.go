@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -17,7 +17,7 @@ func (OrderController) SubmitOrderForGreen(ctx *gin.Context) (interface{}, error
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(ctx)
-	order, err := service2.DefaultOrderService.SubmitOrderForGreenMonday(service2.SubmitOrderForGreenParam{
+	order, err := service.DefaultOrderService.SubmitOrderForGreenMonday(service.SubmitOrderForGreenParam{
 		AddressId: form.AddressId,
 		UserId:    user.ID,
 	})

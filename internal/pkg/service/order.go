@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/service/event"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
 	"strconv"
@@ -311,15 +312,16 @@ func (srv OrderService) afterCreateOrder(param submitOrderParam, user *entity.Us
 	participateEvent(param, user, order, orderItems)
 	generateBadgeFromOrderItems(param, user, order, orderItems)
 }
+
 func participateEvent(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
-	participateEventParams := make([]ParticipateEventParam, 0)
+	participateEventParams := make([]event.ParticipateEventParam, 0)
 	for _, orderItem := range orderItems {
-		participateEventParams = append(participateEventParams, ParticipateEventParam{
+		participateEventParams = append(participateEventParams, event.ParticipateEventParam{
 			ProductItemId: orderItem.ItemId,
 			Count:         orderItem.Count,
 		})
 	}
-	err := DefaultEventParticipationService.ParticipateEvent(user.ID, participateEventParams)
+	err := event.DefaultEventParticipationService.ParticipateEvent(*user, participateEventParams)
 	if err != nil {
 		app.Logger.Errorf("下订单后参加活动参与失败 %d %+v", user.ID, participateEventParams)
 	}

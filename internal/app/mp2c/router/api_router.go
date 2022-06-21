@@ -6,6 +6,7 @@ import (
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/api/coupon"
+	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
@@ -43,6 +44,12 @@ func apiRouter(router *gin.Engine) {
 		//星星充电订单同步接口
 		authRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
 
+		eventRouter := authRouter.Group("/event")
+		{
+			eventRouter.GET("category/list", apiutil.Format(event.DefaultEventController.GetEventCategoryList))
+			eventRouter.GET("/list", apiutil.Format(event.DefaultEventController.GetEventList))
+			eventRouter.GET("detail", apiutil.Format(event.DefaultEventController.GetEventFullDetail))
+		}
 	}
 
 	//必须登陆的路由
