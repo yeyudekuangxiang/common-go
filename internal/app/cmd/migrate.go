@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/event"
 )
 
@@ -32,6 +33,8 @@ to quickly create a Cobra application.`,
 		app.DB.AutoMigrate(
 			&event.Event{},
 			&event.EventCategory{},
+			&entity.UploadLog{},
+			&entity.UploadScene{},
 		)
 	},
 }

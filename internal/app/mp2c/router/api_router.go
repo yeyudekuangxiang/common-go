@@ -51,6 +51,8 @@ func apiRouter(router *gin.Engine) {
 		}
 
 		authRouter.GET("banner/list", apiutil.Format(api.DefaultBannerController.GetBannerList))
+		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
+		authRouter.GET("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
 	}
 
 	//必须登陆的路由

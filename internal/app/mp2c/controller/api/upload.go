@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/service_types"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"net/http"
 	"path"
 )
@@ -49,4 +52,42 @@ func (UploadController) UploadPointCollectImage(ctx *gin.Context) (gin.H, error)
 	return gin.H{
 		"imgUrl": imgUrl,
 	}, err
+}
+func (UploadController) GetUploadTokenInfo(ctx *gin.Context) (gin.H, error) {
+
+	form := api_types.GetUploadTokenInfoForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(ctx)
+
+	info, err := service.DefaultUploadService.CreateUploadToken(user.ID, form.Scene)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"info": info,
+	}, err
+}
+func (UploadController) UploadCallback(ctx *gin.Context) (gin.H, error) {
+	form := api_types.OssUploadCallbackForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	logId := ctx.Query("logId")
+	if logId == "" {
+		return nil, errno.ErrBind.WithCaller()
+	}
+
+	err := service.DefaultUploadService.UploadCallback(service_types.UploadCallbackParam{
+		LogId:    logId,
+		Filename: form.Filename,
+		Size:     form.Size,
+		MimeType: form.MimeType,
+		Height:   form.Height,
+		Width:    form.Width,
+	})
+
+	return nil, err
 }

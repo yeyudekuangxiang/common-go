@@ -176,7 +176,7 @@ func (srv OaService) Sign(url string) (*OaSignResult, error) {
 	ticker, err := tickerServer.Ticket()
 	if err != nil {
 		app.Logger.Error(err)
-		return nil, errno.InternalServerError
+		return nil, errno.ErrInternalServer
 	}
 
 	nonceStr := util.Md5(time.Now().String())

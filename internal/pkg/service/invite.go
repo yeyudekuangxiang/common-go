@@ -26,7 +26,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 	if qrcode.ID != 0 {
 		imgUrl := qrcode.ImageUrl
 		if strings.Index(imgUrl, "http") == -1 {
-			imgUrl = OssDomain + imgUrl
+			imgUrl = util.LinkJoin(OssDomain, imgUrl)
 		}
 		return &QrCodeInfo{
 			QrCodeId:    qrcode.QrCodeId,

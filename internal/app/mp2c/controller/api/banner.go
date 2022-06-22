@@ -51,6 +51,21 @@ func (BannerController) GetBannerList(ctx *gin.Context) (gin.H, error) {
 				},
 			},
 		}, nil
+	case "home":
+		return gin.H{
+			"list": []map[string]string{
+				{
+					"name":     "banner1",
+					"path":     "/pages/webview/index?url=https://mp.weixin.qq.com/s/NcP2QrU74to7xLbJJPoBOw",
+					"imageUrl": "https://resources.miotech.com/static/mp2c/images/home/banner/oldthings.jpg",
+				},
+				{
+					"name":     "banner2",
+					"path":     "/pages/cool-mio/mio-list-tag/index?id=108",
+					"imageUrl": "https://resources.miotech.com/static/mp2c/images/home/banner/banneresg.gif",
+				},
+			},
+		}, nil
 	}
 	return gin.H{
 		"list": make([]map[string]string, 0),

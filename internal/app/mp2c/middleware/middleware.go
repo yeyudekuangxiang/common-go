@@ -34,7 +34,7 @@ func recovery() gin.HandlerFunc {
 		if ok {
 			c.JSON(200, apiutil.FormatErr(e, nil))
 		} else {
-			c.JSON(200, apiutil.FormatResponse(errno.InternalServerError.Code(), nil, fmt.Sprintf("%v", err)))
+			c.JSON(200, apiutil.FormatResponse(errno.ErrInternalServer.Code(), nil, fmt.Sprintf("%v", err)))
 		}
 		go func() {
 			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
