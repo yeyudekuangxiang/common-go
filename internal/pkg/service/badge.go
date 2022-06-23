@@ -5,6 +5,8 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repo_types"
+	"mio/internal/pkg/service/service_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
 	"strconv"
@@ -91,4 +93,9 @@ func (srv BadgeService) GetUserCertCountById(userId int64) (int64, error) {
 		return 0, nil
 	}
 	return srv.GetUserCertCount(user.OpenId)
+}
+func (srv BadgeService) FindBadge(param service_types.FindBadgeParam) (*entity.Badge, error) {
+	return srv.repo.FindBadge(repo_types.FindBadgeBy{
+		OrderId: param.OrderId,
+	})
 }

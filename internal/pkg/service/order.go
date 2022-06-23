@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/pkg/errors"
 	"math/rand"
@@ -10,8 +11,10 @@ import (
 	repository2 "mio/internal/pkg/repository"
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/product"
+	"mio/internal/pkg/service/service_types"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -355,4 +358,53 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 			}
 		}
 	}
+}
+func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEventParam) (*service_types.SubmitOrderForEventResult, error) {
+	lockKey := fmt.Sprintf("SubmitOrderForEvent%d%s", param.UserId, param.EventId)
+	if !util2.DefaultLock.Lock(lockKey, time.Second*10) {
+		return nil, errno.ErrLimit.WithCaller()
+	}
+	defer util2.DefaultLock.UnLock(lockKey)
+
+	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
+		EventId: param.EventId,
+		Active:  sql.NullBool{Bool: true, Valid: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if ev.ID == 0 {
+		return nil, errno.ErrRecordNotFound.WithCaller()
+	}
+	if ev.ProductItemId == "" {
+		return nil, errors.New("项目未启用,请稍后再试")
+	}
+
+	order, err := srv.SubmitOrder(SubmitOrderParam{
+		Order: SubmitOrder{
+			UserId:    param.UserId,
+			OrderType: entity.OrderTypePurchase,
+		},
+		Items: []SubmitOrderItem{
+			{
+				ItemId: ev.ProductItemId,
+				Count:  1,
+			},
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	badge, err := DefaultBadgeService.FindBadge(service_types.FindBadgeParam{
+		OrderId: order.OrderId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &service_types.SubmitOrderForEventResult{
+		CertificateNo: badge.Code,
+	}, nil
 }

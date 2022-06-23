@@ -155,6 +155,7 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/ocr/gm/ticket", apiutil.Format(api.DefaultOCRController.GmTicket))
 
 		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
+		mustAuthRouter.POST("/order/submit-from-event", apiutil.Format(api.DefaultOrderController.SubmitOrderForEvent))
 
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 

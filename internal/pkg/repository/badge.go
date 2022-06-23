@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository/repo_types"
 )
 
 var DefaultBadgeRepository = BadgeRepository{DB: app.DB}
@@ -30,4 +31,16 @@ func (repo BadgeRepository) Create(badge *entity.Badge) error {
 func (repo BadgeRepository) FindUserCertCount(openid string) (int64, error) {
 	var total int64
 	return total, repo.DB.Model(entity.Badge{}).Where("openid = ?", openid).Count(&total).Error
+}
+func (repo BadgeRepository) FindBadge(by repo_types.FindBadgeBy) (*entity.Badge, error) {
+	badge := entity.Badge{}
+	db := repo.DB.Model(badge)
+	if by.OrderId != "" {
+		db.Where("order_id = ?", by.OrderId)
+	}
+	err := db.Take(&badge).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return &badge, nil
 }
