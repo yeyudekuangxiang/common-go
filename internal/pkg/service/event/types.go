@@ -47,6 +47,7 @@ type EventFullInfo struct {
 	EventDetail           string                                     `json:"eventDetail"`
 	EventRule             string                                     `json:"eventRule"`
 	Cost                  int                                        `json:"cost"`
+	Stock                 int                                        `json:"stock"`
 }
 type ParticipationInfo struct {
 	Nickname string `json:"nickname"`

@@ -103,6 +103,7 @@ func (srv EventService) GetEventFullInfo(eventId string) (*EventFullInfo, error)
 		EventDetail:           eventDetail,
 		EventRule:             eventRule,
 		Cost:                  productItem.Cost,
+		Stock:                 productItem.RemainingCount,
 	}, nil
 }
 func (srv EventService) AddEventParticipationCount(eventId string, count int) error {
