@@ -79,6 +79,12 @@ func (srv OrderService) CalculateAndCheck(items []repository2.CheckStockItem) (*
 9 创建订单
 */
 func (srv OrderService) SubmitOrder(param SubmitOrderParam) (*entity.Order, error) {
+	lockKey := fmt.Sprintf("SubmitOrder%d", param.Order.UserId)
+	if !util2.DefaultLock.Lock(lockKey, time.Second*10) {
+		return nil, errno.ErrLimit.WithCaller()
+	}
+	defer util2.DefaultLock.UnLock(lockKey)
+
 	checkItems := make([]repository2.CheckStockItem, 0)
 	for _, item := range param.Items {
 		checkItems = append(checkItems, repository2.CheckStockItem{
@@ -360,12 +366,6 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 	}
 }
 func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEventParam) (*service_types.SubmitOrderForEventResult, error) {
-	lockKey := fmt.Sprintf("SubmitOrderForEvent%d%s", param.UserId, param.EventId)
-	if !util2.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errno.ErrLimit.WithCaller()
-	}
-	defer util2.DefaultLock.UnLock(lockKey)
-
 	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
 		EventId: param.EventId,
 		Active:  sql.NullBool{Bool: true, Valid: true},
