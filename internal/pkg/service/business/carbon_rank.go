@@ -85,7 +85,7 @@ func (srv CarbonRankService) UserRankList(param GetUserRankListParam) ([]UserRan
 	}
 	likeStatusMap := make(map[int64]bool)
 	for _, likeStatus := range likeStatusList {
-		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
+		likeStatusMap[likeStatus.Pid] = likeStatus.Status.IsLike()
 	}
 
 	userList := DefaultUserService.GetBusinessUserByIds(userIds)
@@ -187,7 +187,7 @@ func (srv CarbonRankService) DepartmentRankList(param GetDepartmentRankListParam
 	}
 	likeStatusMap := make(map[int64]bool)
 	for _, likeStatus := range likeStatusList {
-		likeStatusMap[likeStatus.BUserId] = likeStatus.Status.IsLike()
+		likeStatusMap[likeStatus.Pid] = likeStatus.Status.IsLike()
 	}
 
 	departmentList := DefaultDepartmentService.GetBusinessDepartmentByIds(departmentIdsInt)
@@ -423,11 +423,13 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 			})
 			if rankInfo.ID != 0 {
 				rankInfo.Rank = rank
+				rankInfo.Value = item.Value
 				err = srv.repo.Save(&rankInfo)
 				if err != nil {
 					app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-					break
+					return
 				}
+				rank++
 				continue
 			}
 			rankInfo = business.CarbonRank{
@@ -442,7 +444,7 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 			err = srv.repo.Create(&rankInfo)
 			if err != nil {
 				app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-				break
+				return
 			}
 			rank++
 		}

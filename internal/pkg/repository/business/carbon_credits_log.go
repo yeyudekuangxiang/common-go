@@ -1,7 +1,6 @@
 package business
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity/business"
@@ -54,22 +53,18 @@ func (repo CarbonCreditsLogRepository) GetListBy(by GetCarbonCreditsLogListBy) [
 
 // GetActualUserCarbonRank 获取用户碳积分排行榜
 func (repo CarbonCreditsLogRepository) GetActualUserCarbonRank(by GetActualUserCarbonRankBy) ([]business.UserCarbonRank, int64, error) {
-	db := repo.DB.Table(fmt.Sprintf("%s as log", business.CarbonCreditsLog{}.TableName())).
-		Joins(fmt.Sprintf("inner join %s as \"buser\" on log.b_user_id = buser.id", business.User{}.TableName()))
 
-	if by.CompanyId != 0 {
-		db.Where("buser.b_company_id = ?", by.CompanyId)
-	}
-	if !by.StartTime.IsZero() {
-		db.Where("log.created_at >= ?", by.StartTime)
-	}
-	if !by.EndTime.IsZero() {
-		db.Where("log.created_at <= ?", by.EndTime)
-	}
-
-	db.Select("log.b_user_id user_id,sum(log.value) \"value\"").Group("log.b_user_id")
-
-	db = repo.DB.Table("(?) t", db)
+	sql := `(SELECT buser.id user_id,COALESCE(sum(log.value),0) "value" 
+FROM (SELECT * 
+		FROM "business_carbon_credits_log" 
+		WHERE created_at >= ? 
+		AND created_at <= ?) as log 
+right join business_user as "buser" 
+on log.b_user_id = buser.id 
+WHERE buser.b_company_id = ? 
+GROUP BY buser.id) as t
+`
+	db := repo.DB.Table(sql, by.StartTime, by.EndTime, by.CompanyId)
 
 	list := make([]business.UserCarbonRank, 0)
 	var total int64
@@ -80,20 +75,44 @@ func (repo CarbonCreditsLogRepository) GetActualUserCarbonRank(by GetActualUserC
 
 // GetActualDepartmentCarbonRank 获取部门排行榜
 func (repo CarbonCreditsLogRepository) GetActualDepartmentCarbonRank(by GetActualDepartmentCarbonRankBy) ([]business.DepartCarbonRank, int64, error) {
-	db := repo.DB.Table("(SELECT depart.top_id  department_id,sum(log.value) \"value\" "+
-		"FROM business_carbon_credits_log AS log "+
-		"INNER JOIN business_user AS buser ON log.b_user_id = buser.ID "+
-		"INNER JOIN business_department as depart on buser.b_department_id = depart.id "+
-		"where depart.top_id <> 0 and buser.b_company_id = ? and log.created_at >= ? and log.created_at <= ? "+
-		"GROUP BY depart.top_id "+
-		"UNION SELECT depart.id as department_id,sum(log.value) \"value\" "+
-		"FROM business_carbon_credits_log AS log I"+
-		"NNER JOIN business_user AS buser ON log.b_user_id = buser.ID "+
-		"INNER JOIN business_department as depart on buser.b_department_id = depart.id  "+
-		"where depart.top_id = 0 and buser.b_company_id = ? and log.created_at >= ? and log.created_at <= ? "+
-		"GROUP BY depart.id) t",
-		by.CompanyId, by.StartTime, by.EndTime,
-		by.CompanyId, by.StartTime, by.EndTime,
+	sql := `
+(SELECT
+	r.department_id,sum(r.value) as  "value"
+FROM
+	(
+	SELECT
+		depart.top_id department_id,
+		COALESCE ( SUM ( log.VALUE ), 0 ) "value" 
+	FROM
+		business_user AS buser
+		INNER JOIN business_department AS depart ON buser.b_department_id = depart.ID 
+		LEFT JOIN ( SELECT * FROM business_carbon_credits_log WHERE created_at >= ? AND created_at <= ? ) AS log ON buser.ID = log.b_user_id 
+	WHERE
+		depart.top_id <> 0 
+		AND buser.b_company_id = ? 
+	GROUP BY
+		depart.top_id UNION ALL
+	SELECT
+		depart.ID AS department_id,
+		COALESCE ( SUM ( log.VALUE ), 0 ) "value" 
+	FROM
+		business_user AS buser
+		INNER JOIN business_department AS depart ON buser.b_department_id = depart.ID 
+		LEFT JOIN ( SELECT * FROM business_carbon_credits_log WHERE created_at >= ? AND created_at <= ? ) AS log ON buser.ID = log.b_user_id 
+	WHERE
+		depart.top_id = 0 
+		AND buser.b_company_id = ?
+	GROUP BY
+	depart.ID 
+	
+) r 
+GROUP BY
+	r.department_id
+) t
+`
+	db := repo.DB.Table(sql,
+		by.StartTime, by.EndTime, by.CompanyId,
+		by.StartTime, by.EndTime, by.CompanyId,
 	)
 
 	list := make([]business.DepartCarbonRank, 0)
