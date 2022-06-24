@@ -34,6 +34,7 @@ func (srv ProductItemService) GetListBy(param GetProductItemListParam) []entity.
 func (srv ProductItemService) CreateOrUpdateProductItem(param CreateOrUpdateProductItemParam) (*entity.ProductItem, error) {
 	item := srv.repo.FindByItemId(param.ItemId)
 	if item.ID == 0 {
+		productItemReferenceId := util.UUID()
 		item = entity.ProductItem{
 			ProductItemId:          param.ItemId,
 			Virtual:                param.Virtual,
@@ -42,7 +43,7 @@ func (srv ProductItemService) CreateOrUpdateProductItem(param CreateOrUpdateProd
 			ImageUrl:               param.ImageUrl,
 			SalesCount:             0,
 			Active:                 true,
-			ProductItemReferenceId: util.UUID(),
+			ProductItemReferenceId: &productItemReferenceId,
 			Sort:                   param.Sort,
 		}
 		return &item, srv.repo.Create(&item)
