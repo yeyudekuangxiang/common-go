@@ -10,6 +10,6 @@ type ProductItem struct {
 	RemainingCount         int  //库存
 	SalesCount             int  //已售
 	Active                 bool //是否上架
-	ProductItemReferenceId string
+	ProductItemReferenceId *string
 	Sort                   int
 }
