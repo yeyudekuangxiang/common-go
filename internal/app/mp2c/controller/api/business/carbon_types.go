@@ -17,19 +17,19 @@ type ChangeDepartmentRankLikeStatusForm struct {
 	DateType     business.RankDateType `json:"dateType" form:"dateType" binding:"oneof=day week month" alias:"排行榜类型"`
 }
 type CarbonCollectEvCarForm struct {
-	Electricity float64 `json:"electricity" form:"electricity" binding:"gt=0" alias:"电量"`
+	Electricity float64 `json:"electricity" form:"electricity" binding:"gt=0,lte=30" alias:"电量"`
 }
 type CarbonCollectOnlineMeetingForm struct {
-	OneCityDuration  float64 `json:"oneCityDuration" form:"oneCityDuration" binding:"required_if=ManyCityDuration 0" alias:"同城会议"`
-	ManyCityDuration float64 `json:"manyCityDuration" form:"manyCityDuration" binding:"required_if=OneCityDuration 0" alias:"异地会议"`
+	OneCityDuration  float64 `json:"oneCityDuration" form:"oneCityDuration" binding:"required_if=ManyCityDuration 0,lte=3" alias:"同城会议"`
+	ManyCityDuration float64 `json:"manyCityDuration" form:"manyCityDuration" binding:"required_if=OneCityDuration 0,lte=3" alias:"异地会议"`
 }
 type CarbonCollectSaveWaterElectricityForm struct {
 	Water       int64 `json:"water" form:"water" binding:"required_if=Electricity 0" alias:"水量"`
 	Electricity int64 `json:"electricity" form:"electricity" binding:"required_if=Water 0" alias:"电量"`
 }
 type CarbonCollectPublicTransportForm struct {
-	Bus   int64 `json:"bus" form:"bus" binding:"required_if=Metro 0" alias:"公交"`
-	Metro int64 `json:"metro" form:"metro" binding:"required_if=Bus 0" alias:"地铁"`
+	Bus   int64 `json:"bus" form:"bus" binding:"required_if=Metro 0,lte=30" alias:"公交"`
+	Metro int64 `json:"metro" form:"metro" binding:"required_if=Bus 0,lte=30" alias:"地铁"`
 }
 type GetCarbonCreditLogSortedListForm struct {
 	StartTime time.Time `json:"startTime" form:"startTime" binding:"required" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`

@@ -35,7 +35,8 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 		return 0, errors.New("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
-		CompanyId: userInfo.BCompanyId,
+		CompanyId:     userInfo.BCompanyId,
+		CarbonSceneId: carbonScene.ID,
 	})
 	if err != nil {
 		return 0, err
