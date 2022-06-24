@@ -12,4 +12,9 @@ type Badge struct {
 	Partnership   PartnershipType `json:"partnership" gorm:"type:varchar(100);not null;default:'';comment:合作伙伴"`
 	OrderId       string          `json:"orderId" gorm:"type:varchar(100);not null;default:'';comment:订单编号"`
 	ImageUrl      string          `json:"imageUrl" gorm:"type:varchar(1000);not null;default:'';comment:证书图片"`
+	IsNew         bool            `json:"isNew" gorm:"type:bool;not null;default:false;comment:是否是新获得"`
+}
+
+func (Badge) TableName() string {
+	return "badge"
 }

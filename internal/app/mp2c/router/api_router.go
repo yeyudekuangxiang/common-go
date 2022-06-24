@@ -161,6 +161,8 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 
 		mustAuthRouter.POST("/badge/image", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeImage))
+		mustAuthRouter.GET("/badge/list", apiutil.Format(badge.DefaultBadgeController.GetBadgeList))
+		mustAuthRouter.GET("/badge/looked", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeIsNew))
 	}
 
 }

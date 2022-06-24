@@ -28,6 +28,9 @@ func (repo BadgeRepository) FindLastWithType(t entity.CertType) entity.Badge {
 func (repo BadgeRepository) Create(badge *entity.Badge) error {
 	return repo.DB.Create(badge).Error
 }
+func (repo BadgeRepository) Save(badge *entity.Badge) error {
+	return repo.DB.Save(badge).Error
+}
 func (repo BadgeRepository) FindUserCertCount(openid string) (int64, error) {
 	var total int64
 	return total, repo.DB.Model(entity.Badge{}).Where("openid = ?", openid).Count(&total).Error
@@ -46,4 +49,14 @@ func (repo BadgeRepository) FindBadge(by repo_types.FindBadgeBy) (*entity.Badge,
 		return nil, err
 	}
 	return &badge, nil
+}
+func (repo BadgeRepository) GetBadgeList(by repo_types.GetBadgeListBy) ([]entity.Badge, error) {
+	db := repo.DB.Model(entity.Badge{})
+
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
+
+	list := make([]entity.Badge, 0)
+	return list, db.Order("create_time desc").Find(&list).Error
 }

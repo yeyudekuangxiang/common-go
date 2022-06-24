@@ -136,3 +136,26 @@ func (srv BadgeService) UpdateCertImage(openid string, code string, imageUrl str
 
 	return nil
 }
+func (srv BadgeService) GetBadgePageList(openid string) ([]entity.Badge, error) {
+	return srv.repo.GetBadgeList(repo_types.GetBadgeListBy{
+		OpenId: openid,
+	})
+}
+func (srv BadgeService) UpdateBadgeIsNew(openid string, id int64, isNew bool) error {
+	badge, err := srv.repo.FindBadge(repo_types.FindBadgeBy{
+		ID: id,
+	})
+	if err != nil {
+		return err
+	}
+	if badge.ID == 0 {
+		return errno.ErrRecordNotFound.WithCaller()
+	}
+	if badge.OpenId != openid {
+		return errno.ErrInternalServer
+	}
+
+	badge.IsNew = isNew
+
+	return srv.repo.Save(badge)
+}
