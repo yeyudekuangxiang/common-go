@@ -242,7 +242,7 @@ func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (
 		Pid:        int64(param.DepartmentId),
 		UserId:     param.UserId,
 		DateType:   param.DateType,
-		ObjectType: business.RankObjectTypeUser,
+		ObjectType: business.RankObjectTypeDepartment,
 		TimePoint:  start,
 	})
 	if err != nil {
