@@ -1,7 +1,10 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -9,8 +12,10 @@ import (
 	"mio/internal/pkg/service/service_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const badgeCodeLength = 10
@@ -98,4 +103,36 @@ func (srv BadgeService) FindBadge(param service_types.FindBadgeParam) (*entity.B
 	return srv.repo.FindBadge(repo_types.FindBadgeBy{
 		OrderId: param.OrderId,
 	})
+}
+func (srv BadgeService) UpdateCertImage(openid string, code string, imageUrl string) error {
+	if !util.DefaultLock.Lock("UpdateCertImage:"+openid, time.Second*10) {
+		return errno.ErrLimit.WithCaller()
+	}
+	defer util.DefaultLock.UnLock("UpdateCertImage:" + openid)
+
+	badgeId, err := app.Redis.Get(context.Background(), config.RedisKey.BadgeImageCode+code).Int64()
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	if badgeId == 0 {
+		return errno.ErrTimeout.WithCaller()
+	}
+	badge, err := srv.repo.FindBadge(repo_types.FindBadgeBy{
+		ID: badgeId,
+	})
+	if err != nil {
+		return err
+	}
+
+	if badge.ID == 0 {
+		return errno.ErrRecordNotFound
+	}
+	if badge.OpenId != openid {
+		return errno.ErrInternalServer
+	}
+	badge.ImageUrl = imageUrl
+
+	app.Redis.Del(context.Background(), code)
+
+	return nil
 }

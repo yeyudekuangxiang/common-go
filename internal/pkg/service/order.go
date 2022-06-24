@@ -1,10 +1,12 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/pkg/errors"
 	"math/rand"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -404,7 +406,11 @@ func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEv
 		return nil, err
 	}
 
+	code := util2.UUID()
+
+	app.Redis.Set(context.Background(), config.RedisKey.BadgeImageCode+code, badge.ID, time.Minute*5)
 	return &service_types.SubmitOrderForEventResult{
 		CertificateNo: badge.Code,
+		UploadCode:    code,
 	}, nil
 }

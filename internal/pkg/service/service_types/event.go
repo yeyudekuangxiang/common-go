@@ -7,4 +7,5 @@ type SubmitOrderForEventParam struct {
 
 type SubmitOrderForEventResult struct {
 	CertificateNo string `json:"certificateNo"`
+	UploadCode    string `json:"uploadCode"`
 }

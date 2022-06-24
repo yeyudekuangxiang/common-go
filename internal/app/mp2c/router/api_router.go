@@ -5,6 +5,7 @@ import (
 	"mio/internal/app/mp2c/controller/api"
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
+	"mio/internal/app/mp2c/controller/api/badge"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/product"
@@ -159,6 +160,7 @@ func apiRouter(router *gin.Engine) {
 
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 
+		mustAuthRouter.POST("/badge/image", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeImage))
 	}
 
 }

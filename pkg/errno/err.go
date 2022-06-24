@@ -20,7 +20,8 @@ var (
 	// ErrBind 绑定错误
 	ErrBind = Err{code: 10002, message: "请求参数错误"}
 	// ErrLimit 超出频率限制
-	ErrLimit = Err{code: 10002, message: "操作太频繁了、请稍后再试"}
+	ErrLimit   = Err{code: 10003, message: "操作太频繁了、请稍后再试"}
+	ErrTimeout = Err{code: 10004, message: "操作已超时"}
 
 	// ErrRecordNotFound 数据库错误
 	ErrRecordNotFound = Err{code: 20100, message: "数据异常"}

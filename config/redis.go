@@ -12,6 +12,7 @@ type redisKey struct {
 	ActivityZeroIsNewUser string
 	OaAuth                string
 	BaiDu                 string
+	BadgeImageCode        string
 }
 
 var RedisKey = redisKey{
@@ -26,4 +27,5 @@ var RedisKey = redisKey{
 	ActivityZeroIsNewUser: "mp2c:activity:zero:isnewuser:%d", //0元拿活动记录是否新用户
 	OaAuth:                "mp2c:oaauth:%s",                  //微信网页授权
 	BaiDu:                 "mp2c:baidu:",                     //用于百度接口
+	BadgeImageCode:        "mp2c:updateBadgeImage:",          //上传证书图片凭证
 }
