@@ -113,7 +113,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 	defer util.DefaultLock.UnLock(lockKey)
 
 	transactionId := util.UUID()
-	count, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeOnlineMeeting)
+	count, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeSaveWaterElectricity)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus int64, me
 	defer util.DefaultLock.UnLock(lockKey)
 
 	transactionId := util.UUID()
-	count, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeOnlineMeeting)
+	count, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypePublicTransport)
 	if err != nil {
 		return nil, err
 	}
