@@ -156,3 +156,18 @@ func (srv CarbonCreditsLogService) GetCarbonCreditLogListHistoryBy(by rbusiness.
 func (srv CarbonCreditsLogService) GetUserTotalCarbonCreditsByUserId(userId int64) rbusiness.GetUserTotalCarbonCredits {
 	return srv.repo.GetUserTotalCarbonCredits(rbusiness.GetCarbonCreditsLogSortedListBy{UserId: userId})
 }
+
+func (srv CarbonCreditsLogService) GetUserTotalCarbonCreditsByCid(cid int) rbusiness.GetUserTotalCarbonCredits {
+	if cid <= 0 {
+		return rbusiness.GetUserTotalCarbonCredits{}
+	}
+	userList := DefaultUserService.GetBusinessUserListByCid(cid)
+	if len(userList) == 0 || userList[0].ID == 0 {
+		return rbusiness.GetUserTotalCarbonCredits{}
+	}
+	var ids []int64
+	for _, v := range userList {
+		ids = append(ids, v.ID)
+	}
+	return srv.repo.GetUserTotalCarbonCredits(rbusiness.GetCarbonCreditsLogSortedListBy{UserIds: ids})
+}
