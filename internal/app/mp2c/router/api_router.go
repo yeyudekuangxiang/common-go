@@ -162,7 +162,7 @@ func apiRouter(router *gin.Engine) {
 
 		mustAuthRouter.POST("/badge/image", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeImage))
 		mustAuthRouter.GET("/badge/list", apiutil.Format(badge.DefaultBadgeController.GetBadgeList))
-		mustAuthRouter.GET("/badge/looked", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeIsNew))
+		mustAuthRouter.POST("/badge/looked", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeIsNew))
 	}
 
 }
