@@ -132,9 +132,9 @@ func (srv BadgeService) UpdateCertImage(openid string, code string, imageUrl str
 	}
 	badge.ImageUrl = imageUrl
 
-	app.Redis.Del(context.Background(), code)
+	app.Redis.Del(context.Background(), config.RedisKey.BadgeImageCode+code)
 
-	return nil
+	return srv.repo.Save(badge)
 }
 func (srv BadgeService) GetBadgePageList(openid string) ([]entity.Badge, error) {
 	return srv.repo.GetBadgeList(repo_types.GetBadgeListBy{

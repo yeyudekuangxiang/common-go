@@ -237,8 +237,6 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		return nil, nil, err
 	}
 
-	srv.afterCreateOrder(param, user, order, orderItems)
-
 	return order, orderItems, nil
 }
 
