@@ -280,6 +280,10 @@ var virtualGoodMap = map[string]int{
 	"6e4a4a84-92af-43d4-b73b-8da09d9647b0": 2000,
 	"f233927c-72cc-4df3-8bc3-b4fe6d8a31b9": 2500,
 	"7380d8bb-9969-4028-90bc-06a357b40abb": 3000,
+	"0e72028b-7c93-4a64-ba0f-2144b08ffef4": 5000,
+	"6c2a99fc-4b6f-49da-9b23-b47c11b8494f": 10000,
+	"136c0116-df2c-4610-b3c2-aabbec90b75a": 15000,
+	"90de1c36-60d7-4e75-b738-79ce2ab9a405": 20000,
 }
 
 func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId string, credit int64, err error) {
