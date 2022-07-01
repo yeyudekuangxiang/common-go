@@ -29,6 +29,7 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
+		return nil, errors.New("渠道查询失败")
 	}
 
 	//校验sign
@@ -43,13 +44,14 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
 		fmt.Println("charge 重复提交订单", form)
 		app.Logger.Info("charge 重复提交订单", form)
-		return gin.H{}, nil
+		return nil, errors.New("重复提交订单")
 	}
 
 	//通过手机号查询用户
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile})
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
+		return nil, errors.New("未找到用户")
 	} else {
 		//查询今日积分总量
 		timeStr := time.Now().Format("2006-01-02")
