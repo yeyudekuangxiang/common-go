@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
@@ -28,14 +29,13 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return gin.H{}, nil
 	}
 
 	//校验sign
 	if scene.Ch != "lvmiao" {
 		if !service.DefaultBdSceneService.CheckSign(form.Mobile, form.OutTradeNo, form.TotalPower, form.Sign, scene) {
 			app.Logger.Info("校验sign失败", form)
-			return gin.H{}, nil
+			return nil, errors.New("sign:" + form.Sign + " 验证失败")
 		}
 	}
 
