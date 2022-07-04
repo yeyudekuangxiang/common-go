@@ -135,11 +135,11 @@ func (srv *defaultCommentService) FindPageListByPage(data *entity.CommentIndex, 
 		return nil, 0, err
 	}
 	//4.组合数据
-	for _, rootCommentId := range rootComments {
-		for _, subComment := range subComments {
-
-		}
-	}
+	//for _, rootCommentId := range rootComments {
+	//	for _, subComment := range subComments {
+	//
+	//	}
+	//}
 	return nil, 0, nil
 }
 
