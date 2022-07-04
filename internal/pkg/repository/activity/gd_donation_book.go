@@ -136,7 +136,7 @@ func (repo GDDbSchoolRankRepository) FindAllBy(by FindSchoolBy) []activity.GDDbS
 
 func (repo GDDbSchoolRankRepository) GetRank() []activity.GDDbSchoolRank {
 	record := make([]activity.GDDbSchoolRank, 0)
-	db := app.DB.Model(activity.GDDbSchoolRank{}).Order("donate_number desc").Limit(20)
+	db := app.DB.Model(activity.GDDbSchoolRank{}).Order("donate_number desc").Limit(30)
 	if err := db.Scan(&record).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
