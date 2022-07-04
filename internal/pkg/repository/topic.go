@@ -12,9 +12,10 @@ var DefaultTopicRepository ITopicRepository = NewTopicRepository(app.DB)
 type ITopicRepository interface {
 	GetTopicPageList(by GetTopicPageListBy) (list []entity2.Topic, total int64)
 	FindById(topicId int64) entity2.Topic
+	//FindTopicOneBy() entity2.Topic
 	Save(topic *entity2.Topic) error
 	AddTopicLikeCount(topicId int64, num int) error
-	GetTopicList(by GetTopicListBy) []entity2.Topic
+	GetTopicList(by FindTopicBy) []entity2.Topic
 	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity2.Topic, total int64)
 	UpdateColumn(id int64, key string, value interface{}) error
 }
@@ -55,6 +56,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity2
 	}
 	return
 }
+
 func (u TopicRepository) FindById(topicId int64) entity2.Topic {
 	topic := entity2.Topic{}
 	err := u.DB.Model(entity2.Topic{}).Where("id = ?", topicId).First(&topic).Error
@@ -63,6 +65,7 @@ func (u TopicRepository) FindById(topicId int64) entity2.Topic {
 	}
 	return topic
 }
+
 func (u TopicRepository) Save(topic *entity2.Topic) error {
 	return u.DB.Save(topic).Error
 }
@@ -75,7 +78,7 @@ func (u TopicRepository) AddTopicLikeCount(topicId int64, num int) error {
 	}
 	return db.Update("like_count", gorm.Expr("like_count + ?", num)).Error
 }
-func (u TopicRepository) GetTopicList(by GetTopicListBy) []entity2.Topic {
+func (u TopicRepository) GetTopicList(by FindTopicBy) []entity2.Topic {
 	list := make([]entity2.Topic, 0)
 	db := u.DB.Model(entity2.Topic{})
 	if len(by.TopicIds) > 0 {

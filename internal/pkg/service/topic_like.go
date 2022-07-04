@@ -5,7 +5,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository"
 	"time"
 )
 
@@ -13,13 +13,13 @@ type TopicLikeService struct {
 }
 
 func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLike, error) {
-	topic := repository2.DefaultTopicRepository.FindById(int64(topicId))
+	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
 	if topic.Id == 0 {
 		return nil, errors.New("帖子不存在")
 	}
 
-	r := repository2.TopicLikeRepository{DB: app.DB}
-	like := r.FindBy(repository2.FindTopicLikeBy{
+	r := repository.TopicLikeRepository{DB: app.DB}
+	like := r.FindBy(repository.FindTopicLikeBy{
 		TopicId: topicId,
 		UserId:  userId,
 	})
@@ -33,9 +33,9 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLi
 		like.Status = (like.Status + 1) % 2
 	}
 	if like.Status == 1 {
-		_ = repository2.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
+		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
 	} else {
-		_ = repository2.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
+		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
 	}
 
 	return &like, r.Save(&like)

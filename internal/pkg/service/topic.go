@@ -11,8 +11,9 @@ import (
 	"math"
 	"math/rand"
 	"mio/internal/pkg/core/app"
-	entity2 "mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/pkg/wxapp"
 	"os"
 	"path"
@@ -21,20 +22,57 @@ import (
 	"time"
 )
 
-var DefaultTopicService = NewTopicService(repository2.DefaultTopicRepository)
+var DefaultTopicService = NewTopicService(repository.DefaultTopicRepository)
 
-func NewTopicService(r repository2.ITopicRepository) TopicService {
+func NewTopicService(r repository.ITopicRepository) TopicService {
 	return TopicService{
 		r: r,
 	}
 }
 
 type TopicService struct {
-	r repository2.ITopicRepository
+	r repository.ITopicRepository
+}
+
+// GetTopicDetail 获取topic详情
+func (u TopicService) GetTopicDetail(topicId int64) (entity.Topic, error) {
+	//查询数据是否存在
+	topic := u.r.FindById(topicId)
+	if topic.Id == 0 {
+		return entity.Topic{}, errors.New("数据不存在")
+	}
+	//查找关联关系
+	tagModels := make([]entity.Tag, 0)
+	err := app.DB.Model(entity.Topic{}).Association("Tags").Find(&tagModels)
+	if err != nil {
+		return entity.Topic{}, err
+	}
+	topic.Tags = tagModels
+	//更新查看次数
+	return topic, nil
+}
+
+func (u TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]entity.Topic, error) {
+	//获取置顶数据，按时间倒序排序
+	//topList := make([]entity.Topic, 0)
+	//app.DB.Model(entity.Topic{}).Preload("Tags").
+	//	Where("status = ? and sort = ?", 3, 9999).
+	//	Where("id > ?", param.ID).
+	//	Where("tag_id = ?", param.TopicTagId).
+	//	Order("updated_at desc").
+	//	Limit(param.Limit).
+	//	Find(&topList)
+	//获取精华数据，按时间倒序排序
+	//essenceList := make([]entity.Topic, 0)
+	//剩下的数据，按时间倒叙排序
+
+	//获取所有数据数量
+
+	return nil, nil
 }
 
 //将 entity.Topic 列表填充为 TopicDetail 列表
-func (u TopicService) fillTopicList(topicList []entity2.Topic, userId int64) ([]TopicDetail, error) {
+func (u TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
 	//查询点赞信息
 	topicIds := make([]int64, 0)
 	for _, topic := range topicList {
@@ -42,7 +80,7 @@ func (u TopicService) fillTopicList(topicList []entity2.Topic, userId int64) ([]
 	}
 	topicLikeMap := make(map[int64]bool)
 	if userId > 0 {
-		likeList := repository2.TopicLikeRepository{DB: app.DB}.GetListBy(repository2.GetTopicLikeListBy{
+		likeList := repository.TopicLikeRepository{DB: app.DB}.GetListBy(repository.GetTopicLikeListBy{
 			TopicIds: topicIds,
 			UserId:   userId,
 		})
@@ -70,7 +108,7 @@ func (u TopicService) fillTopicList(topicList []entity2.Topic, userId int64) ([]
 }
 
 // GetTopicDetailPageList 通过topic表直接查询获取内容列表
-func (u TopicService) GetTopicDetailPageList(param repository2.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 	list, total := u.r.GetTopicPageList(param)
 
 	//更新曝光和查看次数
@@ -88,15 +126,15 @@ func (u TopicService) GetTopicDetailPageList(param repository2.GetTopicPageListB
 }
 
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
-func (u TopicService) GetTopicDetailPageListByFlow(param repository2.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
-	topicList, total := u.r.GetFlowPageList(repository2.GetTopicFlowPageListBy{
+	topicList, total := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
 		Offset:     param.Offset,
 		Limit:      param.Limit,
 		UserId:     param.UserId,
 		TopicId:    param.ID,
 		TopicTagId: param.TopicTagId,
-		Status:     entity2.TopicStatusPublished,
+		Status:     entity.TopicStatusPublished,
 	})
 	if total == 0 {
 		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
@@ -142,7 +180,7 @@ func (u TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
 }
 
 // UpdateTopicFlowListShowCount 更新内容流的曝光次数加1
-func (u TopicService) UpdateTopicFlowListShowCount(list []entity2.Topic, userId int64) {
+func (u TopicService) UpdateTopicFlowListShowCount(list []entity.Topic, userId int64) {
 	err := initUserFlowPool.Submit(func() {
 		for _, topic := range list {
 			DefaultTopicFlowService.AddUserFlowShowCount(userId, topic.Id)
@@ -154,13 +192,13 @@ func (u TopicService) UpdateTopicFlowListShowCount(list []entity2.Topic, userId 
 }
 
 //根据id列表对 entity.Topic 列表排序
-func (u TopicService) sortTopicListByIds(list []entity2.Topic, ids []int64) []entity2.Topic {
-	topicMap := make(map[int64]entity2.Topic)
+func (u TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []entity.Topic {
+	topicMap := make(map[int64]entity.Topic)
 	for _, topic := range list {
 		topicMap[topic.Id] = topic
 	}
 
-	newList := make([]entity2.Topic, 0)
+	newList := make([]entity.Topic, 0)
 	for _, id := range ids {
 		newList = append(newList, topicMap[id])
 	}
@@ -182,11 +220,6 @@ func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, stri
 		return nil, "", errors.New(resp.ErrMsg)
 	}
 	return resp.Buffer, resp.ContentType, nil
-}
-
-// FindById 根据id查询 entity.Topic
-func (u TopicService) FindById(topicId int64) entity2.Topic {
-	return u.r.FindById(topicId)
 }
 
 // UpdateTopicSort 更新内容的排序权重
@@ -229,7 +262,7 @@ func (u TopicService) ImportUser(filename string) error {
 		//avatarImage := row[2]
 		wechat := row[3]
 		phone := row[4]
-		user := entity2.User{}
+		user := entity.User{}
 		if nickname == "星星充电" {
 			app.DB.Where("openid = ?", wechat).First(&user)
 		} else {
@@ -253,7 +286,7 @@ func (u TopicService) ImportUser(filename string) error {
 			AvatarUrl:   avatar,
 			Nickname:    nickname,
 			PhoneNumber: phone,
-			Source:      entity2.UserSourceMio,
+			Source:      entity.UserSourceMio,
 		})
 		if err != nil {
 			return errors.Errorf("创建用户失败 %s %v", nickname, err)
@@ -344,7 +377,7 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 			tag2Text = strings.Trim(row[7], " ")
 		}
 
-		users := make([]entity2.User, 0)
+		users := make([]entity.User, 0)
 
 		if nickname == "咚的一声不响" {
 			err = app.DB.Where("phone_number = ?", "19988433595").Find(&users).Error
@@ -375,7 +408,7 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 
 		topicTag := ""
 		topicTagId := ""
-		var tag1, tag2 *entity2.Tag
+		var tag1, tag2 *entity.Tag
 		if tag1Text != "" {
 			err = app.DB.Where("name = ?", tag1Text).First(&tag1).Error
 			if err != nil {
@@ -407,7 +440,7 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 			return errors.WithMessagef(err, "获取topic%d图片失败", importId)
 		}
 
-		topic := entity2.Topic{
+		topic := entity.Topic{
 			TopicTag:   topicTag,
 			UserId:     users[0].ID,
 			Title:      title,
@@ -428,14 +461,14 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 			if err != nil {
 				return errors.WithMessagef(err, "创建topic%d失败", importId)
 			}
-			app.DB.Model(entity2.Topic{}).Where("id = ?", topic.Id).Updates(map[string]interface{}{
+			app.DB.Model(entity.Topic{}).Where("id = ?", topic.Id).Updates(map[string]interface{}{
 				"created_at": time.Now().Add(time.Duration(int64(math.Ceil(rand.Float64()*-1200))) * time.Hour),
 				"updated_at": time.Now().Add(time.Duration(int64(math.Ceil(rand.Float64()*-1200))) * time.Hour),
 			})
 		}
 
 		if tag1 != nil {
-			topicTag := entity2.TopicTag{
+			topicTag := entity.TopicTag{
 				TopicId: topic.Id,
 				TagId:   tag1.Id,
 			}
@@ -451,7 +484,7 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 			}
 		}
 		if tag2 != nil {
-			topicTag := entity2.TopicTag{
+			topicTag := entity.TopicTag{
 				TopicId: topic.Id,
 				TagId:   tag2.Id,
 			}
@@ -470,6 +503,84 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 
 	return nil
 }
+
+//CreateTopic 创建文章
+func (u TopicService) CreateTopic(userId int64, avatarUrl, nikeName, title, images, content string, tagIds []int64) error {
+	//tag
+	tagModel := make([]entity.Tag, 0)
+	for _, tagId := range tagIds {
+		tagModel = append(tagModel, entity.Tag{
+			Id: tagId,
+		})
+	}
+	//topic
+	topicModel := &entity.Topic{
+		UserId:    userId,
+		Title:     title,
+		Content:   content,
+		ImageList: images,
+		Status:    1,
+		Avatar:    avatarUrl,
+		Nickname:  nikeName,
+		Tags:      tagModel,
+		CreatedAt: model.Time{},
+		UpdatedAt: model.Time{},
+	}
+	if err := u.r.Save(topicModel); err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateTopic 更新帖子
+func (u TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topicId int64, title, images, content string, tagIds []int64) error {
+	//查询记录是否存在
+	topicModel := u.r.FindById(topicId)
+	if topicModel.Id == 0 {
+		return errors.New("该帖子不存在")
+	}
+	if topicModel.UserId != userId {
+		return errors.New("无权限修改")
+	}
+	//tag
+	tagModel := make([]entity.Tag, 0)
+	for _, tagId := range tagIds {
+		tagModel = append(tagModel, entity.Tag{
+			Id: tagId,
+		})
+	}
+	//更新帖子
+	topicModel.Title = title
+	topicModel.Avatar = avatarUrl
+	topicModel.Nickname = nikeName
+	topicModel.ImageList = images
+	topicModel.Content = content
+	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
+		return err
+	}
+	err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DelTopic 软删除
+func (u TopicService) DelTopic(userId, topicId int64) error {
+	topicModel := u.r.FindById(topicId)
+	if topicModel.Id == 0 {
+		return errors.New("该帖子不存在")
+	}
+	if topicModel.UserId != userId {
+		return errors.New("无权限删除")
+	}
+	topicModel.Status = 0
+	if err := app.DB.Model(&entity.Topic{}).Save(topicModel).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func getTopicImage(importId int, p string) ([]string, error) {
 	files, err := ioutil.ReadDir(path.Join(p, strconv.Itoa(importId)))
 	if err != nil {
