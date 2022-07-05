@@ -99,7 +99,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
 			topicRouter.POST("/like/change", apiutil.Format(api.DefaultTopicController.ChangeTopicLike))
-			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
+			//topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 		}
 
 		//积分相关路由
