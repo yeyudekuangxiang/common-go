@@ -131,6 +131,7 @@ func (srv CarbonCreditsLogService) FormatCarbonCreditLogList(list []rbusiness.Ca
 	return res
 }
 
+//test
 func (srv CarbonCreditsLogService) GetCarbonCreditLogListHistoryBy(by rbusiness.GetCarbonCreditsLogSortedListBy) map[string]CarbonCreditLogListHistoryResponse {
 	var CarbonCreditLogListHistoryResponseMap map[string]CarbonCreditLogListHistoryResponse
 	CarbonCreditLogListHistoryResponseMap = make(map[string]CarbonCreditLogListHistoryResponse)
