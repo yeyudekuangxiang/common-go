@@ -19,6 +19,10 @@ func Router(router *gin.Engine) {
 		context.String(200, "c636e427fa1d442771a93ff2885d6c15")
 	})
 
+	router.Any("pt04CfOnB5.txt", func(context *gin.Context) {
+		context.String(200, "e2082465010d1787e6090c37ed629674")
+	})
+
 	apiRouter(router)
 	adminRouter(router)
 	openRouter(router)
