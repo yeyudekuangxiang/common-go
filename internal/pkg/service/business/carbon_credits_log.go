@@ -99,6 +99,7 @@ func (srv CarbonCreditsLogService) GetCarbonCreditLogSortedListByCid(param GetCa
 	return []rbusiness.CarbonCreditsLogSortedList{}
 }
 
+//test
 func (srv CarbonCreditsLogService) FormatCarbonCreditLogList(list []rbusiness.CarbonCreditsLogSortedList) []CarbonCreditsLogSortedListResponse {
 	var res []CarbonCreditsLogSortedListResponse
 	//查询减碳场景
