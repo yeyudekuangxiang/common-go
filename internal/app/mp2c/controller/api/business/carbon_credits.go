@@ -71,13 +71,12 @@ func (CarbonCreditsController) GetCarbonCreditLogSortedListHistory(ctx *gin.Cont
 	//先拿token,然后拿到公司id
 	user := apiutil.GetAuthBusinessUser(ctx)
 	Company := business.DefaultCompanyService.GetCompanyById(user.BCompanyId)
-	//企业碳减排信息
 	if Company.ID <= 0 {
-
+		return gin.H{}, nil
 	}
 	userList := business.DefaultUserService.GetBusinessUserListByCid(Company.ID)
 	if len(userList) == 0 || userList[0].ID == 0 {
-
+		return gin.H{}, nil
 	}
 	var ids []int64
 	for _, v := range userList {
