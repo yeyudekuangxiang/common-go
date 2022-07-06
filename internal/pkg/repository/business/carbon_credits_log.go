@@ -152,6 +152,9 @@ func (repo CarbonCreditsLogRepository) GetCarbonCreditsLogListHistory(by GetCarb
 	if by.UserId != 0 {
 		db.Where("b_user_id = ?", by.UserId)
 	}
+	if len(by.UserIds) > 0 {
+		db.Where("b_user_id in (?)", by.UserIds)
+	}
 	if err := db.Select("sum(\"value\") as total ,substring(cast(created_at as varchar),1,7) as month,type").Group("month,type").Order("month desc,total desc").Find(&list).Error; err != nil {
 		panic(err)
 	}

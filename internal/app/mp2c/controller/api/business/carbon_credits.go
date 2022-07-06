@@ -68,7 +68,22 @@ func (CarbonCreditsController) GetUserCarbonCreditLogSortedList(ctx *gin.Context
 }
 
 func (CarbonCreditsController) GetCarbonCreditLogSortedListHistory(ctx *gin.Context) (gin.H, error) {
-	list := business.DefaultCarbonCreditsLogService.GetCarbonCreditLogListHistoryBy(business2.GetCarbonCreditsLogSortedListBy{})
+	//先拿token,然后拿到公司id
+	user := apiutil.GetAuthBusinessUser(ctx)
+	Company := business.DefaultCompanyService.GetCompanyById(user.BCompanyId)
+	//企业碳减排信息
+	if Company.ID <= 0 {
+
+	}
+	userList := business.DefaultUserService.GetBusinessUserListByCid(Company.ID)
+	if len(userList) == 0 || userList[0].ID == 0 {
+
+	}
+	var ids []int64
+	for _, v := range userList {
+		ids = append(ids, v.ID)
+	}
+	list := business.DefaultCarbonCreditsLogService.GetCarbonCreditLogListHistoryBy(business2.GetCarbonCreditsLogSortedListBy{UserIds: ids})
 	return gin.H{
 		"list": list,
 	}, nil
