@@ -28,8 +28,8 @@ type CarbonCollectSaveWaterElectricityForm struct {
 	Electricity int64 `json:"electricity" form:"electricity" binding:"required_if=Water 0" alias:"电量"`
 }
 type CarbonCollectPublicTransportForm struct {
-	Bus   int64 `json:"bus" form:"bus" binding:"required_if=Metro 0,lte=30" alias:"公交"`
-	Metro int64 `json:"metro" form:"metro" binding:"required_if=Bus 0,lte=30" alias:"地铁"`
+	Bus   float64 `json:"bus" form:"bus" binding:"required_if=Metro 0,lte=30" alias:"公交"`
+	Metro float64 `json:"metro" form:"metro" binding:"required_if=Bus 0,lte=30" alias:"地铁"`
 }
 type GetCarbonCreditLogSortedListForm struct {
 	StartTime time.Time `json:"startTime" form:"startTime" binding:"required" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
