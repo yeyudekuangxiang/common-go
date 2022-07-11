@@ -149,7 +149,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 }
 
 //CarbonCreditPublicTransport 公交地铁
-func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus int64, metro int64) (*CarbonResult, error) {
+func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus float64, metro float64) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditSavePublicTransport%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
 		return nil, errors.New("操作频率过快,请稍后再试")

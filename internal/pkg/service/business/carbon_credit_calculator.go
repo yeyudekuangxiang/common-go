@@ -32,13 +32,13 @@ func (srv CarbonCreditCalculatorService) CalcSaveElectricity(electricity int64) 
 }
 
 // CalcBus 乘坐公交车 km
-func (srv CarbonCreditCalculatorService) CalcBus(bus int64) decimal.Decimal {
-	return decimal.NewFromFloat(float64(bus) * 111.45).Round(2)
+func (srv CarbonCreditCalculatorService) CalcBus(bus float64) decimal.Decimal {
+	return decimal.NewFromFloat(bus * 111.45).Round(2)
 }
 
 //CalcMetro 乘坐地铁 km
-func (srv CarbonCreditCalculatorService) CalcMetro(metro int64) decimal.Decimal {
-	return decimal.NewFromFloat(float64(metro) * 134.05).Round(2)
+func (srv CarbonCreditCalculatorService) CalcMetro(metro float64) decimal.Decimal {
+	return decimal.NewFromFloat(metro * 134.05).Round(2)
 }
 
 /*

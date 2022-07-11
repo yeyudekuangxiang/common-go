@@ -165,8 +165,8 @@ type SendCarbonCreditSaveWaterElectricityResult struct {
 }
 type SendCarbonCreditSavePublicTransportParam struct {
 	UserId        int64
-	Bus           int64
-	Metro         int64
+	Bus           float64
+	Metro         float64
 	TransactionId string
 }
 type SendCarbonCreditSavePublicTransportResult struct {

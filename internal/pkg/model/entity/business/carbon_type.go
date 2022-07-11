@@ -119,8 +119,8 @@ func (c CarbonTypeInfoSaveWaterElectricity) PointTypeInfo() PointTypeInfo {
 }
 
 type CarbonTypeInfoPublicTransport struct {
-	Bus   int64 //公里
-	Metro int64 //公里
+	Bus   float64 //公里
+	Metro float64 //公里
 }
 
 func (c CarbonTypeInfoPublicTransport) CarbonTypeInfo() CarbonTypeInfo {

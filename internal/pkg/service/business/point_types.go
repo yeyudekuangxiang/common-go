@@ -110,8 +110,8 @@ type SendPointSaveWaterElectricityParam struct {
 }
 type SendPointPublicTransportParam struct {
 	UserId        int64
-	Bus           int64
-	Metro         int64
+	Bus           float64
+	Metro         float64
 	BusCredit     decimal.Decimal
 	MetroCredit   decimal.Decimal
 	TransactionId string
