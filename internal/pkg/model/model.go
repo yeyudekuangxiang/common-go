@@ -50,7 +50,7 @@ func (t Time) Value() (driver.Value, error) {
 	if t.IsZero() {
 		return nil, nil
 	}
-	return t.Format(timeFormat), nil
+	return t.Time, nil
 }
 func (t *Time) Scan(value interface{}) error {
 	ti, ok := value.(time.Time)
@@ -112,7 +112,7 @@ func (d Date) Value() (driver.Value, error) {
 	if d.IsZero() {
 		return nil, nil
 	}
-	return d.Time.Format(dateFormat), nil
+	return d.Time, nil
 }
 func (d *Date) Scan(value interface{}) error {
 	t, ok := value.(time.Time)

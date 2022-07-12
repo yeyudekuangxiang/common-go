@@ -5,6 +5,7 @@ import (
 	"mio/internal/app/mp2c/controller/api"
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
+	"mio/internal/app/mp2c/controller/api/business"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/middleware"
@@ -24,6 +25,8 @@ func apiRouter(router *gin.Engine) {
 		{
 			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))     //获取验证码
 			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM)) //校验验证码
+			//企业用户获取token
+			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
 
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))

@@ -1,0 +1,43 @@
+package business
+
+import "mio/internal/pkg/model"
+
+type User struct {
+	ID            int64      `json:"-" gorm:"primaryKey;not null;type:serial8;comment:企业用户表"`
+	Uid           string     `json:"uid" gorm:"not null;type:varchar(100);comment:uuid"`
+	BDepartmentId int        `json:"bDepartmentId" gorm:"not null;type:int4;comment:所属企业版部门id"`
+	BCompanyId    int        `json:"-" gorm:"not null;type:int4;comment:所属企业版企业表主键id"`
+	Nickname      string     `json:"nickname" gorm:"not null;type:varchar(100);comment:昵称"`
+	Mobile        string     `json:"mobile" gorm:"not null;type:varchar(20);comment:手机号"`
+	TelephoneCode string     `json:"telephoneCode" gorm:"not null;type:varchar(10);default:'86';comment:国际区号 默认86"`
+	Realname      string     `json:"realname" gorm:"not null;type:varchar(20);default:'';comment:真实姓名"`
+	Avatar        string     `json:"avatar" gorm:"not null;type:varchar(500);default:'';comment:头像链接"`
+	Status        int8       `json:"status" gorm:"not null;type:int2;default:1;comment:在职状态 1在职 2离职"`
+	CreatedAt     model.Time `json:"createdAt" gorm:"not null;type:timestamp"`
+	UpdatedAt     model.Time `json:"updatedAt" gorm:"not null;type:timestamp"`
+}
+
+func (User) TableName() string {
+	return "business_user"
+}
+func (u User) ShortUser() ShortUser {
+	return ShortUser{
+		ID:       u.ID,
+		Uid:      u.Uid,
+		Nickname: u.Nickname,
+		Realname: u.Realname,
+		Avatar:   u.Avatar,
+	}
+}
+
+type ShortUser struct {
+	ID       int64  `json:"-" gorm:"primaryKey;not null;type:serial8;comment:企业用户表"`
+	Uid      string `json:"uid" gorm:"not null;type:varchar(100);comment:uuid"`
+	Nickname string `json:"nickname" gorm:"not null;type:varchar(100);comment:昵称"`
+	Realname string `json:"realname" gorm:"not null;type:varchar(20);default:'';comment:真实姓名"`
+	Avatar   string `json:"avatar" gorm:"not null;type:varchar(500);default:'';comment:头像链接"`
+}
+
+func (ShortUser) TableName() string {
+	return "business_user"
+}
