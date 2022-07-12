@@ -51,3 +51,30 @@ type GetDuiBaActivityQrForm struct {
 	ActivityId string `json:"activityId" form:"activityId" binding:"required" alias:"activityId"`
 	Password   string `json:"password" form:"password" binding:"required" alias:"password"`
 }
+
+type GDDbActivityHomePageForm struct {
+	//UserId   int64 `json:"userId" form:"userId" alias:"userId"`
+	InviteId int64 `json:"inviteId" form:"inviteId" alias:"inviteId"`
+}
+
+type GDDbActivitySchoolForm struct {
+	UserName string `json:"userName" form:"userName" binding:"required" alias:"userName"`
+	SchoolId int64  `json:"schoolId" form:"schoolId" binding:"required" alias:"schoolId"`
+	//ProvinceId  int64  `json:"provinceId" form:"provinceId" binding:"required" alias:"provinceId"`                   //省id
+	CityId int64 `json:"cityId" form:"cityId" binding:"required" alias:"cityId"` //市id
+	//AreaId      int64  `json:"areaId" form:"areaId" binding:"required" alias:"areaId"`                               //区id
+	GradeId     int64  `json:"gradeId" form:"gradeId" binding:"required" alias:"gradeId"`                            //年级id
+	ClassNumber uint32 `json:"classNumber" form:"classNumber" binding:"required,max=1000,min=1" alias:"classNumber"` //班级号码
+}
+
+type GDDbSelectSchoolForm struct {
+	SchoolName string `json:"schoolName" form:"schoolName" alias:"schoolName"`
+	CityId     int64  `json:"cityId" form:"cityId" binding:"gte=0" alias:"cityId"`
+	GradeId    int64  `json:"gradeId" form:"gradeId" binding:"gte=0" alias:"gradeId"`
+}
+
+type GDDbCreateSchoolForm struct {
+	SchoolName string `json:"schoolName" form:"schoolName" binding:"required" alias:"schoolName"`
+	CityId     int64  `json:"cityId" form:"cityId" binding:"required,number" alias:"cityId"`
+	GradeType  int    `json:"gradeType" form:"gradeType" binding:"gte=0" alias:"gradeType"`
+}

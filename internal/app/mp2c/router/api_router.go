@@ -42,7 +42,8 @@ func apiRouter(router *gin.Engine) {
 
 		//h5活动页调用
 		authRouter.POST("/activity/boc/record", apiutil.Format(activityApi.DefaultBocController.FindOrCreateRecord))
-
+		//广东小学图书馆公益捐书活动
+		authRouter.POST("/activity/answer/homepage", apiutil.Format(activityApi.DefaultAnswerController.HomePage))
 	}
 
 	//必须登陆的路由
@@ -83,6 +84,17 @@ func apiRouter(router *gin.Engine) {
 			activityRouter.POST("/zero/storeurl", apiutil.Format(activityApi.DefaultZeroController.StoreUrl))
 			activityRouter.POST("/duiba/autologin", apiutil.Format(activityApi.DefaultZeroController.DuiBaAutoLogin))
 			activityRouter.POST("/duiba/storeurl", apiutil.Format(activityApi.DefaultZeroController.DuiBaStoreUrl))
+			//广东小学图书馆公益捐书活动
+			activityRouter.POST("/answer/start-question", apiutil.Format(activityApi.DefaultAnswerController.StartQuestion))
+			activityRouter.POST("/answer/end-question", apiutil.Format(activityApi.DefaultAnswerController.EndQuestion))
+			activityRouter.POST("/answer/create-school", apiutil.Format(activityApi.DefaultAnswerController.CreateSchool))
+			activityRouter.GET("/answer/get-city-list", apiutil.Format(activityApi.DefaultAnswerController.GetCityList))
+			activityRouter.GET("/answer/get-grade-list", apiutil.Format(activityApi.DefaultAnswerController.GetGradeList))
+			activityRouter.GET("/answer/get-school-list", apiutil.Format(activityApi.DefaultAnswerController.GetSchoolList))
+			activityRouter.GET("/answer/get-achievement", apiutil.Format(activityApi.DefaultAnswerController.GetAchievement))
+			activityRouter.POST("/answer/put-file", apiutil.Format(activityApi.DefaultAnswerController.PutFile))
+			activityRouter.GET("/answer/get-user-school", apiutil.Format(activityApi.DefaultAnswerController.GetUserSchool))
+			activityRouter.POST("/answer/close-late-tips", apiutil.Format(activityApi.DefaultAnswerController.CloseLateTips))
 		}
 
 		//酷喵圈相关路由
@@ -90,6 +102,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
 			topicRouter.POST("/like/change", apiutil.Format(api.DefaultTopicController.ChangeTopicLike))
+			//topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 		}
 
 		//积分相关路由
