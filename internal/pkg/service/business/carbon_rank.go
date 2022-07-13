@@ -264,7 +264,7 @@ func (srv CarbonRankService) InitUserRank(dateType business.RankDateType) {
 		app.Logger.Info("20个小时内已经有一个线程初始化过")
 		return
 	}
-
+	app.Logger.Info("生成用户排行榜", dateType)
 	offset := 0
 	for {
 		list, _, err := DefaultCompanyService.GetCompanyPageList(GetCompanyPageListParam{
@@ -358,6 +358,7 @@ func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) 
 		app.Logger.Info("20个小时内已经有一个线程初始化过")
 		return
 	}
+	app.Logger.Info("生成部门排行榜", dateType)
 	offset := 0
 	for {
 		list, _, err := DefaultCompanyService.GetCompanyPageList(GetCompanyPageListParam{
