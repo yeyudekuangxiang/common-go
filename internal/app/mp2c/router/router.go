@@ -27,4 +27,5 @@ func Router(router *gin.Engine) {
 	adminRouter(router)
 	openRouter(router)
 	pugcRouter(router)
+	BusinessRouter(router)
 }
