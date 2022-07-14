@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity/business"
 	"mio/pkg/errno"
+	"time"
 )
 
 var DefaultCarbonRankRepository = CarbonRankRepository{DB: app.DB}
@@ -33,6 +34,7 @@ func (repo CarbonRankRepository) FindCarbonRank(by FindCarbonRankBy) business.Ca
 	if by.DateType != "" {
 		db.Where("date_type = ?", by.DateType)
 	}
+	fmt.Println("失去", time.Now())
 	if !by.TimePoint.IsZero() {
 		db.Where("time_point =  ?", by.TimePoint)
 	}

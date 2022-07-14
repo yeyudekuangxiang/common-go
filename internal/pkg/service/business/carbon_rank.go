@@ -2,12 +2,11 @@ package business
 
 import (
 	"errors"
+	"fmt"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
-	"mio/internal/pkg/util"
-	"time"
 )
 
 var DefaultCarbonRankService = CarbonRankService{repo: rbusiness.DefaultCarbonRankRepository}
@@ -47,6 +46,7 @@ func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*bus
 
 	rank.LikeNum += likeNumStep
 
+	fmt.Printf("%+v\n", rank)
 	return like, srv.repo.Save(&rank)
 }
 
@@ -260,10 +260,10 @@ func (srv CarbonRankService) FindDepartmentRank(param FindDepartmentRankParam) (
 
 // InitUserRank 生成用户排名信息
 func (srv CarbonRankService) InitUserRank(dateType business.RankDateType) {
-	if !util.DefaultLock.Lock(string("InitUserRank_"+dateType), time.Hour*20) {
+	/*if !util.DefaultLock.Lock(string("InitUserRank_"+dateType), time.Hour*20) {
 		app.Logger.Info("20个小时内已经有一个线程初始化过")
 		return
-	}
+	}*/
 	app.Logger.Info("生成用户排行榜", dateType)
 	offset := 0
 	for {
@@ -354,10 +354,10 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 
 // InitDepartmentRank 生成部门排名信息
 func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) {
-	if !util.DefaultLock.Lock(string("InitDepartmentRank_"+dateType), time.Hour*20) {
+	/*if !util.DefaultLock.Lock(string("InitDepartmentRank_"+dateType), time.Hour*20) {
 		app.Logger.Info("20个小时内已经有一个线程初始化过")
 		return
-	}
+	}*/
 	app.Logger.Info("生成部门排行榜", dateType)
 	offset := 0
 	for {
