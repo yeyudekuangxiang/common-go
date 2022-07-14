@@ -22,7 +22,6 @@ func init() {
 }
 func main() {
 	cron.Run()
-
 	server.RunServer()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)

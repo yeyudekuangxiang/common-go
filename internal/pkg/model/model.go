@@ -57,6 +57,7 @@ func (t *Time) Scan(value interface{}) error {
 	if !ok {
 		return errors.New("Time type error")
 	}
+	fmt.Printf("时间时间 %+v\n", ti)
 	t.Time = ti
 	return nil
 }

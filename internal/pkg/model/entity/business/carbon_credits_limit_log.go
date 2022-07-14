@@ -11,9 +11,9 @@ type CarbonCreditsLimitLog struct {
 	BUserId      int64           `json:"-" gorm:"not null;type:int8;comment:企业用户表主键"`
 	CurrentCount int             `json:"currentCount" gorm:"not null;type:int4;comment:当天已获取碳积分次数"`
 	CurrentValue decimal.Decimal `json:"currentValue" gorm:"not null;type:decimal(10,2);comment:当天已获得碳积分值"`
-	TimePoint    model.Time      `json:"timePoint" gorm:"not null;type:timestamp;comment:时间点 2006-01-02 00:00:00"`
-	CreatedAt    model.Time      `json:"createdAt" gorm:"not null;type:timestamp"`
-	UpdatedAt    model.Time      `json:"updatedAt" gorm:"not null;type:timestamp"`
+	TimePoint    model.Time      `json:"timePoint" gorm:"not null;type:timestamptz;comment:时间点 2006-01-02 00:00:00"`
+	CreatedAt    model.Time      `json:"createdAt" gorm:"not null;type:timestamptz"`
+	UpdatedAt    model.Time      `json:"updatedAt" gorm:"not null;type:timestamptz"`
 }
 
 func (CarbonCreditsLimitLog) TableName() string {

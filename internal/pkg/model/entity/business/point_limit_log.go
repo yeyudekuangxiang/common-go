@@ -9,8 +9,8 @@ type PointLimitLog struct {
 	CurrentCount int        `json:"currentCount" gorm:"not null;type:int4;comment:当天已获取积分次数"`
 	CurrentValue int        `json:"currentValue" gorm:"not null;type:int4;comment:当天已获得积分值"`
 	TimePoint    model.Time `json:"timePoint" gorm:"not null;type:timestamp;comment:时间点 2006-01-02 00:00:00"`
-	CreatedAt    model.Time `json:"createdAt" gorm:"not null;type:timestamp"`
-	UpdatedAt    model.Time `json:"updatedAt" gorm:"not null;type:timestamp"`
+	CreatedAt    model.Time `json:"createdAt" gorm:"not null;type:timestamptz"`
+	UpdatedAt    model.Time `json:"updatedAt" gorm:"not null;type:timestamptz"`
 }
 
 func (PointLimitLog) TableName() string {

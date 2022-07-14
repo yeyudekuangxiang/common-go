@@ -69,7 +69,7 @@ GROUP BY buser.id) as t
 	list := make([]business.UserCarbonRank, 0)
 	var total int64
 
-	err := db.Count(&total).Limit(by.Limit).Offset(by.Offset).Order("value desc").Find(&list).Error
+	err := db.Count(&total).Limit(by.Limit).Offset(by.Offset).Order("value desc,user_id asc").Find(&list).Error
 	return list, total, err
 }
 
@@ -118,7 +118,7 @@ GROUP BY
 	list := make([]business.DepartCarbonRank, 0)
 	var total int64
 
-	err := db.Count(&total).Limit(by.Limit).Offset(by.Offset).Order("value desc").Find(&list).Error
+	err := db.Count(&total).Limit(by.Limit).Offset(by.Offset).Order("value desc,department_id asc").Find(&list).Error
 	return list, total, err
 }
 func (repo CarbonCreditsLogRepository) GetSortedListBy(by GetCarbonCreditsLogSortedListBy) []CarbonCreditsLogSortedList {

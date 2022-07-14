@@ -48,9 +48,9 @@ type CarbonRank struct {
 	Rank       int             `json:"rank" gorm:"not null;type:int4;comment:榜单排名"`
 	Pid        int64           `json:"-" gorm:"not null;type:int8;comment:根据object_type 分别对应 user表和department表主键"`
 	LikeNum    int             `json:"likeNum" gorm:"not null;type:int4;comment:点赞数量"`
-	TimePoint  model.Time      `json:"timePoint" gorm:"not null;type:timestamp;comment:根据date_type 记录日 周 月 开始的时间节点 2006-01-02 00:00:00"` //同一个用户  日榜每天都会有一条记录 周榜每周有一条记录 月榜每月有一条记录
-	CreatedAt  model.Time      `json:"createdAt" gorm:"not null;type:timestamp"`
-	UpdatedAt  model.Time      `json:"updatedAt" gorm:"not null;type:timestamp"`
+	TimePoint  model.Time      `json:"timePoint" gorm:"not null;type:timestamptz;comment:根据date_type 记录日 周 月 开始的时间节点 2006-01-02 00:00:00"` //同一个用户  日榜每天都会有一条记录 周榜每周有一条记录 月榜每月有一条记录
+	CreatedAt  model.Time      `json:"createdAt" gorm:"not null;type:timestamptz"`
+	UpdatedAt  model.Time      `json:"updatedAt" gorm:"not null;type:timestamptz"`
 }
 
 func (CarbonRank) TableName() string {
