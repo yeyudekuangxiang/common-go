@@ -13,8 +13,8 @@ type User struct {
 	Realname      string     `json:"realname" gorm:"not null;type:varchar(20);default:'';comment:真实姓名"`
 	Avatar        string     `json:"avatar" gorm:"not null;type:varchar(500);default:'';comment:头像链接"`
 	Status        int8       `json:"status" gorm:"not null;type:int2;default:1;comment:在职状态 1在职 2离职"`
-	CreatedAt     model.Time `json:"createdAt" gorm:"not null;type:timestamp"`
-	UpdatedAt     model.Time `json:"updatedAt" gorm:"not null;type:timestamp"`
+	CreatedAt     model.Time `json:"createdAt" gorm:"not null;type:timestamptz"`
+	UpdatedAt     model.Time `json:"updatedAt" gorm:"not null;type:timestamptz"`
 }
 
 func (User) TableName() string {

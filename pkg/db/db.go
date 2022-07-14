@@ -91,7 +91,7 @@ func NewMysqlDB(conf Config) (*gorm.DB, error) {
 //NewPostgresDB 创建PostgreSQL数据库链接
 func NewPostgresDB(conf Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		conf.Host,
 		conf.UserName,
 		conf.Password,
