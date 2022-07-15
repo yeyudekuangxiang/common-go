@@ -1,6 +1,7 @@
 package service
 
 import (
+	"mio/config"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/service_types"
@@ -34,7 +35,7 @@ func (srv UploadLogService) UpdateLog(logId, filename string, size int64) (*enti
 		return nil, errno.ErrRecordNotFound.WithCaller()
 	}
 	log.Size = size
-	log.Url = util.LinkJoin(OssDomain, log.OssPath, filename)
+	log.Url = util.LinkJoin(config.Config.OSS.CdnDomain, log.OssPath, filename)
 	return log, srv.repo.Save(log)
 }
 func (srv UploadLogService) FindUploadLog(logId string) (*entity.UploadLog, error) {

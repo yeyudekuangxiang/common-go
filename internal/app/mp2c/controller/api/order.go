@@ -2,9 +2,12 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller"
 	"mio/internal/app/mp2c/controller/api/api_types"
+	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -45,4 +48,23 @@ func (OrderController) SubmitOrderForEvent(ctx *gin.Context) (gin.H, error) {
 	return gin.H{
 		"badgeInfo": info,
 	}, nil
+}
+func (OrderController) GetUserOrderList(c *gin.Context) (interface{}, error) {
+	page := controller.PageFrom{}
+	if err := apiutil.BindForm(c, &page); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+
+	list, total, err := service.DefaultOrderService.GetPageFullOrder(srv_types.GetPageFullOrderDTO{
+		Openid:      user.OpenId,
+		OrderSource: entity2.OrderSourceMio,
+		Offset:      page.Offset(),
+		Limit:       page.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return controller.NewPageResult(list, total, page), nil
 }

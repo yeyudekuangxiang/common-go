@@ -66,7 +66,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		MimeTypes:      uploadScene.MimeTypes,
 		MaxSize:        uploadScene.MaxSize,
 		UploadId:       log.LogId,
-		Domain:         util.LinkJoin(OssDomain, uploadScene.OssDir),
+		Domain:         util.LinkJoin(config.Config.OSS.CdnDomain, uploadScene.OssDir),
 	}, nil
 }
 func (srv UploadService) UploadCallback(param service_types.UploadCallbackParam) error {

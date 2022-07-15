@@ -5,6 +5,7 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -26,7 +27,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 	if qrcode.ID != 0 {
 		imgUrl := qrcode.ImageUrl
 		if strings.Index(imgUrl, "http") == -1 {
-			imgUrl = util.LinkJoin(OssDomain, imgUrl)
+			imgUrl = util.LinkJoin(config.Config.OSS.CdnDomain, imgUrl)
 		}
 		return &QrCodeInfo{
 			QrCodeId:    qrcode.QrCodeId,

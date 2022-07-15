@@ -60,10 +60,11 @@ AppKey=
 AppSecret=
 
 [oss]
-Endpoint=
+CdnDomain=https://resources.miotech.com
+Endpoint=oss-cn-hongkong.aliyuncs.com
 AccessKey=
 AccessSecret=
-BasePath=static/mp2c
+BasePath=static/mp2c/test
 
 [baidu]
 AppKey=

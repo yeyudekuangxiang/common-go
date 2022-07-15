@@ -23,6 +23,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.4.8
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
+	github.com/shopspring/decimal v1.2.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.0

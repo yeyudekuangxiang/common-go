@@ -157,12 +157,16 @@ func apiRouter(router *gin.Engine) {
 
 		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 		mustAuthRouter.POST("/order/submit-from-event", apiutil.Format(api.DefaultOrderController.SubmitOrderForEvent))
+		mustAuthRouter.GET("/order/list", apiutil.FormatInterface(api.DefaultOrderController.GetUserOrderList))
 
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 
 		mustAuthRouter.POST("/badge/image", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeImage))
 		mustAuthRouter.GET("/badge/list", apiutil.Format(badge.DefaultBadgeController.GetBadgeList))
 		mustAuthRouter.POST("/badge/looked", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeIsNew))
+
+		//兑换券相关
+		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 	}
 
 }

@@ -11,11 +11,14 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repo_types"
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
+	"mio/pkg/duiba/util"
 	"mio/pkg/errno"
 	"strconv"
 	"time"
@@ -411,4 +414,11 @@ func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEv
 		CertificateNo: badge.Code,
 		UploadCode:    code,
 	}, nil
+}
+func (srv OrderService) GetPageFullOrder(dto srv_types.GetPageFullOrderDTO) ([]entity.OrderWithGood, int64, error) {
+	orderDO := repo_types.GetPageFullOrderDO{}
+	if err := util.MapTo(dto, &orderDO); err != nil {
+		return nil, 0, err
+	}
+	return srv.repo.GetPageFullOrder(orderDO)
 }

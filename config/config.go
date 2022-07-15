@@ -75,6 +75,7 @@ type duiBaSetting struct {
 	AppSecret string
 }
 type ossSetting struct {
+	CdnDomain    string
 	Endpoint     string
 	AccessKey    string
 	AccessSecret string

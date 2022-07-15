@@ -17,8 +17,6 @@ import (
 	"time"
 )
 
-const OssDomain = "https://miotech-resource.oss-cn-hongkong.aliyuncs.com"
-
 var DefaultOssService OssService
 
 func InitDefaultOssService() {
@@ -26,6 +24,7 @@ func InitDefaultOssService() {
 		client:   app.OssClient,
 		Bucket:   "miotech-resource",
 		BasePath: config.Config.OSS.BasePath,
+		Domain:   config.Config.OSS.CdnDomain,
 	}
 }
 
@@ -33,6 +32,7 @@ type OssService struct {
 	client   *oss.Client
 	Bucket   string
 	BasePath string
+	Domain   string
 }
 
 // PutObject name 文件路径  最终路径为 OssService.BasePath +"/"+ images/topic/tag/1.png
@@ -52,7 +52,7 @@ func (srv OssService) PubObjectAbsolutePath(name string, reader io.Reader) (stri
 	if err != nil {
 		return "", err
 	}
-	return util.LinkJoin(OssDomain, name), nil
+	return util.LinkJoin(srv.Domain, name), nil
 }
 func (srv OssService) GetPolicyToken(param service_types.GetOssPolicyTokenParam) (*service_types.OssPolicyToken, error) {
 	expireEnd := time.Now().Add(param.ExpireTime).Unix()

@@ -4,12 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/coupon"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repo_types"
 	"mio/internal/pkg/service/product"
+	"mio/internal/pkg/service/srv_types"
 
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -243,4 +246,36 @@ func (r CouponService) GenerateCouponBatch(param GenerateCouponBatchParam) ([]st
 	}
 
 	return couponIds, r.r.CreateBatch(&cps)
+}
+func (r CouponService) GetPageUserCouponRecord(getCouponDTO srv_types.GetPageCouponRecordDTO) ([]srv_types.BaseCouponRecordDTO, int64, error) {
+	getCouponDO := repo_types.GetPageUserCouponTypeDO{}
+	if err := util.MapTo(getCouponDTO, &getCouponDO); err != nil {
+		return nil, 0, err
+	}
+
+	couponTypeList, total, err := r.r.GetPageCouponRecord(getCouponDO)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	couponRecordList := make([]srv_types.BaseCouponRecordDTO, 0)
+
+	for _, couponType := range couponTypeList {
+		coverImage := util.LinkJoin(config.Config.OSS.CdnDomain, "/static/mp2c/images/coupon/redeem-point-icon.png")
+		if couponType.ProductItemId != "" {
+			productItem, err := product.DefaultProductItemService.FindProductByItemId(couponType.ProductItemId)
+			if err != nil {
+				return nil, 0, err
+			}
+			coverImage = productItem.ImageUrl
+		}
+
+		couponRecordList = append(couponRecordList, srv_types.BaseCouponRecordDTO{
+			ID:         couponType.ID,
+			CoverImage: coverImage,
+			Title:      couponType.Name,
+			UpdateDate: couponType.UpdateTime.Date(),
+		})
+	}
+	return couponRecordList, total, nil
 }

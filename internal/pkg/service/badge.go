@@ -69,7 +69,7 @@ func (srv BadgeService) GenerateCode(certificateId string) (string, error) {
 }
 func (srv BadgeService) GenerateRuleCode() string {
 	badge := srv.repo.FindLastWithType(entity.CertTypeRule)
-	currentDate := timeutils.Now().StartOfDay().String()
+	currentDate := timeutils.NowDate().String()
 
 	code := strings.Builder{}
 	code.WriteString(badgeCodePrefix)
