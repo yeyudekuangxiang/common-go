@@ -6,6 +6,7 @@ type UploadTokenInfo struct {
 	MaxSize        int64          `json:"maxSize"`
 	UploadId       string         `json:"uploadId"`
 	Domain         string         `json:"domain"`
+	MaxAge         int            `json:"maxAge"`
 }
 type FindSceneParam struct {
 	Scene string

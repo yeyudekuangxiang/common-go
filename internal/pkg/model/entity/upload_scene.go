@@ -14,6 +14,7 @@ type UploadScene struct {
 	MimeTypes model.ArrayString `gorm:"type:varchar(500);not null;comment:可上传的文件mime类型多个用英文逗号隔开 image/png,image/jpg"`
 	Scene     string            `gorm:"type:varchar(50);not null;comment:上传场景标识 必须是英文字母 例如 userAvatar"`
 	SceneName string            `gorm:"type:varchar(50);not null;comment:上传场景标识名称 例如 用户头像"`
+	MaxAge    int               `gorm:"type:int4;not null;default:0;comment:缓存时长 单位秒 0表示不缓存"`
 	CreatedAt time.Time         `gorm:"type:timestamp;not null"`
 	UpdatedAt time.Time         `gorm:"type:timestamp;not null"`
 }

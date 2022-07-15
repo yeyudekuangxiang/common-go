@@ -55,6 +55,8 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		MaxSize:     uploadScene.MaxSize,
 		UploadDir:   uploadScene.OssDir,
 		CallbackUrl: config.Config.App.Domain + "/api/mp2c/upload/callback",
+		MimeTypes:   uploadScene.MimeTypes,
+		MaxAge:      uploadScene.MaxAge,
 	})
 
 	if err != nil {
@@ -67,6 +69,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		MaxSize:        uploadScene.MaxSize,
 		UploadId:       log.LogId,
 		Domain:         util.LinkJoin(config.Config.OSS.CdnDomain, uploadScene.OssDir),
+		MaxAge:         uploadScene.MaxAge,
 	}, nil
 }
 func (srv UploadService) UploadCallback(param service_types.UploadCallbackParam) error {

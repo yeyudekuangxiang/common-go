@@ -64,6 +64,7 @@ func (srv OssService) GetPolicyToken(param service_types.GetOssPolicyTokenParam)
 	policyConfig.AddStartWithKey(param.UploadDir)
 	policyConfig.AddContentLength(param.MaxSize)
 	policyConfig.AddBucket(srv.Bucket)
+	policyConfig.AddMaxAge(param.MaxAge)
 	policyConfig.AddContentType(param.MimeTypes)
 
 	//calucate signature

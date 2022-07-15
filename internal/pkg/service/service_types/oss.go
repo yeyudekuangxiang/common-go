@@ -1,6 +1,8 @@
 package service_types
 
-import "time"
+import (
+	"time"
+)
 
 type GetOssPolicyTokenParam struct {
 	//有效期
@@ -10,6 +12,7 @@ type GetOssPolicyTokenParam struct {
 	UploadDir   string
 	CallbackUrl string
 	MimeTypes   []string
+	MaxAge      int //缓存有效期 单位秒
 }
 type OssPolicyConfig struct {
 	Expiration string        `json:"expiration"`
@@ -20,7 +23,7 @@ type OssPolicyConfig struct {
 func (c *OssPolicyConfig) AddContentLength(maxLength int64) {
 	c.Conditions = append(c.Conditions, []interface{}{
 		"content-length-range",
-		0,
+		1,
 		maxLength,
 	})
 }
@@ -32,8 +35,19 @@ func (c *OssPolicyConfig) AddBucket(bucket string) {
 	})
 }
 
+func (c *OssPolicyConfig) AddMaxAge(maxAge int) {
+	/*c.Conditions = append(c.Conditions, []interface{}{
+		"not-in",
+		"Cache-Control",
+		[]string{"no-cache"},
+	})*/
+}
+
 //AddContentType []string{"image/jpg","image/png"}
 func (c *OssPolicyConfig) AddContentType(contentTypes []string) {
+	if len(contentTypes) == 0 {
+		return
+	}
 	c.Conditions = append(c.Conditions, []interface{}{
 		"in",
 		"$content-type",
