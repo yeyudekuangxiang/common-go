@@ -68,7 +68,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		MimeTypes:      uploadScene.MimeTypes,
 		MaxSize:        uploadScene.MaxSize,
 		UploadId:       log.LogId,
-		Domain:         util.LinkJoin(config.Config.OSS.CdnDomain, uploadScene.OssDir),
+		Domain:         config.Config.OSS.CdnDomain,
 		MaxAge:         uploadScene.MaxAge,
 	}, nil
 }
