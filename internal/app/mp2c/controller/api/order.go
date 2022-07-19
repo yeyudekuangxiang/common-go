@@ -6,7 +6,6 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/service_types"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -37,7 +36,7 @@ func (OrderController) SubmitOrderForEvent(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(ctx)
-	info, err := service.DefaultOrderService.SubmitOrderForEvent(service_types.SubmitOrderForEventParam{
+	info, err := service.DefaultOrderService.SubmitOrderForEvent(srv_types.SubmitOrderForEventParam{
 		UserId:  user.ID,
 		EventId: form.EventId,
 	})

@@ -11,10 +11,9 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/repo_types"
+	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/product"
-	"mio/internal/pkg/service/service_types"
 	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
@@ -368,7 +367,7 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 		}
 	}
 }
-func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEventParam) (*service_types.SubmitOrderForEventResult, error) {
+func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventParam) (*srv_types.SubmitOrderForEventResult, error) {
 	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
 		EventId: param.EventId,
 		Active:  sql.NullBool{Bool: true, Valid: true},
@@ -400,7 +399,7 @@ func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEv
 		return nil, err
 	}
 
-	badge, err := DefaultBadgeService.FindBadge(service_types.FindBadgeParam{
+	badge, err := DefaultBadgeService.FindBadge(srv_types.FindBadgeParam{
 		OrderId: order.OrderId,
 	})
 	if err != nil {
@@ -410,13 +409,13 @@ func (srv OrderService) SubmitOrderForEvent(param service_types.SubmitOrderForEv
 	code := util2.UUID()
 
 	app.Redis.Set(context.Background(), config.RedisKey.BadgeImageCode+code, badge.ID, time.Minute*5)
-	return &service_types.SubmitOrderForEventResult{
+	return &srv_types.SubmitOrderForEventResult{
 		CertificateNo: badge.Code,
 		UploadCode:    code,
 	}, nil
 }
 func (srv OrderService) GetPageFullOrder(dto srv_types.GetPageFullOrderDTO) ([]entity.OrderWithGood, int64, error) {
-	orderDO := repo_types.GetPageFullOrderDO{}
+	orderDO := repotypes.GetPageFullOrderDO{}
 	if err := util.MapTo(dto, &orderDO); err != nil {
 		return nil, 0, err
 	}

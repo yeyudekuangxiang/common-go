@@ -1,4 +1,4 @@
-package service_types
+package srv_types
 
 import (
 	"time"

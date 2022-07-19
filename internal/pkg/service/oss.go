@@ -10,7 +10,7 @@ import (
 	"io"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"strings"
@@ -54,12 +54,12 @@ func (srv OssService) PubObjectAbsolutePath(name string, reader io.Reader) (stri
 	}
 	return util.LinkJoin(srv.Domain, name), nil
 }
-func (srv OssService) GetPolicyToken(param service_types.GetOssPolicyTokenParam) (*service_types.OssPolicyToken, error) {
+func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*srv_types.OssPolicyToken, error) {
 	expireEnd := time.Now().Add(param.ExpireTime).Unix()
 	tokenExpire := time.Unix(expireEnd, 0).UTC().Format("2006-01-02T15:04:05Z")
 
 	//create post policy json
-	policyConfig := service_types.OssPolicyConfig{}
+	policyConfig := srv_types.OssPolicyConfig{}
 	policyConfig.Expiration = tokenExpire
 	policyConfig.AddStartWithKey(param.UploadDir)
 	policyConfig.AddContentLength(param.MaxSize)
@@ -83,7 +83,7 @@ func (srv OssService) GetPolicyToken(param service_types.GetOssPolicyTokenParam)
 
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	callbackParam := service_types.OssCallbackParam{}
+	callbackParam := srv_types.OssCallbackParam{}
 	callbackParam.CallbackUrl = param.CallbackUrl
 	callbackParam.CallbackBody = "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}"
 	callbackParam.CallbackBodyType = "application/x-www-form-urlencoded"
@@ -94,7 +94,7 @@ func (srv OssService) GetPolicyToken(param service_types.GetOssPolicyTokenParam)
 	}
 	callbackBase64 := base64.StdEncoding.EncodeToString(callbackStr)
 
-	policyToken := service_types.OssPolicyToken{}
+	policyToken := srv_types.OssPolicyToken{}
 	policyToken.AccessKeyId = config.Config.OSS.AccessKey
 	policyToken.Host = "https://" + srv.Bucket + "." + config.Config.OSS.Endpoint
 	policyToken.Expire = expireEnd

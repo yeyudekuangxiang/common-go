@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository/repo_types"
+	"mio/internal/pkg/repository/repotypes"
 )
 
 var DefaultBadgeRepository = BadgeRepository{DB: app.DB}
@@ -35,7 +35,7 @@ func (repo BadgeRepository) FindUserCertCount(openid string) (int64, error) {
 	var total int64
 	return total, repo.DB.Model(entity.Badge{}).Where("openid = ?", openid).Count(&total).Error
 }
-func (repo BadgeRepository) FindBadge(by repo_types.FindBadgeBy) (*entity.Badge, error) {
+func (repo BadgeRepository) FindBadge(by repotypes.FindBadgeBy) (*entity.Badge, error) {
 	badge := entity.Badge{}
 	db := repo.DB.Model(badge)
 	if by.OrderId != "" {
@@ -50,7 +50,7 @@ func (repo BadgeRepository) FindBadge(by repo_types.FindBadgeBy) (*entity.Badge,
 	}
 	return &badge, nil
 }
-func (repo BadgeRepository) GetBadgeList(by repo_types.GetBadgeListBy) ([]entity.Badge, error) {
+func (repo BadgeRepository) GetBadgeList(by repotypes.GetBadgeListBy) ([]entity.Badge, error) {
 	db := repo.DB.Model(entity.Badge{})
 
 	if by.OpenId != "" {
