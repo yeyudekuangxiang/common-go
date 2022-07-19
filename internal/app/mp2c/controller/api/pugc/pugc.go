@@ -47,7 +47,7 @@ func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 
 func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 
-	service2.DefaultUnidianService.SendPrize(service2.UnidianTypeId.FiveYuan, "13817715315")
+	//	service2.DefaultUnidianService.SendPrize(service2.UnidianTypeId.FiveYuan, "13817715315", "")
 	//os.Exit(0)
 	return nil, nil
 	f := excelize.NewFile()

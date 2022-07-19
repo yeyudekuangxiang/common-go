@@ -141,12 +141,21 @@ func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 	if user.ID > 0 {
 		return &user, nil
 	}
+
+	cid := int64(1) //todo 待开发
+	//判断来源是否在库中
+	ok := DefaultUserChannelService.GetByCid(cid)
+	channelId := int64(0)
+	if ok != nil {
+		channelId = cid
+	}
 	return u.CreateUser(CreateUserParam{
 		OpenId:      mobile,
 		Nickname:    "手机用户" + mobile[len(mobile)-4:],
 		PhoneNumber: mobile,
 		Source:      entity.UserSourceMobile,
 		UnionId:     mobile,
+		ChannelId:   channelId,
 	})
 }
 
