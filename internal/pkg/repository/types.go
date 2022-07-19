@@ -50,6 +50,14 @@ type GetUserListBy struct {
 	OpenId     string
 	StartTime  time.Time
 	EndTime    time.Time
+	Risk       int
+}
+
+type GetUserPageListBy struct {
+	User    GetUserListBy
+	Offset  int    `json:"offset"`
+	Limit   int    `json:"limit"` //limit为0时不限制数量
+	OrderBy string `json:"orderBy"`
 }
 
 type FindPointBy struct {
@@ -164,4 +172,19 @@ type FindDuiBaPointAddLogBy struct {
 type FindCertificateBy struct {
 	ProductItemId string
 	CertificateId string
+}
+
+type FindUserChannelBy struct {
+	Cid  int64
+	Code string
+}
+
+type GetUserChannelPageListBy struct {
+	Name    string             `json:"name" `
+	Code    string             `json:"code" `
+	Cid     int                `json:"cid"`
+	Pid     int                `json:"pid"`
+	Offset  int                `json:"offset"`
+	Limit   int                `json:"limit"` //limit为0时不限制数量
+	OrderBy entity.OrderByList `json:"orderBy"`
 }

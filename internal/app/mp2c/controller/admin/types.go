@@ -58,3 +58,27 @@ type AdminLoginForm struct {
 	Account  string `json:"account" form:"account" binding:"required" alias:"账号"`
 	Password string `json:"password" form:"password" binding:"required" alias:"密码"`
 }
+
+type UserPageListForm struct {
+	Mobile    string    `json:"mobile" form:"mobile" alias:"手机号码"`
+	Nickname  string    `json:"nickname" form:"nickname"`
+	ID        int64     `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
+	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+}
+
+type GetUserChannelPageForm struct {
+	Cid  int    `json:"cid" form:"cid" binding:"" alias:"渠道id"`
+	Pid  int    `json:"pid" form:"pid" binding:"required" alias:"分类id不能为空"`
+	Name string `json:"name" form:"name" binding:"" alias:"渠道名称"`
+	Code string `json:"code" form:"code" binding:"" alias:"渠道code"`
+	controller.PageFrom
+}
+
+type CreateUserChannelForm struct {
+	Cid     int64  `json:"cid" form:"cid" binding:"gte=0" alias:"渠道id"`
+	Pid     int64  `json:"pid" form:"pid" binding:"gte=0" alias:"渠道父级ID"`
+	Name    string `json:"name" form:"name" binding:"required" alias:"渠道名称"`
+	Code    string `json:"code" form:"code" binding:"required" alias:"渠道code"`
+	Company string `json:"company" form:"company" binding:"" alias:"公司名称"`
+}

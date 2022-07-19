@@ -352,8 +352,8 @@ func (b BocService) SendApplyBonus(userId int64) error {
 	}
 
 	//后续进行实际话费充值操作
-	userInfo, _ := service2.DefaultUserService.GetUserById(userId)                                        //需要手机号码
-	err = service2.DefaultUnidianService.SendPrize(service2.UnidianTypeId.FiveYuan, userInfo.PhoneNumber) //充话费
+	userInfo, _ := service2.DefaultUserService.GetUserById(userId)                                                                 //需要手机号码
+	err = service2.DefaultUnidianService.SendPrize(service2.UnidianTypeId.FiveYuan, userInfo.PhoneNumber, config.RedisKey.UniDian) //充话费
 	if err != nil {
 		return err
 	}

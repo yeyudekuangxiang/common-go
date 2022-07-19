@@ -31,16 +31,19 @@ type CreateUserParam struct {
 	PhoneNumber string            `json:"phoneNumber"`
 	Source      entity.UserSource `json:"source" binding:"oneof=mio mobile"`
 	UnionId     string            `json:"unionId"`
+	ChannelId   int64             `json:"int64"`
 }
 
 type unidianTypeId struct {
-	Test     string
-	FiveYuan string
+	Test       string
+	FiveYuan   string
+	TwentyYuan string
 }
 
 var UnidianTypeId = unidianTypeId{
-	Test:     "10013", // 测试
-	FiveYuan: "10689", // 5元话费
+	Test:       "10013", // 测试
+	FiveYuan:   "10689", // 5元话费
+	TwentyYuan: "10725", // 20元话费
 }
 
 type SubmitOrderParam struct {

@@ -14,5 +14,6 @@ func pugcRouter(router *gin.Engine) {
 	{
 		pugcRouter.GET("/addPugc", apiutil.Format(pugc.DefaultPugcController.AddPugc))
 		pugcRouter.POST("/ex", apiutil.Format(pugc.DefaultPugcController.ExportExcel))
+		//pugcRouter.POST("/phoneTen", apiutil.Format(pugc.DefaultPugcController.SendTwentyYuanByExcel))
 	}
 }

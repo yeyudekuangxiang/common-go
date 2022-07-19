@@ -27,11 +27,16 @@ func adminRouter(router *gin.Engine) {
 			pointRouter.GET("/adjust/list", apiutil.Format(admin.DefaultPointController.GetAdjustRecordPageList))
 			pointRouter.GET("/adjust/type/list", apiutil.Format(admin.DefaultPointController.GetAdjustPointTransactionTypeList))
 		}
-
 		fileExportRouter := adminRouter.Group("/file-export")
 		{
 			fileExportRouter.GET("/list", apiutil.Format(admin.DefaultFileExportController.GetFileExportPageList))
 			fileExportRouter.GET("/options", apiutil.FormatInterface(admin.DefaultFileExportController.GetFileExportOptions))
+		}
+		channelRouter := adminRouter.Group("/channel")
+		{
+			channelRouter.POST("/create", apiutil.Format(admin.DefaultUserChannelController.Create))
+			channelRouter.POST("/update", apiutil.Format(admin.DefaultUserChannelController.UpdateByCid))
+			channelRouter.GET("/list", apiutil.Format(admin.DefaultUserChannelController.GetPageList))
 		}
 	}
 }

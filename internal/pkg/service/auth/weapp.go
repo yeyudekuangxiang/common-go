@@ -89,7 +89,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 
 	}
 
-	if isNewUser || !isNewUser {
+	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
 		})
