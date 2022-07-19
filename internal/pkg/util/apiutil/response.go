@@ -6,6 +6,7 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
 	"os"
@@ -68,6 +69,16 @@ func FormatResponse(code int, data interface{}, message string) gin.H {
 func FormatInterface(f func(*gin.Context) (interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := f(ctx)
+		ctx.JSON(200, FormatErr(err, data))
+	}
+}
+
+func FormatCtx(f func(*context.MioContext) (gin.H, error)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		data, err := f(&context.MioContext{
+			Context: ctx,
+			DB:      app.DB,
+		})
 		ctx.JSON(200, FormatErr(err, data))
 	}
 }
