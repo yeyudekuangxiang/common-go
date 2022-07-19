@@ -1,4 +1,4 @@
-package repo_types
+package repotypes
 
 type GetPageUserCouponTypeDO struct {
 	OpenId string

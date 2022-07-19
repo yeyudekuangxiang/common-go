@@ -1,6 +1,8 @@
 package controller
 
-import "github.com/shopspring/decimal"
+import (
+	"github.com/shopspring/decimal"
+)
 
 type PageFrom struct {
 	Page     int `json:"page" form:"page" binding:"gt=0" alias:"页码"`

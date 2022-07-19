@@ -1,4 +1,4 @@
-package repo_types
+package repotypes
 
 type FindBadgeBy struct {
 	ID      int64

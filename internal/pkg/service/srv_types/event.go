@@ -1,4 +1,4 @@
-package service_types
+package srv_types
 
 type SubmitOrderForEventParam struct {
 	UserId  int64

@@ -10,7 +10,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/coupon"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/repo_types"
+	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 
@@ -248,7 +248,7 @@ func (r CouponService) GenerateCouponBatch(param GenerateCouponBatchParam) ([]st
 	return couponIds, r.r.CreateBatch(&cps)
 }
 func (r CouponService) GetPageUserCouponRecord(getCouponDTO srv_types.GetPageCouponRecordDTO) ([]srv_types.BaseCouponRecordDTO, int64, error) {
-	getCouponDO := repo_types.GetPageUserCouponTypeDO{}
+	getCouponDO := repotypes.GetPageUserCouponTypeDO{}
 	if err := util.MapTo(getCouponDTO, &getCouponDO); err != nil {
 		return nil, 0, err
 	}

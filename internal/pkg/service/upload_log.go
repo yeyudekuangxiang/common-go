@@ -4,7 +4,7 @@ import (
 	"mio/config"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 )
@@ -15,7 +15,7 @@ type UploadLogService struct {
 	repo repository.UploadLogRepository
 }
 
-func (srv UploadLogService) Create(param service_types.CreateUploadLogParam) (*entity.UploadLog, error) {
+func (srv UploadLogService) Create(param srv_types.CreateUploadLogParam) (*entity.UploadLog, error) {
 	log := entity.UploadLog{
 		LogId:   util.UUID(),
 		OssPath: param.OssPath,
