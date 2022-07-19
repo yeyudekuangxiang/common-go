@@ -77,7 +77,7 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	}
 
 	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
-		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile)
+		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile, form.Cid)
 		if err != nil {
 			return gin.H{}, err
 		}

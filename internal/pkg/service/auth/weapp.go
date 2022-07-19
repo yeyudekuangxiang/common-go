@@ -27,7 +27,7 @@ type WeappService struct {
 	client *weapp.Client
 }
 
-func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType) (*entity.User, string, error) {
+func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64) (*entity.User, string, error) {
 	//调用java那边登陆接口
 	result, err := httputil.OriginJson(javaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
@@ -72,6 +72,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	isNewUser := false
 	if user.ID == 0 {
 		isNewUser = true
+		channelId := service.DefaultUserChannelService.GetChannelByCid(cid) //获取渠道id
 		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
 			AvatarUrl:   "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/default.png",
@@ -79,6 +80,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 			PhoneNumber: "",
 			Source:      entity.UserSourceMio,
 			UnionId:     session.WxUnionId,
+			ChannelId:   channelId,
 		})
 		if err != nil {
 			return nil, "", err

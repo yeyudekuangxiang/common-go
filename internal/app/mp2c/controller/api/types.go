@@ -23,6 +23,7 @@ type GetTagForm struct {
 type GetYZMForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
 	Code   string `json:"code" form:"code"  alias:"验证码"`
+	Cid    int64  `json:"cid" form:"cid"  alias:"渠道来源"`
 }
 
 type CreateQrcodeForm struct {
