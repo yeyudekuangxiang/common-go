@@ -36,6 +36,7 @@ to quickly create a Cobra application.`,
 			&entity.UploadLog{},
 			&entity.UploadScene{},
 			&entity.Badge{},
+			&entity.Banner{},
 		)
 	},
 }

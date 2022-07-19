@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"net/http"
@@ -80,7 +80,7 @@ func (UploadController) UploadCallback(ctx *gin.Context) (gin.H, error) {
 		return nil, errno.ErrBind.WithCaller()
 	}
 
-	err := service.DefaultUploadService.UploadCallback(service_types.UploadCallbackParam{
+	err := service.DefaultUploadService.UploadCallback(srv_types.UploadCallbackParam{
 		LogId:    logId,
 		Filename: form.Filename,
 		Size:     form.Size,

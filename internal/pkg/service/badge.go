@@ -8,8 +8,8 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/repo_types"
-	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
@@ -99,8 +99,8 @@ func (srv BadgeService) GetUserCertCountById(userId int64) (int64, error) {
 	}
 	return srv.GetUserCertCount(user.OpenId)
 }
-func (srv BadgeService) FindBadge(param service_types.FindBadgeParam) (*entity.Badge, error) {
-	return srv.repo.FindBadge(repo_types.FindBadgeBy{
+func (srv BadgeService) FindBadge(param srv_types.FindBadgeParam) (*entity.Badge, error) {
+	return srv.repo.FindBadge(repotypes.FindBadgeBy{
 		OrderId: param.OrderId,
 	})
 }
@@ -117,7 +117,7 @@ func (srv BadgeService) UpdateCertImage(openid string, code string, imageUrl str
 	if badgeId == 0 {
 		return errno.ErrTimeout.WithCaller()
 	}
-	badge, err := srv.repo.FindBadge(repo_types.FindBadgeBy{
+	badge, err := srv.repo.FindBadge(repotypes.FindBadgeBy{
 		ID: badgeId,
 	})
 	if err != nil {
@@ -137,12 +137,12 @@ func (srv BadgeService) UpdateCertImage(openid string, code string, imageUrl str
 	return srv.repo.Save(badge)
 }
 func (srv BadgeService) GetBadgePageList(openid string) ([]entity.Badge, error) {
-	return srv.repo.GetBadgeList(repo_types.GetBadgeListBy{
+	return srv.repo.GetBadgeList(repotypes.GetBadgeListBy{
 		OpenId: openid,
 	})
 }
 func (srv BadgeService) UpdateBadgeIsNew(openid string, id int64, isNew bool) error {
-	badge, err := srv.repo.FindBadge(repo_types.FindBadgeBy{
+	badge, err := srv.repo.FindBadge(repotypes.FindBadgeBy{
 		ID: id,
 	})
 	if err != nil {

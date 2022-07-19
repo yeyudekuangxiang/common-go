@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository/repo_types"
+	"mio/internal/pkg/repository/repotypes"
 )
 
 var DefaultOrderRepository = NewOrderRepository(app.DB)
@@ -41,7 +41,7 @@ func (repo OrderRepository) FindByOrderId(orderId string) entity.Order {
 	}
 	return order
 }
-func (repo OrderRepository) GetPageFullOrder(do repo_types.GetPageFullOrderDO) ([]entity.OrderWithGood, int64, error) {
+func (repo OrderRepository) GetPageFullOrder(do repotypes.GetPageFullOrderDO) ([]entity.OrderWithGood, int64, error) {
 	db := repo.DB.Model(entity.OrderWithGood{})
 	if do.Openid != "" {
 		db.Where("openid = ?", do.Openid)

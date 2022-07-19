@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mio/config"
-	"mio/internal/pkg/service/service_types"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"path"
@@ -22,8 +22,8 @@ func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filenam
 	imgUrl, err := DefaultOssService.PutObject(key, reader)
 	return imgUrl, err
 }
-func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service_types.UploadTokenInfo, error) {
-	uploadScene, err := DefaultUploadSceneService.FindUploadScene(service_types.FindSceneParam{
+func (srv UploadService) CreateUploadToken(userId int64, scene string) (*srv_types.UploadTokenInfo, error) {
+	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
 		Scene: scene,
 	})
 	if err != nil {
@@ -41,7 +41,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		return nil, errno.ErrLimit.WithCaller()
 	}
 
-	log, err := DefaultUploadLogService.Create(service_types.CreateUploadLogParam{
+	log, err := DefaultUploadLogService.Create(srv_types.CreateUploadLogParam{
 		OssPath: uploadScene.OssDir,
 		UserId:  userId,
 		SceneId: uploadScene.ID,
@@ -50,7 +50,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		return nil, err
 	}
 
-	tokenInfo, err := DefaultOssService.GetPolicyToken(service_types.GetOssPolicyTokenParam{
+	tokenInfo, err := DefaultOssService.GetPolicyToken(srv_types.GetOssPolicyTokenParam{
 		ExpireTime:  time.Minute * 5,
 		MaxSize:     uploadScene.MaxSize,
 		UploadDir:   uploadScene.OssDir,
@@ -63,7 +63,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		return nil, err
 	}
 
-	return &service_types.UploadTokenInfo{
+	return &srv_types.UploadTokenInfo{
 		OssPolicyToken: *tokenInfo,
 		MimeTypes:      uploadScene.MimeTypes,
 		MaxSize:        uploadScene.MaxSize,
@@ -72,7 +72,7 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*service
 		MaxAge:         uploadScene.MaxAge,
 	}, nil
 }
-func (srv UploadService) UploadCallback(param service_types.UploadCallbackParam) error {
+func (srv UploadService) UploadCallback(param srv_types.UploadCallbackParam) error {
 	_, err := DefaultUploadLogService.UpdateLog(param.LogId, param.Filename, param.Size)
 	return err
 }

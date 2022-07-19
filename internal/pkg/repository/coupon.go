@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity/coupon"
-	"mio/internal/pkg/repository/repo_types"
+	"mio/internal/pkg/repository/repotypes"
 )
 
 var DefaultCouponRepository ICouponRepository = NewCouponRepository(app.DB)
@@ -14,7 +14,7 @@ type ICouponRepository interface {
 	FindCoupon(by FindCouponBy) coupon.Coupon
 	Save(coupon2 *coupon.Coupon) error
 	CreateBatch(list *[]coupon.Coupon) error
-	GetPageCouponRecord(do repo_types.GetPageUserCouponTypeDO) ([]coupon.CouponRecord, int64, error)
+	GetPageCouponRecord(do repotypes.GetPageUserCouponTypeDO) ([]coupon.CouponRecord, int64, error)
 }
 
 func NewCouponRepository(DB *gorm.DB) CouponRepository {
@@ -55,7 +55,7 @@ func (p CouponRepository) Save(coupon2 *coupon.Coupon) error {
 func (p CouponRepository) CreateBatch(list *[]coupon.Coupon) error {
 	return p.DB.Create(list).Error
 }
-func (p CouponRepository) GetPageCouponRecord(do repo_types.GetPageUserCouponTypeDO) ([]coupon.CouponRecord, int64, error) {
+func (p CouponRepository) GetPageCouponRecord(do repotypes.GetPageUserCouponTypeDO) ([]coupon.CouponRecord, int64, error) {
 	db := p.DB.Table("coupon c").
 		Joins("inner join coupon_type ct on c.coupon_type_id = ct.coupon_type_id")
 	if do.OpenId != "" {
