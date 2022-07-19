@@ -6,7 +6,7 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/pkg/context"
+	"mio/internal/pkg/core/context"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
 	"os"
