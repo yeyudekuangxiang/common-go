@@ -21,7 +21,7 @@ func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 	}
 
 	partnershipWith := entity.PartnershipType(strings.ToUpper(form.PartnershipWith))
-	user, cookie, err := auth.DefaultWeappService.LoginByCode(form.Code, form.InvitedBy, partnershipWith)
+	user, cookie, err := auth.DefaultWeappService.LoginByCode(form.Code, form.InvitedBy, partnershipWith, form.Cid)
 	if err != nil {
 		return nil, err
 	}

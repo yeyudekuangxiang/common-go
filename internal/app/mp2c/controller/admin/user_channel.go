@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -25,11 +26,13 @@ func (ctl UserChannelController) Create(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	err := ctl.service.Create(&entity.UserChannel{
-		Cid:     form.Cid,
-		Pid:     form.Pid,
-		Name:    form.Name,
-		Code:    form.Code,
-		Company: form.Company,
+		Cid:        form.Cid,
+		Pid:        form.Pid,
+		Name:       form.Name,
+		Code:       form.Code,
+		Company:    form.Company,
+		CreateTime: model.NewTime(),
+		UpdateTime: model.NewTime(),
 	})
 	if err != nil {
 		return nil, err

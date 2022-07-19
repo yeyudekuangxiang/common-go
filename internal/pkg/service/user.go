@@ -100,7 +100,8 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	if param.UnionId != "" {
 		app.DB.Where("unionid = ? and guid =''", param.UnionId).Update("guid", guid)
 	}
-
+	channelId := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
+	user.ChannelId = channelId
 	return &user, repository2.DefaultUserRepository.Save(&user)
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {
@@ -129,7 +130,7 @@ func (u UserService) GetUserBy(by repository2.GetUserBy) (*entity.User, error) {
 	user := repository2.DefaultUserRepository.GetUserBy(by)
 	return &user, nil
 }
-func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
+func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.User, error) {
 	if mobile == "" {
 		return nil, errors.New("手机号不能为空")
 	}
@@ -137,18 +138,10 @@ func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 		Mobile: mobile,
 		Source: entity.UserSourceMobile,
 	})
-
 	if user.ID > 0 {
 		return &user, nil
 	}
-
-	cid := int64(1) //todo 待开发
-	//判断来源是否在库中
-	ok := DefaultUserChannelService.GetByCid(cid)
-	channelId := int64(0)
-	if ok != nil {
-		channelId = cid
-	}
+	channelId := DefaultUserChannelService.GetChannelByCid(cid) //获取渠道来源
 	return u.CreateUser(CreateUserParam{
 		OpenId:      mobile,
 		Nickname:    "手机用户" + mobile[len(mobile)-4:],

@@ -19,9 +19,11 @@ type AutoLoginCallbackForm struct {
 type OaAuthForm struct {
 	oa
 	Code string `json:"code" form:"code" binding:"required" alias:"code"`
+	Cid  int64  `json:"cid" form:"cid" binding:"" alias:"cid"`
 }
 type WeappAuthForm struct {
 	Code            string `json:"code" form:"code" binding:"required" alias:"code"`
 	PartnershipWith string `json:"partnershipWith" form:"partnershipWith" alias:"partnershipWith"`
 	InvitedBy       string `json:"invitedBy" form:"invitedBy" alias:"invitedBy"`
+	Cid             int64  `json:"cid" form:"cid" alias:"cid"`
 }

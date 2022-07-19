@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 )
@@ -44,8 +45,19 @@ func (srv UserChannelService) UpdateUserChannel(params *entity.UserChannel) erro
 	}
 	channel.Code = params.Code
 	channel.Name = params.Name
+	channel.UpdateTime = model.NewTime()
+
 	err := srv.Save(channel)
 	return err
+}
+
+/**根据cid获取渠道信息*/
+func (srv UserChannelService) GetChannelByCid(cid int64) int64 {
+	ok := srv.GetByCid(cid)
+	if ok != nil {
+		return cid
+	}
+	return 0
 }
 
 /**根据cid获取渠道信息*/
