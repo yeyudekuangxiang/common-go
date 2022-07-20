@@ -3,26 +3,26 @@ package repository
 import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultPointRepository = NewPointRepository(app.DB)
-
-func NewPointRepository(db *gorm.DB) PointRepository {
-	return PointRepository{DB: db}
+func NewPointRepository(ctx *context.MioContext) PointRepository {
+	return PointRepository{ctx: ctx}
 }
 
 type PointRepository struct {
-	DB *gorm.DB
+	ctx *context.MioContext
 }
 
-func (p PointRepository) Save(point *entity.Point) error {
-	return p.DB.Save(point).Error
+func (repo PointRepository) Save(point *entity.Point) error {
+	app.DB.Session(&gorm.Session{})
+	return repo.ctx.DB.Save(point).Error
 }
 
-func (p PointRepository) FindBy(by FindPointBy) entity.Point {
+func (repo PointRepository) FindBy(by FindPointBy) entity.Point {
 	point := entity.Point{}
-	db := p.DB.Model(point)
+	db := repo.ctx.DB.Model(point)
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
@@ -32,4 +32,19 @@ func (p PointRepository) FindBy(by FindPointBy) entity.Point {
 		}
 	}
 	return point
+}
+
+func (repo PointRepository) FindForUpdate(openId string) (entity.Point, error) {
+	point := entity.Point{}
+	err := repo.ctx.DB.
+		Set("gorm:query_option", "for update").
+		Where("openid = ?", openId).
+		First(&point).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return point, err
+	}
+	return point, nil
+}
+func (repo PointRepository) Create(point *entity.Point) error {
+	return repo.ctx.DB.Create(point).Error
 }

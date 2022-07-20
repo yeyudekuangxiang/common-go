@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/duiba"
@@ -154,7 +155,8 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 		}
 	}
 
-	userPoint, _ := service.DefaultPointService.FindByOpenId(form.Uid)
+	pointService := service.NewPointService(context.NewMioContext())
+	userPoint, _ := pointService.FindByOpenId(form.Uid)
 	err := service.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		return gin.H{
@@ -165,7 +167,8 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 	}
 
 	tranId, err := service.DefaultDuiBaService.PointAddCallback(form)
-	userPoint, _ = service.DefaultPointService.FindByOpenId(form.Uid)
+
+	userPoint, _ = pointService.FindByOpenId(form.Uid)
 	if err != nil {
 		return gin.H{
 			"status":       "fail",

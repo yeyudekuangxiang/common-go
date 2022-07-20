@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
@@ -237,8 +238,8 @@ func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 
 type Summery struct {
 	CurrentSteps        int     `json:"currentSteps"`
-	RedeemedPointsToday int     `json:"redeemedPointsToday"`
-	BalanceOfPoints     int     `json:"balanceOfPoints"`
+	RedeemedPointsToday int64   `json:"redeemedPointsToday"`
+	BalanceOfPoints     int64   `json:"balanceOfPoints"`
 	SavedCO2            float64 `json:"savedCO2"`
 	PendingPoints       int     `json:"pendingPoints"`
 	StepDiff            int     `json:"stepDiff"`
@@ -271,7 +272,8 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 	}
 	summery.RedeemedPointsToday = todayStepPoint
 
-	point, err := DefaultPointService.FindByUserId(userId)
+	pointService := NewPointService(mioctx.NewMioContext())
+	point, err := pointService.FindByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -294,20 +296,21 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 }
 
 //获取用户今日已领取步行积分
-func (u UserService) calculateStepPointsOfToday(userId int64) (int, error) {
+func (u UserService) calculateStepPointsOfToday(userId int64) (int64, error) {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
 		return 0, nil
 	}
 
 	t := model.NewTime()
-	list := DefaultPointTransactionService.GetListBy(repository2.GetPointTransactionListBy{
+	pointTranService := NewPointTransactionService(mioctx.NewMioContext())
+	list := pointTranService.GetListBy(repository2.GetPointTransactionListBy{
 		OpenId:    userInfo.OpenId,
 		StartTime: t.StartOfDay(),
 		EndTime:   t.EndOfDay(),
 		Type:      entity.POINT_STEP,
 	})
-	total := 0
+	var total int64 = 0
 	for _, item := range list {
 		total += item.Value
 	}
