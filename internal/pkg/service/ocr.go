@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"time"
 )
@@ -42,10 +44,13 @@ func (u OCRService) OCRForGm(openid string, src string) error {
 		fmt.Println(config.RedisKey.Lock + orderNo + "重复扫描素食打卡")
 		return errors.New("重复扫描素食打卡账单")
 	}
+
+	pointTranService := NewPointService(mioctx.NewMioContext())
 	//发放积分
-	_, err := DefaultPointTransactionService.Create(CreatePointTransactionParam{
+	_, err := pointTranService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openid,
-		Value:        100,
+		ChangePoint:  100,
+		BizId:        util.UUID(),
 		Type:         entity.POINT_ADJUSTMENT,
 		AdditionInfo: `{"素食打卡":"` + orderNo + `"}`,
 	})

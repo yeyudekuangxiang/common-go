@@ -2,30 +2,28 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultPointTransactionRepository = NewPointTransactionRepository(app.DB)
-
-func NewPointTransactionRepository(db *gorm.DB) PointTransactionRepository {
-	return PointTransactionRepository{
-		DB: db,
+func NewPointTransactionRepository(ctx *context.MioContext) *PointTransactionRepository {
+	return &PointTransactionRepository{
+		ctx: ctx,
 	}
 }
 
 type PointTransactionRepository struct {
-	DB *gorm.DB
+	ctx *context.MioContext
 }
 
-func (p PointTransactionRepository) Save(transaction *entity.PointTransaction) error {
-	return p.DB.Save(transaction).Error
+func (repo PointTransactionRepository) Save(transaction *entity.PointTransaction) error {
+	return repo.ctx.DB.Save(transaction).Error
 }
 
-func (p PointTransactionRepository) GetListBy(by GetPointTransactionListBy) []entity.PointTransaction {
+func (repo PointTransactionRepository) GetListBy(by GetPointTransactionListBy) []entity.PointTransaction {
 	list := make([]entity.PointTransaction, 0)
 
-	db := p.DB.Model(entity.PointTransaction{})
+	db := repo.ctx.DB.Model(entity.PointTransaction{})
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
@@ -54,9 +52,9 @@ func (p PointTransactionRepository) GetListBy(by GetPointTransactionListBy) []en
 
 	return list
 }
-func (p PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.PointTransaction {
+func (repo PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.PointTransaction {
 	pt := entity.PointTransaction{}
-	db := p.DB.Model(pt)
+	db := repo.ctx.DB.Model(pt)
 	if by.TransactionId != "" {
 		db.Where("transaction_id", by.TransactionId)
 	}
@@ -66,10 +64,10 @@ func (p PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.Poi
 	}
 	return pt
 }
-func (p PointTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.PointTransaction, int64) {
+func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.PointTransaction, int64) {
 	list := make([]entity.PointTransaction, 0)
 
-	db := p.DB.Model(entity.PointTransaction{})
+	db := repo.ctx.DB.Model(entity.PointTransaction{})
 	if len(by.OpenIds) > 0 {
 		db.Where("openid in (?)", by.OpenIds)
 	}

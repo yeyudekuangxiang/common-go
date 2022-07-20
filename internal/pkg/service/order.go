@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"math/rand"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
 	"strconv"
@@ -116,12 +118,13 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 		return nil, errors.New("未查找到用户信息,请联系管理员")
 	}
 
+	pointService := NewPointService(context.NewMioContext())
 	//检查积分
-	point, err := DefaultPointService.FindByUserId(param.Order.UserId)
+	point, err := pointService.FindByUserId(param.Order.UserId)
 	if err != nil {
 		return nil, err
 	}
-	if point.Balance < param.Order.TotalCost {
+	if point.Balance < int64(param.Order.TotalCost) {
 		return nil, errors.New("积分不足,无法兑换")
 	}
 
@@ -149,22 +152,26 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 	}()
 
 	//扣除积分
-	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
+	_, err = pointService.DecUserPoint(srv_types.DecUserPointDTO{
 		OpenId:       user.OpenId,
-		Value:        -param.Order.TotalCost,
+		ChangePoint:  int64(param.Order.TotalCost),
+		BizId:        util2.UUID(),
 		Type:         entity.POINT_PURCHASE,
 		AdditionInfo: `{"orderId":"` + orderId + `"}`,
 	})
 	if err != nil {
 		return nil, err
 	}
+
 	//下单失败返还积分
 	defer func() {
 		if !orderSuccess {
 			//返还积分
-			_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
+
+			_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       user.OpenId,
-				Value:        param.Order.TotalCost,
+				ChangePoint:  int64(param.Order.TotalCost),
+				BizId:        util2.UUID(),
 				Type:         entity.POINT_ADJUSTMENT,
 				AdditionInfo: `{"orderId":"` + orderId + `","message":"下单失败返还积分"}`,
 			})

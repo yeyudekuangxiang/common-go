@@ -2,24 +2,26 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultPointTransactionCountLimitRepository = PointTransactionCountLimitRepository{DB: app.DB}
-
 type PointTransactionCountLimitRepository struct {
-	DB *gorm.DB
+	ctx *context.MioContext
+}
+
+func NewPointTransactionCountLimitRepository(ctx *context.MioContext) *PointTransactionCountLimitRepository {
+	return &PointTransactionCountLimitRepository{ctx: ctx}
 }
 
 func (p PointTransactionCountLimitRepository) Save(transactionCountLimit *entity.PointTransactionCountLimit) error {
-	return p.DB.Save(transactionCountLimit).Error
+	return p.ctx.DB.Save(transactionCountLimit).Error
 }
 
 func (p PointTransactionCountLimitRepository) FindBy(by FindPointTransactionCountLimitBy) entity.PointTransactionCountLimit {
 	limit := entity.PointTransactionCountLimit{}
 
-	db := p.DB.Model(entity.PointTransactionCountLimit{})
+	db := p.ctx.DB.Model(entity.PointTransactionCountLimit{})
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}

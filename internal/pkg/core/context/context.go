@@ -4,11 +4,41 @@ import (
 	"context"
 	"database/sql"
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 )
 
 type MioContext struct {
+	//default context.Background()
 	context.Context
+	//default app.DB
 	DB *gorm.DB
+}
+
+type Option func(mioctx *MioContext)
+
+func WithDB(db *gorm.DB) Option {
+	return func(ctx *MioContext) {
+		ctx.DB = db
+	}
+}
+func WithContext(ctx context.Context) Option {
+	return func(mioctx *MioContext) {
+		mioctx.Context = ctx
+	}
+}
+
+func NewMioContext(options ...Option) *MioContext {
+	mioContext := &MioContext{}
+	for _, option := range options {
+		option(mioContext)
+	}
+	if mioContext.Context == nil {
+		mioContext.Context = context.Background()
+	}
+	if mioContext.DB == nil {
+		mioContext.DB = app.DB
+	}
+	return mioContext
 }
 
 // BeginTran begins a transaction
