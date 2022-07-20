@@ -48,7 +48,7 @@ func FormatErr(err error, data interface{}) gin.H {
 				return
 			}
 
-			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
+			sendErr := wxwork.SendRobotMessage(config.Constants.WxWorkBugRobotKey, wxwork.Markdown{
 				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**响应 \n\n**消息:**%+v", os.Getenv("HOSTNAME"), err),
 			})
 			if sendErr != nil {
