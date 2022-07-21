@@ -35,9 +35,10 @@ const (
 type BannerScene string
 
 const (
-	BannerSceneHome  BannerScene = "home"
-	BannerSceneEvent BannerScene = "event"
-	BannerSceneTopic BannerScene = "topic"
+	BannerSceneHome    BannerScene = "home"
+	BannerSceneEvent   BannerScene = "event"
+	BannerSceneTopic   BannerScene = "topic"
+	BannerSceneWelfare BannerScene = "welfare"
 )
 
 const OrderByBannerSortAsc OrderBy = "order_by_banner_sort_asc"
@@ -45,12 +46,16 @@ const OrderByBannerSortAsc OrderBy = "order_by_banner_sort_asc"
 var (
 	BannerStatusMap = map[BannerStatus]string{
 		BannerStatusOk:   "上线",
-		BannerStatusDown: "下线"}
+		BannerStatusDown: "下线",
+	}
 	BannerSceneMap = map[BannerScene]string{
-		BannerSceneHome:  "首页",
-		BannerSceneEvent: "携手",
-		BannerSceneTopic: "社区"}
+		BannerSceneHome:    "首页",
+		BannerSceneEvent:   "携手",
+		BannerSceneTopic:   "社区",
+		BannerSceneWelfare: "公益",
+	}
 	BannerTypeMap = map[BannerType]string{
 		BannerTypeMini: "第三方小程序",
-		BannerTypePath: "内部小程序路径"}
+		BannerTypePath: "内部小程序路径",
+	}
 )
