@@ -6,6 +6,11 @@ type GetBannerOneDO struct {
 	ID int64
 }
 
+type GetBannerExistDO struct {
+	Name     string
+	ImageUrl string
+	NotId    int64
+}
 type GetBannerListDO struct {
 	Scene   entity.BannerScene
 	Type    entity.BannerType
@@ -16,6 +21,8 @@ type GetBannerListDO struct {
 type GetBannerPageDO struct {
 	Scene   entity.BannerScene
 	Type    entity.BannerType
+	Status  entity.BannerStatus
+	Name    string
 	OrderBy entity.OrderByList
 	Offset  int
 	Limit   int

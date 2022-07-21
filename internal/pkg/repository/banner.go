@@ -21,6 +21,26 @@ func (repo BannerRepository) GetById(id int64) entity.Banner {
 	}
 	return banner
 }
+
+func (repo BannerRepository) GetExistOne(do repotypes.GetBannerExistDO) (entity.Banner, error) {
+	banner := entity.Banner{}
+	db := repo.DB.Model(banner)
+	if do.Name != "" {
+		db.Where("name = ?", do.Name)
+	}
+	if do.ImageUrl != "" {
+		db.Or("image_url = ?", do.ImageUrl)
+	}
+	if do.NotId != 0 {
+		db.Not("id", do.NotId)
+	}
+	err := db.First(&banner).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return banner, err
+	}
+	return banner, nil
+}
+
 func (repo BannerRepository) GetOne(do repotypes.GetBannerOneDO) (entity.Banner, error) {
 	banner := entity.Banner{}
 	db := repo.DB.Model(banner)
@@ -62,6 +82,12 @@ func (repo BannerRepository) Page(do repotypes.GetBannerPageDO) ([]entity.Banner
 	if do.Type != "" {
 		db.Where("type = ?", do.Type)
 	}
+	if do.Status != 0 {
+		db.Where("status = ?", do.Status)
+	}
+	if do.Name != "" {
+		db.Where("name like ?", "%"+do.Name+"%")
+	}
 	for _, orderBy := range do.OrderBy {
 		switch orderBy {
 		case entity.OrderByBannerSortAsc:
@@ -75,6 +101,6 @@ func (repo BannerRepository) Page(do repotypes.GetBannerPageDO) ([]entity.Banner
 func (repo BannerRepository) Save(banner *entity.Banner) error {
 	return repo.DB.Save(banner).Error
 }
-func (repo BannerRepository) Create(banner *entity.Banner) error {
-	return repo.DB.Create(banner).Error
+func (repo BannerRepository) Create(do *entity.Banner) error {
+	return repo.DB.Create(do).Error
 }

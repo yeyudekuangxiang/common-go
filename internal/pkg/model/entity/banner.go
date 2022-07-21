@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"time"
+	"mio/internal/pkg/model"
 )
 
 type Banner struct {
@@ -15,8 +15,8 @@ type Banner struct {
 	Redirect   string       `json:"redirect" gorm:"type:varchar(1000);not null;comment:跳转路径"`
 	Status     BannerStatus `json:"status" gorm:"type:int2;not null;default:1;comment:状态 1上线 2下线"`
 	Ext        string       `json:"ext" gorm:"type:varchar(1000);not null;default:'';comment:额外参数"`
-	CreateTime time.Time    `json:"createTime" gorm:"type:timestamptz;not null;comment:创建时间"`
-	UpdateTime time.Time    `json:"updateTime" gorm:"type:timestamptz;not null;comment:更新时间"`
+	CreateTime model.Time   `json:"createTime" gorm:"type:timestamptz;not null;comment:创建时间"`
+	UpdateTime model.Time   `json:"updateTime" gorm:"type:timestamptz;not null;comment:更新时间"`
 }
 type BannerStatus int8
 
@@ -41,3 +41,16 @@ const (
 )
 
 const OrderByBannerSortAsc OrderBy = "order_by_banner_sort_asc"
+
+var (
+	BannerStatusMap = map[BannerStatus]string{
+		BannerStatusOk:   "上线",
+		BannerStatusDown: "下线"}
+	BannerSceneMap = map[BannerScene]string{
+		BannerSceneHome:  "首页",
+		BannerSceneEvent: "携手",
+		BannerSceneTopic: "社区"}
+	BannerTypeMap = map[BannerType]string{
+		BannerTypeMini: "第三方小程序",
+		BannerTypePath: "内部小程序路径"}
+)

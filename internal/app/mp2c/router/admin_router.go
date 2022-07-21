@@ -16,7 +16,7 @@ func adminRouter(router *gin.Engine) {
 
 		adminRouter.GET("/info/list", apiutil.Format(admin.DefaultAdminController.GetAdminList))
 		adminRouter.GET("/login/info", apiutil.Format(admin.DefaultAdminController.GetLoginAdminInfo))
-
+		adminRouter.GET("/constant", apiutil.Format(admin.DefaultConstantController.List))
 		pointRouter := adminRouter.Group("/point")
 		{
 			pointRouter.GET("/record/list", apiutil.Format(admin.DefaultPointController.GetPointRecordPageList))
@@ -37,6 +37,13 @@ func adminRouter(router *gin.Engine) {
 			channelRouter.POST("/create", apiutil.Format(admin.DefaultUserChannelController.Create))
 			channelRouter.POST("/update", apiutil.Format(admin.DefaultUserChannelController.UpdateByCid))
 			channelRouter.GET("/list", apiutil.Format(admin.DefaultUserChannelController.GetPageList))
+		}
+		bannerRouter := adminRouter.Group("/banner")
+		{
+			bannerRouter.POST("/create", apiutil.Format(admin.DefaultBannerController.Create))
+			bannerRouter.POST("/update", apiutil.Format(admin.DefaultBannerController.Update))
+			bannerRouter.GET("/list", apiutil.Format(admin.DefaultBannerController.GetPageList))
+
 		}
 	}
 }
