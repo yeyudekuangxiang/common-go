@@ -11,6 +11,7 @@ import (
 )
 
 func InitDB() {
+	log.Println("初始化数据库连接...")
 	var conf db.Config
 	err := util.MapTo(config.Config.Database, &conf)
 	if err != nil {
@@ -22,4 +23,5 @@ func InitDB() {
 		log.Panic(err)
 	}
 	*app.DB = *gormDb
+	log.Println("初始化数据库成功")
 }

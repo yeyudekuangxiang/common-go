@@ -8,6 +8,7 @@ import (
 )
 
 func InitIni(source interface{}) {
+	log.Println("初始化配置文件...")
 	f, err := ini.Load(source)
 	if err != nil {
 		log.Panic(err)
@@ -16,6 +17,7 @@ func InitIni(source interface{}) {
 	if err != nil {
 		log.Panic(err)
 	}
+	log.Println("初始化配置文件成功")
 	afterInitIni()
 }
 

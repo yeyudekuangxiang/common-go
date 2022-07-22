@@ -4,6 +4,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3"
+	"github.com/wagslane/go-rabbitmq"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"mio/pkg/wxoa"
@@ -22,4 +23,6 @@ var (
 	Redis = new(redis.Client)
 	// OssClient 阿里云oss
 	OssClient = new(oss.Client)
+
+	QueueProduct = new(rabbitmq.Publisher)
 )
