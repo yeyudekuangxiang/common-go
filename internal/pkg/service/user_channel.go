@@ -18,8 +18,8 @@ type UserChannelService struct {
 }
 
 func (srv UserChannelService) Create(param *entity.UserChannel) error {
-	err := srv.GetByCid(param.Cid)
-	if err == nil {
+	channel, _ := srv.GetByCid(param.Cid)
+	if channel.Cid != 0 {
 		return errors.New("渠道已存在，不能重复创建")
 	}
 	ch := srv.r.FindByCode(repository.FindUserChannelBy{Cid: param.Cid, Code: param.Code})
@@ -53,22 +53,26 @@ func (srv UserChannelService) UpdateUserChannel(params *entity.UserChannel) erro
 
 /**根据cid获取渠道信息*/
 func (srv UserChannelService) GetChannelByCid(cid int64) int64 {
-	ok := srv.GetByCid(cid)
-	if ok != nil {
-		return cid
+	//如果cid不传那么默认自然流量
+	if cid == 0 {
+		return 1
 	}
-	return 0
+	channel, err := srv.GetByCid(cid)
+	if err != nil {
+		return 1 //不明来源的渠道，算自然流露
+	}
+	return channel.Cid
 }
 
 /**根据cid获取渠道信息*/
-func (srv UserChannelService) GetByCid(cid int64) error {
-	point := srv.r.FindByCid(repository.FindUserChannelBy{
+func (srv UserChannelService) GetByCid(cid int64) (channel *entity.UserChannel, err error) {
+	ch := srv.r.FindByCid(repository.FindUserChannelBy{
 		Cid: cid,
 	})
-	if point.Cid != 0 {
-		return nil
+	if ch.Cid != 0 {
+		return ch, nil
 	}
-	return errors.New("渠道不存在")
+	return nil, errors.New("渠道不存在")
 }
 
 /**获取渠道列表*/
