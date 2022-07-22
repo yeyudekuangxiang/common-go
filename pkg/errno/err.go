@@ -87,11 +87,14 @@ func DecodeErr(e error) (int, string) {
 	if e == nil {
 		return OK.Code(), OK.Message()
 	}
-	if e2, ok := e.(err); ok {
+	if decodeErr, ok := e.(err); ok {
 		if config.Config.App.Debug {
-			return e2.Code(), e2.err.Error()
+			return decodeErr.Code(), decodeErr.err.Error()
 		}
-		return e2.Code(), e2.Message()
+		return decodeErr.Code(), decodeErr.Message()
+	}
+	if config.Config.App.Debug {
+		return ErrInternalServer.Code(), e.Error()
 	}
 	return ErrInternalServer.Code(), ErrInternalServer.Message()
 }
