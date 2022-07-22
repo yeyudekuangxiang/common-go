@@ -45,5 +45,8 @@ func adminRouter(router *gin.Engine) {
 			bannerRouter.GET("/list", apiutil.Format(admin.DefaultBannerController.GetPageList))
 
 		}
+
+		adminRouter.GET("upload/token", apiutil.Format(admin.DefaultUploadController.GetUploadTokenInfo))
+
 	}
 }
