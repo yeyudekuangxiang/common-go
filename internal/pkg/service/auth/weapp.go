@@ -72,7 +72,6 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	isNewUser := false
 	if user.ID == 0 {
 		isNewUser = true
-		channelId := service.DefaultUserChannelService.GetChannelByCid(cid) //获取渠道id
 		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
 			AvatarUrl:   "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/default.png",
@@ -80,7 +79,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 			PhoneNumber: "",
 			Source:      entity.UserSourceMio,
 			UnionId:     session.WxUnionId,
-			ChannelId:   channelId,
+			ChannelId:   cid,
 		})
 		if err != nil {
 			return nil, "", err
