@@ -53,19 +53,32 @@ type err struct {
 	callers string //保存调用文件名
 }
 
+// WithErr 带上err信息
 func (e err) WithErr(err error) err {
 	e.err = err
 	return e
 }
+
+// WithMessage 替换默认的提示
 func (e err) WithMessage(message string) err {
-	e.err = errors.New(message)
+	e.message = message
 	return e
 }
+
+// WithErrMessage 带上err message
+func (e err) WithErrMessage(err string) err {
+	e.err = errors.New(err)
+	return e
+}
+
+// WithCaller 带上调用栈
 func (e err) WithCaller() err {
 	_, f, l, _ := runtime.Caller(1)
 	e.callers = f + ":" + strconv.Itoa(l)
 	return e
 }
+
+// With 带上错误和调用栈
 func (e err) With(err error) err {
 	e.err = err
 	_, f, l, _ := runtime.Caller(1)
@@ -79,7 +92,7 @@ func (e err) Message() string {
 	return e.message
 }
 func (e err) Error() string {
-	return fmt.Sprintf("Err - code: %d, message: %s ,err: %s", e.code, e.message, e.err.Error())
+	return fmt.Sprintf("Err - code: %d, message: %s ,err: %v", e.code, e.message, e.err)
 }
 
 // DecodeErr 解码错误, 获取 Code 和 Message
@@ -89,12 +102,14 @@ func DecodeErr(e error) (int, string) {
 	}
 	if decodeErr, ok := e.(err); ok {
 		if config.Config.App.Debug {
-			return decodeErr.Code(), decodeErr.err.Error()
+			return decodeErr.Code(), decodeErr.Error()
 		}
 		return decodeErr.Code(), decodeErr.Message()
 	}
 	if config.Config.App.Debug {
 		return ErrInternalServer.Code(), e.Error()
 	}
-	return ErrInternalServer.Code(), ErrInternalServer.Message()
+	return ErrInternalServer.Code(), ErrInternalServer.Error()
+	//后面系统全面替换后使用下面的方式
+	//return ErrInternalServer.Code(), ErrInternalServer.Message()
 }
