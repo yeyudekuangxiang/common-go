@@ -6,6 +6,7 @@ const (
 	CertTypeRandom CertType = "RANDOM"
 	CertTypeRule   CertType = "RULE"
 	CertTypeStock  CertType = "STOCK"
+	CertTypeEmpty  CertType = "EMPTY"
 )
 
 type Certificate struct {
