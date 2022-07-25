@@ -381,6 +381,13 @@ func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventP
 	if ev.ProductItemId == "" {
 		return nil, errors.New("项目未启用,请稍后再试")
 	}
+	if !ev.StartTime.IsZero() && ev.StartTime.After(time.Now()) {
+		return nil, errno.ErrCommon.WithMessage("项目未开始")
+	}
+
+	if !ev.EndTime.IsZero() && ev.EndTime.Before(time.Now()) {
+		return nil, errno.ErrCommon.WithMessage("项目已结束")
+	}
 
 	order, err := srv.SubmitOrder(SubmitOrderParam{
 		Order: SubmitOrder{
