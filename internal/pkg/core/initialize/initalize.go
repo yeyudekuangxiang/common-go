@@ -2,8 +2,6 @@ package initialize
 
 import (
 	"github.com/shopspring/decimal"
-	"math/rand"
-	"time"
 )
 
 func Initialize(configPath string) {
@@ -15,5 +13,4 @@ func Initialize(configPath string) {
 	InitWeapp()
 	initOss()
 	decimal.MarshalJSONWithoutQuotes = true
-	rand.Seed(time.Now().UnixMilli())
 }
