@@ -8,8 +8,8 @@ type GetPageCouponRecordDTO struct {
 	Limit  int
 }
 type BaseCouponRecordDTO struct {
-	ID         int64
-	CoverImage string
-	Title      string
-	UpdateDate timeutils.Date
+	ID         int64          `json:"id"`
+	CoverImage string         `json:"coverImage"`
+	Title      string         `json:"title"`
+	UpdateDate timeutils.Date `json:"updateDate"`
 }
