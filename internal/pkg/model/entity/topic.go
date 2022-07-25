@@ -30,7 +30,7 @@ type Topic struct {
 	CommentCount  int64       `gorm:"not null" json:"commentCount" form:"commentCount"`               // 跟帖数量
 	LikeCount     int64       `gorm:"not null" json:"likeCount" form:"likeCount"`                     // 点赞数量
 	Status        TopicStatus `gorm:"index:idx_topic_status;" json:"status" form:"status"`            // 状态：1 待审核 2审核失败 3已发布 4已下架
-	Sort          int         `gorm:"index:idx_sort_" json:"sort" form:"sort"`                        // 排序编号 置顶9999 精华8888
+	Sort          int         `gorm:"index:idx_sort_" json:"sort" form:"sort"`                        // 排序编号
 	Avatar        string      `json:"avatar"`
 	Tags          []Tag       `json:"tags" gorm:"many2many:topic_tag;"`
 	Nickname      string      `json:"nickname"`
@@ -39,6 +39,7 @@ type Topic struct {
 	CreatedAt     model.Time  `json:"createdAt"`
 	UpdatedAt     model.Time  `json:"updatedAt"`
 	ImportId      int         `json:"-"`
+	IsTop         int         `json:"isTop"` //是否置顶
 }
 
 func (Topic) TableName() string {

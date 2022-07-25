@@ -1,8 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
+	"github.com/medivhzhan/weapp/v3/security"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
@@ -15,6 +17,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/pkg/wxapp"
+	"mio/pkg/wxoa"
 	"os"
 	"path"
 	"strconv"
@@ -22,22 +25,25 @@ import (
 	"time"
 )
 
-var DefaultTopicService = NewTopicService(repository.DefaultTopicRepository)
+var DefaultTopicService = NewTopicService()
 
-func NewTopicService(r repository.ITopicRepository) TopicService {
+func NewTopicService() TopicService {
 	return TopicService{
-		r: r,
+		topic: repository.DefaultTopicRepository,
+		tag:   repository.DefaultTagRepository,
 	}
 }
 
 type TopicService struct {
-	r repository.ITopicRepository
+	topic       repository.ITopicRepository
+	tag         repository.ITagRepository
+	TokenServer *wxoa.AccessTokenServer
 }
 
 // GetTopicDetail 获取topic详情
-func (u TopicService) GetTopicDetail(topicId int64) (entity.Topic, error) {
+func (srv TopicService) GetTopicDetail(topicId int64) (entity.Topic, error) {
 	//查询数据是否存在
-	topic := u.r.FindById(topicId)
+	topic := srv.topic.FindById(topicId)
 	if topic.Id == 0 {
 		return entity.Topic{}, errors.New("数据不存在")
 	}
@@ -52,7 +58,7 @@ func (u TopicService) GetTopicDetail(topicId int64) (entity.Topic, error) {
 	return topic, nil
 }
 
-func (u TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]entity.Topic, error) {
+func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]entity.Topic, error) {
 	//获取置顶数据，按时间倒序排序
 	//topList := make([]entity.Topic, 0)
 	//app.DB.Model(entity.Topic{}).Preload("Tags").
@@ -72,7 +78,7 @@ func (u TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]entit
 }
 
 //将 entity.Topic 列表填充为 TopicDetail 列表
-func (u TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
+func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
 	//查询点赞信息
 	topicIds := make([]int64, 0)
 	for _, topic := range topicList {
@@ -108,17 +114,17 @@ func (u TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]T
 }
 
 // GetTopicDetailPageList 通过topic表直接查询获取内容列表
-func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
-	list, total := u.r.GetTopicPageList(param)
+func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+	list, total := srv.topic.GetTopicPageList(param)
 
 	//更新曝光和查看次数
-	u.UpdateTopicFlowListShowCount(list, param.UserId)
+	srv.UpdateTopicFlowListShowCount(list, param.UserId)
 	if param.ID != 0 && len(list) > 0 {
 		app.Logger.Info("更新查看次数", list[0].Id, param.UserId)
-		u.UpdateTopicSeeCount(list[0].Id, param.UserId)
+		srv.UpdateTopicSeeCount(list[0].Id, param.UserId)
 	}
 
-	detailList, err := u.fillTopicList(list, param.UserId)
+	detailList, err := srv.fillTopicList(list, param.UserId)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -126,9 +132,9 @@ func (u TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy
 }
 
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
-func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
-	topicList, total := u.r.GetFlowPageList(repository.GetTopicFlowPageListBy{
+	topicList, total := srv.topic.GetFlowPageList(repository.GetTopicFlowPageListBy{
 		Offset:     param.Offset,
 		Limit:      param.Limit,
 		UserId:     param.UserId,
@@ -138,18 +144,18 @@ func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPage
 	})
 	if total == 0 {
 		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
-		return u.GetTopicDetailPageList(param)
+		return srv.GetTopicDetailPageList(param)
 	}
 
 	//更新曝光和查看次数
-	u.UpdateTopicFlowListShowCount(topicList, param.UserId)
+	srv.UpdateTopicFlowListShowCount(topicList, param.UserId)
 
 	if param.ID != 0 && len(topicList) > 0 {
 		app.Logger.Info("更新查看次数", param.UserId, topicList[0].Id)
-		u.UpdateTopicSeeCount(topicList[0].Id, param.UserId)
+		srv.UpdateTopicSeeCount(topicList[0].Id, param.UserId)
 	}
 
-	topicDetailList, err := u.fillTopicList(topicList, param.UserId)
+	topicDetailList, err := srv.fillTopicList(topicList, param.UserId)
 
 	if err != nil {
 		return nil, 0, err
@@ -158,16 +164,16 @@ func (u TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPage
 }
 
 // UpdateTopicSeeCount 更新内容的查看次数加1
-func (u TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
+func (srv TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
 	err := initUserFlowPool.Submit(func() {
-		topic := u.r.FindById(topicId)
+		topic := srv.topic.FindById(topicId)
 		if topic.Id == 0 {
 			return
 		}
 
 		seeCount := topic.SeeCount + 1
 
-		if err := u.r.UpdateColumn(topic.Id, "see_count", seeCount); err != nil {
+		if err := srv.topic.UpdateColumn(topic.Id, "see_count", seeCount); err != nil {
 			app.Logger.Error("更新topic查看次数失败", topicId, userId)
 			return
 		}
@@ -180,7 +186,7 @@ func (u TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
 }
 
 // UpdateTopicFlowListShowCount 更新内容流的曝光次数加1
-func (u TopicService) UpdateTopicFlowListShowCount(list []entity.Topic, userId int64) {
+func (srv TopicService) UpdateTopicFlowListShowCount(list []entity.Topic, userId int64) {
 	err := initUserFlowPool.Submit(func() {
 		for _, topic := range list {
 			DefaultTopicFlowService.AddUserFlowShowCount(userId, topic.Id)
@@ -192,7 +198,7 @@ func (u TopicService) UpdateTopicFlowListShowCount(list []entity.Topic, userId i
 }
 
 //根据id列表对 entity.Topic 列表排序
-func (u TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []entity.Topic {
+func (srv TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []entity.Topic {
 	topicMap := make(map[int64]entity.Topic)
 	for _, topic := range list {
 		topicMap[topic.Id] = topic
@@ -206,7 +212,7 @@ func (u TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []ent
 }
 
 // GetShareWeappQrCode 获取小程序端内容详情页分享小程序码
-func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
+func (srv TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
 	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
 		Scene:     fmt.Sprintf("tid=%d&uid=%d&s=p", topicId, userId),
 		Page:      "pages/cool-mio/mio-detail/index",
@@ -223,12 +229,12 @@ func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, stri
 }
 
 // UpdateTopicSort 更新内容的排序权重
-func (u TopicService) UpdateTopicSort(topicId int64, sort int) error {
-	topic := u.r.FindById(topicId)
+func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
+	topic := srv.topic.FindById(topicId)
 	if topic.Id == 0 {
 		return errors.New("未查询到此内容")
 	}
-	err := u.r.UpdateColumn(topicId, "sort", sort)
+	err := srv.topic.UpdateColumn(topicId, "sort", sort)
 	if err != nil {
 		return err
 	}
@@ -236,7 +242,7 @@ func (u TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	return nil
 }
 
-func (u TopicService) ImportUser(filename string) error {
+func (srv TopicService) ImportUser(filename string) error {
 
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
@@ -277,7 +283,7 @@ func (u TopicService) ImportUser(filename string) error {
 			continue
 		}
 
-		avatar, err := u.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
+		avatar, err := srv.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
 		if err != nil {
 			return errors.WithMessage(err, "上传头像失败"+importId)
 		}
@@ -295,7 +301,7 @@ func (u TopicService) ImportUser(filename string) error {
 	return nil
 }
 
-func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
+func (srv TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return "", err
@@ -312,7 +318,7 @@ func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 	return DefaultOssService.PutObject(name, file)
 }
 
-func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
+func (srv TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 	fileInfos, err := ioutil.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
@@ -343,7 +349,7 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 }
 
 // ImportTopic 从xlsx中导入内容
-func (u TopicService) ImportTopic(filename string, baseImportId int) error {
+func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
 		return errors.WithStack(err)
@@ -435,7 +441,7 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 		topicTag = strings.TrimRight(topicTag, ",")
 		topicTagId = strings.TrimRight(topicTagId, ",")
 
-		imageList, err := u.UploadImportTopicImage(path.Join(strings.Split(filename, "_")[0], row[0]))
+		imageList, err := srv.UploadImportTopicImage(path.Join(strings.Split(filename, "_")[0], row[0]))
 		if err != nil {
 			return errors.WithMessagef(err, "获取topic%d图片失败", importId)
 		}
@@ -505,7 +511,14 @@ func (u TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (u TopicService) CreateTopic(userId int64, avatarUrl, nikeName, title, images, content string, tagIds []int64) error {
+func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, isTop int, tagIds []int64, images []string) error {
+	//检查内容
+	err := srv.checkMsgs(openid, content)
+	if err != nil {
+		return err
+	}
+	//处理images
+	imageStr := strings.Join(images, ",")
 	//tag
 	tagModel := make([]entity.Tag, 0)
 	for _, tagId := range tagIds {
@@ -513,35 +526,42 @@ func (u TopicService) CreateTopic(userId int64, avatarUrl, nikeName, title, imag
 			Id: tagId,
 		})
 	}
+	tag := srv.tag.GetById(tagIds[0])
 	//topic
 	topicModel := &entity.Topic{
 		UserId:    userId,
 		Title:     title,
+		TopicTag:  tag.Name,
 		Content:   content,
-		ImageList: images,
-		Status:    1,
+		ImageList: imageStr,
+		Status:    entity.TopicStatusNeedVerify,
 		Avatar:    avatarUrl,
 		Nickname:  nikeName,
 		Tags:      tagModel,
+		IsTop:     isTop,
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
-	if err := u.r.Save(topicModel); err != nil {
+	if err := srv.topic.Save(topicModel); err != nil {
 		return err
 	}
 	return nil
 }
 
 // UpdateTopic 更新帖子
-func (u TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topicId int64, title, images, content string, tagIds []int64) error {
+func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, isTop int, tagIds []int64, images []string) error {
+	//检查内容
+	err := srv.checkMsgs(openid, content)
 	//查询记录是否存在
-	topicModel := u.r.FindById(topicId)
+	topicModel := srv.topic.FindById(topicId)
 	if topicModel.Id == 0 {
 		return errors.New("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
 		return errors.New("无权限修改")
 	}
+	//处理images
+	imageStr := strings.Join(images, ",")
 	//tag
 	tagModel := make([]entity.Tag, 0)
 	for _, tagId := range tagIds {
@@ -549,16 +569,20 @@ func (u TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topi
 			Id: tagId,
 		})
 	}
+	tag := srv.tag.GetById(tagIds[0])
+
 	//更新帖子
 	topicModel.Title = title
 	topicModel.Avatar = avatarUrl
 	topicModel.Nickname = nikeName
-	topicModel.ImageList = images
+	topicModel.ImageList = imageStr
 	topicModel.Content = content
+	topicModel.IsTop = isTop
+	topicModel.TopicTag = tag.Name
 	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
 		return err
 	}
-	err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
+	err = app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
 	if err != nil {
 		return err
 	}
@@ -566,15 +590,15 @@ func (u TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topi
 }
 
 // DelTopic 软删除
-func (u TopicService) DelTopic(userId, topicId int64) error {
-	topicModel := u.r.FindById(topicId)
+func (srv TopicService) DelTopic(userId, topicId int64) error {
+	topicModel := srv.topic.FindById(topicId)
 	if topicModel.Id == 0 {
 		return errors.New("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
 		return errors.New("无权限删除")
 	}
-	topicModel.Status = 0
+	topicModel.Status = 4
 	if err := app.DB.Model(&entity.Topic{}).Save(topicModel).Error; err != nil {
 		return err
 	}
@@ -591,4 +615,63 @@ func getTopicImage(importId int, p string) ([]string, error) {
 		list = append(list, fmt.Sprintf("https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/info/%d/%s", importId, f.Name()))
 	}
 	return list, nil
+}
+
+func (srv TopicService) checkMsgs(openid, content string) error {
+	length := len(content)
+	if length > 2500 {
+		s := []rune(content)
+		var buffer bytes.Buffer
+		for i, str := range s {
+			buffer.WriteString(string(str))
+			if i > 0 && (i+1)%2500 == 0 {
+				params := &security.MsgSecCheckRequest{
+					Content: "",
+					Version: 2,
+					Scene:   3,
+					Openid:  openid,
+				}
+				err := srv.checkMsg(params)
+				buffer.Reset()
+				if err != nil {
+					return err
+				}
+			}
+		}
+		params := &security.MsgSecCheckRequest{
+			Content: "",
+			Version: 2,
+			Scene:   3,
+			Openid:  openid,
+		}
+		err := srv.checkMsg(params)
+		buffer.Reset()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	//处理内容
+	params := &security.MsgSecCheckRequest{
+		Content: content,
+		Version: 2,
+		Scene:   3,
+		Openid:  openid,
+	}
+	err := srv.checkMsg(params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (srv TopicService) checkMsg(params *security.MsgSecCheckRequest) error {
+	check, err := app.Weapp.NewSecurity().MsgSecCheck(params)
+	if err != nil {
+		return err
+	}
+	if check.ErrCode != 0 {
+		return fmt.Errorf("check error: %s", check.ErrMSG)
+	}
+	return nil
 }

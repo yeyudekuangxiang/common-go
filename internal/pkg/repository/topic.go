@@ -48,7 +48,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity2
 	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
-		Order("sort desc,updated_at desc,id desc").
+		Order("is_top desc, sort desc,updated_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
 	if err != nil {

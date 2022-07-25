@@ -215,9 +215,6 @@ func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 	if data.Message != "" {
 		result.Message = data.Message
 	}
-	if data.Root != 0 {
-		result.Root = data.Root
-	}
 	if data.Floor != 0 {
 		result.Floor = data.Floor
 	}

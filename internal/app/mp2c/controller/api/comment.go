@@ -13,7 +13,7 @@ type CommentController struct {
 }
 
 // List 除去置顶外，按时间排序
-func (CommentController) List(c *gin.Context) (gin.H, error) {
+func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	form := CommentForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (CommentController) List(c *gin.Context) (gin.H, error) {
 }
 
 // SubCommentList 根据root分页获取子评论
-func (CommentController) SubCommentList(c *gin.Context) (gin.H, error) {
+func (ctr *CommentController) SubCommentList(c *gin.Context) (gin.H, error) {
 	form := SubCommentForm{}
 	if err := apiutil.BindForm(c, form); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (CommentController) SubCommentList(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-func (CommentController) Create(c *gin.Context) (gin.H, error) {
+func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	form := CommentCreateForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -59,7 +59,7 @@ func (CommentController) Create(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-func (CommentController) Update(c *gin.Context) (gin.H, error) {
+func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	form := CommentEditForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -72,7 +72,7 @@ func (CommentController) Update(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-func (CommentController) Delete(c *gin.Context) (gin.H, error) {
+func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	form := IdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -85,7 +85,7 @@ func (CommentController) Delete(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-func (CommentController) Detail(c *gin.Context) (gin.H, error) {
+func (ctr *CommentController) Detail(c *gin.Context) (gin.H, error) {
 	//user := apiutil.GetAuthUser(c)
 	form := IdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -98,4 +98,9 @@ func (CommentController) Detail(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"result": one,
 	}, nil
+}
+
+func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
+
+	return nil, nil
 }

@@ -42,3 +42,7 @@ func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
 		"points": point.Balance,
 	}, nil
 }
+
+func (PointsController) MyReward(ctx *gin.Context) (gin.H, error) {
+	return nil, nil
+}

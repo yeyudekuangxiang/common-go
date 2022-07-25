@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/mlogclub/simple"
+	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 )
@@ -11,6 +12,7 @@ var DefaultTagRepository ITagRepository = NewTagRepository()
 type ITagRepository interface {
 	List(cnd *simple.SqlCnd) (list []entity.Tag)
 	GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64)
+	GetById(id int64) entity.Tag
 }
 
 func NewTagRepository() TagRepository {
@@ -18,6 +20,15 @@ func NewTagRepository() TagRepository {
 }
 
 type TagRepository struct {
+}
+
+func (u TagRepository) GetById(id int64) entity.Tag {
+	tag := entity.Tag{}
+	err := app.DB.Model(entity.Tag{}).Where("id = ?", id).First(&tag).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return tag
 }
 
 func (u TagRepository) List(cnd *simple.SqlCnd) (list []entity.Tag) {

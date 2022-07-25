@@ -323,8 +323,8 @@ github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27k
 github.com/mattn/goveralls v0.0.2/go.mod h1:8d1ZMHsd7fW6IRPKQh46F2WRpyib5/X4FOpevwGNQEw=
 github.com/mediocregopher/radix/v3 v3.5.0/go.mod h1:8FL3F6UQRXHXIBSPUs5h0RybMF8i4n7wVopoX3x7Bv8=
 github.com/mediocregopher/radix/v3 v3.5.2/go.mod h1:8FL3F6UQRXHXIBSPUs5h0RybMF8i4n7wVopoX3x7Bv8=
-github.com/medivhzhan/weapp/v3 v3.6.6 h1:Utn2g66EGyf11eNaYewWq1WE3ZoNDClOCghOlt32OSM=
-github.com/medivhzhan/weapp/v3 v3.6.6/go.mod h1:ixhzzAElbhWvmxlc2umv4ynKy2TpB2052nXsb5k5Jt8=
+github.com/medivhzhan/weapp/v3 v3.6.12 h1:+cMpxQ5AEFm2JEcH4mJ6PQHwGIwxBZGaUDnpN/mQEWg=
+github.com/medivhzhan/weapp/v3 v3.6.12/go.mod h1:ixhzzAElbhWvmxlc2umv4ynKy2TpB2052nXsb5k5Jt8=
 github.com/microcosm-cc/bluemonday v1.0.4 h1:p0L+CTpo/PLFdkoPcJemLXG+fpMD7pYOoDEq1axMbGg=
 github.com/microcosm-cc/bluemonday v1.0.4/go.mod h1:8iwZnFn2CDDNZ0r6UXhF4xawGvzaqzCRa1n3/lO3W2w=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=

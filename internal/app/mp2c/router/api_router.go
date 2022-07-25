@@ -104,11 +104,19 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
 			topicRouter.POST("/like/change", apiutil.Format(api.DefaultTopicController.ChangeTopicLike))
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
-			topicRouter.POST("/edit", apiutil.Format(api.DefaultTopicController.EditTopic))
+			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			topicRouter.POST("/comment/create", apiutil.Format(api.DefaultCommentController.Create))
-			topicRouter.POST("/comment/update", apiutil.Format(api.DefaultCommentController.Update))
-			topicRouter.POST("/comment/delete", apiutil.Format(api.DefaultCommentController.Delete))
+			userRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.Detail))             //帖子详情
+			userRouter.GET("/my-topic-list", apiutil.Format(api.DefaultTopicController.MyTopicList)) //我的帖子列表
+		}
+		//评论相关
+		commentRouter := mustAuthRouter.Group("/comment")
+		{
+			commentRouter.GET("/list", apiutil.Format(api.DefaultCommentController.List))
+			commentRouter.POST("/create", apiutil.Format(api.DefaultCommentController.Create))
+			commentRouter.POST("/update", apiutil.Format(api.DefaultCommentController.Update))
+			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
+			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 		}
 
 		//积分相关路由
@@ -116,6 +124,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
 			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
+			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward)) //我的奖励
 		}
 
 		//步行相关的路由
