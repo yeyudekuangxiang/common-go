@@ -222,7 +222,7 @@ type PointAdjustRecord struct {
 	CreateTime model.Time                  `json:"createTime"`
 }
 type UpdateStepHistoryByEncryptedParam struct {
-	UserId        int64
+	OpenId        string
 	EncryptedData string
 	IV            string
 }
@@ -231,14 +231,14 @@ type updateStepHistoryItem struct {
 	RecordedEpoch int64
 }
 type GetStepHistoryListBy struct {
-	UserId            int64
+	OpenId            string
 	StartRecordedTime model.Time // >=
 	EndRecordedTime   model.Time //<=
 	RecordEpochs      []int64
 	OrderBy           entity.OrderByList
 }
 type GetStepHistoryPageListBy struct {
-	UserId            int64
+	OpenId            string
 	StartRecordedTime model.Time // >=
 	EndRecordedTime   model.Time //<=
 	RecordEpochs      []int64
@@ -247,7 +247,7 @@ type GetStepHistoryPageListBy struct {
 	Offset            int
 }
 type CreateOrUpdateStepHistoryParam struct {
-	UserId        int64
+	OpenId        string
 	Count         int
 	RecordedTime  model.Time
 	RecordedEpoch int64

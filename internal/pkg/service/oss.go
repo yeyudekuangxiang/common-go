@@ -35,13 +35,13 @@ type OssService struct {
 	Domain   string
 }
 
-// PutObject name 文件路径  最终路径为 OssService.BasePath +"/"+ images/topic/tag/1.png
+// PutObject name 文件路径  最终路径为 OssService.BasePath +"/"+ images/topic/tag/1.png 上传成功返回路径
 func (srv OssService) PutObject(name string, reader io.Reader) (string, error) {
 	name = srv.BasePath + "/" + strings.TrimLeft(name, "/")
 	return srv.PubObjectAbsolutePath(name, reader)
 }
 
-// PubObjectAbsolutePath name 文件路径 例如static/mp2c/images/topic/tag/1.png
+// PubObjectAbsolutePath name 文件路径 例如static/mp2c/images/topic/tag/1.png 上传成功返回路径
 func (srv OssService) PubObjectAbsolutePath(name string, reader io.Reader) (string, error) {
 	name = strings.TrimLeft(name, "/")
 	bucket, err := srv.client.Bucket(srv.Bucket)
@@ -52,7 +52,7 @@ func (srv OssService) PubObjectAbsolutePath(name string, reader io.Reader) (stri
 	if err != nil {
 		return "", err
 	}
-	return util.LinkJoin(srv.Domain, name), nil
+	return name, nil
 }
 func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*srv_types.OssPolicyToken, error) {
 	expireEnd := time.Now().Add(param.ExpireTime).Unix()
@@ -104,4 +104,7 @@ func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*s
 	policyToken.Callback = callbackBase64
 
 	return &policyToken, nil
+}
+func (srv OssService) FullUrl(path string) string {
+	return util.LinkJoin(srv.Domain, path)
 }

@@ -104,7 +104,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 
 func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {
 	app.Logger.Infof("新用户创建后事件 %+v %s %s", user, invitedBy, partnershipType)
-	_, err := service.DefaultStepService.FindOrCreateStep(user.ID)
+	_, err := service.DefaultStepService.FindOrCreateStep(user.OpenId)
 	if err != nil {
 		app.Logger.Error(user, invitedBy, err)
 	}

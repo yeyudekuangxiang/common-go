@@ -4,7 +4,6 @@ import "mio/internal/pkg/model"
 
 type Step struct {
 	ID                 int64
-	UserId             int64      //用户id
 	OpenId             string     `gorm:"column:openid"`
 	Total              int64      //步行总数量
 	LastCheckTime      model.Time //领取积分时stepHistory最后一条记录的recorded_time
