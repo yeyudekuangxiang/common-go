@@ -169,6 +169,6 @@ func (ctr *TopicController) MyTopicList(context *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (ctr *TopicController) Detail(context *gin.Context) (gin.H, error) {
+func (ctr *TopicController) DetailTopic(context *gin.Context) (gin.H, error) {
 	return nil, nil
 }

@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+//test
 func TestGetUserInfo(t *testing.T) {
 	router := mp2c.SetupServer()
 	recorder := httptest.NewRecorder()

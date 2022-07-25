@@ -2,30 +2,35 @@ package service
 
 import (
 	"errors"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
-	entity2 "mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"time"
 )
 
-var DefaultPointTransactionCountLimitService = PointTransactionCountLimitService{}
-
 type PointTransactionCountLimitService struct {
+	ctx  *context.MioContext
+	repo *repository.PointTransactionCountLimitRepository
+}
+
+func NewPointTransactionCountLimitService(ctx *context.MioContext) *PointTransactionCountLimitService {
+	return &PointTransactionCountLimitService{ctx: ctx, repo: repository.NewPointTransactionCountLimitRepository(ctx)}
 }
 
 // CheckLimitAndUpdate 检查积分发送次数限制
-func (p PointTransactionCountLimitService) CheckLimitAndUpdate(t entity2.PointTransactionType, openId string) error {
-	limitNum, ok := entity2.PointCollectLimitMap[t]
+func (srv PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointTransactionType, openId string) error {
+	limitNum, ok := entity.PointCollectLimitMap[t]
 	if !ok {
 		return nil
 	}
-	limit := repository2.DefaultPointTransactionCountLimitRepository.FindBy(repository2.FindPointTransactionCountLimitBy{
+	limit := srv.repo.FindBy(repository.FindPointTransactionCountLimitBy{
 		OpenId:          openId,
 		TransactionType: t,
 		TransactionDate: model.Date{Time: time.Now()},
 	})
 	if limit.Id == 0 {
-		_, err := p.createLimitOfToday(t, openId)
+		_, err := srv.createLimitOfToday(t, openId)
 		if err != nil {
 			return err
 		}
@@ -37,7 +42,7 @@ func (p PointTransactionCountLimitService) CheckLimitAndUpdate(t entity2.PointTr
 	}
 
 	limit.MaxCount++
-	err := repository2.DefaultPointTransactionCountLimitRepository.Save(&limit)
+	err := srv.repo.Save(&limit)
 	if err != nil {
 		return err
 	}
@@ -45,14 +50,14 @@ func (p PointTransactionCountLimitService) CheckLimitAndUpdate(t entity2.PointTr
 }
 
 //创建用户今天积分发送次数限制记录
-func (p PointTransactionCountLimitService) createLimitOfToday(transactionType entity2.PointTransactionType, openId string) (*entity2.PointTransactionCountLimit, error) {
-	limit := entity2.PointTransactionCountLimit{
+func (srv PointTransactionCountLimitService) createLimitOfToday(transactionType entity.PointTransactionType, openId string) (*entity.PointTransactionCountLimit, error) {
+	limit := entity.PointTransactionCountLimit{
 		OpenId:          openId,
 		TransactionType: transactionType,
-		MaxCount:        entity2.PointCollectLimitMap[transactionType],
+		MaxCount:        entity.PointCollectLimitMap[transactionType],
 		CurrentCount:    1,
 		UpdateTime:      model.Time{Time: time.Now()},
 		TransactionDate: model.Date{Time: time.Now()},
 	}
-	return &limit, repository2.DefaultPointTransactionCountLimitRepository.Save(&limit)
+	return &limit, srv.repo.Save(&limit)
 }

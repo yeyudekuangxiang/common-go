@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	Id        int64      `json:"id"`
+	ID        int64      `json:"id"`
 	Mobile    string     `json:"mobile"`
 	CreatedAt model.Time `json:"createdAt"`
 }

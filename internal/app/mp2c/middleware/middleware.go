@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
@@ -47,7 +48,7 @@ func recovery() gin.HandlerFunc {
 				return
 			}
 
-			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
+			sendErr := wxwork.SendRobotMessage(config.Constants.WxWorkBugRobotKey, wxwork.Markdown{
 				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
 			})
 			if sendErr != nil {
@@ -118,6 +119,26 @@ func AuthAdmin() gin.HandlerFunc {
 		}
 
 		ctx.Set("AuthAdmin", *admin)
+	}
+}
+
+// AuthBusinessUser 企业用户登录时,解析token
+func AuthBusinessUser() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("b-token")
+		if token == "" {
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			return
+		}
+
+		user, err := business.DefaultUserService.GetBusinessUserByToken(token)
+		if err != nil || user == nil {
+			app.Logger.Error("用户登陆验证失败", user, err)
+			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			return
+		}
+
+		ctx.Set("BusinessUser", *user)
 	}
 }
 func mustAuth() gin.HandlerFunc {
@@ -227,6 +248,6 @@ func Throttle() gin.HandlerFunc {
 func corsM() gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AddAllowHeaders("x-token", "token", "authorization", "openid")
+	config.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid")
 	return cors.New(config)
 }

@@ -6,8 +6,11 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
 )
@@ -95,10 +98,12 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 			app.Logger.Error(user, invitedBy, err)
 		} else if isNew {
 			//发放积分奖励
-			_, err := service.DefaultPointTransactionService.Create(service.CreatePointTransactionParam{
+			pointService := service.NewPointService(context.NewMioContext())
+			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       invitedBy,
 				Type:         entity.POINT_INVITE,
-				Value:        entity.PointCollectValueMap[entity.POINT_INVITE],
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_INVITE]),
+				BizId:        util.UUID(),
 				AdditionInfo: fmt.Sprintf("invite %s", user.OpenId),
 			})
 			if err != nil {

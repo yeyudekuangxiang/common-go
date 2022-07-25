@@ -106,7 +106,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			userRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.Detail))             //帖子详情
+			userRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic))        //帖子详情
 			userRouter.GET("/my-topic-list", apiutil.Format(api.DefaultTopicController.MyTopicList)) //我的帖子列表
 		}
 		//评论相关

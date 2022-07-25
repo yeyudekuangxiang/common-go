@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -21,7 +22,8 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 	}
 
 	user := apiutil.GetAuthUser(ctx)
-	list := service.DefaultPointTransactionService.GetListBy(repository.GetPointTransactionListBy{
+	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	list := pointTranService.GetListBy(repository.GetPointTransactionListBy{
 		OpenId:    user.OpenId,
 		StartTime: model.Time{Time: form.StartTime},
 		EndTime:   model.Time{Time: form.EndTime},
@@ -34,7 +36,8 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 }
 func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	point, err := service.DefaultPointService.FindByUserId(user.ID)
+	pointService := service.NewPointService(context.NewMioContext(context.WithContext(ctx)))
+	point, err := pointService.FindByUserId(user.ID)
 	if err != nil {
 		return nil, err
 	}

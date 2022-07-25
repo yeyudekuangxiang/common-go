@@ -2,7 +2,9 @@ package apiutil
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/model"
 	entity "mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity/business"
 	"mio/pkg/errno"
 	"mio/pkg/validator"
 )
@@ -25,4 +27,23 @@ func GetAuthUser(c *gin.Context) entity.User {
 		return user.(entity.User)
 	}
 	return entity.User{}
+}
+func GetAuthBusinessUser(c *gin.Context) business.User {
+	if user, ok := c.Get("BusinessUser"); ok {
+		return user.(business.User)
+	}
+	return business.User{
+		ID:            3,
+		Uid:           "mock-uid-3",
+		BCompanyId:    1,
+		BDepartmentId: 2,
+		Nickname:      "greencat",
+		Mobile:        "13000000000",
+		TelephoneCode: "86",
+		Realname:      "绿喵",
+		Avatar:        "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/mio-kol/mio-avatar.jpg",
+		Status:        1,
+		CreatedAt:     model.NewTime(),
+		UpdatedAt:     model.NewTime(),
+	}
 }
