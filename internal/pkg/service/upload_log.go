@@ -17,10 +17,11 @@ type UploadLogService struct {
 
 func (srv UploadLogService) Create(param srv_types.CreateUploadLogParam) (*entity.UploadLog, error) {
 	log := entity.UploadLog{
-		LogId:   util.UUID(),
-		OssPath: param.OssPath,
-		UserId:  param.UserId,
-		SceneId: param.SceneId,
+		LogId:        util.UUID(),
+		OssPath:      param.OssPath,
+		OperatorId:   param.OperatorId,
+		OperatorType: param.OperatorType,
+		SceneId:      param.SceneId,
 	}
 	return &log, srv.repo.Create(&log)
 }

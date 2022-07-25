@@ -207,6 +207,9 @@ func (u UserService) BindPhoneByCode(userId int64, code string) error {
 	if err != nil {
 		return err
 	}
+	if phoneResult.ErrCode != 0 {
+		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
+	}
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
 	return u.r.Save(&userInfo)
 }

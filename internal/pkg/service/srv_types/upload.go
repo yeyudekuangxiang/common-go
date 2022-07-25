@@ -13,9 +13,10 @@ type FindSceneParam struct {
 }
 
 type CreateUploadLogParam struct {
-	OssPath string
-	UserId  int64
-	SceneId int
+	OssPath      string
+	OperatorId   int64
+	OperatorType int8 //1用户 2管理员
+	SceneId      int
 }
 
 type UploadCallbackParam struct {

@@ -61,7 +61,7 @@ func (UploadController) GetUploadTokenInfo(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 
-	info, err := service.DefaultUploadService.CreateUploadToken(user.ID, form.Scene)
+	info, err := service.DefaultUploadService.CreateUploadToken(user.ID, 1, form.Scene)
 	if err != nil {
 		return nil, err
 	}

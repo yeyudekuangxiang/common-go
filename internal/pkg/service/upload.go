@@ -22,7 +22,9 @@ func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filenam
 	imgUrl, err := DefaultOssService.PutObject(key, reader)
 	return imgUrl, err
 }
-func (srv UploadService) CreateUploadToken(userId int64, scene string) (*srv_types.UploadTokenInfo, error) {
+
+//CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 scene上传场景
+func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, scene string) (*srv_types.UploadTokenInfo, error) {
 	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
 		Scene: scene,
 	})
@@ -32,19 +34,22 @@ func (srv UploadService) CreateUploadToken(userId int64, scene string) (*srv_typ
 	if uploadScene.ID == 0 {
 		return nil, errno.ErrRecordNotFound.With(err)
 	}
-	if uploadScene.MustLogin && userId == 0 {
+	if uploadScene.MustLogin && operatorId == 0 {
 		return nil, errno.ErrValidation.WithCaller()
 	}
 
-	lockKey := fmt.Sprintf("UploadToken%d", userId)
-	if !util.DefaultLock.LockNum(lockKey, uploadScene.MaxCount, time.Hour*24) {
-		return nil, errno.ErrLimit.WithCaller()
+	if operatorId != 0 {
+		lockKey := fmt.Sprintf("UploadToken%d", operatorId)
+		if !util.DefaultLock.LockNum(lockKey, uploadScene.MaxCount, time.Hour*24) {
+			return nil, errno.ErrLimit.WithCaller()
+		}
 	}
 
 	log, err := DefaultUploadLogService.Create(srv_types.CreateUploadLogParam{
-		OssPath: uploadScene.OssDir,
-		UserId:  userId,
-		SceneId: uploadScene.ID,
+		OssPath:      uploadScene.OssDir,
+		OperatorId:   operatorId,
+		OperatorType: operatorType,
+		SceneId:      uploadScene.ID,
 	})
 	if err != nil {
 		return nil, err
