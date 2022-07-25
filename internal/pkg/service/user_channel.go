@@ -72,7 +72,7 @@ func (srv UserChannelService) GetByCid(cid int64) (channel *entity.UserChannel, 
 	if ch.Cid != 0 {
 		return ch, nil
 	}
-	return nil, errors.New("渠道不存在")
+	return ch, errors.New("渠道不存在")
 }
 
 /**获取渠道列表*/
