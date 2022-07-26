@@ -9,7 +9,7 @@ const (
 
 type StepHistory struct {
 	ID            int64      `json:"id"`
-	UserId        int64      `json:"userId"`
+	OpenId        string     `gorm:"column:openid" json:"openId"`
 	Count         int        `json:"count"`
 	RecordedTime  model.Time `json:"recordedTime"`
 	RecordedEpoch int64      `json:"recordedEpoch"`

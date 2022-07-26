@@ -19,8 +19,11 @@ type UploadService struct {
 
 func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filename string, collectType PointCollectType) (string, error) {
 	key := fmt.Sprintf("ocr/%s/%s/%s%s", strings.ToLower(string(collectType)), openid, util.UUID(), path.Ext(filename))
-	imgUrl, err := DefaultOssService.PutObject(key, reader)
-	return imgUrl, err
+	ocrPath, err := DefaultOssService.PutObject(key, reader)
+	if err != nil {
+		return "", err
+	}
+	return DefaultOssService.FullUrl(ocrPath), nil
 }
 
 //CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 scene上传场景

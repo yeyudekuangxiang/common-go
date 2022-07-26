@@ -3,7 +3,6 @@ package util
 import (
 	"math/rand"
 	"strings"
-	"time"
 )
 
 type RandomStrItem []string
@@ -37,7 +36,6 @@ func RandomStr(length int, items ...RandomStrItem) string {
 			strs = append(strs, item...)
 		}
 	}
-	rand.Seed(time.Now().Unix())
 	str := strings.Builder{}
 	for i := 0; i < length; i++ {
 		index := rand.Intn(len(strs))

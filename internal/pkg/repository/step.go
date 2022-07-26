@@ -15,9 +15,6 @@ type StepRepository struct {
 func (repo StepRepository) FindBy(by FindStepBy) entity.Step {
 	step := entity.Step{}
 	db := repo.DB.Model(step)
-	if by.UserId != 0 {
-		db.Where("user_id = ?", by.UserId)
-	}
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}

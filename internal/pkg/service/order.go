@@ -288,7 +288,6 @@ func (srv OrderService) UpdateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 	return &order, srv.repo.Save(&order)
 }
 func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderInfo) (*entity.Order, error) {
-	rand.Seed(time.Now().Unix())
 	order := entity.Order{
 		OrderId:          orderId,
 		OpenId:           info.Uid,
@@ -380,6 +379,13 @@ func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventP
 	}
 	if ev.ProductItemId == "" {
 		return nil, errors.New("项目未启用,请稍后再试")
+	}
+	if !ev.StartTime.IsZero() && ev.StartTime.After(time.Now()) {
+		return nil, errno.ErrCommon.WithMessage("项目未开始")
+	}
+
+	if !ev.EndTime.IsZero() && ev.EndTime.Before(time.Now()) {
+		return nil, errno.ErrCommon.WithMessage("项目已结束")
 	}
 
 	order, err := srv.SubmitOrder(SubmitOrderParam{

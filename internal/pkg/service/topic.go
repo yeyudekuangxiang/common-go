@@ -275,7 +275,11 @@ func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 
 	defer file.Close()
 
-	return DefaultOssService.PutObject(name, file)
+	avatarPath, err := DefaultOssService.PutObject(name, file)
+	if err != nil {
+		return "", err
+	}
+	return DefaultOssService.FullUrl(avatarPath), nil
 }
 
 func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
@@ -294,19 +298,19 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 		name := fmt.Sprintf("images/topic/%s/%s/%s", path.Base(path.Dir(dirPath)), path.Base(dirPath), fileInfo.Name())
 
 		fmt.Println("上传内容图片", path.Join(dirPath, fileInfo.Name()), name)
-		u, err := DefaultOssService.PutObject(name, file)
+		topicPath, err := DefaultOssService.PutObject(name, file)
 		if err != nil {
 			file.Close()
 			return nil, err
 		}
-		images = append(images, u)
+		images = append(images, DefaultOssService.FullUrl(topicPath))
 	}
 	return images, nil
 }
 
 // ImportTopic 从xlsx中导入内容
 func (u TopicService) ImportTopic(filename string, baseImportId int) error {
-	rand.Seed(time.Now().Unix())
+
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
 		return errors.WithStack(err)

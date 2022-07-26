@@ -5,7 +5,6 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -27,7 +26,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 	if qrcode.ID != 0 {
 		imgUrl := qrcode.ImageUrl
 		if strings.Index(imgUrl, "http") == -1 {
-			imgUrl = util.LinkJoin(config.Config.OSS.CdnDomain, imgUrl)
+			imgUrl = DefaultOssService.FullUrl(imgUrl)
 		}
 		return &QrCodeInfo{
 			QrCodeId:    qrcode.QrCodeId,
@@ -48,13 +47,14 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 		return nil, errors.New(comErr.ErrMSG)
 	}
 	defer resp.Body.Close()
-	imageUrl, err := DefaultOssService.PubObjectAbsolutePath(fmt.Sprintf("mp2c/qrcode/share/%s.png", util.UUID()), resp.Body)
+	imgPath, err := DefaultOssService.PubObjectAbsolutePath(fmt.Sprintf("mp2c/qrcode/share/%s.png", util.UUID()), resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	qrcode = entity.QRCode{
 		QrCodeId:    util.UUID(),
-		ImageUrl:    imageUrl,
+		ImageUrl:    imgPath,
 		QrCodeType:  entity.QrCodeTypeSHARE,
 		OpenId:      openid,
 		Description: "Share to friends",
@@ -64,7 +64,7 @@ func (srv InviteService) GetInviteQrCode(openid string) (*QrCodeInfo, error) {
 	return &QrCodeInfo{
 		QrCodeId:    qrcode.QrCodeId,
 		OpenId:      qrcode.OpenId,
-		ImageUrl:    qrcode.ImageUrl,
+		ImageUrl:    DefaultOssService.FullUrl(qrcode.ImageUrl),
 		Description: qrcode.Description,
 	}, nil
 }

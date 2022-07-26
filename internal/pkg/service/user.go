@@ -280,7 +280,7 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 
 	summery.SavedCO2 = DefaultCarbonNeutralityService.calculateCO2ByStep(int64(lastStepHistory.Count))
 
-	pendingPoints, _, err := DefaultStepService.ComputePendingPoint(userId)
+	pendingPoints, _, err := DefaultStepService.ComputePendingPoint(userInfo.OpenId)
 	if err != nil {
 		return nil, err
 	}
