@@ -31,6 +31,7 @@ func apiRouter(router *gin.Engine) {
 		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
+		userRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
 		//文章评论列表
 		authRouter.POST("/topic/comment/list", apiutil.Format(api.DefaultCommentController.List)) //
 		authRouter.POST("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubCommentList))
@@ -106,7 +107,6 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			userRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic))        //帖子详情
 			userRouter.GET("/my-topic-list", apiutil.Format(api.DefaultTopicController.MyTopicList)) //我的帖子列表
 		}
 		//评论相关

@@ -161,14 +161,25 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
+	form := IdForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	//user
+	user := apiutil.GetAuthUser(c)
+	//获取帖子
+	err := service.DefaultTopicService.DelTopic(user.ID, form.ID)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
 func (ctr *TopicController) MyTopicList(context *gin.Context) (gin.H, error) {
-	return nil, nil
-}
-
-func (ctr *TopicController) DetailTopic(context *gin.Context) (gin.H, error) {
 	return nil, nil
 }
