@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/event"
 	revent "mio/internal/pkg/repository/event"
 	"mio/internal/pkg/service/product"
@@ -46,6 +47,7 @@ func (srv EventService) GetEventFullInfo(eventId string) (*EventFullInfo, error)
 	participationList, _, err := DefaultEventParticipationService.GetParticipationPageList(GetParticipationPageListParam{
 		EventId: eventId,
 		Limit:   3,
+		OrderBy: entity.OrderByList{event.OrderByEventParticipationTimeDesc},
 	})
 	if err != nil {
 		return nil, err
