@@ -10,6 +10,18 @@ build:
     - develop
     - master
     - tags
+  script:
+    - sh ./scripts/build.sh mp2c
+  artifacts:
+    paths:
+      - ./cmd/mp2c/mp2c
+
+build-manual:
+  image: golang:1.17
+  stage: build
+  allow_failure: false
+  when: manual
+  only:
     - /^hotfix-.+$/
     - /^feature-.+$/
   script:
@@ -23,13 +35,21 @@ package:
     - develop
     - master
     - tags
+  dependencies:
+    - build
+  script:
+    - sh ./scripts/package.sh mp2c
+
+package-manual:
+  stage: package
+  when: on_success
+  only:
     - /^hotfix-.+$/
     - /^feature-.+$/
   dependencies:
     - build
   script:
     - sh ./scripts/package.sh mp2c
-
 
 deploy-dev:
   image: yeyudekuangxiang/helm:3.8.1
@@ -70,6 +90,7 @@ deploy-feature:
     name: $CI_COMMIT_REF_NAME
     url: https://godev-api.miotech.com/$CI_COMMIT_REF_SLUG/
     on_stop: stop-deploy-dev
+  when: on_success
   tags:
     - k8s
   only:
@@ -104,6 +125,7 @@ deploy-hotfix:
     on_stop: stop-deploy-prod
   tags:
     - k8s
+  when: on_success
   only:
     - /^hotfix-.+$/
   before_script:
