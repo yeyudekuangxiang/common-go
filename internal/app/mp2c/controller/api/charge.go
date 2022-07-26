@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"strconv"
@@ -76,10 +78,12 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 		//加积分
 		typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
-		_, err := service.DefaultPointTransactionService.Create(service.CreatePointTransactionParam{
+		pointService := service.NewPointService(context.NewMioContext())
+		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       userInfo.OpenId,
 			Type:         typeString,
-			Value:        thisPoint,
+			ChangePoint:  int64(thisPoint),
+			BizId:        util.UUID(),
 			AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
 		})
 		if err != nil {

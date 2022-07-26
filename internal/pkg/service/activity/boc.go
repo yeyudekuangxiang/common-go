@@ -7,12 +7,14 @@ import (
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	entity2 "mio/internal/pkg/model/entity"
 	activity2 "mio/internal/pkg/model/entity/activity"
 	repository2 "mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/activity"
 	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"strconv"
 	"time"
@@ -248,10 +250,12 @@ func (b BocService) SendAnswerBonus(userId int64) error {
 		additionInfo = "新用户答题得2500积分"
 	}
 
-	_, err = service2.DefaultPointTransactionService.Create(service2.CreatePointTransactionParam{
+	pointService := service2.NewPointService(mioctx.NewMioContext())
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       mioUser.OpenId,
 		Type:         entity2.POINT_QUIZ,
-		Value:        value,
+		ChangePoint:  int64(value),
+		BizId:        util.UUID(),
 		AdditionInfo: additionInfo,
 	})
 	return err

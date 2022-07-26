@@ -3,46 +3,33 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/jszwec/csvutil"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
-	"mio/pkg/errno"
 	"time"
 )
 
-var DefaultPointTransactionService = NewPointTransactionService(repository.DefaultPointTransactionRepository)
-
-func NewPointTransactionService(repo repository.PointTransactionRepository) PointTransactionService {
-	return PointTransactionService{
-		repo: repo,
-	}
-}
-
 type PointTransactionService struct {
-	repo repository.PointTransactionRepository
+	ctx  *context.MioContext
+	repo *repository.PointTransactionRepository
 }
 
-// Create 添加发放积分记录并且更新用户剩余积分
-func (srv PointTransactionService) Create(param CreatePointTransactionParam) (*entity.PointTransaction, error) {
-	util.DefaultLock.LockWait(fmt.Sprintf("PointTransactionCreate%s", param.OpenId), time.Second*5)
-	defer util.DefaultLock.UnLock(fmt.Sprintf("PointTransactionCreate%s", param.OpenId))
-
-	if err := util.ValidatorStruct(param); err != nil {
-		app.Logger.Error(param, err)
-		return nil, err
+func NewPointTransactionService(ctx *context.MioContext) *PointTransactionService {
+	return &PointTransactionService{
+		ctx:  ctx,
+		repo: repository.NewPointTransactionRepository(ctx),
 	}
-	err := DefaultPointTransactionCountLimitService.CheckLimitAndUpdate(param.Type, param.OpenId)
-	if err != nil {
-		return nil, err
-	}
+}
 
+// CreateTransaction 添加发放积分记录
+func (srv PointTransactionService) CreateTransaction(param CreatePointTransactionParam) (*entity.PointTransaction, error) {
 	transaction := entity.PointTransaction{
 		OpenId:         param.OpenId,
-		TransactionId:  util.UUID(),
+		TransactionId:  param.BizId,
 		Type:           param.Type,
 		Value:          param.Value,
 		CreateTime:     model.Time{Time: time.Now()},
@@ -51,19 +38,12 @@ func (srv PointTransactionService) Create(param CreatePointTransactionParam) (*e
 		Note:           param.Note,
 	}
 
-	err = srv.repo.Save(&transaction)
-	if err != nil {
-		return nil, err
-	}
-
-	_ = DefaultPointService.RefreshBalance(param.OpenId)
-
-	return &transaction, nil
+	return &transaction, srv.repo.Save(&transaction)
 }
 
 // GetListBy 查询记录列表
 func (srv PointTransactionService) GetListBy(by repository.GetPointTransactionListBy) []entity.PointTransaction {
-	return repository.DefaultPointTransactionRepository.GetListBy(by)
+	return srv.repo.GetListBy(by)
 }
 func (srv PointTransactionService) FindBy(by repository.FindPointTransactionBy) (*entity.PointTransaction, error) {
 	pt := srv.repo.FindBy(by)
@@ -98,13 +78,14 @@ func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListB
 		Limit:     by.Limit,
 	})
 
+	pointService := NewPointService(srv.ctx)
 	for _, point := range pointTranList {
 		user, err := DefaultUserService.GetUserByOpenId(point.OpenId)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		userPoint, err := DefaultPointService.FindByOpenId(user.OpenId)
+		userPoint, err := pointService.FindByOpenId(user.OpenId)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -198,9 +179,9 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 			OpenId         string `csv:"openId"`
 			Phone          string `csv:"用户手机号"`
 			Nickname       string `csv:"微信昵称"`
-			BalanceOfPoint int    `csv:"剩余积分"`
+			BalanceOfPoint int64  `csv:"剩余积分"`
 			Type           string `csv:"积分变动类型"`
-			Value          int    `csv:"积分变动数量"`
+			Value          int64  `csv:"积分变动数量"`
 			Time           string `csv:"积分变动时间"`
 			Info           string `csv:"附带信息"`
 		}
@@ -272,36 +253,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 	}()
 	return nil
 }
-func (srv PointTransactionService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserPointParam) error {
 
-	if err := util.ValidatorStruct(param); err != nil {
-		app.Logger.Error(param, err)
-		return err
-	}
-
-	user, err := DefaultUserService.GetUserBy(repository.GetUserBy{
-		OpenId:     param.OpenId,
-		LikeMobile: param.Phone,
-	})
-	if err != nil {
-		return err
-	}
-	if user.ID == 0 {
-		return errno.ErrUserNotFound
-	}
-	value := param.Value
-	if param.Type == entity.POINT_SYSTEM_REDUCE {
-		value = -value
-	}
-	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
-		OpenId:  param.OpenId,
-		Type:    param.Type,
-		Value:   value,
-		AdminId: adminId,
-		Note:    param.Note,
-	})
-	return err
-}
 func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustRecordPageListParam) ([]PointRecord, int64, error) {
 	types := make([]entity.PointTransactionType, 0)
 	if param.Type != "" {
@@ -313,7 +265,7 @@ func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustR
 		}
 	}
 
-	return DefaultPointTransactionService.GetPageListBy(GetPointTransactionPageListBy{
+	return srv.GetPageListBy(GetPointTransactionPageListBy{
 		UserId:    param.UserId,
 		AdminId:   param.AdminId,
 		Nickname:  param.Nickname,

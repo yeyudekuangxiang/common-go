@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	sduiba "mio/internal/pkg/service/duiba"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
@@ -40,7 +42,7 @@ func (srv DuiBaService) AutoLogin(param AutoLoginParam) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	b, err := DefaultPointService.FindByUserId(param.UserId)
+	b, err := NewPointService(context.NewMioContext()).FindByUserId(param.UserId)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +60,7 @@ func (srv DuiBaService) AutoLoginOpenId(param AutoLoginOpenIdParam) (string, err
 	if err != nil {
 		return "", err
 	}*/
-	b, err := DefaultPointService.FindByUserId(param.UserId)
+	b, err := NewPointService(context.NewMioContext()).FindByUserId(param.UserId)
 	if err != nil {
 		return "", err
 	}
@@ -105,24 +107,22 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*ExchangeCallb
 
 	pointType := duibaTypeToPointType[form.Type]
 
-	pointTran, err := DefaultPointTransactionService.Create(CreatePointTransactionParam{
+	bizId := util.UUID()
+	balance, err := NewPointService(context.NewMioContext()).DecUserPoint(srv_types.DecUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         pointType,
-		Value:        int(-form.Credits),
+		BizId:        bizId,
+		ChangePoint:  form.Credits,
 		AdditionInfo: string(data),
 	})
 	if err != nil {
 		app.Logger.Errorf("%+v %v", form, err)
 		return nil, errors.New("系统异常,请联系管理员")
 	}
-	point, err := DefaultPointService.FindByUserId(userInfo.ID)
-	if err != nil {
-		return nil, err
-	}
 
 	return &ExchangeCallbackResult{
-		BizId:   pointTran.TransactionId,
-		Credits: point.Balance,
+		BizId:   bizId,
+		Credits: balance,
 	}, nil
 }
 
@@ -147,7 +147,8 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		return errors.New("用户信息不存在")
 	}
 
-	pt, err := DefaultPointTransactionService.FindBy(repository.FindPointTransactionBy{
+	pointTranService := NewPointTransactionService(context.NewMioContext())
+	pt, err := pointTranService.FindBy(repository.FindPointTransactionBy{
 		TransactionId: form.BizId,
 	})
 	if err != nil {
@@ -161,11 +162,14 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 	if err != nil {
 		return err
 	}
+	refundPoint := -pt.Value
 
-	_, err = DefaultPointTransactionService.Create(CreatePointTransactionParam{
+	pointService := NewPointService(context.NewMioContext())
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         entity.POINT_DUIBA_REFUND,
-		Value:        -pt.Value,
+		BizId:        util.UUID(),
+		ChangePoint:  refundPoint,
 		AdditionInfo: string(data),
 	})
 	return err
@@ -250,10 +254,12 @@ func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string,
 		return
 	}
 
-	tran, err := DefaultPointTransactionService.Create(CreatePointTransactionParam{
+	bizId := util.UUID()
+	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         entity.POINT_ADJUSTMENT,
-		Value:        int(form.Credits.ToInt()),
+		ChangePoint:  form.Credits.ToInt(),
+		BizId:        bizId,
 		AdminId:      0,
 		AdditionInfo: fmt.Sprintf("log %d", newLog.ID),
 	})
@@ -261,12 +267,12 @@ func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string,
 		return
 	}
 
-	err = DefaultDuiBaPointAddLogService.UpdateLogTransaction(newLog.ID, tran.TransactionId)
+	err = DefaultDuiBaPointAddLogService.UpdateLogTransaction(newLog.ID, bizId)
 	if err != nil {
-		app.Logger.Errorf("更新DuiBaPointAddLog失败 %d %s", newLog.ID, tran.TransactionId)
+		app.Logger.Errorf("更新DuiBaPointAddLog失败 %d %s", newLog.ID, bizId)
 	}
 
-	return tran.TransactionId, nil
+	return bizId, nil
 }
 
 var virtualGoodMap = map[string]int{
@@ -301,13 +307,14 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 		return "", 0, err
 	}
 
-	userPoint, err := DefaultPointService.FindByOpenId(form.Uid)
+	pointService := NewPointService(context.NewMioContext())
+	userPoint, err := pointService.FindByOpenId(form.Uid)
 	if err != nil {
 		return "", 0, err
 	}
 
 	if log.ID != 0 {
-		return log.SupplierBizId, int64(userPoint.Balance), nil
+		return log.SupplierBizId, userPoint.Balance, nil
 	}
 
 	log, err = sduiba.DefaultVirtualGoodLogService.CreateVirtualGoodLog(form)
@@ -321,7 +328,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 		return "", 0, err
 	}
 
-	userPoint, err = DefaultPointService.FindByOpenId(form.Uid)
+	userPoint, err = pointService.FindByOpenId(form.Uid)
 	if err != nil {
 		return "", 0, err
 	}
@@ -333,10 +340,12 @@ func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productIte
 	if point == 0 {
 		return errors.New("虚拟商品不存在")
 	}
-	_, err := DefaultPointTransactionService.Create(CreatePointTransactionParam{
+	pointService := NewPointService(context.NewMioContext())
+	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openid,
 		Type:         entity.POINT_ADJUSTMENT,
-		Value:        point,
+		ChangePoint:  int64(point),
+		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprintf("兑吧虚拟商品兑换 orderNum:%s productItemId:%s", orderNum, productItemId),
 	})
 	return err
