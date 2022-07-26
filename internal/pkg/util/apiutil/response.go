@@ -6,6 +6,7 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
 	"os"
@@ -47,7 +48,7 @@ func FormatErr(err error, data interface{}) gin.H {
 				return
 			}
 
-			sendErr := wxwork.SendRobotMessage("f0edb1a2-3f9b-4a5d-aa15-9596a32840ec", wxwork.Markdown{
+			sendErr := wxwork.SendRobotMessage(config.Constants.WxWorkBugRobotKey, wxwork.Markdown{
 				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**响应 \n\n**消息:**%+v", os.Getenv("HOSTNAME"), err),
 			})
 			if sendErr != nil {
@@ -68,6 +69,16 @@ func FormatResponse(code int, data interface{}, message string) gin.H {
 func FormatInterface(f func(*gin.Context) (interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := f(ctx)
+		ctx.JSON(200, FormatErr(err, data))
+	}
+}
+
+func FormatCtx(f func(*context.MioContext) (gin.H, error)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		data, err := f(&context.MioContext{
+			Context: ctx,
+			DB:      app.DB,
+		})
 		ctx.JSON(200, FormatErr(err, data))
 	}
 }

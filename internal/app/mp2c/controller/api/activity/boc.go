@@ -14,7 +14,8 @@ var DefaultBocController = BocController{}
 type BocController struct {
 }
 
-var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2022-06-30 23:59:59")
+//中行活动持续开放
+var bocEndTime, _ = time.Parse("2006-01-02 15:04:05", "2122-06-30 23:59:59")
 
 func (b BocController) GetRecordList(c *gin.Context) (gin.H, error) {
 	form := GetBocRecordListForm{}

@@ -13,6 +13,7 @@ type DuiBaActivity struct {
 	CreatedAt           model.Time
 	UpdatedAt           model.Time
 	DeletedAt           model.Time
+	RiskLimit           int //用户风险等级限制
 }
 
 func (DuiBaActivity) TableName() string {

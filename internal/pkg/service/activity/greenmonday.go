@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/repository/activity"
 	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"time"
 )
@@ -136,10 +138,12 @@ func (srv GMService) SendAnswerQuestionBonus(userId int64, logId int) error {
 		return err
 	}
 
-	_, err = service2.DefaultPointTransactionService.Create(service2.CreatePointTransactionParam{
+	pointService := service2.NewPointService(context.NewMioContext())
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       user.OpenId,
 		Type:         entity2.POINT_QUIZ,
-		Value:        50,
+		ChangePoint:  50,
+		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprintf(`{"activity":"greenmonday","logId",%d}`, logId),
 	})
 	return err

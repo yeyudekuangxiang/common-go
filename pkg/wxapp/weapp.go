@@ -39,8 +39,8 @@ func (c Client) GetUnlimitedQRCodeResponse(param *weapp.UnlimitedQRCode) (*Unlim
 
 var accessToken = ""
 
-// GetUserRiskRank 根据提交的用户信息获取用户的安全等级
-func (c Client) GetUserRiskRank(param UserRiskRankParam) (*UserRiskRankResponse, error) {
+// GetUserRiskRank 根据提交的用户信息获取用户的安全等级 recursiveCount记录token1失效时递归次数 最多重试三次
+func (c Client) GetUserRiskRank(param UserRiskRankParam, recursiveCount ...int) (*UserRiskRankResponse, error) {
 	if accessToken == "" {
 		token, err := c.AccessToken()
 		if err != nil {
@@ -54,19 +54,30 @@ func (c Client) GetUserRiskRank(param UserRiskRankParam) (*UserRiskRankResponse,
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("request", string(body))
+
 	resp := UserRiskRankResponse{}
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err
 	}
-	if resp.ErrCode == 40001 {
+	if resp.ErrCode == 40001 || resp.ErrCode == 41001 || resp.ErrCode == 42001 {
+
+		count := 0
+		if len(recursiveCount) > 0 {
+			count = recursiveCount[0]
+		}
+
+		if count >= 3 {
+			return &resp, nil
+		}
+		count++
+
 		token, err := c.AccessToken()
 		if err != nil {
 			return nil, err
 		}
 		accessToken = token
-		return c.GetUserRiskRank(param)
+		return c.GetUserRiskRank(param, count)
 	}
 	return &resp, nil
 }

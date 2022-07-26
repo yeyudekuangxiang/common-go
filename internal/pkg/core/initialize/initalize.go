@@ -1,5 +1,9 @@
 package initialize
 
+import (
+	"github.com/shopspring/decimal"
+)
+
 func Initialize(configPath string) {
 	InitIni(configPath)
 	InitLog()
@@ -8,4 +12,5 @@ func Initialize(configPath string) {
 	InitValidator()
 	InitWeapp()
 	initOss()
+	decimal.MarshalJSONWithoutQuotes = true
 }

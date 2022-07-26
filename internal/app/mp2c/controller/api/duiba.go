@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/duiba"
@@ -87,6 +88,40 @@ func (DuiBaController) ExchangeResultNoticeCallback(ctx *gin.Context) string {
 	}
 	return "ok"
 }
+func (DuiBaController) VirtualGoodCallback(ctx *gin.Context) gin.H {
+	form := duibaApi.VirtualGood{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		app.Logger.Error("VirtualGoodCallback 参数获取失败", ctx, err)
+		return gin.H{
+			"status":        "fail",
+			"credits":       0,
+			"supplierBizId": "",
+		}
+	}
+	err := service.DefaultDuiBaService.CheckSign(form)
+	if err != nil {
+		app.Logger.Error("VirtualGoodCallback 参数验证失败", form, err)
+		return gin.H{
+			"status":        "fail",
+			"credits":       0,
+			"supplierBizId": "",
+		}
+	}
+	orderId, credit, err := service.DefaultDuiBaService.VirtualGoodCallback(form)
+	if err != nil {
+		app.Logger.Error("VirtualGoodCallback 兑换虚拟商品失败", form, err)
+		return gin.H{
+			"status":        "fail",
+			"credits":       0,
+			"supplierBizId": "",
+		}
+	}
+	return gin.H{
+		"status":        "success",
+		"credits":       credit,
+		"supplierBizId": orderId,
+	}
+}
 func (DuiBaController) OrderCallback(ctx *gin.Context) string {
 
 	form := duibaApi.OrderInfo{}
@@ -120,7 +155,8 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 		}
 	}
 
-	userPoint, _ := service.DefaultPointService.FindByOpenId(form.Uid)
+	pointService := service.NewPointService(context.NewMioContext())
+	userPoint, _ := pointService.FindByOpenId(form.Uid)
 	err := service.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		return gin.H{
@@ -131,7 +167,8 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 	}
 
 	tranId, err := service.DefaultDuiBaService.PointAddCallback(form)
-	userPoint, _ = service.DefaultPointService.FindByOpenId(form.Uid)
+
+	userPoint, _ = pointService.FindByOpenId(form.Uid)
 	if err != nil {
 		return gin.H{
 			"status":       "fail",

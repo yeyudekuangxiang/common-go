@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
@@ -19,7 +20,8 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 		return nil, err
 	}
 
-	list, total, err := service.DefaultPointTransactionService.GetPageListBy(service.GetPointTransactionPageListBy{
+	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	list, total, err := pointTranService.GetPageListBy(service.GetPointTransactionPageListBy{
 		UserId:    form.UserId,
 		Nickname:  form.Nickname,
 		OpenId:    form.OpenId,
@@ -41,7 +43,8 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	}, nil
 }
 func (ctr PointController) GetPointTypeList(ctx *gin.Context) (gin.H, error) {
-	list := service.DefaultPointTransactionService.GetPointTransactionTypeList()
+	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	list := pointTranService.GetPointTransactionTypeList()
 	return gin.H{
 		"list": list,
 	}, nil
@@ -53,7 +56,8 @@ func (ctr PointController) ExportPointRecordList(ctx *gin.Context) (gin.H, error
 	}
 
 	admin := apiutil.GetAuthAdmin(ctx)
-	err := service.DefaultPointTransactionService.ExportPointTransactionList(admin.ID, service.ExportPointTransactionListBy{
+	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	err := pointTranService.ExportPointTransactionList(admin.ID, service.ExportPointTransactionListBy{
 		UserId:    form.UserId,
 		Nickname:  form.Nickname,
 		OpenId:    form.OpenId,
@@ -70,7 +74,8 @@ func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, err
 		return nil, err
 	}
 
-	list, total, err := service.DefaultPointTransactionService.GetAdjustRecordPageList(service.GetPointAdjustRecordPageListParam{
+	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	list, total, err := pointTranService.GetAdjustRecordPageList(service.GetPointAdjustRecordPageListParam{
 		OpenId:    form.OpenId,
 		Phone:     form.Phone,
 		Type:      form.Type,
@@ -93,7 +98,8 @@ func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, err
 	}, nil
 }
 func (ctr PointController) GetAdjustPointTransactionTypeList(ctx *gin.Context) (gin.H, error) {
-	list := service.DefaultPointTransactionService.GetAdjustPointTransactionTypeList()
+	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	list := pointTranService.GetAdjustPointTransactionTypeList()
 	return gin.H{
 		"list": list,
 	}, nil
@@ -105,7 +111,8 @@ func (ctr PointController) AdjustUserPoint(ctx *gin.Context) (gin.H, error) {
 	}
 	admin := apiutil.GetAuthAdmin(ctx)
 
-	err := service.DefaultPointTransactionService.AdminAdjustUserPoint(admin.ID, service.AdminAdjustUserPointParam{
+	pointService := service.NewPointService(context.NewMioContext(context.WithContext(ctx)))
+	err := pointService.AdminAdjustUserPoint(admin.ID, service.AdminAdjustUserPointParam{
 		OpenId: form.OpenId,
 		Phone:  form.Phone,
 		Type:   form.Type,

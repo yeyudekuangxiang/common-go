@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"mio/pkg/wxapp"
 	"time"
 )
 
@@ -113,7 +114,7 @@ func (srv ZeroService) GetDuiBaUrlByShort(short string) (string, error) {
 	}
 	return u, nil
 }
-func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdParty string) (string, error) {
+func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdParty string, cip string) (string, error) {
 	userInfo, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return "", err
@@ -146,6 +147,21 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			if p != "" {
 				path = p
 			}
+		}
+	}
+
+	//检测用户风险等级
+	resp, err := service.DefaultUserService.CheckUserRisk(wxapp.UserRiskRankParam{
+		AppId:    config.Config.Weapp.AppId,
+		OpenId:   userInfo.OpenId,
+		Scene:    1,
+		ClientIp: cip,
+	})
+	if err != nil {
+		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
+	} else {
+		if resp.RiskRank > activity.RiskLimit {
+			return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
 		}
 	}
 
