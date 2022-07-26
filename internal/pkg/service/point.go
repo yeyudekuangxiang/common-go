@@ -118,6 +118,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		//增加积分变动记录
 		tranService := NewPointTransactionService(ctx)
 		_, err = tranService.CreateTransaction(CreatePointTransactionParam{
+			BizId:        dto.BizId,
 			OpenId:       dto.OpenId,
 			Type:         dto.Type,
 			Value:        dto.ChangePoint,
