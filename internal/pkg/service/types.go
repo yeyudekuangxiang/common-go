@@ -271,13 +271,6 @@ type FilterPointRecordOpenIds struct {
 	Nickname string
 }
 
-type QrCodeInfo struct {
-	QrCodeId    string            `json:"qrCodeId"`
-	OpenId      string            `json:"openid"`
-	Description string            `json:"description"`
-	QrCodeType  entity.QrCodeType `json:"qrCodeType"`
-	ImageUrl    string            `json:"imageUrl"`
-}
 type InviteInfo struct {
 	OpenId    string     `json:"openId"`
 	Nickname  string     `json:"nickname"`

@@ -5,7 +5,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	service2 "mio/internal/pkg/service"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -22,7 +22,7 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	list, total, err := service2.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
+	list, total, err := service.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
 		ID:         form.ID,
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
@@ -55,7 +55,7 @@ func (TopicController) ListFlow(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	list, total, err := service2.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
+	list, total, err := service.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
 		ID:         form.ID,
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
@@ -86,13 +86,12 @@ func (TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	buffers, contType, err := service2.DefaultTopicService.GetShareWeappQrCode(int(user.ID), form.TopicId)
+	qr, err := service.NewQRCodeService().CreateTopicShareQr(form.TopicId, user.ID)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
-		"buffers":     buffers,
-		"contentType": contType,
+		"qrcode": service.DefaultOssService.FullUrl(qr.ImagePath),
 	}, nil
 }
 func (TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
@@ -103,7 +102,7 @@ func (TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	like, err := service2.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID))
+	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID))
 	if err != nil {
 		return nil, err
 	}

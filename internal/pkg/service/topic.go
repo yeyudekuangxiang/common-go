@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
@@ -13,7 +12,6 @@ import (
 	"mio/internal/pkg/core/app"
 	entity2 "mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
-	"mio/pkg/wxapp"
 	"os"
 	"path"
 	"strconv"
@@ -163,23 +161,6 @@ func (u TopicService) sortTopicListByIds(list []entity2.Topic, ids []int64) []en
 		newList = append(newList, topicMap[id])
 	}
 	return newList
-}
-
-// GetShareWeappQrCode 获取小程序端内容详情页分享小程序码
-func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
-		Scene:     fmt.Sprintf("tid=%d&uid=%d&s=p", topicId, userId),
-		Page:      "pages/cool-mio/mio-detail/index",
-		Width:     100,
-		IsHyaline: true,
-	})
-	if err != nil {
-		return nil, "", err
-	}
-	if resp.ErrCode != 0 {
-		return nil, "", errors.New(resp.ErrMsg)
-	}
-	return resp.Buffer, resp.ContentType, nil
 }
 
 // FindById 根据id查询 entity.Topic

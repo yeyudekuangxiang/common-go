@@ -6,7 +6,7 @@ import (
 )
 
 type GetWeappQrCodeFrom struct {
-	TopicId int `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
+	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 type GetTopicPageListForm struct {
 	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
