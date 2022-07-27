@@ -107,7 +107,7 @@ func (srv QRCodeService) CreateTopicShareQr(topicId int64, userId int64) (*entit
 // CreateInvite 创建邀请的积分小程序码
 func (srv QRCodeService) CreateInvite(openId string) (*entity.QRCode, error) {
 
-	page := "/pages/home/index?invitedBy=" + openId
+	page := "/pages/home/index?invitedBy=" + openId + "&cid=2"
 
 	key := srv.QrCodeKey(entity.QrCodeSceneInvite, page)
 
