@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/event"
 	revent "mio/internal/pkg/repository/event"
 	"mio/internal/pkg/service/product"
+	"mio/internal/pkg/util/timeutils"
 	"strconv"
 	"strings"
 	"time"
@@ -55,10 +57,11 @@ func (srv EventService) GetEventFullInfo(eventId string) (*EventFullInfo, error)
 	participationInfoList := make([]ParticipationInfo, 0)
 	for _, participation := range participationList {
 		timeStr := ""
-		day := int(time.Now().Sub(participation.Time).Hours() / 24)
-		if day == 0 {
+
+		if timeutils.StartOfDay(time.Now()).Before(participation.Time) {
 			timeStr = "今天"
 		} else {
+			day := int(math.Ceil(time.Now().Sub(participation.Time).Hours() / 24))
 			timeStr = fmt.Sprintf("%d天前", day)
 		}
 		participationInfoList = append(participationInfoList, ParticipationInfo{
@@ -115,7 +118,7 @@ func (srv EventService) AddEventParticipationCount(eventId string, count int) er
 	if err != nil {
 		return err
 	}
-	if ev.ID != 0 {
+	if ev.ID == 0 {
 		return errors.New("未查询到项目信息")
 	}
 	ev.ParticipationCount += count

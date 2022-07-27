@@ -33,11 +33,6 @@ func (TopicController) List(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]int64, 0)
-	for _, item := range list {
-		ids = append(ids, item.Id)
-	}
-	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
 
 	return gin.H{
 		"list":     list,

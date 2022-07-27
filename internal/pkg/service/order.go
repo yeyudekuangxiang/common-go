@@ -116,7 +116,7 @@ func (srv OrderService) SubmitOrder(param SubmitOrderParam) (*entity.Order, erro
 //submitOrder (此方法可自定义需要支付的金额 需谨慎使用 用户下单请使用 OrderService.SubmitOrder 方法创建订单)
 func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, error) {
 	//防止并发
-	if !util2.DefaultLock.Lock("submitOrder_"+strconv.FormatInt(param.Order.UserId, 10), time.Second*5) {
+	if !util2.DefaultLock.Lock("submitOrder_"+strconv.FormatInt(param.Order.UserId, 5), time.Second*5) {
 		return nil, errors.New("操作频率过快,请稍后再试")
 	}
 

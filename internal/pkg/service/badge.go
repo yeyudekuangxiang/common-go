@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -69,17 +70,18 @@ func (srv BadgeService) GenerateCode(certificateId string) (string, error) {
 }
 func (srv BadgeService) GenerateRuleCode() string {
 	badge := srv.repo.FindLastWithType(entity.CertTypeRule)
-	currentDate := timeutils.NowDate().String()
+	currentDate := timeutils.NowDate().Format("20060102")
 
 	code := strings.Builder{}
 	code.WriteString(badgeCodePrefix)
 	code.WriteString(currentDate)
 
+	/*WBCF202201250002*/
 	if len(badge.Code) >= 12 && badge.Code[4:12] == currentDate {
 		lastNum, _ := strconv.Atoi(badge.Code[12:])
 		if lastNum != 0 {
 			lastNum += 1
-			code.WriteString(strconv.Itoa(lastNum))
+			code.WriteString(fmt.Sprintf("%04d", lastNum))
 			return code.String()
 		}
 	}
