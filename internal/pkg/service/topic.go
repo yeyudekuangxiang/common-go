@@ -72,11 +72,11 @@ func (u TopicService) GetTopicDetailPageList(param repository2.GetTopicPageListB
 	list, total := u.r.GetTopicPageList(param)
 
 	//更新曝光和查看次数
-	u.UpdateTopicFlowListShowCount(list, param.UserId)
-	if param.ID != 0 && len(list) > 0 {
+	//u.UpdateTopicFlowListShowCount(list, param.UserId)
+	/*if param.ID != 0 && len(list) > 0 {
 		app.Logger.Info("更新查看次数", list[0].Id, param.UserId)
 		u.UpdateTopicSeeCount(list[0].Id, param.UserId)
-	}
+	}*/
 
 	detailList, err := u.fillTopicList(list, param.UserId)
 	if err != nil {

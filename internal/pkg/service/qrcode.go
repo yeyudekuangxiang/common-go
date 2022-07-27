@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
+	"strings"
 	"time"
 )
 
@@ -24,14 +25,13 @@ func NewQRCodeService() *QRCodeService {
 }
 
 //GetQrCode 获取二维码
-// scene entity.QrCodeScene 二维码的使用场景
-// key  二维码的key值 key值和scene应该组成唯一索引
+// key  二维码的key值
 // 返回值
 // qr *entity.QRCode 二维码信息
 // exist bool 二维码信息是否存在 true代表存在 false代表不存在
 // err error 查询异常错误信息
-func (srv QRCodeService) GetQrCode(scene entity.QrCodeScene, key string) (qr *entity.QRCode, exist bool, err error) {
-	return srv.repo.GetQrCode(scene, key)
+func (srv QRCodeService) GetQrCode(key string) (qr *entity.QRCode, exist bool, err error) {
+	return srv.repo.GetQrCode(key)
 }
 func (srv QRCodeService) CreateQrCode(dto srv_types.CreateQrCodeDTO) (*entity.QRCode, error) {
 	qrcode := entity.QRCode{}
@@ -56,10 +56,10 @@ func (srv QRCodeService) CreateTopicShareQr(topicId int64, userId int64) (*entit
 	page := "pages/cool-mio/mio-detail/index"
 	scene := fmt.Sprintf("tid=%d&uid=%d&s=p", topicId, userId)
 
-	key := util.Md5(userInfo.OpenId + scene)
+	key := srv.QrCodeKey(entity.QrCodeSceneTopicShare, page, scene)
 
 	//判断是否已经创建过
-	qr, exist, err := srv.GetQrCode(entity.QrCodeSceneTopicShare, key)
+	qr, exist, err := srv.GetQrCode(key)
 	if err != nil {
 		return nil, err
 	}
@@ -109,10 +109,10 @@ func (srv QRCodeService) CreateInvite(openId string) (*entity.QRCode, error) {
 
 	page := "/pages/home/index?invitedBy=" + openId
 
-	key := util.Md5(openId)
+	key := srv.QrCodeKey(entity.QrCodeSceneInvite, page)
 
 	//判断是否已经创建过
-	qr, exist, err := srv.GetQrCode(entity.QrCodeSceneInvite, key)
+	qr, exist, err := srv.GetQrCode(key)
 	if err != nil {
 		return nil, err
 	}
@@ -150,4 +150,9 @@ func (srv QRCodeService) CreateInvite(openId string) (*entity.QRCode, error) {
 		Description:  "邀请得积分小程序码",
 	})
 	return qr, err
+}
+
+func (srv QRCodeService) QrCodeKey(scene entity.QrCodeScene, content string, others ...string) string {
+	keyStr := string(scene) + content + strings.Join(others, "")
+	return util.Md5(keyStr)
 }

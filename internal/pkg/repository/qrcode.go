@@ -21,9 +21,9 @@ func NewQrCodeRepository(db *gorm.DB) *QrCodeRepository {
 // qr *entity.QRCode 二维码信息
 // exist bool 二维码信息是否存在 true代表存在 false代表不存在
 // err error 查询异常错误信息
-func (repo QrCodeRepository) GetQrCode(scene entity.QrCodeScene, key string) (qr *entity.QRCode, exist bool, err error) {
+func (repo QrCodeRepository) GetQrCode(key string) (qr *entity.QRCode, exist bool, err error) {
 	qr = &entity.QRCode{}
-	err = app.DB.Where("qr_code_scene = ? and key = ?", scene, key).First(qr).Error
+	err = app.DB.Where("key = ?", key).First(qr).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, nil
