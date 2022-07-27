@@ -160,7 +160,8 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	step.LastCheckCount = step.LastCheckCount + pendingStep
+
+	step.LastCheckCount = srv.computeLastCheckedSteps(step.LastCheckTime.Time, step.LastCheckCount) + pendingStep
 	step.LastCheckTime = stepHistory.RecordedTime
 	err = srv.repo.Save(step)
 	if err != nil {
@@ -176,20 +177,22 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 	return int(pendingPoint), err
 }
 
+func (srv StepService) computeLastCheckedSteps(lastCheckedTime time.Time, lastCheckedCount int) int {
+	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
+	if lastCheckedTime.IsZero() || !lastCheckedTime.Equal(model.NewTime().StartOfDay().Time) {
+		return 0
+	}
+	return lastCheckedCount
+}
+
 // computePendingStep 计算未领取积分的步行步数
 func (srv StepService) computePendingStep(history entity.StepHistory, step entity.Step) int {
-	// date check is moved outside
-	lastCheckedSteps := 0
 	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
+	lastCheckedSteps := srv.computeLastCheckedSteps(step.LastCheckTime.Time, step.LastCheckCount)
 
-	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
-	if step.LastCheckTime.IsZero() || !step.LastCheckTime.Equal(model.NewTime().StartOfDay().Time) {
-		lastCheckedSteps = 0
-	} else {
-		lastCheckedSteps = step.LastCheckCount
-		if lastCheckedSteps > stepUpperLimit {
-			return 0
-		}
+	//之前的领取已经超出了
+	if lastCheckedSteps >= stepUpperLimit {
+		return 0
 	}
 
 	currentStep := util.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
