@@ -28,7 +28,7 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	return gin.H{
-		"data":     list,
+		"list":     list,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,

@@ -38,7 +38,7 @@ func recovery() gin.HandlerFunc {
 		if ok {
 			c.JSON(200, apiutil.FormatErr(e, nil))
 		} else {
-			c.JSON(200, apiutil.FormatResponse(errno.InternalServerError.Code(), nil, fmt.Sprintf("%v", err)))
+			c.JSON(200, apiutil.FormatResponse(errno.ErrInternalServer.Code(), nil, fmt.Sprintf("%v", err)))
 		}
 		c.Abort()
 
@@ -175,7 +175,7 @@ func MustAuth2() gin.HandlerFunc {
 
 		if openId := ctx.GetHeader("openid"); openId != "" {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
-			if err != nil || user == nil {
+			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth openid err", openId, err)
 				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
 				return

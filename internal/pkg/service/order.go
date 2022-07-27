@@ -1,17 +1,24 @@
 package service
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
+	"github.com/pkg/errors"
 	"math/rand"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/event"
+	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
+	"mio/pkg/duiba/util"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -35,7 +42,7 @@ func (srv OrderService) CalculateAndCheck(items []repository2.CheckStockItem) (*
 		itemMap[item.ItemId] = item
 	}
 
-	productItems := DefaultProductItemService.GetListBy(repository2.GetProductItemListBy{
+	productItems := product.DefaultProductItemService.GetListBy(product.GetProductItemListParam{
 		ItemIds: itemIds,
 	})
 	if len(productItems) != len(itemIds) {
@@ -76,6 +83,12 @@ func (srv OrderService) CalculateAndCheck(items []repository2.CheckStockItem) (*
 9 创建订单
 */
 func (srv OrderService) SubmitOrder(param SubmitOrderParam) (*entity.Order, error) {
+	lockKey := fmt.Sprintf("SubmitOrder%d", param.Order.UserId)
+	if !util2.DefaultLock.Lock(lockKey, time.Second*10) {
+		return nil, errno.ErrLimit.WithCaller()
+	}
+	defer util2.DefaultLock.UnLock(lockKey)
+
 	checkItems := make([]repository2.CheckStockItem, 0)
 	for _, item := range param.Items {
 		checkItems = append(checkItems, repository2.CheckStockItem{
@@ -95,14 +108,15 @@ func (srv OrderService) SubmitOrder(param SubmitOrderParam) (*entity.Order, erro
 			TotalCost: calculateResult.TotalCost,
 			OrderType: entity.OrderTypePurchase,
 		},
-		Items: calculateResult.ItemList,
+		Items:           calculateResult.ItemList,
+		PartnershipType: param.PartnershipType,
 	})
 }
 
 //submitOrder (此方法可自定义需要支付的金额 需谨慎使用 用户下单请使用 OrderService.SubmitOrder 方法创建订单)
 func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, error) {
 	//防止并发
-	if !util2.DefaultLock.Lock("submitOrder_"+strconv.FormatInt(param.Order.UserId, 10), time.Second*5) {
+	if !util2.DefaultLock.Lock("submitOrder_"+strconv.FormatInt(param.Order.UserId, 5), time.Second*5) {
 		return nil, errors.New("操作频率过快,请稍后再试")
 	}
 
@@ -136,7 +150,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 			Count:  item.Count,
 		})
 	}
-	err = DefaultProductItemService.CheckAndLockStock(checkStockItems)
+	err = product.DefaultProductItemService.CheckAndLockStock(checkStockItems)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +158,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 	defer func() {
 		if orderSuccess == false {
 			//释放库存
-			err := DefaultProductItemService.UnLockStock(checkStockItems)
+			err := product.DefaultProductItemService.UnLockStock(checkStockItems)
 			if err != nil {
 				app.Logger.Errorf("释放库存失败 %+v %+v", checkStockItems, err)
 			}
@@ -179,27 +193,29 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 	}()
 
 	//创建订单
-	order, err := srv.create(orderId, param)
+	order, orderItems, err := srv.create(orderId, param)
 	if err != nil {
 		return nil, err
 	}
+
+	srv.afterCreateOrder(param, user, order, orderItems)
 
 	orderSuccess = true
 	return order, nil
 }
 
 //直接创建订单 不会扣除积分(请勿使用此方法创建订单 请使用 OrderService.SubmitOrder 方法创建订单)
-func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.Order, error) {
+func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.Order, []entity.OrderItem, error) {
 	var addressId *string
 	if param.Order.AddressId != "" {
 		addressId = &param.Order.AddressId
 	}
 	user, err := DefaultUserService.GetUserById(param.Order.UserId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if user.ID == 0 || user.OpenId == "" {
-		return nil, errors.New("未查找到用户信息,请联系管理员")
+		return nil, nil, errors.New("未查找到用户信息,请联系管理员")
 	}
 
 	order := &entity.Order{
@@ -223,7 +239,12 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		})
 	}
 
-	return order, srv.repo.SubmitOrder(order, &orderItems)
+	err = srv.repo.SubmitOrder(order, &orderItems)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return order, orderItems, nil
 }
 
 // SubmitOrderForGreenMonday 用于greenmonday活动用户下单
@@ -302,4 +323,112 @@ func (srv OrderService) CreateOrderOfDuiBa(orderId string, info duibaApi.OrderIn
 	}
 
 	return &order, srv.repo.SubmitOrder(&order, &orderItemList)
+}
+func (srv OrderService) afterCreateOrder(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+	participateEvent(param, user, order, orderItems)
+	generateBadgeFromOrderItems(param, user, order, orderItems)
+}
+
+func participateEvent(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+	participateEventParams := make([]event.ParticipateEventParam, 0)
+	for _, orderItem := range orderItems {
+		participateEventParams = append(participateEventParams, event.ParticipateEventParam{
+			ProductItemId: orderItem.ItemId,
+			Count:         orderItem.Count,
+		})
+	}
+	err := event.DefaultEventParticipationService.ParticipateEvent(*user, participateEventParams)
+	if err != nil {
+		app.Logger.Errorf("下订单后参加活动参与失败 %d %+v", user.ID, participateEventParams)
+	}
+}
+func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, order *entity.Order, orderItems []entity.OrderItem) {
+	for _, orderItem := range orderItems {
+		cert, err := DefaultCertificateService.FindCertificate(FindCertificateBy{
+			ProductItemId: orderItem.ItemId,
+		})
+		if err != nil {
+			app.Logger.Error("发放证书失败 查询证书异常", orderItem.ItemId, err)
+			continue
+		}
+
+		if cert.ID == 0 {
+			continue
+		}
+
+		for i := 0; i < orderItem.Count; i++ {
+			_, err := DefaultBadgeService.GenerateBadge(GenerateBadgeParam{
+				OpenId:        user.OpenId,
+				CertificateId: cert.CertificateId,
+				ProductItemId: orderItem.ItemId,
+				OrderId:       order.OrderId,
+				Partnership:   param.PartnershipType,
+			})
+			if err != nil {
+				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
+				continue
+			}
+		}
+	}
+}
+func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventParam) (*srv_types.SubmitOrderForEventResult, error) {
+	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
+		EventId: param.EventId,
+		Active:  sql.NullBool{Bool: true, Valid: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if ev.ID == 0 {
+		return nil, errno.ErrRecordNotFound.WithCaller()
+	}
+	if ev.ProductItemId == "" {
+		return nil, errors.New("项目未启用,请稍后再试")
+	}
+	if !ev.StartTime.IsZero() && ev.StartTime.After(time.Now()) {
+		return nil, errno.ErrCommon.WithMessage("项目未开始")
+	}
+
+	if !ev.EndTime.IsZero() && ev.EndTime.Before(time.Now()) {
+		return nil, errno.ErrCommon.WithMessage("项目已结束")
+	}
+
+	order, err := srv.SubmitOrder(SubmitOrderParam{
+		Order: SubmitOrder{
+			UserId:    param.UserId,
+			OrderType: entity.OrderTypePurchase,
+		},
+		Items: []SubmitOrderItem{
+			{
+				ItemId: ev.ProductItemId,
+				Count:  1,
+			},
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	badge, err := DefaultBadgeService.FindBadge(srv_types.FindBadgeParam{
+		OrderId: order.OrderId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	code := util2.UUID()
+
+	app.Redis.Set(context.NewMioContext(), config.RedisKey.BadgeImageCode+code, badge.ID, time.Minute*5)
+	return &srv_types.SubmitOrderForEventResult{
+		CertificateNo: badge.Code,
+		UploadCode:    code,
+	}, nil
+}
+func (srv OrderService) GetPageFullOrder(dto srv_types.GetPageFullOrderDTO) ([]entity.OrderWithGood, int64, error) {
+	orderDO := repotypes.GetPageFullOrderDO{}
+	if err := util.MapTo(dto, &orderDO); err != nil {
+		return nil, 0, err
+	}
+	return srv.repo.GetPageFullOrder(orderDO)
 }

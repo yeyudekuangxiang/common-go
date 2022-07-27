@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/medivhzhan/weapp/v3"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
@@ -13,7 +12,6 @@ import (
 	"mio/internal/pkg/core/app"
 	entity2 "mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
-	"mio/pkg/wxapp"
 	"os"
 	"path"
 	"strconv"
@@ -74,11 +72,11 @@ func (u TopicService) GetTopicDetailPageList(param repository2.GetTopicPageListB
 	list, total := u.r.GetTopicPageList(param)
 
 	//更新曝光和查看次数
-	u.UpdateTopicFlowListShowCount(list, param.UserId)
-	if param.ID != 0 && len(list) > 0 {
+	//u.UpdateTopicFlowListShowCount(list, param.UserId)
+	/*if param.ID != 0 && len(list) > 0 {
 		app.Logger.Info("更新查看次数", list[0].Id, param.UserId)
 		u.UpdateTopicSeeCount(list[0].Id, param.UserId)
-	}
+	}*/
 
 	detailList, err := u.fillTopicList(list, param.UserId)
 	if err != nil {
@@ -165,23 +163,6 @@ func (u TopicService) sortTopicListByIds(list []entity2.Topic, ids []int64) []en
 		newList = append(newList, topicMap[id])
 	}
 	return newList
-}
-
-// GetShareWeappQrCode 获取小程序端内容详情页分享小程序码
-func (u TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, string, error) {
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
-		Scene:     fmt.Sprintf("tid=%d&uid=%d&s=p", topicId, userId),
-		Page:      "pages/cool-mio/mio-detail/index",
-		Width:     100,
-		IsHyaline: true,
-	})
-	if err != nil {
-		return nil, "", err
-	}
-	if resp.ErrCode != 0 {
-		return nil, "", errors.New(resp.ErrMsg)
-	}
-	return resp.Buffer, resp.ContentType, nil
 }
 
 // FindById 根据id查询 entity.Topic
@@ -276,7 +257,11 @@ func (u TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 
 	defer file.Close()
 
-	return DefaultOssService.PutObject(name, file)
+	avatarPath, err := DefaultOssService.PutObject(name, file)
+	if err != nil {
+		return "", err
+	}
+	return DefaultOssService.FullUrl(avatarPath), nil
 }
 
 func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
@@ -299,18 +284,19 @@ func (u TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
 		name := fmt.Sprintf("images/topic/%s/%s/%s", path.Base(path.Dir(dirPath)), path.Base(dirPath), fileInfo.Name())
 
 		fmt.Println("上传内容图片", path.Join(dirPath, fileInfo.Name()), name)
-		u, err := DefaultOssService.PutObject(name, file)
+		topicPath, err := DefaultOssService.PutObject(name, file)
 		if err != nil {
 			file.Close()
 			return nil, err
 		}
-		images = append(images, u)
+		images = append(images, DefaultOssService.FullUrl(topicPath))
 	}
 	return images, nil
 }
 
 // ImportTopic 从xlsx中导入内容
 func (u TopicService) ImportTopic(filename string, baseImportId int) error {
+
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
 		return errors.WithStack(err)

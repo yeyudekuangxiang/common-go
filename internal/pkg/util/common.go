@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"strings"
 )
 
 func IsTesting() bool {
@@ -37,4 +38,23 @@ func Ternary(right bool, val1 interface{}, val2 interface{}) TOResult {
 		return TOResult{val: val1}
 	}
 	return TOResult{val: val2}
+}
+
+func LinkJoin(ele ...string) string {
+	builder := strings.Builder{}
+	length := len(ele) - 1
+	for i, e := range ele {
+
+		if i == length {
+			e = strings.TrimLeft(e, "/")
+		} else {
+			e = strings.Trim(e, "/")
+		}
+		builder.WriteString(e)
+
+		if i != length {
+			builder.WriteString("/")
+		}
+	}
+	return builder.String()
 }

@@ -6,15 +6,16 @@ package cmd
 
 import (
 	"github.com/shopspring/decimal"
+	"github.com/spf13/cobra"
 	"gorm.io/gorm"
+	"log"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/model"
 	ebusiness "mio/internal/pkg/model/entity/business"
+	"mio/internal/pkg/model/entity/event"
 	sbusiness "mio/internal/pkg/service/business"
 	"time"
-
-	"github.com/spf13/cobra"
 )
 
 // seedCmd represents the seed command
@@ -35,7 +36,11 @@ to quickly create a Cobra application.`,
 		}
 		conPath := cmd.Flag("config").Value.String()
 		initialize.Initialize(conPath)
-		business(app.DB)
+		app.DB.Transaction(func(tx *gorm.DB) error {
+			business(tx)
+			eventCategory(tx)
+			return nil
+		})
 	},
 }
 
@@ -369,4 +374,51 @@ func business(db *gorm.DB) {
 	sbusiness.DefaultCarbonRankService.InitCompanyDepartmentRank(1, ebusiness.RankDateTypeDay)
 	sbusiness.DefaultCarbonRankService.InitCompanyDepartmentRank(1, ebusiness.RankDateTypeWeek)
 	sbusiness.DefaultCarbonRankService.InitCompanyDepartmentRank(1, ebusiness.RankDateTypeMonth)
+}
+
+func eventCategory(db *gorm.DB) {
+	categoryList := []event.EventCategory{
+		{
+			EventCategoryId: "79550af260ecf9df2635751c3273b269",
+			Title:           "生态环保",
+			Active:          true,
+			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_sthb.png",
+			Icon:            "https://resources.miotech.com/static/mp2c/images/event/category/icon/eep.png",
+			Sort:            2,
+		},
+		{
+			EventCategoryId: "cbddf0af60ecf9f11676bcbd6482736f",
+			Title:           "公益善心",
+			Active:          true,
+			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_rw.png",
+			Icon:            "https://resources.miotech.com/static/mp2c/images/event/category/icon/hc.png",
+			Sort:            1,
+		},
+		{
+			EventCategoryId: "79550af260ecfcd4263627ff7c516d0b",
+			Title:           "碳减排证书",
+			Active:          true,
+			ImageUrl:        "https//resources.miotech.com//static/mp2c/images/event/shouye/sy_dtjp.png",
+			Icon:            "https://resources.miotech.com/static/mp2c/images/event/category/icon/lcaer.png",
+			Sort:            3,
+		},
+	}
+
+	for _, category := range categoryList {
+		old := event.EventCategory{}
+		err := db.Where("event_category_id = ?", category.EventCategoryId).First(&old).Error
+		panicOnErr(err)
+
+		if old.ID > 0 {
+			category.ID = old.ID
+			panicOnErr(db.Save(&category).Error)
+		} else {
+			panicOnErr(db.Create(&category).Error)
+		}
+	}
+}
+func panicOnErr(err error) {
+	if err != nil {
+		log.Panicln(err)
+	}
 }

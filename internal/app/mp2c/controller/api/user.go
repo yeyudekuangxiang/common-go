@@ -77,7 +77,7 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	}
 
 	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
-		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile)
+		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile, form.Cid)
 		if err != nil {
 			return gin.H{}, err
 		}
@@ -121,6 +121,16 @@ func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 	}
 	return gin.H{
 		"summary": summary,
+	}, nil
+}
+func (UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(c)
+	accountInfo, err := service.DefaultUserService.AccountInfo(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"accountInfo": accountInfo,
 	}, nil
 }
 

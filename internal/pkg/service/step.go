@@ -1,19 +1,23 @@
 package service
 
 import (
+	"errors"
+	"fmt"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
-	"mio/pkg/errno"
 	"time"
 )
 
 const (
-	// StepToScoreConvertRatio 步行数量和积分比例  60步等于1积分
-	StepToScoreConvertRatio = 60
+	// StepToScoreConvertRatio 步行数量和积分比例  90步等于1积分
+	StepToScoreConvertRatio = 90
 	// StepScoreUpperLimit 每天步行最多获取的积分数量
-	StepScoreUpperLimit = 296
+	StepScoreUpperLimit = 133
 )
 
 // DefaultStepService 默认步行服务
@@ -25,17 +29,9 @@ type StepService struct {
 }
 
 // FindOrCreateStep 查询或者创建步行记录
-func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
-	user, err := DefaultUserService.GetUserById(userId)
-	if err != nil {
-		return nil, err
-	}
-	if user.ID == 0 {
-		return nil, errno.ErrUserNotFound
-	}
-
+func (srv StepService) FindOrCreateStep(openId string) (*entity.Step, error) {
 	step := srv.repo.FindBy(repository.FindStepBy{
-		OpenId: user.OpenId,
+		OpenId: openId,
 	})
 
 	if step.ID != 0 {
@@ -43,8 +39,7 @@ func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
 	}
 
 	step = entity.Step{
-		UserId:         userId,
-		OpenId:         user.OpenId,
+		OpenId:         openId,
 		Total:          0,
 		LastCheckTime:  model.NewTime().StartOfDay(),
 		LastCheckCount: 0,
@@ -53,8 +48,8 @@ func (srv StepService) FindOrCreateStep(userId int64) (*entity.Step, error) {
 }
 
 // UpdateStepTotal 更新用户步行总数
-func (srv StepService) UpdateStepTotal(userId int64) error {
-	step, err := srv.FindOrCreateStep(userId)
+func (srv StepService) UpdateStepTotal(openId string) error {
+	step, err := srv.FindOrCreateStep(openId)
 	if err != nil {
 		return err
 	}
@@ -62,7 +57,7 @@ func (srv StepService) UpdateStepTotal(userId int64) error {
 	//查询未统计在内的步行数据历史
 	stepHistoryList, err := DefaultStepHistoryService.GetStepHistoryList(GetStepHistoryListBy{
 		StartRecordedTime: step.LastSumHistoryTime,
-		UserId:            userId,
+		OpenId:            openId,
 		OrderBy:           entity.OrderByList{entity.OrderByStepHistoryTimeDesc},
 	})
 
@@ -88,11 +83,11 @@ func (srv StepService) UpdateStepTotal(userId int64) error {
 }
 
 // WeeklyHistory 获取最近一周
-func (srv StepService) WeeklyHistory(userId int64) (*WeeklyHistoryInfo, error) {
+func (srv StepService) WeeklyHistory(openId string) (*WeeklyHistoryInfo, error) {
 
 	//最近7天记录
 	historyList, err := DefaultStepHistoryService.GetStepHistoryList(GetStepHistoryListBy{
-		UserId:            userId,
+		OpenId:            openId,
 		StartRecordedTime: model.Time{Time: timeutils.StartOfDay(time.Now().Add(-6 * time.Hour * 24))},
 	})
 	if err != nil {
@@ -107,13 +102,13 @@ func (srv StepService) WeeklyHistory(userId int64) (*WeeklyHistoryInfo, error) {
 	sevenDayCo2 := DefaultCarbonNeutralityService.calculateCO2ByStep(int64(totalStep))
 
 	//查询历史总步数
-	step, err := srv.FindOrCreateStep(userId)
+	step, err := srv.FindOrCreateStep(openId)
 	if err != nil {
 		return nil, err
 	}
 
 	//历史总步数和总天数
-	total, days := DefaultStepHistoryService.GetUserLifeStepInfo(userId)
+	total, days := DefaultStepHistoryService.GetUserLifeStepInfo(openId)
 
 	weeklyHistoryInfo := WeeklyHistoryInfo{}
 	weeklyHistoryInfo.SevenDaysCo2 = sevenDayCo2
@@ -137,4 +132,100 @@ func (srv StepService) formatWeeklyHistoryStepList(list []entity.StepHistory) []
 		})
 	}
 	return stepList
+}
+
+// RedeemPointFromPendingSteps 领取步行积分
+func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
+	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId), time.Second*5) {
+		return 0, errors.New("操作频繁,请稍后再试")
+	}
+	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId))
+
+	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId: openId,
+		Day:    model.NewTime().StartOfDay(),
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	pendingPoint, pendingStep, err := srv.ComputePendingPoint(openId)
+	if err != nil {
+		return 0, err
+	}
+
+	if pendingPoint == 0 {
+		return 0, nil
+	}
+
+	step, err := srv.FindOrCreateStep(openId)
+	if err != nil {
+		return 0, err
+	}
+
+	step.LastCheckCount = srv.computeLastCheckedSteps(step.LastCheckTime.Time, step.LastCheckCount) + pendingStep
+	step.LastCheckTime = stepHistory.RecordedTime
+	err = srv.repo.Save(step)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+		ChangePoint:  pendingPoint,
+		BizId:        util.UUID(),
+		Type:         entity.POINT_STEP,
+		OpenId:       openId,
+		AdditionInfo: fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
+	})
+	return int(pendingPoint), err
+}
+
+func (srv StepService) computeLastCheckedSteps(lastCheckedTime time.Time, lastCheckedCount int) int {
+	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
+	if lastCheckedTime.IsZero() || !lastCheckedTime.Equal(model.NewTime().StartOfDay().Time) {
+		return 0
+	}
+	return lastCheckedCount
+}
+
+// computePendingStep 计算未领取积分的步行步数
+func (srv StepService) computePendingStep(history entity.StepHistory, step entity.Step) int {
+	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
+	lastCheckedSteps := srv.computeLastCheckedSteps(step.LastCheckTime.Time, step.LastCheckCount)
+
+	//之前的领取已经超出了
+	if lastCheckedSteps >= stepUpperLimit {
+		return 0
+	}
+
+	currentStep := util.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
+
+	result := currentStep - lastCheckedSteps
+
+	return util.Ternary(result > 0, result, 0).Int()
+}
+
+// computePendingStep 计算可领取的积分数量 和 步行数量
+func (srv StepService) computePendingPoint(history entity.StepHistory, step entity.Step) (point int64, stepNum int) {
+	pendingStep := srv.computePendingStep(history, step)
+	pendingPoint := pendingStep / StepToScoreConvertRatio
+	return int64(pendingPoint), pendingPoint * StepToScoreConvertRatio
+}
+
+func (srv StepService) ComputePendingPoint(openId string) (point int64, step int, err error) {
+
+	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId: openId,
+		Day:    model.NewTime().StartOfDay(),
+	})
+	if err != nil {
+		return 0, 0, err
+	}
+	userStep, err := DefaultStepService.FindOrCreateStep(openId)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	pointNum, stepNum := srv.computePendingPoint(*stepHistory, *userStep)
+	return pointNum, stepNum, nil
 }
