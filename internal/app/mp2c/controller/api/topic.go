@@ -124,7 +124,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	//创建帖子
-	err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.IsTop, form.TagIds, form.Images)
+	err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	//user
 	user := apiutil.GetAuthUser(c)
 	//更新帖子
-	err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.IsTop, form.TagIds, form.Images)
+	err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -166,14 +166,14 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	//user
-	user := apiutil.GetAuthUser(c)
 	//获取帖子
-	err := service.DefaultTopicService.DelTopic(user.ID, form.ID)
+	topic, err := service.DefaultTopicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"topic": topic,
+	}, nil
 }
 
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {

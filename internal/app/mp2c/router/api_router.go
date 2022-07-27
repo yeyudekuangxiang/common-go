@@ -31,7 +31,7 @@ func apiRouter(router *gin.Engine) {
 		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
-		userRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		userRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
 		//文章评论列表
 		authRouter.POST("/topic/comment/list", apiutil.Format(api.DefaultCommentController.List)) //
 		authRouter.POST("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubCommentList))

@@ -40,24 +40,6 @@ type TopicService struct {
 	TokenServer *wxoa.AccessTokenServer
 }
 
-// GetTopicDetail 获取topic详情
-func (srv TopicService) GetTopicDetail(topicId int64) (entity.Topic, error) {
-	//查询数据是否存在
-	topic := srv.topic.FindById(topicId)
-	if topic.Id == 0 {
-		return entity.Topic{}, errors.New("数据不存在")
-	}
-	//查找关联关系
-	tagModels := make([]entity.Tag, 0)
-	err := app.DB.Model(entity.Topic{}).Association("Tags").Find(&tagModels)
-	if err != nil {
-		return entity.Topic{}, err
-	}
-	topic.Tags = tagModels
-	//更新查看次数
-	return topic, nil
-}
-
 func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]entity.Topic, error) {
 	//获取置顶数据，按时间倒序排序
 	//topList := make([]entity.Topic, 0)
@@ -71,9 +53,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]ent
 	//获取精华数据，按时间倒序排序
 	//essenceList := make([]entity.Topic, 0)
 	//剩下的数据，按时间倒叙排序
-
 	//获取所有数据数量
-
 	return nil, nil
 }
 
@@ -511,7 +491,7 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, isTop int, tagIds []int64, images []string) error {
+func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) error {
 	//检查内容
 	err := srv.checkMsgs(openid, content)
 	if err != nil {
@@ -538,7 +518,6 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		Avatar:    avatarUrl,
 		Nickname:  nikeName,
 		Tags:      tagModel,
-		IsTop:     isTop,
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
@@ -549,7 +528,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, isTop int, tagIds []int64, images []string) error {
+func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) error {
 	//检查内容
 	err := srv.checkMsgs(openid, content)
 	//查询记录是否存在
@@ -577,7 +556,6 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.Nickname = nikeName
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
-	topicModel.IsTop = isTop
 	topicModel.TopicTag = tag.Name
 	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
 		return err
@@ -587,6 +565,24 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		return err
 	}
 	return nil
+}
+
+// DetailTopic 获取topic详情
+func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
+	//查询数据是否存在
+	topic := srv.topic.FindById(topicId)
+	if topic.Id == 0 {
+		return entity.Topic{}, errors.New("数据不存在")
+	}
+	//查找关联关系
+	tagModels := make([]entity.Tag, 0)
+	err := app.DB.Model(entity.Topic{}).Association("Tags").Find(&tagModels)
+	if err != nil {
+		return entity.Topic{}, err
+	}
+	topic.Tags = tagModels
+	//更新查看次数
+	return topic, nil
 }
 
 // DelTopic 软删除
@@ -603,18 +599,6 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 		return err
 	}
 	return nil
-}
-
-func getTopicImage(importId int, p string) ([]string, error) {
-	files, err := ioutil.ReadDir(path.Join(p, strconv.Itoa(importId)))
-	if err != nil {
-		return nil, err
-	}
-	list := make([]string, 0)
-	for _, f := range files {
-		list = append(list, fmt.Sprintf("https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/info/%d/%s", importId, f.Name()))
-	}
-	return list, nil
 }
 
 func (srv TopicService) checkMsgs(openid, content string) error {
@@ -674,4 +658,16 @@ func (srv TopicService) checkMsg(params *security.MsgSecCheckRequest) error {
 		return fmt.Errorf("check error: %s", check.ErrMSG)
 	}
 	return nil
+}
+
+func (srv TopicService) getTopicImage(importId int, p string) ([]string, error) {
+	files, err := ioutil.ReadDir(path.Join(p, strconv.Itoa(importId)))
+	if err != nil {
+		return nil, err
+	}
+	list := make([]string, 0)
+	for _, f := range files {
+		list = append(list, fmt.Sprintf("https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/topic/info/%d/%s", importId, f.Name()))
+	}
+	return list, nil
 }

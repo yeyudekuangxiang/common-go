@@ -39,7 +39,8 @@ type Topic struct {
 	CreatedAt     model.Time  `json:"createdAt"`
 	UpdatedAt     model.Time  `json:"updatedAt"`
 	ImportId      int         `json:"-"`
-	IsTop         int         `json:"isTop"` //是否置顶
+	IsTop         int         `json:"isTop"`     //是否置顶
+	IsEssence     int         `json:"isEssence"` //是否精华
 }
 
 func (Topic) TableName() string {

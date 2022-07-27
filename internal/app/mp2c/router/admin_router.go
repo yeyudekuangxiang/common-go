@@ -37,12 +37,13 @@ func adminRouter(router *gin.Engine) {
 		//后台接口-文章管理
 		articleRouter := adminRouter.Group("/topic")
 		{
-			articleRouter.GET("/list", apiutil.Format(admin.DefaultTopicController.List))            //文章列表
-			articleRouter.GET("/detail", apiutil.Format(admin.DefaultTopicController.Detail))        //文章详情
-			articleRouter.POST("/update", apiutil.Format(admin.DefaultTopicController.Update))       //文章详情
-			articleRouter.POST("/delete", apiutil.Format(admin.DefaultTopicController.Delete))       //文章删除
-			articleRouter.POST("/review", apiutil.Format(admin.DefaultTopicController.Review))       //审核
-			articleRouter.POST("/recommend", apiutil.Format(admin.DefaultTopicController.Recommend)) //推荐
+			articleRouter.GET("/list", apiutil.Format(admin.DefaultTopicController.List))        //文章列表
+			articleRouter.GET("/detail", apiutil.Format(admin.DefaultTopicController.Detail))    //文章详情
+			articleRouter.POST("/update", apiutil.Format(admin.DefaultTopicController.Update))   //文章更新
+			articleRouter.POST("/create", apiutil.Format(admin.DefaultTopicController.Create))   //文章创建
+			articleRouter.POST("/review", apiutil.Format(admin.DefaultTopicController.Review))   //审核
+			articleRouter.POST("/top", apiutil.Format(admin.DefaultTopicController.Top))         //置顶
+			articleRouter.POST("/essence", apiutil.Format(admin.DefaultTopicController.Essence)) //精华
 		}
 		//后台接口-tag管理
 		tagRouter := adminRouter.Group("/tag")

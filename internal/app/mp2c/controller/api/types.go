@@ -10,7 +10,7 @@ type GetWeappQrCodeFrom struct {
 }
 type GetTopicPageListForm struct {
 	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
-	TopicTagId int   `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
+	TopicTagId int64 `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
 	controller.PageFrom
 }
 type ChangeTopicLikeForm struct {
@@ -69,7 +69,6 @@ type DuiBaNoLoginH5Form struct {
 type CreateTopicForm struct {
 	Title   string   `json:"title" form:"title" alias:"title" binding:"required,min=2,max=64"`
 	Content string   `json:"content" form:"content" alias:"content" binding:"min=0,max=10000"`
-	IsTop   int      `json:"isTop" form:"isTop" alias:"isTop" binding:"oneof=0 1"`
 	Images  []string `json:"images" form:"images" alias:"images" binding:"required,min=1,max=12"`
 	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"tagIds" binding:"min=0,max=2"`
 }

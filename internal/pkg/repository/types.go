@@ -24,12 +24,27 @@ type GetTopicLikeListBy struct {
 
 type GetTopicPageListBy struct {
 	ID         int64              `json:"id"`
-	TopicTagId int                `json:"topicTagId"`
+	TopicTagId int64              `json:"topicTagId"`
 	Offset     int                `json:"offset"`
 	Status     int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop      int                `json:"isTop"`
+	IsEssence  int                `json:"isEssence"`
 	Limit      int                `json:"limit"`  //limit为0时不限制数量
 	UserId     int64              `json:"userId"` // 用于查询用户对帖子是否点赞
 	OrderBy    entity.OrderByList `json:"orderBy"`
+}
+
+type TopicListRequest struct {
+	ID        int64  `json:"id"` //帖子id
+	Title     string `json:"title"`
+	UserId    int64  `json:"userId"`
+	UserName  string `json:"userName"`
+	TagId     int64  `json:"tagId"`
+	Status    int    `json:"status"`    //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop     int    `json:"isTop"`     //是否置顶
+	IsEssence int    `json:"isEssence"` //是否
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
 }
 
 type GetTagPageListBy struct {
@@ -96,7 +111,7 @@ type GetTopicFlowPageListBy struct {
 	Limit      int
 	UserId     int64
 	TopicId    int64
-	TopicTagId int
+	TopicTagId int64
 	Status     entity.TopicStatus `json:"status"` //直接传0值表示全部
 }
 type GetProductItemListBy struct {
