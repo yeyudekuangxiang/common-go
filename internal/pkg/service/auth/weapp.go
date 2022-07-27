@@ -7,17 +7,13 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/pkg/errors"
 	"log"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
-)
-
-const (
-	javaLoginUrl = "https://dev.mp2c.miotech.com/api/mp2c/auth/login"
-	javaWhoAmi   = "https://dev.mp2c.miotech.com/api/mp2c/user/whoami"
 )
 
 var userDealPool, _ = ants.NewPool(100)
@@ -29,7 +25,7 @@ type WeappService struct {
 
 func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64) (*entity.User, string, error) {
 	//调用java那边登陆接口
-	result, err := httputil.OriginJson(javaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
+	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
 		return nil, "", err
 	}
@@ -38,7 +34,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	cookie := result.Response.Header.Get("Set-Cookie")
 
 	log.Println("cookie", cookie, invitedBy, partnershipWith)
-	whoAmiResult, err := httputil.OriginGet(javaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
+	whoAmiResult, err := httputil.OriginGet(config.Config.Java.JavaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
 	if err != nil {
 		return nil, "", err
 	}
