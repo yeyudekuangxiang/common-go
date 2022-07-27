@@ -10,20 +10,31 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/baidu"
 	"time"
 )
 
-var DefaultOCRService = NewOCRService()
+var DefaultOCRService OCRService
 
-func NewOCRService() OCRService {
-	return OCRService{}
+func InitDefaultOCRService() {
+	DefaultOCRService = OCRService{
+		imageClient: &baidu.ImageClient{
+			AccessToken: baidu.NewAccessToken(baidu.AccessTokenConfig{
+				RedisClient: app.Redis,
+				Prefix:      config.RedisKey.BaiDu,
+				AppKey:      config.Config.BaiDu.AppKey,
+				AppSecret:   config.Config.BaiDu.AppSecret,
+			}),
+		},
+	}
 }
 
 type OCRService struct {
+	imageClient *baidu.ImageClient
 }
 
 // OCRForGm 素食打卡
-func (u OCRService) OCRForGm(openid string, src string) error {
+func (srv OCRService) OCRForGm(openid string, src string) error {
 	res := util.OCRPush(src)
 	var orderNo, fee string
 
@@ -56,4 +67,22 @@ func (u OCRService) OCRForGm(openid string, src string) error {
 	})
 
 	return err
+}
+func (srv OCRService) Scan(imgUrl string) ([]string, error) {
+	rest, err := srv.imageClient.WebImage(baidu.WebImageParam{
+		ImageUrl: imgUrl,
+	})
+	fmt.Printf("%+v %+v\n", rest, err)
+	if err != nil {
+		return nil, err
+	}
+	if !rest.IsSuccess() {
+		return nil, errors.New(rest.ErrorDescription)
+	}
+
+	results := make([]string, 0)
+	for _, word := range rest.WordsResult {
+		results = append(results, word.Words)
+	}
+	return results, nil
 }

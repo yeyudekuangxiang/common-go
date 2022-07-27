@@ -32,21 +32,25 @@ type CreateUserParam struct {
 	PhoneNumber string            `json:"phoneNumber"`
 	Source      entity.UserSource `json:"source" binding:"oneof=mio mobile"`
 	UnionId     string            `json:"unionId"`
+	ChannelId   int64             `json:"int64"`
 }
 
 type unidianTypeId struct {
-	Test     string
-	FiveYuan string
+	Test       string
+	FiveYuan   string
+	TwentyYuan string
 }
 
 var UnidianTypeId = unidianTypeId{
-	Test:     "10013", // 测试
-	FiveYuan: "10689", // 5元话费
+	Test:       "10013", // 测试
+	FiveYuan:   "10689", // 5元话费
+	TwentyYuan: "10725", // 20元话费
 }
 
 type SubmitOrderParam struct {
-	Order SubmitOrder
-	Items []SubmitOrderItem
+	Order           SubmitOrder
+	Items           []SubmitOrderItem
+	PartnershipType entity.PartnershipType
 }
 type SubmitOrder struct {
 	AddressId string
@@ -59,8 +63,9 @@ type SubmitOrderItem struct {
 }
 
 type submitOrderParam struct {
-	Order submitOrder
-	Items []submitOrderItem
+	Order           submitOrder
+	Items           []submitOrderItem
+	PartnershipType entity.PartnershipType
 }
 type submitOrder struct {
 	AddressId string
@@ -219,7 +224,7 @@ type PointAdjustRecord struct {
 	CreateTime model.Time                  `json:"createTime"`
 }
 type UpdateStepHistoryByEncryptedParam struct {
-	UserId        int64
+	OpenId        string
 	EncryptedData string
 	IV            string
 }
@@ -228,14 +233,14 @@ type updateStepHistoryItem struct {
 	RecordedEpoch int64
 }
 type GetStepHistoryListBy struct {
-	UserId            int64
+	OpenId            string
 	StartRecordedTime model.Time // >=
 	EndRecordedTime   model.Time //<=
 	RecordEpochs      []int64
 	OrderBy           entity.OrderByList
 }
 type GetStepHistoryPageListBy struct {
-	UserId            int64
+	OpenId            string
 	StartRecordedTime model.Time // >=
 	EndRecordedTime   model.Time //<=
 	RecordEpochs      []int64
@@ -244,7 +249,7 @@ type GetStepHistoryPageListBy struct {
 	Offset            int
 }
 type CreateOrUpdateStepHistoryParam struct {
-	UserId        int64
+	OpenId        string
 	Count         int
 	RecordedTime  model.Time
 	RecordedEpoch int64
@@ -267,30 +272,17 @@ type FilterPointRecordOpenIds struct {
 	Phone    string
 	Nickname string
 }
-type CreateOrUpdateProductItemParam struct {
-	ItemId   string
-	Virtual  bool
-	Title    string
-	Cost     int
-	ImageUrl string
-	Sort     int
-}
-type QrCodeInfo struct {
-	QrCodeId    string `json:"qrCodeId"`
-	OpenId      string `json:"openid"`
-	Description string `json:"description"`
-	QrCodeType  string `json:"qrCodeType"`
-	ImageUrl    string `json:"imageUrl"`
-}
+
 type InviteInfo struct {
 	OpenId    string     `json:"openId"`
 	Nickname  string     `json:"nickname"`
 	AvatarUrl string     `json:"avatarUrl"`
-	Time      model.Date `json:"time"`
+	Time      model.Time `json:"time"`
 }
-type GetPromotionPromotionListBy struct {
-	Partnership entity.PartnershipType
-	Trigger     entity.PartnershipPromotionTrigger
+type GetPartnershipPromotionListBy struct {
+	Partnership  entity.PartnershipType
+	PartnerShips []entity.PartnershipType
+	Trigger      entity.PartnershipPromotionTrigger
 }
 type FindCouponBy struct {
 	CouponTypeId string
@@ -299,7 +291,43 @@ type FindCouponTypeBy struct {
 	CouponTypeId string
 }
 type RedeemCouponParam struct {
-	CouponId string
+	OpenId    string
+	CouponId  string
+	OrderType entity.OrderType
+}
+type RedeemCouponWithTransactionParam struct {
+	OpenId               string
+	CouponId             string
+	OrderType            entity.OrderType
+	PointTransactionType entity.PointTransactionType
+}
+type FindProductItemBy struct {
+	ItemId string
+}
+type SubmitOrderFromRedeemCodeParam struct {
+	UserId           int64
+	DefaultAddressId string
+	ProductItemId    string
+	Count            int
+	Partnership      entity.PartnershipType
+	OrderType        entity.OrderType
+}
+type RedeemCouponWithTransactionResult struct {
+	Point   int    `json:"point"`
+	OrderId string `json:"orderId"`
+}
+type GenerateCouponBatchParam struct {
+	CouponTypeId       string
+	BatchSize          int
+	GenerateRedeemCode bool
+}
+
+type ProcessPromotionInformationInfo struct {
+	PromotionId string     `json:"promotionId"`
+	CouponId    string     `json:"couponId"`
+	Time        model.Date `json:"time"`
+	OpenId      string     `json:"openid"`
+	OrderId     string     `json:"orderId"`
 }
 type FindDuiBaPointAddLogBy struct {
 	OrderNum string
@@ -341,4 +369,27 @@ type UpdateUserInfoParam struct {
 type UpdateUserRiskParam struct {
 	UserId int64
 	Risk   int
+}
+
+type FindCertificateBy struct {
+	ProductItemId string
+	CertificateId string
+}
+type GenerateBadgeParam struct {
+	OpenId        string
+	CertificateId string
+	ProductItemId string
+	OrderId       string
+	Partnership   entity.PartnershipType
+}
+type OCRResult struct {
+	WordsResult []struct {
+		Words string `json:"words"`
+	} `json:"words_result"`
+	WordsResultNum int   `json:"words_result_num"`
+	LogID          int64 `json:"log_id"`
+}
+type UserAccountInfo struct {
+	Balance int64 `json:"balance"` //积分余额
+	CertNum int64 `json:"certNum"` //证书数量
 }

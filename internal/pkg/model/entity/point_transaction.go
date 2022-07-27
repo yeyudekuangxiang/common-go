@@ -138,15 +138,13 @@ const (
 )
 
 var PointCollectValueMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP: 150,
-	POINT_BIKE_RIDE:  150,
-	POINT_ECAR:       300,
-	POINT_INVITE:     500,
+	POINT_COFFEE_CUP: 39,  //每次
+	POINT_BIKE_RIDE:  42,  //每次
+	POINT_INVITE:     500, //每人
 }
 var PointCollectLimitMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP: 4,
+	POINT_COFFEE_CUP: 2,
 	POINT_BIKE_RIDE:  2,
-	POINT_ECAR:       1,
 	POINT_INVITE:     5,
 }
 

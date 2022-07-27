@@ -11,6 +11,6 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UnixMilli())
+	rand.Seed(time.Now().Unix())
 	cmd.Execute()
 }

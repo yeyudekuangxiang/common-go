@@ -47,9 +47,6 @@ func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
 	user := u.r.GetUserBy(repository2.GetUserBy{
 		OpenId: openId,
 	})
-	if user.ID == 0 {
-		return nil, errors.New("未查询到用户信息")
-	}
 	return &user, nil
 }
 func (u UserService) GetUserByToken(token string) (*entity.User, error) {
@@ -105,7 +102,8 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	if param.UnionId != "" {
 		app.DB.Where("unionid = ? and guid =''", param.UnionId).Update("guid", guid)
 	}
-
+	channelId := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
+	user.ChannelId = channelId
 	return &user, repository2.DefaultUserRepository.Save(&user)
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {
@@ -134,7 +132,7 @@ func (u UserService) GetUserBy(by repository2.GetUserBy) (*entity.User, error) {
 	user := repository2.DefaultUserRepository.GetUserBy(by)
 	return &user, nil
 }
-func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
+func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.User, error) {
 	if mobile == "" {
 		return nil, errors.New("手机号不能为空")
 	}
@@ -142,16 +140,17 @@ func (u UserService) FindOrCreateByMobile(mobile string) (*entity.User, error) {
 		Mobile: mobile,
 		Source: entity.UserSourceMobile,
 	})
-
 	if user.ID > 0 {
 		return &user, nil
 	}
+	channelId := DefaultUserChannelService.GetChannelByCid(cid) //获取渠道来源
 	return u.CreateUser(CreateUserParam{
 		OpenId:      mobile,
 		Nickname:    "手机用户" + mobile[len(mobile)-4:],
 		PhoneNumber: mobile,
 		Source:      entity.UserSourceMobile,
 		UnionId:     mobile,
+		ChannelId:   channelId,
 	})
 }
 
@@ -209,6 +208,9 @@ func (u UserService) BindPhoneByCode(userId int64, code string) error {
 	})
 	if err != nil {
 		return err
+	}
+	if phoneResult.ErrCode != 0 {
+		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
 	}
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
 	return u.r.Save(&userInfo)
@@ -281,7 +283,7 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 
 	summery.SavedCO2 = DefaultCarbonNeutralityService.calculateCO2ByStep(int64(lastStepHistory.Count))
 
-	pendingPoints, err := u.calculatePendingStepPoints(userId)
+	pendingPoints, _, err := DefaultStepService.ComputePendingPoint(userInfo.OpenId)
 	if err != nil {
 		return nil, err
 	}
@@ -317,46 +319,12 @@ func (u UserService) calculateStepPointsOfToday(userId int64) (int64, error) {
 	return total, nil
 }
 
-//计算待领取积分数
-func (u UserService) calculatePendingStepPoints(userId int64) (int64, error) {
-	userinfo := u.r.GetUserById(userId)
-	if userinfo.ID == 0 {
-		return 0, nil
-	}
-	userStep, err := DefaultStepService.FindOrCreateStep(userId)
-	if err != nil {
-		return 0, err
-	}
-
-	stepUpperLimit := StepScoreUpperLimit * StepToScoreConvertRatio
-
-	if userStep.LastCheckTime.Equal(time.Now()) && userStep.LastCheckCount > stepUpperLimit {
-		return 0, nil
-	}
-
-	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
-		OpenId: userinfo.OpenId,
-		Day:    model.NewTime().StartOfDay(),
-	})
-
-	if err != nil {
-		return 0, err
-	}
-
-	stepCount := u.computePendingHistoryStep(*stepHistory, *userStep)
-	if stepCount > stepUpperLimit {
-		stepCount = stepUpperLimit
-	}
-	return int64(stepCount / StepToScoreConvertRatio), nil
-}
-
 // history 今天的步行历史 step 步行总历史
 func (u UserService) computePendingHistoryStep(history entity.StepHistory, step entity.Step) int {
 	// date check is moved outside
 	lastCheckedSteps := 0
 	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
 
-	fmt.Printf("%+v %+v\n", history, step)
 	//如果最后一次领积分时间为0 或者 最后一次领取时间不等于今天的开始时间
 	if step.LastCheckTime.IsZero() || !step.LastCheckTime.Equal(model.NewTime().StartOfDay().Time) {
 		lastCheckedSteps = 0
@@ -366,11 +334,8 @@ func (u UserService) computePendingHistoryStep(history entity.StepHistory, step 
 			return 0
 		}
 	}
-	fmt.Println("lastCheckedSteps", lastCheckedSteps, stepUpperLimit)
 
 	currentStep := util2.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
-	fmt.Println("currentStep", currentStep, lastCheckedSteps)
-	fmt.Println("result", currentStep-lastCheckedSteps, lastCheckedSteps%StepToScoreConvertRatio)
 	result := currentStep - lastCheckedSteps + lastCheckedSteps%StepToScoreConvertRatio
 
 	return util2.Ternary(result > 0, result, 0).Int()
@@ -447,4 +412,20 @@ func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRi
 		app.Logger.Error("DefaultUserRiskLogService.Create 异常", rest)
 	}
 	return rest, err
+}
+
+// AccountInfo 用户账户信息
+func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
+	point, err := NewPointService(mioctx.NewMioContext()).FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	certCount, err := DefaultBadgeService.GetUserCertCountById(userId)
+	if err != nil {
+		return nil, err
+	}
+	return &UserAccountInfo{
+		Balance: point.Balance,
+		CertNum: certCount,
+	}, nil
 }

@@ -10,3 +10,11 @@ func ArrayIsContains(items []string, item string) bool {
 	}
 	return false
 }
+func InArray(items []string, item string) bool {
+	for _, item1 := range items {
+		if item1 == item {
+			return true
+		}
+	}
+	return false
+}

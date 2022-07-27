@@ -30,7 +30,7 @@ type OaService struct {
 	Platform entity.UserSource
 }
 
-func (srv OaService) LoginByCode(code string) (string, error) {
+func (srv OaService) LoginByCode(code string, cid int64) (string, error) {
 	setting := config.FindOaSetting(srv.Platform)
 
 	oauth2Client := oauth2.Client{
@@ -52,6 +52,7 @@ func (srv OaService) LoginByCode(code string) (string, error) {
 	} else if userinfo.Sex == 2 {
 		sexStr = "FEMALE"
 	}
+
 	user, err := service.DefaultUserService.CreateUser(service.CreateUserParam{
 		OpenId:    userinfo.OpenId,
 		AvatarUrl: userinfo.HeadImageURL,
@@ -59,6 +60,7 @@ func (srv OaService) LoginByCode(code string) (string, error) {
 		Nickname:  userinfo.Nickname,
 		Source:    srv.Platform,
 		UnionId:   userinfo.UnionId,
+		ChannelId: cid,
 	})
 	if err != nil {
 		return "", err
@@ -177,7 +179,7 @@ func (srv OaService) Sign(url string) (*OaSignResult, error) {
 	ticker, err := tickerServer.Ticket()
 	if err != nil {
 		app.Logger.Error(err)
-		return nil, errno.InternalServerError
+		return nil, errno.ErrInternalServer
 	}
 
 	nonceStr := util.Md5(time.Now().String())

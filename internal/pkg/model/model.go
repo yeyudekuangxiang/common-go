@@ -212,12 +212,12 @@ func (as ArrayString) Value() (driver.Value, error) {
 	return strings.Join(as, ","), nil
 }
 func (as *ArrayString) Scan(value interface{}) error {
-	v, ok := value.([]byte)
+	v, ok := value.(string)
 	if !ok {
 		return errors.New("ArrayString type error")
 	}
 	if len(v) > 0 {
-		*as = strings.Split(string(v), ",")
+		*as = strings.Split(v, ",")
 	} else {
 		*as = make([]string, 0)
 	}
@@ -276,5 +276,26 @@ func (d *NullString) Scan(value interface{}) error {
 		return errors.New("NullString type error")
 	}
 	*d = NullString(t)
+	return nil
+}
+
+type NullInt int64
+
+func (d NullInt) Value() (driver.Value, error) {
+	if d == 0 {
+		return nil, nil
+	}
+	return int64(d), nil
+}
+func (d *NullInt) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	t, ok := value.(int64)
+	if !ok {
+		return errors.New("NullInt type error")
+	}
+	*d = NullInt(t)
 	return nil
 }
