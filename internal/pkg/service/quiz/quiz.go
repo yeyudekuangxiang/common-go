@@ -12,7 +12,7 @@ import (
 )
 
 const OneDayAnswerNum = 4
-const questionToPointRatio = 50
+const questionToPointRatio = 25
 
 var DefaultQuizService = QuizService{}
 

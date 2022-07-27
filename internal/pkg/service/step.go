@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	// StepToScoreConvertRatio 步行数量和积分比例  60步等于1积分
-	StepToScoreConvertRatio = 60
+	// StepToScoreConvertRatio 步行数量和积分比例  90步等于1积分
+	StepToScoreConvertRatio = 90
 	// StepScoreUpperLimit 每天步行最多获取的积分数量
-	StepScoreUpperLimit = 296
+	StepScoreUpperLimit = 133
 )
 
 // DefaultStepService 默认步行服务
