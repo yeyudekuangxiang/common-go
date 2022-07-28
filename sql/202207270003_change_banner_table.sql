@@ -1,3 +1,4 @@
+/*ok*/
 ALTER TABLE "public"."banner"
     ADD COLUMN "sort" int4 NOT NULL DEFAULT 0,
     ADD COLUMN "scene" varchar(20) NOT NULL DEFAULT 'home',

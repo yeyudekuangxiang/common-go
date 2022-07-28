@@ -1,3 +1,4 @@
+/*ok*/
 create table upload_scene
 (
     id         serial

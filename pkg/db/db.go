@@ -8,26 +8,9 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"log"
-	"os"
 	"strings"
 	"time"
 )
-
-var LogLevelMap = map[string]logger.LogLevel{
-	"silent": logger.Silent,
-	"error":  logger.Error,
-	"warn":   logger.Warn,
-	"info":   logger.Info,
-}
-
-func getLogLevel(level string) logger.LogLevel {
-	logLevel, ok := LogLevelMap[strings.ToLower(level)]
-	if !ok {
-		logLevel = logger.Error
-	}
-	return logLevel
-}
 
 type Config struct {
 	Type         string
@@ -37,10 +20,10 @@ type Config struct {
 	Database     string
 	Port         int
 	TablePrefix  string
-	MaxOpenConns int    //最大连接数 <=0表示不限制连接数
-	MaxIdleConns int    //最大空闲数 <=0表示不保留空闲连接
-	MaxLifetime  int    //连接可重用时间 <=0表示永远可用(单位秒)
-	LogLevel     string //控制台日志等级 Silent Error Warn Info
+	MaxOpenConns int //最大连接数 <=0表示不限制连接数
+	MaxIdleConns int //最大空闲数 <=0表示不保留空闲连接
+	MaxLifetime  int //连接可重用时间 <=0表示永远可用(单位秒)
+	Logger       logger.Interface
 }
 
 func NewDB(conf Config) (*gorm.DB, error) {
@@ -81,10 +64,7 @@ func NewMysqlDB(conf Config) (*gorm.DB, error) {
 		sqlDb.SetConnMaxLifetime(time.Duration(conf.MaxLifetime) * time.Second)
 	}
 	//配置日志打印
-	db.Logger = logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
-		SlowThreshold: 3 * time.Second,
-		LogLevel:      getLogLevel(conf.LogLevel),
-	})
+	db.Logger = conf.Logger
 	return db, nil
 }
 
@@ -115,9 +95,6 @@ func NewPostgresDB(conf Config) (*gorm.DB, error) {
 		sqlDb.SetConnMaxLifetime(time.Duration(conf.MaxLifetime) * time.Second)
 	}
 	//配置日志打印
-	db.Logger = logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
-		SlowThreshold: 3 * time.Second,
-		LogLevel:      getLogLevel(conf.LogLevel),
-	})
+	db.Logger = conf.Logger
 	return db, nil
 }
