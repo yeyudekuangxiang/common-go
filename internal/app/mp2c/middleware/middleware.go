@@ -3,12 +3,14 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-contrib/cors"
-	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
+	"go.uber.org/zap"
+	mzap "mio/pkg/zap"
+
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -19,7 +21,6 @@ import (
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
-	"mio/pkg/zap"
 	"os"
 	"runtime"
 	"strings"
@@ -71,19 +72,7 @@ func callers() string {
 }
 
 func access() gin.HandlerFunc {
-	//执行测试时 访问日志输出到控制台
-	if util.IsTesting() {
-		return Access(zap.DefaultLogger("info"), time.RFC3339, false)
-		return ginzap.Ginzap(zap.DefaultLogger("info"), time.RFC3339, false)
-	}
-	logger := zap.NewZapLogger(zap.LoggerConfig{
-		Level:    "info",
-		Path:     "runtime",
-		FileName: "access.log",
-		MaxSize:  100,
-	})
-	return Access(logger, time.RFC3339, false)
-	return ginzap.Ginzap(logger, time.RFC3339, false)
+	return Access(mzap.DefaultLogger().WithOptions(zap.Fields(zap.String("scene", "access"))), time.RFC3339, false)
 }
 func auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -246,8 +235,8 @@ func Throttle() gin.HandlerFunc {
 	return middleware
 }
 func corsM() gin.HandlerFunc {
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid")
-	return cors.New(config)
+	cfg := cors.DefaultConfig()
+	cfg.AllowAllOrigins = true
+	cfg.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid")
+	return cors.New(cfg)
 }

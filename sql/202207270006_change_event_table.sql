@@ -1,3 +1,4 @@
+/*ok*/
 ALTER TABLE "public"."event"
     ADD COLUMN "sort" int4 NOT NULL DEFAULT 0,
     ADD COLUMN "event_template_type" varchar(50) NOT NULL DEFAULT '',
