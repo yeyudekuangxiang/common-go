@@ -6,7 +6,7 @@ import (
 )
 
 type GetWeappQrCodeFrom struct {
-	TopicId int `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
+	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 type GetTopicPageListForm struct {
 	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
@@ -23,6 +23,7 @@ type GetTagForm struct {
 type GetYZMForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
 	Code   string `json:"code" form:"code"  alias:"验证码"`
+	Cid    int64  `json:"cid" form:"cid"  alias:"渠道来源"`
 }
 
 type CreateQrcodeForm struct {
@@ -49,12 +50,24 @@ type BindMobileByCodeForm struct {
 	Code string `json:"code" form:"code" binding:"required" alias:"code"`
 }
 type GetPointTransactionListForm struct {
-	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
-	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
 }
 type UpdateStepTotalForm struct {
 	EncryptedData string `json:"encryptedData" form:"encryptedData" binding:"required" alias:"encryptedData"`
 	IV            string `json:"iv" form:"iv" binding:"required" alias:"iv"`
+}
+
+type AnswerQuizQuestionForm struct {
+	QuestionId string `json:"questionId" form:"questionId" binding:"required" alias:"questionId"`
+	Choice     string `json:"choice" form:"choice" binding:"required" alias:"choice"`
+}
+type UploadPointCollectImageForm struct {
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI" alias:"类型"`
+}
+type PointCollectForm struct {
+	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE" alias:"类型"`
 }
 
 type UpdateUserInfoForm struct {

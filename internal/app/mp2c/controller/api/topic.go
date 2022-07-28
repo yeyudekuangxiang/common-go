@@ -88,7 +88,7 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
-	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(int(user.ID), form.TopicId)
+	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(int(user.ID), int(form.TopicId))
 	if err != nil {
 		return nil, err
 	}

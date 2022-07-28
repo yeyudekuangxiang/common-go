@@ -8,7 +8,9 @@ import (
 	"github.com/spf13/cobra"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
+	"mio/internal/pkg/model/entity"
 	ebusiness "mio/internal/pkg/model/entity/business"
+	"mio/internal/pkg/model/entity/event"
 )
 
 // migrateCmd represents the migrate command
@@ -43,6 +45,13 @@ to quickly create a Cobra application.`,
 			&ebusiness.PointLimitLog{},
 			&ebusiness.PointLog{},
 			&ebusiness.User{},
+			&event.Event{},
+			&event.EventCategory{},
+			&entity.UploadLog{},
+			&entity.UploadScene{},
+			&entity.Badge{},
+			&entity.Banner{},
+			&entity.QRCode{},
 		)
 	},
 }

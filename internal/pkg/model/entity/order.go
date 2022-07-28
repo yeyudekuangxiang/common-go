@@ -67,3 +67,25 @@ type ShortOrder struct {
 	OrderReferenceId model.NullString `json:"orderReferenceId"`
 	OrderType        OrderType        `json:"orderType"`
 }
+
+type OrderWithGood struct {
+	ID               int64            `gorm:"primary_key" json:"id"`
+	OrderId          string           `json:"orderId"`
+	AddressId        *string          `json:"addressId"`
+	OpenId           string           `gorm:"column:openid" json:"openid"`
+	TotalCost        int              `json:"totalCost"`
+	Status           OrderStatus      `json:"orderStatus"`
+	PaidTime         model.Time       `json:"paidTime"`
+	InTransitTime    model.Time       `json:"inTransitTime"`
+	CompletedTime    model.Time       `json:"completedTime"`
+	TrackingNumber   string           `json:"trackingNumber"`
+	OrderReferenceId model.NullString `json:"orderReferenceId"`
+	OrderType        OrderType        `json:"orderType"`
+	Source           OrderSource      `json:"source"`
+	ThirdOrderNo     string           `json:"thirdOrderNo"`
+	OrderGoods       []ProductItem    `gorm:"many2many:order_item;foreignKey:OrderId;joinForeignKey:OrderId;references:ProductItemId;joinReferences:ItemId"`
+}
+
+func (OrderWithGood) TableName() string {
+	return "order"
+}

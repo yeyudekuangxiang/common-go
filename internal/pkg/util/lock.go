@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var DefaultLock = RedisDistributedLock{Prefix: fmt.Sprintf(config.RedisKey.Lock, "default_"), Redis: app.Redis}
+var DefaultLock = RedisDistributedLock{Prefix: config.RedisKey.Lock + "default_", Redis: app.Redis}
 
 // DistributedLock 分布式锁
 type DistributedLock interface {
@@ -44,7 +44,7 @@ type RedisDistributedLock struct {
 }
 
 func (lock *RedisDistributedLock) FormatKey(key string) string {
-	return fmt.Sprintf(config.RedisKey.Lock, lock.Prefix+key)
+	return fmt.Sprintf(lock.Prefix + key)
 }
 func (lock *RedisDistributedLock) Lock(key string, expireIn time.Duration) bool {
 	key = lock.FormatKey(key)
