@@ -146,7 +146,7 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
 		Gender:      entity.UserGender(form.Gender),
-		Birthday:    form.Birthday.Time(),
+		Birthday:    form.Birthday.Time,
 		PhoneNumber: form.PhoneNumber,
 	})
 	return nil, err

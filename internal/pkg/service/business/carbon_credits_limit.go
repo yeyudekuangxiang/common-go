@@ -46,7 +46,7 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 	}
 
 	limitLog, err := DefaultCarbonCreditsLimitLogService.FindLimitLog(FindCarbonCreditsLimitLogParam{
-		TimePoint: timeutils.Now().StartOfDay().Time(),
+		TimePoint: timeutils.Now().StartOfDay().Time,
 		Type:      t,
 		UserId:    userId,
 	})
