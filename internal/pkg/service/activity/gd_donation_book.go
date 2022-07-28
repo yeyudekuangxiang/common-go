@@ -2,7 +2,6 @@ package activity
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -247,7 +246,9 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 		}
 		//正常答题 更新状态
 		ids := []int64{userInfo.UserId, userInfo.InviteId}
-		if err := app.DB.Model(entity.GDDonationBookRecord{}).Where("user_id in ?", ids).Updates(entity.GDDonationBookRecord{IsSuccess: 1}).Error; err != nil {
+		if err := app.DB.Model(entity.GDDonationBookRecord{}).
+			Where("user_id in ?", ids).
+			Updates(entity.GDDonationBookRecord{IsSuccess: 1}).Error; err != nil {
 			return errors.New("更新答题状态失败")
 		}
 		//被邀请者答题完成，更新学校排行榜
@@ -274,7 +275,7 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 		record.ClassNumber = classNumber
 		err = repoactivity.DefaultGDDbUserSchoolRepository.Save(&record)
 		_, file, line, _ := runtime.Caller(1)
-		app.Logger.Infof("学校信息更新:%v;file:%s_line:%d", record, file, line)
+		app.Logger.Infof("广东教育-学校信息更新:%v;file:%s_line:%d", record, file, line)
 	} else {
 		//创建
 		req := entity.GDDbUserSchool{
@@ -288,7 +289,7 @@ func (srv GDdbService) SaveSchoolInfo(userName string, schoolId, gradeId, userId
 		}
 		err = repoactivity.DefaultGDDbUserSchoolRepository.Create(&req)
 		_, file, line, _ := runtime.Caller(1)
-		app.Logger.Infof("学校信息绑定:%v;file:%s_line:%d", req, file, line)
+		app.Logger.Infof("广东教育-学校信息绑定:%v;file:%s_line:%d", req, file, line)
 	}
 	if err != nil {
 		return err
@@ -309,67 +310,33 @@ func (srv GDdbService) UpdateAnswerStatus(userId int64, status int) error {
 	return srv.repo.Save(&record)
 }
 
-// IncrRankBack IncrRank  学校捐赠书+1 废弃
-func (srv GDdbService) IncrRankBack(userId int64) error {
-	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
-	if activityUser.ID != 0 && activityUser.InviteType == 1 && activityUser.IsSuccess == 1 {
-		//获取学校id
-		var userSchoolList []entity.GDDbUserSchool
-		schoolIds := make([]int64, 0)
-		err := app.DB.Model(entity.GDDbUserSchool{}).Where("user_id = ? or user_id = ?", activityUser.UserId, activityUser.InviteId).Find(&userSchoolList).Error
-		if err != nil {
-			return err
-		}
-		for _, userSchool := range userSchoolList {
-			schoolIds = append(schoolIds, userSchool.SchoolId)
-		}
-		//获取学校信息
-		schoolList := repoactivity.DefaultGDDbSchoolRepository.FindAllBy(repoactivity.FindSchoolBy{SchoolIds: schoolIds})
-		rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindAllBy(repoactivity.FindSchoolBy{SchoolIds: schoolIds})
-		if len(rankInfo) > 1 {
-			updateReq := make([]entity.GDDbSchoolRank, 0)
-			for _, rank := range rankInfo {
-				updateReq = append(updateReq, entity.GDDbSchoolRank{DonateNumber: rank.DonateNumber + 1})
-			}
-			err = app.DB.Model(entity.GDDbSchoolRank{}).Where("school_id in ?", schoolIds).Updates(&rankInfo).Error
-		} else {
-			insertReq := make([]entity.GDDbSchoolRank, 0)
-			for _, school := range schoolList {
-				insertReq = append(insertReq, entity.GDDbSchoolRank{
-					SchoolId:     school.ID,
-					SchoolName:   school.SchoolName,
-					DonateNumber: 1,
-					CreatedAt:    model.Time{},
-					UpdatedAt:    model.Time{},
-				})
-			}
-			err = app.DB.Model(entity.GDDbSchoolRank{}).Create(&insertReq).Error
-		}
-		if err != nil {
-			fmt.Printf("error:%e", err)
-			return err
-		}
-	}
-
-	return nil
-}
-
 // IncrRank  学校捐赠书+1
 func (srv GDdbService) IncrRank(userId int64) error {
-	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	var err error
+	if userId == 0 {
+		return errors.New("参数错误：userId不能为空")
+	}
+	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
+	app.Logger.Infof("广东教育-活动用户信息：activityUser:%v", activityUser)
 	if activityUser.ID != 0 && activityUser.IsSuccess == 1 {
 		//获取学校id
 		USchool := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: activityUser.UserId})
+		if USchool.ID == 0 {
+			app.Logger.Infof("广东教育-未获取到用户绑定的学校信息：USchool:%v", USchool)
+			return errors.New("未绑定学校，请重试")
+		}
 		//获取学校信息
 		schoolInfo := repoactivity.DefaultGDDbSchoolRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: USchool.SchoolId})
+		if schoolInfo.ID == 0 {
+			app.Logger.Infof("广东教育-未获取到学校信息：schoolInfo:%v", schoolInfo)
+			return errors.New("获取学校信息失败，请重试")
+		}
 		rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: USchool.SchoolId})
-
+		app.Logger.Infof("广东教育-获取排行榜信息：%v", rankInfo)
 		if rankInfo.ID != 0 {
 			rankInfo.DonateNumber++
 			err = repoactivity.DefaultGDDbSchoolRankRepository.Save(&rankInfo)
-			_, file, line, _ := runtime.Caller(1)
-			app.Logger.Infof("更新排行榜信息:rankInfo:%v;schoolInfo:%v,file:%s_line:%d", rankInfo, schoolInfo, file, line)
+			app.Logger.Infof("广东教育-更新排行榜信息:rankInfo:%v;schoolInfo:%v,activityUser:%v,USchool:%v,userId:%d", rankInfo, schoolInfo, activityUser, USchool, userId)
 		} else {
 			insertReq := entity.GDDbSchoolRank{
 				SchoolId:     schoolInfo.ID,
@@ -379,8 +346,7 @@ func (srv GDdbService) IncrRank(userId int64) error {
 				UpdatedAt:    model.Time{},
 			}
 			err = repoactivity.DefaultGDDbSchoolRankRepository.Create(&insertReq)
-			_, file, line, _ := runtime.Caller(1)
-			app.Logger.Infof("新建排行榜信息:rankInfo:%v;schoolInfo:%v,file:%s_line:%d", insertReq, schoolInfo, file, line)
+			app.Logger.Infof("广东教育-新建排行榜信息:insertReq:%v;schoolInfo:%v,activityUser:%v,USchool:%v,userId:%d", insertReq, schoolInfo, activityUser, USchool, userId)
 		}
 		if err != nil {
 			return err

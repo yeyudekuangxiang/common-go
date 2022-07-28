@@ -33,11 +33,11 @@ mp2c-go
 ## 项目开发流程
 > 分支管理规范参考 [gitlab flow](https://docs.gitlab.com/ee/topics/gitlab_flow.html)  
 > 代码提交规范参考 <https://blog.csdn.net/github_39506988/article/details/90298780>
-1. 新功能的开发 - 从远程develop分支切出 /^feature-.+$/ 分支,开发完成推送远程后会自动将此分支部署到测试环境 部署成功后地址为 dev-domain/feature-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境
+1. 新功能的开发 - 从远程develop分支切出 /^feature-.+$/ 分支,开发完成推送远程后手动运行通道会将此分支部署到测试环境 部署成功后地址为 dev-domain/feature-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境
 2. 测试发布 - 新功能开发完成后请求合并到develop分支 , 合并完成后会自动将develop分支部署到测试环境 部署成功后地址为 dev-domain 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看
 3. 预发布 - develop分支请求合并到master分支,合并完成后会自动将master分支部署到正式环境 部署成功后地址为 prod-domain/pre-prod/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看
 4. 发布正式版本 - 在master分支上打tag后会将此tag自动部署到正式环境 部署成功后地址为 prod-domain 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看
-5. bug的修复 紧急bug可直接从master分支切出 /^hotfix-.+$/分支,推送远程后会将此分支自动部署的正式环境  部署成功后地址为 prod-domain/hotfix-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境。修复完成后手动将此分支分别请求合并到master和develop分支
+5. bug的修复 紧急bug可直接从master分支切出 /^hotfix-.+$/分支,推送远程后手动运行通道会将此分支自动部署的正式环境  部署成功后地址为 prod-domain/hotfix-(.+)/ 具体地址可在 [环境](https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/environments) 中查看 此分支删除后会自动删除已部署的环境。修复完成后手动将此分支分别请求合并到master和develop分支
 ## 项目运行
 1. `git clone https://gitlab.miotech.com/miotech-application/backend/mp2c-go.git`
 2. 下载所需库文件 `go mod download`
