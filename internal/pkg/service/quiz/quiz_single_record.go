@@ -14,7 +14,7 @@ type QuizSingleRecordService struct {
 }
 
 func (srv QuizSingleRecordService) ClearTodayRecord(openid string) {
-	err := app.DB.Where("openid = ? and answer_time >= ? and answer_time < ?", openid, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1)).Delete(&entity.QuizSingleRecord{}).Error
+	err := app.DB.Where("openid = ? and answer_time >= ? and answer_time < ?", openid, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Delete(&entity.QuizSingleRecord{}).Error
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func (srv QuizSingleRecordService) CreateSingleRecord(param CreateSingleRecordPa
 // GetTodayAnswerNum 获取今天已答题数量
 func (srv QuizSingleRecordService) GetTodayAnswerNum(openId string) int64 {
 	var count int64
-	err := app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1)).Count(&count).Error
+	err := app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Count(&count).Error
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
@@ -44,11 +44,11 @@ func (srv QuizSingleRecordService) GetTodayAnswerNum(openId string) int64 {
 }
 func (srv QuizSingleRecordService) GetTodaySummary(openId string) DaySummary {
 	summary := DaySummary{}
-	err := app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1)).Count(&summary.AnsweredNum).Error
+	err := app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Count(&summary.AnsweredNum).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
-	err = app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ? and correct = true", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1)).Count(&summary.CorrectNum).Error
+	err = app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ? and correct = true", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Count(&summary.CorrectNum).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
