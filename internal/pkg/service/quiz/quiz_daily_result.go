@@ -35,7 +35,7 @@ func (srv QuizDailyResultService) CompleteTodayQuiz(openid string) (*entity.Quiz
 	if todayResult.ID != 0 {
 		return nil, errors.New("请勿重复提交答题")
 	}
-
+	openid = "oy_BA5Nwkt6hzECxIXwNYkhLyzSs"
 	todaySummary := DefaultQuizSingleRecordService.GetTodaySummary(openid)
 	if todaySummary.AnsweredNum < OneDayAnswerNum {
 		return nil, errors.New("答题未完成")
