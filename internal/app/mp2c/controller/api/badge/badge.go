@@ -41,3 +41,14 @@ func (BadgeController) UpdateBadgeIsNew(ctx *gin.Context) (gin.H, error) {
 
 	return nil, err
 }
+func (BadgeController) UploadOldBadgeImage(ctx *gin.Context) (interface{}, error) {
+	form := UploadOLdBadgeImageForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	info, err := service.DefaultBadgeService.GetUploadOldBadgeSetting(form.BadgeId)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}
