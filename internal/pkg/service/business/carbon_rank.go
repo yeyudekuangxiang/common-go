@@ -311,10 +311,10 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 		})
 		if err != nil {
 			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-			break
+			return
 		}
 		if len(list) == 0 {
-			break
+			return
 		}
 
 		for _, item := range list {
@@ -325,13 +325,8 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 				TimePoint:  start,
 			})
 			if rankInfo.ID != 0 {
-				rankInfo.Rank = rank
-				err = srv.repo.Save(&rankInfo)
-				if err != nil {
-					app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-					break
-				}
-				continue
+				app.Logger.Error("排行榜数据已存在", companyId, dateType)
+				return
 			}
 			rankInfo = business.CarbonRank{
 				DateType:   dateType,
@@ -345,7 +340,7 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 			err = srv.repo.Create(&rankInfo)
 			if err != nil {
 				app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-				break
+				return
 			}
 			rank++
 		}
@@ -407,10 +402,10 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 		})
 		if err != nil {
 			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-			break
+			return
 		}
 		if len(list) == 0 {
-			break
+			return
 		}
 
 		for _, item := range list {
@@ -425,15 +420,8 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 				TimePoint:  start,
 			})
 			if rankInfo.ID != 0 {
-				rankInfo.Rank = rank
-				rankInfo.Value = item.Value
-				err = srv.repo.Save(&rankInfo)
-				if err != nil {
-					app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-					return
-				}
-				rank++
-				continue
+				app.Logger.Error("排行榜数据已存在", dateType, companyId)
+				return
 			}
 			rankInfo = business.CarbonRank{
 				DateType:   dateType,
