@@ -40,23 +40,6 @@ type TopicService struct {
 	TokenServer *wxoa.AccessTokenServer
 }
 
-func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]entity.Topic, error) {
-	//获取置顶数据，按时间倒序排序
-	//topList := make([]entity.Topic, 0)
-	//app.DB.Model(entity.Topic{}).Preload("Tags").
-	//	Where("status = ? and sort = ?", 3, 9999).
-	//	Where("id > ?", param.ID).
-	//	Where("tag_id = ?", param.TopicTagId).
-	//	Order("updated_at desc").
-	//	Limit(param.Limit).
-	//	Find(&topList)
-	//获取精华数据，按时间倒序排序
-	//essenceList := make([]entity.Topic, 0)
-	//剩下的数据，按时间倒叙排序
-	//获取所有数据数量
-	return nil, nil
-}
-
 //将 entity.Topic 列表填充为 TopicDetail 列表
 func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
 	//查询点赞信息
@@ -109,6 +92,39 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 		return nil, 0, err
 	}
 	return detailList, total, nil
+}
+
+// GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
+func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+	topList := make([]*entity.Topic, 0)
+	var total int64
+	query := app.DB.Model(&entity.Topic{}).
+		Preload("Tags").
+		Preload("Comment", func(db *gorm.DB) *gorm.DB {
+			return db.Where("comment_index.to_comment_id = ?", 0).
+				Order("like_count desc").Limit(10)
+		}).
+		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Order("comment_index.like_count desc")
+		}).Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
+
+	if param.TopicTagId != 0 {
+		query.Where("topic_tag.tag_id = ?", param.TopicTagId)
+	}
+
+	query.Where("topic.status = ?", entity.TopicStatusPublished)
+
+	err := query.Count(&total).
+		Group("topic.id").
+		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
+		Limit(param.Limit).
+		Offset(param.Offset).
+		Find(&topList).Error
+	if err != nil {
+		return nil, 0, nil
+	}
+	return topList, total, nil
 }
 
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
@@ -599,6 +615,20 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 		return err
 	}
 	return nil
+}
+
+func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) {
+	app.DB.Model(&entity.CommentIndex{}).Select("root_comment_id as total_id, count(*) as total").Where("root_comment_id in ?", ids).Group("root_comment_id").Find(&result)
+	return result
+}
+
+func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount) {
+	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as total_id, count(*) as total").
+		Where("obj_id in ?", ids).
+		Where("to_comment_id = 0").
+		Group("obj_id").
+		Find(&result)
+	return result
 }
 
 func (srv TopicService) checkMsgs(openid, content string) error {

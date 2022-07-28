@@ -16,9 +16,8 @@ type (
 		FindOne(commentId int64) (*entity.CommentIndex, error)
 		FindOneQuery(data *entity.CommentIndex) (*entity.CommentIndex, error)
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
-		FindPageListByPage(data *entity.CommentIndex, page, pageSize int64, orderBy string) ([]*entity.CommentIndex, int64, error)
-		FindPageListByIdDESC(data *entity.CommentIndex, preCommentMinId, pageSize int64) ([]*entity.CommentIndex, int64, error)
-		FindPageListByIdASC(data *entity.CommentIndex, preCommentMinId, pageSize int64) ([]*entity.CommentIndex, int64, error)
+		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
+		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) error
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
@@ -99,106 +98,41 @@ func (srv *defaultCommentService) FindAll(data *entity.CommentIndex) ([]*entity.
 	return all, count, nil
 }
 
-// FindPageListByPage 除去置顶评论外，按时间分页获取评论
-func (srv *defaultCommentService) FindPageListByPage(data *entity.CommentIndex, page, pageSize int64, orderBy string) ([]*entity.CommentIndex, int64, error) {
-	//1. 分页获取根评论列表及各自子评论总数
-	rootComments := make([]map[string]interface{}, 0)
-	err := app.DB.Table("comment_index as index").
-		Select("index.*,(select count(*) from comment_index where RootCommentId_comment_id = index.id) as sub_count").
-		Where("index.RootCommentId_comment_id = 0 and index.to_comment_id = 0").
-		Where("index.obj_id = ?", data.ObjId).
-		Find(&rootComments).Error
+// FindListAndChild 获取顶级评论列表及各分属下的三条子评论
+func (srv *defaultCommentService) FindListAndChild(params *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error) {
+	commentList := make([]*entity.CommentIndex, 0)
+	var total int64
+	err := app.DB.Model(&entity.CommentIndex{}).
+		Preload("RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Order("comment_index.like_count desc")
+		}).
+		Where("to_comment_id = ?", 0).
+		Where("obj_id = ?", params.ObjId).
+		Count(&total).
+		Order("like_count desc, id asc").
+		Limit(limit).
+		Offset(offset).
+		Find(&commentList).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	//2.根据根评论id获取各自前三条子评论,以like_count desc和id asc排序
-	rootCommentIds := make([]int64, 0)
-	memberIds := make([]int64, 0)
-	for _, item := range rootComments {
-		rootCommentIds = append(rootCommentIds, item["id"].(int64))
-		memberIds = append(memberIds, item["member_id"].(int64))
-	}
-	subComments := make([]entity.CommentIndex, 0)
-	err = app.DB.Table("comment_index as index").
-		Where("(select count(id) from comment_index where RootCommentId_comment_id = index.RootCommentId_comment_id and like_count > index.like_count) < 3").
-		Where("index.RootCommentId_comment_id in ?", rootCommentIds).
-		Order("RootCommentId_comment_id").
-		Find(subComments).Error
-	if err != nil {
-		return nil, 0, err
-	}
-	//3.获取用户昵称及头像
-
-	usersInfo := make([]map[string]interface{}, 0)
-	err = app.DB.Model(&entity.User{}).Select("id, nick_name, avatar_url").Where("id in = ?", memberIds).Find(&usersInfo).Error
-	if err != nil {
-		return nil, 0, err
-	}
-	//4.组合数据
-	//for _, rootCommentId := range rootComments {
-	//	for _, subComment := range subComments {
-	//
-	//	}
-	//}
-	return nil, 0, nil
+	return commentList, total, nil
 }
 
-func (srv *defaultCommentService) FindPageListByIdDESC(data *entity.CommentIndex, preCommentMinId, pageSize int64) ([]*entity.CommentIndex, int64, error) {
-	builder := srv.commentModel.RowBuilder()
-
-	if data.MemberId != 0 {
-		builder.Where("member_id = ?", data.MemberId)
-	}
-	if data.RootCommentId != 0 {
-		builder.Where("RootCommentId = ?", data.RootCommentId)
-	}
-	if data.ToCommentId != 0 {
-		builder.Where("ToCommentId = ?", data.ToCommentId)
-	}
-	if data.ObjId != 0 {
-		builder.Where("obj_id = ?", data.ObjId)
-	}
-	if data.Attrs != 0 {
-		builder.Where("attrs = ?", data.Attrs)
-	}
-	byPage, err := srv.commentModel.FindPageListByIdDESC(builder, preCommentMinId, pageSize)
+//FindSubList 分页获取子评论列表
+func (srv *defaultCommentService) FindSubList(data *entity.CommentIndex, offSize, limit int) ([]*entity.CommentIndex, int64, error) {
+	commentList := make([]*entity.CommentIndex, 0)
+	var total int64
+	err := srv.commentModel.RowBuilder().
+		Where("root_comment_id = ?", data.RootCommentId).
+		Count(&total).
+		Order("like_count desc, id asc").
+		Find(&commentList).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	count, err := srv.commentModel.FindCount(builder)
-	if err != nil {
-		return nil, 0, err
-	}
-	return byPage, count, err
-}
-
-func (srv *defaultCommentService) FindPageListByIdASC(data *entity.CommentIndex, preCommentMinId, pageSize int64) ([]*entity.CommentIndex, int64, error) {
-	builder := srv.commentModel.RowBuilder()
-
-	if data.MemberId != 0 {
-		builder.Where("member_id = ?", data.MemberId)
-	}
-	if data.RootCommentId != 0 {
-		builder.Where("RootCommentId = ?", data.RootCommentId)
-	}
-	if data.ToCommentId != 0 {
-		builder.Where("ToCommentId = ?", data.ToCommentId)
-	}
-	if data.ObjId != 0 {
-		builder.Where("obj_id = ?", data.ObjId)
-	}
-	if data.Attrs != 0 {
-		builder.Where("attrs = ?", data.Attrs)
-	}
-	byPage, err := srv.commentModel.FindPageListByIdASC(builder, preCommentMinId, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	count, err := srv.commentModel.FindCount(builder)
-	if err != nil {
-		return nil, 0, err
-	}
-	return byPage, count, nil
+	return commentList, total, nil
 }
 
 func (srv *defaultCommentService) UpdateComment(userId, commentId int64, message string) error {

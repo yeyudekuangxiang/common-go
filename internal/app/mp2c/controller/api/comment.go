@@ -7,21 +7,21 @@ import (
 	"mio/internal/pkg/util/apiutil"
 )
 
-var DefaultCommentController = CommentController{}
+var DefaultCommentController = &CommentController{}
 
 type CommentController struct {
 }
 
-// List 除去置顶外，按时间排序
-func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
-	form := CommentForm{}
+// RootList 分页获取顶级评论 及 每条顶级评论下3条子评论
+func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
+	form := ListFormById{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	req := entity.CommentIndex{
-		ObjId: form.TopicId,
+		ObjId: form.ID,
 	}
-	list, total, err := service.DefaultCommentService.FindPageListByPage(&req, form.Page, form.PageSize, "like_count DESC")
+	list, total, err := service.DefaultCommentService.FindListAndChild(&req, form.Offset(), form.Limit())
 	if err != nil {
 		return nil, err
 	}
@@ -33,17 +33,25 @@ func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-// SubCommentList 根据root分页获取子评论
-func (ctr *CommentController) SubCommentList(c *gin.Context) (gin.H, error) {
-	form := SubCommentForm{}
+// SubList 根据顶级评论分页获取子评论
+func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
+	form := ListFormById{}
 	if err := apiutil.BindForm(c, form); err != nil {
 		return nil, err
 	}
-	//data := entity.CommentIndex{
-	//	Parent: form.CommentId,
-	//}
-	//list, total, err := service.DefaultCommentService.FindPageListByPage(&data)
-	return gin.H{}, nil
+	data := &entity.CommentIndex{
+		RootCommentId: form.ID,
+	}
+	list, total, err := service.DefaultCommentService.FindSubList(data, form.Offset(), form.Limit())
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
 }
 
 func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {

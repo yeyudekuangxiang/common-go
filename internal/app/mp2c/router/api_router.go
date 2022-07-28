@@ -29,12 +29,15 @@ func apiRouter(router *gin.Engine) {
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
+
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
+		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
+
 		userRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
 		//文章评论列表
-		authRouter.POST("/topic/comment/list", apiutil.Format(api.DefaultCommentController.List)) //
-		authRouter.POST("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubCommentList))
+		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
+		authRouter.GET("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
 
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 
@@ -112,7 +115,6 @@ func apiRouter(router *gin.Engine) {
 		//评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
 		{
-			commentRouter.GET("/list", apiutil.Format(api.DefaultCommentController.List))
 			commentRouter.POST("/create", apiutil.Format(api.DefaultCommentController.Create))
 			commentRouter.POST("/update", apiutil.Format(api.DefaultCommentController.Update))
 			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))

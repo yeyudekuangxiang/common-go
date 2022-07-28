@@ -342,3 +342,9 @@ type UpdateUserRiskParam struct {
 	UserId int64
 	Risk   int
 }
+
+type CommentCount struct {
+	Date    time.Time
+	TotalID int64
+	Total   int64
+}

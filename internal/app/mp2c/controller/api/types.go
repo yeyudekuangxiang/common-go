@@ -82,17 +82,15 @@ type IdForm struct {
 	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
 }
 
-type CommentForm struct {
-	TopicId  int64 `json:"topicId" form:"topicId" alias:"topicId" binding:"required,min=1"`
-	Page     int64 `json:"page" form:"page" alias:"page" binding:"required,min=1"`
-	PageSize int64 `json:"pageSize" form:"pageSize" alias:"pageSize" binding:"required,min=1"`
+type ListFormById struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+	controller.PageFrom
 }
 
-type SubCommentForm struct {
-	CommentId    int64 `json:"commentId" form:"formId" alias:"formId" binding:"required,min=1"`
-	SubCommentId int64 `json:"subCommentId" form:"subCommentId" alias:"subCommentId" binding:"min=0"`
-	Page         int64 `json:"page" form:"page" alias:"page" binding:"required,min=1"`
-	PageSize     int64 `json:"pageSize" form:"pageSize" alias:"pageSize" binding:"required,min=1"`
+type ListFormByLastId struct {
+	ID       int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+	LastId   int64 `json:"lastId" form:"lastId" alias:"lastId" binding:"required,gte=1"`
+	PageSize int   `json:"pageSize" form:"pageSize" binding:"gt=0" alias:"每页数量"`
 }
 
 type CommentCreateForm struct {

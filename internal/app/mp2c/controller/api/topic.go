@@ -116,6 +116,46 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//ListTopic 帖子列表+顶级评论+顶级评论下子评论3条
+func (ctr TopicController) ListTopic(c *gin.Context) (gin.H, error) {
+	form := GetTopicPageListForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+	list, total, err := service.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
+		TopicTagId: form.TopicTagId,
+		Offset:     form.Offset(),
+		Limit:      form.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	//获取顶级评论数量
+	ids := make([]int64, 0) //topicId
+	for _, item := range list {
+		ids = append(ids, item.Id)
+	}
+	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
+	//组装数据---帖子的顶级评论数量
+	topic2comment := make(map[int64]int64, 0)
+	for _, item := range rootCommentCount {
+		topic2comment[item.TotalID] = item.Total
+	}
+	for _, item := range list {
+		item.CommentCount = topic2comment[item.Id]
+	}
+
+	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
+//CreateTopic 创建帖子
 func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	form := CreateTopicForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
