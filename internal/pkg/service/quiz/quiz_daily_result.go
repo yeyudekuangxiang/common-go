@@ -21,7 +21,7 @@ func (srv QuizDailyResultService) IsAnsweredToday(openId string) (bool, error) {
 }
 func (srv QuizDailyResultService) FindTodayResult(openId string) (*entity.QuizDailyResult, error) {
 	result := entity.QuizDailyResult{}
-	err := app.DB.Where("openid = ? and answer_date = ?", openId, timeutils.NowDate().FullString()).Take(&result).Error
+	err := app.DB.Where("openid = ? and answer_time >= ? and answer_time< ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Take(&result).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
