@@ -6,7 +6,7 @@ import (
 
 func Initialize(configPath string) {
 	InitIni(configPath)
-	InitLog()
+	InitConsoleLog()
 	InitDB()
 	InitRedis()
 	InitValidator()

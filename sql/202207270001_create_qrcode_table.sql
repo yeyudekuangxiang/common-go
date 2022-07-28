@@ -1,20 +1,22 @@
-create table qr_code
-(
-    id             bigserial
-        constraint qr_code_pk
-            primary key,
-    qr_code_id     varchar(255)                               not null
-        unique,
-    openid         varchar(255) default ''::character varying not null,
-    description    varchar(255) default ''::character varying not null,
-    image_path     varchar(500)                               not null,
-    key            varchar(255) default ''::character varying not null,
-    ext            varchar(255)                               not null,
-    created_at     timestamp with time zone                   not null,
-    qr_code_scene  varchar(255)                               not null,
-    qr_code_source varchar(255)                               not null,
-    content        varchar(255)                               not null
-);
+/*ok*/
+ALTER TABLE "public"."qr_code"
+    ADD COLUMN "image_path" varchar(500) NOT NULL DEFAULT '',
+    ADD COLUMN "key" varchar(255) NOT NULL DEFAULT '',
+    ADD COLUMN "ext" varchar(255) NOT NULL DEFAULT '',
+    ADD COLUMN "created_at" timestamptz NOT NULL DEFAULT '2022-07-28 14:00:00+08',
+    ADD COLUMN "qr_code_scene" varchar(255) NOT NULL DEFAULT '',
+    ADD COLUMN "qr_code_source" varchar(255) NOT NULL DEFAULT '',
+    ADD COLUMN "content" varchar(255) NOT NULL DEFAULT '',
+
+    ALTER COLUMN "qr_code_id" TYPE varchar(255) COLLATE "pg_catalog"."default",
+    ALTER COLUMN "openid" TYPE varchar(255) COLLATE "pg_catalog"."default",
+    ALTER COLUMN "openid" SET DEFAULT '',
+    ALTER COLUMN "openid" SET NOT NULL ,
+    ALTER COLUMN "description" TYPE varchar(255) COLLATE "pg_catalog"."default",
+    ALTER COLUMN "description" SET DEFAULT '',
+    ALTER COLUMN "description" SET NOT NULL ,
+    ALTER COLUMN "image_url" SET DEFAULT '废弃',
+    ALTER COLUMN "qr_code_type" SET DEFAULT '废弃';
 
 comment on column qr_code.id is '自增编号';
 

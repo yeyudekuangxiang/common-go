@@ -73,7 +73,7 @@ func v2(db *gorm.DB) {
 		{
 			EventCategoryId: "79550af260ecf9df2635751c3273b269",
 			Title:           "生态环保",
-			Active:          false,
+			Active:          true,
 			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_sthb.png",
 			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/eep.png",
 			Sort:            2,
@@ -81,7 +81,7 @@ func v2(db *gorm.DB) {
 		{
 			EventCategoryId: "79550af260ecfcd4263627ff7c516d0b",
 			Title:           "碳减排证书",
-			Active:          false,
+			Active:          true,
 			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_dtjp.png",
 			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/lcaer.png",
 			Sort:            3,
