@@ -42,6 +42,7 @@ type User struct {
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`
 	ChannelId    int64        `gorm:"column:channel_id" json:"channel_id"`
+	Carbon       float64      `gorm:"carbon" json:"carbon"`
 }
 
 func (u User) ShortUser() ShortUser {
