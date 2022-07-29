@@ -12,7 +12,7 @@ import (
 func BindForm(c *gin.Context, data interface{}) error {
 	if err := c.ShouldBind(data); err != nil {
 		err = validator.TranslateError(err)
-		return errno.NewBindErr(err)
+		return errno.ErrBind.With(err)
 	}
 	return nil
 }

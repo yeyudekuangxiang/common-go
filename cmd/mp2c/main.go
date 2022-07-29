@@ -16,9 +16,9 @@ var (
 )
 
 func init() {
-	flag.Parse()
+	rand.Seed(time.Now().Unix())
 
-	rand.Seed(time.Now().UnixMilli())
+	flag.Parse()
 
 	initialize.Initialize(*flagConf)
 

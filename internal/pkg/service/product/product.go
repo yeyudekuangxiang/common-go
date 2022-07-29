@@ -1,4 +1,4 @@
-package service
+package product
 
 import (
 	"mio/internal/pkg/model/entity/product"

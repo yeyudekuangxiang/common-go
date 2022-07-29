@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util/unidian"
 	"time"
@@ -20,13 +19,13 @@ type UnidianService struct {
 }
 
 // SendPrize 发放奖励
-func (u UnidianService) SendPrize(typeId string, mobile string) error {
+func (u UnidianService) SendPrize(typeId string, mobile string, activityType string) error {
 	//检测重复
-	cmd := app.Redis.SetNX(context.Background(), config.RedisKey.UniDian+mobile, "a", 3650*time.Second)
+	cmd := app.Redis.SetNX(context.Background(), activityType+mobile, "a", 3650*time.Second)
 	if !cmd.Val() {
-		fmt.Println(config.RedisKey.UniDian + mobile + "重复充值")
+		fmt.Println(activityType + mobile + "重复充值")
 		return errors.New("正在充值,请稍等")
 	}
-	unidian.CouponOfUnidian(typeId, mobile, config.RedisKey.UniDian+mobile)
+	unidian.CouponOfUnidian(typeId, mobile, activityType+mobile)
 	return nil
 }

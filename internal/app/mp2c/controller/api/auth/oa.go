@@ -78,7 +78,7 @@ func (OaController) Login(c *gin.Context) (gin.H, error) {
 	oaService := authSrv.OaService{
 		Platform: entity.UserSource(form.Platform),
 	}
-	token, err := oaService.LoginByCode(form.Code)
+	token, err := oaService.LoginByCode(form.Code, form.Cid)
 	return gin.H{
 		"token": token,
 	}, err

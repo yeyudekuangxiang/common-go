@@ -77,7 +77,7 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	}
 
 	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
-		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile)
+		user, err := service.DefaultUserService.FindOrCreateByMobile(form.Mobile, form.Cid)
 		if err != nil {
 			return gin.H{}, err
 		}
@@ -123,6 +123,16 @@ func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 		"summary": summary,
 	}, nil
 }
+func (UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(c)
+	accountInfo, err := service.DefaultUserService.AccountInfo(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"accountInfo": accountInfo,
+	}, nil
+}
 
 func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	form := UpdateUserInfoForm{}
@@ -131,17 +141,13 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
-	var gender entity.UserGender
-	if form.Gender == 1 {
-		gender = entity.UserGenderMale
-	} else if form.Gender == 2 {
-		gender = entity.UserGenderFemale
-	}
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
-		UserId:   user.ID,
-		Nickname: form.Nickname,
-		Avatar:   form.Avatar,
-		Gender:   gender,
+		UserId:      user.ID,
+		Nickname:    form.Nickname,
+		Avatar:      form.Avatar,
+		Gender:      entity.UserGender(form.Gender),
+		Birthday:    form.Birthday.Time,
+		PhoneNumber: form.PhoneNumber,
 	})
 	return nil, err
 }
