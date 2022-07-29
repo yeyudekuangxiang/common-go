@@ -53,7 +53,7 @@ func (srv QRCodeService) CreateTopicShareQr(topicId int64, userId int64) (*entit
 		return nil, err
 	}
 
-	page := "pages/cool-mio/mio-detail/index"
+	page := "pages/community/details/index"
 	scene := fmt.Sprintf("tid=%d&uid=%d&s=p", topicId, userId)
 
 	key := srv.QrCodeKey(entity.QrCodeSceneTopicShare, page, scene)
