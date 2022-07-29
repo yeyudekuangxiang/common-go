@@ -17,9 +17,9 @@ type (
 		FindCount(builder *gorm.DB) (int64, error)
 		FindSum(builder *gorm.DB) (float64, error)
 		FindAll(builder *gorm.DB, orderBy string) ([]*entity.CommentIndex, error)
-		FindPageListByPage(builder *gorm.DB, page, pageSize int64, orderBy string) ([]*entity.CommentIndex, error)
-		FindPageListByIdDESC(builder *gorm.DB, preMinId, pageSize int64) ([]*entity.CommentIndex, error)
-		FindPageListByIdASC(builder *gorm.DB, preMinId, pageSize int64) ([]*entity.CommentIndex, error)
+		FindPageListByPage(builder *gorm.DB, offset, limit int64, orderBy string) ([]*entity.CommentIndex, error)
+		FindPageListByIdDESC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error)
+		FindPageListByIdASC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error)
 		Delete(id, userId int64) error
 		DeleteSoft(id, userId int64) error
 		Update(data *entity.CommentIndex) error
@@ -133,18 +133,15 @@ func (m *defaultCommentRepository) FindAll(builder *gorm.DB, orderBy string) ([]
 	}
 }
 
-func (m *defaultCommentRepository) FindPageListByPage(builder *gorm.DB, page, pageSize int64, orderBy string) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentRepository) FindPageListByPage(builder *gorm.DB, offset, limit int64, orderBy string) ([]*entity.CommentIndex, error) {
 	if orderBy == "" {
 		builder.Order("id DESC")
 	} else {
 		builder.Order(orderBy)
 	}
 	var resp []*entity.CommentIndex
-	if page < 1 {
-		page = 1
-	}
-	offset := (page - 1) * pageSize
-	err := builder.Where("state = ?", 0).Offset(int(offset)).Limit(int(page)).Find(&resp).Error
+
+	err := builder.Where("state = ?", 0).Offset(int(offset)).Limit(int(limit)).Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -155,12 +152,12 @@ func (m *defaultCommentRepository) FindPageListByPage(builder *gorm.DB, page, pa
 	}
 }
 
-func (m *defaultCommentRepository) FindPageListByIdDESC(builder *gorm.DB, preMinId, pageSize int64) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentRepository) FindPageListByIdDESC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error) {
 	if preMinId > 0 {
 		builder = builder.Where(" id < ? ", preMinId)
 	}
 	var resp []*entity.CommentIndex
-	err := builder.Where("state = ?", 0).Order("id DESC").Limit(int(pageSize)).Find(&resp).Error
+	err := builder.Where("state = ?", 0).Order("id DESC").Limit(int(limit)).Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -171,12 +168,12 @@ func (m *defaultCommentRepository) FindPageListByIdDESC(builder *gorm.DB, preMin
 	}
 }
 
-func (m *defaultCommentRepository) FindPageListByIdASC(builder *gorm.DB, preMinId, pageSize int64) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentRepository) FindPageListByIdASC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error) {
 	if preMinId > 0 {
 		builder = builder.Where(" id < ? ", preMinId)
 	}
 	var resp []*entity.CommentIndex
-	err := builder.Where("state = ?", 0).Order("id ASC").Limit(int(pageSize)).Find(&resp).Error
+	err := builder.Where("state = ?", 0).Order("id ASC").Limit(int(limit)).Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil

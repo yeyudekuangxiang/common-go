@@ -42,7 +42,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
-	form := TopicDetailRequest{}
+	form := IDForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -80,6 +80,18 @@ func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 	//更新帖子
 	err := service.DefaultTopicAdminService.UpdateTopic(user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
+	form := IDForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	//更新帖子
+	if err := service.DefaultTopicAdminService.DeleteTopic(form.ID); err != nil {
 		return nil, err
 	}
 	return nil, nil

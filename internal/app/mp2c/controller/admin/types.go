@@ -67,6 +67,13 @@ type UserPageListForm struct {
 	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 }
 
+/*common start*/
+type IDForm struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1" `
+}
+
+/*common end*/
+
 /*topic start*/
 type TopicListRequest struct {
 	ID        int64  `json:"id" form:"id" alias:"帖子id" binding:"gte=0"`
@@ -78,10 +85,6 @@ type TopicListRequest struct {
 	IsTop     int    `json:"isTop" form:"isTop" alias:"是否置顶" binding:"min=0,max=1"`
 	IsEssence int    `json:"isEssence" form:"isEssence" alias:"是否精华" binding:"min=0,max=1"`
 	controller.PageFrom
-}
-
-type TopicDetailRequest struct {
-	ID int64 `json:"id" form:"id" alias:"帖子id" binding:"required,gte=1"`
 }
 
 type CreateTopicRequest struct {
@@ -104,3 +107,11 @@ type ChangeTopicStatus struct {
 }
 
 /*topic end*/
+
+/*comment start*/
+type CommentListRequest struct {
+	Comment string `json:"comment" form:"comment" alias:"comment"`
+	UserId  int64  `json:"userId" form:"userId" alias:"userId" binding:"gte=0"`
+}
+
+/*comment end*/
