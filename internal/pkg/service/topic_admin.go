@@ -151,6 +151,22 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 	return topic, nil
 }
 
+// DeleteTopic 删除（下架）
+func (srv TopicAdminService) DeleteTopic(topicId int64) error {
+	//查询数据是否存在
+	var topic entity.Topic
+	app.DB.Model(&entity.Topic{}).Preload("Tags").Where("id = ?", topicId).Find(&topic)
+	if topic.Id == 0 {
+		return errors.New("数据不存在")
+	}
+	err := app.DB.Model(&topic).Update("status", 4).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Review 审核
 func (srv TopicAdminService) Review(topicId int64, status int) error {
 	//查询数据是否存在
 	var topic entity.Topic
