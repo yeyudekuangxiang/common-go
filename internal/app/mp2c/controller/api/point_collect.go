@@ -27,6 +27,8 @@ func (PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		point, err = service.DefaultPointCollectService.CollectBikeRide(user.OpenId, form.ImgUrl)
 	case service.PointCollectCoffeeCupType:
 		point, err = service.DefaultPointCollectService.CollectCoffeeCup(user.OpenId, form.ImgUrl)
+	case service.PointCollectPowerReplaceType:
+		point, err = service.DefaultPointCollectService.CollectPowerReplace(user.OpenId, form.ImgUrl)
 	}
 	return gin.H{
 		"point": point,

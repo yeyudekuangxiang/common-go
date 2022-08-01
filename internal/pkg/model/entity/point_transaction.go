@@ -84,6 +84,7 @@ const (
 	POINT_CHECK_IN        PointTransactionType = "CHECK_IN"        //每日签到
 	POINT_BIKE_RIDE       PointTransactionType = "BIKE_RIDE"       //骑行
 	POINT_ECAR            PointTransactionType = "ECAR"            //电动车主
+	POINT_POWER_REPLACE   PointTransactionType = "POWER_REPLACE"   //电车换电
 	POINT_COUPON          PointTransactionType = "COUPON"          //券码兑换
 	POINT_QUIZ            PointTransactionType = "QUIZ"            //答题活动
 	POINT_PARTNERSHIP     PointTransactionType = "PARTNERSHIP"     //合作活动
@@ -108,6 +109,7 @@ const (
 var PointTransactionTypeList = []PointTransactionType{
 	POINT_STEP,
 	POINT_COFFEE_CUP,
+	POINT_POWER_REPLACE,
 	POINT_PURCHASE,
 	POINT_INVITE,
 	POINT_CHECK_IN,
@@ -137,11 +139,14 @@ const (
 	OrderByPointTranCTDESC OrderBy = "order_by_point_ct_desc"
 )
 
+//每次获取 （多少） 积分
 var PointCollectValueMap = map[PointTransactionType]int{
 	POINT_COFFEE_CUP: 39,  //每次
 	POINT_BIKE_RIDE:  42,  //每次
 	POINT_INVITE:     500, //每人
 }
+
+//每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_COFFEE_CUP: 2,
 	POINT_BIKE_RIDE:  2,
