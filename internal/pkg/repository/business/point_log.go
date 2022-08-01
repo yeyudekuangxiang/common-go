@@ -36,7 +36,7 @@ func (p PointLogRepository) GetListBy(by GetPointLogListBy) []business.PointLog 
 		db.Where("created_at >= ?", by.StartTime)
 	}
 	if !by.EndTime.IsZero() {
-		db.Where("updated_at <= ?", by.EndTime)
+		db.Where("created_at <= ?", by.EndTime)
 	}
 
 	if by.Type != "" {
