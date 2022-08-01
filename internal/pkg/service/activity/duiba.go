@@ -122,6 +122,10 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	if userInfo.ID == 0 {
 		return "", errno.ErrUserNotFound
 	}
+	//判断用户手机号
+	if userInfo.PhoneNumber == "" {
+		return "", errno.ErrNotBindMobile
+	}
 
 	path := DUIBAIndex
 	isNewUser := false
@@ -156,12 +160,14 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		OpenId:   userInfo.OpenId,
 		Scene:    1,
 		ClientIp: cip,
+		MobileNo: userInfo.PhoneNumber,
 	})
 	if err != nil {
 		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
 	} else {
 		if resp.RiskRank > activity.RiskLimit {
-			return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
+			return "", nil
+			//return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
 		}
 	}
 

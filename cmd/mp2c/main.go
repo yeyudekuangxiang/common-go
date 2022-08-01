@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
+	"math/rand"
 	"mio/internal/app/cron"
 	"mio/internal/app/mp2c/server"
 	"mio/internal/pkg/core/initialize"
 	"os"
 	"os/signal"
+	"time"
 )
 
 var (
@@ -14,6 +16,8 @@ var (
 )
 
 func init() {
+	rand.Seed(time.Now().Unix())
+
 	flag.Parse()
 
 	initialize.Initialize(*flagConf)

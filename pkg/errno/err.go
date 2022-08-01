@@ -1,7 +1,11 @@
 package errno
 
 import (
+	"errors"
 	"fmt"
+	"mio/config"
+	"runtime"
+	"strconv"
 )
 
 /*
@@ -11,84 +15,103 @@ import (
 第四五位表示具体错误代码
 */
 var (
-	OK = Err{code: 200, message: "OK"}
+	OK = err{code: 200, message: "OK"}
 
-	// 系统错误, 前缀为 100
-	InternalServerError = Err{code: 10001, message: "内部服务器错误"}
-	ErrBind             = Err{code: 10002, message: "请求参数错误"}
-	ErrTokenSign        = Err{code: 10003, message: "签名 jwt 时发生错误"}
-	ErrEncrypt          = Err{code: 10004, message: "加密用户密码时发生错误"}
+	// ErrCommon 通用错误
+	ErrCommon = err{code: 10000, message: "通用错误"}
+	// ErrInternalServer 系统错误
+	ErrInternalServer = err{code: 10001, message: "内部服务器错误"}
+	// ErrBind 绑定错误
+	ErrBind = err{code: 10002, message: "请求参数错误"}
+	// ErrLimit 超出频率限制
+	ErrLimit   = err{code: 10003, message: "操作太频繁了、请稍后再试"}
+	ErrTimeout = err{code: 10004, message: "操作已超时"}
 
-	// 数据库错误, 前缀为 201
-	ErrDatabase = Err{code: 20100, message: "数据库错误"}
-	ErrFill     = Err{code: 20101, message: "从数据库填充 struct 时发生错误"}
+	// ErrRecordNotFound 数据库错误
+	ErrRecordNotFound = err{code: 20100, message: "数据异常"}
 
-	// 认证错误, 前缀是 202
-	ErrAuth         = Err{code: 20201, message: "未登陆"}
-	ErrValidation   = Err{code: 20202, message: "验证失败"}
-	ErrTokenInvalid = Err{code: 20203, message: "jwt 是无效的"}
+	// ErrAuth 未登录
+	ErrAuth = err{code: 20201, message: "未登陆"}
+	// ErrValidation 验证失败
+	ErrValidation = err{code: 20202, message: "验证失败"}
 
-	// 用户错误, 前缀为 203
-	ErrUserNotFound      = Err{code: 20301, message: "未查询到用户信息"}
-	ErrPasswordIncorrect = Err{code: 20302, message: "密码错误"}
-	ErrNotBindMobile     = Err{code: 20303, message: "未授权手机号码"}
+	// ErrUserNotFound 未查询到用户信息
+	ErrUserNotFound = err{code: 20301, message: "未查询到用户信息"}
 
-	//管理员错误 前缀204
-	ErrAdminNotFound = Err{code: 20401, message: "未查询到管理员信息"}
+	// ErrNotBindMobile 未绑定手机号
+	ErrNotBindMobile = err{code: 20303, message: "未授权手机号码"}
+	// ErrBindMobile 绑定手机号时异常
+	ErrBindMobile = err{code: 20304, message: "绑定手机号码失败"}
+
+	// ErrAdminNotFound 管理员错误 前缀204
+	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"}
 )
 
-func NewBindErr(err error) Err {
-	return Err{
-		code:    ErrBind.Code(),
-		message: err.Error(),
-		err:     err,
-	}
-}
-func NewInternalServerError(err error) Err {
-	return Err{
-		code:    InternalServerError.Code(),
-		message: err.Error(),
-		err:     err,
-	}
-}
-func NewAuthErr(err error) Err {
-	return Err{
-		code:    ErrAuth.Code(),
-		message: err.Error(),
-		err:     err,
-	}
-}
-
-type IErr interface {
-	Code() int
-	Message() string
-	error
-}
-
 // Err 定义错误
-type Err struct {
+type err struct {
 	code    int    // 错误码
 	message string // 展示给用户看的
 	err     error  // 保存内部错误信息
+	callers string //保存调用文件名
 }
 
-func (err Err) Code() int {
-	return err.code
+// WithErr 带上err信息
+func (e err) WithErr(err error) err {
+	e.err = err
+	return e
 }
-func (err Err) Message() string {
-	return err.message
+
+// WithMessage 替换默认的提示
+func (e err) WithMessage(message string) err {
+	e.message = message
+	return e
 }
-func (err Err) Error() string {
-	return fmt.Sprintf("Err - code: %d, message: %s", err.code, err.message)
+
+// WithErrMessage 带上err message
+func (e err) WithErrMessage(err string) err {
+	e.err = errors.New(err)
+	return e
+}
+
+// WithCaller 带上调用栈
+func (e err) WithCaller() err {
+	_, f, l, _ := runtime.Caller(1)
+	e.callers = f + ":" + strconv.Itoa(l)
+	return e
+}
+
+// With 带上错误和调用栈
+func (e err) With(err error) err {
+	e.err = err
+	_, f, l, _ := runtime.Caller(1)
+	e.callers = f + ":" + strconv.Itoa(l)
+	return e
+}
+func (e err) Code() int {
+	return e.code
+}
+func (e err) Message() string {
+	return e.message
+}
+func (e err) Error() string {
+	return fmt.Sprintf("Err - code: %d, message: %s ,err: %v", e.code, e.message, e.err)
 }
 
 // DecodeErr 解码错误, 获取 Code 和 Message
-func DecodeErr(err error) (int, string) {
-	if err == nil {
+func DecodeErr(e error) (int, string) {
+	if e == nil {
 		return OK.Code(), OK.Message()
 	}
-	if e, ok := err.(IErr); ok {
-		return e.Code(), e.Message()
+	if decodeErr, ok := e.(err); ok {
+		if config.Config.App.Debug {
+			return decodeErr.Code(), decodeErr.Error()
+		}
+		return decodeErr.Code(), decodeErr.Message()
 	}
-	return InternalServerError.Code(), err.Error()
+	if config.Config.App.Debug {
+		return ErrInternalServer.Code(), e.Error()
+	}
+	return ErrInternalServer.Code(), ErrInternalServer.Error()
+	//后面系统全面替换后使用下面的方式
+	//return ErrInternalServer.Code(), ErrInternalServer.Message()
 }

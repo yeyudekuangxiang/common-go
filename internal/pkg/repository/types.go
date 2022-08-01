@@ -125,14 +125,12 @@ type FindPointTransactionBy struct {
 	TransactionId string
 }
 type FindStepHistoryBy struct {
-	UserId        int64
 	OpenId        string
 	Day           model.Time
 	RecordedEpoch int64
 	OrderBy       entity.OrderByList
 }
 type FindStepBy struct {
-	UserId int64
 	OpenId string
 }
 type GetStepListBy struct {
@@ -160,7 +158,7 @@ type FindOaAuthWhiteBy struct {
 	AppId  string
 }
 type GetStepHistoryListBy struct {
-	UserId            int64
+	OpenId            string
 	RecordedEpochs    []int64
 	StartRecordedTime model.Time // >=
 	EndRecordedTime   model.Time //<=
@@ -180,6 +178,25 @@ type FindCouponTypeBy struct {
 }
 type FindDuiBaPointAddLogBy struct {
 	OrderNum string
+}
+type FindCertificateBy struct {
+	ProductItemId string
+	CertificateId string
+}
+
+type FindUserChannelBy struct {
+	Cid  int64
+	Code string
+}
+
+type GetUserChannelPageListBy struct {
+	Name    string             `json:"name" `
+	Code    string             `json:"code" `
+	Cid     int                `json:"cid"`
+	Pid     int                `json:"pid"`
+	Offset  int                `json:"offset"`
+	Limit   int                `json:"limit"` //limit为0时不限制数量
+	OrderBy entity.OrderByList `json:"orderBy"`
 }
 
 type FindTopicBy struct {

@@ -3,7 +3,7 @@ replicaCount: 3
 restartTime: "0"
 
 image:
-  repository: "hub-cn.miotech.com/mioyingtech/mio-go"
+  repository: "hub.miotech.com/mioyingtech/mio-go"
   tag: "v1.0.0"
   branch: ""
 

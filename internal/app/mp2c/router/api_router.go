@@ -5,7 +5,9 @@ import (
 	"mio/internal/app/mp2c/controller/api"
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
+	"mio/internal/app/mp2c/controller/api/badge"
 	"mio/internal/app/mp2c/controller/api/coupon"
+	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
@@ -19,7 +21,6 @@ func apiRouter(router *gin.Engine) {
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
 	{
-
 		userRouter := authRouter.Group("/user")
 		{
 			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))     //获取验证码
@@ -49,6 +50,17 @@ func apiRouter(router *gin.Engine) {
 		authRouter.POST("/activity/boc/record", apiutil.Format(activityApi.DefaultBocController.FindOrCreateRecord))
 		//广东小学图书馆公益捐书活动
 		authRouter.POST("/activity/answer/homepage", apiutil.Format(activityApi.DefaultAnswerController.HomePage))
+
+		eventRouter := authRouter.Group("/event")
+		{
+			eventRouter.GET("category/list", apiutil.Format(event.DefaultEventController.GetEventCategoryList))
+			eventRouter.GET("/list", apiutil.Format(event.DefaultEventController.GetEventList))
+			eventRouter.GET("detail", apiutil.Format(event.DefaultEventController.GetEventFullDetail))
+		}
+
+		authRouter.GET("banner/list", apiutil.Format(api.DefaultBannerController.GetBannerList))
+		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
+		authRouter.GET("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
 	}
 
 	//必须登陆的路由
@@ -62,8 +74,9 @@ func apiRouter(router *gin.Engine) {
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
+			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
 		}
-		//拉新
+		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
 		{
 			inviteRouter.GET("/qrcode", apiutil.Format(api.DefaultInviteController.GetShareQrCode))
@@ -136,6 +149,37 @@ func apiRouter(router *gin.Engine) {
 			stepRouter.POST("/update", apiutil.Format(api.DefaultStepController.UpdateStepTotal))
 			//获取最近7天内步行数据
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
+			stepRouter.POST("/collect", apiutil.Format(api.DefaultStepController.Collect))
+		}
+
+		//签到相关路由
+		checkinRouter := mustAuthRouter.Group("/checkin")
+		{
+			checkinRouter.GET("/info", apiutil.Format(api.DefaultCheckinController.GetCheckinInfo))
+			checkinRouter.POST("/collect", apiutil.Format(api.DefaultCheckinController.Checkin))
+		}
+
+		//答题相关路由
+		quizRouter := mustAuthRouter.Group("/quiz")
+		{
+			quizRouter.GET("/daily-questions", apiutil.Format(api.DefaultQuizController.GetDailyQuestions))
+			quizRouter.GET("/availability", apiutil.Format(api.DefaultQuizController.Availability))
+			quizRouter.POST("/check", apiutil.Format(api.DefaultQuizController.AnswerQuestion))
+			quizRouter.POST("/submit", apiutil.Format(api.DefaultQuizController.Submit))
+			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
+			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
+		}
+
+		//扫小票得积分相关路由
+		pointCollectRouter := mustAuthRouter.Group("/point-collect")
+		{
+			pointCollectRouter.POST("", apiutil.Format(api.DefaultPointCollectController.Collect))
+		}
+
+		//上传文件相关路由
+		uploadRouter := mustAuthRouter.Group("/upload")
+		{
+			uploadRouter.Any("/point-collect", apiutil.Format(api.DefaultUploadController.UploadPointCollectImage))
 		}
 
 		mustAuthRouter.GET("/mobile-user", apiutil.Format(api.DefaultUserController.GetMobileUserInfo))
@@ -144,9 +188,18 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/ocr/gm/ticket", apiutil.Format(api.DefaultOCRController.GmTicket))
 
 		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
+		mustAuthRouter.POST("/order/submit-from-event", apiutil.Format(api.DefaultOrderController.SubmitOrderForEvent))
+		mustAuthRouter.GET("/order/list", apiutil.FormatInterface(api.DefaultOrderController.GetUserOrderList))
 
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 
+		mustAuthRouter.POST("/badge/image", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeImage))
+		mustAuthRouter.GET("/badge/list", apiutil.Format(badge.DefaultBadgeController.GetBadgeList))
+		mustAuthRouter.POST("/badge/looked", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeIsNew))
+		mustAuthRouter.GET("/badge/upload/setting", apiutil.FormatInterface(badge.DefaultBadgeController.UploadOldBadgeImage))
+
+		//兑换券相关
+		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 	}
 
 }

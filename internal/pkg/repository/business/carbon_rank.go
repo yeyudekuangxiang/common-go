@@ -90,7 +90,7 @@ func (repo CarbonRankRepository) GetCarbonRankList(by GetCarbonRankBy) ([]busine
 	} else if by.ObjectType == "department" {
 		objectTable = business.Department{}.TableName()
 	} else {
-		return nil, 0, errno.InternalServerError
+		return nil, 0, errno.ErrInternalServer
 	}
 
 	db := repo.DB.Table(fmt.Sprintf("%s as rank", business.CarbonRank{}.TableName())).

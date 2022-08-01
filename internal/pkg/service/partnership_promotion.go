@@ -10,12 +10,16 @@ var DefaultPartnershipPromotionService = PartnershipPromotionService{}
 type PartnershipPromotionService struct {
 }
 
-func (srv PartnershipPromotionService) GetPromotionPromotionList(by GetPromotionPromotionListBy) ([]entity.PartnershipPromotion, error) {
+func (srv PartnershipPromotionService) GetPartnershipPromotionList(by GetPartnershipPromotionListBy) ([]entity.PartnershipPromotion, error) {
 	list := make([]entity.PartnershipPromotion, 0)
 	db := app.DB.Model(entity.PartnershipPromotion{})
 
 	if by.Partnership != "" {
 		db.Where("partnership = ?", by.Partnership)
+	}
+
+	if len(by.PartnerShips) > 0 {
+		db.Where("partnership in (?)", by.PartnerShips)
 	}
 
 	if by.Trigger != "" {

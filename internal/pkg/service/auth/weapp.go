@@ -4,38 +4,37 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
+	"github.com/panjf2000/ants/v2"
 	"github.com/pkg/errors"
+	"log"
+	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
 )
 
-const (
-	javaLoginUrl = "https://miniprogram.api.miotech.com/api/mp2c/auth/login"
-	javaWhoAmi   = "https://miniprogram.api.miotech.com/api/mp2c/user/whoami"
-)
-
+var userDealPool, _ = ants.NewPool(100)
 var DefaultWeappService = WeappService{}
 
 type WeappService struct {
 	client *weapp.Client
 }
 
-func (srv WeappService) LoginByCode(code string, invitedBy string) (*entity.User, string, error) {
+func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64) (*entity.User, string, error) {
 	//调用java那边登陆接口
-	result, err := httputil.OriginJson(javaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
+	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
 		return nil, "", err
 	}
 
 	//获取用户信息
 	cookie := result.Response.Header.Get("Set-Cookie")
-	whoAmiResult, err := httputil.OriginGet(javaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
+
+	log.Println("cookie", cookie, invitedBy, partnershipWith)
+	whoAmiResult, err := httputil.OriginGet(config.Config.Java.JavaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
 	if err != nil {
 		return nil, "", err
 	}
@@ -66,53 +65,59 @@ func (srv WeappService) LoginByCode(code string, invitedBy string) (*entity.User
 	}
 	session, _ := service.DefaultSessionService.FindSessionByOpenId(whoAmiResp.Data.Openid)
 
+	isNewUser := false
 	if user.ID == 0 {
-		user, err := service.DefaultUserService.CreateUser(service.CreateUserParam{
+		isNewUser = true
+		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
-			AvatarUrl:   "",
-			Nickname:    "",
+			AvatarUrl:   "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/default.png",
+			Nickname:    "绿喵用户" + util.RandomStr(6, util.RandomStrNumber, util.RandomStrLower),
 			PhoneNumber: "",
 			Source:      entity.UserSourceMio,
 			UnionId:     session.WxUnionId,
+			ChannelId:   cid,
 		})
 		if err != nil {
 			return nil, "", err
 		}
-		return user, cookie, nil
+		//return user, cookie, nil
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
+
+	}
+
+	if isNewUser {
+		err := userDealPool.Submit(func() {
+			srv.AfterCreateUser(user, invitedBy, partnershipWith)
+		})
+		if err != nil {
+			app.Logger.Errorf("提交新用户处理事件失败 %+v %s %s", user, invitedBy, partnershipWith)
+		}
 	}
 
 	return user, cookie, nil
 }
 
 func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {
-	_, err := service.DefaultStepService.FindOrCreateStep(user.ID)
+	app.Logger.Infof("新用户创建后事件 %+v %s %s", user, invitedBy, partnershipType)
+	_, err := service.DefaultStepService.FindOrCreateStep(user.OpenId)
 	if err != nil {
 		app.Logger.Error(user, invitedBy, err)
 	}
 
 	if invitedBy != "" {
-		_, isNew, err := service.DefaultInviteService.AddInvite(user.OpenId, invitedBy)
+		err := service.DefaultInviteService.Invite(user.OpenId, invitedBy)
 		if err != nil {
 			app.Logger.Error(user, invitedBy, err)
-		} else if isNew {
-			//发放积分奖励
-			pointService := service.NewPointService(context.NewMioContext())
-			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
-				OpenId:       invitedBy,
-				Type:         entity.POINT_INVITE,
-				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_INVITE]),
-				BizId:        util.UUID(),
-				AdditionInfo: fmt.Sprintf("invite %s", user.OpenId),
-			})
-			if err != nil {
-				app.Logger.Error("发放邀请积分失败", err)
-			}
 		}
 	}
 
 	if partnershipType != "" {
-
+		list, err := service.DefaultPartnershipRedemptionService.ProcessPromotionInformation(user.OpenId, partnershipType, entity.PartnershipPromotionTriggerREGISTER)
+		if err != nil {
+			app.Logger.Errorf("添加第三方活动信息失败 %+v %s %s %v", user, invitedBy, partnershipType, err)
+		} else {
+			app.Logger.Errorf("添加第三方活动信息成功 %+v %s %s %+v", user, invitedBy, partnershipType, list)
+		}
 	}
 }

@@ -13,10 +13,14 @@ type InviteController struct {
 
 func (InviteController) GetShareQrCode(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	info, err := service.DefaultInviteService.GetInviteQrCode(user.OpenId)
+
+	info, err := service.NewQRCodeService().CreateInvite(user.OpenId)
+	if err != nil {
+		return nil, err
+	}
 	return gin.H{
-		"qrInfo": info,
-	}, err
+		"qrcode": service.DefaultOssService.FullUrl(info.ImagePath),
+	}, nil
 }
 func (InviteController) GetInviteList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)

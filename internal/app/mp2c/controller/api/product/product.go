@@ -2,7 +2,7 @@ package product
 
 import (
 	"github.com/gin-gonic/gin"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/product"
 )
 
 var DefaultProductController = ProductController{}
@@ -11,7 +11,7 @@ type ProductController struct {
 }
 
 func (ProductController) ProductList(c *gin.Context) (gin.H, error) {
-	list, err := service.DefaultProductService.ProductList()
+	list, err := product.DefaultProductService.ProductList()
 
 	return gin.H{
 		"records":          list,

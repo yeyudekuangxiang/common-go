@@ -88,13 +88,12 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
-	buffers, contType, err := service.DefaultTopicService.GetShareWeappQrCode(int(user.ID), form.TopicId)
+	qr, err := service.NewQRCodeService().CreateTopicShareQr(form.TopicId, user.ID)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
-		"buffers":     buffers,
-		"contentType": contType,
+		"qrcode": service.DefaultOssService.FullUrl(qr.ImagePath),
 	}, nil
 }
 

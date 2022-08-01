@@ -81,11 +81,11 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 	list, total := srv.topic.GetTopicPageList(param)
 
 	//更新曝光和查看次数
-	srv.UpdateTopicFlowListShowCount(list, param.UserId)
-	if param.ID != 0 && len(list) > 0 {
+	//u.UpdateTopicFlowListShowCount(list, param.UserId)
+	/*if param.ID != 0 && len(list) > 0 {
 		app.Logger.Info("更新查看次数", list[0].Id, param.UserId)
-		srv.UpdateTopicSeeCount(list[0].Id, param.UserId)
-	}
+		u.UpdateTopicSeeCount(list[0].Id, param.UserId)
+	}*/
 
 	detailList, err := srv.fillTopicList(list, param.UserId)
 	if err != nil {
@@ -224,6 +224,11 @@ func (srv TopicService) GetShareWeappQrCode(userId int, topicId int) ([]byte, st
 	return resp.Buffer, resp.ContentType, nil
 }
 
+// FindById 根据id查询 entity.Topic
+func (srv TopicService) FindById(topicId int64) entity.Topic {
+	return srv.topic.FindById(topicId)
+}
+
 // UpdateTopicSort 更新内容的排序权重
 func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	topic := srv.topic.FindById(topicId)
@@ -311,7 +316,11 @@ func (srv TopicService) uploadImportUserAvatar(filepath string) (string, error) 
 
 	defer file.Close()
 
-	return DefaultOssService.PutObject(name, file)
+	avatarPath, err := DefaultOssService.PutObject(name, file)
+	if err != nil {
+		return "", err
+	}
+	return DefaultOssService.FullUrl(avatarPath), nil
 }
 
 func (srv TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
@@ -334,12 +343,12 @@ func (srv TopicService) UploadImportTopicImage(dirPath string) ([]string, error)
 		name := fmt.Sprintf("images/topic/%s/%s/%s", path.Base(path.Dir(dirPath)), path.Base(dirPath), fileInfo.Name())
 
 		fmt.Println("上传内容图片", path.Join(dirPath, fileInfo.Name()), name)
-		u, err := DefaultOssService.PutObject(name, file)
+		topicPath, err := DefaultOssService.PutObject(name, file)
 		if err != nil {
 			file.Close()
 			return nil, err
 		}
-		images = append(images, u)
+		images = append(images, DefaultOssService.FullUrl(topicPath))
 	}
 	return images, nil
 }

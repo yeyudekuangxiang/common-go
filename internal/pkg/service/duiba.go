@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	sduiba "mio/internal/pkg/service/duiba"
+	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/duiba"
@@ -199,7 +200,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		}
 		orderItemList[i].MerchantCode = itemId
 
-		_, err := DefaultProductItemService.CreateOrUpdateProductItem(CreateOrUpdateProductItemParam{
+		_, err := product.DefaultProductItemService.CreateOrUpdateProductItem(product.CreateOrUpdateProductItemParam{
 			ItemId:   itemId,
 			Virtual:  false,
 			Title:    orderItem.Title,

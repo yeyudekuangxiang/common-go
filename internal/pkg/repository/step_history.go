@@ -16,9 +16,6 @@ func (repo StepHistoryRepository) FindBy(by FindStepHistoryBy) entity.StepHistor
 	sh := entity.StepHistory{}
 	db := repo.DB.Model(sh)
 
-	if by.UserId != 0 {
-		db.Where("user_id = ?", by.UserId)
-	}
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
@@ -62,8 +59,8 @@ func (repo StepHistoryRepository) GetStepHistoryList(by GetStepHistoryListBy) []
 }
 func (repo StepHistoryRepository) initStepHistoryListDB(db *gorm.DB, by GetStepHistoryListBy) *gorm.DB {
 	db = db.Model(entity.StepHistory{})
-	if by.UserId != 0 {
-		db.Where("user_id = ?", by.UserId)
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
 	}
 	if len(by.RecordedEpochs) != 0 {
 		db.Where("recorded_epoch in (?)", by.RecordedEpochs)
@@ -98,11 +95,11 @@ func (repo StepHistoryRepository) Create(history *entity.StepHistory) error {
 }
 
 // GetUserLifeStepInfo 获取用户历史总步数及总天数
-func (repo StepHistoryRepository) GetUserLifeStepInfo(userId int64) (steps int64, days int64) {
+func (repo StepHistoryRepository) GetUserLifeStepInfo(openId string) (steps int64, days int64) {
 	sum := struct {
 		Sum int64
 	}{}
-	err := repo.DB.Model(entity.StepHistory{}).Where("user_id = ?", userId).Count(&days).Select("sum(count) as sum").Take(&sum).Error
+	err := repo.DB.Model(entity.StepHistory{}).Where("openid = ?", openId).Count(&days).Select("sum(count) as sum").Take(&sum).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
