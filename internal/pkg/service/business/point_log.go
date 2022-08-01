@@ -1,7 +1,6 @@
 package business
 
 import (
-	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
 )
@@ -22,26 +21,6 @@ func (srv PointLogService) GetListBy(param GetPointLogListParam) []business.Poin
 	})
 }
 
-func (srv PointLogService) GetPointLogInfoList(param GetPointLogInfoListParam) []PointLogInfo {
-	ptList := srv.GetListBy(GetPointLogListParam{
-		UserId:    param.UserId,
-		StartTime: param.StartTime,
-		EndTime:   param.EndTime,
-		OrderBy:   entity.OrderByList{business.OrderByPointLogCTDESC},
-	})
-
-	infoList := make([]PointLogInfo, 0)
-	for _, pt := range ptList {
-		infoList = append(infoList, PointLogInfo{
-			ID:       pt.ID,
-			Type:     pt.Type,
-			TypeText: pt.Type.Text(),
-			TimeStr:  pt.CreatedAt.Format("01.02 15:04:05"),
-			Value:    pt.Value,
-		})
-	}
-	return infoList
-}
 func (srv PointLogService) CreatePointLog(param CreatePointLogParam) (*business.PointLog, error) {
 	log := business.PointLog{
 		TransactionId: param.TransactionId,
@@ -49,7 +28,7 @@ func (srv PointLogService) CreatePointLog(param CreatePointLogParam) (*business.
 		Type:          param.Type,
 		Value:         param.Value,
 		OrderId:       param.OrderId,
-		Info:          business.PointTypeInfo(param.Info),
+		Info:          param.Info,
 	}
 	return &log, srv.repo.Create(&log)
 }

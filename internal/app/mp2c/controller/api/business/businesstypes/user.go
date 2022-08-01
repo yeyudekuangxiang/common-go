@@ -1,4 +1,4 @@
-package business
+package businesstypes
 
 type RegisterBusinessUserForm struct {
 	Mobile     string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`

@@ -2,11 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -30,8 +32,19 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 		OrderBy:   entity.OrderByList{entity.OrderByPointTranCTDESC},
 	})
 
+	recordInfoList := make([]api_types.PointRecordInfo, 0)
+	for _, pt := range list {
+		recordInfo := api_types.PointRecordInfo{}
+		if err := util.MapTo(pt, &recordInfo); err != nil {
+			return nil, err
+		}
+		recordInfo.TypeText = recordInfo.Type.Text()
+		recordInfo.TimeStr = recordInfo.CreateTime.Format("01-02 15:04:05")
+		recordInfoList = append(recordInfoList, recordInfo)
+	}
+
 	return gin.H{
-		"list": list,
+		"list": recordInfoList,
 	}, nil
 }
 func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
