@@ -77,7 +77,7 @@ func Router(router *gin.Engine) {
                 })
                 break
             case 'redirectTo':
-                alert(1)
+                alert(t+path)
                 wx.miniProgram.redirectTo({
                     url:path,
                     fail:()=>{
