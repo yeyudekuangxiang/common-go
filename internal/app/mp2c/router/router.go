@@ -77,6 +77,7 @@ func Router(router *gin.Engine) {
                 })
                 break
             case 'redirectTo':
+                alert(1)
                 wx.miniProgram.redirectTo({
                     url:path,
                     fail:()=>{
@@ -85,6 +86,9 @@ func Router(router *gin.Engine) {
                             history.back()
                         },1000)
                     },
+                    success:()=>{
+                        alert(2)
+                    }
                 })
                 break
             case 'navigateTo':
