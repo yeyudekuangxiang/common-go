@@ -21,14 +21,14 @@ func (rdt RankDateType) ParseLastTime() (time.Time, time.Time) {
 	var start, end time.Time
 	switch rdt {
 	case RankDateTypeDay:
-		start = t.AddDay(-1).StartOfDay().Time()
-		end = t.AddDay(-1).EndOfDay().Time()
+		start = t.AddDay(-1).StartOfDay().Time
+		end = t.AddDay(-1).EndOfDay().Time
 	case RankDateTypeWeek:
-		start = t.AddWeek(-1).StartOfWeek().Time()
-		end = t.AddWeek(-1).EndOfWeek().Time()
+		start = t.AddWeek(-1).StartOfWeek().Time
+		end = t.AddWeek(-1).EndOfWeek().Time
 	case RankDateTypeMonth:
-		start = t.AddMonth(-1).StartOfMonth().Time()
-		end = t.AddMonth(-1).EndOfMonth().Time()
+		start = t.AddMonth(-1).StartOfMonth().Time
+		end = t.AddMonth(-1).EndOfMonth().Time
 	}
 	return start, end
 }

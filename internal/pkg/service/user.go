@@ -372,6 +372,13 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+	if param.PhoneNumber != "" {
+		user.PhoneNumber = param.PhoneNumber
+	}
+	if !param.Birthday.IsZero() {
+		user.Birthday = model.Date{Time: param.Birthday}
+	}
+
 	user.AvatarUrl = param.Avatar
 	user.Nickname = param.Nickname
 	user.Gender = param.Gender

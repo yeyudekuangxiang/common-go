@@ -141,17 +141,13 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
-	var gender entity.UserGender
-	if form.Gender == 1 {
-		gender = entity.UserGenderMale
-	} else if form.Gender == 2 {
-		gender = entity.UserGenderFemale
-	}
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
-		UserId:   user.ID,
-		Nickname: form.Nickname,
-		Avatar:   form.Avatar,
-		Gender:   gender,
+		UserId:      user.ID,
+		Nickname:    form.Nickname,
+		Avatar:      form.Avatar,
+		Gender:      entity.UserGender(form.Gender),
+		Birthday:    form.Birthday.Time,
+		PhoneNumber: form.PhoneNumber,
 	})
 	return nil, err
 }

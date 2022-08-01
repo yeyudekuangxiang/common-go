@@ -5,5 +5,8 @@ type UpdateBadgeImageForm struct {
 	ImageUrl   string `json:"imageUrl" form:"imageUrl" binding:"required" alias:"证书图片"`
 }
 type UpdateBadgeIsNewForm struct {
-	BadgeId int64 `json:"badgeId" form:"badgeId" binding:"required" alias:"证书编号"`
+	BadgeId int64 `json:"badgeId" form:"badgeId" binding:"required" alias:"证书ID"`
+}
+type UploadOLdBadgeImageForm struct {
+	BadgeId int64 `json:"badgeId" form:"badgeId" binding:"required" alias:"证书ID"`
 }

@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
@@ -160,4 +161,49 @@ func (srv BadgeService) UpdateBadgeIsNew(openid string, id int64, isNew bool) er
 	badge.IsNew = isNew
 
 	return srv.repo.Save(badge)
+}
+
+func (srv BadgeService) GetUploadOldBadgeSetting(badgeId int64) (*srv_types.UploadOldBadgeResult, error) {
+
+	badge, err := srv.repo.FindBadge(repotypes.FindBadgeBy{
+		ID: badgeId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if badge.ID == 0 || badge.ProductItemId == "" {
+		return nil, errors.New("获取证书信息失败,请稍后再试")
+	}
+	if badge.ImageUrl != "" {
+		return nil, errors.New("证书已存在")
+	}
+
+	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
+		ProductItemId: badge.ProductItemId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if ev.ID == 0 {
+		return nil, errors.New("获取证书信息失败,请稍后再试")
+	}
+
+	setting, err := event.DefaultEventTemplateService.ParseSetting(ev.EventTemplateType, ev.TemplateSetting)
+	if err != nil {
+		app.Logger.Error(ev.EventTemplateType, ev.TemplateSetting, err)
+		return nil, errors.New("系统异常,请稍后再试")
+	}
+
+	code := util.UUID()
+
+	app.Redis.Set(context.Background(), config.RedisKey.BadgeImageCode+code, badge.ID, time.Minute*5)
+	return &srv_types.UploadOldBadgeResult{
+		CreateTime:        badge.CreateTime,
+		EventTemplateType: ev.EventTemplateType,
+		TemplateSetting: map[string]interface{}{
+			string(ev.EventTemplateType): setting,
+		},
+		UploadCode: code,
+	}, nil
 }
