@@ -141,16 +141,18 @@ const (
 
 //每次获取 （多少） 积分
 var PointCollectValueMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP: 39,  //每次
-	POINT_BIKE_RIDE:  42,  //每次
-	POINT_INVITE:     500, //每人
+	POINT_COFFEE_CUP:    39,  //每次
+	POINT_BIKE_RIDE:     42,  //每次
+	POINT_INVITE:        500, //每人
+	POINT_POWER_REPLACE: 300, //每次
 }
 
 //每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP: 2,
-	POINT_BIKE_RIDE:  2,
-	POINT_INVITE:     5,
+	POINT_COFFEE_CUP:    2,
+	POINT_BIKE_RIDE:     2,
+	POINT_INVITE:        5,
+	POINT_POWER_REPLACE: 1,
 }
 
 type PointTransaction struct {

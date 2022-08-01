@@ -31,7 +31,7 @@ var (
 		"青桔",
 	}
 	powerReplaceRuleOne = []string{
-		"测试",
+		"订单编号",
 	}
 )
 var DefaultPointCollectService = PointCollectService{}
