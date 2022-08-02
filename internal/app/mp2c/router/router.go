@@ -39,9 +39,17 @@ func Router(router *gin.Engine) {
 <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
 <script>
     window.onload = function () {
-        const t = getQueryVariable("t")
-        const path = decodeURIComponent(getQueryVariable("path"))
-        gotoPath(t,path)
+        try{
+            const t = getQueryVariable("t")
+            const path = decodeURIComponent(getQueryVariable("path"))
+            gotoPath(t,path)
+        }catch (e){
+            alert(e)
+            setTimeout(function (){
+                history.back()
+            },1000)
+        }
+
     }
 
     function gotoPath(t,path){
@@ -69,6 +77,7 @@ func Router(router *gin.Engine) {
                 })
                 break
             case 'redirectTo':
+                alert(t+path)
                 wx.miniProgram.redirectTo({
                     url:path,
                     fail:()=>{
@@ -77,6 +86,9 @@ func Router(router *gin.Engine) {
                             history.back()
                         },1000)
                     },
+                    success:()=>{
+                        alert(2)
+                    }
                 })
                 break
             case 'navigateTo':
