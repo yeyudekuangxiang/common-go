@@ -70,11 +70,12 @@ func apiRouter(router *gin.Engine) {
 		userRouter := mustAuthRouter.Group("/user")
 		{
 			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
-			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
 			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic)) //我的帖子列表
+			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
+			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM)) //绑定手机
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")

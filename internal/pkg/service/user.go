@@ -154,6 +154,19 @@ func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.Use
 	})
 }
 
+// BindMobileByYZM 绑定手机号
+func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
+	if mobile == "" {
+		return errors.New("手机号不能为空")
+	}
+	user := repository2.DefaultUserRepository.GetUserById(userId)
+	if user.ID == 0 {
+		return errors.New("未查到用户信息")
+	}
+	user.PhoneNumber = mobile
+	return repository2.DefaultUserRepository.Save(&user)
+}
+
 // FindUserBySource 根据用户id 获取指定平台的用户
 func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
 	if userId == 0 {

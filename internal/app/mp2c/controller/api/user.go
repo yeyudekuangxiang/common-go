@@ -91,7 +91,18 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 		err := errors.New("验证码错误,请重新输入")
 		return gin.H{}, err
 	}
+}
 
+func (UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
+	form := GetYZMForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	userInfo := apiutil.GetAuthUser(c)
+	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
+		return nil, service.DefaultUserService.BindMobileByYZM(userInfo.ID, form.Mobile)
+	}
+	return nil, errors.New("验证码错误,请重新输入")
 }
 
 func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
