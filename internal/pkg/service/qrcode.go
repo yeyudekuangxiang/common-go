@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"strings"
@@ -154,5 +155,5 @@ func (srv QRCodeService) CreateInvite(openId string) (*entity.QRCode, error) {
 
 func (srv QRCodeService) QrCodeKey(scene entity.QrCodeScene, content string, others ...string) string {
 	keyStr := string(scene) + content + strings.Join(others, "")
-	return util.Md5(keyStr)
+	return encrypt.Md5(keyStr)
 }

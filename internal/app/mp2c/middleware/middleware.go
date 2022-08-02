@@ -9,6 +9,7 @@ import (
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"go.uber.org/zap"
+	"mio/internal/pkg/util/encrypt"
 	mzap "mio/pkg/zap"
 
 	"log"
@@ -17,7 +18,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/service/business"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
@@ -230,7 +230,7 @@ func Throttle() gin.HandlerFunc {
 	}
 
 	middleware := mgin.NewMiddleware(limiter.New(store, rate), mgin.WithKeyGetter(func(c *gin.Context) string {
-		return util.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
+		return encrypt.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
 	}))
 	return middleware
 }

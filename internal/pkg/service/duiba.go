@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
@@ -196,7 +197,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		if orderItem.MerchantCode != "" {
 			itemId = "duiba-" + orderItem.MerchantCode
 		} else {
-			itemId = "duiba-" + form.OrderNum + "-" + util.Md5(orderItem.Title)
+			itemId = "duiba-" + form.OrderNum + "-" + encrypt.Md5(orderItem.Title)
 		}
 		orderItemList[i].MerchantCode = itemId
 
@@ -294,7 +295,7 @@ var virtualGoodMap = map[string]int{
 }
 
 func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId string, credit int64, err error) {
-	lockKey := fmt.Sprintf("VirtualGoodCallback%s", util.Md5(form.OrderNum+form.Params))
+	lockKey := fmt.Sprintf("VirtualGoodCallback%s", encrypt.Md5(form.OrderNum+form.Params))
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
 		return "", 0, errors.New("操作频繁,请稍后再试")
 	}
