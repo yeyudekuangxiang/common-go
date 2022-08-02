@@ -122,10 +122,6 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	if userInfo.ID == 0 {
 		return "", errno.ErrUserNotFound
 	}
-	//判断用户手机号,警告:必须是非首页
-	//if userInfo.PhoneNumber == "" && activityId != "index" {
-	//	return "", errno.ErrNotBindMobile
-	//}
 
 	path := DUIBAIndex
 	isNewUser := false
@@ -161,9 +157,14 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		Scene:    1,
 		ClientIp: cip,
 	}
-	//if activityId != "index" {
-	//	userRiskRankParam.MobileNo = userInfo.PhoneNumber
-	//}
+	//风险等级4,代表不需要验证.0-3代表需要做出限制
+	if activity.RiskLimit < 4 {
+		//判断用户手机号,警告:必须是非首页
+		if userInfo.PhoneNumber == "" {
+			return "", errno.ErrNotBindMobile
+		}
+		userRiskRankParam.MobileNo = userInfo.PhoneNumber
+	}
 	resp, err := service.DefaultUserService.CheckUserRisk(userRiskRankParam)
 	if err != nil && activityId != "index" {
 		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
