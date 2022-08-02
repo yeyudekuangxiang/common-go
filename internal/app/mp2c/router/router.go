@@ -44,7 +44,7 @@ func Router(router *gin.Engine) {
             const path = decodeURIComponent(getQueryVariable("path"))
             gotoPath(t,path)
         }catch (e){
-            alert(e)
+            alert("跳转失败")
             setTimeout(function (){
                 history.back()
             },1000)
@@ -77,7 +77,6 @@ func Router(router *gin.Engine) {
                 })
                 break
             case 'redirectTo':
-                alert(t+path)
                 wx.miniProgram.redirectTo({
                     url:path,
                     fail:()=>{
@@ -86,9 +85,6 @@ func Router(router *gin.Engine) {
                             history.back()
                         },1000)
                     },
-                    success:()=>{
-                        alert(2)
-                    }
                 })
                 break
             case 'navigateTo':
@@ -114,7 +110,7 @@ func Router(router *gin.Engine) {
                 })
                 break
             default:
-                alert(t+path)
+                alert("暂不支持此跳转方式")
                 break
         }
     }
