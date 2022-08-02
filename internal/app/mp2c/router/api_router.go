@@ -34,7 +34,6 @@ func apiRouter(router *gin.Engine) {
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
 		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
-
 		userRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
 		//文章评论列表
 		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
@@ -75,6 +74,7 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
+			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic)) //我的帖子列表
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
@@ -123,7 +123,6 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			userRouter.GET("/my-topic-list", apiutil.Format(api.DefaultTopicController.MyTopicList)) //我的帖子列表
 		}
 		//评论相关
 		commentRouter := mustAuthRouter.Group("/comment")

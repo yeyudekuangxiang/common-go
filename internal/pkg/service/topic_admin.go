@@ -177,9 +177,16 @@ func (srv TopicAdminService) Review(topicId int64, status int) error {
 	if err := app.DB.Model(&topic).Update("status", status).Error; err != nil {
 		return err
 	}
+	//积分变动
+	//pointService := NewPointService(context.NewMioContext())
+	//point, err := pointService.IncUserPoint()
+	//if err != nil {
+	//	return err
+	//}
 	return nil
 }
 
+// Top 置顶
 func (srv TopicAdminService) Top(topicId int64, isTop int) error {
 	//查询数据是否存在
 	var topic entity.Topic
@@ -193,6 +200,7 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) error {
 	return nil
 }
 
+// Essence 精华
 func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 	//查询数据是否存在
 	var topic entity.Topic

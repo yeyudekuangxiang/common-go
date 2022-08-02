@@ -110,6 +110,9 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	if param.TopicTagId != 0 {
 		query.Where("topic_tag.tag_id = ?", param.TopicTagId)
 	}
+	if param.UserId != 0 {
+		query.Where("topic.user_id = ?", param.UserId)
+	}
 
 	query.Where("topic.status = ?", entity.TopicStatusPublished)
 

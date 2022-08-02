@@ -104,6 +104,8 @@ const (
 	POINT_SYSTEM_REDUCE   PointTransactionType = "SYSTEM_REDUCE"   //系统扣减
 	POINT_SYSTEM_ADD      PointTransactionType = "SYSTEM_ADD"      //系统补发
 	POINT_JHX             PointTransactionType = "JHX"             //金华行
+	POINT_ARTICAL         PointTransactionType = "ARTICAL"         //发文章
+	POINT_RECOMMEND       PointTransactionType = "RECOMMEND"       //文章/评论 推荐位
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -133,6 +135,8 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_DUIBA_REFUND,
 	POINT_SYSTEM_REDUCE,
 	POINT_SYSTEM_ADD,
+	POINT_ARTICAL,
+	POINT_RECOMMEND,
 }
 
 const (
@@ -145,6 +149,7 @@ var PointCollectValueMap = map[PointTransactionType]int{
 	POINT_BIKE_RIDE:     42,  //每次
 	POINT_INVITE:        500, //每人
 	POINT_POWER_REPLACE: 300, //每次
+	POINT_ARTICAL:       150, //每次
 }
 
 //每天获取 （多少）次积分
@@ -153,6 +158,7 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_BIKE_RIDE:     2,
 	POINT_INVITE:        5,
 	POINT_POWER_REPLACE: 1,
+	POINT_ARTICAL:       2,
 }
 
 type PointTransaction struct {

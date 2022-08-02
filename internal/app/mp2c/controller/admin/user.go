@@ -15,21 +15,7 @@ var DefaultUserController = UserController{}
 type UserController struct {
 }
 
-func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
-	var form GetUserForm
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-	user, err := service.DefaultUserService.GetUserById(form.Id)
-	if err != nil {
-		return nil, err
-	}
-	return gin.H{
-		"user": user,
-	}, nil
-}
-
-func GetUserPageListBy(c *gin.Context) (gin.H, error) {
+func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 	form := UserPageListForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -46,7 +32,25 @@ func GetUserPageListBy(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func UpdateUserRisk(c *gin.Context) (gin.H, error) {
+func (ctr UserController) Detail(c *gin.Context) (gin.H, error) {
+	var form GetUserForm
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user, err := service.DefaultUserService.GetUserById(form.Id)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"user": user,
+	}, nil
+}
+
+func (ctr UserController) ChangeStatus(c *gin.Context) (gin.H, error) {
+	return nil, nil
+}
+
+func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 	i := 0
 	for {
 		list, _ := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -116,7 +117,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 }
 
 //ListTopic 帖子列表+顶级评论+顶级评论下子评论3条
-func (ctr TopicController) ListTopic(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	form := GetTopicPageListForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -216,9 +217,20 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
-	return nil, nil
-}
-
-func (ctr *TopicController) MyTopicList(context *gin.Context) (gin.H, error) {
-	return nil, nil
+	form := controller.PageFrom{}
+	user := apiutil.GetAuthUser(c)
+	list, total, err := service.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
+		UserId: user.ID,
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, err
 }

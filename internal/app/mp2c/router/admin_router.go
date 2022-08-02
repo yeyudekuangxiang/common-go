@@ -48,7 +48,6 @@ func adminRouter(router *gin.Engine) {
 
 		adminRouter.GET("upload/token", apiutil.Format(admin.DefaultUploadController.GetUploadTokenInfo))
 
-
 		//后台接口-文章管理
 		articleRouter := adminRouter.Group("/topic")
 		{
@@ -63,9 +62,8 @@ func adminRouter(router *gin.Engine) {
 		//后台接口-评论管理
 		commentRouter := adminRouter.Group("/comment")
 		{
-			commentRouter.GET("/list", apiutil.Format(admin.DefaultCommentController.List))
+			commentRouter.GET("/list", apiutil.Format(admin.DefaultCommentController.List))      //评论列表
 			commentRouter.POST("/delete", apiutil.Format(admin.DefaultCommentController.Delete)) //软删除
-
 		}
 		//后台接口-tag管理
 		tagRouter := adminRouter.Group("/tag")
@@ -78,11 +76,10 @@ func adminRouter(router *gin.Engine) {
 		//后台接口-用户管理
 		userRouter := adminRouter.Group("/user")
 		{
-			userRouter.GET("/list")
-			userRouter.GET("/detail")
-			userRouter.POST("/change-status")
+			userRouter.GET("/list", apiutil.Format(admin.DefaultUserController.List))                   //用户列表
+			userRouter.GET("/detail", apiutil.Format(admin.DefaultUserController.Detail))               //用户详情
+			userRouter.POST("/change-status", apiutil.Format(admin.DefaultUserController.ChangeStatus)) //更新用户状态
 		}
 	}
-	adminRouter.POST("/user/list", apiutil.Format(admin.GetUserPageListBy))
 	//adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))
 }
