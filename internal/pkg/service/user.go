@@ -159,9 +159,17 @@ func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
 	if mobile == "" {
 		return errors.New("手机号不能为空")
 	}
+	userBy := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{Mobile: mobile})
+	if userBy.ID != 0 {
+		return errors.New("该号码已被绑定，请更换号码重新绑定")
+	}
+
 	user := repository2.DefaultUserRepository.GetUserById(userId)
 	if user.ID == 0 {
 		return errors.New("未查到用户信息")
+	}
+	if user.PhoneNumber != "" {
+		return errors.New("您已绑定号码，请勿重复操作")
 	}
 	user.PhoneNumber = mobile
 	return repository2.DefaultUserRepository.Save(&user)
