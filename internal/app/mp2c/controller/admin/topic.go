@@ -21,7 +21,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	list, total, err := service.DefaultTopicAdminService.GetTopicList(repository.TopicListRequest{
 		ID:        form.ID,
 		Title:     form.Title,
-		UserId:    form.ID,
+		UserId:    form.UserId,
 		UserName:  form.UserName,
 		TagId:     form.TagId,
 		Status:    form.Status,
@@ -103,7 +103,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Review(form.ID, form.Status)
+	err := service.DefaultTopicAdminService.Review(form.ID, form.Status, form.Content)
 	if err != nil {
 		return nil, err
 	}
