@@ -47,7 +47,7 @@ package-manual:
     - /^hotfix-.+$/
     - /^feature-.+$/
   dependencies:
-    - build
+    - build-manual
   script:
     - sh ./scripts/package.sh mp2c
 
