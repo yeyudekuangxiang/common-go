@@ -168,14 +168,14 @@ func (srv TopicAdminService) DeleteTopic(topicId int64) error {
 }
 
 // Review 审核
-func (srv TopicAdminService) Review(topicId int64, status int) error {
+func (srv TopicAdminService) Review(topicId int64, status int, content string) error {
 	//查询数据是否存在
 	var topic entity.Topic
 	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
-	if err := app.DB.Model(&topic).Update("status", status).Error; err != nil {
+	if err := app.DB.Model(&topic).Updates(map[string]interface{}{"status": status, "content": content}).Error; err != nil {
 		return err
 	}
 	//积分变动

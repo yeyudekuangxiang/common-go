@@ -103,7 +103,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Review(form.ID, form.Status)
+	err := service.DefaultTopicAdminService.Review(form.ID, form.Status, form.Content)
 	if err != nil {
 		return nil, err
 	}
