@@ -89,7 +89,8 @@ deploy-feature:
   environment:
     name: $CI_COMMIT_REF_NAME
     url: https://godev-api.miotech.com/$CI_COMMIT_REF_SLUG/
-    on_stop: stop-deploy-dev
+    on_stop: stop-deploy-feature
+    auto_stop_in: 7 days
   when: on_success
   tags:
     - k8s
@@ -122,7 +123,9 @@ deploy-hotfix:
   stage: deploy
   environment:
     name: $CI_COMMIT_REF_NAME
-    on_stop: stop-deploy-prod
+    url: https://go-api.miotech.com/$CI_COMMIT_REF_SLUG/
+    on_stop: stop-deploy-hotfix
+    auto_stop_in: 7 days
   tags:
     - k8s
   when: on_success
@@ -134,7 +137,7 @@ deploy-hotfix:
   script:
     - sh ./scripts/deploy.sh mp2c
 
-stop-deploy-prod:
+stop-deploy-hotfix:
   image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
   variables:
@@ -154,7 +157,7 @@ stop-deploy-prod:
   script:
     -  helm uninstall $RELEASE_NAME  -n prod
 
-stop-deploy-dev:
+stop-deploy-feature:
   image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
   variables:
