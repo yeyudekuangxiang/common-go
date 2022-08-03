@@ -39,10 +39,7 @@ func (ctr *TagController) Detail(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	topic, err := service.DefaultTagAdminService.Detail(form.ID)
-	if err != nil {
-		return nil, err
-	}
+	topic := service.DefaultTagAdminService.Detail(form.ID)
 	return gin.H{
 		"topic": topic,
 	}, nil

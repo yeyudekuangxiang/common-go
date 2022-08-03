@@ -16,7 +16,6 @@ type ITagRepository interface {
 	Delete(id int64) error
 	Update(tag *entity.Tag) error
 	Create(tag *entity.Tag) error
-	Detail(id int64) (*entity.Tag, error)
 }
 
 func NewTagRepository(db *gorm.DB) TagRepository {
@@ -25,14 +24,6 @@ func NewTagRepository(db *gorm.DB) TagRepository {
 
 type TagRepository struct {
 	DB *gorm.DB
-}
-
-func (u TagRepository) Detail(id int64) (*entity.Tag, error) {
-	tag := &entity.Tag{}
-	if err := u.DB.First(tag, id).Error; err != nil {
-		return nil, err
-	}
-	return tag, nil
 }
 
 func (u TagRepository) Delete(id int64) error {

@@ -51,12 +51,8 @@ func (u TagAdminService) Update(tag repository.UpdateTag) error {
 	return nil
 }
 
-func (u TagAdminService) Detail(id int64) (*entity.Tag, error) {
-	detail, err := u.r.Detail(id)
-	if err != nil {
-		return &entity.Tag{}, err
-	}
-	return detail, nil
+func (u TagAdminService) Detail(id int64) entity.Tag {
+	return u.r.GetById(id)
 }
 
 func (u TagAdminService) Create(tag repository.CreateTag) error {
