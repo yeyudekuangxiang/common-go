@@ -1,5 +1,5 @@
 # 注意事项
-## 1.gin form 时间绑定
+### 1.gin form 时间绑定
 如果传参方式为form或者get方式提交 则可使用下面方式绑定
 ```
 type TestForm struct {
@@ -20,7 +20,7 @@ StartTime string `json:"startTime" form:"startTime" binding:"datetime=2006-01-02
 }
 ```
 
-2 float32 转换float64时数据异常
+### 2 float32 转换float64时数据异常
 
 ```
 var a float32 = 100.123
