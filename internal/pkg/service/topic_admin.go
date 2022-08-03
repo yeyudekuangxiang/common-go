@@ -40,10 +40,10 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 		query.Where("topic.id = ?", param.ID)
 	}
 	if param.Title != "" {
-		query.Where("topic.title = ?", param.Title)
+		query.Where("topic.title like ?", "%"+param.Title+"%")
 	}
 	if param.UserId != 0 {
-		query.Where("topic.user_id = >", param.UserId)
+		query.Where("topic.user_id = ?", param.UserId)
 	}
 	if param.UserName != "" {
 		query.Where("topic.nickname = ?", param.UserName)
