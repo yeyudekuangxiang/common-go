@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 )
@@ -22,29 +21,25 @@ type defaultCommentAdminService struct {
 
 func (d defaultCommentAdminService) CommentList(content string, userId int64, limit, offset int) ([]*entity.CommentIndex, int64, error) {
 	builder := d.commentModel.RowBuilder()
+	builder.Limit(limit).Offset(offset).Preload("Member")
 	if content != "" {
-		builder.Where("comment_index.message like ?", "%"+content+"%")
+		builder.Where("message like ?", "%"+content+"%")
 	}
 	if userId != 0 {
-		builder.Where("comment_index.member_id = ?", userId)
+		builder.Preload("Member", "id = ?", userId)
 	}
-	var result map[string]interface{}
-
-	builder.Limit(limit).Offset(offset).Find(&result)
-	fmt.Printf("result: %v", result)
-	return nil, 0, nil
-	//all, err := d.commentModel.FindAll(builder, "id desc, like_count desc")
-	//if err != nil {
-	//	if err == entity.ErrNotFount {
-	//		return nil, 0, nil
-	//	}
-	//	return nil, 0, err
-	//}
-	//count, err := d.commentModel.FindCount(d.commentModel.CountBuilder("id"))
-	//if err != nil {
-	//	return nil, 0, err
-	//}
-	//return all, count, nil
+	all, err := d.commentModel.FindAll(builder, "id desc, like_count desc")
+	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil, 0, nil
+		}
+		return nil, 0, err
+	}
+	count, err := d.commentModel.FindCount(d.commentModel.CountBuilder("id"))
+	if err != nil {
+		return nil, 0, err
+	}
+	return all, count, nil
 }
 
 func (d defaultCommentAdminService) DelCommentSoft(commentId int64) error {

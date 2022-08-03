@@ -76,7 +76,7 @@ func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	t, _ := strconv.Atoi(ctx.PostForm("type"))

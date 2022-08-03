@@ -105,7 +105,10 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
 			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
 				Order("comment_index.like_count desc")
-		}).Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
+		}).
+		Preload("Comment.RootChild.Member").
+		Preload("Comment.Member").
+		Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
 
 	if param.TopicTagId != 0 {
 		query.Where("topic_tag.tag_id = ?", param.TopicTagId)

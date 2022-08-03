@@ -124,7 +124,6 @@ func (m *defaultCommentRepository) FindAll(builder *gorm.DB, orderBy string) ([]
 	}
 	var resp []*entity.CommentIndex
 	err := builder.Find(&resp).Error
-
 	switch err {
 	case nil:
 		return resp, nil
