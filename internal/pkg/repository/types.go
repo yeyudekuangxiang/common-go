@@ -48,10 +48,22 @@ type TopicListRequest struct {
 }
 
 type GetTagPageListBy struct {
-	ID      int                `json:"id"`
-	Offset  int                `json:"offset"`
-	Limit   int                `json:"limit"` //limit为0时不限制数量
-	OrderBy entity.OrderByList `json:"orderBy"`
+	//	ID          int                `json:"id"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Offset      int                `json:"offset"`
+	Limit       int                `json:"limit"` //limit为0时不限制数量
+	OrderBy     entity.OrderByList `json:"orderBy"`
+}
+
+type CreateTag struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+}
+type UpdateTag struct {
+	ID int64 `json:"id"`
+	CreateTag
 }
 
 type GetUserListBy struct {
