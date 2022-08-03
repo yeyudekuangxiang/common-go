@@ -2,7 +2,6 @@ package event
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/model/entity"
 	eevent "mio/internal/pkg/model/entity/event"
@@ -33,7 +32,6 @@ func (EventController) GetEventCategoryList(ctx *gin.Context) (gin.H, error) {
 		OrderBy: entity.OrderByList{eevent.OrderByEventCategorySortDesc},
 		Active:  sql.NullBool{Bool: true, Valid: true},
 	})
-	fmt.Printf("%+v\n", categoryList)
 
 	if err != nil {
 		return nil, err

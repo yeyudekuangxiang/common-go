@@ -94,7 +94,7 @@ func DefaultLogger(level ...string) *zap.Logger {
 				Content: fmt.Sprintf(
 					"**容器:**%s \n\n**来源:**日志 \n\n**level:**%s \n\n**time**:%s \n\n**message**:%s \n\n**caller**:%+v \n\n**stack**:%s", os.Getenv("HOSTNAME"), entry.Level, entry.Time.Format("2006-01-02 15:04:05"), entry.Message, entry.Caller, entry.Stack),
 			})
-			fmt.Println("发送结果", err)
+
 			if err != nil {
 				log.Printf("推送异常到企业微信失败 %+v %v", entry, err)
 			}

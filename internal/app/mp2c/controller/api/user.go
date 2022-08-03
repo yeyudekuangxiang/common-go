@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
+	"time"
 )
 
 var DefaultUserController = UserController{}
@@ -152,12 +154,21 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
+	birthday := time.Time{}
+	if form.Birthday != "" {
+		t, err := time.Parse("2006-01-02", form.Birthday)
+		if err != nil {
+			return nil, errno.ErrBind.WithErr(err)
+		}
+		birthday = t
+	}
+
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
 		Gender:      entity.UserGender(form.Gender),
-		Birthday:    form.Birthday.Time,
+		Birthday:    birthday,
 		PhoneNumber: form.PhoneNumber,
 	})
 	return nil, err
