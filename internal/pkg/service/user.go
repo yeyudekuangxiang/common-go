@@ -393,6 +393,11 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 		return errno.ErrUserNotFound
 	}
 	if param.PhoneNumber != "" {
+
+		if u.CheckMobileBound(user.ID, param.PhoneNumber) {
+			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
+		}
+
 		user.PhoneNumber = param.PhoneNumber
 	}
 	if !param.Birthday.IsZero() {
@@ -455,4 +460,13 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 		Balance: point.Balance,
 		CertNum: certCount,
 	}, nil
+}
+
+func (u UserService) CheckMobileBound(id int64, mobile string) bool {
+	user := u.r.GetUserById(id)
+	if user.ID == 0 && user.ID == id {
+		return false
+	}
+
+	return true
 }
