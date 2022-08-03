@@ -18,7 +18,7 @@ func InitFileLog() {
 	var err error
 	err = util.MapTo(config.Config.Log, &loggerConfig)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	loggerConfig.Path = "runtime"
 	loggerConfig.FileName = "log.log"

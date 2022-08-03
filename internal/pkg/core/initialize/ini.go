@@ -11,12 +11,12 @@ import (
 func InitIni(source interface{}) {
 	f, err := ini.Load(source)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	app.Ini = f
 	err = app.Ini.MapTo(&config.Config)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	afterInitIni()
 }

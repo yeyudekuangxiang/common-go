@@ -112,9 +112,28 @@ type ChangeTopicStatus struct {
 type CommentListRequest struct {
 	Comment string `json:"comment" form:"comment" alias:"comment"`
 	UserId  int64  `json:"userId" form:"userId" alias:"userId" binding:"gte=0"`
+	ObjId   int64  `json:"objId" form:"objId" alias:"objId" binding:"gte=0"`
+	controller.PageFrom
 }
 
 /*comment end*/
+
+/*tag start*/
+type TagListRequest struct {
+	Name        string `json:"name" form:"name" alias:"name"`
+	Description string `json:"description" form:"description" alias:"description"`
+	controller.PageFrom
+}
+type CreateTagRequest struct {
+	Name        string `json:"name" form:"name" alias:"name" binding:"required,min=2,max=64"`
+	Description string `json:"description" form:"description" alias:"description" binding:"min=0,max=200"`
+}
+type UpdateTagRequest struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+	CreateTagRequest
+}
+
+/*tag end*/
 
 type GetUserChannelPageForm struct {
 	Cid  int    `json:"cid" form:"cid" binding:"" alias:"渠道id"`

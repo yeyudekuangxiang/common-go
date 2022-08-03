@@ -21,6 +21,7 @@ type CommentIndex struct {
 	Version       int64  `gorm:"type:int8;version"`            // 版本号 保留字段
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+	Member        ShortUser      `gorm:"foreignKey:ID;references:MemberId"` // 评论用户
 	RootChild     []CommentIndex `gorm:"foreignKey:RootCommentId;association_foreignKey:Id"`
 }
 

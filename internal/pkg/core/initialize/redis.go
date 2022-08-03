@@ -17,6 +17,6 @@ func InitRedis() {
 	})
 	*app.Redis = *rdb
 	if err := app.Redis.Ping(context.Background()).Err(); err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 }
