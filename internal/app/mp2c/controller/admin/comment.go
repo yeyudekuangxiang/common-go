@@ -18,8 +18,16 @@ func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-
-	return nil, nil
+	list, total, err := service.DefaultCommentAdminService.CommentList(form.Comment, form.UserId, form.Limit(), form.Offset())
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
 }
 
 func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {

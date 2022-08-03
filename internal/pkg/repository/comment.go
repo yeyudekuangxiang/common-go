@@ -116,13 +116,15 @@ func (m *defaultCommentRepository) FindSum(builder *gorm.DB) (float64, error) {
 }
 
 func (m *defaultCommentRepository) FindAll(builder *gorm.DB, orderBy string) ([]*entity.CommentIndex, error) {
+	builder.Where("comment_index.state = ?", 0)
 	if orderBy == "" {
-		builder.Order("id DESC")
+		builder.Order("comment_index.id DESC")
 	} else {
 		builder.Order(orderBy)
 	}
 	var resp []*entity.CommentIndex
-	err := builder.Where("state = ?", 0).Find(&resp).Error
+	err := builder.Find(&resp).Error
+
 	switch err {
 	case nil:
 		return resp, nil

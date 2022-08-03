@@ -10,7 +10,7 @@ import (
 func initOss() {
 	client, err := oss.New(config.Config.OSS.Endpoint, config.Config.OSS.AccessKey, config.Config.OSS.AccessSecret)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	*app.OssClient = *client
 }

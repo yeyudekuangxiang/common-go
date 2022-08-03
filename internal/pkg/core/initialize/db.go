@@ -14,13 +14,13 @@ func InitDB() {
 	var conf db.Config
 	err := util.MapTo(config.Config.Database, &conf)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	conf.Logger = mzap.NewGormLogger(mzap.DefaultLogger(config.Config.Log.Level).WithOptions(zap.Fields(zap.String("scene", "database"))).Sugar())
 	//创建晓筑规范数据库连接
 	gormDb, err := db.NewDB(conf)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	*app.DB = *gormDb
 }

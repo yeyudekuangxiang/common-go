@@ -58,6 +58,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 		query.Where("topic.is_essence = ?", param.IsEssence)
 	}
 	err := query.Count(&total).
+		Group("topic.id").
 		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
