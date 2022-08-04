@@ -462,11 +462,13 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	}, nil
 }
 
-func (u UserService) CheckMobileBound(id int64, mobile string) bool {
-	user := u.r.GetUserById(id)
+func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile string) bool {
+	user := u.r.GetUserBy(repository2.GetUserBy{
+		Source: source,
+		Mobile: mobile,
+	})
 	if user.ID == 0 && user.ID == id {
 		return false
 	}
-
 	return true
 }
