@@ -29,7 +29,6 @@ build-manual:
   artifacts:
     paths:
       - ./cmd/mp2c/mp2c
-
 package:
   stage: package
   only:

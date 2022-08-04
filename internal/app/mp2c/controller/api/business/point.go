@@ -1,7 +1,6 @@
 package business
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api/business/businesstypes"
 	"mio/internal/pkg/model/entity"
@@ -32,7 +31,6 @@ func (PointController) GetPointRecordList(ctx *gin.Context) (gin.H, error) {
 
 	infoList := make([]businesstypes.PointLogInfo, 0)
 	for _, pt := range ptList {
-		fmt.Println(pt)
 		infoList = append(infoList, businesstypes.PointLogInfo{
 			ID:       pt.ID,
 			Type:     pt.Type,

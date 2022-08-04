@@ -154,6 +154,26 @@ func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.Use
 	})
 }
 
+// BindMobileByYZM 绑定手机号
+func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
+	if mobile == "" {
+		return errors.New("手机号不能为空")
+	}
+	userBy := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{Mobile: mobile})
+	if userBy.ID != 0 {
+		return errors.New("该号码已被绑定，请更换号码重新绑定")
+	}
+	user := repository2.DefaultUserRepository.GetUserById(userId)
+	if user.ID == 0 {
+		return errors.New("未查到用户信息")
+	}
+	if user.PhoneNumber != "" {
+		return errors.New("您已绑定号码，请勿重复操作")
+	}
+	user.PhoneNumber = mobile
+	return repository2.DefaultUserRepository.Save(&user)
+}
+
 // FindUserBySource 根据用户id 获取指定平台的用户
 func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
 	if userId == 0 {
@@ -373,6 +393,11 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 		return errno.ErrUserNotFound
 	}
 	if param.PhoneNumber != "" {
+
+		if u.CheckMobileBound(user.ID, param.PhoneNumber) {
+			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
+		}
+
 		user.PhoneNumber = param.PhoneNumber
 	}
 	if !param.Birthday.IsZero() {
@@ -435,4 +460,13 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 		Balance: point.Balance,
 		CertNum: certCount,
 	}, nil
+}
+
+func (u UserService) CheckMobileBound(id int64, mobile string) bool {
+	user := u.r.GetUserById(id)
+	if user.ID == 0 && user.ID == id {
+		return false
+	}
+
+	return true
 }

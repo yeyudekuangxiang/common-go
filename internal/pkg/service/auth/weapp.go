@@ -6,7 +6,6 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/panjf2000/ants/v2"
 	"github.com/pkg/errors"
-	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -33,7 +32,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	//获取用户信息
 	cookie := result.Response.Header.Get("Set-Cookie")
 
-	log.Println("cookie", cookie, invitedBy, partnershipWith)
+	app.Logger.Debug("cookie", cookie, invitedBy, partnershipWith)
 	whoAmiResult, err := httputil.OriginGet(config.Config.Java.JavaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
 	if err != nil {
 		return nil, "", err

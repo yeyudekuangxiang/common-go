@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
+	"time"
 )
 
 var DefaultUserController = UserController{}
@@ -91,7 +93,18 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 		err := errors.New("验证码错误,请重新输入")
 		return gin.H{}, err
 	}
+}
 
+func (UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
+	form := GetYZMForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	userInfo := apiutil.GetAuthUser(c)
+	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
+		return nil, service.DefaultUserService.BindMobileByYZM(userInfo.ID, form.Mobile)
+	}
+	return nil, errors.New("验证码错误,请重新输入")
 }
 
 func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
@@ -141,12 +154,21 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
+	birthday := time.Time{}
+	if form.Birthday != "" {
+		t, err := time.Parse("2006-01-02", form.Birthday)
+		if err != nil {
+			return nil, errno.ErrBind.WithErr(err)
+		}
+		birthday = t
+	}
+
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
 		Gender:      entity.UserGender(form.Gender),
-		Birthday:    form.Birthday.Time,
+		Birthday:    birthday,
 		PhoneNumber: form.PhoneNumber,
 	})
 	return nil, err

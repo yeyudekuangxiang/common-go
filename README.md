@@ -43,3 +43,6 @@ mp2c-go
 2. 下载所需库文件 `go mod download`
 3. 复制配置文件`copy config.ini.example config.ini` 并且完善配置文件config.ini
 4. `go run cmd/mp2c/main.go`
+
+## [开发规范](DEVELOPMENT_GUIDE.md)
+## [避坑指南](NOTES.md)
