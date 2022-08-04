@@ -467,7 +467,8 @@ func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile
 		Source: source,
 		Mobile: mobile,
 	})
-	if user.ID == 0 && user.ID == id {
+
+	if user.ID == 0 || user.ID == id {
 		return false
 	}
 	return true
