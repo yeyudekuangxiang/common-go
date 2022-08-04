@@ -394,7 +394,7 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	}
 	if param.PhoneNumber != "" {
 
-		if u.CheckMobileBound(user.ID, param.PhoneNumber) {
+		if u.CheckMobileBound(entity.UserSourceMio, user.ID, param.PhoneNumber) {
 			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
 		}
 
@@ -462,11 +462,14 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	}, nil
 }
 
-func (u UserService) CheckMobileBound(id int64, mobile string) bool {
-	user := u.r.GetUserById(id)
-	if user.ID == 0 && user.ID == id {
+func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile string) bool {
+	user := u.r.GetUserBy(repository2.GetUserBy{
+		Source: source,
+		Mobile: mobile,
+	})
+
+	if user.ID == 0 || user.ID == id {
 		return false
 	}
-
 	return true
 }
