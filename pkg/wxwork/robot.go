@@ -21,6 +21,10 @@ func SendRobotMessage(key string, v interface{}) error {
 		msgType = MsgTypeNews
 	case File:
 		msgType = MsgTypeFile
+	case CardText:
+		msgType = MsgTypeCard
+	case CardNews:
+		msgType = MsgTypeCard
 	default:
 		return errors.New("unknown msgtype")
 	}

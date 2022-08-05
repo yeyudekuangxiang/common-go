@@ -5,7 +5,7 @@ import (
 	"mio/internal/app/mp2c/controller/api"
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
-	"mio/internal/app/mp2c/controller/api/system"
+	"mio/internal/app/mp2c/controller/open"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -54,7 +54,6 @@ func openRouter(router *gin.Engine) {
 		}
 
 		openRouter.POST("/weapp/auth", apiutil.Format(authApi.DefaultWeappController.LoginByCode))
-		openRouter.Any("/gitlab/callback", apiutil.Format(system.DefaultGitlabController.Callback))
 		openRouter.GET("/activity/duiba/qr", func(context *gin.Context) {
 			if err := activityApi.DefaultZeroController.GetActivityMiniQR(context); err != nil {
 				context.String(400, err.Error())
@@ -64,5 +63,6 @@ func openRouter(router *gin.Engine) {
 		//星星充电订单同步接口
 		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
 
+		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
 	}
 }
