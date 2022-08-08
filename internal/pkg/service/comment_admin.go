@@ -26,7 +26,8 @@ func (d defaultCommentAdminService) CommentList(content string, userId int64, ob
 		builder.Where("message like ?", "%"+content+"%")
 	}
 	if userId != 0 {
-		builder.Preload("Member", "id = ?", userId)
+		builder.Where("member_id = ?", userId)
+		builder.Preload("Member")
 	}
 	if objId != 0 {
 		builder.Where("obj_id = ?", objId)
