@@ -217,7 +217,7 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 
 	return false
 }
-func (u UserService) BindPhoneByCode(userId int64, code string) error {
+func (u UserService) BindPhoneByCode(userId int64, code string, cip string) error {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
 		return errors.New("未查到用户信息")
@@ -233,6 +233,21 @@ func (u UserService) BindPhoneByCode(userId int64, code string) error {
 		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
 	}
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
+
+	//检测用户风险等级
+	userRiskRankParam := wxapp.UserRiskRankParam{
+		AppId:    config.Config.Weapp.AppId,
+		OpenId:   userInfo.OpenId,
+		Scene:    1,
+		ClientIp: cip,
+		MobileNo: userInfo.PhoneNumber,
+	}
+	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
+	if err != nil {
+		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
+	}
+	userInfo.Risk = rest.RiskRank
+
 	return u.r.Save(&userInfo)
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
