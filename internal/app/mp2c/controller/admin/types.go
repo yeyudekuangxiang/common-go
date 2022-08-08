@@ -134,6 +134,7 @@ type TagListRequest struct {
 type CreateTagRequest struct {
 	Name        string `json:"name" form:"name" alias:"name" binding:"required,min=2,max=64"`
 	Description string `json:"description" form:"description" alias:"description" binding:"min=0,max=200"`
+	Image       string `json:"image" form:"image" alias:"image"`
 }
 type UpdateTagRequest struct {
 	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`

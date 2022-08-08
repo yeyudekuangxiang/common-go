@@ -75,3 +75,19 @@ func (ctr *TagController) Delete(c *gin.Context) (gin.H, error) {
 	}
 	return nil, nil
 }
+
+func (ctr *TagController) Create(c *gin.Context) (gin.H, error) {
+	form := CreateTagRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	err := service.DefaultTagAdminService.Create(repository.CreateTag{
+		Name:        form.Name,
+		Description: form.Description,
+		Image:       form.Image,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}

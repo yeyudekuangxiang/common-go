@@ -72,6 +72,7 @@ func adminRouter(router *gin.Engine) {
 			tagRouter.GET("/list", apiutil.Format(admin.DefaultTagController.List))      //话题列表
 			tagRouter.GET("/detail", apiutil.Format(admin.DefaultTagController.Detail))  //话题详情
 			tagRouter.POST("/update", apiutil.Format(admin.DefaultTagController.Update)) //更新话题
+			tagRouter.POST("/create", apiutil.Format(admin.DefaultTagController.Create)) //新建话题
 			tagRouter.POST("/delete", apiutil.Format(admin.DefaultTagController.Delete)) //删除话题
 		}
 		//后台接口-用户管理
