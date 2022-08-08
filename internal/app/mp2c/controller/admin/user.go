@@ -20,24 +20,31 @@ func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	list, count := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
-		Limit:   10,
-		Offset:  0,
-		User:    repository.GetUserListBy{Mobile: form.Mobile},
+	list, total := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+		User: repository.GetUserListBy{
+			Mobile:   form.Mobile,
+			UserId:   form.ID,
+			State:    form.State,
+			Nickname: form.Nickname,
+		},
 		OrderBy: "id desc",
 	})
 	return gin.H{
-		"users": list,
-		"page":  count,
+		"users":    list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
 }
 
 func (ctr UserController) Detail(c *gin.Context) (gin.H, error) {
-	var form GetUserForm
+	var form IDForm
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user, err := service.DefaultUserService.GetUserById(form.Id)
+	user, err := service.DefaultUserService.GetUserById(form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +53,32 @@ func (ctr UserController) Detail(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr UserController) ChangeStatus(c *gin.Context) (gin.H, error) {
+func (ctr UserController) ChangeState(c *gin.Context) (gin.H, error) {
+	var form ChangeUserState
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if err := service.DefaultUserService.ChangeUserState(service.ChangeUserState{
+		UserId: form.ID,
+		State:  form.State,
+	}); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr UserController) ChangePosition(c *gin.Context) (gin.H, error) {
+	var form changeUserPosition
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if err := service.DefaultUserService.ChangeUserPosition(service.ChangeUserPosition{
+		UserId:       form.ID,
+		Position:     form.Position,
+		PositionIcon: form.PositionIcon,
+	}); err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
 

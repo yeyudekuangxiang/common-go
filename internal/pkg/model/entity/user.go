@@ -44,7 +44,7 @@ type User struct {
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`
 	ChannelId    int64        `gorm:"column:channel_id" json:"channel_id"`
-	State        int          `json:"state" gorm:"default:0"` //用户状态 0正常 1禁言 2封号
+	State        int          `json:"state" gorm:"default:1"` //用户状态 1正常 2禁言 3封号
 }
 
 func (u User) ShortUser() ShortUser {

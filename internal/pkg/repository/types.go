@@ -67,17 +67,18 @@ type UpdateTag struct {
 }
 
 type GetUserListBy struct {
-	Mobile     string
-	Mobiles    []string
-	Source     entity.UserSource
-	UserIds    []int64
-	Nickname   string //模糊查询
-	LikeMobile string //手机号模糊查询
-	UserId     int64
-	OpenId     string
-	StartTime  time.Time
-	EndTime    time.Time
-	Risk       int
+	Mobile     string            `json:"mobile,omitempty"`
+	Mobiles    []string          `json:"mobiles,omitempty"`
+	Source     entity.UserSource `json:"source,omitempty"`
+	UserIds    []int64           `json:"userIds,omitempty"`
+	Nickname   string            `json:"nickname,omitempty"`   //模糊查询
+	LikeMobile string            `json:"likeMobile,omitempty"` //手机号模糊查询
+	UserId     int64             `json:"userId,omitempty"`
+	State      int               `json:"state,omitempty"` //
+	OpenId     string            `json:"openId,omitempty"`
+	StartTime  time.Time         `json:"startTime"`
+	EndTime    time.Time         `json:"endTime"`
+	Risk       int               `json:"risk,omitempty"`
 }
 
 type GetUserPageListBy struct {

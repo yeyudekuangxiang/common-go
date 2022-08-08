@@ -78,9 +78,10 @@ func adminRouter(router *gin.Engine) {
 		//后台接口-用户管理
 		userRouter := adminRouter.Group("/user")
 		{
-			userRouter.GET("/list", apiutil.Format(admin.DefaultUserController.List))                   //用户列表
-			userRouter.GET("/detail", apiutil.Format(admin.DefaultUserController.Detail))               //用户详情
-			userRouter.POST("/change-status", apiutil.Format(admin.DefaultUserController.ChangeStatus)) //更新用户状态
+			userRouter.GET("/list", apiutil.Format(admin.DefaultUserController.List))                       //用户列表
+			userRouter.GET("/detail", apiutil.Format(admin.DefaultUserController.Detail))                   //用户详情
+			userRouter.POST("/change-state", apiutil.Format(admin.DefaultUserController.ChangeState))       //更新用户状态
+			userRouter.POST("/change-position", apiutil.Format(admin.DefaultUserController.ChangePosition)) //更新用户身份
 		}
 	}
 	//adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))

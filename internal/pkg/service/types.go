@@ -401,3 +401,14 @@ type CommentCount struct {
 	TotalID int64
 	Total   int64
 }
+
+type ChangeUserState struct {
+	UserId int64 `json:"userId"`
+	State  int   `json:"state"`
+}
+
+type ChangeUserPosition struct {
+	UserId       int64  `json:"userId"`
+	Position     string `json:"position"`
+	PositionIcon string `json:"positionIcon"`
+}

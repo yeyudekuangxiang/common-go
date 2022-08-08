@@ -65,11 +65,13 @@ type AdminLoginForm struct {
 }
 
 type UserPageListForm struct {
+	ID        int64     `json:"id" form:"id" alias:"用户id" binding:"gte=0"`
 	Mobile    string    `json:"mobile" form:"mobile" alias:"手机号码"`
-	Nickname  string    `json:"nickname" form:"nickname"`
-	ID        int64     `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
+	Nickname  string    `json:"nickname" form:"nickname" alias:"昵称"`
+	State     int       `json:"state" form:"state" alias:"状态" binding:"min=0,max=3"`
 	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
+	controller.PageFrom
 }
 
 /*common start*/
@@ -188,3 +190,21 @@ type GetBannerPageForm struct {
 	Status int8   `json:"status" form:"status" binding:"" alias:"上线和下线状态"`
 	controller.PageFrom
 }
+
+/*
+user start
+*/
+type ChangeUserState struct {
+	IDForm
+	State int `json:"state" binding:"min:1,max=3"`
+}
+
+type changeUserPosition struct {
+	IDForm
+	Position     string `json:"position"`
+	PositionIcon string `json:"positionIcon"`
+}
+
+/*
+user end
+*/
