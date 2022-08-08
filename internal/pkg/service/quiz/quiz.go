@@ -110,15 +110,15 @@ func (srv QuizService) DailyResult(openId string) (*srv_types.QuizDailyResult, e
 	}
 	switch result.CorrectNum {
 	case 0:
-		qdResult.Text = "妥妥的一只零碳萌新~还需努力哟！"
+		qdResult.Text = []string{"妥妥的一只零碳萌新~", "还需努力哟！"}
 	case 1:
-		qdResult.Text = "零碳见习生你好呀，要再接再厉嗷~"
+		qdResult.Text = []string{"零碳见习生你好呀~", "要再接再厉嗷~"}
 	case 2:
-		qdResult.Text = "你已达到零碳高中生水平！加油吧少年~"
+		qdResult.Text = []string{"你已达到零碳高中生水平！", "加油吧少年~"}
 	case 3:
-		qdResult.Text = "你已成功晋级零碳大学生！距离巅峰只有一步之遥~"
+		qdResult.Text = []string{"你已成功晋级零碳大学生！", "距离巅峰只有一步之遥~"}
 	case 4:
-		qdResult.Text = "你已达到零碳博士水准，再创辉煌吧！"
+		qdResult.Text = []string{"你已达到零碳博士水准~", "再创辉煌吧！"}
 	}
 	return &qdResult, nil
 }
