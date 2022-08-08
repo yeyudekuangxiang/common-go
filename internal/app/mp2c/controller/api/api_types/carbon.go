@@ -77,6 +77,7 @@ type CreateCarbonTransactionDto struct {
 	Value   float64
 	Info    string
 	AdminId int
+	Ip      string
 }
 
 type GetCarbonTransactionBankDto struct {

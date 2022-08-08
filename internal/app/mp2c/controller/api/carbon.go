@@ -29,6 +29,7 @@ func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
 	}
 	//user := apiutil.GetAuthUser(ctx)
 	//判断名称和图片是否存在.
+
 	info, err := c.service.Create(api_types.CreateCarbonTransactionDto{
 		OpenId:  "1",
 		UserId:  5,
@@ -36,6 +37,7 @@ func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
 		Value:   1,
 		Info:    fmt.Sprintf("{imageUrl=%s}", 1),
 		AdminId: 1,
+		Ip:      ctx.ClientIP(),
 	})
 	if err != nil {
 

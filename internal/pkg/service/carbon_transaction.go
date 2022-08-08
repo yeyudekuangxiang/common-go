@@ -32,7 +32,8 @@ type CarbonTransactionService struct {
 	repoDay repository.CarbonTransactionDayRepository
 }
 
-// Create 添加发放碳量记录并且更新用户剩余碳量
+//  添加发放碳量记录并且更新用户剩余碳量
+
 func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (*entity.CarbonTransaction, error) {
 	if err := util.ValidatorStruct(dto); err != nil {
 		app.Logger.Error(dto, err)
@@ -42,12 +43,18 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if errCheck != nil {
 		return nil, errCheck
 	}
+	cityCode := 0
+	cityInfo, cityErr := util.IpToCity(dto.Ip)
+	if cityErr == nil {
+		cityCode = cityInfo.Content.AddressDetail.CityCode
+	}
 	//入库
 	CarbonTransactionDo := entity.CarbonTransaction{
 		TransactionId: util.UUID(),
 		Info:          dto.Info,
 		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now()}
+		UpdatedAt:     time.Now(),
+		City:          cityCode}
 
 	if err := util.MapTo(dto, &CarbonTransactionDo); err != nil {
 		return nil, err
