@@ -182,6 +182,19 @@ func apiRouter(router *gin.Engine) {
 
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+
+		//签到相关路由
+		carbonRouter := mustAuthRouter.Group("/carbon")
+		{
+			carbonRouter.GET("/info", apiutil.Format(api.DefaultCarbonController.Info))
+			carbonRouter.GET("/bank", apiutil.Format(api.DefaultCarbonController.Bank))
+			carbonRouter.GET("/myBank", apiutil.Format(api.DefaultCarbonController.MyBank))
+			carbonRouter.GET("/classify", apiutil.Format(api.DefaultCarbonController.Classify))
+			carbonRouter.GET("/history", apiutil.Format(api.DefaultCarbonController.History))
+			carbonRouter.GET("/addClassify", apiutil.Format(api.DefaultCarbonController.AddClassify))
+			carbonRouter.GET("/addHistory", apiutil.Format(api.DefaultCarbonController.AddHistory))
+		}
+
 	}
 
 }

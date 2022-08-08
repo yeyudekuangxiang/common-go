@@ -1,7 +1,11 @@
 package entity
 
 import (
-	"mio/internal/pkg/model"
+	"time"
+)
+
+const (
+	OrderByCarbonTranDayVDate OrderBy = "order_by_carbon_day_v_date_desc"
 )
 
 type CarbonTransactionType string
@@ -11,17 +15,47 @@ func (p CarbonTransactionType) Text() string {
 	switch p {
 	case CARBON_STEP:
 		return "步行"
+	case CARBON_COFFEE_CUP:
+		return "自带咖啡杯"
+	case CARBON_BIKE_RIDE:
+		return "骑行"
+	case CARBON_ECAR:
+		return "电动车"
+	case CARBON_TESR:
+		return "测试"
 	}
 	return "未知积分"
+}
+
+func (p CarbonTransactionType) Cover() string {
+	switch p {
+	case CARBON_STEP:
+		return "step_url"
+	case CARBON_COFFEE_CUP:
+		return "cup_url"
+	case CARBON_BIKE_RIDE:
+		return "bike_url"
+	case CARBON_ECAR:
+		return "car_url"
+	case CARBON_TESR:
+		return "test_url"
+	}
+	return ""
 }
 
 // RealText 获取积分类型的中文名称(给管理员看的)
 func (p CarbonTransactionType) RealText() string {
 	switch p {
 	case CARBON_STEP:
-		return "兑吧话费"
+		return "步行"
 	case CARBON_COFFEE_CUP:
-		return "兑吧流量"
+		return "自带咖啡杯"
+	case CARBON_BIKE_RIDE:
+		return "骑行"
+	case CARBON_ECAR:
+		return "电动车"
+	case CARBON_TESR:
+		return "测试"
 	}
 	return p.Text()
 }
@@ -29,6 +63,9 @@ func (p CarbonTransactionType) RealText() string {
 const (
 	CARBON_STEP       CarbonTransactionType = "STEP"       //步行
 	CARBON_COFFEE_CUP CarbonTransactionType = "COFFEE_CUP" //自带咖啡杯
+	CARBON_BIKE_RIDE  CarbonTransactionType = "BIKE_RIDE"  //骑行
+	CARBON_ECAR       CarbonTransactionType = "ECAR"       //电动车主
+	CARBON_TESR       CarbonTransactionType = "TEST"       //测试用
 )
 
 var CarbonTransactionTypeList = []CarbonTransactionType{
@@ -46,25 +83,6 @@ var CarbonCollectLimitMap = map[CarbonTransactionType]int{
 	CARBON_COFFEE_CUP: 2,
 }
 
-/*
-CREATE TABLE "public"."carbon_transaction" (
-  "id" int8 NOT NULL,
-  "openid" text COLLATE "pg_catalog"."default" NOT NULL,
-  "user_id" int8 NOT NULL DEFAULT 0,
-  "transaction_id" text COLLATE "pg_catalog"."default" NOT NULL,
-  "type" varchar(100) COLLATE "pg_catalog"."default" NOT NULL,
-  "city" int8  NOT NULL DEFAULT 0,
-  "value" numeric(10,2) NOT NULL,
-  "info" text COLLATE "pg_catalog"."default",
-  "admin_id" int4 NOT NULL DEFAULT 0,
-  "created_at" timestamptz(6) NOT NULL DEFAULT now(),
-  "updated_at" timestamptz(6) NOT NULL DEFAULT now(),
-  CONSTRAINT "carbon_transaction_pk" PRIMARY KEY ("id"),
-  CONSTRAINT "carbon_transaction_transaction_id_key" UNIQUE ("transaction_id"),
-  CONSTRAINT "carbon_transaction_user_id_key" UNIQUE ("user_id")
-);
-*/
-
 type CarbonTransaction struct {
 	ID            int64                 `json:"id"`
 	OpenId        string                `gorm:"column:openid" json:"openId"`
@@ -75,6 +93,6 @@ type CarbonTransaction struct {
 	Value         float64               `json:"value"`
 	Info          string                `json:"info"`
 	AdminId       int                   `json:"adminId"`
-	CreatedAt     model.Time            `json:"createdAt"`
-	UpdatedAt     model.Time            `json:"updatedAt"`
+	CreatedAt     time.Time             `json:"createdAt"`
+	UpdatedAt     time.Time             `json:"updatedAt"`
 }

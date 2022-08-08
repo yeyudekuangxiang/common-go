@@ -70,6 +70,7 @@ type GetPointTransactionListBy struct {
 	OrderBy   entity.OrderByList
 	Type      entity.PointTransactionType
 }
+
 type GetPointTransactionPageListBy struct {
 	AdminId   int
 	OpenIds   []string

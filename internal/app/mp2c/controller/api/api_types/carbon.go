@@ -1,6 +1,9 @@
 package api_types
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/app/mp2c/controller"
+	"mio/internal/pkg/model/entity"
+)
 
 type PageFrom struct {
 	Page     int `json:"page" form:"page" binding:"gt=0" alias:"页码"`
@@ -21,41 +24,48 @@ type RedeemCouponWithTransactionResult struct {
 }
 
 type CarbonUser struct {
-	Nickname  string
-	AvatarUrl string
-	Uid       int64
+	Nickname  string `json:"nickname"`
+	AvatarUrl string `json:"avatarUrl"`
+	Uid       int64  `json:"uid"`
 }
 
 type CarbonTransactionMyBank struct {
-	User    CarbonUser
-	Carbon  float64
-	Rank    string
-	OverPer string
+	User    CarbonUser `json:"user"`
+	Carbon  string     `json:"carbon"`
+	Rank    string     `json:"rank"`
+	OverPer string     `json:"overPer"`
 }
 
 type CarbonTransactionBank struct {
-	User     CarbonUser
-	Carbon   float64
-	Rank     int64
-	IsFriend bool
+	User     CarbonUser `json:"user"`
+	Carbon   string     `json:"carbon"`
+	Rank     int64      `json:"rank"`
+	IsFriend bool       `json:"isFriend"`
+}
+
+type CarbonTransactionInfo struct {
+	User           CarbonUser `json:"user"`
+	Carbon         string     `json:"carbon"`
+	RegisterDayNum int        `json:"registerDayNum"`
+	TreeNum        string     `json:"treeNum"`
+	TreeNumMsg     string     `json:"treeNumMsg"`
+}
+
+type CarbonTransactionClassify struct {
+	List  []CarbonTransactionClassifyList
+	Cover string  `json:"cover"`
+	Total float64 `json:"total"`
+}
+
+type CarbonTransactionClassifyList struct {
+	Key string  `json:"key"`
+	Val float64 `json:"val"`
 }
 
 //form
 
 type GetCarbonTransactionBankForm struct {
-	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
-}
-type GetCarbonTransactionMyBankForm struct {
-	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
-}
-type GetCarbonTransactionInfoForm struct {
-	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
-}
-type GetCarbonTransactionClassifyForm struct {
-	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
-}
-type GetCarbonTransactionHistoryForm struct {
-	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
+	controller.PageFrom
 }
 
 // DTO
@@ -70,8 +80,8 @@ type CreateCarbonTransactionDto struct {
 }
 
 type GetCarbonTransactionBankDto struct {
-	Offset int64
-	Limit  int64
+	Offset int
+	Limit  int
 	UserId int64
 }
 type GetCarbonTransactionMyBankDto struct {
@@ -81,10 +91,14 @@ type GetCarbonTransactionInfoDto struct {
 	UserId int64
 }
 type GetCarbonTransactionClassifyDto struct {
-	UserId int64
+	UserId    int64
+	StartTime string
+	EndTime   string
 }
 type GetCarbonTransactionHistoryDto struct {
-	UserId int64
+	UserId    int64
+	StartTime string
+	EndTime   string
 }
 
 //VO
@@ -102,4 +116,15 @@ type BankCarbonTransactionParam struct {
 	Info          string
 	AdminId       int
 	Offset, Count int64
+}
+
+type CarbonTransactionClassifyVO struct {
+	Key string `json:"key"`
+	Val string `json:"val"`
+}
+
+type CarbonTransactionHistoryVO struct {
+	VDate    string  `json:"vDate"`
+	Value    float64 `json:"value"`
+	ValueStr string  `json:"valueStr"`
 }

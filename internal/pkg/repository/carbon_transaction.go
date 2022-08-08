@@ -2,65 +2,70 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository/repotypes"
 )
 
-var DefaultCarbonTransactionRepository = NewCarbonTransactionRepository(app.DB)
-
-func NewCarbonTransactionRepository(db *gorm.DB) CarbonTransactionRepository {
-	return CarbonTransactionRepository{
-		DB: db,
-	}
+func NewCarbonTransactionRepository(ctx *context.MioContext) CarbonTransactionRepository {
+	return CarbonTransactionRepository{ctx: ctx}
 }
 
 type CarbonTransactionRepository struct {
-	DB *gorm.DB
+	ctx *context.MioContext
 }
 
-func (p CarbonTransactionRepository) Save(transaction *entity.CarbonTransaction) error {
-	return p.DB.Save(transaction).Error
+func (repo CarbonTransactionRepository) Save(transaction *entity.CarbonTransaction) error {
+	return repo.ctx.DB.Save(transaction).Error
 }
 
 func (repo CarbonTransactionRepository) Create(transaction *entity.CarbonTransaction) error {
-	return repo.DB.Create(transaction).Error
+	return repo.ctx.DB.Create(transaction).Error
 }
 
-func (p CarbonTransactionRepository) GetListBy(by GetPointTransactionListBy) []entity.CarbonTransaction {
-	list := make([]entity.CarbonTransaction, 0)
-
-	db := p.DB.Model(entity.CarbonTransaction{})
+func (repo CarbonTransactionRepository) GetListBy(by repotypes.GetCarbonTransactionListByDO) []repotypes.GetCarbonTransactionListBy {
+	list := make([]repotypes.GetCarbonTransactionListBy, 0)
+	db := repo.ctx.DB.Model(entity.CarbonTransaction{})
+	db.Select("type", "sum(value)", "user_id")
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
-
-	if !by.StartTime.IsZero() {
-		db.Where("create_time >= ?", by.StartTime.Time)
+	if by.StartTime == "" {
+		db.Where("created_at >= ?", by.StartTime)
 	}
-	if !by.EndTime.IsZero() {
-		db.Where("create_time <= ?", by.EndTime.Time)
+	if by.EndTime != "" {
+		db.Where("created_at <= ?", by.EndTime)
 	}
-
 	if by.Type != "" {
 		db.Where("type = ?", by.Type)
 	}
-
-	for _, orderBy := range by.OrderBy {
-		switch orderBy {
-		case entity.OrderByPointTranCTDESC:
-			db.Order("create_time desc")
-		}
-	}
-
+	db.Group("type,user_id")
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
-
 	return list
 }
-func (p CarbonTransactionRepository) FindBy(by FindPointTransactionBy) entity.CarbonTransaction {
+
+func (repo CarbonTransactionRepository) GetListByDay(by repotypes.GetCarbonTransactionListByDO) []repotypes.GetCarbonTransactionListBy {
+	list := make([]repotypes.GetCarbonTransactionListBy, 0)
+	db := repo.ctx.DB.Model(entity.CarbonTransaction{})
+	db.Select("sum(value)", "user_id", "openid")
+	if by.StartTime == "" {
+		db.Where("created_at >= ?", by.StartTime)
+	}
+	if by.EndTime != "" {
+		db.Where("created_at <= ?", by.EndTime)
+	}
+	db.Group("user_id")
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}
+
+func (repo CarbonTransactionRepository) FindBy(by FindPointTransactionBy) entity.CarbonTransaction {
 	pt := entity.CarbonTransaction{}
-	db := p.DB.Model(pt)
+	db := repo.ctx.DB.Model(pt)
 	if by.TransactionId != "" {
 		db.Where("transaction_id", by.TransactionId)
 	}
@@ -70,10 +75,10 @@ func (p CarbonTransactionRepository) FindBy(by FindPointTransactionBy) entity.Ca
 	}
 	return pt
 }
-func (p CarbonTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.CarbonTransaction, int64) {
+func (repo CarbonTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.CarbonTransaction, int64) {
 	list := make([]entity.CarbonTransaction, 0)
 
-	db := p.DB.Model(entity.CarbonTransaction{})
+	db := repo.ctx.DB.Model(entity.CarbonTransaction{})
 	if len(by.OpenIds) > 0 {
 		db.Where("openid in (?)", by.OpenIds)
 	}

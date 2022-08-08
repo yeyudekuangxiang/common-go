@@ -16,6 +16,7 @@ type redisKey struct {
 	BadgeImageCode        string
 	CheckBusinessUser     string
 	UserCarbonRank        string
+	UserCarbonClassify    string
 }
 
 var RedisKey = redisKey{
@@ -34,4 +35,5 @@ var RedisKey = redisKey{
 	BadgeImageCode:        "mp2c:updateBadgeImage:",          //上传证书图片凭证
 	CheckBusinessUser:     "mp2c:checkBusinessUser:%s",       //检测用户token是否有更新
 	UserCarbonRank:        "user_carbon_rank:%s",             //排行榜
+	UserCarbonClassify:    "user_carbon_classify",            //碳分类
 }
