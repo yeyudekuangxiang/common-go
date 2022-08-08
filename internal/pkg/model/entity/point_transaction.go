@@ -43,7 +43,7 @@ func (p PointTransactionType) Text() string {
 	case POINT_DUIBA_ALIPAY, POINT_DUIBA_QB, POINT_DUIBA_COUPON, POINT_DUIBA_OBJECT, POINT_DUIBA_PHONEBILL, POINT_DUIBA_PHONEFLOW, POINT_DUIBA_VIRTUAL:
 		return "积分兑换"
 	case POINT_DUIBA_REFUND:
-		return "腿积分"
+		return "退积分"
 	case POINT_SYSTEM_REDUCE:
 		return "系统扣减"
 	case POINT_SYSTEM_ADD:
