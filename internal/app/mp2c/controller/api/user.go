@@ -154,20 +154,25 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
-	birthday := time.Time{}
-	if form.Birthday != "" {
-		t, err := time.Parse("2006-01-02", form.Birthday)
+	var birthday *time.Time
+	if form.Birthday != nil {
+		t, err := time.Parse("2006-01-02", *form.Birthday)
 		if err != nil {
 			return nil, errno.ErrBind.WithErr(err)
 		}
-		birthday = t
+		birthday = &t
+	}
+
+	var gender *entity.UserGender
+	if form.Gender != nil {
+		gender = (*entity.UserGender)(form.Gender)
 	}
 
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
-		Gender:      entity.UserGender(form.Gender),
+		Gender:      gender,
 		Birthday:    birthday,
 		PhoneNumber: form.PhoneNumber,
 	})
