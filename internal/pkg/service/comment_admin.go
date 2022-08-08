@@ -46,14 +46,16 @@ func (d defaultCommentAdminService) CommentList(content string, userId int64, ob
 }
 
 func (d defaultCommentAdminService) DelCommentSoft(commentId int64, reason string) error {
-	one, err := d.commentModel.FindOne(commentId)
+	builder := d.commentModel.RowBuilder()
+	builder.Where("id = ?", commentId).Where("state = ?", 0)
+	query, err := d.commentModel.FindOneQuery(builder)
 	if err != nil {
 		if err == entity.ErrNotFount {
 			return errors.New("该评论不存在")
 		}
 		return err
 	}
-	err = d.commentModel.RowBuilder().Model(one).Updates(entity.CommentIndex{State: 4, Reason: reason}).Error
+	err = d.commentModel.RowBuilder().Model(query).Updates(entity.CommentIndex{State: 1, DelReason: reason}).Error
 	if err != nil {
 		return err
 	}

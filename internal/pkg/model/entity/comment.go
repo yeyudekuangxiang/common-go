@@ -17,7 +17,7 @@ type CommentIndex struct {
 	LikeCount     int32  `gorm:"type:int4;not null:default:0"` // 该评论点赞总数
 	HateCount     int32  `gorm:"type:int4;not null:default:0"` // 该评论点踩总数
 	State         int8   `gorm:"type:int2;not null:default:0"` // 状态 0-正常 1-隐藏
-	Reason        string `gorm:"type:varchar(200)"`            //删除理由
+	DelReason     string `gorm:"type:varchar(200)"`            //删除理由
 	Attrs         int8   `gorm:"type:int2"`                    // 属性 00-正常 10-运营置顶 01-用户置顶 保留字段
 	Version       int64  `gorm:"type:int8;version"`            // 版本号 保留字段
 	CreatedAt     time.Time

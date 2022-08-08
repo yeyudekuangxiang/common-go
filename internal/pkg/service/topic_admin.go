@@ -128,7 +128,7 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
 	topicModel.TopicTag = tag.Name
-	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
+	if err := app.DB.Model(&topicModel).Updates(topicModel).Error; err != nil {
 		return err
 	}
 	err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
@@ -157,7 +157,7 @@ func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) error {
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
-	err := app.DB.Model(&topic).Updates(entity.Topic{Status: 4, Reason: reason}).Error
+	err := app.DB.Model(&topic).Updates(entity.Topic{Status: 4, DelReason: reason}).Error
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
-	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), Reason: reason}).Error; err != nil {
+	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
 		return err
 	}
 	//积分变动
