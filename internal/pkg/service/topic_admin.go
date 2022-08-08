@@ -1,9 +1,6 @@
 package service
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/medivhzhan/weapp/v3/security"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -211,65 +208,6 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 	}
 	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
 		return err
-	}
-	return nil
-}
-
-func (srv TopicAdminService) checkMsgs(openid, content string) error {
-	length := len(content)
-	if length > 2500 {
-		s := []rune(content)
-		var buffer bytes.Buffer
-		for i, str := range s {
-			buffer.WriteString(string(str))
-			if i > 0 && (i+1)%2500 == 0 {
-				params := &security.MsgSecCheckRequest{
-					Content: "",
-					Version: 2,
-					Scene:   3,
-					Openid:  openid,
-				}
-				err := srv.checkMsg(params)
-				buffer.Reset()
-				if err != nil {
-					return err
-				}
-			}
-		}
-		params := &security.MsgSecCheckRequest{
-			Content: "",
-			Version: 2,
-			Scene:   3,
-			Openid:  openid,
-		}
-		err := srv.checkMsg(params)
-		buffer.Reset()
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	//处理内容
-	params := &security.MsgSecCheckRequest{
-		Content: content,
-		Version: 2,
-		Scene:   3,
-		Openid:  openid,
-	}
-	err := srv.checkMsg(params)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (srv TopicAdminService) checkMsg(params *security.MsgSecCheckRequest) error {
-	check, err := app.Weapp.NewSecurity().MsgSecCheck(params)
-	if err != nil {
-		return err
-	}
-	if check.ErrCode != 0 {
-		return fmt.Errorf("check error: %s", check.ErrMSG)
 	}
 	return nil
 }

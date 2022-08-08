@@ -1,10 +1,8 @@
 package service
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
-	"github.com/medivhzhan/weapp/v3/security"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
@@ -16,6 +14,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/wxapp"
 	"mio/pkg/wxoa"
 	"os"
@@ -522,7 +521,7 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 //CreateTopic 创建文章
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) error {
 	//检查内容
-	err := srv.checkMsgs(openid, content)
+	err := validator.CheckMsgWithOpenId(openid, content)
 	if err != nil {
 		return err
 	}
@@ -559,7 +558,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 // UpdateTopic 更新帖子
 func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) error {
 	//检查内容
-	err := srv.checkMsgs(openid, content)
+	err := validator.CheckMsgWithOpenId(openid, content)
 	//查询记录是否存在
 	topicModel := srv.repo.FindById(topicId)
 	if topicModel.Id == 0 {
@@ -642,65 +641,6 @@ func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount)
 		Group("obj_id").
 		Find(&result)
 	return result
-}
-
-func (srv TopicService) checkMsgs(openid, content string) error {
-	length := len(content)
-	if length > 2500 {
-		s := []rune(content)
-		var buffer bytes.Buffer
-		for i, str := range s {
-			buffer.WriteString(string(str))
-			if i > 0 && (i+1)%2500 == 0 {
-				params := &security.MsgSecCheckRequest{
-					Content: "",
-					Version: 2,
-					Scene:   3,
-					Openid:  openid,
-				}
-				err := srv.checkMsg(params)
-				buffer.Reset()
-				if err != nil {
-					return err
-				}
-			}
-		}
-		params := &security.MsgSecCheckRequest{
-			Content: "",
-			Version: 2,
-			Scene:   3,
-			Openid:  openid,
-		}
-		err := srv.checkMsg(params)
-		buffer.Reset()
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	//处理内容
-	params := &security.MsgSecCheckRequest{
-		Content: content,
-		Version: 2,
-		Scene:   3,
-		Openid:  openid,
-	}
-	err := srv.checkMsg(params)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (srv TopicService) checkMsg(params *security.MsgSecCheckRequest) error {
-	check, err := app.Weapp.NewSecurity().MsgSecCheck(params)
-	if err != nil {
-		return err
-	}
-	if check.ErrCode != 0 {
-		return fmt.Errorf("check error: %s", check.ErrMSG)
-	}
-	return nil
 }
 
 func (srv TopicService) getTopicImage(importId int, p string) ([]string, error) {
