@@ -16,7 +16,9 @@ const (
 type UserPosition string
 
 const (
-	UserPositionBlue UserPosition = "blue" //蓝v
+	UserPositionBlue   UserPosition = "blue"   //蓝v
+	UserPositionYellow UserPosition = "yellow" //黄v
+	UserPositionLohoja UserPosition = "lohoja" //乐活家
 )
 
 type UserGender string
@@ -42,6 +44,7 @@ type User struct {
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`
 	ChannelId    int64        `gorm:"column:channel_id" json:"channel_id"`
+	State        int          `json:"state" gorm:"default:0"` //用户状态 0正常 1禁言 2封号
 }
 
 func (u User) ShortUser() ShortUser {
