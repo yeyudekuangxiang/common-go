@@ -156,7 +156,7 @@ func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 		Content: fmt.Sprintf(`## %s 开始发布通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
-**发布版本:**%s
+**发布分支:**%s
 **发布描述:**%s
 **发布时间:**%s
 **发布人:**%s
@@ -176,7 +176,7 @@ func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
 		Content: fmt.Sprintf(`## %s 发布成功通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
-**发布版本:**%s
+**发布分支:**%s
 **发布描述:**%s
 **发布时间:**%s
 **发布人:**%s
@@ -196,7 +196,7 @@ func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
 		Content: fmt.Sprintf(`## %s 发布失败通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
-**发布版本:**%s
+**发布分支:**%s
 **发布描述:**%s
 **发布时间:**%s
 **发布人:**%s
