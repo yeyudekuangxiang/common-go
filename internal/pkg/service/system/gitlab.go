@@ -11,6 +11,7 @@ import (
 	"mio/pkg/wxwork"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var DefaultGitlabService = GitlabService{}
@@ -136,16 +137,18 @@ func (srv GitlabService) deployment(deployment glbtyp.Deployment) error {
 	}
 }
 func (srv GitlabService) formatName(ref string) string {
+	result := ""
 	for regStr, name := range gitlabRefMap {
 		reg, err := regexp.Compile(regStr)
 		if err != nil {
 			panic(err)
 		}
 		if reg.MatchString(ref) {
-			return name
+			result = name
+			break
 		}
 	}
-	return ""
+	return strings.ReplaceAll(result, "{ref}", ref)
 }
 func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 
@@ -178,7 +181,7 @@ func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
 **发布时间:**%s
 **发布人:**%s
 **查看发布:**[%d](%s)
-`, deployment.Ref,
+`, srv.formatName(deployment.Ref),
 			deployment.Project.Name, deployment.Project.WebUrl,
 			deployment.Project.Description,
 			deployment.Ref,
@@ -198,7 +201,7 @@ func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
 **发布时间:**%s
 **发布人:**%s
 **查看发布:**[%d](%s)
-`, deployment.Ref,
+`, srv.formatName(deployment.Ref),
 			deployment.Project.Name, deployment.Project.WebUrl,
 			deployment.Project.Description,
 			deployment.Ref,
@@ -213,12 +216,12 @@ func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
 		Content: fmt.Sprintf(`## %s 发布取消通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
-**发布版本:**%s
+**发布分支:**%s
 **发布描述:**%s
 **发布时间:**%s
 **发布人:**%s
 **查看发布:**[%d](%s)
-`, deployment.Ref,
+`, srv.formatName(deployment.Ref),
 			deployment.Project.Name, deployment.Project.WebUrl,
 			deployment.Project.Description,
 			deployment.Ref,
