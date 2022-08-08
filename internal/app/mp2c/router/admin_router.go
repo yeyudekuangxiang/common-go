@@ -55,6 +55,7 @@ func adminRouter(router *gin.Engine) {
 			articleRouter.GET("/detail", apiutil.Format(admin.DefaultTopicController.Detail))    //文章详情
 			articleRouter.POST("/update", apiutil.Format(admin.DefaultTopicController.Update))   //文章更新
 			articleRouter.POST("/create", apiutil.Format(admin.DefaultTopicController.Create))   //文章创建
+			articleRouter.POST("/delete", apiutil.Format(admin.DefaultTopicController.Delete))   //文章删除 软删除
 			articleRouter.POST("/review", apiutil.Format(admin.DefaultTopicController.Review))   //审核
 			articleRouter.POST("/top", apiutil.Format(admin.DefaultTopicController.Top))         //置顶
 			articleRouter.POST("/essence", apiutil.Format(admin.DefaultTopicController.Essence)) //精华

@@ -70,12 +70,12 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 }
 
 //CreateTopic 创建文章
-func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) error {
+func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, title, content string, tagIds []int64, images []string) error {
 	//检查内容
-	err := srv.checkMsgs(openid, content)
-	if err != nil {
-		return err
-	}
+	//err := srv.checkMsgs(openid, content)
+	//if err != nil {
+	//	return err
+	//}
 	//处理images
 	imageStr := strings.Join(images, ",")
 	//tag
@@ -107,9 +107,9 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, open
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicAdminService) UpdateTopic(openid string, topicId int64, title, content string, tagIds []int64, images []string) error {
+func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, tagIds []int64, images []string) error {
 	//检查内容
-	err := srv.checkMsgs(openid, content)
+	//err := srv.checkMsgs(openid, content)
 	//查询记录是否存在
 	topicModel := srv.topic.FindById(topicId)
 	if topicModel.Id == 0 {
@@ -134,7 +134,7 @@ func (srv TopicAdminService) UpdateTopic(openid string, topicId int64, title, co
 	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
 		return err
 	}
-	err = app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
+	err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
 	if err != nil {
 		return err
 	}
@@ -153,14 +153,14 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 }
 
 // DeleteTopic 删除（下架）
-func (srv TopicAdminService) DeleteTopic(topicId int64) error {
+func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) error {
 	//查询数据是否存在
 	var topic entity.Topic
 	app.DB.Model(&entity.Topic{}).Preload("Tags").Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
-	err := app.DB.Model(&topic).Update("status", 4).Error
+	err := app.DB.Model(&topic).Updates(entity.Topic{Status: 4, Reason: reason}).Error
 	if err != nil {
 		return err
 	}
@@ -168,14 +168,14 @@ func (srv TopicAdminService) DeleteTopic(topicId int64) error {
 }
 
 // Review 审核
-func (srv TopicAdminService) Review(topicId int64, status int, content string) error {
+func (srv TopicAdminService) Review(topicId int64, status int, reason string) error {
 	//查询数据是否存在
 	var topic entity.Topic
 	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
-	if err := app.DB.Model(&topic).Updates(map[string]interface{}{"status": status, "content": content}).Error; err != nil {
+	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), Reason: reason}).Error; err != nil {
 		return err
 	}
 	//积分变动

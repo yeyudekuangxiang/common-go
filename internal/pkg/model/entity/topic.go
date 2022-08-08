@@ -42,6 +42,7 @@ type Topic struct {
 	ImportId      int            `json:"-"`
 	IsTop         int            `json:"isTop"`     //是否置顶
 	IsEssence     int            `json:"isEssence"` //是否精华
+	Reason        string         `json:"reason"`    //审核不通过 or 删除 的理由
 }
 
 func (Topic) TableName() string {

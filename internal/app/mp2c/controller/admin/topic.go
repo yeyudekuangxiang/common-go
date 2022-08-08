@@ -61,9 +61,9 @@ func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//user
-	user := apiutil.GetAuthUser(c)
-	//更新帖子
-	err := service.DefaultTopicAdminService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
+	user := apiutil.GetAuthAdmin(c)
+	//创建帖子
+	err := service.DefaultTopicAdminService.CreateTopic(int64(user.ID), user.Avatar, user.Nickname, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -76,22 +76,22 @@ func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user := apiutil.GetAuthUser(c)
 	//更新帖子
-	err := service.DefaultTopicAdminService.UpdateTopic(user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	err := service.DefaultTopicAdminService.UpdateTopic(form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
 	return nil, nil
 }
 
+// Delete 软删除
 func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
-	form := IDForm{}
+	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	//更新帖子
-	if err := service.DefaultTopicAdminService.DeleteTopic(form.ID); err != nil {
+	if err := service.DefaultTopicAdminService.DeleteTopic(form.ID, form.Reason); err != nil {
 		return nil, err
 	}
 	return nil, nil
@@ -103,7 +103,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Review(form.ID, form.Status, form.Content)
+	err := service.DefaultTopicAdminService.Review(form.ID, form.Status, form.Reason)
 	if err != nil {
 		return nil, err
 	}
