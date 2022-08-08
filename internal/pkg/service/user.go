@@ -392,21 +392,22 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
-	if param.PhoneNumber != "" {
-
-		if u.CheckMobileBound(entity.UserSourceMio, user.ID, param.PhoneNumber) {
+	if param.PhoneNumber != nil {
+		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
 			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
 		}
 
-		user.PhoneNumber = param.PhoneNumber
+		user.PhoneNumber = *param.PhoneNumber
 	}
-	if !param.Birthday.IsZero() {
-		user.Birthday = model.Date{Time: param.Birthday}
+	if param.Birthday != nil {
+		user.Birthday = model.Date{Time: *param.Birthday}
+	}
+	if param.Gender != nil {
+		user.Gender = *param.Gender
 	}
 
 	user.AvatarUrl = param.Avatar
 	user.Nickname = param.Nickname
-	user.Gender = param.Gender
 	return u.r.Save(&user)
 }
 
