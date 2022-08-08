@@ -100,8 +100,27 @@ func (srv QuizService) SendAnswerPoint(openId string, correctNum int) error {
 	})
 	return err
 }
-func (srv QuizService) DailyResult(openId string) (*entity.QuizDailyResult, error) {
-	return DefaultQuizDailyResultService.FindTodayResult(openId)
+func (srv QuizService) DailyResult(openId string) (*srv_types.QuizDailyResult, error) {
+	result, err := DefaultQuizDailyResultService.FindTodayResult(openId)
+	if err != nil {
+		return nil, err
+	}
+	qdResult := srv_types.QuizDailyResult{
+		QuizDailyResult: *result,
+	}
+	switch result.CorrectNum {
+	case 0:
+		qdResult.Text = "妥妥的一只零碳萌新~还需努力哟！"
+	case 1:
+		qdResult.Text = "零碳见习生你好呀，要再接再厉嗷~"
+	case 2:
+		qdResult.Text = "你已达到零碳高中生水平！加油吧少年~"
+	case 3:
+		qdResult.Text = "你已成功晋级零碳大学生！距离巅峰只有一步之遥~"
+	case 4:
+		qdResult.Text = "你已达到零碳博士水准，再创辉煌吧！"
+	}
+	return &qdResult, nil
 }
 func (srv QuizService) GetSummary(openId string) (*entity.QuizSummary, error) {
 	return DefaultQuizSummaryService.FindOrCreateSummary(openId)
