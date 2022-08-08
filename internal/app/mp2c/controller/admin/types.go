@@ -9,6 +9,11 @@ import (
 type GetUserForm struct {
 	Id int64
 }
+
+type IDForm struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1" `
+}
+
 type GetPointRecordPageListFrom struct {
 	UserId    int64                       `json:"userId" form:"userId" binding:"gte=0" alias:"用户ID"`
 	Nickname  string                      `json:"nickname" form:"nickname" binding:"lte=30" alias:"用户昵称"`
@@ -68,8 +73,9 @@ type UserPageListForm struct {
 }
 
 /*common start*/
-type IDForm struct {
-	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1" `
+type CommentDeleteRequest struct {
+	Reason string `json:"reason" form:"reason" alias:"reason"`
+	IDForm
 }
 
 /*common end*/

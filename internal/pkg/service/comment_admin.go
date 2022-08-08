@@ -10,7 +10,7 @@ var DefaultCommentAdminService = NewCommentAdminService(repository.DefaultCommen
 
 type (
 	CommentAdminService interface {
-		DelCommentSoft(commentId int64) error
+		DelCommentSoft(commentId int64, reason string) error
 		CommentList(content string, userId, topicId int64, limit, offset int) ([]*entity.CommentIndex, int64, error)
 	}
 )
@@ -45,7 +45,7 @@ func (d defaultCommentAdminService) CommentList(content string, userId, objId in
 	return all, count, nil
 }
 
-func (d defaultCommentAdminService) DelCommentSoft(commentId int64) error {
+func (d defaultCommentAdminService) DelCommentSoft(commentId int64, reason string) error {
 	one, err := d.commentModel.FindOne(commentId)
 	if err != nil {
 		if err == entity.ErrNotFount {
@@ -53,7 +53,7 @@ func (d defaultCommentAdminService) DelCommentSoft(commentId int64) error {
 		}
 		return err
 	}
-	err = d.commentModel.RowBuilder().Model(one).Update("status", 4).Error
+	err = d.commentModel.RowBuilder().Model(one).Updates(entity.CommentIndex{State: 4, Reason: reason}).Error
 	if err != nil {
 		return err
 	}
