@@ -18,7 +18,7 @@ func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	list, total, err := service.DefaultCommentAdminService.CommentList(form.Comment, form.UserId, form.ObjId, form.Limit(), form.Offset())
+	list, total, err := service.DefaultCommentAdminService.CommentList(form.Comment, form.UserId, form.TopicId, form.Limit(), form.Offset())
 	if err != nil {
 		return nil, err
 	}

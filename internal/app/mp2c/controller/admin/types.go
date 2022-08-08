@@ -119,7 +119,7 @@ type ChangeTopicStatus struct {
 type CommentListRequest struct {
 	Comment string `json:"comment" form:"comment" alias:"comment"`
 	UserId  int64  `json:"userId" form:"userId" alias:"userId" binding:"gte=0"`
-	ObjId   int64  `json:"objId" form:"objId" alias:"objId" binding:"gte=0"`
+	TopicId int64  `json:"topicId" form:"topicId" alias:"topicId" binding:"gte=0"`
 	controller.PageFrom
 }
 

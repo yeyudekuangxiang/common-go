@@ -11,7 +11,7 @@ var DefaultCommentAdminService = NewCommentAdminService(repository.DefaultCommen
 type (
 	CommentAdminService interface {
 		DelCommentSoft(commentId int64, reason string) error
-		CommentList(content string, userId, topicId int64, limit, offset int) ([]*entity.CommentIndex, int64, error)
+		CommentList(content string, userId int64, topicId int64, limit, offset int) ([]*entity.CommentIndex, int64, error)
 	}
 )
 
@@ -19,7 +19,7 @@ type defaultCommentAdminService struct {
 	commentModel repository.CommentModel
 }
 
-func (d defaultCommentAdminService) CommentList(content string, userId, objId int64, limit, offset int) ([]*entity.CommentIndex, int64, error) {
+func (d defaultCommentAdminService) CommentList(content string, userId int64, objId int64, limit, offset int) ([]*entity.CommentIndex, int64, error) {
 	builder := d.commentModel.RowBuilder()
 	builder.Limit(limit).Offset(offset).Preload("Member")
 	if content != "" {
