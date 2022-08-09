@@ -27,11 +27,11 @@ const private_token = "yoQqAi__rVuZj8kRwgfh"
 const base_url = "https://gitlab.miotech.com/api/v4"
 
 var gitlabRefMap = map[string]string{
-	"^master$":                  "预发布版本",
-	"^develop$":                 "测试版本",
-	"^feature-.+$":              "开发版本 [{ref}]",
-	"^hotfix-.+$":               "热修复版本 [{ref}]",
-	"v[0-9]+\\.[0-9]+\\.[0-9]+": "正式版本 [{ref}]",
+	"^master$":                  "## 预发布版本",
+	"^develop$":                 "## 测试版本",
+	"^feature-.+$":              "## 开发版本 [{ref}]",
+	"^hotfix-.+$":               "## 热修复版本 [{ref}]",
+	"v[0-9]+\\.[0-9]+\\.[0-9]+": "# 正式版本 [{ref}]",
 }
 
 // MergeBranch 合并
@@ -153,7 +153,7 @@ func (srv GitlabService) formatName(ref string) string {
 func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 
 	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
-		Content: fmt.Sprintf(`## %s 开始发布通知
+		Content: fmt.Sprintf(`%s 开始发布通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
 **发布分支:**%s
@@ -173,7 +173,7 @@ func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 }
 func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
 	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
-		Content: fmt.Sprintf(`## %s 发布成功通知
+		Content: fmt.Sprintf(`%s 发布成功通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
 **发布分支:**%s
@@ -193,7 +193,7 @@ func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
 }
 func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
 	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
-		Content: fmt.Sprintf(`## %s 发布失败通知
+		Content: fmt.Sprintf(`%s 发布失败通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
 **发布分支:**%s
@@ -213,7 +213,7 @@ func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
 }
 func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
 	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
-		Content: fmt.Sprintf(`## %s 发布取消通知
+		Content: fmt.Sprintf(`%s 发布取消通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
 **发布分支:**%s
