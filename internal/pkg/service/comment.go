@@ -165,12 +165,19 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 }
 
 func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) error {
+	//to user info
+	var toUser *entity.User
+	if ToCommentId != 0 {
+		toComment, _ := srv.FindOne(ToCommentId)
+		toUser, _ = DefaultUserService.GetUserById(toComment.MemberId)
+	}
 	data := &entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
 		MemberId:      userId,
 		RootCommentId: RootCommentId,
 		ToCommentId:   ToCommentId,
+		ToNickName:    toUser.Nickname,
 		CreatedAt:     time.Time{},
 		UpdatedAt:     time.Time{},
 	}
