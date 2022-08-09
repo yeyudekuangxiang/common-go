@@ -105,7 +105,7 @@ const (
 	POINT_SYSTEM_ADD      PointTransactionType = "SYSTEM_ADD"      //系统补发
 	POINT_JHX             PointTransactionType = "JHX"             //金华行
 	POINT_ARTICAL         PointTransactionType = "ARTICAL"         //发文章
-	POINT_RECOMMEND       PointTransactionType = "RECOMMEND"       //文章/评论 推荐位
+	POINT_RECOMMEND       PointTransactionType = "RECOMMEND"       //文章/评论被推荐
 )
 
 var PointTransactionTypeList = []PointTransactionType{
