@@ -239,7 +239,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string) erro
 	userRiskRankParam := wxapp.UserRiskRankParam{
 		AppId:    config.Config.Weapp.AppId,
 		OpenId:   userInfo.OpenId,
-		Scene:    1,
+		Scene:    0,
 		ClientIp: cip,
 		MobileNo: userInfo.PhoneNumber,
 	}
@@ -255,7 +255,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string) erro
 		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
 	}
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
-
+	userInfo.Ip = cip
 	return u.r.Save(&userInfo)
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
