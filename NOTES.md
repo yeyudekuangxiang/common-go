@@ -32,4 +32,4 @@ fmt.Println(float64(a))
 100.123
 100.12300109863281
 ```
-使用int、decimal.Decimal替换float
+应用中全部使用float64 或者使用int、decimal.Decimal替换float
