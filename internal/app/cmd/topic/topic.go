@@ -2,16 +2,15 @@
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
 */
-package cmd
+package topic
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
-// topicCmd represents the topic command
-var topicCmd = &cobra.Command{
+// TopicCmd represents the topic command
+var TopicCmd = &cobra.Command{
 	Use:   "topic",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -26,7 +25,6 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(topicCmd)
 
 	// Here you will define your flags and configuration settings.
 
