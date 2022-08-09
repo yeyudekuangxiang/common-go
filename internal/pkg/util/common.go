@@ -28,6 +28,9 @@ func (res TOResult) Float32() float32 {
 func (res TOResult) Float64() float64 {
 	return res.val.(float64)
 }
+func (res TOResult) Bool() bool {
+	return res.val.(bool)
+}
 func (res TOResult) Interface() interface{} {
 	return res.val
 }
