@@ -12,17 +12,23 @@ import (
 
 type ZhuGeService struct {
 	client *zhuge.Client
+	//是否开启打点
+	Open bool
 }
 
 func DefaultZhuGeService() *ZhuGeService {
-	return NewZhuGeService(zhuge.NewClient(config.Config.Zhuge.AppKey, config.Config.Zhuge.AppSecret))
+	return NewZhuGeService(zhuge.NewClient(config.Config.Zhuge.AppKey, config.Config.Zhuge.AppSecret), config.Config.App.Env == "prod")
 }
-func NewZhuGeService(client *zhuge.Client) *ZhuGeService {
-	return &ZhuGeService{client: client}
+func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
+	return &ZhuGeService{client: client, Open: open}
 }
 
 // TrackPoint 积分打点
 func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
+	if !srv.Open {
+		app.Logger.Info("诸葛打点已关闭", point)
+		return
+	}
 	err := srv.client.Track(types.Event{
 		Dt:    "evt",
 		Pl:    "js",
@@ -31,7 +37,7 @@ func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 			Ct:   time.Now().UnixMilli(),
 			Eid:  "积分变动",
 			Cuid: point.OpenId,
-			Sid:  0,
+			Sid:  time.Now().UnixMilli(),
 		},
 	}, map[string]interface{}{
 		"积分类型": point.PointType.RealText(),

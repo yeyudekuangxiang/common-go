@@ -26,7 +26,7 @@ func NewClient(appKey, secretKey string) *Client {
 
 func (client Client) Sign() string {
 	signStr := client.AppKey + ":" + client.SecretKey
-	return base64.StdEncoding.EncodeToString([]byte(signStr))
+	return "Basic " + base64.StdEncoding.EncodeToString([]byte(signStr))
 }
 func (client Client) Track(event types.Event, others map[string]interface{}) error {
 	var pr map[string]interface{}
