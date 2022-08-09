@@ -15,6 +15,7 @@ import (
 	repository2 "mio/internal/pkg/repository"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"strconv"
@@ -244,9 +245,16 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string) erro
 	}
 	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
 	if err != nil {
-		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
+		app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
 	}
 	userInfo.Risk = rest.RiskRank
+
+	//获取用户地址  todo 加入队列
+	city, err := baidu.IpToCity(cip)
+	if err != nil {
+		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+	}
+	userInfo.CityCode = city.Content.AddressDetail.Adcode
 
 	return u.r.Save(&userInfo)
 }
