@@ -69,7 +69,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		isNewUser = true
 		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
-			AvatarUrl:   "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/default.png",
+			AvatarUrl:   "https://resources.miotech.com/static/mp2c/images/user/default.png",
 			Nickname:    "绿喵用户" + util.RandomStr(6, util.RandomStrNumber, util.RandomStrLower),
 			PhoneNumber: "",
 			Source:      entity.UserSourceMio,

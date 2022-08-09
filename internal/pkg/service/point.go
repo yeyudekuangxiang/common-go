@@ -145,6 +145,54 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 	return balance, err
 }
 
+//ChangeUserPointByOffline 线下发积分
+func (srv PointService) ChangeUserPointByOffline(dto srv_types.ChangeUserPointDTO) (int64, error) {
+	var balance int64 = 0
+	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
+		//查询积分账户
+		pointRepo := repository.NewPointRepository(ctx)
+		point, err := pointRepo.FindForUpdate(dto.OpenId)
+		if err != nil {
+			return err
+		}
+		//判读积分余额是否充足
+		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
+			return errors.New("积分不足")
+		}
+		if point.Id == 0 {
+			//创建积分账户
+			point.OpenId = dto.OpenId
+			point.Balance += dto.ChangePoint
+			if err := pointRepo.Create(&point); err != nil {
+				return err
+			}
+		} else {
+			//更新积分账户
+			point.Balance += dto.ChangePoint
+			if err := pointRepo.Save(&point); err != nil {
+				return err
+			}
+		}
+		balance = point.Balance
+		//增加积分变动记录
+		tranService := NewPointTransactionService(ctx)
+		_, err = tranService.CreateTransaction(CreatePointTransactionParam{
+			BizId:        dto.BizId,
+			OpenId:       dto.OpenId,
+			Type:         dto.Type,
+			Value:        dto.ChangePoint,
+			AdminId:      dto.AdminId,
+			Note:         dto.Note,
+			AdditionInfo: dto.AdditionInfo,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return balance, err
+}
+
 //AdminAdjustUserPoint 管理员变动积分
 func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserPointParam) error {
 

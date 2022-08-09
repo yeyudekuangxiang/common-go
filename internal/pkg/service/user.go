@@ -15,6 +15,7 @@ import (
 	repository2 "mio/internal/pkg/repository"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"strconv"
@@ -217,7 +218,7 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 
 	return false
 }
-func (u UserService) BindPhoneByCode(userId int64, code string) error {
+func (u UserService) BindPhoneByCode(userId int64, code string, cip string) error {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
 		return errors.New("未查到用户信息")
@@ -233,6 +234,28 @@ func (u UserService) BindPhoneByCode(userId int64, code string) error {
 		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
 	}
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
+
+	//检测用户风险等级
+	userRiskRankParam := wxapp.UserRiskRankParam{
+		AppId:    config.Config.Weapp.AppId,
+		OpenId:   userInfo.OpenId,
+		Scene:    1,
+		ClientIp: cip,
+		MobileNo: userInfo.PhoneNumber,
+	}
+	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
+	if err != nil {
+		app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
+	}
+	userInfo.Risk = rest.RiskRank
+
+	//获取用户地址  todo 加入队列
+	city, err := baidu.IpToCity(cip)
+	if err != nil {
+		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+	}
+	userInfo.CityCode = city.Content.AddressDetail.Adcode
+
 	return u.r.Save(&userInfo)
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
