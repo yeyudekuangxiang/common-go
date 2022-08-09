@@ -5,13 +5,18 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"mio/internal/app/cmd/certificate"
+	"mio/internal/app/cmd/db"
+	"mio/internal/app/cmd/gitlab"
+	"mio/internal/app/cmd/topic"
+	"mio/internal/app/cmd/user"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "mp2c",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
@@ -29,7 +34,7 @@ to quickly create a Cobra application.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -44,5 +49,14 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().StringP("config", "c", "./config.ini", "配置文件路径")
+	RootCmd.Flags().StringP("config", "c", "./config.ini", "配置文件路径")
+
+	cmds()
+}
+func cmds() {
+	RootCmd.AddCommand(user.UserCmd)
+	RootCmd.AddCommand(topic.TopicCmd)
+	RootCmd.AddCommand(gitlab.GitlabCmd)
+	RootCmd.AddCommand(db.DBCmd)
+	RootCmd.AddCommand(certificate.CertificateCmd)
 }

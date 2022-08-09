@@ -2,7 +2,7 @@
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
 */
-package cmd
+package user
 
 import (
 	"fmt"
@@ -60,7 +60,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	userCmd.AddCommand(validatorCmd)
+	UserCmd.AddCommand(validatorCmd)
 
 	// Here you will define your flags and configuration settings.
 

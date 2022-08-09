@@ -2,7 +2,7 @@
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
 */
-package cmd
+package db
 
 import (
 	"github.com/shopspring/decimal"
