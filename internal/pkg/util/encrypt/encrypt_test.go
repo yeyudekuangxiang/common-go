@@ -1,13 +1,11 @@
 package encrypt
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"testing"
 )
@@ -116,32 +114,4 @@ func aesDecrypt(cryted string, key string) string {
 		return err.Error()
 	}
 	return string(origin)
-}
-
-//补码
-func PKCS7Padding(ciphertext []byte, blocksize int) []byte {
-	padding := blocksize - len(ciphertext)%blocksize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
-}
-
-func PKCS5Padding(cipherText []byte, blockSize int) []byte {
-	padding := blockSize - len(cipherText)%blockSize
-	padText := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(cipherText, padText...)
-}
-
-//去码
-func PKCS7Trimming(encrypt []byte) ([]byte, error) {
-	length := len(encrypt)
-	if length == 0 {
-		return nil, errors.New("加密字符串错误！")
-	}
-	//获取填充的个数
-	unPadding := int(encrypt[length-1])
-	return encrypt[:(length - unPadding)], nil
-}
-func PKCS5Trimming(encrypt []byte) []byte {
-	padding := encrypt[len(encrypt)-1]
-	return encrypt[:len(encrypt)-int(padding)]
 }
