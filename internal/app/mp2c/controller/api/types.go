@@ -2,7 +2,6 @@ package api
 
 import (
 	"mio/internal/app/mp2c/controller"
-	"mio/internal/pkg/util/timeutils"
 	"time"
 )
 
@@ -72,11 +71,11 @@ type PointCollectForm struct {
 }
 
 type UpdateUserInfoForm struct {
-	Nickname    string         `json:"nickname" form:"nickname"`
-	Avatar      string         `json:"avatar" form:"avatar"`
-	Gender      string         `json:"gender" form:"gender" binding:"omitempty,oneof=MALE FEMALE"`
-	Birthday    timeutils.Date `json:"birthday" form:"birthday" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
-	PhoneNumber string         `json:"phoneNumber" form:"phoneNumber"`
+	Nickname    string  `json:"nickname" form:"nickname"`
+	Avatar      string  `json:"avatar" form:"avatar"`
+	Gender      *string `json:"gender" form:"gender" binding:"omitempty,oneof=MALE FEMALE"`
+	Birthday    *string `json:"birthday" form:"birthday" binding:"omitempty,datetime=2006-01-02"`
+	PhoneNumber *string `json:"phoneNumber" form:"phoneNumber" binding:"omitempty,gt=0"`
 }
 type DuiBaNoLoginH5Form struct {
 	ActivityId string `json:"activityId" form:"activityId" `

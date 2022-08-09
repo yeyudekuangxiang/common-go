@@ -17,6 +17,7 @@ var Config = app{
 	OSS:      ossSetting{},
 	BaiDu:    baiDuSetting{},
 	Java:     javaConfig{},
+	Zhuge:    zhugeConfig{},
 }
 
 type app struct {
@@ -32,6 +33,7 @@ type app struct {
 	OSS      ossSetting      `ini:"oss"`
 	BaiDu    baiDuSetting    `ini:"baidu"`
 	Java     javaConfig      `ini:"java"`
+	Zhuge    zhugeConfig     `ini:"zhuge"`
 }
 type appSetting struct {
 	TokenKey string
@@ -92,6 +94,10 @@ type baiDuSetting struct {
 type javaConfig struct {
 	JavaLoginUrl string `binding:"required"`
 	JavaWhoAmi   string `binding:"required"`
+}
+type zhugeConfig struct {
+	AppKey    string
+	AppSecret string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {

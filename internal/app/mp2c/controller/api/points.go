@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"time"
 )
 
 var DefaultPointController = PointsController{}
@@ -23,12 +24,16 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 		return nil, err
 	}
 
+	endTime := form.EndTime
+	if !endTime.IsZero() {
+		endTime = endTime.Add(time.Hour * 24).Add(-time.Nanosecond)
+	}
 	user := apiutil.GetAuthUser(ctx)
 	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
 	list := pointTranService.GetListBy(repository.GetPointTransactionListBy{
 		OpenId:    user.OpenId,
 		StartTime: model.Time{Time: form.StartTime},
-		EndTime:   model.Time{Time: form.EndTime},
+		EndTime:   model.Time{Time: endTime},
 		OrderBy:   entity.OrderByList{entity.OrderByPointTranCTDESC},
 	})
 

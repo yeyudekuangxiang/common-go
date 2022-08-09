@@ -85,7 +85,6 @@ func (srv GDdbService) HomePage(userId, inviteId int64) (GDDbHomePageResponse, e
 }
 
 func (srv GDdbService) IsNewUser(user entity2.User) bool {
-
 	stringToTime, _ := time.Parse("2006-01-02 15:04:05", "2022-06-19 00:00:00")
 	if stringToTime.After(user.Time.Time) && user.PhoneNumber == "" {
 		return false

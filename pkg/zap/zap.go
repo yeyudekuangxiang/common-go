@@ -85,5 +85,20 @@ func DefaultLogger(level ...string) *zap.Logger {
 
 	encoder := getEncoder()
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), zapcore.AddSync(os.Stdout), lev)
-	return zap.New(core, zap.AddCaller())
+	return zap.New(core, zap.AddCaller(), zap.Hooks(func(entry zapcore.Entry) error {
+		if entry.Level >= zapcore.ErrorLevel {
+			if setting.Config.App.Env != "prod" {
+				return nil
+			}
+			err := wxwork.SendRobotMessage(setting.Constants.WxWorkBugRobotKey, wxwork.Markdown{
+				Content: fmt.Sprintf(
+					"**容器:**%s \n\n**来源:**日志 \n\n**level:**%s \n\n**time**:%s \n\n**message**:%s \n\n**caller**:%+v \n\n**stack**:%s", os.Getenv("HOSTNAME"), entry.Level, entry.Time.Format("2006-01-02 15:04:05"), entry.Message, entry.Caller, entry.Stack),
+			})
+
+			if err != nil {
+				log.Printf("推送异常到企业微信失败 %+v %v", entry, err)
+			}
+		}
+		return nil
+	}))
 }

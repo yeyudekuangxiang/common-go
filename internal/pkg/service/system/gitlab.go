@@ -3,9 +3,15 @@ package system
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util/httputil"
+	glbtyp "mio/pkg/gitlab/types"
+	"mio/pkg/wxwork"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 var DefaultGitlabService = GitlabService{}
@@ -13,8 +19,20 @@ var DefaultGitlabService = GitlabService{}
 type GitlabService struct {
 }
 
+func NewGitlabService() *GitlabService {
+	return &GitlabService{}
+}
+
 const private_token = "yoQqAi__rVuZj8kRwgfh"
 const base_url = "https://gitlab.miotech.com/api/v4"
+
+var gitlabRefMap = map[string]string{
+	"^master$":                  "预发布版本",
+	"^develop$":                 "测试版本",
+	"^feature-.+$":              "开发版本 [{ref}]",
+	"^hotfix-.+$":               "热修复版本 [{ref}]",
+	"v[0-9]+\\.[0-9]+\\.[0-9]+": "正式版本 [{ref}]",
+}
 
 // MergeBranch 合并
 func (srv GitlabService) MergeBranch(projectId int, source, target string) error {
@@ -93,4 +111,123 @@ func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, err
 		return "", err
 	}
 	return mergeRequest.State, err
+}
+func (srv GitlabService) Callback(event glbtyp.EventType, body []byte) error {
+	switch event {
+	case glbtyp.EventTypeDeploymentHook:
+		data := glbtyp.Deployment{}
+		err := json.Unmarshal(body, &data)
+		if err != nil {
+			return err
+		}
+		return srv.deployment(data)
+	}
+	return nil
+}
+func (srv GitlabService) deployment(deployment glbtyp.Deployment) error {
+	switch deployment.Status {
+	case "running":
+		return srv.deploymentRunning(deployment)
+	case "success":
+		return srv.deploymentSuccess(deployment)
+	case "failed":
+		return srv.deployFailed(deployment)
+	default:
+		return srv.deployCancel(deployment)
+	}
+}
+func (srv GitlabService) formatName(ref string) string {
+	result := ""
+	for regStr, name := range gitlabRefMap {
+		reg, err := regexp.Compile(regStr)
+		if err != nil {
+			panic(err)
+		}
+		if reg.MatchString(ref) {
+			result = name
+			break
+		}
+	}
+	return strings.ReplaceAll(result, "{ref}", ref)
+}
+func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
+
+	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+		Content: fmt.Sprintf(`## %s 开始发布通知
+**应用名称:**[%s](%s)
+**应用描述:**%s
+**发布分支:**%s
+**发布描述:**%s
+**发布时间:**%s
+**发布人:**%s
+**查看发布:**[%d](%s)
+`, srv.formatName(deployment.Ref),
+			deployment.Project.Name, deployment.Project.WebUrl,
+			deployment.Project.Description,
+			deployment.Ref,
+			deployment.CommitTitle,
+			deployment.StatusChangedAt,
+			deployment.User.Name,
+			deployment.DeployableId, deployment.DeployableUrl),
+	})
+}
+func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
+	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+		Content: fmt.Sprintf(`## %s 发布成功通知
+**应用名称:**[%s](%s)
+**应用描述:**%s
+**发布分支:**%s
+**发布描述:**%s
+**发布时间:**%s
+**发布人:**%s
+**查看发布:**[%d](%s)
+`, srv.formatName(deployment.Ref),
+			deployment.Project.Name, deployment.Project.WebUrl,
+			deployment.Project.Description,
+			deployment.Ref,
+			deployment.CommitTitle,
+			deployment.StatusChangedAt,
+			deployment.User.Name,
+			deployment.DeployableId, deployment.DeployableUrl),
+	})
+}
+func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
+	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+		Content: fmt.Sprintf(`## %s 发布失败通知
+**应用名称:**[%s](%s)
+**应用描述:**%s
+**发布分支:**%s
+**发布描述:**%s
+**发布时间:**%s
+**发布人:**%s
+**查看发布:**[%d](%s)
+`, srv.formatName(deployment.Ref),
+			deployment.Project.Name, deployment.Project.WebUrl,
+			deployment.Project.Description,
+			deployment.Ref,
+			deployment.CommitTitle,
+			deployment.StatusChangedAt,
+			deployment.User.Name,
+			deployment.DeployableId, deployment.DeployableUrl),
+	})
+}
+func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
+	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+		Content: fmt.Sprintf(`## %s 发布取消通知
+**应用名称:**[%s](%s)
+**应用描述:**%s
+**发布分支:**%s
+**发布描述:**%s
+**发布时间:**%s
+**发布人:**%s
+**查看发布:**[%d](%s)
+`, srv.formatName(deployment.Ref),
+			deployment.Project.Name, deployment.Project.WebUrl,
+			deployment.Project.Description,
+			deployment.Ref,
+			deployment.CommitTitle,
+			deployment.StatusChangedAt,
+			deployment.User.Name,
+			deployment.DeployableId, deployment.DeployableUrl),
+	})
 }

@@ -71,6 +71,7 @@ func (srv PointService) DecUserPoint(dto srv_types.DecUserPointDTO) (int64, erro
 func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64, error) {
 	lockKey := "changeUserPoint" + dto.OpenId
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
+		go srv.trackPoint(dto, "操作频繁")
 		return 0, errors.New("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
@@ -80,6 +81,8 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		limitService := NewPointTransactionCountLimitService(srv.ctx)
 		err := limitService.CheckLimitAndUpdate(dto.Type, dto.OpenId)
 		if err != nil {
+			//积分打点
+			go srv.trackPoint(dto, err.Error())
 			return 0, err
 		}
 	}
@@ -132,6 +135,14 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		}
 		return nil
 	})
+
+	//积分打点
+	if err != nil {
+		go srv.trackPoint(dto, err.Error())
+	} else {
+		go srv.trackPoint(dto, "")
+	}
+
 	return balance, err
 }
 
@@ -166,4 +177,15 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 		Note:        param.Note,
 	})
 	return err
+}
+
+func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage string) {
+	go DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
+		OpenId:      dto.OpenId,
+		PointType:   dto.Type,
+		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "desc").String(),
+		Value:       uint(dto.ChangePoint),
+		IsFail:      util.Ternary(failMessage == "", false, true).Bool(),
+		FailMessage: failMessage,
+	})
 }

@@ -228,6 +228,17 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 func (srv DuiBaService) CheckSign(param duiba.Param) error {
 	return srv.client.CheckSign(param)
 }
+
+var duibaPointAddTypeMap = map[duibaApi.PointAddType]entity.PointTransactionType{
+	duibaApi.PointAddTypeGame:       entity.POINT_DUIBA_GAME,
+	duibaApi.PointAddTypeSign:       entity.POINT_DUIBA_SIGN,
+	duibaApi.PointAddTypeTask:       entity.POINT_DUIBA_TASK,
+	duibaApi.PointAddTypeReSign:     entity.POINT_DUIBA_SIGN,       //补签
+	duibaApi.PointAddTypePostSale:   entity.POINT_DUIBA_POSTSALE,   //售后退积分
+	duibaApi.PointAddTypeCancelShip: entity.POINT_DUIBA_CANCELSHIP, //取消发货
+	duibaApi.PointAddTypeHdTool:     entity.POINT_DUIBA_HDTOOL,
+}
+
 func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string, err error) {
 	log, err := DefaultDuiBaPointAddLogService.FindBy(FindDuiBaPointAddLogBy{
 		OrderNum: form.OrderNum,
@@ -256,10 +267,14 @@ func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string,
 		return
 	}
 
+	pointType := duibaPointAddTypeMap[form.Type]
+	if pointType == "" {
+		pointType = entity.POINT_ADJUSTMENT
+	}
 	bizId := util.UUID()
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
-		Type:         entity.POINT_ADJUSTMENT,
+		Type:         pointType,
 		ChangePoint:  form.Credits.ToInt(),
 		BizId:        bizId,
 		AdminId:      0,

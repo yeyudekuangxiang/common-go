@@ -23,13 +23,13 @@ func (p PointTransactionType) Text() string {
 	case POINT_BIKE_RIDE:
 		return "骑行"
 	case POINT_ECAR:
-		return "电动车主"
+		return "新能源充电"
 	case POINT_COUPON:
 		return "券码兑换"
 	case POINT_QUIZ:
-		return "答题活动"
+		return "答题"
 	case POINT_PARTNERSHIP:
-		return "合作活动"
+		return "活动奖励"
 	case POINT_GREEN_TORCH:
 		return "绿炬人抽奖"
 	case POINT_ADJUSTMENT:
@@ -37,17 +37,25 @@ func (p PointTransactionType) Text() string {
 	case POINT_DUIBA_HDTOOL:
 		return "活动抽奖"
 	case POINT_DUIBA_GAME:
-		return "游戏"
+		return "游戏奖励"
 	case POINT_DUIBA_SIGN:
-		return "活动奖励"
+		return "签到"
 	case POINT_DUIBA_ALIPAY, POINT_DUIBA_QB, POINT_DUIBA_COUPON, POINT_DUIBA_OBJECT, POINT_DUIBA_PHONEBILL, POINT_DUIBA_PHONEFLOW, POINT_DUIBA_VIRTUAL:
 		return "积分兑换"
 	case POINT_DUIBA_REFUND:
-		return "积分退还"
+		return "退积分"
+	case POINT_DUIBA_TASK:
+		return "PK赛"
+	case POINT_DUIBA_CANCELSHIP:
+		return "取消发货"
+	case POINT_DUIBA_POSTSALE:
+		return "退积分"
 	case POINT_SYSTEM_REDUCE:
 		return "系统扣减"
 	case POINT_SYSTEM_ADD:
 		return "系统补发"
+	case POINT_JHX:
+		return "公交出行"
 	}
 	return "未知积分"
 }
@@ -71,7 +79,8 @@ func (p PointTransactionType) RealText() string {
 		return "兑吧虚拟商品"
 	case POINT_DUIBA_REFUND:
 		return "兑吧积分退还"
-
+	case POINT_JHX:
+		return "金华行"
 	}
 	return p.Text()
 }
@@ -106,6 +115,9 @@ const (
 	POINT_JHX             PointTransactionType = "JHX"             //金华行
 	POINT_ARTICAL         PointTransactionType = "ARTICAL"         //发文章
 	POINT_RECOMMEND       PointTransactionType = "RECOMMEND"       //文章/评论被推荐
+	POINT_DUIBA_POSTSALE   PointTransactionType = "DUIBA_POSTSALE"   //售后退积分 退积分
+	POINT_DUIBA_CANCELSHIP PointTransactionType = "DUIBA_CANCELSHIP" //取消发货 退积分
+	POINT_DUIBA_TASK       PointTransactionType = "DUIBA_TASK"       //pk比赛 pk比赛
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -135,6 +147,9 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_DUIBA_REFUND,
 	POINT_SYSTEM_REDUCE,
 	POINT_SYSTEM_ADD,
+	POINT_DUIBA_POSTSALE,
+	POINT_DUIBA_CANCELSHIP,
+	POINT_DUIBA_TASK,
 	POINT_ARTICAL,
 	POINT_RECOMMEND,
 }

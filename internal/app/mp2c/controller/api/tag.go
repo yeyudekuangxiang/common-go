@@ -22,7 +22,7 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 	list, total, err := service.DefaultTagService.GetTagPageList(repository.GetTagPageListBy{
 		Offset:  form.Offset(),
 		Limit:   form.Limit(),
-		OrderBy: entity2.OrderByList{entity2.OrderByTopicSortDesc},
+		OrderBy: entity2.OrderByList{entity2.OrderByTagSortDesc},
 	})
 	if err != nil {
 		return nil, err

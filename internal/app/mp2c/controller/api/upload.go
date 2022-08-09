@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -32,7 +31,6 @@ func (UploadController) UploadPointCollectImage(ctx *gin.Context) (gin.H, error)
 		return nil, err
 	}
 
-	fmt.Println(fileHeader.Filename, fileHeader.Size)
 	if fileHeader.Size > 5*1024*1024 {
 		return nil, errors.New("文件大小不能超过5M")
 	}

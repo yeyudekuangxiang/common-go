@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/medivhzhan/weapp/v3"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -73,9 +72,6 @@ func (srv StepHistoryService) CreateOrUpdate(param CreateOrUpdateStepHistoryPara
 // updateStepHistoryByList 根据微信运动数据列表创建或者更新步行历史记录(最多更新最近8天数据)
 func (srv StepHistoryService) updateStepHistoryByList(openId string, stepInfoList []weapp.SetpInfo) error {
 
-	for _, step := range stepInfoList {
-		fmt.Println(time.Unix(step.Timestamp, 0), step.Step)
-	}
 	//只更新最近8天的
 	if len(stepInfoList) > 8 {
 		stepInfoList = stepInfoList[len(stepInfoList)-8:]

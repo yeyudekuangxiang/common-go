@@ -65,9 +65,9 @@ func (u TagRepository) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, t
 	for _, orderBy := range by.OrderBy {
 		switch orderBy {
 		case entity.OrderByTagSortAsc:
-			db.Order("tag asc")
+			db.Order("sort asc")
 		case entity.OrderByTagSortDesc:
-			db.Order("tag desc")
+			db.Order("sort desc")
 		}
 	}
 

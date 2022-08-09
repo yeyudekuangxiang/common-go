@@ -1,4 +1,4 @@
-package system
+package open
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"mio/internal/pkg/service/system"
 	"mio/internal/pkg/util"
 	"mio/pkg/gitlab"
-	"strings"
+	glbtyp "mio/pkg/gitlab/types"
 )
 
 var DefaultGitlabController = GitlabController{}
@@ -16,21 +16,25 @@ var DefaultGitlabController = GitlabController{}
 type GitlabController struct {
 }
 
-func (ctr GitlabController) Callback(ctx *gin.Context) (gin.H, error) {
-	gitlabEvent := ctx.GetHeader("X-Gitlab-Event")
-	body, _ := ioutil.ReadAll(ctx.Request.Body)
-	app.Logger.Infof("event:%s body:%s", gitlabEvent, string(body))
-	_ = ioutil.WriteFile("./runtime/"+strings.ReplaceAll(gitlabEvent, " ", "")+".json", body, 0777)
-	switch gitlabEvent {
-	case "Merge Request Hook":
-		return ctr.MergeRequestCallback(body)
+func (GitlabController) WebHook(ctx *gin.Context) (gin.H, error) {
+	event := ctx.GetHeader("X-Gitlab-Event")
+	var ev glbtyp.EventType
+	switch event {
+	case "Deployment Hook":
+		ev = glbtyp.EventTypeDeploymentHook
+	default:
+		return nil, nil
 	}
-
-	return nil, nil
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	defer ctx.Request.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	return nil, system.NewGitlabService().Callback(ev, body)
 }
 
 // MergeRequestCallback 当创建新的合并请求、更新/合并/关闭现有合并请求或在源分支中添加提交时触发
-func (ctr GitlabController) MergeRequestCallback(data []byte) (gin.H, error) {
+func (GitlabController) MergeRequestCallback(data []byte) (gin.H, error) {
 	form := gitlab.GitlabWebHookForm{}
 	if err := json.Unmarshal(data, &form); err != nil {
 		return nil, err

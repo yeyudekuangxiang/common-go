@@ -2,7 +2,6 @@ package business
 
 import (
 	"errors"
-	"fmt"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"
@@ -48,7 +47,6 @@ func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*bus
 
 	rank.LikeNum += likeNumStep
 
-	fmt.Printf("%+v\n", rank)
 	return like, srv.repo.Save(&rank)
 }
 
