@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/timeutils"
 )
 
 var DefaultInviteService = InviteService{}
@@ -23,10 +24,20 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 		panic(err)
 	}
 	infoList := make([]InviteInfo, 0)
+
+	pointMap := make(map[int64]int)
 	for _, invite := range inviteList {
 		user, err := DefaultUserService.GetUserByOpenId(invite.NewUserOpenId)
 		if err != nil {
 			return nil, err
+		}
+
+		d := timeutils.StartOfDay(invite.Time.Time).Unix()
+		point := 0
+
+		if pointMap[d] < 5 {
+			pointMap[d] = pointMap[d] + 1
+			point = entity.PointCollectValueMap[entity.POINT_INVITE]
 		}
 
 		infoList = append(infoList, InviteInfo{
@@ -34,6 +45,7 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 			Nickname:  user.Nickname,
 			AvatarUrl: user.AvatarUrl,
 			Time:      user.Time,
+			Point:     point,
 		})
 	}
 	return infoList, nil

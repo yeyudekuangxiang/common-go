@@ -25,6 +25,7 @@ func (InviteController) GetShareQrCode(ctx *gin.Context) (gin.H, error) {
 func (InviteController) GetInviteList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	list, err := service.DefaultInviteService.GetInviteList(user.OpenId)
+
 	return gin.H{
 		"list": list,
 	}, err
