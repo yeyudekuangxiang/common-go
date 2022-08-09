@@ -15,6 +15,7 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/baidu"
 	"sort"
 	"strconv"
 	"time"
@@ -44,7 +45,7 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		return nil, errCheck
 	}
 	cityCode := 0
-	cityInfo, cityErr := util.IpToCity(dto.Ip)
+	cityInfo, cityErr := baidu.IpToCity(dto.Ip)
 	if cityErr == nil {
 		cityCode = cityInfo.Content.AddressDetail.CityCode
 	}
