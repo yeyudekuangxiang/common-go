@@ -56,6 +56,8 @@ func (p PointTransactionType) Text() string {
 		return "系统补发"
 	case POINT_JHX:
 		return "公交出行"
+	case POINT_PLATFORM:
+		return "活动奖励" //平台活动
 	}
 	return "未知积分"
 }
@@ -81,6 +83,8 @@ func (p PointTransactionType) RealText() string {
 		return "兑吧积分退还"
 	case POINT_JHX:
 		return "金华行"
+	case POINT_PLATFORM:
+		return "平台活动奖励"
 	}
 	return p.Text()
 }
@@ -96,6 +100,7 @@ const (
 	POINT_COUPON           PointTransactionType = "COUPON"           //券码兑换
 	POINT_QUIZ             PointTransactionType = "QUIZ"             //答题活动
 	POINT_PARTNERSHIP      PointTransactionType = "PARTNERSHIP"      //合作活动
+	POINT_PLATFORM         PointTransactionType = "PLATFORM"         //合作活动
 	POINT_GREEN_TORCH      PointTransactionType = "GREEN_TORCH"      //绿炬人抽奖
 	POINT_ADJUSTMENT       PointTransactionType = "ADJUSTMENT"       //积分调整
 	POINT_DUIBA_ALIPAY     PointTransactionType = "DUIBA_ALIPAY"     //兑吧支付宝 积分兑换
@@ -143,6 +148,7 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_DUIBA_REFUND,
 	POINT_SYSTEM_REDUCE,
 	POINT_SYSTEM_ADD,
+	POINT_PLATFORM,
 }
 
 const (
