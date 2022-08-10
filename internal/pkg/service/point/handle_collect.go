@@ -1,13 +1,23 @@
 package point
 
-func (c *clientHandle) coffeeCup(opts ...interface{}) error {
+func (c *clientHandle) coffeeCup() error {
+
 	return nil
 }
 
-func (c *clientHandle) bikeRide(opts ...interface{}) error {
+func (c *clientHandle) bikeRide() error {
+
 	return nil
 }
 
-func (c *clientHandle) powerReplace(opts ...interface{}) error {
+func (c *clientHandle) powerReplace() error {
+	return nil
+}
+
+func (c *clientHandle) invite() error {
+	return nil
+}
+
+func (c *clientHandle) article() error {
 	return nil
 }
