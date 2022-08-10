@@ -45,7 +45,12 @@ func adminRouter(router *gin.Engine) {
 			bannerRouter.GET("/list", apiutil.Format(admin.DefaultBannerController.GetPageList))
 
 		}
-
+		duiBaRouter := adminRouter.Group("/dui-ba")
+		{
+			duiBaRouter.POST("/create", apiutil.Format(admin.DefaultDuiBaActivityController.Create))
+			duiBaRouter.POST("/update", apiutil.Format(admin.DefaultDuiBaActivityController.Update))
+			//duiBaRouter.GET("/list", apiutil.Format(admin.DefaultDuiBaActivityController.GetPageList))
+		}
 		adminRouter.GET("upload/token", apiutil.Format(admin.DefaultUploadController.GetUploadTokenInfo))
 
 	}

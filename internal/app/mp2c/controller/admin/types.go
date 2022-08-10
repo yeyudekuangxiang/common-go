@@ -112,3 +112,11 @@ type GetBannerPageForm struct {
 	Status int8   `json:"status" form:"status" binding:"" alias:"上线和下线状态"`
 	controller.PageFrom
 }
+
+type CreateDuiBaActivityForm struct {
+	Name        string `json:"name" form:"name" binding:"required" alias:"链接名称"`
+	Cid         int64  `json:"cid" form:"cid" binding:"" alias:"渠道id"`
+	Type        int8   `json:"type" form:"type" binding:"" alias:"类别"`
+	ActivityUrl string `json:"activity_url" form:"activity_url" binding:"required" alias:"兑吧链接"`
+	ActivityId  string `json:"activity_id" form:"activity_id" binding:"" alias:"活动"`
+}
