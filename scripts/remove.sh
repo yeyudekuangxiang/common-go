@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "remove start"
 container_name='mp2c-go'
 
