@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 
 echo "package start"
 cd $(dirname $(readlink -f "$0"))/../
@@ -31,6 +32,7 @@ else
   echo "THIS CI_COMMIT_REF_NAME $CI_COMMIT_REF_NAME DOES NOT REQUIRE DEPLOYMENT"
   exit 1
 fi
+sed -i "s/^appVersion:.*$/appVersion: $tag/" build/mp2c/Chart.yaml
 remoteAppVersion=`helm list -n ${namespace} --filter ^${container_name}$ | grep ${container_name} | awk '{print $10}'`
 echo "deploy namespace:$namespace chart:$1 container_name:$container_name branch:$CI_COMMIT_REF_SLUG tag:$tag remoteAppVersion:$remoteAppVersion replicaCount:$replicaCount"
 if [ -z $remoteAppVersion ]; then
