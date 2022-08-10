@@ -4,16 +4,10 @@ import (
 	"github.com/wagslane/go-rabbitmq"
 	"log"
 	"mio/config"
-	"mio/internal/app/consumer/hello"
 	"mio/internal/pkg/core/app"
 	"mio/pkg/zap"
+	"os"
 )
-
-func fatalOnErr(err error, msg string) {
-	if err != nil {
-		log.Fatal(msg, err)
-	}
-}
 
 var consumer rabbitmq.Consumer
 
@@ -27,17 +21,32 @@ func Run() {
 		log.Fatal("创建消费者失败", err)
 	}
 
-	err = consumer.StartConsuming(
-		hello.DealHello,
-		"hello",
-		[]string{"hello"},
-		rabbitmq.WithConsumeOptionsBindingExchangeName("hello-exchange"),
-		rabbitmq.WithConsumeOptionsBindingExchangeKind("topic"),
-	)
-	fatalOnErr(err, "开始消费失败")
-
+	Router()
 }
+func StartConsume(exchange, queue, topic string, routerKeys []string, handler rabbitmq.Handler) {
+	err := consumer.StartConsuming(
+		handler,
+		queue,
+		routerKeys,
+		rabbitmq.WithConsumeOptionsBindingExchangeName(exchange),
+		rabbitmq.WithConsumeOptionsBindingExchangeKind(topic),
+	)
+	closeOnErr(err, "创建消费者失败")
+}
+func closeOnErr(err error, msg string) {
+	if err != nil {
+		log.Println(msg, err)
 
+		log.Println("关闭消费者...")
+		err := Close()
+		if err != nil {
+			log.Println("关闭消费者异常", err)
+		} else {
+			log.Println("关闭消费者成功")
+		}
+		os.Exit(1)
+	}
+}
 func Close() error {
 	return consumer.Close()
 }

@@ -1,4 +1,4 @@
-package producer
+package hellopdr
 
 import (
 	"github.com/wagslane/go-rabbitmq"

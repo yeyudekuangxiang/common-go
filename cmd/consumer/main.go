@@ -24,8 +24,9 @@ func main() {
 		err := consumer.Close()
 		if err != nil {
 			log.Println("关闭消费者异常", err)
+		} else {
+			log.Println("关闭消费者成功")
 		}
-		log.Println("关闭消费者成功")
 	}()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)

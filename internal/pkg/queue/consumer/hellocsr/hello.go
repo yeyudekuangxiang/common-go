@@ -1,4 +1,4 @@
-package hello
+package hellocsr
 
 import (
 	"github.com/wagslane/go-rabbitmq"
