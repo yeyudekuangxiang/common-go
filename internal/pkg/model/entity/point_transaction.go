@@ -120,9 +120,9 @@ const (
 	POINT_SYSTEM_REDUCE    PointTransactionType = "SYSTEM_REDUCE"    //系统扣减
 	POINT_SYSTEM_ADD       PointTransactionType = "SYSTEM_ADD"       //系统补发
 	POINT_JHX              PointTransactionType = "JHX"              //金华行
-	POINT_POWER_REPLACE   PointTransactionType = "POWER_REPLACE"   //电车换电
-	POINT_ARTICAL         PointTransactionType = "ARTICAL"         //发文章
-	POINT_RECOMMEND       PointTransactionType = "RECOMMEND"       //文章/评论被推荐
+	POINT_POWER_REPLACE    PointTransactionType = "POWER_REPLACE"    //电车换电
+	POINT_ARTICAL          PointTransactionType = "ARTICAL"          //发文章
+	POINT_RECOMMEND        PointTransactionType = "RECOMMEND"        //文章/评论被推荐
 )
 
 var PointTransactionTypeList = []PointTransactionType{

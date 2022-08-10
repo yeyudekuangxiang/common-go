@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"net/http"
 	"time"
 )
@@ -47,7 +46,7 @@ func (srv *AccessTokenServer) Token() (token string, err error) {
 	//return srv.RefreshToken("")
 	token, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
 	if err != nil && err != redis.Nil {
-		app.Logger.Error(err)
+		return "", err
 	}
 	if token != "" {
 		return
@@ -66,7 +65,7 @@ func (srv *AccessTokenServer) Token() (token string, err error) {
 func (srv *AccessTokenServer) RefreshToken(currentToken string) (token string, err error) {
 	token, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
 	if err != nil && err != redis.Nil {
-		app.Logger.Error(err)
+		return "", err
 	}
 	if token != "" && currentToken != "" && token != currentToken {
 		return
