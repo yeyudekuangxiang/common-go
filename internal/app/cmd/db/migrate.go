@@ -2,7 +2,7 @@
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
 */
-package cmd
+package db
 
 import (
 	"github.com/spf13/cobra"
@@ -57,7 +57,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	dbCmd.AddCommand(migrateCmd)
+	DBCmd.AddCommand(migrateCmd)
 
 	// Here you will define your flags and configuration settings.
 

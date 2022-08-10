@@ -2,7 +2,7 @@
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
 */
-package cmd
+package topic
 
 import (
 	"github.com/spf13/cobra"
@@ -55,7 +55,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	topicCmd.AddCommand(importCmd)
+	TopicCmd.AddCommand(importCmd)
 
 	importCmd.Flags().StringP("topic", "t", "", "topic file path")
 	importCmd.Flags().StringP("user", "u", "", "user file path")

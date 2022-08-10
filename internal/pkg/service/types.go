@@ -278,6 +278,7 @@ type InviteInfo struct {
 	Nickname  string     `json:"nickname"`
 	AvatarUrl string     `json:"avatarUrl"`
 	Time      model.Time `json:"time"`
+	Point     int        `json:"point"`
 }
 type GetPartnershipPromotionListBy struct {
 	Partnership  entity.PartnershipType
