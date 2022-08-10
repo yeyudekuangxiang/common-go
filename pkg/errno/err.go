@@ -3,7 +3,10 @@ package errno
 import (
 	"errors"
 	"fmt"
+	"log"
 	"mio/config"
+	"mio/pkg/wxwork"
+	"os"
 	"runtime"
 	"strconv"
 )
@@ -49,10 +52,17 @@ var (
 
 // Err 定义错误
 type err struct {
+	status  int    //http状态码 默认200
 	code    int    // 错误码
 	message string // 展示给用户看的
 	err     error  // 保存内部错误信息
 	callers string //保存调用文件名
+}
+
+// Status 修改返回的http状态码
+func (e err) Status(status int) err {
+	e.status = status
+	return e
 }
 
 // WithErr 带上err信息
@@ -96,22 +106,46 @@ func (e err) Message() string {
 func (e err) Error() string {
 	return fmt.Sprintf("Err - code: %d, message: %s ,err: %v", e.code, e.message, e.err)
 }
+func status(status int) int {
+	if status == 0 {
+		return 200
+	}
+	return status
+}
 
-// DecodeErr 解码错误, 获取 Code 和 Message
-func DecodeErr(e error) (int, string) {
+// DecodeErr 解码错误, 获取 httpStatus、 code 和 message
+func DecodeErr(e error) (httpStatus int, code int, message string) {
 	if e == nil {
-		return OK.Code(), OK.Message()
+		return status(OK.status), OK.Code(), OK.Message()
 	}
+
 	if decodeErr, ok := e.(err); ok {
-		if config.Config.App.Debug {
-			return decodeErr.Code(), decodeErr.Error()
+		if config.Config.App.Debug && decodeErr.err != nil {
+			logerr(decodeErr.err, decodeErr.callers)
+			return status(decodeErr.status), decodeErr.Code(), decodeErr.err.Error()
 		}
-		return decodeErr.Code(), decodeErr.Message()
+		return status(decodeErr.status), decodeErr.Code(), decodeErr.Message()
 	}
+
 	if config.Config.App.Debug {
-		return ErrInternalServer.Code(), e.Error()
+		logerr(e, "")
+		return status(ErrInternalServer.status), ErrInternalServer.Code(), e.Error()
 	}
-	return ErrInternalServer.Code(), ErrInternalServer.Error()
-	//后面系统全面替换后使用下面的方式
+	return status(ErrInternalServer.status), ErrInternalServer.Code(), ErrInternalServer.Error()
+
+	//后面系统错误全面替换后使用下面的方式
 	//return ErrInternalServer.Code(), ErrInternalServer.Message()
+}
+func logerr(err error, callers string) {
+	if config.Config.App.Env != "prod" {
+		return
+	}
+	go func() {
+		sendErr := wxwork.SendRobotMessage(config.Constants.WxWorkBugRobotKey, wxwork.Markdown{
+			Content: fmt.Sprintf("**容器:**%s \n\n**来源:**响应 \n\n**消息:**%+v \n\n**堆栈:**%+v", os.Getenv("HOSTNAME"), err.Error(), callers),
+		})
+		if sendErr != nil {
+			log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
+		}
+	}()
 }

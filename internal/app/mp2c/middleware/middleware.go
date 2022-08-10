@@ -37,7 +37,7 @@ func recovery() gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, err interface{}) {
 		e, ok := err.(error)
 		if ok {
-			c.JSON(200, apiutil.FormatErr(e, nil))
+			c.JSON(apiutil.FormatErr(e, nil))
 		} else {
 			c.JSON(200, apiutil.FormatResponse(errno.ErrInternalServer.Code(), nil, fmt.Sprintf("%v", err)))
 		}
@@ -96,14 +96,14 @@ func AuthAdmin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		admin, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || admin == nil {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 
@@ -116,14 +116,14 @@ func AuthBusinessUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("b-token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		user, err := business.DefaultUserService.GetBusinessUserByToken(token)
 		if err != nil || user == nil {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 
@@ -134,14 +134,14 @@ func mustAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		user, err := service2.DefaultUserService.GetUserByToken(token)
 		if err != nil || user.ID == 0 {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -157,7 +157,7 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByToken(token)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth token err", token, err)
-				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 				return
 			}
 		}
@@ -166,13 +166,13 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 				return
 			}
 		}
 
 		if user == nil {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)

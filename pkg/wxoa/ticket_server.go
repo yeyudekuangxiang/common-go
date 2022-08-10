@@ -18,6 +18,7 @@ type TicketTokenServer struct {
 }
 
 func (srv *TicketTokenServer) cacheKey() string {
+
 	return fmt.Sprintf(config.RedisKey.AccessToken, "oaticket", srv.AppId)
 }
 func (srv *TicketTokenServer) getTicket() (*Ticket, error) {
