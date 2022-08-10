@@ -1,8 +1,9 @@
 package point
 
 type CommandDescription struct {
-	Open bool // 是否实现
-	Fn   func(*clientHandle, ...interface{}) error
+	Number int                                       //当前次数
+	Open   bool                                      // 是否实现
+	Fn     func(*clientHandle, ...interface{}) error //执行方法
 }
 
 type CollectType string
