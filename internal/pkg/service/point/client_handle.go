@@ -9,7 +9,6 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-	"strconv"
 	"strings"
 	"sync"
 )
@@ -74,6 +73,7 @@ func (c *clientHandle) HandleCollectCommand(types string) error {
 		//记录日志 返回错误
 		return err
 	}
+	c.identifyImg(intersect)
 	//幂等
 	if err = c.checkIdempotency(); err != nil {
 		return err
@@ -144,25 +144,34 @@ func (c *clientHandle) WithBizId(bizId string) {
 func (c *clientHandle) WithAdditionInfo(additionInfo string) {
 	if additionInfo != "" {
 		c.AdditionInfo = additionInfo
-		//todo 识别内容获取关键数据
-
 	}
 }
 
-//保存积分变动记录
+//保存收集积分记录
 func (c *clientHandle) saveRecord() error {
 	history := &entity.PointCollectLog{
-		OpenId:  c.OpenId,
-		Type:    string(c.Type),
-		Info:    c.Message,
-		Point:   strconv.FormatInt(c.Point, 10),
-		OrderId: c.additional.orderId,
-		Date:    model.Date{},
-		Time:    model.Time{},
+		OpenId: c.OpenId,
+		Type:   string(c.Type),
+		Info:   c.Message,
+		Point:  c.Point,
+		Date:   model.Date{},
+		Time:   model.Time{},
+	}
+	if c.additional.orderId != "" {
+		history.AdditionalOrder = c.additional.orderId
 	}
 	return repository.DefaultPointCollectHistoryRepository.CreateLog(history)
 }
 
+// 保存积分
+func (c *clientHandle) savePoint(usrPoint *entity.Point) (int64, error) {
+	if err := c.plugin.pointRepo.Save(usrPoint); err != nil {
+		return 0, err
+	}
+	return usrPoint.Balance, nil
+}
+
+// 获取用户积分信息
 func (c *clientHandle) findByOpenId() (*entity.Point, error) {
 	if c.OpenId == "" {
 		return nil, errno.ErrUserNotFound.WithErrMessage("用户未授权")
@@ -171,6 +180,7 @@ func (c *clientHandle) findByOpenId() (*entity.Point, error) {
 	return &p, nil
 }
 
+// 增加积分，返回现有积分
 func (c *clientHandle) incPoint(num int64) (int64, error) {
 	if num == 0 {
 		return 0, nil
@@ -187,18 +197,14 @@ func (c *clientHandle) incPoint(num int64) (int64, error) {
 		usrPoint.Balance += c.Point
 	}
 	//操作积分
-	point, err := c.changePoint(&usrPoint)
-	if err != nil {
-		return 0, err
-	}
-	//添加记录
-	err = c.saveRecord()
+	point, err := c.savePoint(&usrPoint)
 	if err != nil {
 		return 0, err
 	}
 	return point, nil
 }
 
+// 消耗积分，返回现有积分
 func (c *clientHandle) decPoint(num int64) (int64, error) {
 	if num == 0 {
 		return 0, nil
@@ -216,7 +222,7 @@ func (c *clientHandle) decPoint(num int64) (int64, error) {
 		return 0, err
 	}
 	usrPoint.Balance -= c.Point
-	point, err := c.changePoint(&usrPoint)
+	point, err := c.savePoint(&usrPoint)
 	if err != nil {
 		return 0, err
 	}
@@ -226,13 +232,6 @@ func (c *clientHandle) decPoint(num int64) (int64, error) {
 		return 0, err
 	}
 	return point, nil
-}
-
-func (c *clientHandle) changePoint(usrPoint *entity.Point) (int64, error) {
-	if err := c.plugin.pointRepo.Save(usrPoint); err != nil {
-		return 0, err
-	}
-	return usrPoint.Balance, nil
 }
 
 func (c *clientHandle) changePointByAdmin() error {

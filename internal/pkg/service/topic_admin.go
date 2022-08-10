@@ -49,7 +49,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 		query.Where("topic.status = ?", param.Status)
 	}
 	if param.IsTop > 0 {
-		query.Where("topic.s_top = ?", param.IsTop)
+		query.Where("topic.is_top = ?", param.IsTop)
 	}
 	if param.IsEssence > 0 {
 		query.Where("topic.is_essence = ?", param.IsEssence)

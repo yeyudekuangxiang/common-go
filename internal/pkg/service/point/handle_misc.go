@@ -2,8 +2,9 @@ package point
 
 import (
 	"errors"
-	"google.golang.org/appengine/log"
+	"fmt"
 	"math"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -26,14 +27,17 @@ func (c *clientHandle) scanImage(imgUrl string) ([]string, error) {
 func (c *clientHandle) validateRule(content []string, rules CollectRules) ([]string, error) {
 	ruleArray := util.Intersect(content, rules[c.Type])
 	if len(ruleArray) == 0 {
-		return nil, errors.New("未匹配到对应规则")
+		return nil, errors.New("不是有效的图片")
 	}
 	return ruleArray, nil
 }
 
 //图片识别
-func (c *clientHandle) identifyImg([]string) {
-
+func (c *clientHandle) identifyImg(identify []string) {
+	for i, str := range identify {
+		fmt.Printf("%d-%s", i, str)
+	}
+	return
 }
 
 //积分类型
@@ -72,5 +76,5 @@ func (c *clientHandle) trackPoint(err error) {
 
 //写日志
 func (c *clientHandle) writeMessage(code int, message string) {
-	log.Infof(c.ctx, "%d-%s", code, message)
+	app.Logger.Info(fmt.Sprintf("%d-%s", code, message))
 }
