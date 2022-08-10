@@ -11,6 +11,7 @@ func Initialize(configPath string) {
 	InitRedis()
 	InitValidator()
 	InitWeapp()
-	initOss()
+	InitOss()
+	InitWxoa()
 	decimal.MarshalJSONWithoutQuotes = true
 }

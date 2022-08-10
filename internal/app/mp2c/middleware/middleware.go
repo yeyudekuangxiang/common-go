@@ -205,19 +205,14 @@ func Auth2() gin.HandlerFunc {
 	}
 }
 
-type ThrottleConfig struct {
-	Throttle string
-}
-
 func Throttle() gin.HandlerFunc {
-	throttleConfig := &struct {
-		Throttle string
-	}{}
-	_ = app.Ini.Section("http").MapTo(throttleConfig)
-	if throttleConfig.Throttle == "" {
-		throttleConfig.Throttle = "200-M"
+
+	throttle := "200-M"
+	if config.Config.Http.Throttle != "" {
+		throttle = config.Config.Http.Throttle
 	}
-	rate, err := limiter.NewRateFromFormatted(throttleConfig.Throttle)
+
+	rate, err := limiter.NewRateFromFormatted(throttle)
 	if err != nil {
 		log.Fatal(err)
 	}

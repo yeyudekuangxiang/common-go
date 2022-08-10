@@ -167,7 +167,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 func (srv OaService) Sign(url string) (*OaSignResult, error) {
 	setting := config.FindOaSetting(srv.Platform)
 
-	tickerServer := wxoa2.TicketTokenServer{
+	tickerServer := wxoa2.TicketServer{
 		TokenServer: &wxoa2.AccessTokenServer{
 			AppId:  setting.AppId,
 			Secret: setting.Secret,

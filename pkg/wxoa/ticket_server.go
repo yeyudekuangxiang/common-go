@@ -4,24 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chanxuehong/wechat/mp/core"
 	"github.com/go-redis/redis/v8"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"net/http"
 	"time"
 )
 
-type TicketTokenServer struct {
+type TicketServer struct {
 	Redis       *redis.Client
 	AppId       string
-	TokenServer *AccessTokenServer
+	TokenServer core.AccessTokenServer
 }
 
-func (srv *TicketTokenServer) cacheKey() string {
+func (srv *TicketServer) cacheKey() string {
 
 	return fmt.Sprintf(config.RedisKey.AccessToken, "oaticket", srv.AppId)
 }
-func (srv *TicketTokenServer) getTicket() (*Ticket, error) {
+func (srv *TicketServer) getTicket() (*Ticket, error) {
 	accessToken, err := srv.TokenServer.Token()
 	if err != nil {
 		return nil, err
@@ -47,11 +47,11 @@ func (srv *TicketTokenServer) getTicket() (*Ticket, error) {
 	}
 	return nil, fmt.Errorf("%d %s", oaResponse.ErrCode, oaResponse.ErrMsg)
 }
-func (srv *TicketTokenServer) Ticket() (ticket string, err error) {
+func (srv *TicketServer) Ticket() (ticket string, err error) {
 	//return srv.RefreshTicket("")
 	ticket, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
 	if err != nil && err != redis.Nil {
-		app.Logger.Error(err)
+		return "", err
 	}
 	if ticket != "" {
 		return
@@ -67,10 +67,10 @@ func (srv *TicketTokenServer) Ticket() (ticket string, err error) {
 	srv.Redis.Set(context.Background(), srv.cacheKey(), ticket, expiresIn)
 	return
 }
-func (srv *TicketTokenServer) RefreshTicket(currentTicket string) (ticket string, err error) {
+func (srv *TicketServer) RefreshTicket(currentTicket string) (ticket string, err error) {
 	ticket, err = srv.Redis.Get(context.Background(), srv.cacheKey()).Result()
 	if err != nil && err != redis.Nil {
-		app.Logger.Error(err)
+		return "", err
 	}
 	if ticket != "" && currentTicket != "" && ticket != currentTicket {
 		return
@@ -85,6 +85,6 @@ func (srv *TicketTokenServer) RefreshTicket(currentTicket string) (ticket string
 	srv.Redis.Set(context.Background(), srv.cacheKey(), ticket, expiresIn)
 	return
 }
-func (srv *TicketTokenServer) IIDB04E44A0E1DC11E5ADCEA4DB30FED8E1() {
+func (srv *TicketServer) IIDB04E44A0E1DC11E5ADCEA4DB30FED8E1() {
 
 }
