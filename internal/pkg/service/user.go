@@ -500,9 +500,6 @@ func (u UserService) ChangeUserState(param ChangeUserState) error {
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
-	if param.State != 0 {
-		user.State = param.State
-	}
 	return u.r.Save(&user)
 }
 
