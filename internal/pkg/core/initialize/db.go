@@ -17,7 +17,6 @@ func InitDB() {
 		log.Panic(err)
 	}
 	conf.Logger = mzap.NewGormLogger(mzap.DefaultLogger(config.Config.Log.Level).WithOptions(zap.Fields(zap.String("scene", "database"))).Sugar())
-	//创建晓筑规范数据库连接
 	gormDb, err := db.NewDB(conf)
 	if err != nil {
 		log.Panic(err)

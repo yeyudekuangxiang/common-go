@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "package start"
 cd $(dirname $(readlink -f "$0"))/../
 pwd
