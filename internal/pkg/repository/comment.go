@@ -69,7 +69,7 @@ func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.Co
 
 func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
-	err := m.Model.Where("id = ?", id).First(&resp).Error
+	err := m.Model.First(&resp).Error
 	switch err {
 	case nil:
 		return &resp, nil
@@ -82,7 +82,7 @@ func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, erro
 
 func (m *defaultCommentRepository) FindOneQuery(builder *gorm.DB) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
-	err := builder.Where("state = ?", 0).First(&resp).Error
+	err := builder.First(&resp).Error
 	switch err {
 	case nil:
 		return &resp, nil
@@ -95,7 +95,7 @@ func (m *defaultCommentRepository) FindOneQuery(builder *gorm.DB) (*entity.Comme
 
 func (m *defaultCommentRepository) FindCount(builder *gorm.DB) (int64, error) {
 	var resp int64
-	err := builder.Where("state = ?", 0).Find(&resp).Error
+	err := builder.Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -106,7 +106,7 @@ func (m *defaultCommentRepository) FindCount(builder *gorm.DB) (int64, error) {
 
 func (m *defaultCommentRepository) FindSum(builder *gorm.DB) (float64, error) {
 	var resp float64
-	err := builder.Where("state = ?", 0).First(&resp).Error
+	err := builder.First(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -116,7 +116,6 @@ func (m *defaultCommentRepository) FindSum(builder *gorm.DB) (float64, error) {
 }
 
 func (m *defaultCommentRepository) FindAll(builder *gorm.DB, orderBy string) ([]*entity.CommentIndex, error) {
-	builder.Where("comment_index.state = ?", 0)
 	if orderBy == "" {
 		builder.Order("comment_index.id DESC")
 	} else {
@@ -142,7 +141,7 @@ func (m *defaultCommentRepository) FindPageListByPage(builder *gorm.DB, offset, 
 	}
 	var resp []*entity.CommentIndex
 
-	err := builder.Where("state = ?", 0).Offset(int(offset)).Limit(int(limit)).Find(&resp).Error
+	err := builder.Offset(int(offset)).Limit(int(limit)).Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -158,7 +157,7 @@ func (m *defaultCommentRepository) FindPageListByIdDESC(builder *gorm.DB, preMin
 		builder = builder.Where(" id < ? ", preMinId)
 	}
 	var resp []*entity.CommentIndex
-	err := builder.Where("state = ?", 0).Order("id DESC").Limit(int(limit)).Find(&resp).Error
+	err := builder.Order("id DESC").Limit(int(limit)).Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -174,7 +173,7 @@ func (m *defaultCommentRepository) FindPageListByIdASC(builder *gorm.DB, preMinI
 		builder = builder.Where(" id < ? ", preMinId)
 	}
 	var resp []*entity.CommentIndex
-	err := builder.Where("state = ?", 0).Order("id ASC").Limit(int(limit)).Find(&resp).Error
+	err := builder.Order("id ASC").Limit(int(limit)).Find(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -191,7 +190,16 @@ func (m *defaultCommentRepository) Delete(id, userId int64) error {
 	if err != nil {
 		return err
 	}
-	return m.Model.Delete(result).Error
+	err = m.Model.Transaction(func(tx *gorm.DB) error {
+		if err = m.Model.Delete(result).Error; err != nil {
+			return err
+		}
+		if err = m.Update(&result); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
 }
 
 func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
@@ -201,6 +209,7 @@ func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
 		return err
 	}
 	result.State = 1
+	result.Count -= 1
 	return m.Update(&result)
 }
 

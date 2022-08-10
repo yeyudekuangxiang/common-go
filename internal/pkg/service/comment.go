@@ -63,6 +63,7 @@ func (srv *defaultCommentService) FindOneQuery(data *entity.CommentIndex) (*enti
 	if data.Attrs != 0 {
 		builder.Where("attrs = ?", data.Attrs)
 	}
+	builder.Where("state = ?", 0)
 	query, err := srv.commentModel.FindOneQuery(builder)
 	if err != nil {
 		return nil, err
@@ -87,6 +88,7 @@ func (srv *defaultCommentService) FindAll(data *entity.CommentIndex) ([]*entity.
 	if data.Attrs != 0 {
 		builder.Where("attrs = ?", data.Attrs)
 	}
+	builder.Where("state = ?", 0)
 	all, err := srv.commentModel.FindAll(builder, "like_count DESC")
 	if err != nil {
 		return nil, 0, err
@@ -109,6 +111,7 @@ func (srv *defaultCommentService) FindListAndChild(params *entity.CommentIndex, 
 		}).
 		Where("to_comment_id = ?", 0).
 		Where("obj_id = ?", params.ObjId).
+		Where("state = ?", 0).
 		Count(&total).
 		Order("like_count desc, id asc").
 		Limit(limit).
@@ -126,6 +129,7 @@ func (srv *defaultCommentService) FindSubList(data *entity.CommentIndex, offSize
 	var total int64
 	err := srv.commentModel.RowBuilder().
 		Where("root_comment_id = ?", data.RootCommentId).
+		Where("state = ?", 0).
 		Count(&total).
 		Order("like_count desc, id asc").
 		Find(&commentList).Error
