@@ -9,6 +9,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/business"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
+	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
@@ -176,6 +177,7 @@ func apiRouter(router *gin.Engine) {
 		pointCollectRouter := mustAuthRouter.Group("/point-collect")
 		{
 			pointCollectRouter.POST("", apiutil.Format(api.DefaultPointCollectController.Collect))
+			pointCollectRouter.POST("/new-collect", apiutil.Format(points.DefaultPointsCollectController.Collect))
 		}
 
 		//上传文件相关路由

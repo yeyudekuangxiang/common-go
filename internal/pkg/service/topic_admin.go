@@ -92,7 +92,7 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
 		Avatar:    avatarUrl,
-		Nickname:  nikeName,
+		Nickname:  "绿喵",
 		Tags:      tagModel,
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
