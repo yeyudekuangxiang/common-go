@@ -95,12 +95,11 @@ func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 	rest, err := srv.imageClient.WebImage(baidu.WebImageParam{
 		ImageUrl: imgUrl,
 	})
-	fmt.Printf("%+v %+v\n", rest, err)
 	if err != nil {
 		return nil, err
 	}
 	if !rest.IsSuccess() {
-		return nil, errors.New(rest.ErrorDescription)
+		return nil, errors.New(rest.ErrorMsg)
 	}
 
 	results := make([]string, 0)

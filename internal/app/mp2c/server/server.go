@@ -50,7 +50,7 @@ func RunServer() {
 func CloseServer() {
 	var err error
 	log.Println("Shutdown Server ...")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err = Server.Shutdown(ctx); err != nil {
 		log.Println("Server Shutdown:", err)

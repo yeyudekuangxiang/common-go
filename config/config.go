@@ -18,6 +18,7 @@ var Config = app{
 	BaiDu:    baiDuSetting{},
 	Java:     javaConfig{},
 	Zhuge:    zhugeConfig{},
+	AMQP:     amqpSetting{},
 }
 
 type app struct {
@@ -31,6 +32,7 @@ type app struct {
 	Redis    redisSetting    `ini:"redis"`
 	DuiBa    duiBaSetting    `ini:"duiba"`
 	OSS      ossSetting      `ini:"oss"`
+	AMQP     amqpSetting     `ini:"amqp"`
 	BaiDu    baiDuSetting    `ini:"baidu"`
 	Java     javaConfig      `ini:"java"`
 	Zhuge    zhugeConfig     `ini:"zhuge"`
@@ -86,6 +88,9 @@ type ossSetting struct {
 	AccessKey    string
 	AccessSecret string
 	BasePath     string
+}
+type amqpSetting struct {
+	Url string
 }
 type baiDuSetting struct {
 	AppKey    string

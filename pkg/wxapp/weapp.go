@@ -17,7 +17,8 @@ type Client struct {
 	*weapp.Client
 }
 
-func (c Client) GetUnlimitedQRCodeResponse(param *weapp.UnlimitedQRCode) (*UnlimitedQRCodeResponse, error) {
+// GetUnlimitedQRCodeResponse 获取没有数量限制的小程序码
+func (c Client) GetUnlimitedQRCodeResponse(param *weapp.UnlimitedQRCode) (*QRCodeResponse, error) {
 	resp, cerr, err := c.GetUnlimitedQRCode(param)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -27,7 +28,49 @@ func (c Client) GetUnlimitedQRCodeResponse(param *weapp.UnlimitedQRCode) (*Unlim
 		return nil, errors.New(resp.Status)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	return &UnlimitedQRCodeResponse{
+	return &QRCodeResponse{
+		Response: Response{
+			ErrCode: cerr.ErrCode,
+			ErrMsg:  cerr.ErrMSG,
+		},
+		ContentType: resp.Header.Get("Content-Type"),
+		Buffer:      body,
+	}, nil
+}
+
+// GetWxaCodeResponse 获取有数量限制的小程序码
+func (c Client) GetWxaCodeResponse(code *weapp.QRCode) (*QRCodeResponse, error) {
+	resp, cerr, err := c.GetQRCode(code)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	return &QRCodeResponse{
+		Response: Response{
+			ErrCode: cerr.ErrCode,
+			ErrMsg:  cerr.ErrMSG,
+		},
+		ContentType: resp.Header.Get("Content-Type"),
+		Buffer:      body,
+	}, nil
+}
+
+// CreateWxaQrcodeResponse 获取有数量限制的小程序二维码
+func (c Client) CreateWxaQrcodeResponse(creator *weapp.QRCodeCreator) (*QRCodeResponse, error) {
+	resp, cerr, err := c.CreateQRCode(creator)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New(resp.Status)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	return &QRCodeResponse{
 		Response: Response{
 			ErrCode: cerr.ErrCode,
 			ErrMsg:  cerr.ErrMSG,

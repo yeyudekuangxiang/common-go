@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	"math/rand"
-	"mio/internal/app/cron"
-	"mio/internal/app/mp2c/server"
+	"log"
+	"mio/internal/app/consumer"
 	"mio/internal/pkg/core/initialize"
 	"os"
 	"os/signal"
-	"time"
 )
 
 var (
@@ -16,20 +14,21 @@ var (
 )
 
 func init() {
-	rand.Seed(time.Now().Unix())
-
 	flag.Parse()
-
 	initialize.Initialize(*flagConf)
-
-	server.InitServer()
 }
 func main() {
-	cron.Run()
-	server.RunServer()
+	consumer.Run()
+	defer func() {
+		log.Println("关闭消费者...")
+		err := consumer.Close()
+		if err != nil {
+			log.Println("关闭消费者异常", err)
+		} else {
+			log.Println("关闭消费者成功")
+		}
+	}()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	server.CloseServer()
-	initialize.Close()
 }
