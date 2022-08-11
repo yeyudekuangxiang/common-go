@@ -101,11 +101,10 @@ func (srv DuiBaActivityService) Delete(dto srv_types.DeleteDuiBaActivityDTO) err
 	if info.ID == 0 {
 		return errors.New("activityId不存在")
 	}
-	do := entity.DuiBaActivity{
+	do := repotypes.DeleteDuiBaActivityDO{
+		UpdatedAt: time.Now(),
+		Id:        dto.Id,
 		Status:    entity.DuiBaActivityStatusNo,
-		UpdatedAt: time.Now()}
-	if err := util.MapTo(dto, &do); err != nil {
-		return err
 	}
-	return srv.repo.Save(&do)
+	return srv.repo.Delete(&do)
 }

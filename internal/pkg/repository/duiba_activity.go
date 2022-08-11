@@ -25,6 +25,10 @@ func (repo DuiBaActivityRepository) Create(transaction *entity.DuiBaActivity) er
 	return repo.ctx.DB.Create(transaction).Error
 }
 
+func (repo DuiBaActivityRepository) Delete(transaction *repotypes.DeleteDuiBaActivityDO) error {
+	return repo.ctx.DB.Model(entity.DuiBaActivity{}).Where("id", transaction.Id).Updates(transaction).Error
+}
+
 func (repo DuiBaActivityRepository) GetPageList(by repotypes.GetDuiBaActivityPageDO) (list []entity.DuiBaActivity, total int64, err error) {
 	list = make([]entity.DuiBaActivity, 0)
 	db := repo.ctx.DB.Table("duiba_activity")

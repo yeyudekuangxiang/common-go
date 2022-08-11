@@ -22,8 +22,7 @@ type UpdateDuiBaActivityDTO struct {
 }
 
 type DeleteDuiBaActivityDTO struct {
-	Id     int64
-	Status entity.DuiBaActivityStatus
+	Id int64
 }
 
 type GetPageDuiBaActivityDTO struct {

@@ -1,6 +1,9 @@
 package repotypes
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/pkg/model/entity"
+	"time"
+)
 
 type GetDuiBaActivityExistDO struct {
 	ActivityId string
@@ -16,4 +19,10 @@ type GetDuiBaActivityPageDO struct {
 	Limit      int                `json:"limit"` //limit为0时不限制数量
 	OrderBy    entity.OrderByList `json:"orderBy"`
 	Statue     entity.DuiBaActivityStatus
+}
+
+type DeleteDuiBaActivityDO struct {
+	Id        int64
+	Status    entity.DuiBaActivityStatus
+	UpdatedAt time.Time
 }
