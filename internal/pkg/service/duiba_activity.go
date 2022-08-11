@@ -124,13 +124,28 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 	if info.ID == 0 {
 		return nil, errors.New("activityId不存在")
 	}
+	//生成兑吧页面路径
+	ActivityAppPath := srv.GetActivityAppPath(info.ActivityId, info.Cid, info.IsShare, info.IsPhone)
+	//生成兑吧页面预览小程序码
+	ActivityViewQrCode, _ := srv.GetActivityViewQrCode(ActivityAppPath)
+	//获取兑吧h5免登录链接
+	activityH5 := srv.GetActivityH5(info.ActivityId)
+	//生成兑吧页面路径
+	jumpAppH5 := srv.GetJumpAppH5(info.ActivityId, info.Cid, info.IsShare, info.IsPhone)
+
 	return &api_types.DuiBaActivityShowVO{
 		ID:            info.ID,
-		NoLoginH5Link: fmt.Sprintf(config.Constants.DuiBaActivityNoLoginH5Link, info.ActivityId),
-		StaticH5Link:  fmt.Sprintf(config.Constants.DuiBaActivityStaticH5Link, info.ActivityId, info.Cid),
-		InsideLink:    fmt.Sprintf(config.Constants.DuiBaActivityInsideLink, info.ActivityId),
-		EwmLink:       "",
+		NoLoginH5Link: activityH5,
+		StaticH5Link:  jumpAppH5,
+		InsideLink:    ActivityAppPath,
+		EwmLink:       ActivityViewQrCode,
 	}, nil
+
+	/**
+	NoLoginH5Link: fmt.Sprintf(config.Constants.DuiBaActivityNoLoginH5Link, info.ActivityId),
+	StaticH5Link:  fmt.Sprintf(config.Constants.DuiBaActivityStaticH5Link, info.ActivityId, info.Cid),
+	InsideLink:    fmt.Sprintf(config.Constants.DuiBaActivityInsideLink, info.ActivityId),
+	*/
 }
 
 // GetActivityAppPath 生成兑吧页面路径
@@ -139,7 +154,7 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 // needShare 页面是否可以分享 1可以分享 2不可以分享
 // checkPhone 访问页面是否必须绑定手机号 1必须绑定 2不必须绑定
 // 返回值 pages/duiba_v2/duiba/duiba-share/index?activityId=001&cid=12&bind=bind
-func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid string, needShare, checkPhone int) string {
+func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	path := ""
 	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
 	if needShare == 1 {
@@ -175,7 +190,7 @@ func (srv DuiBaActivityService) GetActivityH5(activityId string) string {
 // needShare 页面是否可以分享 1可以分享 2不可以分享
 // checkPhone 访问页面是否必须绑定手机号 1必须绑定 2不必须绑定
 // return https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=index&cid=12&bind=true
-func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid string, needShare, checkPhone int) string {
+func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	link := ""
 	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
 	if needShare == 1 {
