@@ -80,7 +80,9 @@ func (srv DuiBaActivityService) Update(dto srv_types.UpdateDuiBaActivityDTO) err
 }
 
 func (srv DuiBaActivityService) GetPageList(dto srv_types.GetPageDuiBaActivityDTO) ([]entity.DuiBaActivity, int64, error) {
-	bannerDo := repotypes.GetDuiBaActivityPageDO{}
+	bannerDo := repotypes.GetDuiBaActivityPageDO{
+		Statue: dto.Status,
+	}
 	if err := util.MapTo(dto, &bannerDo); err != nil {
 		return nil, 0, err
 	}
