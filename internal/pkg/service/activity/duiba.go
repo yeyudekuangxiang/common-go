@@ -7,7 +7,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
@@ -200,25 +199,4 @@ func (srv ZeroService) IsDuiBaActivityNewUser(activityId string, userId int64) (
 		return false, errno.ErrUserNotFound
 	}
 	return !userInfo.Time.IsZero() && userInfo.Time.Add(time.Hour*24).After(time.Now()), nil
-}
-
-// GetActivityViewQrCode 生成兑吧页面预览小程序码
-// activityId 活动id
-// cid 渠道id
-// needShare 页面是否可以分享 1可以分享 0不可以分享
-// checkPhone 访问页面是否必须绑定手机号 1必须绑定 0不必须绑定
-func (srv ZeroService) GetActivityViewQrCode(activityId string, cid string, needShare, checkPhone int) (string, error) {
-	path := ""
-	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
-	if needShare == 1 {
-		path = fmt.Sprintf("pages/duiba_v2/duiba/duiba-share/index?activityId=%s&cid=%s%s", activityId, cid, checkPhoneParam)
-	} else {
-		path = fmt.Sprintf("pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%s%s", activityId, cid, checkPhoneParam)
-	}
-
-	qrCode, err := service.NewQRCodeService().GetLimitedQRCode(entity.QrCodeSceneDuibaView, path, 256, "")
-	if err != nil {
-		return "", err
-	}
-	return service.DefaultOssService.FullUrl(qrCode.ImagePath), nil
 }
