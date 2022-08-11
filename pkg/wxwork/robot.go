@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func SendRobotMessage(key string, v interface{}) error {
+func SendRobotMessage(key string, v IMessage) error {
 	var msgType MsgType
 	switch v.(type) {
 	case Text:
@@ -29,9 +29,14 @@ func SendRobotMessage(key string, v interface{}) error {
 		return errors.New("unknown msgtype")
 	}
 
+	return SendRobotMessageRaw(key, msgType, v)
+}
+
+func SendRobotMessageRaw(key string, msgType MsgType, message interface{}) error {
+
 	data, err := json.Marshal(map[string]interface{}{
 		"msgtype":       msgType,
-		string(msgType): v,
+		string(msgType): message,
 	})
 	if err != nil {
 		return err

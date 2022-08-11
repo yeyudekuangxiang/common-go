@@ -13,5 +13,6 @@ func Initialize(configPath string) {
 	InitWeapp()
 	InitOss()
 	InitWxoa()
+	initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
 }
