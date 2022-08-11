@@ -7,6 +7,7 @@ type CreateDuiBaActivityDTO struct {
 	Cid         int64
 	Type        entity.DuiBaActivityType
 	IsShare     entity.DuiBaActivityIsShare
+	IsPhone     entity.DuiBaActivityIsPhone
 	ActivityUrl string
 	ActivityId  string
 }
@@ -17,6 +18,7 @@ type UpdateDuiBaActivityDTO struct {
 	Cid         int64
 	Type        entity.DuiBaActivityType
 	IsShare     entity.DuiBaActivityIsShare
+	IsPhone     entity.DuiBaActivityIsPhone
 	ActivityUrl string
 	ActivityId  string
 }
@@ -29,9 +31,14 @@ type GetPageDuiBaActivityDTO struct {
 	Cid        int64
 	Type       entity.DuiBaActivityType
 	Status     entity.DuiBaActivityStatus
+	IsPhone    entity.DuiBaActivityIsPhone
 	ActivityId string
 	Name       string
 	Offset     int                `json:"offset"`
 	Limit      int                `json:"limit"` //limit为0时不限制数量
 	OrderBy    entity.OrderByList `json:"orderBy"`
+}
+
+type ShowDuiBaActivityDTO struct {
+	Id int64
 }

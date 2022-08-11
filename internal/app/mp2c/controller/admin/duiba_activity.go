@@ -1,9 +1,7 @@
 package admin
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -45,6 +43,7 @@ func (ctl DuiBaActivityController) Create(c *gin.Context) (gin.H, error) {
 		Type:        form.Type,
 		ActivityId:  form.ActivityId,
 		IsShare:     form.IsShare,
+		IsPhone:     form.IsPhone,
 	})
 	if err != nil {
 		return nil, err
@@ -74,6 +73,7 @@ func (ctl DuiBaActivityController) Update(c *gin.Context) (gin.H, error) {
 		ActivityId:  form.ActivityId,
 		IsShare:     form.IsShare,
 		Id:          form.Id,
+		IsPhone:     form.IsPhone,
 	})
 	if err != nil {
 		return nil, err
@@ -114,19 +114,16 @@ func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 		urlVo := url.QueryEscape(activity.ActivityUrl)
 		urlVo = "https://go-api.miotech.com?dbredirect=" + urlVo
 		voList = append(voList, api_types.DuiBaActivityVO{
-			ID:            activity.ID,
-			Name:          activity.Name,
-			Type:          activity.Type,
-			Cid:           activity.Cid,
-			IsShare:       activity.IsShare,
-			ActivityId:    activity.ActivityId,
-			ActivityUrl:   urlVo,
-			CreatedAt:     activity.CreatedAt.Format("2006.01.02 15:04:05"),
-			UpdatedAt:     activity.UpdatedAt.Format("2006.01.02 15:04:05"),
-			NoLoginH5Link: fmt.Sprintf(config.Constants.DuiBaActivityNoLoginH5Link, activity.ActivityId),
-			StaticH5Link:  fmt.Sprintf(config.Constants.DuiBaActivityStaticH5Link, activity.ActivityId, activity.Cid),
-			InsideLink:    fmt.Sprintf(config.Constants.DuiBaActivityInsideLink, activity.ActivityId),
-			//	EwmLink:       fmt.Sprintf(config.Constants.DuiBaActivityEwmLink, ""),
+			ID:          activity.ID,
+			Name:        activity.Name,
+			Type:        activity.Type,
+			Cid:         activity.Cid,
+			IsShare:     activity.IsShare,
+			IsPhone:     activity.IsPhone,
+			ActivityId:  activity.ActivityId,
+			ActivityUrl: urlVo,
+			CreatedAt:   activity.CreatedAt.Format("2006.01.02 15:04:05"),
+			UpdatedAt:   activity.UpdatedAt.Format("2006.01.02 15:04:05"),
 		})
 	}
 	return gin.H{
@@ -137,7 +134,7 @@ func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//Update 修改兑吧链接
+//Delete 修改兑吧链接
 func (ctl DuiBaActivityController) Delete(c *gin.Context) (gin.H, error) {
 	var form DeleteDuiBaActivityForm
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -151,4 +148,21 @@ func (ctl DuiBaActivityController) Delete(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	return gin.H{}, nil
+}
+
+//Show 根据分页获取渠道列表
+func (ctl DuiBaActivityController) Show(c *gin.Context) (gin.H, error) {
+	var form ShowDuiBaActivityForm
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	info, err := service.NewDuiBaActivityService(context.NewMioContext()).Show(srv_types.ShowDuiBaActivityDTO{
+		Id: form.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"info": info,
+	}, nil
 }

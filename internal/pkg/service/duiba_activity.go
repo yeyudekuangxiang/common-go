@@ -2,7 +2,10 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
+	"mio/config"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -109,4 +112,23 @@ func (srv DuiBaActivityService) Delete(dto srv_types.DeleteDuiBaActivityDTO) err
 		Status:    entity.DuiBaActivityStatusNo,
 	}
 	return srv.repo.Delete(&do)
+}
+
+func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_types.DuiBaActivityShowVO, error) {
+	//判断是否存在
+	info, err := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{
+		Id: dto.Id})
+	if err != nil {
+		return nil, err
+	}
+	if info.ID == 0 {
+		return nil, errors.New("activityId不存在")
+	}
+	return &api_types.DuiBaActivityShowVO{
+		ID:            info.ID,
+		NoLoginH5Link: fmt.Sprintf(config.Constants.DuiBaActivityNoLoginH5Link, info.ActivityId),
+		StaticH5Link:  fmt.Sprintf(config.Constants.DuiBaActivityStaticH5Link, info.ActivityId, info.Cid),
+		InsideLink:    fmt.Sprintf(config.Constants.DuiBaActivityInsideLink, info.ActivityId),
+		EwmLink:       "",
+	}, nil
 }

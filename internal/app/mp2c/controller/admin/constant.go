@@ -22,6 +22,7 @@ func (ctl ConstantController) List(c *gin.Context) (gin.H, error) {
 		"duiBaActivityType":    entity.DuiBaActivityTypeMap,
 		"duiBaActivityIsShare": entity.DuiBaActivityIsShareMap,
 		"duiBaActivityStatus":  entity.DuiBaActivityStatusMap,
+		"DuiBaActivityIsPhone": entity.DuiBaActivityIsPhoneMap,
 	}
 	return gin.H{
 		"banner": BannerCollectValueMap,

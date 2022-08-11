@@ -21,6 +21,7 @@ type DuiBaActivity struct {
 	IsShare             DuiBaActivityIsShare
 	Name                string
 	Status              DuiBaActivityStatus
+	IsPhone             DuiBaActivityIsPhone
 }
 
 type DuiBaActivityType int8
@@ -44,6 +45,13 @@ const (
 	DuiBaActivityStatusNo  DuiBaActivityStatus = 2
 )
 
+type DuiBaActivityIsPhone int8
+
+const (
+	DuiBaActivityIsPhoneYes DuiBaActivityIsPhone = 1
+	DuiBaActivityIsPhoneNo  DuiBaActivityIsPhone = 2
+)
+
 var (
 	DuiBaActivityTypeMap = map[DuiBaActivityType]string{
 		DuiBaActivityGoodsShow: "商品详情",
@@ -56,6 +64,10 @@ var (
 	DuiBaActivityStatusMap = map[DuiBaActivityStatus]string{
 		DuiBaActivityStatusYes: "正常",
 		DuiBaActivityStatusNo:  "删除",
+	}
+	DuiBaActivityIsPhoneMap = map[DuiBaActivityIsPhone]string{
+		DuiBaActivityIsPhoneYes: "需要绑定",
+		DuiBaActivityIsPhoneNo:  "不需要绑定",
 	}
 )
 
