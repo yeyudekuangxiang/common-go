@@ -35,7 +35,7 @@ type OCRService struct {
 }
 
 func (srv OCRService) CheckIdempotent(openId string) error {
-	if !util.DefaultLock.Lock("GmTicket:"+openId, time.Second*5) {
+	if !util.DefaultLock.Lock("OCRIdempotent:"+openId, time.Second*10) {
 		return errno.ErrLimit
 	}
 	return nil
@@ -43,7 +43,7 @@ func (srv OCRService) CheckIdempotent(openId string) error {
 
 func (srv OCRService) CheckRisk(risk int) error {
 	if risk > 2 {
-		return errno.ErrCommon.WithMessage("无权限")
+		return errno.ErrCommon.WithMessage("风险等级检测异常，请您稍后再试")
 	}
 	return nil
 }
@@ -95,12 +95,11 @@ func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 	rest, err := srv.imageClient.WebImage(baidu.WebImageParam{
 		ImageUrl: imgUrl,
 	})
-	fmt.Printf("%+v %+v\n", rest, err)
 	if err != nil {
 		return nil, err
 	}
 	if !rest.IsSuccess() {
-		return nil, errors.New(rest.ErrorDescription)
+		return nil, errors.New(rest.ErrorMsg)
 	}
 
 	results := make([]string, 0)

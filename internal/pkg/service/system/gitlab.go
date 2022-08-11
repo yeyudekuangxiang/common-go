@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/queue/producer/wxworkpdr"
+	"mio/internal/pkg/queue/types/wxworkqueue"
 	"mio/internal/pkg/util/httputil"
 	glbtyp "mio/pkg/gitlab/types"
 	"mio/pkg/wxwork"
@@ -152,8 +154,11 @@ func (srv GitlabService) formatName(ref string) string {
 }
 func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 
-	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
-		Content: fmt.Sprintf(`%s 开始发布通知
+	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{
+		Key:  config.Constants.WxWorkGitlabRobotKey,
+		Type: wxwork.MsgTypeMarkdown,
+		Message: wxwork.Markdown{
+			Content: fmt.Sprintf(`%s 开始发布通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
 **发布分支:**%s
@@ -162,17 +167,18 @@ func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 **发布人:**%s
 **查看发布:**[%d](%s)
 `, srv.formatName(deployment.Ref),
-			deployment.Project.Name, deployment.Project.WebUrl,
-			deployment.Project.Description,
-			deployment.Ref,
-			deployment.CommitTitle,
-			deployment.StatusChangedAt,
-			deployment.User.Name,
-			deployment.DeployableId, deployment.DeployableUrl),
+				deployment.Project.Name, deployment.Project.WebUrl,
+				deployment.Project.Description,
+				deployment.Ref,
+				deployment.CommitTitle,
+				deployment.StatusChangedAt,
+				deployment.User.Name,
+				deployment.DeployableId, deployment.DeployableUrl),
+		},
 	})
 }
 func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
-	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
 		Content: fmt.Sprintf(`%s 发布成功通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
@@ -189,10 +195,10 @@ func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
 			deployment.StatusChangedAt,
 			deployment.User.Name,
 			deployment.DeployableId, deployment.DeployableUrl),
-	})
+	}})
 }
 func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
-	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
 		Content: fmt.Sprintf(`%s 发布失败通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
@@ -209,10 +215,10 @@ func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
 			deployment.StatusChangedAt,
 			deployment.User.Name,
 			deployment.DeployableId, deployment.DeployableUrl),
-	})
+	}})
 }
 func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
-	return wxwork.SendRobotMessage(config.Constants.WxWorkGitlabRobotKey, wxwork.Markdown{
+	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
 		Content: fmt.Sprintf(`%s 发布取消通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
@@ -229,5 +235,5 @@ func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
 			deployment.StatusChangedAt,
 			deployment.User.Name,
 			deployment.DeployableId, deployment.DeployableUrl),
-	})
+	}})
 }

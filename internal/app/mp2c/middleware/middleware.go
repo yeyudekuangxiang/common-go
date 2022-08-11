@@ -9,6 +9,8 @@ import (
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"go.uber.org/zap"
+	"mio/internal/pkg/queue/producer/wxworkpdr"
+	"mio/internal/pkg/queue/types/wxworkqueue"
 	"mio/internal/pkg/util/encrypt"
 	mzap "mio/pkg/zap"
 
@@ -49,9 +51,14 @@ func recovery() gin.HandlerFunc {
 				return
 			}
 
-			sendErr := wxwork.SendRobotMessage(config.Constants.WxWorkBugRobotKey, wxwork.Markdown{
-				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
+			sendErr := wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{
+				Key:  config.Constants.WxWorkBugRobotKey,
+				Type: wxwork.MsgTypeMarkdown,
+				Message: wxwork.Markdown{
+					Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
+				},
 			})
+
 			if sendErr != nil {
 				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
 			}

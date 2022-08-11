@@ -11,6 +11,10 @@ const (
 	MsgTypeCard     MsgType = "template_card"
 )
 
+type IMessage interface {
+	F4CD9CEE4B485C82938A4DD27E1704B0()
+}
+
 // Text
 //    {
 //    "msgtype": "text",
@@ -28,6 +32,8 @@ type Text struct {
 	//手机号列表，提醒手机号对应的群成员(@某个成员)，@all表示提醒所有人
 	MentionedMobileList []string `json:"mentioned_mobile_list"`
 }
+
+func (t Text) F4CD9CEE4B485C82938A4DD27E1704B0() {}
 
 // Markdown
 /*
@@ -50,6 +56,8 @@ type Markdown struct {
 	MentionedMobileList []string `json:"mentioned_mobile_list"`
 }
 
+func (t Markdown) F4CD9CEE4B485C82938A4DD27E1704B0() {}
+
 //：图片（base64编码前）最大不能超过2M，支持JPG,PNG格式
 type Image struct {
 	//图片内容的base64编码
@@ -57,6 +65,8 @@ type Image struct {
 	//图片内容（base64编码前）的md5值
 	Md5 string `json:"md5"`
 }
+
+func (t Image) F4CD9CEE4B485C82938A4DD27E1704B0() {}
 
 // News 图文类型
 type News struct {
@@ -67,12 +77,17 @@ type News struct {
 		Picurl      string `json:"picurl"`
 	} `json:"articles"`
 }
+
+func (t News) F4CD9CEE4B485C82938A4DD27E1704B0() {}
+
 type File struct {
 	File struct {
 		//文件id，通过下文的文件上传接口获取
 		MediaId string `json:"media_id"`
 	} `json:"file"`
 }
+
+func (t File) F4CD9CEE4B485C82938A4DD27E1704B0() {}
 
 // Card 卡片类型
 type CardText struct {
@@ -86,6 +101,9 @@ type CardText struct {
 	JumpList              []Jump              `json:"jump_list"`
 	CardAction            CardAction          `json:"card_action"`
 }
+
+func (t CardText) F4CD9CEE4B485C82938A4DD27E1704B0() {}
+
 type Source struct {
 	IconUrl   string `json:"icon_url"`
 	Desc      string `json:"desc"`
@@ -142,6 +160,9 @@ type CardNews struct {
 	JumpList              []Jump              `json:"jump_list"`
 	CardAction            CardAction          `json:"card_action"`
 }
+
+func (t CardNews) F4CD9CEE4B485C82938A4DD27E1704B0() {}
+
 type CardImage struct {
 	Url         string  `json:"url"`
 	AspectRatio float64 `json:"aspect_ratio"`
