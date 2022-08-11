@@ -6,6 +6,6 @@ import (
 )
 
 func Router() {
-	StartConsume("hello-exchange", "hello", "topic", []string{"hello"}, hellocsr.DealHello)
-	StartConsume("wxwork", "wxworkrobot", "topic", []string{"wxwork.robot"}, wxworkcsr.DealWxWorkRobot)
+	StartConsume("hello-exchange", "hello", []string{"hello"}, false, hellocsr.DealHello)
+	StartConsume("wxwork", "wxworkrobot", []string{"wxwork.robot"}, false, wxworkcsr.DealWxWorkRobot)
 }
