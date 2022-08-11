@@ -585,6 +585,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
 	topicModel.TopicTag = tag.Name
+	topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 	topicModel.Status = 1
 	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
 		return err
