@@ -35,7 +35,7 @@ type OCRService struct {
 }
 
 func (srv OCRService) CheckIdempotent(openId string) error {
-	if !util.DefaultLock.Lock("GmTicket:"+openId, time.Second*5) {
+	if !util.DefaultLock.Lock("GmTicket:"+openId, time.Second*10) {
 		return errno.ErrLimit
 	}
 	return nil
