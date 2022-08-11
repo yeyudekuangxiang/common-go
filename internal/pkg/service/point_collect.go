@@ -98,7 +98,6 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectBikeRide%s", openId), time.Second*10) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
-	defer util.DefaultLock.UnLock(fmt.Sprintf("CollectBikeRide%s", openId))
 	err := DefaultOCRService.CheckRisk(risk)
 	if err != nil {
 		return 0, err
@@ -143,7 +142,6 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectCoffeeCup%s", openId), time.Second*10) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
-	defer util.DefaultLock.UnLock(fmt.Sprintf("CollectCoffeeCup%s", openId))
 	err := DefaultOCRService.CheckRisk(risk)
 	if err != nil {
 		return 0, err
@@ -188,7 +186,6 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectPowerReplace%s", openId), time.Second*10) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
-	defer util.DefaultLock.UnLock(fmt.Sprintf("CollectPowerReplace%s", openId))
 	err := DefaultOCRService.CheckRisk(risk)
 	if err != nil {
 		return 0, err
