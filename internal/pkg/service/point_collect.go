@@ -94,12 +94,15 @@ func (srv PointCollectService) validatePowerReplaceImage(imageUrl string) (bool,
 	}
 	return false, nil, nil
 }
-func (srv PointCollectService) CollectBikeRide(openId string, imageUrl string) (int, error) {
+func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectBikeRide%s", openId), time.Second*5) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("CollectBikeRide%s", openId))
-
+	err := DefaultOCRService.CheckRisk(risk)
+	if err != nil {
+		return 0, err
+	}
 	ok, err := NewPointTransactionCountLimitService(context.NewMioContext()).
 		CheckLimit(entity.POINT_BIKE_RIDE, openId)
 	if err != nil {
@@ -136,12 +139,15 @@ func (srv PointCollectService) CollectBikeRide(openId string, imageUrl string) (
 	})
 	return value, err
 }
-func (srv PointCollectService) CollectCoffeeCup(openId string, imageUrl string) (int, error) {
+func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUrl string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectCoffeeCup%s", openId), time.Second*5) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("CollectCoffeeCup%s", openId))
-
+	err := DefaultOCRService.CheckRisk(risk)
+	if err != nil {
+		return 0, err
+	}
 	ok, err := NewPointTransactionCountLimitService(context.NewMioContext()).
 		CheckLimit(entity.POINT_COFFEE_CUP, openId)
 	if err != nil {
@@ -178,12 +184,15 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, imageUrl string) 
 	})
 	return value, err
 }
-func (srv PointCollectService) CollectPowerReplace(openId string, imageUrl string) (int, error) {
+func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imageUrl string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectPowerReplace%s", openId), time.Second*5) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("CollectPowerReplace%s", openId))
-
+	err := DefaultOCRService.CheckRisk(risk)
+	if err != nil {
+		return 0, err
+	}
 	ok, err := NewPointTransactionCountLimitService(context.NewMioContext()).
 		CheckLimit(entity.POINT_POWER_REPLACE, openId)
 	if err != nil {
