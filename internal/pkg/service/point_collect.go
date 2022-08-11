@@ -9,7 +9,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"strings"
-	"time"
 )
 
 var (
@@ -95,10 +94,11 @@ func (srv PointCollectService) validatePowerReplaceImage(imageUrl string) (bool,
 	return false, nil, nil
 }
 func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl string) (int, error) {
-	if !util.DefaultLock.Lock(fmt.Sprintf("CollectBikeRide%s", openId), time.Second*10) {
-		return 0, errors.New("操作频率过快,请稍后再试")
+	err := DefaultOCRService.CheckIdempotent(openId)
+	if err != nil {
+		return 0, err
 	}
-	err := DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService.CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}
@@ -139,10 +139,11 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	return value, err
 }
 func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUrl string) (int, error) {
-	if !util.DefaultLock.Lock(fmt.Sprintf("CollectCoffeeCup%s", openId), time.Second*10) {
-		return 0, errors.New("操作频率过快,请稍后再试")
+	err := DefaultOCRService.CheckIdempotent(openId)
+	if err != nil {
+		return 0, err
 	}
-	err := DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService.CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}
@@ -183,10 +184,11 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 	return value, err
 }
 func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imageUrl string) (int, error) {
-	if !util.DefaultLock.Lock(fmt.Sprintf("CollectPowerReplace%s", openId), time.Second*10) {
-		return 0, errors.New("操作频率过快,请稍后再试")
+	err := DefaultOCRService.CheckIdempotent(openId)
+	if err != nil {
+		return 0, err
 	}
-	err := DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService.CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}

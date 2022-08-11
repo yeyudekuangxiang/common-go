@@ -34,8 +34,8 @@ type OCRService struct {
 	imageClient *baidu.ImageClient
 }
 
-func (srv OCRService) CheckIdempotent(types, openId string) error {
-	if !util.DefaultLock.Lock(types+":"+openId, time.Second*10) {
+func (srv OCRService) CheckIdempotent(openId string) error {
+	if !util.DefaultLock.Lock("OCRIdempotent:"+openId, time.Second*10) {
 		return errno.ErrLimit
 	}
 	return nil
@@ -50,7 +50,7 @@ func (srv OCRService) CheckRisk(risk int) error {
 
 // OCRForGm 素食打卡
 func (srv OCRService) OCRForGm(openid string, risk int, src string) error {
-	err := srv.CheckIdempotent(string(entity.POINT_ADJUSTMENT), openid)
+	err := srv.CheckIdempotent(openid)
 	if err != nil {
 		return err
 	}
