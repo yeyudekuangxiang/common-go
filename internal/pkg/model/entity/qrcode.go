@@ -8,6 +8,7 @@ type QrCodeScene string
 const (
 	QrCodeSceneInvite     QrCodeScene = "invite"      //邀请得积分
 	QrCodeSceneTopicShare QrCodeScene = "topic_share" //酷喵圈分享
+	QrCodeSceneDuibaView  QrCodeScene = "duiba_view"  //兑吧页面预览
 )
 
 // QrCodeSource 二维码来源
