@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller"
 	"mio/internal/pkg/core/app"
@@ -89,7 +90,10 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 
-	qr, err := service.NewQRCodeService().CreateTopicShareQr(form.TopicId, user.ID)
+	page := "pages/community/details/index"
+	scene := fmt.Sprintf("tid=%d&uid=%d&s=p", form.TopicId, user.ID)
+
+	qr, err := service.NewQRCodeService().GetUnlimitedQRCode(entity.QrCodeSceneTopicShare, page, scene, 100, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
