@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
@@ -127,7 +128,8 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	path := DUIBAIndex
 	isNewUser := false
 
-	activity, err := service.DefaultDuiBaActivityService.FindActivity(activityId)
+	pointService := service.NewDuiBaActivityService(mioContext.NewMioContext())
+	activity, err := pointService.FindActivity(activityId)
 	if err != nil {
 		return "", err
 	}

@@ -191,6 +191,43 @@ type GetBannerPageForm struct {
 	controller.PageFrom
 }
 
+type CreateDuiBaActivityForm struct {
+	Name        string                      `json:"name" form:"name" binding:"required" alias:"链接名称"`
+	Cid         int64                       `json:"cid" form:"cid" binding:"" alias:"渠道id"`
+	Type        entity.DuiBaActivityType    `json:"type" form:"type" binding:"oneof=1 2" alias:"类别"`
+	IsShare     entity.DuiBaActivityIsShare `json:"isShare" form:"isShare" binding:"oneof=1 2" alias:"是否分享"`
+	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
+	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
+	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
+}
+
+type UpdateDuiBaActivityForm struct {
+	Id          int64                       `json:"id" form:"id" binding:"required" alias:"id"`
+	Name        string                      `json:"name" form:"name" binding:"required" alias:"链接名称"`
+	Cid         int64                       `json:"cid" form:"cid" binding:"" alias:"渠道id"`
+	Type        entity.DuiBaActivityType    `json:"type" form:"type" binding:"oneof=1 2" alias:"类别"`
+	IsShare     entity.DuiBaActivityIsShare `json:"isShare" form:"isShare" binding:"oneof=1 2" alias:"是否分享"`
+	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
+	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
+	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
+}
+
+type GetDuiBaActivityPageForm struct {
+	Cid        int64                    `json:"cid" form:"cid" binding:"" alias:"渠道id"`
+	Type       entity.DuiBaActivityType `json:"type" form:"type" binding:"" alias:"类别"`
+	ActivityId string                   `json:"activityId" form:"activityId" binding:"" alias:"活动"`
+	Name       string                   `json:"name" form:"name" binding:"" alias:"链接名称"`
+	controller.PageFrom
+}
+
+type DeleteDuiBaActivityForm struct {
+	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
+}
+
+type ShowDuiBaActivityForm struct {
+	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
+}
+
 /*
 user start
 */

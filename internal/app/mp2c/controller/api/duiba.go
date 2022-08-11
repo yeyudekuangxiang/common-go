@@ -190,7 +190,8 @@ func (DuiBaController) DuiBaNoLoginH5(ctx *gin.Context) {
 		ctx.Status(404)
 		return
 	}
-	activity, err := service.DefaultDuiBaActivityService.FindActivity(form.ActivityId)
+	duiBaService := service.NewDuiBaActivityService(context.NewMioContext())
+	activity, err := duiBaService.FindActivity(form.ActivityId)
 	if err != nil {
 		app.Logger.Error("DuiBaNoLoginH5", form, err)
 		ctx.Status(404)

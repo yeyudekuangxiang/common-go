@@ -1,17 +1,31 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"mio/config"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"time"
 )
 
-var DefaultDuiBaActivityService = DuiBaActivityService{}
-
 type DuiBaActivityService struct {
+	ctx  *context.MioContext
+	repo *repository.DuiBaActivityRepository
+}
+
+func NewDuiBaActivityService(ctx *context.MioContext) *DuiBaActivityService {
+	return &DuiBaActivityService{
+		ctx:  ctx,
+		repo: repository.NewDuiBaActivityRepository(ctx),
+	}
 }
 
 func (srv DuiBaActivityService) FindActivity(activityId string) (*entity.DuiBaActivity, error) {
@@ -20,8 +34,118 @@ func (srv DuiBaActivityService) FindActivity(activityId string) (*entity.DuiBaAc
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
-
 	return &activity, nil
+}
+
+func (srv DuiBaActivityService) Create(dto srv_types.CreateDuiBaActivityDTO) error {
+	//判断是否存在
+	banner, err := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{
+		ActivityId: dto.ActivityId})
+	if err != nil {
+		return err
+	}
+	if banner.ID != 0 {
+		return errors.New("activityId已存在")
+	}
+	bannerDo := entity.DuiBaActivity{
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now()}
+	if err := util.MapTo(dto, &bannerDo); err != nil {
+		return err
+	}
+	return srv.repo.Create(&bannerDo)
+}
+
+func (srv DuiBaActivityService) Update(dto srv_types.UpdateDuiBaActivityDTO) error {
+	//判断是否存在
+	info, err := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{
+		Id: dto.Id})
+	if err != nil {
+		return err
+	}
+	if info.ID == 0 {
+		return errors.New("activityId不存在")
+	}
+	//是否存在
+	one, errInfo := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{ActivityId: dto.ActivityId, NotId: dto.Id})
+	if errInfo != nil {
+		return errInfo
+	}
+	if one.ID != 0 {
+		return errors.New("activityId已存在")
+	}
+	do := entity.DuiBaActivity{
+		UpdatedAt: time.Now()}
+	if err := util.MapTo(dto, &do); err != nil {
+		return err
+	}
+	return srv.repo.Save(&do)
+}
+
+func (srv DuiBaActivityService) GetPageList(dto srv_types.GetPageDuiBaActivityDTO) ([]entity.DuiBaActivity, int64, error) {
+	bannerDo := repotypes.GetDuiBaActivityPageDO{
+		Statue: dto.Status,
+	}
+	if err := util.MapTo(dto, &bannerDo); err != nil {
+		return nil, 0, err
+	}
+	list, total, err := srv.repo.GetPageList(bannerDo)
+	if err != nil {
+		return nil, 0, err
+	}
+	return list, total, nil
+}
+
+func (srv DuiBaActivityService) Delete(dto srv_types.DeleteDuiBaActivityDTO) error {
+	//判断是否存在
+	info, err := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{
+		Id: dto.Id})
+	if err != nil {
+		return err
+	}
+	if info.ID == 0 {
+		return errors.New("activityId不存在")
+	}
+	do := repotypes.DeleteDuiBaActivityDO{
+		UpdatedAt: time.Now(),
+		Id:        dto.Id,
+		Status:    entity.DuiBaActivityStatusNo,
+	}
+	return srv.repo.Delete(&do)
+}
+
+func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_types.DuiBaActivityShowVO, error) {
+	//判断是否存在
+	info, err := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{
+		Id: dto.Id})
+	if err != nil {
+		return nil, err
+	}
+	if info.ID == 0 {
+		return nil, errors.New("activityId不存在")
+	}
+	//生成兑吧页面路径
+	ActivityAppPath := srv.GetActivityAppPath(info.ActivityId, info.Cid, info.IsShare, info.IsPhone)
+	//生成兑吧页面预览小程序码
+	ActivityViewQrCode, _ := srv.GetActivityViewQrCode(ActivityAppPath)
+	//获取兑吧h5免登录链接
+	activityH5 := srv.GetActivityH5(info.ActivityId)
+	//生成兑吧页面路径
+	jumpAppH5 := srv.GetJumpAppH5(info.ActivityId, info.Cid, info.IsShare, info.IsPhone)
+
+	return &api_types.DuiBaActivityShowVO{
+		ID:            info.ID,
+		NoLoginH5Link: activityH5,
+		StaticH5Link:  jumpAppH5,
+		InsideLink:    ActivityAppPath,
+		EwmLink:       ActivityViewQrCode,
+	}, nil
+
+	/**
+	NoLoginH5Link: fmt.Sprintf(config.Constants.DuiBaActivityNoLoginH5Link, info.ActivityId),
+	StaticH5Link:  fmt.Sprintf(config.Constants.DuiBaActivityStaticH5Link, info.ActivityId, info.Cid),
+	InsideLink:    fmt.Sprintf(config.Constants.DuiBaActivityInsideLink, info.ActivityId),
+	*/
 }
 
 // GetActivityAppPath 生成兑吧页面路径
@@ -30,7 +154,7 @@ func (srv DuiBaActivityService) FindActivity(activityId string) (*entity.DuiBaAc
 // needShare 页面是否可以分享 1可以分享 2不可以分享
 // checkPhone 访问页面是否必须绑定手机号 1必须绑定 2不必须绑定
 // 返回值 pages/duiba_v2/duiba/duiba-share/index?activityId=001&cid=12&bind=bind
-func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid string, needShare, checkPhone int) string {
+func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	path := ""
 	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
 	if needShare == 1 {
@@ -66,7 +190,7 @@ func (srv DuiBaActivityService) GetActivityH5(activityId string) string {
 // needShare 页面是否可以分享 1可以分享 2不可以分享
 // checkPhone 访问页面是否必须绑定手机号 1必须绑定 2不必须绑定
 // return https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=index&cid=12&bind=true
-func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid string, needShare, checkPhone int) string {
+func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	link := ""
 	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
 	if needShare == 1 {

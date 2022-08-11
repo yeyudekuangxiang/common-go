@@ -45,7 +45,15 @@ func adminRouter(router *gin.Engine) {
 			bannerRouter.GET("/list", apiutil.Format(admin.DefaultBannerController.GetPageList))
 
 		}
+		duiBaRouter := adminRouter.Group("/duiba")
+		{
+			duiBaRouter.POST("/create", apiutil.Format(admin.DefaultDuiBaActivityController.Create))
+			duiBaRouter.POST("/update", apiutil.Format(admin.DefaultDuiBaActivityController.Update))
+			duiBaRouter.GET("/list", apiutil.Format(admin.DefaultDuiBaActivityController.GetPageList))
+			duiBaRouter.POST("/delete", apiutil.Format(admin.DefaultDuiBaActivityController.Delete))
+			duiBaRouter.GET("/show", apiutil.Format(admin.DefaultDuiBaActivityController.Show))
 
+		}
 		adminRouter.GET("upload/token", apiutil.Format(admin.DefaultUploadController.GetUploadTokenInfo))
 
 		//后台接口-文章管理
