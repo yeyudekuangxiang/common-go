@@ -25,12 +25,11 @@ func (repo DuiBaActivityRepository) Create(transaction *entity.DuiBaActivity) er
 	return repo.ctx.DB.Create(transaction).Error
 }
 
-func (repo DuiBaActivityRepository) GetUserChannelPageList(by GetUserChannelPageListBy) (list []entity.DuiBaActivity, total int64) {
+func (repo DuiBaActivityRepository) GetPageList(by repotypes.GetDuiBaActivityPageDO) (list []entity.DuiBaActivity, total int64, err error) {
 	list = make([]entity.DuiBaActivity, 0)
-
-	db := repo.ctx.DB.Table("user_channel")
-	if by.Pid > 0 {
-		db.Where("pid = ?", by.Pid)
+	db := repo.ctx.DB.Table("duiba_activity")
+	if by.Type > 0 {
+		db.Where("type = ?", by.Type)
 	}
 	if by.Cid > 0 {
 		db.Where("cid = ?", by.Cid)
@@ -38,9 +37,15 @@ func (repo DuiBaActivityRepository) GetUserChannelPageList(by GetUserChannelPage
 	if by.Name != "" {
 		db.Where("name like ?", "%"+by.Name+"%")
 	}
+	if by.Statue != 0 {
+		db.Where("status = ?", by.Statue)
+	}
+	if by.ActivityId != "" {
+		db.Where("activity_id = ?", by.ActivityId)
+	}
 	db.Select("*")
 	db2 := repo.ctx.DB.Table("(?) as t", db)
-	err := db2.Count(&total).
+	err = db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
 		Order("id desc").
@@ -51,21 +56,18 @@ func (repo DuiBaActivityRepository) GetUserChannelPageList(by GetUserChannelPage
 	return
 }
 
-func (repo DuiBaActivityRepository) GetExistOne(do repotypes.GetDuiBaActivityExistDO) (entity.Banner, error) {
-	banner := entity.Banner{}
-	db := repo.ctx.DB.Model(banner)
-	if do.Name != "" {
-		db.Where("name = ?", do.Name)
-	}
-	if do.ImageUrl != "" {
-		db.Or("image_url = ?", do.ImageUrl)
+func (repo DuiBaActivityRepository) GetExistOne(do repotypes.GetDuiBaActivityExistDO) (entity.DuiBaActivity, error) {
+	ent := entity.DuiBaActivity{}
+	db := repo.ctx.DB.Model(ent)
+	if do.ActivityId != "" {
+		db.Where("activity_id = ?", do.ActivityId)
 	}
 	if do.NotId != 0 {
 		db.Not("id", do.NotId)
 	}
-	err := db.First(&banner).Error
+	err := db.First(&ent).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return banner, err
+		return ent, err
 	}
-	return banner, nil
+	return ent, nil
 }
