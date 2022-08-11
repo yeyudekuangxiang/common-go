@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/pkg/wxoa"
+	"strconv"
 	"strings"
 )
 
@@ -28,11 +29,8 @@ type TopicAdminService struct {
 func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]entity.Topic, int64, error) {
 	topList := make([]entity.Topic, 0)
 	var total int64
-	query := app.DB.Model(&entity.Topic{}).Preload("Tags").
-		Joins("left join topic_tag on topic.id = topic_tag.topic_id")
-	if param.TagId != 0 {
-		query.Where("topic_tag.tag_id = ?", param.TagId)
-	}
+	query := app.DB.Model(&entity.Topic{}).Preload("Tags")
+
 	if param.ID != 0 {
 		query.Where("topic.id = ?", param.ID)
 	}
@@ -54,8 +52,11 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 	if param.IsEssence > 0 {
 		query.Where("topic.is_essence = ?", param.IsEssence)
 	}
-	err := query.Count(&total).
-		Group("topic.id").
+	if param.TagId != 0 {
+		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
+	}
+	query.Count(&total)
+	err := query.Group("topic.id").
 		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
@@ -92,7 +93,7 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
 		Avatar:    avatarUrl,
-		Nickname:  nikeName,
+		Nickname:  "绿喵",
 		Tags:      tagModel,
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
@@ -128,6 +129,7 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
 	topicModel.TopicTag = tag.Name
+	topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 	if err := app.DB.Model(&topicModel).Updates(topicModel).Error; err != nil {
 		return err
 	}

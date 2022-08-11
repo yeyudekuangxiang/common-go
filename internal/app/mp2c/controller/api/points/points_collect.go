@@ -8,7 +8,7 @@ import (
 	"mio/internal/pkg/util/apiutil"
 )
 
-var PointsCollectController = PointCollectController{}
+var DefaultPointsCollectController = PointCollectController{}
 
 type PointCollectController struct {
 }
