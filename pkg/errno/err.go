@@ -21,7 +21,7 @@ var (
 	OK = err{code: 200, message: "OK"}
 
 	// ErrCommon 通用错误
-	ErrCommon = err{code: 10000, message: "通用错误"}
+	ErrCommon = err{code: 10000, message: "系统繁忙,请稍后再试"}
 	// ErrInternalServer 系统错误
 	ErrInternalServer = err{code: 10001, message: "内部服务器错误"}
 	// ErrBind 绑定错误
