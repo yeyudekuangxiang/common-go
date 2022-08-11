@@ -396,3 +396,20 @@ type UserAccountInfo struct {
 	Balance int64 `json:"balance"` //积分余额
 	CertNum int64 `json:"certNum"` //证书数量
 }
+
+type CommentCount struct {
+	Date    time.Time
+	TotalID int64
+	Total   int64
+}
+
+type ChangeUserState struct {
+	UserId int64 `json:"userId"`
+	State  int   `json:"state"`
+}
+
+type ChangeUserPosition struct {
+	UserId       int64  `json:"userId"`
+	Position     string `json:"position"`
+	PositionIcon string `json:"positionIcon"`
+}

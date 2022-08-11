@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 type CityResult struct {
@@ -33,24 +32,28 @@ type CityResult struct {
 //根据ip获取城市
 
 func IpToCity(ip string) (*CityResult, error) {
-	url := "https://api.map.baidu.com/location/ip?ak=32f38c9491f2da9eb61106aaab1e9739"
+	url := "https://api.map.baidu.com/location/ip?ak=32f38c9491f2da9eb61106aaab1e9739&ip=" + ip
 	method := "GET"
-	payload := strings.NewReader("ip=" + ip)
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Cookie", "")
 	res, err := client.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 	var o CityResult
 	err = json.Unmarshal([]byte(string(body)), &o)
-	fmt.Println("OCRPush ", payload, string(body))
 	if err != err {
 		return nil, err
 	}

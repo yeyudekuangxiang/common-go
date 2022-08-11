@@ -5,11 +5,12 @@ type Response struct {
 	ErrMsg  string `json:"errmsg"`
 }
 
-type UnlimitedQRCodeResponse struct {
+type QRCodeResponse struct {
 	Response
 	ContentType string `json:"contentType"`
 	Buffer      []byte `json:"buffer"`
 }
+
 type UserRiskRankParam struct {
 	AppId        string `json:"appid"`
 	OpenId       string `json:"openid"`

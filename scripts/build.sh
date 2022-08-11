@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 # 参数1 要构建的目录名 mp2c
 echo "build start"
 cd $(dirname $(readlink -f "$0"))/../cmd/$1/

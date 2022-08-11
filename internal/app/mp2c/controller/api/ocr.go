@@ -17,6 +17,6 @@ func (OCRController) GmTicket(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultOCRService.OCRForGm(user.OpenId, form.Src)
+	err := service.DefaultOCRService.OCRForGm(user.OpenId, user.Risk, form.Src)
 	return gin.H{}, err
 }

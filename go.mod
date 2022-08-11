@@ -15,7 +15,7 @@ require (
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
 	github.com/jszwec/csvutil v1.6.0
-	github.com/medivhzhan/weapp/v3 v3.6.6
+	github.com/medivhzhan/weapp/v3 v3.6.12
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/mlogclub/simple v1.1.14
 	github.com/nacos-group/nacos-sdk-go v1.0.6
@@ -28,6 +28,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
+	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.5.0
 	go.uber.org/zap v1.16.0
 	gopkg.in/ini.v1 v1.62.0
@@ -101,12 +102,14 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.3 // indirect
 	github.com/richardlehane/msoleps v1.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/tdewolff/minify/v2 v2.9.4 // indirect
 	github.com/tdewolff/parse/v2 v2.5.2 // indirect
 	github.com/toolkits/concurrent v0.0.0-20150624120057-a4371d70e3e3 // indirect

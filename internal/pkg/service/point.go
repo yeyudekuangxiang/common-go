@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"time"
 )
@@ -196,7 +197,7 @@ func (srv PointService) ChangeUserPointByOffline(dto srv_types.ChangeUserPointDT
 //AdminAdjustUserPoint 管理员变动积分
 func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserPointParam) error {
 
-	if err := util.ValidatorStruct(param); err != nil {
+	if err := validator.ValidatorStruct(param); err != nil {
 		app.Logger.Error(param, err)
 		return err
 	}

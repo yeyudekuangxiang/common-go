@@ -26,14 +26,20 @@ func apiRouter(router *gin.Engine) {
 		{
 			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))     //获取验证码
 			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM)) //校验验证码
-			//企业用户获取token
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
 
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
+
+		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
+		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
+		userRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		//文章评论列表
+		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
+		authRouter.GET("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
 
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 
@@ -69,6 +75,7 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
+			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic)) //我的帖子列表
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM)) //绑定手机
 		}
@@ -116,7 +123,17 @@ func apiRouter(router *gin.Engine) {
 		{
 			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
 			topicRouter.POST("/like/change", apiutil.Format(api.DefaultTopicController.ChangeTopicLike))
-			//topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
+			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
+			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
+			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
+		}
+		//评论相关
+		commentRouter := mustAuthRouter.Group("/comment")
+		{
+			commentRouter.POST("/create", apiutil.Format(api.DefaultCommentController.Create))
+			commentRouter.POST("/update", apiutil.Format(api.DefaultCommentController.Update))
+			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
+			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 		}
 
 		//积分相关路由
@@ -124,6 +141,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
 			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
+			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward)) //我的奖励
 		}
 
 		//步行相关的路由

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	util2 "mio/internal/pkg/util"
+	util2 "mio/internal/pkg/util/encrypt"
 )
 
 var DefaultBdSceneService = BdSceneService{}

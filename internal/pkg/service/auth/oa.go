@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	wxoa2 "mio/pkg/wxoa"
 	"net/url"
@@ -145,7 +146,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 		return "", err
 	}
 
-	key := util.Md5(fmt.Sprintf("%s%s", setting.AppId, util.UUID()))
+	key := encrypt.Md5(fmt.Sprintf("%s%s", setting.AppId, util.UUID()))
 
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, key)
 
@@ -166,7 +167,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 func (srv OaService) Sign(url string) (*OaSignResult, error) {
 	setting := config.FindOaSetting(srv.Platform)
 
-	tickerServer := wxoa2.TicketTokenServer{
+	tickerServer := wxoa2.TicketServer{
 		TokenServer: &wxoa2.AccessTokenServer{
 			AppId:  setting.AppId,
 			Secret: setting.Secret,
@@ -182,7 +183,7 @@ func (srv OaService) Sign(url string) (*OaSignResult, error) {
 		return nil, errno.ErrInternalServer
 	}
 
-	nonceStr := util.Md5(time.Now().String())
+	nonceStr := encrypt.Md5(time.Now().String())
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	sign := jssdk.WXConfigSign(ticker, nonceStr, timestamp, url)
 	return &OaSignResult{

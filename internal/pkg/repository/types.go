@@ -24,33 +24,61 @@ type GetTopicLikeListBy struct {
 
 type GetTopicPageListBy struct {
 	ID         int64              `json:"id"`
-	TopicTagId int                `json:"topicTagId"`
+	TopicTagId int64              `json:"topicTagId"`
 	Offset     int                `json:"offset"`
 	Status     int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop      int                `json:"isTop"`
+	IsEssence  int                `json:"isEssence"`
 	Limit      int                `json:"limit"`  //limit为0时不限制数量
 	UserId     int64              `json:"userId"` // 用于查询用户对帖子是否点赞
 	OrderBy    entity.OrderByList `json:"orderBy"`
 }
 
+type TopicListRequest struct {
+	ID        int64  `json:"id"` //帖子id
+	Title     string `json:"title"`
+	UserId    int64  `json:"userId"`
+	UserName  string `json:"userName"`
+	TagId     int64  `json:"tagId"`
+	Status    int    `json:"status"`    //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop     int    `json:"isTop"`     //是否置顶
+	IsEssence int    `json:"isEssence"` //是否
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
+}
+
 type GetTagPageListBy struct {
-	ID      int                `json:"id"`
-	Offset  int                `json:"offset"`
-	Limit   int                `json:"limit"` //limit为0时不限制数量
-	OrderBy entity.OrderByList `json:"orderBy"`
+	//	ID          int                `json:"id"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Offset      int                `json:"offset"`
+	Limit       int                `json:"limit"` //limit为0时不限制数量
+	OrderBy     entity.OrderByList `json:"orderBy"`
+}
+
+type CreateTag struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+}
+type UpdateTag struct {
+	ID int64 `json:"id"`
+	CreateTag
 }
 
 type GetUserListBy struct {
-	Mobile     string
-	Mobiles    []string
-	Source     entity.UserSource
-	UserIds    []int64
-	Nickname   string //模糊查询
-	LikeMobile string //手机号模糊查询
-	UserId     int64
-	OpenId     string
-	StartTime  time.Time
-	EndTime    time.Time
-	Risk       int
+	Mobile     string            `json:"mobile,omitempty"`
+	Mobiles    []string          `json:"mobiles,omitempty"`
+	Source     entity.UserSource `json:"source,omitempty"`
+	UserIds    []int64           `json:"userIds,omitempty"`
+	Nickname   string            `json:"nickname,omitempty"`   //模糊查询
+	LikeMobile string            `json:"likeMobile,omitempty"` //手机号模糊查询
+	UserId     int64             `json:"userId,omitempty"`
+	State      int               `json:"state,omitempty"` //
+	OpenId     string            `json:"openId,omitempty"`
+	StartTime  time.Time         `json:"startTime"`
+	EndTime    time.Time         `json:"endTime"`
+	Risk       int               `json:"risk,omitempty"`
 }
 
 type GetUserPageListBy struct {
@@ -86,10 +114,7 @@ type FindPointTransactionCountLimitBy struct {
 	TransactionType entity.PointTransactionType
 	TransactionDate model.Date
 }
-type GetTopicListBy struct {
-	TopicIds []int64
-	Status   int `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
-}
+
 type FindTopicFlowBy struct {
 	TopicId int64
 	UserId  int64
@@ -99,7 +124,7 @@ type GetTopicFlowPageListBy struct {
 	Limit      int
 	UserId     int64
 	TopicId    int64
-	TopicTagId int
+	TopicTagId int64
 	Status     entity.TopicStatus `json:"status"` //直接传0值表示全部
 }
 type GetProductItemListBy struct {
@@ -185,4 +210,9 @@ type GetUserChannelPageListBy struct {
 	Offset  int                `json:"offset"`
 	Limit   int                `json:"limit"` //limit为0时不限制数量
 	OrderBy entity.OrderByList `json:"orderBy"`
+}
+
+type FindTopicBy struct {
+	TopicIds []int64
+	Status   int `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
 }

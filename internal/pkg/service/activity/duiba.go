@@ -10,6 +10,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"time"
@@ -56,7 +57,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	})
 }
 func (srv ZeroService) StoreUrl(url string) (string, error) {
-	key := util.Md5(url)
+	key := encrypt.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
@@ -99,7 +100,7 @@ type DuiBaActivity struct {
 const DUIBAIndex = "https://88543.activity-12.m.duiba.com.cn/chw/visual-editor/skins?id=239935"
 
 func (srv ZeroService) DuiBaStoreUrl(activityId string, url string) (string, error) {
-	key := activityId + "_" + util.Md5(url)
+	key := activityId + "_" + encrypt.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
