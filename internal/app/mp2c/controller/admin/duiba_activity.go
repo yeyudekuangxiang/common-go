@@ -117,6 +117,7 @@ func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 			ID:            activity.ID,
 			Name:          activity.Name,
 			Type:          activity.Type,
+			Cid:           activity.Cid,
 			IsShare:       activity.IsShare,
 			ActivityId:    activity.ActivityId,
 			ActivityUrl:   urlVo,
