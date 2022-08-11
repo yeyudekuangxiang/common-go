@@ -17,14 +17,18 @@ type WebImageParam struct {
 	ImageUrl string
 }
 type WebImageResult struct {
-	ErrorResponse
-	LogId          int64 `json:"log_id"`
-	WordsResultNum int   `json:"words_result_num"`
+	ErrorCode      int    `json:"error_code"`
+	ErrorMsg       string `json:"error_msg"`
+	LogId          int64  `json:"log_id"`
+	WordsResultNum int    `json:"words_result_num"`
 	WordsResult    []struct {
 		Words string `json:"words"`
 	} `json:"words_result"`
 }
 
+func (result WebImageResult) IsSuccess() bool {
+	return result.ErrorCode == 0
+}
 func (c ImageClient) WebImage(param WebImageParam) (*WebImageResult, error) {
 	token, err := c.AccessToken.GetToken()
 	if err != nil {
