@@ -14,9 +14,16 @@ func initQueueProducer() {
 
 	pub, err := rabbitmq.NewPublisher(config.Config.AMQP.Url, rabbitmq.Config{}, rabbitmq.WithPublisherOptionsLogger(zap.NewRabbitmqLogger(app.Logger)))
 	if err != nil {
-		log.Fatal("初始化amqp生产者失败", err)
+
+		if config.Config.App.Env == "prod" {
+			log.Fatal("初始化amqp生产者失败", err)
+		} else {
+			log.Println("初始化amqp生产者失败", err)
+		}
+
+	} else {
+		*app.QueueProduct = *pub
+		log.Println("初始化amqp生产者成功")
 	}
 
-	*app.QueueProduct = *pub
-	log.Println("初始化amqp生产者成功")
 }
