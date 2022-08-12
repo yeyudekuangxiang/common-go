@@ -76,28 +76,33 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 	//}
 	//处理images
 	imageStr := strings.Join(images, ",")
-	//tag
-	tagModel := make([]entity.Tag, 0)
-	for _, tagId := range tagIds {
-		tagModel = append(tagModel, entity.Tag{
-			Id: tagId,
-		})
-	}
-	tag := srv.tag.GetById(tagIds[0])
 	//topic
 	topicModel := &entity.Topic{
 		UserId:    userId,
 		Title:     title,
-		TopicTag:  tag.Name,
 		Content:   content,
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
 		Avatar:    avatarUrl,
 		Nickname:  "绿喵",
-		Tags:      tagModel,
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
+
+	//tag
+	if len(tagIds) > 0 {
+		tagModel := make([]entity.Tag, 0)
+		for _, tagId := range tagIds {
+			tagModel = append(tagModel, entity.Tag{
+				Id: tagId,
+			})
+		}
+		tag := srv.tag.GetById(tagIds[0])
+		topicModel.Tags = tagModel
+		topicModel.TopicTag = tag.Name
+		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
+	}
+
 	if err := srv.topic.Save(topicModel); err != nil {
 		return err
 	}
@@ -115,26 +120,29 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 	}
 	//处理images
 	imageStr := strings.Join(images, ",")
-	//tag
-	tagModel := make([]entity.Tag, 0)
-	for _, tagId := range tagIds {
-		tagModel = append(tagModel, entity.Tag{
-			Id: tagId,
-		})
-	}
-	tag := srv.tag.GetById(tagIds[0])
 
 	//更新帖子
 	topicModel.Title = title
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
-	topicModel.TopicTag = tag.Name
-	topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
-	if err := app.DB.Model(&topicModel).Updates(topicModel).Error; err != nil {
-		return err
+
+	//tag
+	if len(tagIds) > 0 {
+		tagModel := make([]entity.Tag, 0)
+		for _, tagId := range tagIds {
+			tagModel = append(tagModel, entity.Tag{
+				Id: tagId,
+			})
+		}
+		tag := srv.tag.GetById(tagIds[0])
+		topicModel.TopicTag = tag.Name
+		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
+		err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
+		if err != nil {
+			return err
+		}
 	}
-	err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
-	if err != nil {
+	if err := app.DB.Model(&topicModel).Updates(topicModel).Error; err != nil {
 		return err
 	}
 	return nil

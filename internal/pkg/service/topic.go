@@ -527,29 +527,35 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 	}
 	//处理images
 	imageStr := strings.Join(images, ",")
-	//tag
-	tagModel := make([]entity.Tag, 0)
-	for _, tagId := range tagIds {
-		tagModel = append(tagModel, entity.Tag{
-			Id: tagId,
-		})
-	}
-	tag := DefaultTagService.r.GetById(tagIds[0])
+
 	//topic
 	topicModel := &entity.Topic{
 		UserId:    userId,
 		Title:     title,
-		TopicTag:  tag.Name,
 		Content:   content,
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
 		Avatar:    avatarUrl,
 		Nickname:  nikeName,
-		Tags:      tagModel,
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
-	if err := srv.repo.Save(topicModel); err != nil {
+
+	if len(tagIds) > 0 {
+		//tag
+		tagModel := make([]entity.Tag, 0)
+		for _, tagId := range tagIds {
+			tagModel = append(tagModel, entity.Tag{
+				Id: tagId,
+			})
+		}
+		tag := DefaultTagService.r.GetById(tagIds[0])
+		topicModel.TopicTag = tag.Name
+		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
+		topicModel.Tags = tagModel
+	}
+
+	if err = srv.repo.Save(topicModel); err != nil {
 		return err
 	}
 	return nil
@@ -569,14 +575,6 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	}
 	//处理images
 	imageStr := strings.Join(images, ",")
-	//tag
-	tagModel := make([]entity.Tag, 0)
-	for _, tagId := range tagIds {
-		tagModel = append(tagModel, entity.Tag{
-			Id: tagId,
-		})
-	}
-	tag := DefaultTagService.r.GetById(tagIds[0])
 
 	//更新帖子
 	topicModel.Title = title
@@ -584,14 +582,26 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.Nickname = nikeName
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
-	topicModel.TopicTag = tag.Name
-	topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
+
 	topicModel.Status = 1
-	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
-		return err
+
+	//tag
+	if len(tagIds) > 0 {
+		tagModel := make([]entity.Tag, 0)
+		for _, tagId := range tagIds {
+			tagModel = append(tagModel, entity.Tag{
+				Id: tagId,
+			})
+		}
+		tag := DefaultTagService.r.GetById(tagIds[0])
+		topicModel.TopicTag = tag.Name
+		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
+		err = app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
+		if err != nil {
+			return err
+		}
 	}
-	err = app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
-	if err != nil {
+	if err = app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
 		return err
 	}
 	return nil
