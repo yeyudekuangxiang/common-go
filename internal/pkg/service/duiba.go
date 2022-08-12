@@ -360,7 +360,7 @@ func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productIte
 	pointService := NewPointService(context.NewMioContext())
 	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openid,
-		Type:         entity.POINT_ADJUSTMENT,
+		Type:         entity.POINT_DUIBA_INTEGRAL_RECHARGE,
 		ChangePoint:  int64(point),
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprintf("兑吧虚拟商品兑换 orderNum:%s productItemId:%s", orderNum, productItemId),
