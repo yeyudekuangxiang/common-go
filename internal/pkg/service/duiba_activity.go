@@ -156,11 +156,11 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 // 返回值 pages/duiba_v2/duiba/duiba-share/index?activityId=001&cid=12&bind=bind
 func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	path := ""
-	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
-	if needShare == 1 {
-		path = fmt.Sprintf("pages/duiba_v2/duiba/duiba-share/index?activityId=%s&cid=%s%s", activityId, cid, checkPhoneParam)
+	checkPhoneParam := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "", "&bind=bind").String()
+	if needShare == entity.DuiBaActivityIsShareYes {
+		path = fmt.Sprintf("pages/duiba_v2/duiba/duiba-share/index?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
 	} else {
-		path = fmt.Sprintf("pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%s%s", activityId, cid, checkPhoneParam)
+		path = fmt.Sprintf("pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
 	}
 	return path
 }
@@ -181,6 +181,8 @@ func (srv DuiBaActivityService) GetActivityViewQrCode(path string) (string, erro
 // activityId 获取url
 // 返回值 h5免登陆链接 https://go-api.miotech.com/api/mp2c/duiba/h5?activityId=q8sd82besdsdsd
 func (srv DuiBaActivityService) GetActivityH5(activityId string) string {
+	a := config.Config.App.Domain
+	println(a)
 	return util.LinkJoin(config.Config.App.Domain, "/api/mp2c/duiba/h5?activityId="+activityId)
 }
 
@@ -192,11 +194,11 @@ func (srv DuiBaActivityService) GetActivityH5(activityId string) string {
 // return https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=index&cid=12&bind=true
 func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	link := ""
-	checkPhoneParam := util.Ternary(checkPhone == 1, "", "&bind=bind")
-	if needShare == 1 {
-		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%s%s", activityId, cid, checkPhoneParam)
+	checkPhoneParam := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "", "&bind=bind").String()
+	if needShare == entity.DuiBaActivityIsShareYes {
+		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
 	} else {
-		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_not_share_v2.html?activityId=%s&cid=%s%s", activityId, cid, checkPhoneParam)
+		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_not_share_v2.html?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
 	}
 	return link
 }

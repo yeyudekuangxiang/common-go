@@ -69,6 +69,9 @@ func (repo DuiBaActivityRepository) GetExistOne(do repotypes.GetDuiBaActivityExi
 	if do.NotId != 0 {
 		db.Not("id", do.NotId)
 	}
+	if do.Id != 0 {
+		db.Where("id = ?", do.Id)
+	}
 	err := db.First(&ent).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return ent, err
