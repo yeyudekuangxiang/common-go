@@ -140,12 +140,6 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 		InsideLink:    ActivityAppPath,
 		EwmLink:       ActivityViewQrCode,
 	}, nil
-
-	/**
-	NoLoginH5Link: fmt.Sprintf(config.Constants.DuiBaActivityNoLoginH5Link, info.ActivityId),
-	StaticH5Link:  fmt.Sprintf(config.Constants.DuiBaActivityStaticH5Link, info.ActivityId, info.Cid),
-	InsideLink:    fmt.Sprintf(config.Constants.DuiBaActivityInsideLink, info.ActivityId),
-	*/
 }
 
 // GetActivityAppPath 生成兑吧页面路径
@@ -181,8 +175,6 @@ func (srv DuiBaActivityService) GetActivityViewQrCode(path string) (string, erro
 // activityId 获取url
 // 返回值 h5免登陆链接 https://go-api.miotech.com/api/mp2c/duiba/h5?activityId=q8sd82besdsdsd
 func (srv DuiBaActivityService) GetActivityH5(activityId string) string {
-	a := config.Config.App.Domain
-	println(a)
 	return util.LinkJoin(config.Config.App.Domain, "/api/mp2c/duiba/h5?activityId="+activityId)
 }
 
