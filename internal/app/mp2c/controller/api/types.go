@@ -43,6 +43,11 @@ type GetChargeForm struct {
 	Sign       string `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
 
+type QueryTokenForm struct {
+	OperatorID     string `json:"operatorID" form:"operatorID" alias:"运营商标识" binding:"required;len=9"`
+	OperatorSecret string `json:"operatorSecret" form:"operatorSecret" alias:"运营商密钥" binding:"required"`
+}
+
 type DuibaAutoLoginForm struct {
 	Path string `json:"path" form:"path"`
 }

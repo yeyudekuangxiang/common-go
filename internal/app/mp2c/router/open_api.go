@@ -59,11 +59,13 @@ func openRouter(router *gin.Engine) {
 				context.String(400, err.Error())
 			}
 		})
-
-		//星星充电订单同步接口
-		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
-		//星星充电发放优惠券
-		openRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
+		chargeRouter := openRouter.Group("/charge")
+		{
+			//星星充电订单同步接口
+			chargeRouter.GET("/push", apiutil.Format(api.DefaultChargeController.Push))
+			//星星充电发放优惠券
+			chargeRouter.GET("/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
+		}
 
 		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
 	}

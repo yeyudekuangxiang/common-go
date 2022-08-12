@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -95,6 +96,18 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 }
 
 // SendCoupon 发放优惠券
-func (ctr ChargeController) SendCoupon(g *gin.Context) (gin.H, error) {
+func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
+	authService := activity.AuthService{
+		XingAccessReq: activity.XingAccessRequest{
+			OperatorID:     "",
+			OperatorSecret: "",
+		},
+	}
+	token, err := authService.GetXingAccessToken(context.NewMioContext(), "a.com")
+	if err != nil {
+		return nil, err
+	}
+	//
+	fmt.Printf("token:%s", token)
 	return nil, nil
 }

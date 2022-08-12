@@ -110,11 +110,12 @@ var commandRealText = map[CollectType]string{
 
 //方法定义
 var commandMap = map[string]*CommandDescription{
-	"COFFEE_CUP":    {Fn: (*clientHandle).coffeeCup, Times: 2, Amount: 39},
-	"INVITE":        {Fn: (*clientHandle).invite, Times: 5, Amount: 500},
-	"BIKE_RIDE":     {Fn: (*clientHandle).bikeRide, Times: 2, Amount: 42},
-	"POWER_REPLACE": {Fn: (*clientHandle).powerReplace, Times: 1, Amount: 300},
-	"ARTICLE":       {Fn: (*clientHandle).article, Times: 2, Amount: 150},
+	"COFFEE_CUP":       {Fn: (*clientHandle).coffeeCup, Times: 2, Amount: 39},
+	"INVITE":           {Fn: (*clientHandle).invite, Times: 5, Amount: 500},
+	"BIKE_RIDE":        {Fn: (*clientHandle).bikeRide, Times: 2, Amount: 42},
+	"POWER_REPLACE":    {Fn: (*clientHandle).powerReplace, Times: 1, Amount: 300},
+	"ARTICLE":          {Fn: (*clientHandle).article, Times: 2, Amount: 150},
+	"FAST_ELECTRICITY": {Fn: (*clientHandle).fastElectricity, Times: 0, Amount: 300},
 }
 
 //dui ba

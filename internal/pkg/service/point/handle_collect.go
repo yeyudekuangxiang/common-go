@@ -69,6 +69,12 @@ func (c *clientHandle) article() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *clientHandle) fastElectricity() error {
+	c.WithMessage(fmt.Sprintf("fastElectricity=%v", c.AdditionInfo))
+	//获取充电数 1度电 = 10 积分
 
 	return nil
 }
