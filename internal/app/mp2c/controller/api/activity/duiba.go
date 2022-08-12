@@ -7,6 +7,7 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"io/ioutil"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
@@ -78,7 +79,8 @@ func (ctr ZeroController) GetActivityMiniQR(ctx *gin.Context) error {
 		return errors.New("密码错误")
 	}
 
-	activity, err := service.DefaultDuiBaActivityService.FindActivity(form.ActivityId)
+	duiBaService := service.NewDuiBaActivityService(context.NewMioContext())
+	activity, err := duiBaService.FindActivity(form.ActivityId)
 	if err != nil {
 		return err
 	}

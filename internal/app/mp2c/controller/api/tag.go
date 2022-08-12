@@ -13,13 +13,13 @@ var DefaultTagController = TagController{}
 type TagController struct {
 }
 
+// List 获取话题列表
 func (TagController) List(c *gin.Context) (gin.H, error) {
 	form := GetTagForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	list, total, err := service.DefaultTagService.GetTagPageList(repository.GetTagPageListBy{
-		ID:      form.ID,
 		Offset:  form.Offset(),
 		Limit:   form.Limit(),
 		OrderBy: entity2.OrderByList{entity2.OrderByTagSortDesc},

@@ -9,6 +9,9 @@ import (
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"go.uber.org/zap"
+	"mio/internal/pkg/queue/producer/wxworkpdr"
+	"mio/internal/pkg/queue/types/wxworkqueue"
+	"mio/internal/pkg/util/encrypt"
 	mzap "mio/pkg/zap"
 
 	"log"
@@ -17,7 +20,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/service/business"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"mio/pkg/wxwork"
@@ -37,7 +39,7 @@ func recovery() gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, err interface{}) {
 		e, ok := err.(error)
 		if ok {
-			c.JSON(200, apiutil.FormatErr(e, nil))
+			c.JSON(apiutil.FormatErr(e, nil))
 		} else {
 			c.JSON(200, apiutil.FormatResponse(errno.ErrInternalServer.Code(), nil, fmt.Sprintf("%v", err)))
 		}
@@ -49,9 +51,14 @@ func recovery() gin.HandlerFunc {
 				return
 			}
 
-			sendErr := wxwork.SendRobotMessage(config.Constants.WxWorkBugRobotKey, wxwork.Markdown{
-				Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
+			sendErr := wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{
+				Key:  config.Constants.WxWorkBugRobotKey,
+				Type: wxwork.MsgTypeMarkdown,
+				Message: wxwork.Markdown{
+					Content: fmt.Sprintf("**容器:**%s \n\n**来源:**panic \n\n**消息:**%+v \n\n**堆栈:**%s \n\n<@all>", os.Getenv("HOSTNAME"), err, callers),
+				},
 			})
+
 			if sendErr != nil {
 				log.Printf("推送异常到企业微信失败 %v %v", err, sendErr)
 			}
@@ -96,14 +103,14 @@ func AuthAdmin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			//	ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		admin, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || admin == nil {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			//	ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 
@@ -116,14 +123,14 @@ func AuthBusinessUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("b-token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		user, err := business.DefaultUserService.GetBusinessUserByToken(token)
 		if err != nil || user == nil {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 
@@ -134,14 +141,14 @@ func mustAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
 		if token == "" {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 
 		user, err := service2.DefaultUserService.GetUserByToken(token)
 		if err != nil || user.ID == 0 {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -157,7 +164,7 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByToken(token)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth token err", token, err)
-				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
 				return
 			}
 		}
@@ -166,13 +173,13 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 				return
 			}
 		}
 
 		if user == nil {
-			ctx.AbortWithStatusJSON(200, apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -205,19 +212,14 @@ func Auth2() gin.HandlerFunc {
 	}
 }
 
-type ThrottleConfig struct {
-	Throttle string
-}
-
 func Throttle() gin.HandlerFunc {
-	throttleConfig := &struct {
-		Throttle string
-	}{}
-	_ = app.Ini.Section("http").MapTo(throttleConfig)
-	if throttleConfig.Throttle == "" {
-		throttleConfig.Throttle = "200-M"
+
+	throttle := "200-M"
+	if config.Config.Http.Throttle != "" {
+		throttle = config.Config.Http.Throttle
 	}
-	rate, err := limiter.NewRateFromFormatted(throttleConfig.Throttle)
+
+	rate, err := limiter.NewRateFromFormatted(throttle)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -230,7 +232,7 @@ func Throttle() gin.HandlerFunc {
 	}
 
 	middleware := mgin.NewMiddleware(limiter.New(store, rate), mgin.WithKeyGetter(func(c *gin.Context) string {
-		return util.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
+		return encrypt.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
 	}))
 	return middleware
 }

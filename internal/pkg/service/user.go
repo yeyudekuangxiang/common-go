@@ -35,9 +35,6 @@ type UserService struct {
 }
 
 func (u UserService) GetUserById(id int64) (*entity.User, error) {
-	if id == 0 {
-		return &entity.User{}, nil
-	}
 	user := u.r.GetUserById(id)
 	return &user, nil
 }
@@ -496,4 +493,26 @@ func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile
 		return false
 	}
 	return true
+}
+
+func (u UserService) ChangeUserState(param ChangeUserState) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	return u.r.Save(&user)
+}
+
+func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	if param.Position != "" {
+		user.Position = entity.UserPosition(param.Position)
+	}
+	if param.PositionIcon != "" {
+		user.PositionIcon = param.PositionIcon
+	}
+	return u.r.Save(&user)
 }

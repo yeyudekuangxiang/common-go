@@ -113,7 +113,7 @@ func (t TopicFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
 	}
-	topic := DefaultTopicService.FindById(topicId)
+	topic := repository2.DefaultTopicRepository.FindById(topicId)
 	if topic.Id == 0 {
 		return
 	}
@@ -137,7 +137,7 @@ func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
 	}
-	topic := DefaultTopicService.FindById(topicId)
+	topic := repository2.DefaultTopicRepository.FindById(topicId)
 	if topic.Id == 0 {
 		return
 	}
@@ -158,7 +158,7 @@ func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 
 // AfterUpdateTopic 新增topic 、更新topic权重、更新topic查看次数 后调用此方法 重新计算内容流排序
 func (t TopicFlowService) AfterUpdateTopic(topicId int64) {
-	topic := DefaultTopicService.FindById(topicId)
+	topic := repository2.DefaultTopicRepository.FindById(topicId)
 	if topic.Id == 0 {
 		return
 	}

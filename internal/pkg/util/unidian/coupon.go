@@ -3,7 +3,7 @@ package unidian
 import (
 	"fmt"
 	"io/ioutil"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"net/http"
 )
 
@@ -12,7 +12,7 @@ func CouponOfUnidian(typeId string, mobile string, outTradeNo string) {
 	channelId := "115"
 	timeStamp := "2"
 	key := "B5C0B2C3C1CD4942"
-	sign := util.Md5(typeId + "#" + channelId + "#" + mobile + "#" + timeStamp + "#" + outTradeNo + "#" + key)
+	sign := encrypt.Md5(typeId + "#" + channelId + "#" + mobile + "#" + timeStamp + "#" + outTradeNo + "#" + key)
 	url := "https://qyif.unidian.com/QuanYi/Common/Coupon.aspx?TypeId=" + typeId + "&ChannelId=" + channelId + "&Mobile=" + mobile + "&TimeStamp=" + timeStamp + "&OutTradeNo=" + outTradeNo + "&Sign=" + sign + "&UserIdType=0"
 	method := "GET"
 

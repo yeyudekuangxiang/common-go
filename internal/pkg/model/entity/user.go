@@ -16,7 +16,9 @@ const (
 type UserPosition string
 
 const (
-	UserPositionBlue UserPosition = "blue" //蓝v
+	UserPositionBlue   UserPosition = "blue"   //蓝v
+	UserPositionYellow UserPosition = "yellow" //黄v
+	UserPositionLohoja UserPosition = "lohoja" //乐活家
 )
 
 type UserGender string

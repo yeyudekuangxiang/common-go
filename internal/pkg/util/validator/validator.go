@@ -1,4 +1,4 @@
-package util
+package validator
 
 import (
 	"mio/pkg/validator"

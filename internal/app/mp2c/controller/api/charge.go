@@ -20,7 +20,7 @@ var DefaultChargeController = ChargeController{}
 type ChargeController struct {
 }
 
-func (ChargeController) Push(c *gin.Context) (gin.H, error) {
+func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	form := GetChargeForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -92,4 +92,9 @@ func (ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	return gin.H{}, nil
+}
+
+// SendCoupon 发放优惠券
+func (ctr ChargeController) SendCoupon(g *gin.Context) (gin.H, error) {
+	return nil, nil
 }

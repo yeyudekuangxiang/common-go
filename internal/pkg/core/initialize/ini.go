@@ -4,20 +4,20 @@ import (
 	"gopkg.in/ini.v1"
 	"log"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 )
 
 func InitIni(source interface{}) {
+	log.Println("初始化配置文件...")
 	f, err := ini.Load(source)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
-	app.Ini = f
-	err = app.Ini.MapTo(&config.Config)
+	err = f.MapTo(&config.Config)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
+	log.Println("初始化配置文件成功")
 	afterInitIni()
 }
 

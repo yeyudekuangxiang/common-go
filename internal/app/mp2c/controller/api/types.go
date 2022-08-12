@@ -10,7 +10,7 @@ type GetWeappQrCodeFrom struct {
 }
 type GetTopicPageListForm struct {
 	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
-	TopicTagId int   `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
+	TopicTagId int64 `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
 	controller.PageFrom
 }
 type ChangeTopicLikeForm struct {
@@ -63,11 +63,11 @@ type AnswerQuizQuestionForm struct {
 	Choice     string `json:"choice" form:"choice" binding:"required" alias:"choice"`
 }
 type UploadPointCollectImageForm struct {
-	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI" alias:"类型"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE" alias:"类型"`
 }
 type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
-	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE" alias:"类型"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE" alias:"类型"`
 }
 
 type UpdateUserInfoForm struct {
@@ -79,4 +79,43 @@ type UpdateUserInfoForm struct {
 }
 type DuiBaNoLoginH5Form struct {
 	ActivityId string `json:"activityId" form:"activityId" `
+}
+
+type CreateTopicForm struct {
+	Title   string   `json:"title" form:"title" alias:"title" binding:"required,min=2,max=64"`
+	Content string   `json:"content" form:"content" alias:"content" binding:"min=0,max=10000"`
+	Images  []string `json:"images" form:"images" alias:"images" binding:"required,min=1,max=12"`
+	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"tagIds" binding:"min=0,max=2"`
+}
+
+type UpdateTopicForm struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+	CreateTopicForm
+}
+
+type IdForm struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+}
+
+type ListFormById struct {
+	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+	controller.PageFrom
+}
+
+type ListFormByLastId struct {
+	ID       int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
+	LastId   int64 `json:"lastId" form:"lastId" alias:"lastId" binding:"required,gte=1"`
+	PageSize int   `json:"pageSize" form:"pageSize" binding:"gt=0" alias:"每页数量"`
+}
+
+type CommentCreateForm struct {
+	Message string `json:"message" form:"message" alias:"message" binding:"required,min=1"`
+	Root    int64  `json:"root" form:"root" alias:"root" binding:"min=0"`
+	Parent  int64  `json:"parent" form:"parent" alias:"parent" binding:"min=0"`
+	ObjId   int64  `json:"objId" form:"objId" alias:"objId" binding:"required,min=1"`
+}
+
+type CommentEditForm struct {
+	CommentId int64  `json:"commentId" form:"commentId" alias:"commentId" binding:"required,min=1"`
+	Message   string `json:"message" form:"message" alias:"message" binding:"required,min=1"`
 }

@@ -16,7 +16,7 @@ func (srv PointCollectHistoryService) CreateHistory(param CreateHistoryParam) (*
 	t := model.NewTime()
 	history := entity.PointCollectHistory{
 		OpenId: param.OpenId,
-		Type:   param.TransactionType,
+		Type:   string(param.TransactionType),
 		Info:   param.Info,
 		Date:   t.Date(),
 		Time:   t,
