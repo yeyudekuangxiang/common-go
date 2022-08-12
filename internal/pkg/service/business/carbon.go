@@ -192,3 +192,51 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus float64, 
 		Point:  point,
 	}, nil
 }
+
+//CarbonCreditOEP 光盘行动
+// userId 用户id
+// voucher 凭证图片
+func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonResult, error) {
+	lockKey := fmt.Sprintf("CarbonCreditOEP%d", userId)
+	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
+		return nil, errors.New("操作频率过快,请稍后再试")
+	}
+	defer util.DefaultLock.UnLock(lockKey)
+
+	//检测是否达到上限
+	count, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeOEP)
+	if err != nil {
+		return nil, err
+	}
+	if count <= 0 {
+		return nil, errors.New("已经达到此场景当日最大限制")
+	}
+
+	transactionId := util.UUID()
+
+	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonCreditOEP(SendCarbonCreditOEPParam{
+		UserId:        userId,
+		Voucher:       voucher,
+		TransactionId: transactionId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	//发送积分
+	point, err := DefaultPointService.SendPointOEP(SendPointOEPParam{
+		UserId:        userId,
+		Voucher:       voucher,
+		CarbonCredit:  sendCarbonResult.Credits,
+		TransactionId: transactionId,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &CarbonResult{
+		Credit: sendCarbonResult.Credits,
+		Point:  point,
+	}, nil
+}

@@ -13,6 +13,7 @@ const (
 	CarbonTypeSaveWaterElectricity CarbonType = "SaveWaterElectricity" //节水节电
 	CarbonTypePublicTransport      CarbonType = "PublicTransport"      //公交地铁
 	CarbonTypeEvCar                CarbonType = "EvCar"                //电动车 电车充电
+	CarbonTypeOEP                  CarbonType = "OEP"                  //光盘行动
 )
 
 // Text 展示给用户看的
@@ -150,6 +151,25 @@ func (c CarbonTypeInfoEvCar) CarbonTypeInfo() CarbonTypeInfo {
 	return CarbonTypeInfo(data)
 }
 func (c CarbonTypeInfoEvCar) PointTypeInfo() PointTypeInfo {
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	return PointTypeInfo(data)
+}
+
+type CarbonTypeInfoOEP struct {
+	Voucher string
+}
+
+func (c CarbonTypeInfoOEP) CarbonTypeInfo() CarbonTypeInfo {
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.Logger.Error(err)
+	}
+	return CarbonTypeInfo(data)
+}
+func (c CarbonTypeInfoOEP) PointTypeInfo() PointTypeInfo {
 	data, err := json.Marshal(c)
 	if err != nil {
 		app.Logger.Error(err)

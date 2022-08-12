@@ -11,6 +11,7 @@ const (
 	PointTypeSaveWaterElectricity PointType = "SaveWaterElectricity" //节水节电
 	PointTypePublicTransport      PointType = "PublicTransport"      //公交地铁
 	PointTypeEvCar                PointType = "EvCar"                //电动车 电车充电
+	PointTypeOEP                  PointType = "OEP"                  //光盘行动
 )
 
 // Text 展示给用户看的

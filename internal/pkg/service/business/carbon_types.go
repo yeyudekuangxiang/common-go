@@ -173,6 +173,16 @@ type SendCarbonCreditSavePublicTransportResult struct {
 	BusCredits   decimal.Decimal
 	MetroCredits decimal.Decimal
 }
+
+type SendCarbonCreditOEPResult struct {
+	Credits decimal.Decimal
+}
+
+type SendCarbonCreditOEPParam struct {
+	UserId        int64
+	Voucher       string
+	TransactionId string
+}
 type CarbonResult struct {
 	Credit decimal.Decimal
 	Point  int

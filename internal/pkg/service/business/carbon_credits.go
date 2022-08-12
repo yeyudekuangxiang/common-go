@@ -160,3 +160,23 @@ func (srv CarbonCreditsService) SendCarbonCreditSavePublicTransport(param SendCa
 		MetroCredits: metroCredits,
 	}, err
 }
+
+// SendCarbonCreditOEP 光盘行动得积分
+func (srv CarbonCreditsService) SendCarbonCreditOEP(param SendCarbonCreditOEPParam) (*SendCarbonCreditOEPResult, error) {
+	oepCredits := DefaultCarbonCreditCalculatorService.CalcOEP()
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     oepCredits,
+		Type:          ebusiness.CarbonTypeOEP,
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoOEP{
+			Voucher: param.Voucher,
+		}.CarbonTypeInfo(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditOEPResult{
+		Credits: oepCredits,
+	}, err
+}

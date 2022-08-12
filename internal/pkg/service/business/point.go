@@ -225,3 +225,38 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 	})
 	return addPoint, err
 }
+
+func (srv PointService) SendPointOEP(param SendPointOEPParam) (int, error) {
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
+	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeOEP)
+	if err != nil {
+		return 0, err
+	}
+
+	//获取碳积分和积分汇率
+	pointRate, err := DefaultPointRateSettingService.ParsePublicTransportRate(sceneSetting.PointRateSetting)
+	if err != nil {
+		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
+		return 0, errors.New("系统异常,请稍后再试")
+	}
+
+	addPoint := pointRate.Bus.Calc(param.CarbonCredit)
+
+	_, err = srv.SendPoint(SendPointParam{
+		UserId:        param.UserId,
+		AddPoint:      addPoint,
+		Type:          ebusiness.PointTypeOEP,
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoOEP{
+			Voucher: param.Voucher,
+		}.PointTypeInfo(),
+	})
+	return addPoint, err
+}

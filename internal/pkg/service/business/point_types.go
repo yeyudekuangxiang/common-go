@@ -116,6 +116,12 @@ type SendPointPublicTransportParam struct {
 	MetroCredit   decimal.Decimal
 	TransactionId string
 }
+type SendPointOEPParam struct {
+	UserId        int64
+	Voucher       string
+	CarbonCredit  decimal.Decimal
+	TransactionId string
+}
 type GetCarbonCreditLogSortedListParam struct {
 	UserId    int64
 	StartTime time.Time
