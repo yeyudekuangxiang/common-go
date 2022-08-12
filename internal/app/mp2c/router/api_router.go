@@ -178,6 +178,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			pointCollectRouter.POST("", apiutil.Format(api.DefaultPointCollectController.Collect))
 			pointCollectRouter.POST("/new-collect", apiutil.Format(points.DefaultPointsCollectController.Collect))
+			pointCollectRouter.POST("/getPageData", apiutil.Format(points.DefaultPointsCollectController.GetPageData))
 		}
 
 		//上传文件相关路由

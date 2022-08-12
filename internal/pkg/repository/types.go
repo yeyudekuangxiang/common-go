@@ -109,6 +109,12 @@ type GetPointTransactionPageListBy struct {
 	Offset    int
 	Limit     int
 }
+type GetPointTransactionCountBy struct {
+	AdminId int
+	OpenIds []string
+	Type    entity.PointTransactionType
+	Types   []entity.PointTransactionType
+}
 type FindPointTransactionCountLimitBy struct {
 	OpenId          string
 	TransactionType entity.PointTransactionType

@@ -44,7 +44,7 @@ type GetChargeForm struct {
 }
 
 type QueryTokenForm struct {
-	OperatorID     string `json:"operatorID" form:"operatorID" alias:"运营商标识" binding:"required;len=9"`
+	OperatorID     string `json:"operatorID" form:"operatorID" alias:"运营商标识" binding:"required"`
 	OperatorSecret string `json:"operatorSecret" form:"operatorSecret" alias:"运营商密钥" binding:"required"`
 }
 
@@ -73,6 +73,15 @@ type UploadPointCollectImageForm struct {
 type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
 	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE" alias:"类型"`
+}
+
+type NewCollectForm struct {
+	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" alias:"类型"`
+}
+
+type CollectType struct {
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"required" alias:"类型"`
 }
 
 type UpdateUserInfoForm struct {

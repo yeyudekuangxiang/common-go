@@ -13,25 +13,32 @@ import (
 	"sync"
 )
 
-type clientHandle struct {
+type defaultClientHandle struct {
 	ctx          *context.MioContext
-	OpenId       string      //用户openId
-	ImgUrl       string      //图片地址
-	AdminId      int64       //管理员id
-	Type         CollectType //类型
-	Point        int64       //变更的积分
-	Message      string      //记录信息
-	BizId        string
-	AdditionInfo string
+	clientHandle ClientHandle
 	plugin       clientPlugin
 	additional   additional
 	paramsMutex  sync.RWMutex // mutex to protect the parameters exposed to the library users
 }
 
+type ClientHandle struct {
+	OpenId       string      //用户openId
+	ImgUrl       string      //图片地址
+	AdminId      int64       //管理员id
+	Type         CollectType //类型
+	point        int64       //变更的积分
+	message      string      //记录信息
+	bizId        string
+	additionInfo string
+}
+
 //挂件
 type clientPlugin struct {
-	tracking  *service.ZhuGeService
-	pointRepo repository.PointRepository
+	tracking         *service.ZhuGeService
+	pointRepo        repository.PointRepository
+	history          repository.PointCollectHistoryRepository
+	transaction      *repository.PointTransactionRepository
+	transactionLimit *repository.PointTransactionCountLimitRepository
 }
 
 //额外字段
@@ -40,27 +47,34 @@ type additional struct {
 	orderId    string //图片识别关键字段
 }
 
-type Options struct {
-	f func(*clientHandle)
-}
+//type options struct {
+//	f func(handle *defaultClientHandle)
+//}
 
-func NewClientHandle(ctx *context.MioContext, openId, imgUrl string) *clientHandle {
-	return &clientHandle{
-		ctx:    ctx,
-		OpenId: openId,
-		ImgUrl: imgUrl,
+func NewClientHandle(ctx *context.MioContext, params *ClientHandle) *defaultClientHandle {
+	return &defaultClientHandle{
+		ctx: ctx,
+		clientHandle: ClientHandle{
+			OpenId:  params.OpenId,
+			ImgUrl:  params.ImgUrl,
+			Type:    params.Type,
+			AdminId: params.AdminId,
+		},
 		plugin: clientPlugin{
-			tracking:  service.DefaultZhuGeService(),
-			pointRepo: repository.NewPointRepository(ctx),
+			tracking:         service.DefaultZhuGeService(),
+			pointRepo:        repository.NewPointRepository(ctx),
+			history:          repository.DefaultPointCollectHistoryRepository,
+			transaction:      repository.NewPointTransactionRepository(ctx),
+			transactionLimit: repository.NewPointTransactionCountLimitRepository(ctx),
 		},
 	}
 }
 
-func (c *clientHandle) HandleCollectCommand(types string) error {
-	types = strings.ToUpper(types)
-	cmdDesc := commandMap[types]
+// HandleCollectCommand 执行cmd
+func (c *defaultClientHandle) HandleCollectCommand(types string) error {
+	cmdDesc := commandMap[strings.ToUpper(types)]
 	if cmdDesc == nil {
-		//记录log 返回错误
+		return errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
 	}
 	//检查是否超过次数
 	if err := c.checkTimes(cmdDesc.Times); err != nil {
@@ -68,7 +82,7 @@ func (c *clientHandle) HandleCollectCommand(types string) error {
 		return err
 	}
 	//获取图片内容
-	intersect, err := c.scanImage(c.ImgUrl)
+	intersect, err := c.scanImage(c.clientHandle.ImgUrl)
 	if err != nil {
 		//记录日志 返回错误
 		return err
@@ -83,10 +97,10 @@ func (c *clientHandle) HandleCollectCommand(types string) error {
 		return err
 	}
 	//添加内容
-	c.WithAdditionInfo(fmt.Sprintf("%s", intersect))
-	c.WithType(CollectType(types))
-	c.WithBizId(util.UUID())
-	c.WithPoint(cmdDesc.Amount)
+	c.withAdditionInfo(fmt.Sprintf("%s", intersect))
+	c.withType(CollectType(types))
+	c.withBizId(util.UUID())
+	c.withPoint(cmdDesc.Amount)
 	//执行function
 	if err = c.executeCommandFn(cmdDesc); err != nil {
 		//记录日志 返回错误
@@ -95,7 +109,16 @@ func (c *clientHandle) HandleCollectCommand(types string) error {
 	return nil
 }
 
-func (c *clientHandle) executeCommandFn(cmdDesc *CommandDescription) error {
+func (c *defaultClientHandle) HandlePageDataCommand() (map[string]int64, error) {
+	pageDataCmd := pageDataMap[string(c.clientHandle.Type)]
+	if pageDataCmd == nil {
+		return nil, errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
+	}
+	return pageDataCmd.FnPageData(c)
+}
+
+//具体执行方法
+func (c *defaultClientHandle) executeCommandFn(cmdDesc *commandDescription) error {
 	defer func() {
 		if r := recover(); r != nil {
 			//记录错误日志
@@ -110,50 +133,48 @@ func (c *clientHandle) executeCommandFn(cmdDesc *CommandDescription) error {
 	return nil
 }
 
-func (c *clientHandle) WithType(types CollectType) {
+func (c *defaultClientHandle) withType(types CollectType) {
 	if types != "" {
-		c.Type = types
+		c.clientHandle.Type = types
 	}
 }
 
-func (c *clientHandle) WithPoint(point int64) {
+func (c *defaultClientHandle) withPoint(point int64) {
 	if point != 0 {
-		c.Point = point
-	} else if c.Type != "" {
-
+		c.clientHandle.point = point
 	}
 }
-func (c *clientHandle) WithMessage(message string) {
+func (c *defaultClientHandle) withMessage(message string) {
 	if message != "" {
-		c.Message = message
+		c.clientHandle.message = message
 	}
 }
 
-func (c *clientHandle) WithAdminId(adminId int64) {
+func (c *defaultClientHandle) withAdminId(adminId int64) {
 	if adminId != 0 {
-		c.AdminId = adminId
+		c.clientHandle.AdminId = adminId
 	}
 }
 
-func (c *clientHandle) WithBizId(bizId string) {
+func (c *defaultClientHandle) withBizId(bizId string) {
 	if bizId != "" {
-		c.BizId = bizId
+		c.clientHandle.bizId = bizId
 	}
 }
 
-func (c *clientHandle) WithAdditionInfo(additionInfo string) {
+func (c *defaultClientHandle) withAdditionInfo(additionInfo string) {
 	if additionInfo != "" {
-		c.AdditionInfo = additionInfo
+		c.clientHandle.additionInfo = additionInfo
 	}
 }
 
 //保存收集积分记录
-func (c *clientHandle) saveRecord() error {
+func (c *defaultClientHandle) saveRecord() error {
 	history := &entity.PointCollectLog{
-		OpenId: c.OpenId,
-		Type:   string(c.Type),
-		Info:   c.Message,
-		Point:  c.Point,
+		OpenId: c.clientHandle.OpenId,
+		Type:   string(c.clientHandle.Type),
+		Info:   c.clientHandle.message,
+		Point:  c.clientHandle.point,
 		Date:   model.Date{},
 		Time:   model.Time{},
 	}
@@ -164,7 +185,7 @@ func (c *clientHandle) saveRecord() error {
 }
 
 // 保存积分
-func (c *clientHandle) savePoint(usrPoint *entity.Point) (int64, error) {
+func (c *defaultClientHandle) savePoint(usrPoint *entity.Point) (int64, error) {
 	if err := c.plugin.pointRepo.Save(usrPoint); err != nil {
 		return 0, err
 	}
@@ -172,29 +193,29 @@ func (c *clientHandle) savePoint(usrPoint *entity.Point) (int64, error) {
 }
 
 // 获取用户积分信息
-func (c *clientHandle) findByOpenId() (*entity.Point, error) {
-	if c.OpenId == "" {
+func (c *defaultClientHandle) findByOpenId() (*entity.Point, error) {
+	if c.clientHandle.OpenId == "" {
 		return nil, errno.ErrUserNotFound.WithErrMessage("用户未授权")
 	}
-	p := c.plugin.pointRepo.FindBy(repository.FindPointBy{OpenId: c.OpenId})
+	p := c.plugin.pointRepo.FindBy(repository.FindPointBy{OpenId: c.clientHandle.OpenId})
 	return &p, nil
 }
 
 // 增加积分，返回现有积分
-func (c *clientHandle) incPoint(num int64) (int64, error) {
+func (c *defaultClientHandle) incPoint(num int64) (int64, error) {
 	if num == 0 {
 		return 0, nil
 	}
 	c.additional.changeType = "inc"
-	usrPoint, err := c.plugin.pointRepo.FindForUpdate(c.OpenId)
+	usrPoint, err := c.plugin.pointRepo.FindForUpdate(c.clientHandle.OpenId)
 	if err != nil {
 		return 0, err
 	}
 	if usrPoint.Id == 0 {
-		usrPoint.OpenId = c.OpenId
-		usrPoint.Balance = c.Point
+		usrPoint.OpenId = c.clientHandle.OpenId
+		usrPoint.Balance = c.clientHandle.point
 	} else {
-		usrPoint.Balance += c.Point
+		usrPoint.Balance += c.clientHandle.point
 	}
 	//操作积分
 	point, err := c.savePoint(&usrPoint)
@@ -205,7 +226,7 @@ func (c *clientHandle) incPoint(num int64) (int64, error) {
 }
 
 // 消耗积分，返回现有积分
-func (c *clientHandle) decPoint(num int64) (int64, error) {
+func (c *defaultClientHandle) decPoint(num int64) (int64, error) {
 	if num == 0 {
 		return 0, nil
 	}
@@ -213,7 +234,7 @@ func (c *clientHandle) decPoint(num int64) (int64, error) {
 		num = -num
 	}
 	c.additional.changeType = "dec"
-	usrPoint, err := c.plugin.pointRepo.FindForUpdate(c.OpenId)
+	usrPoint, err := c.plugin.pointRepo.FindForUpdate(c.clientHandle.OpenId)
 	if err != nil {
 		return 0, err
 	}
@@ -221,7 +242,7 @@ func (c *clientHandle) decPoint(num int64) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	usrPoint.Balance -= c.Point
+	usrPoint.Balance -= c.clientHandle.point
 	point, err := c.savePoint(&usrPoint)
 	if err != nil {
 		return 0, err
@@ -234,6 +255,6 @@ func (c *clientHandle) decPoint(num int64) (int64, error) {
 	return point, nil
 }
 
-func (c *clientHandle) changePointByAdmin() error {
+func (c *defaultClientHandle) changePointByAdmin() error {
 	return nil
 }

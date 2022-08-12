@@ -11,10 +11,10 @@ import (
 )
 
 // 检查是否超过次数
-func (c *clientHandle) checkTimes(times int64) error {
+func (c *defaultClientHandle) checkTimes(times int64) error {
 	count, err := repository.DefaultPointCollectHistoryRepository.Count(&entity.PointCollectHistory{
-		OpenId: c.OpenId,
-		Type:   string(c.Type),
+		OpenId: c.clientHandle.OpenId,
+		Type:   string(c.clientHandle.Type),
 		Date:   model.Date{Time: time.Now()},
 	})
 	if err != nil {
@@ -27,16 +27,16 @@ func (c *clientHandle) checkTimes(times int64) error {
 }
 
 // 检查积分是否足够
-func (c *clientHandle) checkUsrPoints(num int64) error {
-	if c.additional.changeType == "dec" && num-c.Point <= 0 {
+func (c *defaultClientHandle) checkUsrPoints(num int64) error {
+	if c.additional.changeType == "dec" && num-c.clientHandle.point <= 0 {
 		return errors.New("积分不足")
 	}
 	return nil
 }
 
 // 幂等
-func (c *clientHandle) checkIdempotency() error {
-	if !util.DefaultLock.Lock(fmt.Sprintf("%s", string(c.Type)+"_"+c.OpenId), time.Second*5) {
+func (c *defaultClientHandle) checkIdempotency() error {
+	if !util.DefaultLock.Lock(fmt.Sprintf("%s", "collect"+"_"+c.clientHandle.OpenId), time.Second*5) {
 		return errors.New("操作频率过快,请稍后再试")
 	}
 	return nil

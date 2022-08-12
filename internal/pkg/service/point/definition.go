@@ -1,9 +1,11 @@
 package point
 
-type CommandDescription struct {
-	Times  int64                     //限制次数
-	Amount int64                     //每次数量
-	Fn     func(*clientHandle) error //执行方法
+type commandDescription struct {
+	Times      int64                            //限制次数 0表示不限次数
+	Amount     int64                            //每次数量
+	Fn         func(*defaultClientHandle) error //执行方法
+	FnPageData func(*defaultClientHandle) (map[string]int64, error)
+	IsOpen     bool //是否实现
 }
 
 type CollectType string
@@ -109,13 +111,23 @@ var commandRealText = map[CollectType]string{
 }
 
 //方法定义
-var commandMap = map[string]*CommandDescription{
-	"COFFEE_CUP":       {Fn: (*clientHandle).coffeeCup, Times: 2, Amount: 39},
-	"INVITE":           {Fn: (*clientHandle).invite, Times: 5, Amount: 500},
-	"BIKE_RIDE":        {Fn: (*clientHandle).bikeRide, Times: 2, Amount: 42},
-	"POWER_REPLACE":    {Fn: (*clientHandle).powerReplace, Times: 1, Amount: 300},
-	"ARTICLE":          {Fn: (*clientHandle).article, Times: 2, Amount: 150},
-	"FAST_ELECTRICITY": {Fn: (*clientHandle).fastElectricity, Times: 0, Amount: 300},
+var commandMap = map[string]*commandDescription{
+	"COFFEE_CUP":       {Fn: (*defaultClientHandle).coffeeCup, Times: 2, Amount: 39},
+	"INVITE":           {Fn: (*defaultClientHandle).invite, Times: 5, Amount: 500},
+	"BIKE_RIDE":        {Fn: (*defaultClientHandle).bikeRide, Times: 2, Amount: 42},
+	"POWER_REPLACE":    {Fn: (*defaultClientHandle).powerReplace, Times: 1, Amount: 300},
+	"ARTICLE":          {Fn: (*defaultClientHandle).article, Times: 2, Amount: 150},
+	"FAST_ELECTRICITY": {Fn: (*defaultClientHandle).fastElectricity, Times: 0, Amount: 300},
+}
+
+//弹框页面获取数据
+var pageDataMap = map[string]*commandDescription{
+	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData},
+	"COFFEE_CUP":       {FnPageData: (*defaultClientHandle).coffeeCupPageData},
+	"INVITE":           {FnPageData: (*defaultClientHandle).invitePageData},
+	"BIKE_RIDE":        {FnPageData: (*defaultClientHandle).bikeRidePageData},
+	"ARTICLE":          {FnPageData: (*defaultClientHandle).articlePageData},
+	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData},
 }
 
 //dui ba

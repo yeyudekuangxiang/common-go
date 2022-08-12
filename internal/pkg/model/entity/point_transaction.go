@@ -198,6 +198,12 @@ type AdditionalInfo string
 type PointPurchaseInfo struct {
 }
 
+type GetCountInfoByToday struct {
+	Count  int64 `json:"count"`  //当日次数
+	Total  int64 `json:"total"`  //当日积分
+	DecCO2 int64 `json:"decCO2"` //当日减碳量
+}
+
 func (info AdditionalInfo) ToDuiBa() duibaApi.Exchange {
 	return duibaApi.Exchange{}
 }

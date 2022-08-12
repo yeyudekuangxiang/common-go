@@ -11,7 +11,7 @@ import (
 )
 
 //检查图片
-func (c *clientHandle) scanImage(imgUrl string) ([]string, error) {
+func (c *defaultClientHandle) scanImage(imgUrl string) ([]string, error) {
 	results, err := service.DefaultOCRService.Scan(imgUrl)
 	if err != nil {
 		return nil, err
@@ -24,8 +24,8 @@ func (c *clientHandle) scanImage(imgUrl string) ([]string, error) {
 }
 
 //规则校验
-func (c *clientHandle) validateRule(content []string, rules CollectRules) ([]string, error) {
-	ruleArray := util.Intersect(content, rules[c.Type])
+func (c *defaultClientHandle) validateRule(content []string, rules CollectRules) ([]string, error) {
+	ruleArray := util.Intersect(content, rules[c.clientHandle.Type])
 	if len(ruleArray) == 0 {
 		return nil, errors.New("不是有效的图片")
 	}
@@ -33,7 +33,7 @@ func (c *clientHandle) validateRule(content []string, rules CollectRules) ([]str
 }
 
 //图片识别
-func (c *clientHandle) identifyImg(identify []string) {
+func (c *defaultClientHandle) identifyImg(identify []string) {
 	for i, str := range identify {
 		fmt.Printf("%d-%s", i, str)
 	}
@@ -41,8 +41,8 @@ func (c *clientHandle) identifyImg(identify []string) {
 }
 
 //积分类型
-func (c *clientHandle) getText() string {
-	text, ok := commandText[c.Type]
+func (c *defaultClientHandle) getText() string {
+	text, ok := commandText[c.clientHandle.Type]
 	if !ok {
 		return "未知积分"
 	}
@@ -50,8 +50,8 @@ func (c *clientHandle) getText() string {
 }
 
 //平台渠道
-func (c *clientHandle) getRealText() string {
-	text, ok := commandRealText[c.Type]
+func (c *defaultClientHandle) getRealText() string {
+	text, ok := commandRealText[c.clientHandle.Type]
 	if !ok {
 		return "未知平台"
 	}
@@ -59,22 +59,22 @@ func (c *clientHandle) getRealText() string {
 }
 
 //诸葛埋点
-func (c *clientHandle) trackPoint(err error) {
+func (c *defaultClientHandle) trackPoint(err error) {
 	var isFail bool
 	if err != nil {
 		isFail = true
 	}
 	c.plugin.tracking.TrackPoints(srv_types.TrackPoints{
-		OpenId:      c.OpenId,
+		OpenId:      c.clientHandle.OpenId,
 		PointType:   c.getRealText(),
 		ChangeType:  c.additional.changeType,
-		Value:       uint(math.Abs(float64(c.Point))),
+		Value:       uint(math.Abs(float64(c.clientHandle.point))),
 		IsFail:      isFail,
 		FailMessage: err.Error(),
 	})
 }
 
 //写日志
-func (c *clientHandle) writeMessage(code int, message string) {
+func (c *defaultClientHandle) writeMessage(code int, message string) {
 	app.Logger.Info(fmt.Sprintf("%d-%s", code, message))
 }
