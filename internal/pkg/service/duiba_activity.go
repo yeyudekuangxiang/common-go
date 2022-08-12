@@ -48,6 +48,7 @@ func (srv DuiBaActivityService) Create(dto srv_types.CreateDuiBaActivityDTO) err
 		return errors.New("activityId已存在")
 	}
 	bannerDo := entity.DuiBaActivity{
+		Status:    entity.DuiBaActivityStatusYes,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now()}
 	if err := util.MapTo(dto, &bannerDo); err != nil {
@@ -75,6 +76,7 @@ func (srv DuiBaActivityService) Update(dto srv_types.UpdateDuiBaActivityDTO) err
 		return errors.New("activityId已存在")
 	}
 	do := entity.DuiBaActivity{
+		Status:    entity.DuiBaActivityStatusYes,
 		UpdatedAt: time.Now()}
 	if err := util.MapTo(dto, &do); err != nil {
 		return err
