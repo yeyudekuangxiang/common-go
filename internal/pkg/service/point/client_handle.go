@@ -11,6 +11,7 @@ import (
 	"mio/pkg/errno"
 	"strings"
 	"sync"
+	"time"
 )
 
 type defaultClientHandle struct {
@@ -35,8 +36,8 @@ type ClientHandle struct {
 //挂件
 type clientPlugin struct {
 	tracking         *service.ZhuGeService
-	pointRepo        repository.PointRepository
-	history          repository.PointCollectHistoryRepository
+	pointRepo        *repository.PointRepository
+	history          *repository.PointCollectHistoryRepository
 	transaction      *repository.PointTransactionRepository
 	transactionLimit *repository.PointTransactionCountLimitRepository
 }
@@ -63,7 +64,7 @@ func NewClientHandle(ctx *context.MioContext, params *ClientHandle) *defaultClie
 		plugin: clientPlugin{
 			tracking:         service.DefaultZhuGeService(),
 			pointRepo:        repository.NewPointRepository(ctx),
-			history:          repository.DefaultPointCollectHistoryRepository,
+			history:          repository.NewPointCollectHistoryRepository(ctx),
 			transaction:      repository.NewPointTransactionRepository(ctx),
 			transactionLimit: repository.NewPointTransactionCountLimitRepository(ctx),
 		},
@@ -77,7 +78,7 @@ func (c *defaultClientHandle) HandleCollectCommand(types string) error {
 		return errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
 	}
 	//检查是否超过次数
-	if err := c.checkTimes(cmdDesc.Times); err != nil {
+	if err := c.checkTimes2(cmdDesc.Times); err != nil {
 		//记录日志 返回错误
 		return err
 	}
@@ -181,7 +182,7 @@ func (c *defaultClientHandle) saveRecord() error {
 	if c.additional.orderId != "" {
 		history.AdditionalOrder = c.additional.orderId
 	}
-	return repository.DefaultPointCollectHistoryRepository.CreateLog(history)
+	return c.plugin.history.CreateLog(history)
 }
 
 // 保存积分
@@ -190,6 +191,39 @@ func (c *defaultClientHandle) savePoint(usrPoint *entity.Point) (int64, error) {
 		return 0, err
 	}
 	return usrPoint.Balance, nil
+}
+
+// 保存积分变动记录 返回积分
+func (c *defaultClientHandle) saveTransAction() (int64, error) {
+	pointTransAction := &entity.PointTransaction{
+		OpenId:         c.clientHandle.OpenId,
+		TransactionId:  c.clientHandle.bizId,
+		Type:           entity.PointTransactionType(c.clientHandle.Type),
+		Value:          c.clientHandle.point,
+		CreateTime:     model.Time{Time: time.Now()},
+		AdditionalInfo: entity.AdditionalInfo(c.clientHandle.additionInfo),
+		AdminId:        int(c.clientHandle.AdminId),
+	}
+	if err := c.plugin.transaction.Save(pointTransAction); err != nil {
+		return 0, err
+	}
+	return pointTransAction.Value, nil
+}
+
+// 保存积分变动次数记录
+func (c *defaultClientHandle) saveTransActionLimit(pointTransActionLimit entity.PointTransactionCountLimit) error {
+	if err := c.plugin.transactionLimit.Save(&pointTransActionLimit); err != nil {
+		return err
+	}
+	return nil
+}
+
+//更新积分变动次数记录
+func (c *defaultClientHandle) updateTransActionLimit(pointTransActionLimit entity.PointTransactionCountLimit) error {
+	if err := c.plugin.transactionLimit.Save(&pointTransActionLimit); err != nil {
+		return err
+	}
+	return nil
 }
 
 // 获取用户积分信息
