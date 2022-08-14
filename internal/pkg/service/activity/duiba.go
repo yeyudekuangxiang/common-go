@@ -8,6 +8,8 @@ import (
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
@@ -19,9 +21,16 @@ import (
 var (
 	ZeroActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-13 00:00:00")
 )
-var DefaultZeroService = ZeroService{}
+var DefaultZeroService = ZeroService{repo: repository.NewPointTransactionRepository(mioContext.NewMioContext())}
 
 type ZeroService struct {
+	repo *repository.PointTransactionRepository
+}
+
+func NewZeroService(ctx *mioContext.MioContext) *ZeroService {
+	return &ZeroService{
+		repo: repository.NewPointTransactionRepository(ctx),
+	}
 }
 
 func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
@@ -117,6 +126,7 @@ func (srv ZeroService) GetDuiBaUrlByShort(short string) (string, error) {
 	return u, nil
 }
 func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdParty string, cip string) (string, error) {
+	//userId = 30
 	userInfo, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return "", err
@@ -181,6 +191,44 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	vip := 0
 	if thirdParty == "thirdParty" && isNewUser {
 		vip = 2
+	}
+
+	switch activity.VipType {
+	case entity.DuiBaActivityVipTypeNewUser:
+		if thirdParty == "thirdParty" && isNewUser {
+			vip = 2
+		}
+		break
+	case entity.DuiBaActivityIsPhoneAnniversaryActivity:
+		var pointTypes = []string{"STEP", "COFFEE_CUP", "BIKE_RIDE", "ECAR"}
+		count := srv.repo.GetListByFenQunCount(repository.GetPointTransactionListByQun{
+			StartTime: "2022-08-01:00:00:01",
+			EndTime:   "2022-08-15:00:00:01",
+			Types:     pointTypes,
+			OpenId:    userInfo.OpenId,
+		})
+		//需求地址：https://confluence.miotech.com/pages/viewpage.action?pageId=26613756
+		switch {
+		case count == 3:
+			{
+				vip = 57
+			}
+		case count >= 4 && count <= 7:
+			{
+				vip = 58
+			}
+		case count >= 8 && count <= 14:
+			{
+				vip = 59
+			}
+		default:
+			{
+
+			}
+		}
+		break
+	default:
+
 	}
 
 	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()
