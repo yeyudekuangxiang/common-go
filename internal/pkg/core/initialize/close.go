@@ -7,9 +7,11 @@ import (
 
 func Close() {
 	log.Println("关闭QueueProduct")
-	err := app.QueueProduct.Close()
-	if err != nil {
-		log.Println("关闭QueueProduct异常", err)
+	if app.QueueProduct != nil {
+		err := app.QueueProduct.Close()
+		if err != nil {
+			log.Println("关闭QueueProduct异常", err)
+		}
 	}
 	log.Println("关闭QueueProduct成功")
 }

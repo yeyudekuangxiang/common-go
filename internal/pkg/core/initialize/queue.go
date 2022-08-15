@@ -26,25 +26,28 @@ func initQueueProducer() {
 		log.Println("初始化amqp生产者成功")
 	}
 
-	publishConfirm := app.QueueProduct.NotifyPublish()
-	returnCh := app.QueueProduct.NotifyReturn()
+	if app.QueueProduct != nil {
+		publishConfirm := app.QueueProduct.NotifyPublish()
+		returnCh := app.QueueProduct.NotifyReturn()
 
-	go func() {
-		for {
-			select {
-			case msg := <-returnCh:
-				app.Logger.Errorf("消息队列发送消息被退回 %+v", msg)
-			}
-		}
-	}()
-	go func() {
-		for {
-			select {
-			case c := <-publishConfirm:
-				if !c.Ack {
-					app.Logger.Errorf("消息队列发送失败 %d %d", c.ReconnectionCount, c.DeliveryTag)
+		go func() {
+			for {
+				select {
+				case msg := <-returnCh:
+					app.Logger.Errorf("消息队列发送消息被退回 %+v", msg)
 				}
 			}
-		}
-	}()
+		}()
+		go func() {
+			for {
+				select {
+				case c := <-publishConfirm:
+					if !c.Ack {
+						app.Logger.Errorf("消息队列发送失败 %d %d", c.ReconnectionCount, c.DeliveryTag)
+					}
+				}
+			}
+		}()
+	}
+
 }
