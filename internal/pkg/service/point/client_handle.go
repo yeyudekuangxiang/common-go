@@ -23,12 +23,12 @@ type defaultClientHandle struct {
 }
 
 type ClientHandle struct {
-	OpenId       string      //用户openId
-	ImgUrl       string      //图片地址
-	AdminId      int64       //管理员id
-	Type         CollectType //类型
-	point        int64       //变更的积分
-	message      string      //记录信息
+	OpenId       string                      //用户openId
+	ImgUrl       string                      //图片地址
+	AdminId      int64                       //管理员id
+	Type         entity.PointTransactionType //类型
+	point        int64                       //变更的积分
+	message      string                      //记录信息
 	bizId        string
 	additionInfo string
 	identifyImg  map[string]string
@@ -135,7 +135,7 @@ func (c *defaultClientHandle) executeCommandFn(cmdDesc *commandDescription) erro
 	return nil
 }
 
-func (c *defaultClientHandle) withType(types CollectType) {
+func (c *defaultClientHandle) withType(types entity.PointTransactionType) {
 	if types != "" {
 		c.clientHandle.Type = types
 		return
