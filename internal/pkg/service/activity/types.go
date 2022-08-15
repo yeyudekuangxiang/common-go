@@ -48,21 +48,6 @@ type GDDbHomePageResponse struct {
 	IsNewUser bool
 }
 
-//活动认证相关 start
-
-type XingAccess struct {
-	OperatorID        string `json:"operatorID,omitempty"`
-	SuccStat          int    `json:"succStat,omitempty"`
-	AccessToken       string `json:"accessToken,omitempty"`
-	TokenAvailableTim int    `json:"tokenAvailableTim,omitempty"`
-	FailReason        int    `json:"failReason,omitempty"`
-}
-
-type XingAccessRequest struct {
-	OperatorID     string `json:"operatorID,omitempty"`
-	OperatorSecret string `json:"operatorSecret,omitempty"`
-}
-
 //活动认证相关 end
 
 var NotInvite error = errors.New("not invite")
