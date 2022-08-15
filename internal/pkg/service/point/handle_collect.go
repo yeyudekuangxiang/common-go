@@ -36,7 +36,13 @@ func (c *defaultClientHandle) bikeRide() error {
 
 func (c *defaultClientHandle) powerReplace() error {
 	c.withMessage(fmt.Sprintf("powerReplace=%v", c.clientHandle.message))
-	_, err := c.incPoint(c.clientHandle.point)
+	m := c.clientHandle.identifyImg
+	fromString, err := decimal.NewFromString(m["kwh"])
+	if err != nil {
+		return err
+	}
+	c.clientHandle.point = fromString.Mul(decimal.NewFromInt(c.clientHandle.point)).IntPart()
+	_, err = c.incPoint(c.clientHandle.point)
 	if err != nil {
 		return err
 	}
@@ -54,11 +60,6 @@ func (c *defaultClientHandle) powerReplace() error {
 		todayPoint += item["value"].(int64)
 	}
 	//计算减碳
-	m := c.clientHandle.identifyImg
-	fromString, err := decimal.NewFromString(m["kwh"])
-	if err != nil {
-		return err
-	}
 	m["co2"] = fromString.Mul(decimal.NewFromFloat(511)).String()
 	m["point"] = strconv.FormatInt(c.clientHandle.point, 10)
 	m["todayPoint"] = strconv.FormatInt(todayPoint, 10)

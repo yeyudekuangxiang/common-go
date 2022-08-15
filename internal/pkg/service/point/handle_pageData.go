@@ -2,7 +2,6 @@ package point
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/shopspring/decimal"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -21,7 +20,6 @@ func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, er
 	kwhTotal := decimal.NewFromFloat(0)
 	for _, item := range result {
 		s := item["additional_info"].(entity.AdditionalInfo)
-		fmt.Printf("%v", s)
 		err := json.Unmarshal([]byte(s), &m)
 		if err != nil {
 			return nil, err

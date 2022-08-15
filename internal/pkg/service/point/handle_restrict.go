@@ -56,7 +56,7 @@ func (c *defaultClientHandle) checkTimes2(times int64) error {
 		}
 		return nil
 	}
-	if result.CurrentCount >= int(times) {
+	if result.CurrentCount >= result.MaxCount {
 		return errors.New("超过当日次数")
 	}
 	//更新记录

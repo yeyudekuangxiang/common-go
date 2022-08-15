@@ -138,13 +138,13 @@ func (c *defaultClientHandle) executeCommandFn(cmdDesc *commandDescription) erro
 func (c *defaultClientHandle) withType(types CollectType) {
 	if types != "" {
 		c.clientHandle.Type = types
+		return
 	}
+	return
 }
 
 func (c *defaultClientHandle) withPoint(point int64) {
-	if point != 0 {
-		c.clientHandle.point = point
-	}
+	c.clientHandle.point = point
 }
 func (c *defaultClientHandle) withMessage(message string) {
 	if message != "" {
