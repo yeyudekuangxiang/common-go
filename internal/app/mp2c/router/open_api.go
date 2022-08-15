@@ -67,6 +67,11 @@ func openRouter(router *gin.Engine) {
 			chargeRouter.GET("/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
 		}
 
+		fastRouter := openRouter.Group("/fast")
+		{
+			fastRouter.GET("/push", apiutil.Format(api.DefaultChargeController.FastElectric))
+		}
+
 		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
 	}
 }
