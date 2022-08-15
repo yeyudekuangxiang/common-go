@@ -1,105 +1,104 @@
 package point
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/shopspring/decimal"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/util"
 )
 
-func (c *defaultClientHandle) powerReplacePageData() (map[string]int64, error) {
-	data, err := c.getPageData()
-	if err != nil {
-		return nil, err
-	}
-	//减碳量计算 1 度电 = 511 CO2
-	if _, ok := data["total"]; ok {
-		data["co2"] = data["total"] * 511
-	}
-	return data, nil
-}
-
-func (c *defaultClientHandle) coffeeCupPageData() (map[string]int64, error) {
-	data, err := c.getPageData()
+//电池换电 奥动
+func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, error) {
+	result, count, err := c.getTodayData()
 	if err != nil {
 		return nil, err
 	}
 	//减碳量计算
-	data["decCO2"] = 0
-	//if _, ok := data["total"]; ok {
-	//	data["decCO2"] = data["total"] * 511
-	//}
-	return data, nil
+	m := make(map[string]interface{}, 0)
+	res := make(map[string]interface{}, 0)
+	//kwh
+	kwhTotal := decimal.NewFromFloat(0)
+	for _, item := range result {
+		s := item["additional_info"].(entity.AdditionalInfo)
+		fmt.Printf("%v", s)
+		err := json.Unmarshal([]byte(s), &m)
+		if err != nil {
+			return nil, err
+		}
+		fromString, _ := decimal.NewFromString(m["kwh"].(string))
+		kwhTotal = fromString.Add(kwhTotal)
+	}
+	//返回数据
+	//res["total"] = kwhTotal.String()
+	res["count"] = count
+	res["co2"] = kwhTotal.Mul(decimal.NewFromFloat(511)).String()
+	return res, nil
 }
 
-func (c *defaultClientHandle) invitePageData() (map[string]int64, error) {
-	data, err := c.getPageData()
+func (c *defaultClientHandle) coffeeCupPageData() (map[string]interface{}, error) {
+	_, _, err := c.getTodayData()
 	if err != nil {
 		return nil, err
 	}
 	//减碳量计算
-	data["decCO2"] = 0
 	//if _, ok := data["total"]; ok {
-	//	data["decCO2"] = data["total"] * 511
+	//	data["co2"] = data["total"] * 511
 	//}
-	return data, nil
+	return nil, nil
 }
 
-func (c *defaultClientHandle) bikeRidePageData() (map[string]int64, error) {
-	data, err := c.getPageData()
+func (c *defaultClientHandle) invitePageData() (map[string]interface{}, error) {
+	_, _, err := c.getTodayData()
 	if err != nil {
 		return nil, err
 	}
 	//减碳量计算
-	data["decCO2"] = 0
 	//if _, ok := data["total"]; ok {
-	//	data["decCO2"] = data["total"] * 511
+	//	data["co2"] = data["total"] * 511
 	//}
-	return data, nil
+	return nil, nil
 }
 
-func (c *defaultClientHandle) articlePageData() (map[string]int64, error) {
-	data, err := c.getPageData()
+func (c *defaultClientHandle) bikeRidePageData() (map[string]interface{}, error) {
+	_, _, err := c.getTodayData()
 	if err != nil {
 		return nil, err
 	}
 	//减碳量计算
-	data["decCO2"] = 0
 	//if _, ok := data["total"]; ok {
-	//	data["decCO2"] = data["total"] * 511
+	//	data["co2"] = data["total"] * 511
 	//}
-	return data, nil
+	return nil, nil
 }
 
-func (c *defaultClientHandle) fastElectricityPageData() (map[string]int64, error) {
-	data, err := c.getPageData()
+func (c *defaultClientHandle) articlePageData() (map[string]interface{}, error) {
+	_, _, err := c.getTodayData()
 	if err != nil {
 		return nil, err
 	}
 	//减碳量计算
-	data["decCO2"] = 0
 	//if _, ok := data["total"]; ok {
-	//	data["decCO2"] = data["total"] * 511
+	//	data["co2"] = data["total"] * 511
 	//}
-	return data, nil
+	return nil, nil
 }
 
-func (c *defaultClientHandle) getPageData() (map[string]int64, error) {
-	result, err := repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
+func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{}, error) {
+	_, _, err := c.getTodayData()
+	if err != nil {
+		return nil, err
+	}
+	//减碳量计算
+	//if _, ok := data["total"]; ok {
+	//	data["co2"] = data["total"] * 511
+	//}
+	return nil, nil
+}
+
+func (c *defaultClientHandle) getTodayData() ([]map[string]interface{}, int64, error) {
+	return repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: []string{c.clientHandle.OpenId},
 		Type:    entity.PointTransactionType(c.clientHandle.Type),
 	})
-	if err != nil {
-		return nil, err
-	}
-	data := util.MapInterface2int64(result)
-	if _, ok := data["total"]; !ok {
-		data["total"] = 0
-	}
-	if _, ok := data["co2"]; !ok {
-		data["co2"] = 0
-	}
-	if _, ok := data["count"]; !ok {
-		data["count"] = 0
-	}
-	return data, nil
 }

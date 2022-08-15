@@ -33,18 +33,18 @@ func (c *defaultClientHandle) validateRule(content []string, rules CollectRules)
 }
 
 //图片识别 根据rule匹配关键数据
-func (c *defaultClientHandle) withIdentifyImg(identify []string) {
+func (c *defaultClientHandle) identifyImg(identify []string) map[string]string {
 	rule := identifyChRules[c.clientHandle.Type] //汉字
-	enRule := identifyEnRules[c.clientHandle.Type]
+	enRules := identifyEnRules[c.clientHandle.Type]
 	m := util.IntersectContains(identify, rule)
 	enM := map[string]string{}
 	for k, v := range m {
-		if enRule, ok := enRule[k]; ok {
+		if enRule, ok := enRules[k]; ok {
 			enM[enRule] = v
 		}
 	}
 	c.clientHandle.identifyImg = enM
-	return
+	return enM
 }
 
 //积分类型

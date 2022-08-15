@@ -4,7 +4,7 @@ type commandDescription struct {
 	Times      int64                            //限制次数 0表示不限次数
 	Amount     int64                            //每次数量
 	Fn         func(*defaultClientHandle) error //执行方法
-	FnPageData func(*defaultClientHandle) (map[string]int64, error)
+	FnPageData func(*defaultClientHandle) (map[string]interface{}, error)
 	IsOpen     bool //是否实现
 }
 

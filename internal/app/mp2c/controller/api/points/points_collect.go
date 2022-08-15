@@ -13,7 +13,8 @@ var DefaultPointsCollectController = PointCollectController{}
 type PointCollectController struct {
 }
 
-func (ctr PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
+// ImageCollect 根据图片收集积分
+func (ctr PointCollectController) ImageCollect(ctx *gin.Context) (gin.H, error) {
 	form := api.PointCollectForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
@@ -24,7 +25,7 @@ func (ctr PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		ImgUrl: form.ImgUrl,
 		Type:   point.CollectType(form.PointCollectType),
 	})
-	result, err := client.HandleCollectCommand()
+	result, err := client.HandleImageCollectCommand()
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +34,7 @@ func (ctr PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+// CallCollect 收集积分结束后返回数据
 func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
 	form := api.PointCollectForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
@@ -51,6 +53,7 @@ func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
 	return gin.H{"data": result}, nil
 }
 
+// GetPageData 收集积分前返回数据
 func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {
 	form := api.CollectType{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {

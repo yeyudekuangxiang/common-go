@@ -1,6 +1,7 @@
 package point
 
 import (
+	"encoding/json"
 	"fmt"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -9,7 +10,6 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -49,10 +49,6 @@ type additional struct {
 	orderId    string //图片识别关键字段
 }
 
-//type options struct {
-//	f func(handle *defaultClientHandle)
-//}
-
 func NewClientHandle(ctx *context.MioContext, params *ClientHandle) *defaultClientHandle {
 	return &defaultClientHandle{
 		ctx: ctx,
@@ -72,8 +68,8 @@ func NewClientHandle(ctx *context.MioContext, params *ClientHandle) *defaultClie
 	}
 }
 
-// HandleCollectCommand 执行cmd
-func (c *defaultClientHandle) HandleCollectCommand() (map[string]string, error) {
+// HandleImageCollectCommand 根据图片收集积分
+func (c *defaultClientHandle) HandleImageCollectCommand() (map[string]string, error) {
 	cmdDesc := commandMap[string(c.clientHandle.Type)]
 	if cmdDesc == nil {
 		return nil, errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
@@ -97,9 +93,11 @@ func (c *defaultClientHandle) HandleCollectCommand() (map[string]string, error) 
 		//记录日志 返回错误
 		return nil, err
 	}
-	c.withIdentifyImg(content)
+	imgInfo := c.identifyImg(content)
 	//添加内容
-	c.withAdditionInfo(fmt.Sprintf("%s", content))
+	marshal, _ := json.Marshal(imgInfo)
+	c.withAdditionInfo(string(marshal))
+	c.withMessage(fmt.Sprintf("%s", content))
 	c.withType(c.clientHandle.Type)
 	c.withBizId(util.UUID())
 	c.withPoint(cmdDesc.Amount)
@@ -112,7 +110,8 @@ func (c *defaultClientHandle) HandleCollectCommand() (map[string]string, error) 
 	return c.clientHandle.identifyImg, nil
 }
 
-func (c *defaultClientHandle) HandlePageDataCommand() (map[string]int64, error) {
+// HandlePageDataCommand 收集积分前返回的数据
+func (c *defaultClientHandle) HandlePageDataCommand() (map[string]interface{}, error) {
 	pageDataCmd := pageDataMap[string(c.clientHandle.Type)]
 	if pageDataCmd == nil {
 		return nil, errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
@@ -145,7 +144,6 @@ func (c *defaultClientHandle) withType(types CollectType) {
 func (c *defaultClientHandle) withPoint(point int64) {
 	if point != 0 {
 		c.clientHandle.point = point
-		c.clientHandle.identifyImg["point"] = strconv.FormatInt(point, 10)
 	}
 }
 func (c *defaultClientHandle) withMessage(message string) {
@@ -178,8 +176,8 @@ func (c *defaultClientHandle) saveRecord() error {
 		OpenId: c.clientHandle.OpenId,
 		Type:   string(c.clientHandle.Type),
 		Info:   c.clientHandle.message,
-		Date:   model.Date{},
-		Time:   model.Time{},
+		Date:   model.Date{Time: time.Now()},
+		Time:   model.Time{Time: time.Now()},
 	}
 	return c.plugin.history.Create(history)
 }

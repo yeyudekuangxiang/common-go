@@ -106,10 +106,9 @@ func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageL
 	return list, total
 }
 
-func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountBy) (map[string]interface{}, error) {
-	//result := entity.GetCountInfoByToday
-	result := make(map[string]interface{}, 0)
-	db := repo.ctx.DB.Model(entity.PointTransaction{})
+func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountBy) ([]map[string]interface{}, int64, error) {
+	var result []map[string]interface{}
+	db := repo.ctx.DB.Model(&entity.PointTransaction{})
 	if len(by.OpenIds) > 0 {
 		db.Where("openid in (?)", by.OpenIds)
 	}
@@ -122,11 +121,10 @@ func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountB
 	if by.AdminId != 0 {
 		db.Where("admin_id = ?", by.AdminId)
 	}
-	var count int64
 	db.Where("date(create_time) = CURRENT_DATE")
-	if err := db.Count(&count).Select("sum(value) as total").Find(&result).Error; err != nil {
-		return result, err
+	var count int64
+	if err := db.Count(&count).Find(&result).Error; err != nil {
+		return result, count, err
 	}
-	result["count"] = count
-	return result, nil
+	return result, count, nil
 }
