@@ -177,7 +177,8 @@ func apiRouter(router *gin.Engine) {
 		pointCollectRouter := mustAuthRouter.Group("/point-collect")
 		{
 			pointCollectRouter.POST("", apiutil.Format(api.DefaultPointCollectController.Collect))
-			pointCollectRouter.POST("/new-collect", apiutil.Format(points.DefaultPointsCollectController.Collect))
+			pointCollectRouter.POST("/new-collect", apiutil.Format(points.DefaultPointsCollectController.ImageCollect))
+			pointCollectRouter.POST("/getPageData", apiutil.Format(points.DefaultPointsCollectController.GetPageData))
 		}
 
 		//上传文件相关路由

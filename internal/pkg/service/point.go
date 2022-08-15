@@ -19,7 +19,7 @@ func NewPointService(ctx *context.MioContext) PointService {
 
 type PointService struct {
 	ctx  *context.MioContext
-	repo repository.PointRepository
+	repo *repository.PointRepository
 }
 
 // FindByUserId 获取用户积分

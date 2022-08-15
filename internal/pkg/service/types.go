@@ -413,3 +413,16 @@ type ChangeUserPosition struct {
 	Position     string `json:"position"`
 	PositionIcon string `json:"positionIcon"`
 }
+
+type XingXingSignResult struct {
+	OperatorID         string `json:"operatorID,omitempty"`
+	SucStat            int    `json:"sucStat,omitempty"`
+	AccessToken        string `json:"accessToken,omitempty"`
+	TokenAvailableTime int    `json:"tokenAvailableTime,omitempty"`
+	FailReason         int    `json:"failReason,omitempty"`
+}
+
+type XingXingSendCouponResult struct {
+	FailReason int `json:"failReason,omitempty"`
+	SuccStat   int `json:"succStat,omitempty"`
+}

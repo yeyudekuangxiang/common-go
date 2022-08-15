@@ -2,23 +2,29 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"strings"
 )
 
-var DefaultPointCollectHistoryRepository = PointCollectHistoryRepository{DB: app.DB}
+//var DefaultPointCollectHistoryRepository = PointCollectHistoryRepository{DB: app.DB}
+
+func NewPointCollectHistoryRepository(ctx *context.MioContext) *PointCollectHistoryRepository {
+	return &PointCollectHistoryRepository{
+		ctx: ctx,
+	}
+}
 
 type PointCollectHistoryRepository struct {
-	DB *gorm.DB
+	ctx *context.MioContext
 }
 
 func (repo PointCollectHistoryRepository) Create(history *entity.PointCollectHistory) error {
-	return repo.DB.Create(history).Error
+	return repo.ctx.DB.Create(history).Error
 }
 
 func (repo PointCollectHistoryRepository) Count(history *entity.PointCollectHistory) (count int64, err error) {
-	model := repo.DB.Model(&entity.PointCollectHistory{})
+	model := repo.ctx.DB.Model(&entity.PointCollectHistory{})
 	if history.OpenId != "" {
 		model.Where("openid = ?", history.OpenId)
 	}
@@ -37,8 +43,4 @@ func (repo PointCollectHistoryRepository) Count(history *entity.PointCollectHist
 		}
 	}
 	return
-}
-
-func (repo PointCollectHistoryRepository) CreateLog(history *entity.PointCollectLog) error {
-	return repo.DB.Create(history).Error
 }

@@ -119,7 +119,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 		return 0, errors.New("不是有效的单车图片")
 	}
 
-	_, err = DefaultPointCollectHistoryService.CreateHistory(CreateHistoryParam{
+	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
 		OpenId:          openId,
 		TransactionType: entity.POINT_BIKE_RIDE,
 		Info:            fmt.Sprintf("bikeRide=%v", result),
@@ -164,7 +164,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 		return 0, errors.New("不是有效的自带杯图片")
 	}
 
-	_, err = DefaultPointCollectHistoryService.CreateHistory(CreateHistoryParam{
+	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
 		OpenId:          openId,
 		TransactionType: entity.POINT_COFFEE_CUP,
 		Info:            fmt.Sprintf("coffeeCup=%v", result),
@@ -209,7 +209,7 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 		return 0, errors.New("不是有效的图片")
 	}
 
-	_, err = DefaultPointCollectHistoryService.CreateHistory(CreateHistoryParam{
+	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
 		OpenId:          openId,
 		TransactionType: entity.POINT_POWER_REPLACE,
 		Info:            fmt.Sprintf("powerReplace=%v", result),

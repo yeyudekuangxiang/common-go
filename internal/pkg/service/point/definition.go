@@ -1,13 +1,17 @@
 package point
 
-type CommandDescription struct {
-	Times  int64                     //限制次数
-	Amount int64                     //每次数量
-	Fn     func(*clientHandle) error //执行方法
+type commandDescription struct {
+	Times      int64                            //限制次数 0表示不限次数
+	Amount     int64                            //积分
+	MaxAmount  int64                            //每日最多获取积分
+	Fn         func(*defaultClientHandle) error //执行方法
+	FnPageData func(*defaultClientHandle) (map[string]interface{}, error)
+	IsOpen     bool //是否实现
 }
 
 type CollectType string
 type CollectRules map[CollectType][]string
+type RuleTranslate map[CollectType]map[string]string
 
 //type CollectError map[CollectType]error
 
@@ -51,6 +55,17 @@ var rules = CollectRules{
 	"COFFEE_CUP":    []string{"自带杯", "单号", "订单"},
 	"BIKE_RIDE":     []string{"骑行", "单车", "骑车", "bike", "出行", "哈啰", "摩拜", "青桔"},
 	"POWER_REPLACE": []string{"订单编号", "已支付"},
+}
+
+var identifyChRules = CollectRules{
+	"POWER_REPLACE": []string{"订单编号", "度"},
+}
+
+var identifyEnRules = RuleTranslate{
+	"POWER_REPLACE": map[string]string{
+		"订单编号": "orderId",
+		"度":    "kwh",
+	},
 }
 
 //var collectError = CollectError{
@@ -109,12 +124,24 @@ var commandRealText = map[CollectType]string{
 }
 
 //方法定义
-var commandMap = map[string]*CommandDescription{
-	"COFFEE_CUP":    {Fn: (*clientHandle).coffeeCup, Times: 2, Amount: 39},
-	"INVITE":        {Fn: (*clientHandle).invite, Times: 5, Amount: 500},
-	"BIKE_RIDE":     {Fn: (*clientHandle).bikeRide, Times: 2, Amount: 42},
-	"POWER_REPLACE": {Fn: (*clientHandle).powerReplace, Times: 1, Amount: 300},
-	"ARTICLE":       {Fn: (*clientHandle).article, Times: 2, Amount: 150},
+var commandMap = map[string]*commandDescription{
+	"COFFEE_CUP": {Fn: (*defaultClientHandle).coffeeCup, Times: 2, Amount: 39},
+	"INVITE":     {Fn: (*defaultClientHandle).invite, Times: 5, Amount: 500},
+	"BIKE_RIDE":  {Fn: (*defaultClientHandle).bikeRide, Times: 2, Amount: 42},
+	//times:每天可以提交次数 amount:1度电10积分 maxAmount:每天最多获取积分
+	"POWER_REPLACE":    {Fn: (*defaultClientHandle).powerReplace, Times: 1, Amount: 10, MaxAmount: 300},
+	"ARTICLE":          {Fn: (*defaultClientHandle).article, Times: 2, Amount: 150},
+	"FAST_ELECTRICITY": {Fn: (*defaultClientHandle).fastElectricity, Times: 0, Amount: 300},
+}
+
+//弹框页面获取数据
+var pageDataMap = map[string]*commandDescription{
+	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData},
+	"COFFEE_CUP":       {FnPageData: (*defaultClientHandle).coffeeCupPageData},
+	"INVITE":           {FnPageData: (*defaultClientHandle).invitePageData},
+	"BIKE_RIDE":        {FnPageData: (*defaultClientHandle).bikeRidePageData},
+	"ARTICLE":          {FnPageData: (*defaultClientHandle).articlePageData},
+	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData},
 }
 
 //dui ba
