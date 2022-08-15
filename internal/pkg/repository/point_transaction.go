@@ -105,3 +105,19 @@ func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageL
 
 	return list, total
 }
+
+//GetListByFenQunCount  分群专用
+func (repo PointTransactionRepository) GetListByFenQunCount(by GetPointTransactionListByQun) int {
+	type Result struct {
+		Days string
+	}
+	list := make([]Result, 0)
+	db := repo.ctx.DB.Table("(?) as u", repo.ctx.DB.Model(&entity.PointTransaction{}).Select("TO_CHAR(create_time, 'YYYY-MM-DD')  as days").Where("type in (?)", by.Types).Where("create_time >= ?", by.StartTime).Where("create_time <= ?", by.EndTime).Where("openid", by.OpenId))
+	db.Group("days")
+	err := db.Find(&list).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	count := len(list)
+	return count
+}
