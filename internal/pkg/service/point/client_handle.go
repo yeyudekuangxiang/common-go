@@ -9,7 +9,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-	"strings"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -31,6 +31,7 @@ type ClientHandle struct {
 	message      string      //记录信息
 	bizId        string
 	additionInfo string
+	identifyImg  map[string]string
 }
 
 //挂件
@@ -72,42 +73,43 @@ func NewClientHandle(ctx *context.MioContext, params *ClientHandle) *defaultClie
 }
 
 // HandleCollectCommand 执行cmd
-func (c *defaultClientHandle) HandleCollectCommand(types string) error {
-	cmdDesc := commandMap[strings.ToUpper(types)]
+func (c *defaultClientHandle) HandleCollectCommand() (map[string]string, error) {
+	cmdDesc := commandMap[string(c.clientHandle.Type)]
 	if cmdDesc == nil {
-		return errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
+		return nil, errno.ErrRecordNotFound.WithMessage("未找到匹配方法")
+	}
+	//幂等
+	if err := c.checkIdempotency(); err != nil {
+		return nil, err
 	}
 	//检查是否超过次数
 	if err := c.checkTimes2(cmdDesc.Times); err != nil {
 		//记录日志 返回错误
-		return err
-	}
-	//获取图片内容
-	intersect, err := c.scanImage(c.clientHandle.ImgUrl)
-	if err != nil {
-		//记录日志 返回错误
-		return err
-	}
-	c.identifyImg(intersect)
-	//幂等
-	if err = c.checkIdempotency(); err != nil {
-		return err
+		return nil, err
 	}
 	//检测当日次数
-	if err = c.checkTimes(cmdDesc.Times); err != nil {
-		return err
+	//if err = c.checkTimes(cmdDesc.Times); err != nil {
+	//	return err
+	//}
+	//获取图片内容
+	content, err := c.scanImage(c.clientHandle.ImgUrl)
+	if err != nil {
+		//记录日志 返回错误
+		return nil, err
 	}
+	c.withIdentifyImg(content)
 	//添加内容
-	c.withAdditionInfo(fmt.Sprintf("%s", intersect))
-	c.withType(CollectType(types))
+	c.withAdditionInfo(fmt.Sprintf("%s", content))
+	c.withType(c.clientHandle.Type)
 	c.withBizId(util.UUID())
 	c.withPoint(cmdDesc.Amount)
+	//c.withValue(c.clientHandle.value)
 	//执行function
 	if err = c.executeCommandFn(cmdDesc); err != nil {
 		//记录日志 返回错误
-		return err
+		return nil, err
 	}
-	return nil
+	return c.clientHandle.identifyImg, nil
 }
 
 func (c *defaultClientHandle) HandlePageDataCommand() (map[string]int64, error) {
@@ -143,6 +145,7 @@ func (c *defaultClientHandle) withType(types CollectType) {
 func (c *defaultClientHandle) withPoint(point int64) {
 	if point != 0 {
 		c.clientHandle.point = point
+		c.clientHandle.identifyImg["point"] = strconv.FormatInt(point, 10)
 	}
 }
 func (c *defaultClientHandle) withMessage(message string) {
@@ -171,18 +174,14 @@ func (c *defaultClientHandle) withAdditionInfo(additionInfo string) {
 
 //保存收集积分记录
 func (c *defaultClientHandle) saveRecord() error {
-	history := &entity.PointCollectLog{
+	history := &entity.PointCollectHistory{
 		OpenId: c.clientHandle.OpenId,
 		Type:   string(c.clientHandle.Type),
 		Info:   c.clientHandle.message,
-		Point:  c.clientHandle.point,
 		Date:   model.Date{},
 		Time:   model.Time{},
 	}
-	if c.additional.orderId != "" {
-		history.AdditionalOrder = c.additional.orderId
-	}
-	return c.plugin.history.CreateLog(history)
+	return c.plugin.history.Create(history)
 }
 
 // 保存积分
@@ -251,8 +250,14 @@ func (c *defaultClientHandle) incPoint(num int64) (int64, error) {
 	} else {
 		usrPoint.Balance += c.clientHandle.point
 	}
-	//操作积分
+	//更新积分
 	point, err := c.savePoint(&usrPoint)
+	if err != nil {
+		return 0, err
+	}
+
+	//保存积分更新记录
+	_, err = c.saveTransAction()
 	if err != nil {
 		return 0, err
 	}

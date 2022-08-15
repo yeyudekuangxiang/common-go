@@ -16,11 +16,11 @@ func (c *defaultClientHandle) scanImage(imgUrl string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	ruleArray, err := c.validateRule(results, rules)
+	content, err := c.validateRule(results, rules)
 	if err != nil {
 		return nil, err
 	}
-	return ruleArray, nil
+	return content, nil
 }
 
 //规则校验
@@ -29,14 +29,21 @@ func (c *defaultClientHandle) validateRule(content []string, rules CollectRules)
 	if len(ruleArray) == 0 {
 		return nil, errors.New("不是有效的图片")
 	}
-	return ruleArray, nil
+	return content, nil
 }
 
-//图片识别
-func (c *defaultClientHandle) identifyImg(identify []string) {
-	for i, str := range identify {
-		fmt.Printf("%d-%s", i, str)
+//图片识别 根据rule匹配关键数据
+func (c *defaultClientHandle) withIdentifyImg(identify []string) {
+	rule := identifyChRules[c.clientHandle.Type] //汉字
+	enRule := identifyEnRules[c.clientHandle.Type]
+	m := util.IntersectContains(identify, rule)
+	enM := map[string]string{}
+	for k, v := range m {
+		if enRule, ok := enRule[k]; ok {
+			enM[enRule] = v
+		}
 	}
+	c.clientHandle.identifyImg = enM
 	return
 }
 

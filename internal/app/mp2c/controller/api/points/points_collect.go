@@ -24,10 +24,13 @@ func (ctr PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		ImgUrl: form.ImgUrl,
 		Type:   point.CollectType(form.PointCollectType),
 	})
-	if err := client.HandleCollectCommand(form.PointCollectType); err != nil {
+	result, err := client.HandleCollectCommand()
+	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"data": result,
+	}, nil
 }
 
 func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
@@ -41,10 +44,13 @@ func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
 		ImgUrl: form.ImgUrl,
 		Type:   point.CollectType(form.PointCollectType),
 	})
-	if err := client.HandleCollectCommand(form.PointCollectType); err != nil {
+	result, err := client.HandlePageDataCommand()
+	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"data": result,
+	}, nil
 }
 
 func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {

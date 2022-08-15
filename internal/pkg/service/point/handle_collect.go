@@ -1,6 +1,9 @@
 package point
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/shopspring/decimal"
+)
 
 func (c *defaultClientHandle) coffeeCup() error {
 	c.withMessage(fmt.Sprintf("coffeeCup=%v", c.clientHandle.additionInfo))
@@ -32,7 +35,6 @@ func (c *defaultClientHandle) bikeRide() error {
 
 func (c *defaultClientHandle) powerReplace() error {
 	c.withMessage(fmt.Sprintf("powerReplace=%v", c.clientHandle.additionInfo))
-	c.additional.orderId = "t"
 	_, err := c.incPoint(c.clientHandle.point)
 	if err != nil {
 		return err
@@ -41,7 +43,13 @@ func (c *defaultClientHandle) powerReplace() error {
 	if err != nil {
 		return err
 	}
-
+	//计算减碳
+	fromString, err := decimal.NewFromString("22.2")
+	if err != nil {
+		return err
+	}
+	c.clientHandle.identifyImg["co2"] = fromString.Mul(decimal.NewFromFloat(511)).String()
+	delete(c.clientHandle.identifyImg, "orderId")
 	return nil
 }
 

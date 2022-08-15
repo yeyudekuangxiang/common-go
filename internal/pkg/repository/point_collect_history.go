@@ -44,7 +44,3 @@ func (repo PointCollectHistoryRepository) Count(history *entity.PointCollectHist
 	}
 	return
 }
-
-func (repo PointCollectHistoryRepository) CreateLog(history *entity.PointCollectLog) error {
-	return repo.ctx.DB.Create(history).Error
-}
