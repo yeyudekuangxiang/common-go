@@ -189,9 +189,9 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	}
 
 	vip := 0
-	if thirdParty == "thirdParty" && isNewUser {
+	/*if thirdParty == "thirdParty" && isNewUser {
 		vip = 2
-	}
+	}*/
 
 	switch activity.VipType {
 	case entity.DuiBaActivityVipTypeNewUser:
@@ -200,6 +200,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		}
 		break
 	case entity.DuiBaActivityIsPhoneAnniversaryActivity:
+		//需求地址：https://confluence.miotech.com/pages/viewpage.action?pageId=26613756
 		var pointTypes = []string{"STEP", "COFFEE_CUP", "BIKE_RIDE", "ECAR"}
 		count := srv.repo.GetListByFenQunCount(repository.GetPointTransactionListByQun{
 			StartTime: "2022-08-01:00:00:01",
@@ -207,7 +208,6 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			Types:     pointTypes,
 			OpenId:    userInfo.OpenId,
 		})
-		//需求地址：https://confluence.miotech.com/pages/viewpage.action?pageId=26613756
 		switch {
 		case count == 3:
 			{
@@ -223,12 +223,12 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			}
 		default:
 			{
-
+				break
 			}
 		}
 		break
 	default:
-
+		break
 	}
 
 	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()
