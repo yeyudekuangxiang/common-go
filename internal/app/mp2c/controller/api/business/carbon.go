@@ -68,7 +68,39 @@ func (CarbonController) CollectPublicTransport(ctx *gin.Context) (gin.H, error) 
 	}
 
 	user := apiutil.GetAuthBusinessUser(ctx)
-	result, err := business.DefaultCarbonService.CarbonCreditPublicTransport(user.ID, form.Bus, form.Metro)
+	result, err := business.DefaultCarbonService.CarbonCreditPublicTransport(user.ID, form.Bus, form.Metro, form.Walk, form.Bike)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"carbonCredit": result.Credit,
+		"point":        result.Point,
+	}, err
+}
+func (CarbonController) CollectOEP(ctx *gin.Context) (gin.H, error) {
+	form := CarbonCollectOEPForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthBusinessUser(ctx)
+	result, err := business.DefaultCarbonService.CarbonCreditOEP(user.ID, form.Voucher)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"carbonCredit": result.Credit,
+		"point":        result.Point,
+	}, err
+}
+func (CarbonController) CollectGreenBusinessTrip(ctx *gin.Context) (gin.H, error) {
+	form := CarbonGreenBusinessTripForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthBusinessUser(ctx)
+	result, err := business.DefaultCarbonService.CarbonCreditGreenBusinessTrip(user.ID, form.TripType, form.From, form.To, form.Voucher)
 	if err != nil {
 		return nil, err
 	}

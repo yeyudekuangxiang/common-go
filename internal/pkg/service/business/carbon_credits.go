@@ -141,15 +141,19 @@ func (srv CarbonCreditsService) SendCarbonCreditSaveWaterElectricity(param SendC
 func (srv CarbonCreditsService) SendCarbonCreditSavePublicTransport(param SendCarbonCreditSavePublicTransportParam) (*SendCarbonCreditSavePublicTransportResult, error) {
 	busCredits := DefaultCarbonCreditCalculatorService.CalcBus(param.Bus)
 	metroCredits := DefaultCarbonCreditCalculatorService.CalcMetro(param.Metro)
+	stepCredits := DefaultCarbonCreditCalculatorService.CalcStep(param.Step)
+	bikeCredits := DefaultCarbonCreditCalculatorService.CalcBike(param.Bike)
 
 	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
 		UserId:        param.UserId,
-		AddCredit:     busCredits.Add(metroCredits),
+		AddCredit:     busCredits.Add(metroCredits).Add(stepCredits).Add(bikeCredits),
 		Type:          ebusiness.CarbonTypePublicTransport,
 		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoPublicTransport{
 			Bus:   param.Bus,
 			Metro: param.Metro,
+			Step:  param.Step,
+			Bike:  param.Bike,
 		}.CarbonTypeInfo(),
 	})
 	if err != nil {
@@ -158,6 +162,8 @@ func (srv CarbonCreditsService) SendCarbonCreditSavePublicTransport(param SendCa
 	return &SendCarbonCreditSavePublicTransportResult{
 		BusCredits:   busCredits,
 		MetroCredits: metroCredits,
+		StepCredits:  stepCredits,
+		BikeCredits:  bikeCredits,
 	}, err
 }
 
@@ -171,6 +177,27 @@ func (srv CarbonCreditsService) SendCarbonCreditOEP(param SendCarbonCreditOEPPar
 		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoOEP{
 			Voucher: param.Voucher,
+		}.CarbonTypeInfo(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditOEPResult{
+		Credits: oepCredits,
+	}, err
+}
+
+func (srv CarbonCreditsService) SendCarbonGreenBusinessTrip(param SendCarbonGreenBusinessTripParam) (*SendCarbonCreditOEPResult, error) {
+	oepCredits := DefaultCarbonCreditCalculatorService.CalcTrip(param.TripType, param.Distance)
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     oepCredits,
+		Type:          ebusiness.CarbonTypeGreenBusinessTrip,
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoGreenBusinessTrip{
+			Distance: param.Distance,
+			From:     param.From,
+			To:       param.To,
 		}.CarbonTypeInfo(),
 	})
 	if err != nil {

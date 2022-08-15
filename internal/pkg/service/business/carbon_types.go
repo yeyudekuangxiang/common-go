@@ -167,11 +167,15 @@ type SendCarbonCreditSavePublicTransportParam struct {
 	UserId        int64
 	Bus           float64
 	Metro         float64
+	Step          float64
+	Bike          float64
 	TransactionId string
 }
 type SendCarbonCreditSavePublicTransportResult struct {
 	BusCredits   decimal.Decimal
 	MetroCredits decimal.Decimal
+	StepCredits  decimal.Decimal
+	BikeCredits  decimal.Decimal
 }
 
 type SendCarbonCreditOEPResult struct {
@@ -190,4 +194,13 @@ type CarbonResult struct {
 type GetCompanyPageListParam struct {
 	Limit  int
 	Offset int
+}
+type SendCarbonGreenBusinessTripParam struct {
+	TripType      string
+	From          string
+	To            string
+	Voucher       string
+	Distance      float64
+	UserId        int64
+	TransactionId string
 }

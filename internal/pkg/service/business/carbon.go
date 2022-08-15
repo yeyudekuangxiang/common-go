@@ -149,7 +149,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 }
 
 //CarbonCreditPublicTransport 公交地铁
-func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus float64, metro float64) (*CarbonResult, error) {
+func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus, metro, step, bike float64) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditSavePublicTransport%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
 		return nil, errors.New("操作频率过快,请稍后再试")
@@ -169,6 +169,8 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus float64, 
 		UserId:        userId,
 		Bus:           bus,
 		Metro:         metro,
+		Step:          step,
+		Bike:          bike,
 		TransactionId: transactionId,
 	})
 	if err != nil {
@@ -179,8 +181,12 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus float64, 
 		UserId:        userId,
 		Bus:           bus,
 		Metro:         metro,
+		Step:          step,
+		Bike:          bike,
 		BusCredit:     sendResult.BusCredits,
 		MetroCredit:   sendResult.MetroCredits,
+		StepCredit:    sendResult.StepCredits,
+		BikeCredit:    sendResult.BikeCredits,
 		TransactionId: transactionId,
 	})
 	if err != nil {
@@ -188,7 +194,7 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus float64, 
 	}
 
 	return &CarbonResult{
-		Credit: sendResult.BusCredits.Add(sendResult.MetroCredits),
+		Credit: sendResult.BusCredits.Add(sendResult.MetroCredits).Add(sendResult.StepCredits).Add(sendResult.BikeCredits),
 		Point:  point,
 	}, nil
 }
@@ -229,6 +235,61 @@ func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonR
 		Voucher:       voucher,
 		CarbonCredit:  sendCarbonResult.Credits,
 		TransactionId: transactionId,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &CarbonResult{
+		Credit: sendCarbonResult.Credits,
+		Point:  point,
+	}, nil
+}
+
+// CarbonCreditGreenBusinessTrip 低碳出行
+func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType string, from, to, voucher string) (*CarbonResult, error) {
+
+	lockKey := fmt.Sprintf("CarbonCreditGreenBusinessTrip%d", userId)
+	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
+		return nil, errors.New("操作频率过快,请稍后再试")
+	}
+	defer util.DefaultLock.UnLock(lockKey)
+
+	//检测是否达到上限
+	count, err := DefaultCarbonCreditsLimitService.CheckLimit(userId, ebusiness.CarbonTypeGreenBusinessTrip)
+	if err != nil {
+		return nil, err
+	}
+	if count <= 0 {
+		return nil, errors.New("已经达到此场景当日最大限制")
+	}
+
+	transactionId := util.UUID()
+
+	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonGreenBusinessTrip(SendCarbonGreenBusinessTripParam{
+		TripType:      tripType,
+		From:          from,
+		To:            to,
+		Voucher:       voucher,
+		Distance:      0,
+		UserId:        userId,
+		TransactionId: transactionId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	//发送积分
+	point, err := DefaultPointService.SendPointGreenBusinessTrip(SendPointGreenBusinessTripParam{
+		TripType:      tripType,
+		From:          from,
+		To:            to,
+		Voucher:       voucher,
+		Distance:      0,
+		UserId:        userId,
+		TransactionId: transactionId,
+		CarbonCredit:  sendCarbonResult.Credits,
 	})
 
 	if err != nil {

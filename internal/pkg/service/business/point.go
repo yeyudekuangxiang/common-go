@@ -211,7 +211,9 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 	}
 
 	addPoint := pointRate.Bus.Calc(param.BusCredit)
-	addPoint += pointRate.Bus.Calc(param.MetroCredit)
+	addPoint += pointRate.Metro.Calc(param.MetroCredit)
+	addPoint += pointRate.Step.Calc(param.StepCredit)
+	addPoint += pointRate.Bike.Calc(param.BikeCredit)
 
 	_, err = srv.SendPoint(SendPointParam{
 		UserId:        param.UserId,
@@ -221,6 +223,8 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 		Info: ebusiness.CarbonTypeInfoPublicTransport{
 			Bus:   param.Bus,
 			Metro: param.Metro,
+			Step:  param.Step,
+			Bike:  param.Bike,
 		}.PointTypeInfo(),
 	})
 	return addPoint, err
@@ -241,13 +245,13 @@ func (srv PointService) SendPointOEP(param SendPointOEPParam) (int, error) {
 	}
 
 	//获取碳积分和积分汇率
-	pointRate, err := DefaultPointRateSettingService.ParsePublicTransportRate(sceneSetting.PointRateSetting)
+	pointRate, err := DefaultPointRateSettingService.ParsePointOEPRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
 		return 0, errors.New("系统异常,请稍后再试")
 	}
 
-	addPoint := pointRate.Bus.Calc(param.CarbonCredit)
+	addPoint := pointRate.Calc(param.CarbonCredit)
 
 	_, err = srv.SendPoint(SendPointParam{
 		UserId:        param.UserId,
@@ -256,6 +260,49 @@ func (srv PointService) SendPointOEP(param SendPointOEPParam) (int, error) {
 		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoOEP{
 			Voucher: param.Voucher,
+		}.PointTypeInfo(),
+	})
+	return addPoint, err
+}
+func (srv PointService) SendPointGreenBusinessTrip(param SendPointGreenBusinessTripParam) (int, error) {
+	userInfo, err := DefaultUserService.GetBusinessUserById(param.UserId)
+	if err != nil {
+		return 0, err
+	}
+	if userInfo.ID == 0 {
+		return 0, errno.ErrUserNotFound
+	}
+
+	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeGreenBusinessTrip)
+	if err != nil {
+		return 0, err
+	}
+
+	//获取碳积分和积分汇率
+	pointRate, err := DefaultPointRateSettingService.ParseGreenBusinessTripExchangeRate(sceneSetting.PointRateSetting)
+	if err != nil {
+		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
+		return 0, errors.New("系统异常,请稍后再试")
+	}
+	var addPoint int
+	switch param.TripType {
+	case "train":
+		addPoint = pointRate.Train.Calc(param.CarbonCredit)
+	case "highSpeed":
+		addPoint = pointRate.HighSpeed.Calc(param.CarbonCredit)
+	case "airplane":
+		addPoint = pointRate.Airplane.Calc(param.CarbonCredit)
+	}
+
+	_, err = srv.SendPoint(SendPointParam{
+		UserId:        param.UserId,
+		AddPoint:      addPoint,
+		Type:          ebusiness.PointTypeGreenBusinessTrip,
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoGreenBusinessTrip{
+			Distance: param.Distance,
+			From:     param.From,
+			To:       param.To,
 		}.PointTypeInfo(),
 	})
 	return addPoint, err
