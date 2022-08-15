@@ -37,16 +37,16 @@ func (c *defaultClientHandle) checkTimes2(times int64) error {
 	//获取次数记录
 	result := c.plugin.transactionLimit.FindBy(repository.FindPointTransactionCountLimitBy{
 		OpenId:          c.clientHandle.OpenId,
-		TransactionType: entity.PointTransactionType(c.clientHandle.Type),
+		TransactionType: c.clientHandle.Type,
 		TransactionDate: model.Date{Time: time.Now()},
 	})
 	if result.Id == 0 {
 		//创建记录
 		pointTransActionLimit := entity.PointTransactionCountLimit{
 			OpenId:          c.clientHandle.OpenId,
-			TransactionType: entity.PointTransactionType(c.clientHandle.Type),
-			MaxCount:        entity.PointCollectLimitMap[entity.PointTransactionType(c.clientHandle.Type)],
-			CurrentCount:    0,
+			TransactionType: c.clientHandle.Type,
+			MaxCount:        entity.PointCollectLimitMap[c.clientHandle.Type],
+			CurrentCount:    1,
 			UpdateTime:      model.Time{Time: time.Now()},
 			TransactionDate: model.Date{Time: time.Now()},
 		}

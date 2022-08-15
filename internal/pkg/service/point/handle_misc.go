@@ -49,20 +49,12 @@ func (c *defaultClientHandle) identifyImg(identify []string) map[string]string {
 
 //积分类型
 func (c *defaultClientHandle) getText() string {
-	text, ok := commandText[c.clientHandle.Type]
-	if !ok {
-		return "未知积分"
-	}
-	return text
+	return service.PointTransactionTypeInfo{Type: c.clientHandle.Type}.Type.RealText()
 }
 
 //平台渠道
 func (c *defaultClientHandle) getRealText() string {
-	text, ok := commandRealText[c.clientHandle.Type]
-	if !ok {
-		return "未知平台"
-	}
-	return text
+	return service.PointTransactionTypeInfo{Type: c.clientHandle.Type}.Type.Text()
 }
 
 //诸葛埋点

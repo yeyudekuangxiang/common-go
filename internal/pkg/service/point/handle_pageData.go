@@ -7,7 +7,7 @@ import (
 	"mio/internal/pkg/repository"
 )
 
-//电池换电 奥动
+//电池换电 奥动 before 弹框数据
 func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, error) {
 	result, count, err := c.getTodayData()
 	if err != nil {
@@ -46,18 +46,6 @@ func (c *defaultClientHandle) coffeeCupPageData() (map[string]interface{}, error
 	return nil, nil
 }
 
-func (c *defaultClientHandle) invitePageData() (map[string]interface{}, error) {
-	_, _, err := c.getTodayData()
-	if err != nil {
-		return nil, err
-	}
-	//减碳量计算
-	//if _, ok := data["total"]; ok {
-	//	data["co2"] = data["total"] * 511
-	//}
-	return nil, nil
-}
-
 func (c *defaultClientHandle) bikeRidePageData() (map[string]interface{}, error) {
 	_, _, err := c.getTodayData()
 	if err != nil {
@@ -70,19 +58,8 @@ func (c *defaultClientHandle) bikeRidePageData() (map[string]interface{}, error)
 	return nil, nil
 }
 
-func (c *defaultClientHandle) articlePageData() (map[string]interface{}, error) {
-	_, _, err := c.getTodayData()
-	if err != nil {
-		return nil, err
-	}
-	//减碳量计算
-	//if _, ok := data["total"]; ok {
-	//	data["co2"] = data["total"] * 511
-	//}
-	return nil, nil
-}
-
-func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{}, error) {
+//飞蚂蚁旧物回收before弹框数据
+func (c *defaultClientHandle) oldStuffRecyclingPageData() (map[string]interface{}, error) {
 	_, _, err := c.getTodayData()
 	if err != nil {
 		return nil, err

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/point"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -23,7 +24,7 @@ func (ctr PointCollectController) ImageCollect(ctx *gin.Context) (gin.H, error) 
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
 		ImgUrl: form.ImgUrl,
-		Type:   point.CollectType(form.PointCollectType),
+		Type:   entity.PointTransactionType(form.PointCollectType),
 	})
 	result, err := client.HandleImageCollectCommand()
 	if err != nil {
@@ -44,7 +45,7 @@ func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
 		ImgUrl: form.ImgUrl,
-		Type:   point.CollectType(form.PointCollectType),
+		Type:   entity.PointTransactionType(form.PointCollectType),
 	})
 	result, err := client.HandlePageDataCommand()
 	if err != nil {
@@ -62,7 +63,7 @@ func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
-		Type:   point.CollectType(form.PointCollectType),
+		Type:   entity.PointTransactionType(form.PointCollectType),
 	})
 	res, err := client.HandlePageDataCommand()
 	if err != nil {
