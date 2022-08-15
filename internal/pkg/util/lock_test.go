@@ -28,10 +28,6 @@ func redisLock() *RedisDistributedLock {
 	return &lock
 }
 func TestLock(t *testing.T) {
-	a, b := IpToCity("47.101.132.254")
-	println(a)
-	println(b)
-	return
 	lock := redisLock()
 	if lock == nil {
 		return

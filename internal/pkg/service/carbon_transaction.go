@@ -15,7 +15,6 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
-	"mio/pkg/baidu"
 	"sort"
 	"strconv"
 	"time"
@@ -46,10 +45,10 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	}
 	//获取ip地址
 	cityCode := ""
-	cityInfo, cityErr := baidu.IpToCity(dto.Ip)
+	/*cityInfo, cityErr := baidu.IpToCity(dto.Ip)
 	if cityErr == nil {
 		cityCode = cityInfo.Content.AddressDetail.Adcode
-	}
+	}*/
 	//入库
 	CarbonTransactionDo := entity.CarbonTransaction{
 		TransactionId: util.UUID(),
