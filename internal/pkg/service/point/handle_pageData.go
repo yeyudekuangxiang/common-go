@@ -12,7 +12,6 @@ func (c *defaultClientHandle) powerReplacePageData() (map[string]int64, error) {
 		return nil, err
 	}
 	//减碳量计算 1 度电 = 511 CO2
-	data["co2"] = 0
 	if _, ok := data["total"]; ok {
 		data["co2"] = data["total"] * 511
 	}
@@ -96,8 +95,8 @@ func (c *defaultClientHandle) getPageData() (map[string]int64, error) {
 	if _, ok := data["total"]; !ok {
 		data["total"] = 0
 	}
-	if _, ok := data["decCO2"]; !ok {
-		data["decCO2"] = 0
+	if _, ok := data["co2"]; !ok {
+		data["co2"] = 0
 	}
 	if _, ok := data["count"]; !ok {
 		data["count"] = 0

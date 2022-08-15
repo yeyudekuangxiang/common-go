@@ -48,9 +48,7 @@ func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	return gin.H{
-		"data": result,
-	}, nil
+	return gin.H{"data": result}, nil
 }
 
 func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {
