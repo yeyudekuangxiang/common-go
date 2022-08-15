@@ -67,7 +67,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		totalPoint := lastPoint + thisPoint
 		fmt.Println("charge 累计积分 ", form, totalPoint)
 		if lastPoint >= scene.PointLimit {
-			fmt.Println("charge 充电量已达到上线 ", form)
+			fmt.Println("charge 充电量已达到上限 ", form)
 		} else {
 			if totalPoint > scene.PointLimit {
 				fmt.Println("charge 充电量限制修正 ", form, thisPoint, lastPoint)
@@ -168,7 +168,7 @@ func (ctr ChargeController) FastElectric(c *gin.Context) (gin.H, error) {
 		totalPoint := lastPoint + thisPoint
 		fmt.Println("charge 累计积分 ", form, totalPoint)
 		if lastPoint >= scene.PointLimit {
-			fmt.Println("charge 充电量已达到上线 ", form)
+			fmt.Println("charge 充电量已达到上限 ", form)
 		} else {
 			if totalPoint > scene.PointLimit {
 				fmt.Println("charge 充电量限制修正 ", form, thisPoint, lastPoint)
