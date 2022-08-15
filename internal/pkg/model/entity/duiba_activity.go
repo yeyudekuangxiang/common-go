@@ -22,6 +22,7 @@ type DuiBaActivity struct {
 	Name                string
 	Status              DuiBaActivityStatus
 	IsPhone             DuiBaActivityIsPhone
+	VipType             DuiBaActivityVipType
 }
 
 type DuiBaActivityType int8
@@ -52,6 +53,13 @@ const (
 	DuiBaActivityIsPhoneNo  DuiBaActivityIsPhone = 2
 )
 
+type DuiBaActivityVipType int8
+
+const (
+	DuiBaActivityVipTypeNewUser             DuiBaActivityVipType = 1
+	DuiBaActivityIsPhoneAnniversaryActivity DuiBaActivityVipType = 2
+)
+
 var (
 	DuiBaActivityTypeMap = map[DuiBaActivityType]string{
 		DuiBaActivityGoodsShow: "商品详情",
@@ -68,6 +76,10 @@ var (
 	DuiBaActivityIsPhoneMap = map[DuiBaActivityIsPhone]string{
 		DuiBaActivityIsPhoneYes: "需要绑定",
 		DuiBaActivityIsPhoneNo:  "不需要绑定",
+	}
+	DuiBaActivityVipTypeMap = map[DuiBaActivityVipType]string{
+		DuiBaActivityVipTypeNewUser:             "新用户",
+		DuiBaActivityIsPhoneAnniversaryActivity: "周年庆活动",
 	}
 )
 
