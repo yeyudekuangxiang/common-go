@@ -141,24 +141,24 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 		listMap[j.VDate.Format("2006-01-02")] = j
 	}
 	//整理最终列表 近2周的数据 i = 14
-	ListVo := make([]api_types.CarbonTransactionHistoryVO, 0)
+	var ListDateVo []string
+	var ListValueVo []float64
+	var ListValueStrVo []string
+
 	for i := 1; i <= 14; i++ {
 		day := time.Now().AddDate(0, 0, -i).Format("2006-01-02")
-		vo := api_types.CarbonTransactionHistoryVO{
-			VDate: day,
-		}
+		ListDateVo = append(ListDateVo, day)
 		l, ok := listMap[day] //判断是否存在map集合中
 		if ok {
 			carbonStr := strconv.FormatFloat(l.Value, 'f', -1, 64) + "g"
-			vo.Value = l.Value
-			vo.ValueStr = carbonStr
+			ListValueVo = append(ListValueVo, l.Value)
+			ListValueStrVo = append(ListValueStrVo, carbonStr)
 		} else {
-			vo.Value = 0
-			vo.ValueStr = "0g"
+			ListValueVo = append(ListValueVo, 0)
+			ListValueStrVo = append(ListValueStrVo, "0g")
 		}
-		ListVo = append(ListVo, vo)
 	}
-	return gin.H{"list": ListVo}, nil
+	return gin.H{"dateList": ListDateVo, "valueList": ListValueVo, "valueListStr": ListValueStrVo}, nil
 }
 
 /****定时器*****/

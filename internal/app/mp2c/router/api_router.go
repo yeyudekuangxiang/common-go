@@ -183,7 +183,7 @@ func apiRouter(router *gin.Engine) {
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 
-		//签到相关路由
+		//碳成就相关路由
 		carbonRouter := mustAuthRouter.Group("/carbon")
 		{
 			carbonRouter.GET("/info", apiutil.Format(api.DefaultCarbonController.Info))

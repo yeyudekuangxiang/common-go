@@ -129,3 +129,12 @@ type CarbonTransactionHistoryVO struct {
 	Value    float64 `json:"value"`
 	ValueStr string  `json:"valueStr"`
 }
+
+type CarbonTransactionHistoryDateVO struct {
+	VDate string `json:"vDate"`
+}
+
+type CarbonTransactionHistoryValueVO struct {
+	Value    float64 `json:"value"`
+	ValueStr string  `json:"valueStr"`
+}
