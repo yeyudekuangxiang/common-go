@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.2+incompatible
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.1

@@ -1,25 +1,37 @@
 package business
 
-type CityLisDTO struct {
-	LikeName    string
-	LikePy      string
-	LikeShortPy string
+import (
+	"mio/internal/pkg/model"
+	ebusiness "mio/internal/pkg/model/entity/business"
+)
+
+type CityProvinceListDTO struct {
+	Search string
 }
 
 type AreaListDTO struct {
-	CityCodes []string
+	Search      string //根据 name、py、ShortPy 模糊搜索
+	CityCodes   []string
+	LikeName    string
+	LikePy      string
+	LikeShortPy string
+	Level       ebusiness.AreaLevel
 }
 
 type ShortArea struct {
-	ID        int64  `json:"id"`
-	CityCode  string `json:"cityCode"`
-	Name      string `json:"name"`
-	Py        string `json:"py"`
-	ShortPy   string `json:"shortPy"`
-	Longitude string `json:"longitude"`
-	Latitude  string `json:"latitude"`
+	CityID    model.LongID `json:"cityID"`
+	CityCode  string       `json:"cityCode"`
+	Name      string       `json:"name"`
+	Py        string       `json:"py"`
+	ShortPy   string       `json:"shortPy"`
+	Longitude string       `json:"longitude"`
+	Latitude  string       `json:"latitude"`
 }
 type CityProvince struct {
 	Province ShortArea `json:"province"`
 	City     ShortArea `json:"city"`
+}
+type GroupCityProvince struct {
+	Letter string         `json:"letter"`
+	Items  []CityProvince `json:"items"`
 }
