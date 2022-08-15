@@ -60,6 +60,8 @@ func (p PointTransactionType) Text() string {
 		return "活动奖励" //平台活动
 	case POINT_DUIBA_INTEGRAL_RECHARGE:
 		return "活动奖励"
+	case POINT_POWER_REPLACE:
+		return "新能源换电"
 	}
 	return "未知积分"
 }
