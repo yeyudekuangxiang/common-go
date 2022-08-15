@@ -222,3 +222,10 @@ type FindTopicBy struct {
 	TopicIds []int64
 	Status   int `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
 }
+
+type GetPointTransactionListByQun struct {
+	OpenId    string
+	StartTime string
+	EndTime   string
+	Types     []string
+}
