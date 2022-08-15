@@ -89,7 +89,7 @@ type CarbonTransaction struct {
 	UserId        int64                 `json:"userId"`
 	TransactionId string                `json:"transactionId"`
 	Type          CarbonTransactionType `json:"type"`
-	City          int                   `json:"city"`
+	City          string                `json:"city"`
 	Value         float64               `json:"value"`
 	Info          string                `json:"info"`
 	AdminId       int                   `json:"adminId"`

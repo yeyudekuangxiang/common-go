@@ -44,10 +44,11 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if errCheck != nil {
 		return nil, errCheck
 	}
-	cityCode := 0
+	//获取ip地址
+	cityCode := ""
 	cityInfo, cityErr := baidu.IpToCity(dto.Ip)
 	if cityErr == nil {
-		cityCode = cityInfo.Content.AddressDetail.CityCode
+		cityCode = cityInfo.Content.AddressDetail.Adcode
 	}
 	//入库
 	CarbonTransactionDo := entity.CarbonTransaction{
@@ -64,13 +65,14 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if err != nil {
 		return nil, err
 	}
-	//记录redis,今日榜单
+
 	todayDate := time.Now().Format("20060102") //当天时间 年月日
 	score := dto.Value                         //增加的碳量
 
 	//更新用户表，碳量字段
 	DefaultUserService.UpdateUserCarbon(dto.UserId, score)
 
+	//记录redis,今日榜单
 	UserIdString := strconv.FormatInt(dto.UserId, 10) //用户uid
 	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, todayDate)
 	err1 := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, score, UserIdString).Err()
