@@ -11,11 +11,21 @@ func (c *defaultClientHandle) powerReplace() error {
 	c.withMessage(fmt.Sprintf("powerReplace=%v", c.clientHandle.message))
 	//c.clientHandle.identifyImg 里只有kwh和orderId;
 	m := c.clientHandle.identifyImg
+	//检查orderId
+	err := c.checkOrderId(m["orderId"])
+	if err != nil {
+		return err
+	}
 	fromString, err := decimal.NewFromString(m["kwh"])
 	if err != nil {
 		return err
 	}
-	c.clientHandle.point = fromString.Mul(decimal.NewFromInt(c.clientHandle.point)).IntPart()
+	//本次积分
+	point := fromString.Mul(decimal.NewFromInt(c.clientHandle.point)).IntPart()
+	//检查积分
+	if err = c.checkMaxPoint(c.clientHandle.maxPoint, point); err != nil {
+		return err
+	}
 	_, err = c.incPoint(c.clientHandle.point)
 	if err != nil {
 		return err

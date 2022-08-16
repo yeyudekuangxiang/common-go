@@ -74,6 +74,6 @@ func (c *defaultClientHandle) oldStuffRecyclingPageData() (map[string]interface{
 func (c *defaultClientHandle) getTodayData() ([]map[string]interface{}, int64, error) {
 	return repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: []string{c.clientHandle.OpenId},
-		Type:    entity.PointTransactionType(c.clientHandle.Type),
+		Type:    c.clientHandle.Type,
 	})
 }

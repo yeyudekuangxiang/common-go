@@ -29,11 +29,7 @@ func (c *defaultClientHandle) checkTimes(times int64) error {
 	}
 	return nil
 }
-func (c *defaultClientHandle) checkTimes2(times int64) error {
-	if times == 0 {
-		// 等于0表示不限次数
-		return nil
-	}
+func (c *defaultClientHandle) checkTimes2() error {
 	//获取次数记录
 	result := c.plugin.transactionLimit.FindBy(repository.FindPointTransactionCountLimitBy{
 		OpenId:          c.clientHandle.OpenId,
@@ -56,7 +52,7 @@ func (c *defaultClientHandle) checkTimes2(times int64) error {
 		}
 		return nil
 	}
-	if result.CurrentCount >= result.MaxCount {
+	if result.CurrentCount+1 >= result.MaxCount {
 		return errors.New("超过当日次数")
 	}
 	//更新记录
@@ -64,6 +60,29 @@ func (c *defaultClientHandle) checkTimes2(times int64) error {
 	err := c.updateTransActionLimit(result)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (c *defaultClientHandle) checkMaxPoint(maxPoint int64, currPoint int64) error {
+	today, _, err := c.plugin.transaction.CountByToday(repository.GetPointTransactionCountBy{
+		OpenIds: []string{c.clientHandle.OpenId},
+		Type:    c.clientHandle.Type,
+	})
+	if err != nil {
+		return err
+	}
+	var point int64
+	for _, item := range today {
+		point += item["value"].(int64)
+	}
+	if maxPoint-point <= 0 {
+		return errors.New("今日积分获取已达到上限")
+	}
+	if currPoint+point >= maxPoint {
+		c.clientHandle.point = maxPoint
+	} else {
+		c.clientHandle.point = currPoint
 	}
 	return nil
 }
@@ -83,4 +102,18 @@ func (c *defaultClientHandle) checkIdempotency() error {
 		return errors.New("操作频率过快,请稍后再试")
 	}
 	return nil
+}
+
+func (c *defaultClientHandle) checkOrderId(orderId string) error {
+	if orderId == "" {
+		return errors.New("参数错误:订单号为空")
+	}
+	result, err := c.plugin.transaction.FindOrder(orderId)
+	if err != nil {
+		return err
+	}
+	if result.ID == 0 {
+		return nil
+	}
+	return errors.New("订单号已经存在")
 }
