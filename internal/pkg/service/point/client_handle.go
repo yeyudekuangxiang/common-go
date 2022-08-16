@@ -212,8 +212,8 @@ func (c *defaultClientHandle) saveTransAction() (int64, error) {
 }
 
 // 保存积分变动次数记录
-func (c *defaultClientHandle) saveTransActionLimit(pointTransActionLimit entity.PointTransactionCountLimit) error {
-	if err := c.plugin.transactionLimit.Save(&pointTransActionLimit); err != nil {
+func (c *defaultClientHandle) saveTransActionLimit(pointTransActionLimit *entity.PointTransactionCountLimit) error {
+	if err := c.plugin.transactionLimit.Save(pointTransActionLimit); err != nil {
 		return err
 	}
 	return nil
@@ -297,5 +297,21 @@ func (c *defaultClientHandle) decPoint(num int64) (int64, error) {
 }
 
 func (c *defaultClientHandle) changePointByAdmin() error {
+	return nil
+}
+
+//更新次数
+func (c *defaultClientHandle) changeLimit() error {
+	//获取次数记录
+	result := c.plugin.transactionLimit.FindBy(repository.FindPointTransactionCountLimitBy{
+		OpenId:          c.clientHandle.OpenId,
+		TransactionType: c.clientHandle.Type,
+		TransactionDate: model.Date{Time: time.Now()},
+	})
+	result.CurrentCount += 1
+	err := c.plugin.transactionLimit.Save(&result)
+	if err != nil {
+		return err
+	}
 	return nil
 }
