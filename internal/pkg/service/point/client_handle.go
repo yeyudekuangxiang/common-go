@@ -238,9 +238,6 @@ func (c *defaultClientHandle) findByOpenId() (*entity.Point, error) {
 
 // 增加积分，返回现有积分
 func (c *defaultClientHandle) incPoint(num int64) (int64, error) {
-	if num == 0 {
-		return 0, nil
-	}
 	c.additional.changeType = "inc"
 	usrPoint, err := c.plugin.pointRepo.FindForUpdate(c.clientHandle.OpenId)
 	if err != nil {

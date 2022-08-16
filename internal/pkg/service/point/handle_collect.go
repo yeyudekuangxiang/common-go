@@ -3,6 +3,7 @@ package point
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -27,18 +28,26 @@ func (c *defaultClientHandle) powerReplace() error {
 		return err
 	}
 	//更新积分
-	_, err = c.incPoint(c.clientHandle.point)
+	err = c.ctx.DB.Transaction(func(tx *gorm.DB) error {
+		_, err = c.incPoint(c.clientHandle.point)
+		if err != nil {
+			return err
+		}
+		//保存记录
+		err = c.saveRecord()
+		if err != nil {
+			return err
+		}
+		//更新次数
+		err = c.changeLimit()
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
 	if err != nil {
-		return err
-	}
-	//保存记录
-	err = c.saveRecord()
-	if err != nil {
-		return err
-	}
-	//更新次数
-	err = c.changeLimit()
-	if err != nil {
+		fmt.Printf("error: %s", err.Error())
 		return err
 	}
 	data, _, err := c.getTodayData()
