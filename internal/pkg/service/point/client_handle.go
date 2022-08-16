@@ -80,7 +80,7 @@ func (c *defaultClientHandle) HandleImageCollectCommand() (map[string]string, er
 		return nil, err
 	}
 	//检查是否超过次数
-	if err := c.checkTimes2(cmdDesc.Times); err != nil {
+	if err := c.checkTimes2(); err != nil {
 		//记录日志 返回错误
 		return nil, err
 	}
