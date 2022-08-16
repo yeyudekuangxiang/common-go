@@ -60,6 +60,13 @@ const (
 	DuiBaActivityIsPhoneAnniversaryActivity DuiBaActivityVipType = 2
 )
 
+const (
+	DuiBaActivityRiskLimitOne   int = 1
+	DuiBaActivityRiskLimitTwo   int = 2
+	DuiBaActivityRiskLimitThree int = 3
+	DuiBaActivityRiskLimitFour  int = 4
+)
+
 var (
 	DuiBaActivityTypeMap = map[DuiBaActivityType]string{
 		DuiBaActivityGoodsShow: "商品详情",
@@ -80,6 +87,12 @@ var (
 	DuiBaActivityVipTypeMap = map[DuiBaActivityVipType]string{
 		DuiBaActivityVipTypeNewUser:             "新用户",
 		DuiBaActivityIsPhoneAnniversaryActivity: "周年庆活动",
+	}
+	DuiBaActivityDuiBaActivityMap = map[int]string{
+		DuiBaActivityRiskLimitOne:   "风险等级1",
+		DuiBaActivityRiskLimitTwo:   "风险等级2",
+		DuiBaActivityRiskLimitThree: "风险等级3",
+		DuiBaActivityRiskLimitFour:  "风险等级4",
 	}
 )
 

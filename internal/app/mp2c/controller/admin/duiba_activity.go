@@ -44,6 +44,7 @@ func (ctl DuiBaActivityController) Create(c *gin.Context) (gin.H, error) {
 		ActivityId:  form.ActivityId,
 		IsShare:     form.IsShare,
 		IsPhone:     form.IsPhone,
+		RiskLimit:   form.RiskLimit,
 	})
 	if err != nil {
 		return nil, err
@@ -74,6 +75,7 @@ func (ctl DuiBaActivityController) Update(c *gin.Context) (gin.H, error) {
 		IsShare:     form.IsShare,
 		Id:          form.Id,
 		IsPhone:     form.IsPhone,
+		RiskLimit:   form.RiskLimit,
 	})
 	if err != nil {
 		return nil, err
@@ -122,6 +124,7 @@ func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 			IsPhone:     activity.IsPhone,
 			ActivityId:  activity.ActivityId,
 			ActivityUrl: urlVo,
+			RiskLimit:   activity.RiskLimit,
 			CreatedAt:   activity.CreatedAt.Format("2006.01.02 15:04:05"),
 			UpdatedAt:   activity.UpdatedAt.Format("2006.01.02 15:04:05"),
 		})

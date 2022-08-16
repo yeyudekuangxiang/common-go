@@ -165,7 +165,7 @@ type CreateBannerForm struct {
 	Name     string              `json:"name" form:"name" binding:"required" alias:"banner名称"`
 	ImageUrl string              `json:"imageUrl" form:"imageUrl" binding:"required" alias:"轮播图图片"`
 	Scene    entity.BannerScene  `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
-	Type     entity.BannerType   `json:"type" form:"type" binding:"oneof=mini path" alias:"跳转类型"`
+	Type     entity.BannerType   `json:"type" form:"type" binding:"oneof=mini path h5" alias:"跳转类型"`
 	AppId    string              `json:"appId" form:"appId" binding:"" alias:"小程序appid(跳转到三方小程序需要)"`
 	Sort     int                 `json:"sort" form:"sort" binding:"" alias:"排序"`
 	Redirect string              `json:"redirect" form:"redirect" binding:"" alias:"跳转路径"`
@@ -177,7 +177,7 @@ type UpdateBannerForm struct {
 	Name     string              `json:"name" form:"name" binding:"required" alias:"banner名称"`
 	ImageUrl string              `json:"imageUrl" form:"imageUrl" binding:"required" alias:"轮播图图片"`
 	Scene    entity.BannerScene  `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
-	Type     entity.BannerType   `json:"type" form:"type" binding:"oneof=mini path" alias:"跳转类型"`
+	Type     entity.BannerType   `json:"type" form:"type" binding:"oneof=mini path h5" alias:"跳转类型"`
 	AppId    string              `json:"appId" form:"appId" binding:"" alias:"小程序appid(跳转到三方小程序需要)"`
 	Sort     int                 `json:"sort" form:"sort" binding:"" alias:"排序"`
 	Redirect string              `json:"redirect" form:"redirect" binding:"" alias:"跳转路径"`
@@ -199,6 +199,7 @@ type CreateDuiBaActivityForm struct {
 	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
 	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
 	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
+	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=1 2 3 4" alias:"允许的风险等级"`
 }
 
 type UpdateDuiBaActivityForm struct {
@@ -210,6 +211,7 @@ type UpdateDuiBaActivityForm struct {
 	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
 	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
 	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
+	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=1 2 3 4" alias:"允许的风险等级"`
 }
 
 type GetDuiBaActivityPageForm struct {
