@@ -3,16 +3,22 @@ package business
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
+	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"time"
 )
 
-var DefaultCarbonCreditsService = CarbonCreditsService{repo: rbusiness.DefaultCarbonCreditsRepository}
-
 type CarbonCreditsService struct {
-	repo rbusiness.CarbonCreditsRepository
+	ctx  *context.MioContext
+	repo *rbusiness.CarbonCreditsRepository
+}
+
+func NewCarbonCreditsService(ctx *context.MioContext) *CarbonCreditsService {
+	return &CarbonCreditsService{ctx: ctx, repo: rbusiness.NewCarbonCreditsRepository(ctx)}
 }
 
 // SendCarbonCredit 发放碳积分 返回用户积分账户 本次实际发放的碳积分数量
@@ -47,6 +53,7 @@ func (srv CarbonCreditsService) SendCarbonCredit(param SendCarbonCreditParam) (*
 	if err != nil {
 		return nil, decimal.Decimal{}, err
 	}
+	srv.trackCreditChange(param.UserId, param.AddCredit)
 	return carbonCredit, param.AddCredit, nil
 }
 
@@ -75,7 +82,7 @@ func (srv CarbonCreditsService) SendCarbonCreditEvCar(param SendCarbonCreditEvCa
 	credits := DefaultCarbonCreditCalculatorService.CalcEvCar(param.Electricity)
 
 	//发放碳积分
-	_, credits, err := DefaultCarbonCreditsService.SendCarbonCredit(SendCarbonCreditParam{
+	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
 		UserId:        param.UserId,
 		AddCredit:     credits,
 		Type:          ebusiness.CarbonTypeEvCar,
@@ -208,4 +215,28 @@ func (srv CarbonCreditsService) SendCarbonGreenBusinessTrip(param SendCarbonGree
 	return &SendCarbonCreditOEPResult{
 		Credits: oepCredits,
 	}, err
+}
+func (srv CarbonCreditsService) trackCreditChange(userId int64, value decimal.Decimal) {
+	go func() {
+		userInfo, err := DefaultUserService.GetBusinessUserById(userId)
+		if err != nil {
+			return
+		}
+		department, err := DefaultDepartmentService.GetBusinessDepartmentById(userInfo.BDepartmentId)
+		if err != nil {
+			return
+		}
+		company := DefaultCompanyService.GetCompanyById(userInfo.BCompanyId)
+
+		service.DefaultZhuGeService().TrackBusinessCredit(srv_types.TrackBusinessCredit{
+			Uid:        userInfo.Uid,
+			Value:      value.InexactFloat64(),
+			ChangeType: "inc",
+			Nickname:   userInfo.Nickname,
+			Username:   userInfo.Realname,
+			Department: department.Title,
+			Company:    company.Name,
+			ChangeTime: time.Now(),
+		})
+	}()
 }

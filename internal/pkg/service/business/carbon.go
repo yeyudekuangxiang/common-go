@@ -41,7 +41,7 @@ func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity float64) (*
 
 	transactionId := util.UUID()
 
-	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonCreditEvCar(SendCarbonCreditEvCarParam{
+	sendCarbonResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditEvCar(SendCarbonCreditEvCarParam{
 		UserId:        userId,
 		Electricity:   electricity,
 		TransactionId: transactionId,
@@ -51,7 +51,7 @@ func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity float64) (*
 	}
 
 	//发送积分
-	point, err := DefaultPointService.SendPointEvCar(SendPointEvCarParam{
+	point, err := NewPointService(srv.ctx).SendPointEvCar(SendPointEvCarParam{
 		UserId:        userId,
 		Electricity:   electricity,
 		TransactionId: transactionId,
@@ -85,7 +85,7 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, oneCityDuration
 		return nil, errors.New("已经达到此场景当日最大限制")
 	}
 
-	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonCreditOnlineMeeting(SendCarbonCreditOnlineMeetingParam{
+	sendCarbonResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditOnlineMeeting(SendCarbonCreditOnlineMeetingParam{
 		UserId:           userId,
 		OneCityDuration:  oneCityDuration,
 		ManyCityDuration: manyCityDuration,
@@ -95,7 +95,7 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, oneCityDuration
 		return nil, err
 	}
 
-	point, err := DefaultPointService.SendPointOnlineMeeting(SendPointOnlineMeetingParam{
+	point, err := NewPointService(srv.ctx).SendPointOnlineMeeting(SendPointOnlineMeetingParam{
 		UserId:           userId,
 		OneCityDuration:  oneCityDuration,
 		manyCityDuration: manyCityDuration,
@@ -130,7 +130,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 		return nil, errors.New("已经达到此场景当日最大限制")
 	}
 
-	sendResult, err := DefaultCarbonCreditsService.SendCarbonCreditSaveWaterElectricity(SendCarbonCreditSaveWaterElectricityParam{
+	sendResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditSaveWaterElectricity(SendCarbonCreditSaveWaterElectricityParam{
 		UserId:        userId,
 		Water:         water,
 		Electricity:   electricity,
@@ -140,7 +140,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 		return nil, err
 	}
 
-	point, err := DefaultPointService.SendPointSaveWaterElectricity(SendPointSaveWaterElectricityParam{
+	point, err := NewPointService(srv.ctx).SendPointSaveWaterElectricity(SendPointSaveWaterElectricityParam{
 		UserId:            userId,
 		Water:             water,
 		Electricity:       electricity,
@@ -174,7 +174,7 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus, metro, s
 		return nil, errors.New("已经达到此场景当日最大限制")
 	}
 
-	sendResult, err := DefaultCarbonCreditsService.SendCarbonCreditSavePublicTransport(SendCarbonCreditSavePublicTransportParam{
+	sendResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditSavePublicTransport(SendCarbonCreditSavePublicTransportParam{
 		UserId:        userId,
 		Bus:           bus,
 		Metro:         metro,
@@ -186,7 +186,7 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus, metro, s
 		return nil, err
 	}
 
-	point, err := DefaultPointService.SendPointPublicTransport(SendPointPublicTransportParam{
+	point, err := NewPointService(srv.ctx).SendPointPublicTransport(SendPointPublicTransportParam{
 		UserId:        userId,
 		Bus:           bus,
 		Metro:         metro,
@@ -229,7 +229,7 @@ func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonR
 
 	transactionId := util.UUID()
 
-	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonCreditOEP(SendCarbonCreditOEPParam{
+	sendCarbonResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditOEP(SendCarbonCreditOEPParam{
 		UserId:        userId,
 		Voucher:       voucher,
 		TransactionId: transactionId,
@@ -239,7 +239,7 @@ func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonR
 	}
 
 	//发送积分
-	point, err := DefaultPointService.SendPointOEP(SendPointOEPParam{
+	point, err := NewPointService(srv.ctx).SendPointOEP(SendPointOEPParam{
 		UserId:        userId,
 		Voucher:       voucher,
 		CarbonCredit:  sendCarbonResult.Credits,
@@ -281,7 +281,7 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType eb
 	}
 
 	transactionId := util.UUID()
-	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonGreenBusinessTrip(SendCarbonGreenBusinessTripParam{
+	sendCarbonResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonGreenBusinessTrip(SendCarbonGreenBusinessTripParam{
 		TripType:      tripType,
 		From:          from,
 		To:            to,
@@ -295,7 +295,7 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType eb
 	}
 
 	//发送积分
-	point, err := DefaultPointService.SendPointGreenBusinessTrip(SendPointGreenBusinessTripParam{
+	point, err := NewPointService(srv.ctx).SendPointGreenBusinessTrip(SendPointGreenBusinessTripParam{
 		TripType:      tripType,
 		From:          from,
 		To:            to,

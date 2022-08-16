@@ -2,25 +2,27 @@ package business
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultCarbonCreditsRepository = CarbonCreditsRepository{DB: app.DB}
-
 type CarbonCreditsRepository struct {
-	DB *gorm.DB
+	ctx *context.MioContext
+}
+
+func NewCarbonCreditsRepository(ctx *context.MioContext) *CarbonCreditsRepository {
+	return &CarbonCreditsRepository{ctx: ctx}
 }
 
 func (repo CarbonCreditsRepository) Create(credit *business.CarbonCredits) error {
-	return repo.DB.Create(credit).Error
+	return repo.ctx.DB.Create(credit).Error
 }
 func (repo CarbonCreditsRepository) Save(credit *business.CarbonCredits) error {
-	return repo.DB.Save(credit).Error
+	return repo.ctx.DB.Save(credit).Error
 }
 func (repo CarbonCreditsRepository) FindCredits(userId int64) business.CarbonCredits {
 	credit := business.CarbonCredits{}
-	err := repo.DB.Model(credit).
+	err := repo.ctx.DB.Model(credit).
 		Where("b_user_id = ?", userId).
 		Take(&credit).Error
 
