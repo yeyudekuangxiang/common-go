@@ -9,25 +9,17 @@ type PointType string
 const (
 	PointTypeOnlineMeeting        PointType = "OnlineMeeting"        //线上会议
 	PointTypeSaveWaterElectricity PointType = "SaveWaterElectricity" //节水节电
-	PointTypePublicTransport      PointType = "PublicTransport"      //公交地铁
+	PointTypePublicTransport      PointType = "PublicTransport"      //低碳通勤
 	PointTypeEvCar                PointType = "EvCar"                //电动车 电车充电
-	PointTypeOEP                  PointType = "OEP"                  //光盘行动
-	PointTypeGreenBusinessTrip    PointType = "GreenBusinessTrip"    //低碳差旅
+	PointTypeOEP                  PointType = "Thrift"               //光盘打卡
+	PointTypeGreenBusinessTrip    PointType = "Travel"               //低碳差旅
 )
 
 // Text 展示给用户看的
 func (t PointType) Text() string {
 	switch t {
-	case PointTypeOnlineMeeting:
-		return "线上会议"
-	case PointTypeSaveWaterElectricity:
-		return "节水节电"
-	case PointTypePublicTransport:
-		return "公交地铁"
-	case PointTypeEvCar:
-		return "电车充电"
 	}
-	return "未知类型"
+	return t.RealText()
 }
 
 // RealText 展示给管理员看的
@@ -38,9 +30,13 @@ func (t PointType) RealText() string {
 	case PointTypeSaveWaterElectricity:
 		return "节水节电"
 	case PointTypePublicTransport:
-		return "公交地铁"
+		return "低碳通勤"
 	case PointTypeEvCar:
 		return "电车充电"
+	case PointTypeOEP:
+		return "光盘打卡"
+	case PointTypeGreenBusinessTrip:
+		return "低碳差旅"
 	}
 	return "未知类型"
 }
@@ -54,6 +50,10 @@ func (t PointType) CarbonType() CarbonType {
 		return CarbonTypePublicTransport
 	case PointTypeEvCar:
 		return CarbonTypeEvCar
+	case PointTypeGreenBusinessTrip:
+		return CarbonTypeGreenBusinessTrip
+	case PointTypeOEP:
+		return CarbonTypeOEP
 	}
 	return ""
 }

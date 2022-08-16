@@ -12,10 +12,10 @@ type CarbonType string
 const (
 	CarbonTypeOnlineMeeting        CarbonType = "OnlineMeeting"        //线上会议
 	CarbonTypeSaveWaterElectricity CarbonType = "SaveWaterElectricity" //节水节电
-	CarbonTypePublicTransport      CarbonType = "PublicTransport"      //公交地铁
+	CarbonTypePublicTransport      CarbonType = "PublicTransport"      //低碳通勤
 	CarbonTypeEvCar                CarbonType = "EvCar"                //电动车 电车充电
-	CarbonTypeOEP                  CarbonType = "OEP"                  //光盘行动
-	CarbonTypeGreenBusinessTrip    CarbonType = "GreenBusinessTrip"    //低碳旅行
+	CarbonTypeOEP                  CarbonType = "Thrift"               //光盘打卡
+	CarbonTypeGreenBusinessTrip    CarbonType = "Travel"               //低碳差旅
 )
 
 // Text 展示给用户看的
@@ -26,9 +26,13 @@ func (t CarbonType) Text() string {
 	case CarbonTypeSaveWaterElectricity:
 		return "节水节电"
 	case CarbonTypePublicTransport:
-		return "公交地铁"
+		return "低碳通勤"
 	case CarbonTypeEvCar:
 		return "电车充电"
+	case CarbonTypeOEP:
+		return "光盘打卡"
+	case CarbonTypeGreenBusinessTrip:
+		return "低碳差旅"
 	}
 	return "未知类型"
 }
@@ -41,9 +45,13 @@ func (t CarbonType) RealText() string {
 	case CarbonTypeSaveWaterElectricity:
 		return "节水节电"
 	case CarbonTypePublicTransport:
-		return "公交地铁"
+		return "低碳通勤"
 	case CarbonTypeEvCar:
 		return "电车充电"
+	case CarbonTypeOEP:
+		return "光盘打卡"
+	case CarbonTypeGreenBusinessTrip:
+		return "低碳差旅"
 	}
 	return "未知类型"
 }
@@ -57,6 +65,10 @@ func (t CarbonType) PointType() PointType {
 		return PointTypePublicTransport
 	case CarbonTypeEvCar:
 		return PointTypeEvCar
+	case CarbonTypeOEP:
+		return PointTypeOEP
+	case CarbonTypeGreenBusinessTrip:
+		return PointTypeGreenBusinessTrip
 	}
 	return ""
 }
