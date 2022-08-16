@@ -42,24 +42,18 @@ func (c *defaultClientHandle) checkTimes2() error {
 			OpenId:          c.clientHandle.OpenId,
 			TransactionType: c.clientHandle.Type,
 			MaxCount:        entity.PointCollectLimitMap[c.clientHandle.Type],
-			CurrentCount:    1,
+			CurrentCount:    0,
 			UpdateTime:      model.Time{Time: time.Now()},
 			TransactionDate: model.Date{Time: time.Now()},
 		}
-		err := c.saveTransActionLimit(pointTransActionLimit)
+		err := c.saveTransActionLimit(&pointTransActionLimit)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	if result.CurrentCount+1 >= result.MaxCount {
+	if result.CurrentCount >= result.MaxCount {
 		return errors.New("超过当日次数")
-	}
-	//更新记录
-	result.CurrentCount += 1
-	err := c.updateTransActionLimit(result)
-	if err != nil {
-		return err
 	}
 	return nil
 }
