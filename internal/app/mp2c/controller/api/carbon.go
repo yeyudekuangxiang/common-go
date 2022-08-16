@@ -23,7 +23,7 @@ var DefaultCarbonController = CarbonController{
 //测试
 
 func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
-	form := api_types.GetCarbonTransactionBankForm{}
+	form := api_types.GetCarbonTransactionCreateForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -31,12 +31,12 @@ func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
 	//判断名称和图片是否存在.
 
 	info, err := c.service.Create(api_types.CreateCarbonTransactionDto{
-		OpenId:  "1",
-		UserId:  5,
-		Type:    entity.CARBON_COFFEE_CUP,
-		Value:   1,
+		OpenId:  form.OpenId,
+		UserId:  form.UserId,
+		Type:    form.Type,
+		Value:   form.Value,
 		Info:    fmt.Sprintf("{imageUrl=%s}", 1),
-		AdminId: 1,
+		AdminId: form.AdminId,
 		Ip:      ctx.ClientIP(),
 	})
 	if err != nil {

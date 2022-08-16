@@ -187,3 +187,7 @@ type GetUserChannelPageListBy struct {
 	Limit   int                `json:"limit"` //limit为0时不限制数量
 	OrderBy entity.OrderByList `json:"orderBy"`
 }
+
+type FindCarbonBy struct {
+	OpenId string
+}

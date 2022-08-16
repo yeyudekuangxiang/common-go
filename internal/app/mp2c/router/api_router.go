@@ -186,6 +186,7 @@ func apiRouter(router *gin.Engine) {
 		//碳成就相关路由
 		carbonRouter := mustAuthRouter.Group("/carbon")
 		{
+			carbonRouter.POST("/create", apiutil.Format(api.DefaultCarbonController.Create))
 			carbonRouter.GET("/info", apiutil.Format(api.DefaultCarbonController.Info))
 			carbonRouter.GET("/bank", apiutil.Format(api.DefaultCarbonController.Bank))
 			carbonRouter.GET("/myBank", apiutil.Format(api.DefaultCarbonController.MyBank))

@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
 	"sort"
@@ -62,7 +63,7 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	}
 
 	//获取碳量
-	carbon := srv.repoScene.GetValue(scene, 1.0) //增加的碳量
+	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
 
 	//入库记录表
 	CarbonTransactionDo := entity.CarbonTransaction{
@@ -81,8 +82,15 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		return nil, err
 	}
 
+	_, err = NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
+		OpenId:      dto.OpenId,
+		Type:        dto.Type,
+		BizId:       util.UUID(),
+		ChangePoint: carbon,
+	})
+
 	//更新用户表，碳量字段
-	DefaultUserService.UpdateUserCarbon(dto.UserId, carbon)
+	//	DefaultUserService.UpdateUserCarbon(dto.UserId, carbon)
 
 	//记录redis,今日榜单
 	UserIdString := strconv.FormatInt(dto.UserId, 10) //用户uid

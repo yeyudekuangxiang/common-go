@@ -15,18 +15,18 @@ type CarbonTransactionCountLimitRepository struct {
 	ctx *context.MioContext
 }
 
-func (repo CarbonTransactionCountLimitRepository) Save(transaction *entity.CarbonTransactionCountLimitDay) error {
+func (repo CarbonTransactionCountLimitRepository) Save(transaction *entity.CarbonTransactionCountLimit) error {
 	return repo.ctx.DB.Save(transaction).Error
 }
 
-func (repo CarbonTransactionCountLimitRepository) Create(transaction *entity.CarbonTransactionCountLimitDay) error {
+func (repo CarbonTransactionCountLimitRepository) Create(transaction *entity.CarbonTransactionCountLimit) error {
 	return repo.ctx.DB.Create(transaction).Error
 }
 
-func (repo CarbonTransactionCountLimitRepository) GetListBy(by repotypes.GetCarbonTransactionCountLimitDO) []entity.CarbonTransactionCountLimitDay {
-	list := make([]entity.CarbonTransactionCountLimitDay, 0)
+func (repo CarbonTransactionCountLimitRepository) GetListBy(by repotypes.GetCarbonTransactionCountLimitDO) []entity.CarbonTransactionCountLimit {
+	list := make([]entity.CarbonTransactionCountLimit, 0)
 
-	db := repo.ctx.DB.Model(entity.CarbonTransactionCountLimitDay{})
+	db := repo.ctx.DB.Model(entity.CarbonTransactionCountLimit{})
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
@@ -56,16 +56,16 @@ func (repo CarbonTransactionCountLimitRepository) GetListBy(by repotypes.GetCarb
 	return list
 }
 
-func (p CarbonTransactionCountLimitRepository) FindBy(by repotypes.FindCarbonTransactionCountLimitFindByDO) entity.CarbonTransactionCountLimitDay {
-	limit := entity.CarbonTransactionCountLimitDay{}
-	db := p.ctx.DB.Model(entity.CarbonTransactionCountLimitDay{})
+func (p CarbonTransactionCountLimitRepository) FindBy(by repotypes.FindCarbonTransactionCountLimitFindByDO) entity.CarbonTransactionCountLimit {
+	limit := entity.CarbonTransactionCountLimit{}
+	db := p.ctx.DB.Model(entity.CarbonTransactionCountLimit{})
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
 	if by.Type != "" {
 		db.Where("type = ?", by.Type)
 	}
-	if !by.VDate.IsZero() {
+	if by.VDate != "" {
 		db.Where("v_date = ?", by.VDate)
 	}
 	if err := db.First(&limit).Error; err != nil {

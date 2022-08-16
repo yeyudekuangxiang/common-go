@@ -68,6 +68,16 @@ type GetCarbonTransactionBankForm struct {
 	controller.PageFrom
 }
 
+type GetCarbonTransactionCreateForm struct {
+	OpenId  string                       `json:"openId" form:"openId"  binding:"required"`
+	UserId  int64                        `form:"userId"`
+	Type    entity.CarbonTransactionType `form:"type" json:"type"`
+	Value   float64                      `form:"value" json:"value"`
+	Info    string                       `form:"info" json:"info"`
+	AdminId int                          `form:"adminId" json:"adminId"`
+	Ip      string                       `form:"ip" json:"ip"`
+}
+
 // DTO
 
 type CreateCarbonTransactionDto struct {

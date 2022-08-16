@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -23,9 +22,9 @@ func (srv CarbonTransactionCountLimitService) CheckLimitAndUpdate(carbonTransact
 	limit := srv.repo.FindBy(repotypes.FindCarbonTransactionCountLimitFindByDO{
 		OpenId: openId,
 		Type:   carbonTransactionType,
-		VDate:  time.Now(),
+		VDate:  time.Now().Format("2006-01-02"),
 	})
-	if limit.ID != 0 {
+	if limit.ID == 0 {
 		newLimit, err := srv.createLimitOfToday(carbonTransactionType, openId, limitNum)
 		if err != nil {
 			return err
@@ -33,7 +32,7 @@ func (srv CarbonTransactionCountLimitService) CheckLimitAndUpdate(carbonTransact
 		limit = *newLimit
 	}
 	if limit.CurrentCount >= limitNum {
-		return errors.New("达到当日该类别最大碳量限制")
+		//return errors.New("达到当日该类别最大碳量限制")
 	}
 	limit.CurrentCount++
 	err := srv.repo.Save(&limit)
@@ -44,15 +43,15 @@ func (srv CarbonTransactionCountLimitService) CheckLimitAndUpdate(carbonTransact
 }
 
 //创建用户今天积分发送次数限制记录
-func (srv CarbonTransactionCountLimitService) createLimitOfToday(transactionType entity.CarbonTransactionType, openId string, limitNum int) (*entity.CarbonTransactionCountLimitDay, error) {
-	limit := entity.CarbonTransactionCountLimitDay{
+func (srv CarbonTransactionCountLimitService) createLimitOfToday(transactionType entity.CarbonTransactionType, openId string, limitNum int) (*entity.CarbonTransactionCountLimit, error) {
+	limit := entity.CarbonTransactionCountLimit{
 		OpenId:       openId,
 		Type:         transactionType,
 		MaxCount:     limitNum,
 		CurrentCount: 0,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
-		VDate:        time.Now(),
+		VDate:        time.Now().Format("2006-01-02"),
 	}
 	return &limit, srv.repo.Save(&limit)
 }
@@ -61,7 +60,7 @@ func (srv CarbonTransactionCountLimitService) CheckLimit(transactionType entity.
 	limit := srv.repo.FindBy(repotypes.FindCarbonTransactionCountLimitFindByDO{
 		OpenId: openId,
 		Type:   transactionType,
-		VDate:  time.Now(),
+		VDate:  time.Now().Format("2006-01-02"),
 	})
 	if limit.ID == 0 {
 		newLimit, err := srv.createLimitOfToday(transactionType, openId, limitNum)

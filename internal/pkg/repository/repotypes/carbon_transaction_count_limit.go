@@ -17,5 +17,5 @@ type GetCarbonTransactionCountLimitDO struct {
 type FindCarbonTransactionCountLimitFindByDO struct {
 	OpenId string
 	Type   entity.CarbonTransactionType
-	VDate  time.Time
+	VDate  string
 }

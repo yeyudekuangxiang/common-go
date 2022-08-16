@@ -393,3 +393,13 @@ type UserAccountInfo struct {
 	Balance int64 `json:"balance"` //积分余额
 	CertNum int64 `json:"certNum"` //证书数量
 }
+
+type CreateCarbonTransactionParam struct {
+	OpenId       string                       `binding:"required"`
+	Type         entity.CarbonTransactionType `binding:"required"`
+	Value        float64
+	AdminId      int
+	BizId        string
+	Note         string
+	AdditionInfo string
+}
