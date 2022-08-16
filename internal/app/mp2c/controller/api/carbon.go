@@ -8,8 +8,8 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"strconv"
 	"time"
 )
 
@@ -150,9 +150,8 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 		ListDateVo = append(ListDateVo, day)
 		l, ok := listMap[day] //判断是否存在map集合中
 		if ok {
-			carbonStr := strconv.FormatFloat(l.Value, 'f', -1, 64) + "g"
 			ListValueVo = append(ListValueVo, l.Value)
-			ListValueStrVo = append(ListValueStrVo, carbonStr)
+			ListValueStrVo = append(ListValueStrVo, util.CarbonToRate(l.Value))
 		} else {
 			ListValueVo = append(ListValueVo, 0)
 			ListValueStrVo = append(ListValueStrVo, "0g")

@@ -68,11 +68,12 @@ const (
 	CARBON_TESR       CarbonTransactionType = "TEST"       //测试用
 )
 
+/*
 var CarbonTransactionTypeList = []CarbonTransactionType{
 	CARBON_STEP,
 	CARBON_COFFEE_CUP,
-}
-
+}*/
+/*
 var CarbonCollectValueMap = map[CarbonTransactionType]int{
 	CARBON_STEP:       150,
 	CARBON_COFFEE_CUP: 150,
@@ -82,7 +83,7 @@ var CarbonCollectLimitMap = map[CarbonTransactionType]int{
 	CARBON_STEP:       4,
 	CARBON_COFFEE_CUP: 2,
 }
-
+*/
 type CarbonTransaction struct {
 	ID            int64                 `json:"id"`
 	OpenId        string                `gorm:"column:openid" json:"openId"`

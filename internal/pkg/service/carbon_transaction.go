@@ -3,6 +3,7 @@ package service
 import (
 	contextRedis "context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/shopspring/decimal"
@@ -22,14 +23,17 @@ import (
 
 func NewCarbonTransactionService(ctx *context.MioContext) CarbonTransactionService {
 	return CarbonTransactionService{ctx: ctx,
-		repo:    repository.NewCarbonTransactionRepository(ctx),
-		repoDay: repository.NewCarbonTransactionDayRepository(ctx)}
+		repo:      repository.NewCarbonTransactionRepository(ctx),
+		repoDay:   repository.NewCarbonTransactionDayRepository(ctx),
+		repoScene: repository.NewCarbonSceneRepository(ctx),
+	}
 }
 
 type CarbonTransactionService struct {
-	ctx     *context.MioContext
-	repo    repository.CarbonTransactionRepository
-	repoDay repository.CarbonTransactionDayRepository
+	ctx       *context.MioContext
+	repo      repository.CarbonTransactionRepository
+	repoDay   repository.CarbonTransactionDayRepository
+	repoScene repository.CarbonSceneRepository
 }
 
 //  添加发放碳量记录并且更新用户剩余碳量
@@ -39,24 +43,36 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		app.Logger.Error(dto, err)
 		return nil, err
 	}
-	errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId)
-	if errCheck != nil {
-		return nil, errCheck
-	}
 	//获取ip地址
 	cityCode := ""
 	/*cityInfo, cityErr := baidu.IpToCity(dto.Ip)
 	if cityErr == nil {
 		cityCode = cityInfo.Content.AddressDetail.Adcode
 	}*/
-	//入库
+	//查询场景配置
+	scene := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: dto.Type})
+	if scene.ID == 0 {
+		return nil, errors.New("不存在该场景")
+	}
+
+	//判断是否有限制
+	errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId, scene.MaxCount)
+	if errCheck != nil {
+		return nil, errCheck
+	}
+
+	//获取碳量
+	carbon := srv.repoScene.GetValue(scene, 1.0) //增加的碳量
+
+	//入库记录表
 	CarbonTransactionDo := entity.CarbonTransaction{
 		TransactionId: util.UUID(),
 		Info:          dto.Info,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
-		City:          cityCode}
-
+		City:          cityCode,
+		Value:         carbon,
+	}
 	if err := util.MapTo(dto, &CarbonTransactionDo); err != nil {
 		return nil, err
 	}
@@ -65,18 +81,15 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		return nil, err
 	}
 
-	todayDate := time.Now().Format("20060102") //当天时间 年月日
-	score := dto.Value                         //增加的碳量
-
 	//更新用户表，碳量字段
-	DefaultUserService.UpdateUserCarbon(dto.UserId, score)
+	DefaultUserService.UpdateUserCarbon(dto.UserId, carbon)
 
 	//记录redis,今日榜单
 	UserIdString := strconv.FormatInt(dto.UserId, 10) //用户uid
-	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, todayDate)
-	err1 := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, score, UserIdString).Err()
-	if err1 != nil {
-		return nil, err1
+	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, time.Now().Format("20060102"))
+	errRedis := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, carbon, UserIdString).Err()
+	if errRedis != nil {
+		return nil, errRedis
 	}
 	return nil, nil
 }

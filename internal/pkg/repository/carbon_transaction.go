@@ -75,6 +75,7 @@ func (repo CarbonTransactionRepository) FindBy(by FindPointTransactionBy) entity
 	}
 	return pt
 }
+
 func (repo CarbonTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.CarbonTransaction, int64) {
 	list := make([]entity.CarbonTransaction, 0)
 
