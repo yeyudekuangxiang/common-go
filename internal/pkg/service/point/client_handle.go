@@ -309,7 +309,7 @@ func (c *defaultClientHandle) changeLimit() error {
 		TransactionDate: model.Date{Time: time.Now()},
 	})
 	result.CurrentCount += 1
-	err := c.plugin.transactionLimit.Save(&result)
+	err := c.saveTransActionLimit(&result)
 	if err != nil {
 		return err
 	}
