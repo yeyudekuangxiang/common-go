@@ -144,3 +144,14 @@ func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountB
 	}
 	return result, count, nil
 }
+
+// FindOrder 换电专用
+func (repo PointTransactionRepository) FindOrder(orderId string) (entity.PointTransaction, error) {
+	var result entity.PointTransaction
+	if err := repo.ctx.DB.Model(&entity.PointTransaction{}).Where("note = ?", orderId).Find(&result).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return result, err
+		}
+	}
+	return result, nil
+}

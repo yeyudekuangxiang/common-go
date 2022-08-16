@@ -28,7 +28,8 @@ type ClientHandle struct {
 	AdminId      int64                       //管理员id
 	Type         entity.PointTransactionType //类型
 	point        int64                       //变更的积分
-	message      string                      //记录信息
+	maxPoint     int64
+	message      string //记录信息
 	bizId        string
 	additionInfo string
 	identifyImg  map[string]string
@@ -83,11 +84,8 @@ func (c *defaultClientHandle) HandleImageCollectCommand() (map[string]string, er
 		//记录日志 返回错误
 		return nil, err
 	}
-	//检测当日次数
-	//if err = c.checkTimes(cmdDesc.Times); err != nil {
-	//	return err
-	//}
-	//获取图片内容
+
+	//获取图篇内容
 	content, err := c.scanImage(c.clientHandle.ImgUrl)
 	if err != nil {
 		//记录日志 返回错误
@@ -101,7 +99,7 @@ func (c *defaultClientHandle) HandleImageCollectCommand() (map[string]string, er
 	c.withType(c.clientHandle.Type)
 	c.withBizId(util.UUID())
 	c.withPoint(cmdDesc.Amount)
-	//c.withValue(c.clientHandle.value)
+	c.withMaxPoint(cmdDesc.MaxAmount)
 	//执行function
 	if err = c.executeCommandFn(cmdDesc); err != nil {
 		//记录日志 返回错误
@@ -146,6 +144,11 @@ func (c *defaultClientHandle) withType(types entity.PointTransactionType) {
 func (c *defaultClientHandle) withPoint(point int64) {
 	c.clientHandle.point = point
 }
+
+func (c *defaultClientHandle) withMaxPoint(maxPoint int64) {
+	c.clientHandle.maxPoint = maxPoint
+}
+
 func (c *defaultClientHandle) withMessage(message string) {
 	if message != "" {
 		c.clientHandle.message = message
@@ -195,11 +198,12 @@ func (c *defaultClientHandle) saveTransAction() (int64, error) {
 	pointTransAction := &entity.PointTransaction{
 		OpenId:         c.clientHandle.OpenId,
 		TransactionId:  c.clientHandle.bizId,
-		Type:           entity.PointTransactionType(c.clientHandle.Type),
+		Type:           c.clientHandle.Type,
 		Value:          c.clientHandle.point,
 		CreateTime:     model.Time{Time: time.Now()},
 		AdditionalInfo: entity.AdditionalInfo(c.clientHandle.additionInfo),
 		AdminId:        int(c.clientHandle.AdminId),
+		Note:           c.clientHandle.identifyImg["orderId"],
 	}
 	if err := c.plugin.transaction.Save(pointTransAction); err != nil {
 		return 0, err
