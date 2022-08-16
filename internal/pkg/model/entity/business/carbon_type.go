@@ -2,6 +2,7 @@ package business
 
 import (
 	"encoding/json"
+	"github.com/shopspring/decimal"
 	"mio/internal/pkg/core/app"
 	"time"
 )
@@ -180,10 +181,20 @@ func (c CarbonTypeInfoOEP) PointTypeInfo() PointTypeInfo {
 	return PointTypeInfo(data)
 }
 
+type TripType string
+
+const (
+	TripTypeTrain     = "train"
+	TripTypeHighSpeed = "hsr"
+	TripTypeAirPlane  = "plane"
+)
+
 type CarbonTypeInfoGreenBusinessTrip struct {
-	Distance float64
+	TripType TripType
+	Distance decimal.Decimal
 	From     string
 	To       string
+	Voucher  string
 }
 
 func (c CarbonTypeInfoGreenBusinessTrip) CarbonTypeInfo() CarbonTypeInfo {

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"github.com/shopspring/decimal"
+	"math"
 	"os"
 	"strings"
 )
@@ -75,4 +77,21 @@ func MapInterface2int64(inputData map[string]interface{}) map[string]int64 {
 		}
 	}
 	return outputData
+}
+
+// CalcLngLatDistance 根据经纬度计算距离 返回m
+func CalcLngLatDistance(lng1 float64, lat1 float64, lng2 float64, lat2 float64) float64 {
+
+	dlng1 := decimal.NewFromFloat(lng1)
+	dlat1 := decimal.NewFromFloat(lat1)
+	dlng2 := decimal.NewFromFloat(lng2)
+	dlat2 := decimal.NewFromFloat(lat2)
+	a := dlat1.Sub(dlat2).Div(decimal.NewFromInt32(2)).Sin().Pow(decimal.NewFromInt32(2))
+	b := dlng1.Sub(dlng2).Div(decimal.NewFromInt32(2)).Sin().Pow(decimal.NewFromInt32(2))
+	c := dlat1.Cos().Mul(dlat2.Cos()).Mul(b)
+	f, _ := a.Add(c).Float64()
+
+	distance := decimal.NewFromFloat(math.Asin(math.Sqrt(f))).Mul(decimal.NewFromInt32(2)).Mul(decimal.NewFromInt32(6378137))
+	v, _ := distance.Round(2).Float64()
+	return v
 }

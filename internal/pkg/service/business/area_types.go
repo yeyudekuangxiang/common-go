@@ -11,11 +11,13 @@ type CityProvinceListDTO struct {
 
 type AreaListDTO struct {
 	Search      string //根据 name、py、ShortPy 模糊搜索
+	CityIds     []int64
 	CityCodes   []string
 	LikeName    string
 	LikePy      string
 	LikeShortPy string
 	Level       ebusiness.AreaLevel
+	Names       []string
 }
 
 type ShortArea struct {

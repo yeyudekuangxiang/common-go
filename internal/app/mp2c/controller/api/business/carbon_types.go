@@ -42,8 +42,7 @@ type CarbonCollectOEPForm struct {
 	Voucher string `json:"voucher" form:"voucher" `
 }
 type CarbonGreenBusinessTripForm struct {
-	TripType string `json:"tripType" form:"tripType" binding:"oneof=train highSpeed airplane" alias:"交通工具"`
-	From     string `json:"from" form:"from" binding:"required" alias:"出发地"`
-	To       string `json:"to" form:"to" binding:"required" alias:"目的地"`
-	Voucher  string `json:"voucher" form:"voucher" binding:"required" alias:"凭证"`
+	Type string `json:"type" form:"type" binding:"oneof=hsr train plane" alias:"交通工具"`
+	From string `json:"from" form:"from" binding:"required" alias:"出发地"`
+	To   string `json:"to" form:"to" binding:"required" alias:"目的地"`
 }

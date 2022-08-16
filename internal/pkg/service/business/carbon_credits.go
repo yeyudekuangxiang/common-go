@@ -195,9 +195,11 @@ func (srv CarbonCreditsService) SendCarbonGreenBusinessTrip(param SendCarbonGree
 		Type:          ebusiness.CarbonTypeGreenBusinessTrip,
 		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoGreenBusinessTrip{
+			TripType: param.TripType,
 			Distance: param.Distance,
 			From:     param.From,
 			To:       param.To,
+			Voucher:  param.Voucher,
 		}.CarbonTypeInfo(),
 	})
 	if err != nil {

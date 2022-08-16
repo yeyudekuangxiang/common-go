@@ -10,4 +10,10 @@ type AreaListPO struct {
 	LikePy      string
 	LikeShortPy string
 	Level       ebusiness.AreaLevel
+	Names       []string
+}
+type GetAreaPO struct {
+	Level  ebusiness.AreaLevel
+	Name   string
+	CityId int64
 }

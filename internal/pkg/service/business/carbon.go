@@ -3,14 +3,23 @@ package business
 import (
 	"errors"
 	"fmt"
+	"github.com/shopspring/decimal"
+	"mio/config"
+	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
-var DefaultCarbonService = CarbonService{}
-
 type CarbonService struct {
+	ctx *context.MioContext
+}
+
+func NewCarbonService(ctx *context.MioContext) *CarbonService {
+	return &CarbonService{ctx: ctx}
 }
 
 // CarbonCreditEvCar 电车充电
@@ -248,7 +257,7 @@ func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonR
 }
 
 // CarbonCreditGreenBusinessTrip 低碳出行
-func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType string, from, to, voucher string) (*CarbonResult, error) {
+func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType ebusiness.TripType, from, to, voucher string) (*CarbonResult, error) {
 
 	lockKey := fmt.Sprintf("CarbonCreditGreenBusinessTrip%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
@@ -265,14 +274,19 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType st
 		return nil, errors.New("已经达到此场景当日最大限制")
 	}
 
-	transactionId := util.UUID()
+	//计算城市距离
+	distance, err := srv.CalcGreenBusinessTripCity(from, to)
+	if err != nil {
+		return nil, err
+	}
 
+	transactionId := util.UUID()
 	sendCarbonResult, err := DefaultCarbonCreditsService.SendCarbonGreenBusinessTrip(SendCarbonGreenBusinessTripParam{
 		TripType:      tripType,
 		From:          from,
 		To:            to,
 		Voucher:       voucher,
-		Distance:      0,
+		Distance:      distance,
 		UserId:        userId,
 		TransactionId: transactionId,
 	})
@@ -286,7 +300,7 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType st
 		From:          from,
 		To:            to,
 		Voucher:       voucher,
-		Distance:      0,
+		Distance:      distance,
 		UserId:        userId,
 		TransactionId: transactionId,
 		CarbonCredit:  sendCarbonResult.Credits,
@@ -300,4 +314,100 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType st
 		Credit: sendCarbonResult.Credits,
 		Point:  point,
 	}, nil
+}
+
+func (srv CarbonService) CalcGreenBusinessTripCity(from, to string) (decimal.Decimal, error) {
+	areaSrv := NewAreaService(srv.ctx)
+
+	fArea, exists, err := areaSrv.GetByName(ebusiness.AreaCity, from)
+	if err != nil || !exists {
+		return decimal.Decimal{}, errno.ErrCommon.WithMessage("出发城市名称错误")
+	}
+
+	tArea, exists, err := areaSrv.GetByName(ebusiness.AreaCity, to)
+	if err != nil || !exists {
+		return decimal.Decimal{}, errno.ErrCommon.WithMessage("到达城市名称错误")
+	}
+
+	app.Redis.ZIncrBy(srv.ctx, config.RedisKey.BusinessCarbonHotCity, 1, strconv.FormatInt(int64(fArea.CityID), 10))
+	app.Redis.ZIncrBy(srv.ctx, config.RedisKey.BusinessCarbonHotCity, 1, strconv.FormatInt(int64(tArea.CityID), 10))
+	lng1, err := strconv.ParseFloat(fArea.Longitude, 10)
+	if err != nil {
+		return decimal.Decimal{}, errno.ErrCommon.WithMessage("计算距离错误")
+	}
+	lat1, err := strconv.ParseFloat(fArea.Latitude, 10)
+	if err != nil {
+		return decimal.Decimal{}, errno.ErrCommon.WithMessage("计算距离错误")
+	}
+
+	lng2, err := strconv.ParseFloat(tArea.Longitude, 10)
+	if err != nil {
+		return decimal.Decimal{}, errno.ErrCommon.WithMessage("计算距离错误")
+	}
+	lat2, err := strconv.ParseFloat(tArea.Latitude, 10)
+	if err != nil {
+		return decimal.Decimal{}, errno.ErrCommon.WithMessage("计算距离错误")
+	}
+	distance := util.CalcLngLatDistance(lng1, lat1, lng2, lat2)
+	return decimal.NewFromFloat(distance).Div(decimal.NewFromInt32(1000)).Round(2), nil
+}
+
+var defaultHotCity = map[int64]string{
+	1559106619671859200: "",
+	1559106622188441600: "",
+	1559106624952487936: "",
+	1559106627527790592: "",
+	1559106630249893888: "",
+	1559106631503990784: "",
+	1559106634259648512: "",
+	1559106636079976448: "",
+}
+
+func (srv CarbonService) GetCarbonHotCity() []ShortArea {
+	hotCacheList, err := app.Redis.ZRevRangeWithScores(srv.ctx, config.RedisKey.BusinessCarbonHotCity, 50, -1).Result()
+	if err != nil {
+		app.Logger.Error(err)
+	}
+
+	areaSrv := NewAreaService(srv.ctx)
+	hotCityIds := make([]int64, 0)
+
+	for _, item := range hotCacheList {
+		hotCityIds = append(hotCityIds, item.Member.(int64))
+		if len(hotCityIds) == 8 {
+			break
+		}
+	}
+
+	for cityId := range defaultHotCity {
+		if len(hotCityIds) == 8 {
+			break
+		}
+		hotCityIds = append(hotCityIds, cityId)
+	}
+
+	hotList, err := areaSrv.List(AreaListDTO{
+		CityIds: hotCityIds,
+	})
+	if err != nil {
+		app.Logger.Error(err)
+	}
+
+	hotCityMap := make(map[int64]ebusiness.Area)
+	for _, city := range hotList {
+		hotCityMap[int64(city.CityID)] = city
+	}
+
+	areaList := make([]ShortArea, 0)
+
+	for _, cityId := range hotCityIds {
+		area := ShortArea{}
+		err := util.MapTo(hotCityMap[cityId], &area)
+		if err != nil {
+			app.Logger.Errorf("map %+v to ShortArea{} err %+v", hotCityMap[cityId], err)
+		}
+		areaList = append(areaList, area)
+	}
+
+	return areaList
 }

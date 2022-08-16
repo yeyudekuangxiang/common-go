@@ -139,11 +139,11 @@ type GetCarbonCreditLogSortedListByCidParam struct {
 }
 
 type SendPointGreenBusinessTripParam struct {
-	TripType      string
+	TripType      business.TripType
 	From          string
 	To            string
 	Voucher       string
-	Distance      float64
+	Distance      decimal.Decimal
 	UserId        int64
 	TransactionId string
 	CarbonCredit  decimal.Decimal

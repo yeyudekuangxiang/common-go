@@ -2,6 +2,7 @@ package business
 
 import (
 	"github.com/shopspring/decimal"
+	"mio/internal/pkg/model/entity/business"
 	"time"
 )
 
@@ -38,9 +39,9 @@ func (srv CarbonCreditCalculatorService) CalcBus(bus float64) decimal.Decimal {
 
 // CalcOEP 光盘行动
 func (srv CarbonCreditCalculatorService) CalcOEP() decimal.Decimal {
-	return decimal.NewFromFloat(100).Round(2)
+	return decimal.NewFromFloat(111).Round(2)
 }
-func (srv CarbonCreditCalculatorService) CalcTrip(tripType string, distance float64) decimal.Decimal {
+func (srv CarbonCreditCalculatorService) CalcTrip(tripType business.TripType, distance decimal.Decimal) decimal.Decimal {
 	return decimal.NewFromFloat(100).Round(2)
 }
 

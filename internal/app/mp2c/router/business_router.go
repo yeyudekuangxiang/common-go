@@ -60,6 +60,6 @@ func BusinessRouter(router *gin.Engine) {
 			CompanyRouter.GET("/info", apiutil.Format(business.DefaultCompanyController.GetCompanyInfo))
 		}
 
-		authRouter.GET("/area/city-province/list", apiutil.Format(business.DefaultAreaController.CityProvinceList))
+		authRouter.GET("/carbon/city-province/list", apiutil.Format(business.DefaultCarbonController.CityProvinceList))
 	}
 }

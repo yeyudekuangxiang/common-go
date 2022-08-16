@@ -89,3 +89,15 @@ func (srv AreaService) GroupCityProvinceList(dto CityProvinceListDTO) ([]GroupCi
 
 	return gcpList, nil
 }
+
+func (srv AreaService) GetByName(level ebusiness.AreaLevel, name string) (area *ebusiness.Area, exists bool, err error) {
+	return srv.repo.GetBy(rbusiness.GetAreaPO{
+		Level: level,
+		Name:  name,
+	})
+}
+func (srv AreaService) GetById(cityId int64) (area *ebusiness.Area, exists bool, err error) {
+	return srv.repo.GetBy(rbusiness.GetAreaPO{
+		CityId: cityId,
+	})
+}

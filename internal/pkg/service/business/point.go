@@ -210,6 +210,7 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 		return 0, errors.New("系统异常,请稍后再试")
 	}
 
+	fmt.Printf("%+v %+v\n", param, pointRate)
 	addPoint := pointRate.Bus.Calc(param.BusCredit)
 	addPoint += pointRate.Metro.Calc(param.MetroCredit)
 	addPoint += pointRate.Step.Calc(param.StepCredit)
@@ -286,11 +287,11 @@ func (srv PointService) SendPointGreenBusinessTrip(param SendPointGreenBusinessT
 	}
 	var addPoint int
 	switch param.TripType {
-	case "train":
+	case ebusiness.TripTypeTrain:
 		addPoint = pointRate.Train.Calc(param.CarbonCredit)
-	case "highSpeed":
+	case ebusiness.TripTypeHighSpeed:
 		addPoint = pointRate.HighSpeed.Calc(param.CarbonCredit)
-	case "airplane":
+	case ebusiness.TripTypeAirPlane:
 		addPoint = pointRate.Airplane.Calc(param.CarbonCredit)
 	}
 
@@ -300,9 +301,11 @@ func (srv PointService) SendPointGreenBusinessTrip(param SendPointGreenBusinessT
 		Type:          ebusiness.PointTypeGreenBusinessTrip,
 		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoGreenBusinessTrip{
+			TripType: param.TripType,
 			Distance: param.Distance,
 			From:     param.From,
 			To:       param.To,
+			Voucher:  param.Voucher,
 		}.PointTypeInfo(),
 	})
 	return addPoint, err
