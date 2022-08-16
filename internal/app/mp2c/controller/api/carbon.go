@@ -104,7 +104,9 @@ func (c CarbonController) Classify(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//返回前整理
-	var classifyList []api_types.CarbonTransactionClassifyVO
+	var ListDateVo []string
+	var ListValueVo []string
+
 	total := decimal.NewFromFloat(ret.Total)
 	for _, v := range ret.List {
 		valDec := decimal.NewFromFloat(v.Val)
@@ -112,14 +114,13 @@ func (c CarbonController) Classify(ctx *gin.Context) (gin.H, error) {
 		if !total.IsZero() {
 			overPer = valDec.Div(total).Round(2).Mul(decimal.NewFromInt(100)).String() + "%"
 		}
-		classifyList = append(classifyList, api_types.CarbonTransactionClassifyVO{
-			Key: v.Key,
-			Val: overPer,
-		})
+		ListDateVo = append(ListDateVo, v.Key)
+		ListValueVo = append(ListValueVo, overPer)
 	}
 	return gin.H{
-		"list":  classifyList,
-		"cover": ret.Cover,
+		"dateList":  ListDateVo,
+		"valueList": ListValueVo,
+		"cover":     ret.Cover,
 	}, nil
 }
 
