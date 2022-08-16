@@ -9,7 +9,7 @@ type Banner struct {
 	Name       string       `json:"name" gorm:"type:varchar(1000);not null;comment:轮播图名称"`
 	ImageUrl   string       `json:"imageUrl" gorm:"type:varchar(1000);not null;comment:轮播图图片"`
 	Scene      BannerScene  `json:"scene" gorm:"type:varchar(20);not null;default:'home';comment:证书场景 home首页 event携手 topic社区"`
-	Type       BannerType   `json:"type" gorm:"type:varchar(20);not null;default:'path';comment:跳转类型 mini第三方小程序 path内部小程序路径"`
+	Type       BannerType   `json:"type" gorm:"type:varchar(20);not null;default:'path';comment:跳转类型 mini第三方小程序 path内部小程序路径 h5 h5链接"`
 	AppId      string       `json:"appId" gorm:"type:varchar(100);not null;default:'';comment:跳转到三方小程序时小程序appid"`
 	Sort       int          `json:"sort" gorm:"type:int4;not null;default:0;comment:排序"`
 	Redirect   string       `json:"redirect" gorm:"type:varchar(1000);not null;comment:跳转路径"`
@@ -30,6 +30,7 @@ type BannerType string
 const (
 	BannerTypeMini BannerType = "mini"
 	BannerTypePath BannerType = "path"
+	BannerTypeH5   BannerType = "h5"
 )
 
 type BannerScene string
@@ -57,5 +58,6 @@ var (
 	BannerTypeMap = map[BannerType]string{
 		BannerTypeMini: "第三方小程序",
 		BannerTypePath: "内部小程序路径",
+		BannerTypeH5:   "H5链接",
 	}
 )
