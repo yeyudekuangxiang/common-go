@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"strings"
 )
 
 var DefaultBannerService = BannerService{repo: repository.DefaultBannerRepository}
@@ -58,8 +59,11 @@ func (srv BannerService) Update(dto srv_types.UpdateBannerDTO) error {
 	if banner.ID != 0 {
 		return errors.New("banner名称已存在")
 	}
+
 	if dto.Type == entity.BannerTypeH5 {
-		dto.Redirect = "pages/load_bearing/webview/index?url=" + dto.Redirect
+		if find := strings.Contains(dto.Redirect, "pages/load_bearing/webview/index?url="); !find {
+			dto.Redirect = "pages/load_bearing/webview/index?url=:" + dto.Redirect
+		}
 	}
 	bannerDo := entity.Banner{
 		UpdateTime: model.NewTime()}
