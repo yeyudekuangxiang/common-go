@@ -61,6 +61,7 @@ const (
 )
 
 const (
+	DuiBaActivityRiskLimitZero  int = 0
 	DuiBaActivityRiskLimitOne   int = 1
 	DuiBaActivityRiskLimitTwo   int = 2
 	DuiBaActivityRiskLimitThree int = 3
@@ -89,6 +90,7 @@ var (
 		DuiBaActivityIsPhoneAnniversaryActivity: "周年庆活动",
 	}
 	DuiBaActivityDuiBaActivityMap = map[int]string{
+		DuiBaActivityRiskLimitZero:  "风险等级0",
 		DuiBaActivityRiskLimitOne:   "风险等级1",
 		DuiBaActivityRiskLimitTwo:   "风险等级2",
 		DuiBaActivityRiskLimitThree: "风险等级3",

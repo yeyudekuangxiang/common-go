@@ -199,7 +199,7 @@ type CreateDuiBaActivityForm struct {
 	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
 	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
 	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
-	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=1 2 3 4" alias:"允许的风险等级"`
+	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
 }
 
 type UpdateDuiBaActivityForm struct {
@@ -211,7 +211,7 @@ type UpdateDuiBaActivityForm struct {
 	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
 	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
 	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
-	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=1 2 3 4" alias:"允许的风险等级"`
+	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
 }
 
 type GetDuiBaActivityPageForm struct {
