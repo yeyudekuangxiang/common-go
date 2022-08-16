@@ -25,6 +25,7 @@ func initQueueProducer() {
 		*app.QueueProduct = *pub
 		log.Println("初始化amqp生产者成功")
 	}
+	return
 
 	if app.QueueProduct != nil {
 		publishConfirm := app.QueueProduct.NotifyPublish()

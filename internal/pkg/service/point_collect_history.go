@@ -1,15 +1,24 @@
 package service
 
 import (
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 )
 
-var DefaultPointCollectHistoryService = PointCollectHistoryService{repo: repository.DefaultPointCollectHistoryRepository}
+//var DefaultPointCollectHistoryService = PointCollectHistoryService{repo: repository.NewPointCollectHistoryRepository()}
 
 type PointCollectHistoryService struct {
-	repo repository.PointCollectHistoryRepository
+	ctx  *context.MioContext
+	repo *repository.PointCollectHistoryRepository
+}
+
+func NewPointCollectHistoryService(ctx *context.MioContext) *PointCollectHistoryService {
+	return &PointCollectHistoryService{
+		ctx:  ctx,
+		repo: repository.NewPointCollectHistoryRepository(ctx),
+	}
 }
 
 func (srv PointCollectHistoryService) CreateHistory(param CreateHistoryParam) (*entity.PointCollectHistory, error) {

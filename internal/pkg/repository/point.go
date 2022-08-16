@@ -7,8 +7,8 @@ import (
 	"mio/internal/pkg/model/entity"
 )
 
-func NewPointRepository(ctx *context.MioContext) PointRepository {
-	return PointRepository{ctx: ctx}
+func NewPointRepository(ctx *context.MioContext) *PointRepository {
+	return &PointRepository{ctx: ctx}
 }
 
 type PointRepository struct {

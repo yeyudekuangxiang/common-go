@@ -48,17 +48,6 @@ type GDDbHomePageResponse struct {
 	IsNewUser bool
 }
 
-//
-//type GDDbHomePageUserInfo struct {
-//	ID           int64      `json:"id"`
-//	AvatarUrl    string     `json:"avatarUrl"`
-//	Nickname     string     `json:"nickname"`
-//	UserId       int64      `json:"userId"`
-//	AnswerStatus int        `json:"answerStatus"` //答题状态 0 未开始 1进行中 2已完成
-//	IsSuccess    int        `json:"isSuccess"`    //是否成团 0 未成团 1已成团
-//	InviteId     int64      `json:"InviteId"`     //邀请人id
-//	CreatedAt    model.Time `json:"createdAt"`
-//	UpdatedAt    model.Time `json:"updatedAt"`
-//}
+//活动认证相关 end
 
 var NotInvite error = errors.New("not invite")

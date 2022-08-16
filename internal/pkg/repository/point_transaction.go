@@ -121,3 +121,37 @@ func (repo PointTransactionRepository) GetListByFenQunCount(by GetPointTransacti
 	count := len(list)
 	return count
 }
+
+func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountBy) ([]map[string]interface{}, int64, error) {
+	var result []map[string]interface{}
+	db := repo.ctx.DB.Model(&entity.PointTransaction{})
+	if len(by.OpenIds) > 0 {
+		db.Where("openid in (?)", by.OpenIds)
+	}
+	if by.Type != "" {
+		db.Where("type = ?", by.Type)
+	}
+	if len(by.Types) > 0 {
+		db.Where("type in (?)", by.Types)
+	}
+	if by.AdminId != 0 {
+		db.Where("admin_id = ?", by.AdminId)
+	}
+	db.Where("date(create_time) = CURRENT_DATE")
+	var count int64
+	if err := db.Count(&count).Find(&result).Error; err != nil {
+		return result, count, err
+	}
+	return result, count, nil
+}
+
+// FindOrder 换电专用
+func (repo PointTransactionRepository) FindOrder(orderId string) (entity.PointTransaction, error) {
+	var result entity.PointTransaction
+	if err := repo.ctx.DB.Model(&entity.PointTransaction{}).Where("note = ?", orderId).Find(&result).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return result, err
+		}
+	}
+	return result, nil
+}

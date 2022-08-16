@@ -291,3 +291,10 @@ func (srv PointTransactionService) GetAdjustPointTransactionTypeList() []PointTr
 		},
 	}
 }
+
+func (srv PointTransactionService) CountByToday(openIds []string, types entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
+	return srv.repo.CountByToday(repository.GetPointTransactionCountBy{
+		OpenIds: openIds,
+		Type:    types,
+	})
+}

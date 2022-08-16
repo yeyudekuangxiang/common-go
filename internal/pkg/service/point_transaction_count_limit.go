@@ -83,3 +83,28 @@ func (srv PointTransactionCountLimitService) CheckLimit(transactionType entity.P
 
 	return limit.CurrentCount < limitNum, nil
 }
+
+//每天最多获取多少分
+func (srv PointTransactionCountLimitService) CheckMaxPoint(transactionType entity.PointTransactionType, openId string, currPoint *int64) error {
+	dayPoint, ok := entity.PointCollectValueMapDay[transactionType]
+	if !ok {
+		return errors.New("未匹配到日积分限制规则")
+	}
+	today, _, err := NewPointTransactionService(srv.ctx).CountByToday([]string{openId}, transactionType)
+	if err != nil {
+		return err
+	}
+	var todayValue int64
+	for _, item := range today {
+		todayValue += item["value"].(int64)
+	}
+	point := int64(dayPoint)
+	if point-todayValue <= 0 {
+		return errors.New("今日积分已达上限")
+	}
+	if point-todayValue > 0 && point-todayValue < *currPoint {
+		*currPoint = point - todayValue
+	}
+	//正常加积分
+	return nil
+}

@@ -177,7 +177,8 @@ func apiRouter(router *gin.Engine) {
 		pointCollectRouter := mustAuthRouter.Group("/point-collect")
 		{
 			pointCollectRouter.POST("", apiutil.Format(api.DefaultPointCollectController.Collect))
-			pointCollectRouter.POST("/new-collect", apiutil.Format(points.DefaultPointsCollectController.Collect))
+			pointCollectRouter.POST("/new-collect", apiutil.Format(points.DefaultPointsCollectController.ImageCollect))
+			pointCollectRouter.POST("/getPageData", apiutil.Format(points.DefaultPointsCollectController.GetPageData))
 		}
 
 		//上传文件相关路由
@@ -204,6 +205,8 @@ func apiRouter(router *gin.Engine) {
 
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+		//星星充电发放优惠券
+		mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
 	}
 
 }
