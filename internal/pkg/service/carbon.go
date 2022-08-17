@@ -1,23 +1,33 @@
 package service
 
 import (
+	contextRedis "context"
 	"errors"
+	"fmt"
+	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
 func NewCarbonService(ctx *context.MioContext) CarbonService {
-	return CarbonService{ctx: ctx, repo: repository.NewCarbonRepository(ctx)}
+	return CarbonService{ctx: ctx,
+		repo:      repository.NewCarbonRepository(ctx),
+		repoScene: repository.NewCarbonSceneRepository(ctx),
+		repoT:     repository.NewCarbonTransactionRepository(ctx)}
 }
 
 type CarbonService struct {
-	ctx  *context.MioContext
-	repo repository.CarbonRepository
+	ctx       *context.MioContext
+	repo      repository.CarbonRepository
+	repoScene repository.CarbonSceneRepository
+	repoT     repository.CarbonTransactionRepository
 }
 
 // FindByUserId 获取用户碳量
@@ -95,7 +105,7 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 
 		//判读积分余额是否充足
 		if dto.ChangePoint < 0 && point.Carbon+dto.ChangePoint < 0 {
-			return errors.New("积分不足")
+			return errors.New("碳量不足")
 		}
 
 		if point.Id == 0 {
@@ -112,7 +122,33 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 				return err
 			}
 		}
+
+		//入库记录表
+		CarbonTransactionDo := entity.CarbonTransaction{
+			TransactionId: util.UUID(),
+			Info:          dto.AdditionInfo,
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+			City:          dto.CityCode,
+			Value:         dto.ChangePoint,
+		}
+		if err = util.MapTo(dto, &CarbonTransactionDo); err != nil {
+			return err
+		}
+		err = srv.repoT.Create(&CarbonTransactionDo)
+		if err != nil {
+			return err
+		}
 		balance = point.Carbon
+
+		//记录redis,今日榜单
+		UserIdString := strconv.FormatInt(dto.Uid, 10) //用户uid
+		redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, time.Now().Format("20060102"))
+		errRedis := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, dto.ChangePoint, UserIdString).Err()
+		if errRedis != nil {
+			return errRedis
+		}
+
 		return nil
 	})
 	return balance, err

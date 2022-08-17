@@ -61,11 +61,10 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if errCheck != nil {
 		return nil, errCheck
 	}
-
 	//获取碳量
 	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
 
-	//入库记录表
+	/*//入库记录表
 	CarbonTransactionDo := entity.CarbonTransaction{
 		TransactionId: util.UUID(),
 		Info:          dto.Info,
@@ -80,26 +79,28 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	err := srv.repo.Create(&CarbonTransactionDo)
 	if err != nil {
 		return nil, err
-	}
-
-	_, err = NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
-		OpenId:      dto.OpenId,
-		Type:        dto.Type,
-		BizId:       util.UUID(),
-		ChangePoint: carbon,
+	}*/
+	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
+		OpenId:       dto.OpenId,
+		Type:         dto.Type,
+		BizId:        util.UUID(),
+		ChangePoint:  carbon,
+		AdditionInfo: dto.Info,
+		CityCode:     cityCode,
+		Uid:          dto.UserId,
 	})
-
-	//更新用户表，碳量字段
-	//	DefaultUserService.UpdateUserCarbon(dto.UserId, carbon)
-
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 	//记录redis,今日榜单
-	UserIdString := strconv.FormatInt(dto.UserId, 10) //用户uid
+	/*UserIdString := strconv.FormatInt(dto.UserId, 10) //用户uid
 	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, time.Now().Format("20060102"))
 	errRedis := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, carbon, UserIdString).Err()
 	if errRedis != nil {
 		return nil, errRedis
-	}
-	return nil, nil
+	}*/
+
 }
 
 // Bank 排行榜
