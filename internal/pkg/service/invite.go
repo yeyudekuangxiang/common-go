@@ -1,14 +1,10 @@
 package service
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
 )
 
@@ -70,6 +66,7 @@ func (srv InviteService) AddInvite(openid, invitedByOpenId string) (*entity.Invi
 		Time:            model.NewTime(),
 		InviteType:      entity.InviteTypeRegular,
 		InviteCode:      "",
+		IsReward:        1,
 	}
 	return &invite, true, app.DB.Create(&invite).Error
 }
@@ -83,7 +80,8 @@ func (srv InviteService) Invite(openid, InvitedByOpenId string) error {
 		return nil
 	}
 	app.Logger.Info("发放邀请积分", openid, InvitedByOpenId, entity.PointCollectValueMap[entity.POINT_INVITE])
-	//发放积分奖励
+	//发放积分放到绑定手机号里了
+	/*//发放积分奖励
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       InvitedByOpenId,
 		Type:         entity.POINT_INVITE,
@@ -94,5 +92,6 @@ func (srv InviteService) Invite(openid, InvitedByOpenId string) error {
 	if err != nil {
 		app.Logger.Error("发放邀请积分失败", err)
 	}
-	return err
+	return err*/
+	return nil
 }

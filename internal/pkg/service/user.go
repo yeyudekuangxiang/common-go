@@ -13,6 +13,8 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
 	"mio/pkg/baidu"
@@ -22,16 +24,18 @@ import (
 	"time"
 )
 
-var DefaultUserService = NewUserService(repository2.DefaultUserRepository)
+var DefaultUserService = NewUserService(repository2.DefaultUserRepository, repository2.InviteRepository{})
 
-func NewUserService(r repository2.IUserRepository) UserService {
+func NewUserService(r repository2.IUserRepository, rInvite repository2.InviteRepository) UserService {
 	return UserService{
-		r: r,
+		r:       r,
+		rInvite: rInvite,
 	}
 }
 
 type UserService struct {
-	r repository2.IUserRepository
+	r       repository2.IUserRepository
+	rInvite repository2.InviteRepository
 }
 
 func (u UserService) GetUserById(id int64) (*entity.User, error) {
@@ -215,7 +219,7 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 
 	return false
 }
-func (u UserService) BindPhoneByCode(userId int64, code string, cip string) error {
+func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
 		return errors.New("未查到用户信息")
@@ -253,7 +257,28 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string) erro
 	}
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
 	userInfo.Ip = cip
-	return u.r.Save(&userInfo)
+	ret := u.r.Save(&userInfo)
+
+	if invitedBy != "" && userInfo.Risk > 2 {
+		return errors.New("很遗憾您暂无法参与活动")
+	}
+	//有邀请，并且没有发放奖励，不是黑产用户，给用户发放奖励
+	inviteInfo := u.rInvite.GetInvite(userInfo.OpenId)
+	if inviteInfo.ID != 0 && userInfo.Risk <= 2 {
+		//发放积分奖励
+		_, err = NewPointService(mioctx.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       inviteInfo.InvitedByOpenId,
+			Type:         entity.POINT_INVITE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_INVITE]),
+			AdditionInfo: fmt.Sprintf("invite %s", userInfo.OpenId),
+			InviteId:     inviteInfo.ID,
+		})
+		if err != nil {
+			app.Logger.Error("发放邀请积分失败", err)
+		}
+	}
+	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 	userInfo := u.r.GetUserById(param.UserId)

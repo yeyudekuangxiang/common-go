@@ -52,7 +52,8 @@ type DuibaAutoLoginForm struct {
 	Path string `json:"path" form:"path"`
 }
 type BindMobileByCodeForm struct {
-	Code string `json:"code" form:"code" binding:"required" alias:"code"`
+	Code      string `json:"code" form:"code" binding:"required" alias:"code"`
+	InvitedBy string `json:"invitedBy" form:"invitedBy" alias:"invitedBy"`
 }
 type GetPointTransactionListForm struct {
 	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`

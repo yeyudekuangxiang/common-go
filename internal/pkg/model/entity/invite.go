@@ -17,4 +17,5 @@ type Invite struct {
 	Time            model.Time `json:"time"`
 	InviteType      InviteType `json:"inviteType"`
 	InviteCode      string     `json:"inviteCode"`
+	IsReward        int        `json:"isReward"`
 }
