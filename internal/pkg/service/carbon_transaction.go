@@ -208,6 +208,15 @@ func (srv CarbonTransactionService) MyBank(dto api_types.GetCarbonTransactionMyB
 	return myBank, nil
 }
 
+//GetTodayCarbon  获取今日碳量
+func (srv CarbonTransactionService) GetTodayCarbon(uid int64) float64 {
+	uidStr := strconv.FormatInt(uid, 10)       //我的uid string
+	todayDate := time.Now().Format("20060102") //当天时间 年月日
+	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, todayDate)
+	myCarbon := app.Redis.ZScore(contextRedis.Background(), redisKey, uidStr) //我的碳量
+	return myCarbon.Val()
+}
+
 type KVPair struct {
 	Key entity.CarbonTransactionType
 	Val float64
@@ -312,10 +321,11 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 		return api_types.CarbonTransactionInfo{}, err
 	}
 	TreeNum, TreeNumMsg := util.CarbonToTree(user.Carbon)
+	carbonToday := srv.GetTodayCarbon(dto.UserId) //今日碳量
 	info := api_types.CarbonTransactionInfo{
 		RegisterDayNum: timeutils.Now().GetDiffDays(time.Now(), user.Time.Time),
 		Carbon:         util.CarbonToRate(user.Carbon),
-		CarbonToday:    "111g",
+		CarbonToday:    util.CarbonToRate(carbonToday),
 		TreeNum:        TreeNum,
 		TreeNumMsg:     TreeNumMsg,
 		User: api_types.CarbonUser{
