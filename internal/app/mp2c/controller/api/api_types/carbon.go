@@ -46,6 +46,7 @@ type CarbonTransactionBank struct {
 type CarbonTransactionInfo struct {
 	User           CarbonUser `json:"user"`
 	Carbon         string     `json:"carbon"`
+	CarbonToday    string     `json:"carbonToday"`
 	RegisterDayNum int        `json:"registerDayNum"`
 	TreeNum        string     `json:"treeNum"`
 	TreeNumMsg     string     `json:"treeNumMsg"`

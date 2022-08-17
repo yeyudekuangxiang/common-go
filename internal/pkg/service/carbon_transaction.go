@@ -315,6 +315,7 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 	info := api_types.CarbonTransactionInfo{
 		RegisterDayNum: timeutils.Now().GetDiffDays(time.Now(), user.Time.Time),
 		Carbon:         util.CarbonToRate(user.Carbon),
+		CarbonToday:    "111g",
 		TreeNum:        TreeNum,
 		TreeNumMsg:     TreeNumMsg,
 		User: api_types.CarbonUser{
