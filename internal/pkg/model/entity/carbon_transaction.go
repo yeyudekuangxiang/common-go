@@ -21,8 +21,6 @@ func (p CarbonTransactionType) Text() string {
 		return "骑行"
 	case CARBON_ECAR:
 		return "电动车"
-	case CARBON_TESR:
-		return "测试"
 	}
 	return "未知积分"
 }
@@ -30,15 +28,13 @@ func (p CarbonTransactionType) Text() string {
 func (p CarbonTransactionType) Cover() string {
 	switch p {
 	case CARBON_STEP:
-		return "step_url"
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_foot.png"
 	case CARBON_COFFEE_CUP:
-		return "cup_url"
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_cup.png"
 	case CARBON_BIKE_RIDE:
-		return "bike_url"
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
-		return "car_url"
-	case CARBON_TESR:
-		return "test_url"
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	}
 	return ""
 }
@@ -54,8 +50,6 @@ func (p CarbonTransactionType) RealText() string {
 		return "骑行"
 	case CARBON_ECAR:
 		return "电动车"
-	case CARBON_TESR:
-		return "测试"
 	}
 	return p.Text()
 }
@@ -65,25 +59,8 @@ const (
 	CARBON_COFFEE_CUP CarbonTransactionType = "COFFEE_CUP" //自带咖啡杯
 	CARBON_BIKE_RIDE  CarbonTransactionType = "BIKE_RIDE"  //骑行
 	CARBON_ECAR       CarbonTransactionType = "ECAR"       //电动车主
-	CARBON_TESR       CarbonTransactionType = "TEST"       //测试用
 )
 
-/*
-var CarbonTransactionTypeList = []CarbonTransactionType{
-	CARBON_STEP,
-	CARBON_COFFEE_CUP,
-}*/
-/*
-var CarbonCollectValueMap = map[CarbonTransactionType]int{
-	CARBON_STEP:       150,
-	CARBON_COFFEE_CUP: 150,
-}
-
-var CarbonCollectLimitMap = map[CarbonTransactionType]int{
-	CARBON_STEP:       4,
-	CARBON_COFFEE_CUP: 2,
-}
-*/
 type CarbonTransaction struct {
 	ID            int64                 `json:"id"`
 	OpenId        string                `gorm:"column:openid" json:"openId"`

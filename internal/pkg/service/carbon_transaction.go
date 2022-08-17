@@ -224,7 +224,7 @@ type KVPair struct {
 
 func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionClassifyDto) (retDto api_types.CarbonTransactionClassify, err error) {
 	UserIdString := strconv.FormatInt(dto.UserId, 10) //我的uid string
-	DataMap := map[entity.CarbonTransactionType]float64{entity.CARBON_STEP: 5, entity.CARBON_COFFEE_CUP: 4, entity.CARBON_BIKE_RIDE: 3, entity.CARBON_ECAR: 2, entity.CARBON_TESR: 1}
+	DataMap := map[entity.CarbonTransactionType]float64{entity.CARBON_STEP: 5, entity.CARBON_COFFEE_CUP: 4, entity.CARBON_BIKE_RIDE: 3, entity.CARBON_ECAR: 2}
 	marshal, err := json.Marshal(DataMap)
 	if err != nil {
 		fmt.Printf("Map转化为byte数组失败,异常:%s\n", err)
