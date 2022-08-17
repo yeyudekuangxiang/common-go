@@ -62,7 +62,11 @@ func Router(router *gin.Engine) {
                         setTimeout(function (){
                             history.back()
                         },1000)
-                    }
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
                 })
                 break
             case 'reLaunch':
@@ -73,7 +77,11 @@ func Router(router *gin.Engine) {
                         setTimeout(function (){
                             history.back()
                         },1000)
-                    }
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
                 })
                 break
             case 'redirectTo':
@@ -85,6 +93,10 @@ func Router(router *gin.Engine) {
                             history.back()
                         },1000)
                     },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
                 })
                 break
             case 'navigateTo':
@@ -95,7 +107,11 @@ func Router(router *gin.Engine) {
                         setTimeout(function (){
                             history.back()
                         },1000)
-                    }
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
                 })
                 break
             case 'navigateBack':
@@ -106,11 +122,142 @@ func Router(router *gin.Engine) {
                         setTimeout(function (){
                             history.back()
                         },1000)
-                    }
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
                 })
                 break
             default:
                 alert("暂不支持此跳转方式")
+				setTimeout(function (){
+					history.back()
+				},1000)
+                break
+        }
+    }
+    function getQueryVariable(variable)
+    {
+        let query = window.location.search.substring(1);
+        let vars = query.split("&");
+        for (let i=0;i<vars.length;i++) {
+            let pair = vars[i].split("=");
+            if(pair[0] === variable){return pair[1];}
+        }
+        return false;
+    }
+</script>
+</body>
+</html>`)
+	})
+	router.GET("/mini/jump.html", func(context *gin.Context) {
+		context.Header("content-type", "text/html; charset=utf-8")
+		context.Writer.WriteString(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>跳转中...</title>
+</head>
+<body>
+<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
+<script>
+    window.onload = function () {
+        try{
+            const t = getQueryVariable("t")
+            const path = decodeURIComponent(getQueryVariable("path"))
+            gotoPath(t,path)
+        }catch (e){
+            alert("跳转失败")
+            setTimeout(function (){
+                history.back()
+            },1000)
+        }
+
+    }
+
+    function gotoPath(t,path){
+        switch (t){
+            case 'switchTab':
+                wx.miniProgram.switchTab({
+                    url:path,
+                    fail:()=>{
+                        alert("跳转失败")
+                        setTimeout(function (){
+                            history.back()
+                        },1000)
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
+                })
+                break
+            case 'reLaunch':
+                wx.miniProgram.reLaunch({
+                    url:path,
+                    fail:()=>{
+                        alert("跳转失败")
+                        setTimeout(function (){
+                            history.back()
+                        },1000)
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
+                })
+                break
+            case 'redirectTo':
+                wx.miniProgram.redirectTo({
+                    url:path,
+                    fail:()=>{
+                        alert("跳转失败")
+                        setTimeout(function (){
+                            history.back()
+                        },1000)
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
+                })
+                break
+            case 'navigateTo':
+                wx.miniProgram.navigateTo({
+                    url:path,
+                    fail:()=>{
+                        alert("跳转失败")
+                        setTimeout(function (){
+                            history.back()
+                        },1000)
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
+                })
+                break
+            case 'navigateBack':
+                wx.miniProgram.navigateBack({
+                    url:path,
+                    fail:()=>{
+                        alert("跳转失败")
+                        setTimeout(function (){
+                            history.back()
+                        },1000)
+                    },
+					success:()=>{
+						//此方法可以在跳转页点击返回时返回到真正的活动页
+						history.back()
+					}
+                })
+                break
+            default:
+                alert("暂不支持此跳转方式")
+				setTimeout(function (){
+					history.back()
+				},1000)
                 break
         }
     }
