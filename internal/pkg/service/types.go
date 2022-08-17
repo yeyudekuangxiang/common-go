@@ -389,9 +389,12 @@ type OCRResult struct {
 	WordsResultNum int   `json:"words_result_num"`
 	LogID          int64 `json:"log_id"`
 }
+
 type UserAccountInfo struct {
-	Balance int64 `json:"balance"` //积分余额
-	CertNum int64 `json:"certNum"` //证书数量
+	Balance     int64  `json:"balance"`     //积分余额
+	CertNum     int64  `json:"certNum"`     //证书数量
+	CarbonToday string `json:"carbonToday"` //今日碳量
+	CarbonAll   string `json:"carbonAll"`   //所有的碳量
 }
 
 type CreateCarbonTransactionParam struct {

@@ -139,7 +139,7 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 	//整理 date为 key
 	listMap := make(map[string]entity.CarbonTransactionDay)
 	for _, j := range list {
-		listMap[j.VDate.Format("2006-01-02")] = j
+		listMap[j.VDate.Format("01-02")] = j
 	}
 	//整理最终列表 近2周的数据 i = 14
 	var ListDateVo []string

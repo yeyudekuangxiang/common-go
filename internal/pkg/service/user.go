@@ -426,8 +426,10 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 		return nil, err
 	}
 	return &UserAccountInfo{
-		Balance: point.Balance,
-		CertNum: certCount,
+		Balance:     point.Balance,
+		CertNum:     certCount,
+		CarbonToday: "100g",
+		CarbonAll:   "101g",
 	}, nil
 }
 
