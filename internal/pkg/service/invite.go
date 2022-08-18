@@ -15,7 +15,7 @@ type InviteService struct {
 
 func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 	inviteList := make([]entity.Invite, 0)
-	err := app.DB.Where("invited_by_openid = ? and time > '2022-01-10 00:00:00'", openid).Order("time desc").Find(&inviteList).Error
+	err := app.DB.Where("invited_by_openid = ? and is_reward = 0 and time > '2022-01-10 00:00:00'", openid).Order("time desc").Find(&inviteList).Error
 	if err != nil {
 		panic(err)
 	}
