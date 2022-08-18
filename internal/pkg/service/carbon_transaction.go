@@ -17,6 +17,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/baidu"
 	"sort"
 	"strconv"
 	"time"
@@ -42,10 +43,10 @@ type CarbonTransactionService struct {
 func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (*entity.CarbonTransaction, error) {
 	//获取ip地址
 	cityCode := ""
-	/*cityInfo, cityErr := baidu.IpToCity(dto.Ip)
+	cityInfo, cityErr := baidu.IpToCity(dto.Ip)
 	if cityErr == nil {
 		cityCode = cityInfo.Content.AddressDetail.Adcode
-	}*/
+	}
 	//查询场景配置
 	scene := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: dto.Type})
 	if scene.ID == 0 {

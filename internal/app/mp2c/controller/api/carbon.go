@@ -42,7 +42,7 @@ func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	return gin.H{
-		"points": info,
+		"carbon": info,
 	}, err
 }
 
