@@ -259,7 +259,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	userInfo.Ip = cip
 	ret := u.r.Save(&userInfo)
 
-	if invitedBy != "" { // && userInfo.Risk > 2
+	if invitedBy != "" && userInfo.Risk > 2 {
 		return errors.New("很遗憾您暂无法参与活动")
 	}
 	//有邀请，并且没有发放奖励，不是黑产用户，给用户发放奖励
