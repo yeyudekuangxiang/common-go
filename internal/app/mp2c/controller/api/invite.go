@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -21,7 +20,7 @@ func (InviteController) GetShareQrCode(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	return gin.H{
-		"qrcode": service.DefaultOssService.FullUrl(info.ImagePath),
+		"qrcode": info,
 	}, nil
 }
 func (InviteController) GetInviteList(ctx *gin.Context) (gin.H, error) {

@@ -21,5 +21,5 @@ type DuiBaActivityShowVO struct {
 	NoLoginH5Link string `json:"noLoginH5Link"`
 	StaticH5Link  string `json:"staticH5Link"`
 	InsideLink    string `json:"insideLink"`
-	EwmLink       string `json:"ewmLink"`
+	EwmLink       []byte `json:"ewmLink"`
 }
