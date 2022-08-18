@@ -40,7 +40,7 @@ type CarbonTransactionService struct {
 
 //  添加发放碳量记录并且更新用户剩余碳量
 
-func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (*entity.CarbonTransaction, error) {
+func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (float64, error) {
 	//获取ip地址
 	cityCode := ""
 	cityInfo, cityErr := baidu.IpToCity(dto.Ip)
@@ -50,12 +50,12 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	//查询场景配置
 	scene := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: dto.Type})
 	if scene.ID == 0 {
-		return nil, errors.New("不存在该场景")
+		return 0, errors.New("不存在该场景")
 	}
 	//判断是否有限制
 	errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId, scene.MaxCount)
 	if errCheck != nil {
-		return nil, errCheck
+		return 0, errCheck
 	}
 	//获取碳量
 	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
@@ -69,9 +69,9 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		Uid:          dto.UserId,
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return nil, nil
+	return carbon, nil
 }
 
 // Bank 排行榜

@@ -32,8 +32,9 @@ func (StepController) WeeklyHistory(ctx *gin.Context) (interface{}, error) {
 }
 func (StepController) Collect(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	points, err := service.DefaultStepService.RedeemPointFromPendingSteps(user.OpenId)
+	points, carbon, err := service.DefaultStepService.RedeemPointFromPendingSteps(user.OpenId, user.ID, ctx.ClientIP())
 	return gin.H{
 		"points": points,
+		"carbon": carbon,
 	}, err
 }

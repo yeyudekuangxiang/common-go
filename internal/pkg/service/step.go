@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -10,6 +11,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"strconv"
 	"time"
 )
 
@@ -135,9 +137,9 @@ func (srv StepService) formatWeeklyHistoryStepList(list []entity.StepHistory) []
 }
 
 // RedeemPointFromPendingSteps 领取步行积分
-func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
+func (srv StepService) RedeemPointFromPendingSteps(openId string, uid int64, ip string) (int, float64, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId), time.Second*5) {
-		return 0, errors.New("操作频繁,请稍后再试")
+		return 0, 0, errors.New("操作频繁,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId))
 
@@ -146,28 +148,28 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 		Day:    model.NewTime().StartOfDay(),
 	})
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	pendingPoint, pendingStep, err := srv.ComputePendingPoint(openId)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	if pendingPoint == 0 {
-		return 0, nil
+		return 0, 0, nil
 	}
 
 	step, err := srv.FindOrCreateStep(openId)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	step.LastCheckCount = srv.computeLastCheckedSteps(step.LastCheckTime.Time, step.LastCheckCount) + pendingStep
 	step.LastCheckTime = stepHistory.RecordedTime
 	err = srv.repo.Save(step)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
@@ -177,7 +179,27 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 		OpenId:       openId,
 		AdditionInfo: fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
 	})
-	return int(pendingPoint), err
+
+	//发碳
+	//int64转float64
+	pend := strconv.FormatInt(pendingPoint, 10)         //int64到string
+	pendFloat, errFloat := strconv.ParseFloat(pend, 64) //string到float32(float64)
+	if errFloat != nil {
+		pendFloat = 0
+	}
+	carbon, errCarbon := NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		OpenId:  openId,
+		UserId:  uid,
+		Type:    entity.CARBON_STEP,
+		Value:   pendFloat,
+		Info:    fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
+		AdminId: 0,
+		Ip:      ip,
+	})
+	if errCarbon != nil {
+		return 0, 0, errCarbon
+	}
+	return int(pendingPoint), carbon, err
 }
 
 func (srv StepService) computeLastCheckedSteps(lastCheckedTime time.Time, lastCheckedCount int) int {

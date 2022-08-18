@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -32,7 +33,7 @@ func (srv CarbonTransactionCountLimitService) CheckLimitAndUpdate(carbonTransact
 		limit = *newLimit
 	}
 	if limit.CurrentCount >= limitNum {
-		//return errors.New("达到当日该类别最大碳量限制")
+		return errors.New("达到当日该类别最大碳量限制")
 	}
 	limit.CurrentCount++
 	err := srv.repo.Save(&limit)

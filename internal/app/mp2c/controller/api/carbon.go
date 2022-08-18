@@ -36,7 +36,7 @@ func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
 		Value:   form.Value,
 		Info:    fmt.Sprintf("{imageUrl=%s}", 1),
 		AdminId: form.AdminId,
-		Ip:      ctx.ClientIP(),
+		Ip:      form.Ip, //ctx.ClientIP()
 	})
 	if err != nil {
 		return nil, err

@@ -95,7 +95,6 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 	//发放或扣减积分
 	var balance float64 = 0
 	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
-
 		//查询积分账户
 		carbonRepo := repository.NewCarbonRepository(ctx)
 		carbon, err := carbonRepo.FindForUpdate(dto.OpenId)
