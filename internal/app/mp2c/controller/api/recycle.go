@@ -66,7 +66,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//匹配类型
 	typeName := service.DefaultRecycleService.GetType(form.Name)
 	//查询今日积分上限
-	currPoint := service.DefaultRecycleService.GetPoint(form.ProductCategoryName, form.Qua, form.Unit)
+	currPoint, _ := service.DefaultRecycleService.GetPoint(form.ProductCategoryName, form.Qua, form.Unit)
 	maxPoint := service.DefaultRecycleService.GetMaxPointByMonth(form.ProductCategoryName)
 	point, err := service.NewPointTransactionCountLimitService(context.NewMioContext()).
 		CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, maxPoint)

@@ -414,7 +414,7 @@ type ChangeUserPosition struct {
 	PositionIcon string `json:"positionIcon"`
 }
 
-type XingSignResponse struct {
+type XingResponse struct {
 	Ret  int    `json:"Ret"`
 	Msg  string `json:"Msg"`
 	Data string `json:"Data"`
@@ -427,6 +427,11 @@ type XingAccessResult struct {
 	AccessToken        string `json:"accessToken,omitempty"`
 	TokenAvailableTime int    `json:"tokenAvailableTime,omitempty"`
 	FailReason         int    `json:"failReason,omitempty"`
+}
+type XingProvideResult struct {
+	SuccStat      int    `json:"succStat,omitempty"`
+	FailReason    int    `json:"failReason,omitempty"`
+	FailReasonMsg string `json:"failReasonMsg,omitempty"`
 }
 
 type OolaSignParams struct {

@@ -114,7 +114,7 @@ func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//todo
-	err = XingService.SendCoupon(user.PhoneNumber, "MA1G55M8X", token)
+	err = XingService.SendCoupon(user.PhoneNumber, "JC_20220816144920341", token)
 	if err != nil {
 		return nil, err
 	}

@@ -75,7 +75,8 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 	if err != nil {
 		return "", err
 	}
-	signResponse := XingSignResponse{}
+	//response
+	signResponse := XingResponse{}
 	err = json.Unmarshal(body, &signResponse)
 	if err != nil {
 		return "", err
@@ -86,13 +87,13 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 	if signResponse.Ret != 0 {
 		return "", errors.New("请求错误")
 	}
-	//data解密
+	//result.data解密
+	accessResult := XingAccessResult{}
 	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
-	signAccess := XingAccessResult{}
-	_ = json.Unmarshal([]byte(encryptStr), &signAccess)
+	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
-	app.Redis.Set(ctx, "token:"+srv.OperatorID, signAccess.AccessToken, time.Second*time.Duration(signAccess.TokenAvailableTime))
-	return signAccess.AccessToken, nil
+	app.Redis.Set(ctx, "token:"+srv.OperatorID, accessResult.AccessToken, time.Second*time.Duration(accessResult.TokenAvailableTime))
+	return accessResult.AccessToken, nil
 }
 
 func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, token string) error {
@@ -104,12 +105,27 @@ func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, toke
 		ProvideId:   provideId,
 	}
 	url := srv.Domain + "/query_delivery_provide"
-	contentType := httputil.HttpWithHeader("Content-Type", "application/json; charset=utf-8")
-	authToken := httputil.HttpWithHeader("Authorization", token)
-	body, err := httputil.PostJson(url, r, contentType, authToken)
+	authToken := httputil.HttpWithHeader("Authorization", "Bearer "+token)
+	body, err := httputil.PostJson(url, r, authToken)
 	fmt.Printf("%s\n", body)
 	if err != nil {
 		return err
+	}
+	// response
+	provideResponse := XingResponse{}
+	err = json.Unmarshal(body, &provideResponse)
+	if err != nil {
+		return err
+	}
+	if provideResponse.Ret != 0 {
+		return errors.New(provideResponse.Msg)
+	}
+	// result.data解密
+	provideResult := XingProvideResult{}
+	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
+	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
+	if provideResult.SuccStat != 0 {
+		return errors.New(provideResult.FailReasonMsg)
 	}
 	return nil
 }
