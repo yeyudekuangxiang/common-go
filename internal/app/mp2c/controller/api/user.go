@@ -124,7 +124,7 @@ func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-	return nil, service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP())
+	return nil, service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
 }
 func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
