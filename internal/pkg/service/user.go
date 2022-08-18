@@ -236,19 +236,24 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
 
-	//检测用户风险等级
-	userRiskRankParam := wxapp.UserRiskRankParam{
-		AppId:    config.Config.Weapp.AppId,
-		OpenId:   userInfo.OpenId,
-		Scene:    0,
-		ClientIp: cip,
-		MobileNo: userInfo.PhoneNumber,
+	isBlack := app.Redis.SIsMember(context.Background(), config.RedisKey.BlackList, phoneResult.Data.PhoneNumber)
+	if isBlack.Val() {
+		userInfo.Risk = 4
+	} else {
+		//检测用户风险等级
+		userRiskRankParam := wxapp.UserRiskRankParam{
+			AppId:    config.Config.Weapp.AppId,
+			OpenId:   userInfo.OpenId,
+			Scene:    0,
+			ClientIp: cip,
+			MobileNo: userInfo.PhoneNumber,
+		}
+		rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
+		if err != nil {
+			app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
+		}
+		userInfo.Risk = rest.RiskRank
 	}
-	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
-	if err != nil {
-		app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
-	}
-	userInfo.Risk = rest.RiskRank
 
 	//获取用户地址  todo 加入队列
 	city, err := baidu.IpToCity(cip)
