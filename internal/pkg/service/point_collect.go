@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -121,7 +122,7 @@ func (srv PointCollectService) validateBikeRideImage(imageUrl string) (bool, []s
 	}
 	return false, nil, nil
 }
-func (srv PointCollectService) CollectBikeRide(openId string, imageUrl string) (int, error) {
+func (srv PointCollectService) CollectBikeRide(openId string, imageUrl string, uid int64, ip string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("CollectBikeRide%s", openId), time.Second*5) {
 		return 0, errors.New("操作频率过快,请稍后再试")
 	}
@@ -160,6 +161,15 @@ func (srv PointCollectService) CollectBikeRide(openId string, imageUrl string) (
 		BizId:        util.UUID(),
 		ChangePoint:  int64(value),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+	})
+
+	NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		OpenId: openId,
+		Type:   entity.CARBON_BIKE_RIDE,
+		Ip:     ip,
+		Value:  0,
+		UserId: uid,
+		Info:   fmt.Sprintf("{imageUrl=%s}", imageUrl),
 	})
 	return value, err
 }

@@ -55,7 +55,6 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if scene.ID == 0 {
 		return nil, errors.New("不存在该场景")
 	}
-
 	//判断是否有限制
 	errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId, scene.MaxCount)
 	if errCheck != nil {
@@ -63,23 +62,6 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	}
 	//获取碳量
 	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
-
-	/*//入库记录表
-	CarbonTransactionDo := entity.CarbonTransaction{
-		TransactionId: util.UUID(),
-		Info:          dto.Info,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
-		City:          cityCode,
-		Value:         carbon,
-	}
-	if err := util.MapTo(dto, &CarbonTransactionDo); err != nil {
-		return nil, err
-	}
-	err := srv.repo.Create(&CarbonTransactionDo)
-	if err != nil {
-		return nil, err
-	}*/
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
 		Type:         dto.Type,
@@ -93,14 +75,6 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		return nil, err
 	}
 	return nil, nil
-	//记录redis,今日榜单
-	/*UserIdString := strconv.FormatInt(dto.UserId, 10) //用户uid
-	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, time.Now().Format("20060102"))
-	errRedis := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, carbon, UserIdString).Err()
-	if errRedis != nil {
-		return nil, errRedis
-	}*/
-
 }
 
 // Bank 排行榜
@@ -321,11 +295,17 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 	if err != nil {
 		return api_types.CarbonTransactionInfo{}, err
 	}
-	TreeNum, TreeNumMsg := util.CarbonToTree(user.Carbon)
+
+	carbonInfo, err := NewCarbonService(context.NewMioContext()).FindByUserId(dto.UserId)
+	if err != nil {
+		return api_types.CarbonTransactionInfo{}, err
+	}
+
+	TreeNum, TreeNumMsg := util.CarbonToTree(carbonInfo.Carbon)
 	carbonToday := srv.GetTodayCarbon(dto.UserId) //今日碳量
 	info := api_types.CarbonTransactionInfo{
 		RegisterDayNum: timeutils.Now().GetDiffDays(time.Now(), user.Time.Time),
-		Carbon:         util.CarbonToRate(user.Carbon),
+		Carbon:         util.CarbonToRate(carbonInfo.Carbon),
 		CarbonToday:    util.CarbonToRate(carbonToday),
 		TreeNum:        TreeNum,
 		TreeNumMsg:     TreeNumMsg,

@@ -24,7 +24,7 @@ func (PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	switch service.PointCollectType(form.PointCollectType) {
 	case service.PointCollectBikeRideType:
-		point, err = service.DefaultPointCollectService.CollectBikeRide(user.OpenId, form.ImgUrl)
+		point, err = service.DefaultPointCollectService.CollectBikeRide(user.OpenId, form.ImgUrl, user.ID, ctx.ClientIP())
 	case service.PointCollectCoffeeCupType:
 		point, err = service.DefaultPointCollectService.CollectCoffeeCup(user.OpenId, form.ImgUrl)
 	}

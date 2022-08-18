@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/medivhzhan/weapp/v3/phonenumber"
 	"github.com/pkg/errors"
-	"github.com/shopspring/decimal"
 	"math/rand"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -433,27 +432,4 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 		CarbonToday: carbonInfo.CarbonToday,
 		CarbonAll:   carbonInfo.Carbon,
 	}, nil
-}
-
-/**更新carbon*/
-
-func (u UserService) UpdateUserCarbon(uid int64, value float64) {
-	valDec := decimal.NewFromFloat(value)
-	if valDec.IsZero() || uid == 0 {
-		return
-	}
-	user := u.r.GetUserById(uid)
-	if user.ID == 0 {
-		return
-	}
-	carbonDec := decimal.NewFromFloat(user.Carbon)
-	addVal, addErr := carbonDec.Add(valDec).Float64()
-	if !addErr {
-		return
-	}
-	user.Carbon = addVal
-	err := u.r.Save(&user)
-	if err != nil {
-		app.Logger.Error("user表更新carbon失败", uid, value, err)
-	}
 }
