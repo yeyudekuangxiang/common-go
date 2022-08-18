@@ -25,7 +25,7 @@ func TestGetAccessToken(t *testing.T) {
 	//	fmt.Printf("get token error: %e\n", err)
 	//}
 	//fmt.Printf("getXingAccessToken token: %s\n", token)
-	err := sendCoupon("13083605153", "JC_20220816144920341", "1805e341-cdf8-4062-92d0-e4d427cd9a09", Xing)
+	err := sendCoupon("13083605153", "JC_20220725142041920", "1805e341-cdf8-4062-92d0-e4d427cd9a09", Xing)
 	if err != nil {
 		fmt.Printf("sendCoupon error: %e\n", err)
 		return
@@ -75,7 +75,7 @@ func getXingAccessToken(ctx *context.MioContext, xing XingXingService) (string, 
 		return "", err
 	}
 
-	signResult := XingSignResponse{}
+	signResult := XingResponse{}
 	err = json.Unmarshal(body, &signResult)
 	if err != nil {
 		return "", err
@@ -126,7 +126,7 @@ func sendCoupon(phoneNumber string, provideId string, token string, xing XingXin
 		return err
 	}
 	//data解密
-	signResult := XingSignResponse{}
+	signResult := XingResponse{}
 	err = json.Unmarshal(body, &signResult)
 	if err != nil {
 		return err
