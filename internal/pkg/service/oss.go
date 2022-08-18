@@ -43,6 +43,10 @@ func (srv OssService) PutObject(name string, reader io.Reader) (string, error) {
 
 // PubObjectAbsolutePath name 文件路径 例如static/mp2c/images/topic/tag/1.png 上传成功返回路径
 func (srv OssService) PubObjectAbsolutePath(name string, reader io.Reader) (string, error) {
+	start := time.Now()
+	defer func() {
+		app.Logger.Infof("上传文件耗时 %s %s", name, time.Now().Sub(start).String())
+	}()
 	name = strings.TrimLeft(name, "/")
 	bucket, err := srv.client.Bucket(srv.Bucket)
 	if err != nil {
