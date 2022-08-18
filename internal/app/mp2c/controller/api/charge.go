@@ -95,26 +95,26 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-// SendCoupon 发放优惠券
+// SendCoupon 星星充电 发放优惠券
 func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	if user.PhoneNumber == "" {
 		return nil, errno.ErrBind.WithMessage("未绑定手机号")
 	}
 	XingService := service.XingXingService{
-		OperatorID:     "313744932",
+		OperatorID:     "MA1G55M81",
 		OperatorSecret: "acb93539fc9bg78k",
 		SigSecret:      "9af2e7b2d7562ad5",
 		DataSecret:     "a2164ada0026ccf7",
 		DataSecretIV:   "82c91325e74bef0f",
-		Url:            "http://test-evcs.starcharge.com/evcs/starcharge",
+		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
 	}
 	token, err := XingService.GetXingAccessToken(context.NewMioContext())
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("xing xing accessToken:%s", token)
-	err = XingService.SendCount(context.NewMioContext(), user.PhoneNumber, "", token)
+	//todo
+	err = XingService.SendCoupon(user.PhoneNumber, "MA1G55M8X", token)
 	if err != nil {
 		return nil, err
 	}
