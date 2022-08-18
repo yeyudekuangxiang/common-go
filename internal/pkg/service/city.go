@@ -2,11 +2,9 @@ package service
 
 import (
 	"mio/internal/app/mp2c/controller/api/api_types"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/util"
 	"time"
 )
 
@@ -22,10 +20,6 @@ type CityService struct {
 //  添加发放碳量记录并且更新用户剩余碳量
 
 func (srv CityService) Create(dto api_types.CreateCityDto) (*entity.CarbonTransaction, error) {
-	if err := util.ValidatorStruct(dto); err != nil {
-		app.Logger.Error(dto, err)
-		return nil, err
-	}
 	//入库
 	cityDo := entity.City{
 		CityCode:  dto.CityCode,

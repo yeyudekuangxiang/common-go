@@ -40,10 +40,6 @@ type CarbonTransactionService struct {
 //  添加发放碳量记录并且更新用户剩余碳量
 
 func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (*entity.CarbonTransaction, error) {
-	if err := util.ValidatorStruct(dto); err != nil {
-		app.Logger.Error(dto, err)
-		return nil, err
-	}
 	//获取ip地址
 	cityCode := ""
 	/*cityInfo, cityErr := baidu.IpToCity(dto.Ip)
