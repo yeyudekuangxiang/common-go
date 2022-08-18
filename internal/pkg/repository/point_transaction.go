@@ -105,3 +105,53 @@ func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageL
 
 	return list, total
 }
+
+//GetListByFenQunCount  分群专用
+func (repo PointTransactionRepository) GetListByFenQunCount(by GetPointTransactionListByQun) int {
+	type Result struct {
+		Days string
+	}
+	list := make([]Result, 0)
+	db := repo.ctx.DB.Table("(?) as u", repo.ctx.DB.Model(&entity.PointTransaction{}).Select("TO_CHAR(create_time, 'YYYY-MM-DD')  as days").Where("type in (?)", by.Types).Where("create_time >= ?", by.StartTime).Where("create_time <= ?", by.EndTime).Where("openid", by.OpenId))
+	db.Group("days")
+	err := db.Find(&list).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	count := len(list)
+	return count
+}
+
+func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountBy) ([]map[string]interface{}, int64, error) {
+	var result []map[string]interface{}
+	db := repo.ctx.DB.Model(&entity.PointTransaction{})
+	if len(by.OpenIds) > 0 {
+		db.Where("openid in (?)", by.OpenIds)
+	}
+	if by.Type != "" {
+		db.Where("type = ?", by.Type)
+	}
+	if len(by.Types) > 0 {
+		db.Where("type in (?)", by.Types)
+	}
+	if by.AdminId != 0 {
+		db.Where("admin_id = ?", by.AdminId)
+	}
+	db.Where("date(create_time) = CURRENT_DATE")
+	var count int64
+	if err := db.Count(&count).Find(&result).Error; err != nil {
+		return result, count, err
+	}
+	return result, count, nil
+}
+
+// FindOrder 换电专用
+func (repo PointTransactionRepository) FindOrder(orderId string) (entity.PointTransaction, error) {
+	var result entity.PointTransaction
+	if err := repo.ctx.DB.Model(&entity.PointTransaction{}).Where("note = ?", orderId).Find(&result).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return result, err
+		}
+	}
+	return result, nil
+}

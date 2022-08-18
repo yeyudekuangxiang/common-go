@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/baidu"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -33,8 +34,30 @@ type OCRService struct {
 	imageClient *baidu.ImageClient
 }
 
+func (srv OCRService) CheckIdempotent(openId string) error {
+	if !util.DefaultLock.Lock("OCRIdempotent:"+openId, time.Second*10) {
+		return errno.ErrLimit
+	}
+	return nil
+}
+
+func (srv OCRService) CheckRisk(risk int) error {
+	if risk > 2 {
+		return errno.ErrCommon.WithMessage("风险等级检测异常，请您稍后再试")
+	}
+	return nil
+}
+
 // OCRForGm 素食打卡
-func (srv OCRService) OCRForGm(openid string, src string) error {
+func (srv OCRService) OCRForGm(openid string, risk int, src string) error {
+	err := srv.CheckIdempotent(openid)
+	if err != nil {
+		return err
+	}
+	err = srv.CheckRisk(risk)
+	if err != nil {
+		return err
+	}
 	res := util.OCRPush(src)
 	var orderNo, fee string
 
@@ -58,7 +81,7 @@ func (srv OCRService) OCRForGm(openid string, src string) error {
 
 	pointTranService := NewPointService(mioctx.NewMioContext())
 	//发放积分
-	_, err := pointTranService.IncUserPoint(srv_types.IncUserPointDTO{
+	_, err = pointTranService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openid,
 		ChangePoint:  100,
 		BizId:        util.UUID(),
@@ -72,12 +95,11 @@ func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 	rest, err := srv.imageClient.WebImage(baidu.WebImageParam{
 		ImageUrl: imgUrl,
 	})
-	fmt.Printf("%+v %+v\n", rest, err)
 	if err != nil {
 		return nil, err
 	}
 	if !rest.IsSuccess() {
-		return nil, errors.New(rest.ErrorDescription)
+		return nil, errors.New(rest.ErrorMsg)
 	}
 
 	results := make([]string, 0)

@@ -6,7 +6,6 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/panjf2000/ants/v2"
 	"github.com/pkg/errors"
-	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -33,7 +32,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	//获取用户信息
 	cookie := result.Response.Header.Get("Set-Cookie")
 
-	log.Println("cookie", cookie, invitedBy, partnershipWith)
+	app.Logger.Debug("cookie", cookie, invitedBy, partnershipWith)
 	whoAmiResult, err := httputil.OriginGet(config.Config.Java.JavaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
 	if err != nil {
 		return nil, "", err
@@ -70,7 +69,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		isNewUser = true
 		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
-			AvatarUrl:   "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/default.png",
+			AvatarUrl:   "https://resources.miotech.com/static/mp2c/images/user/default.png",
 			Nickname:    "绿喵用户" + util.RandomStr(6, util.RandomStrNumber, util.RandomStrLower),
 			PhoneNumber: "",
 			Source:      entity.UserSourceMio,

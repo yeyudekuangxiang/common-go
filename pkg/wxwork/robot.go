@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
-func SendRobotMessage(key string, v interface{}) error {
-	return nil
+func SendRobotMessage(key string, v IMessage) error {
 	var msgType MsgType
 	switch v.(type) {
 	case Text:
@@ -23,13 +21,22 @@ func SendRobotMessage(key string, v interface{}) error {
 		msgType = MsgTypeNews
 	case File:
 		msgType = MsgTypeFile
+	case CardText:
+		msgType = MsgTypeCard
+	case CardNews:
+		msgType = MsgTypeCard
 	default:
 		return errors.New("unknown msgtype")
 	}
 
+	return SendRobotMessageRaw(key, msgType, v)
+}
+
+func SendRobotMessageRaw(key string, msgType MsgType, message interface{}) error {
+
 	data, err := json.Marshal(map[string]interface{}{
 		"msgtype":       msgType,
-		string(msgType): v,
+		string(msgType): message,
 	})
 	if err != nil {
 		return err
@@ -43,10 +50,9 @@ func SendRobotMessage(key string, v interface{}) error {
 	if resp.StatusCode != 200 {
 		return errors.New(resp.Status)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-	log.Println(string(body))
 	return nil
 }

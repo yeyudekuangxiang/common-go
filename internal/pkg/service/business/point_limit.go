@@ -49,7 +49,7 @@ func (srv PointLimitService) checkLimit(userId int64, t ebusiness.PointType) (in
 	}
 
 	limitLog, err := DefaultPointLimitLogService.FindLimitLog(FindPointLimitLogParam{
-		TimePoint: timeutils.Now().StartOfDay().Time(),
+		TimePoint: timeutils.Now().StartOfDay().Time,
 		Type:      t,
 		UserId:    userId,
 	})

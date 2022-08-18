@@ -21,7 +21,7 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	}
 
 	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
-	list, total, err := pointTranService.GetPageListBy(service.GetPointTransactionPageListBy{
+	list, total, err := pointTranService.PagePointRecord(service.GetPointTransactionPageListBy{
 		UserId:    form.UserId,
 		Nickname:  form.Nickname,
 		OpenId:    form.OpenId,
@@ -75,7 +75,7 @@ func (ctr PointController) GetAdjustRecordPageList(ctx *gin.Context) (gin.H, err
 	}
 
 	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
-	list, total, err := pointTranService.GetAdjustRecordPageList(service.GetPointAdjustRecordPageListParam{
+	list, total, err := pointTranService.PageAdjustPointRecord(service.GetPointAdjustRecordPageListParam{
 		OpenId:    form.OpenId,
 		Phone:     form.Phone,
 		Type:      form.Type,

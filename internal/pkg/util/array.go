@@ -1,6 +1,8 @@
 package util
 
-import "strings"
+import (
+	"strings"
+)
 
 func ArrayIsContains(items []string, item string) bool {
 	for _, eachItem := range items {
@@ -17,4 +19,34 @@ func InArray(items []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func Intersect(nums1 []string, nums2 []string) []string {
+	if len(nums1) > len(nums2) {
+		return Intersect(nums2, nums1)
+	}
+	m := map[string]int{}
+	for _, num := range nums1 {
+		m[num]++
+	}
+	var intersection []string
+	for _, num := range nums2 {
+		if m[num] > 0 {
+			intersection = append(intersection, num)
+			m[num]--
+		}
+	}
+	return intersection
+}
+func IntersectContains(identify []string, rules []string) map[string]string {
+	m := map[string]string{}
+	for _, v := range identify {
+		for _, rule := range rules {
+			if strings.Contains(v, rule) {
+				//匹配字符 到map
+				m[rule] = strings.Trim(v, rule)
+			}
+		}
+	}
+	return m
 }

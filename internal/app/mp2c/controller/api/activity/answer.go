@@ -38,7 +38,7 @@ func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	if user.ID != 0 {
-		if activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+		if activity.DefaultGDdbService.IsNewUser(user) {
 			isNewUser = true
 		}
 		homeUser, err = activity.DefaultGDdbService.HomePageUser(user.ID, form.InviteId, isNewUser)
@@ -76,7 +76,7 @@ func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	t, _ := strconv.Atoi(ctx.PostForm("type"))
@@ -112,7 +112,7 @@ func (ctr AnswerController) StartQuestion(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	return nil, nil
@@ -124,7 +124,7 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	form := &GDDbActivitySchoolForm{}
@@ -154,7 +154,7 @@ func (ctr AnswerController) GetCityList(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	cityList := activity.DefaultGDdbService.GetCityList()
@@ -169,7 +169,7 @@ func (ctr AnswerController) GetGradeList(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	gradeList := activity.DefaultGDdbService.GetGradeList()
@@ -183,7 +183,7 @@ func (ctr AnswerController) CreateSchool(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	form := &GDDbCreateSchoolForm{}
@@ -205,7 +205,7 @@ func (ctr AnswerController) GetSchoolList(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	form := &GDDbSelectSchoolForm{}
@@ -224,7 +224,7 @@ func (ctr AnswerController) GetAchievement(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	res := activity.DefaultGDdbService.GetAchievement(user.ID)
@@ -245,7 +245,7 @@ func (ctr AnswerController) CloseLateTips(ctx *gin.Context) (gin.H, error) {
 	if user.ID == 0 {
 		return nil, errors.New("未登录，无法访问。")
 	}
-	if !activity.DefaultGDdbService.IsNewUser(user.Time.Time) {
+	if !activity.DefaultGDdbService.IsNewUser(user) {
 		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
 	}
 	if err := activity.DefaultGDdbService.CloseLateTips(user.ID); err != nil {

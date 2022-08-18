@@ -75,3 +75,10 @@ AppSecret=
 [java]
 JavaLoginUrl=http://mp2c-service:9999/api/mp2c/auth/login
 JavaWhoAmi=http://mp2c-service:9999/api/mp2c/user/whoami
+
+[zhuge]
+AppKey=
+AppSecret=
+
+[amqp]
+Url=amqp://guest:guest@localhost:5672

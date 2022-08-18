@@ -1,3 +1,4 @@
+/*ok*/
 create table upload_log
 (
     id            bigserial

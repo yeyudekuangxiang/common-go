@@ -28,6 +28,9 @@ func (res TOResult) Float32() float32 {
 func (res TOResult) Float64() float64 {
 	return res.val.(float64)
 }
+func (res TOResult) Bool() bool {
+	return res.val.(bool)
+}
 func (res TOResult) Interface() interface{} {
 	return res.val
 }
@@ -57,4 +60,19 @@ func LinkJoin(ele ...string) string {
 		}
 	}
 	return builder.String()
+}
+
+func MapInterface2int64(inputData map[string]interface{}) map[string]int64 {
+	outputData := map[string]int64{}
+	for key, value := range inputData {
+		switch value.(type) {
+		case int64:
+			outputData[key] = value.(int64)
+		case string:
+			outputData[key] = value.(int64)
+		case int:
+			outputData[key] = value.(int64)
+		}
+	}
+	return outputData
 }

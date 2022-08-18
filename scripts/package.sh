@@ -1,7 +1,11 @@
 #!/bin/bash
 
+set -e
+
 echo "package start"
 cd $(dirname $(readlink -f "$0"))/../
+pwd
+ls
 tag=$CI_COMMIT_SHORT_SHA
 if [ $CI_COMMIT_REF_NAME = "develop" ]; then
   tag=$CI_COMMIT_REF_NAME

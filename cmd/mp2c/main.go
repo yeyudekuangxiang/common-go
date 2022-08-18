@@ -31,4 +31,5 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	server.CloseServer()
+	initialize.Close()
 }

@@ -1,3 +1,4 @@
+/*ok*/
 ALTER TABLE "public"."badge"
     ADD COLUMN "image_url" varchar(1000) NOT NULL DEFAULT '',
     ADD COLUMN "is_new" bool NOT NULL DEFAULT false,

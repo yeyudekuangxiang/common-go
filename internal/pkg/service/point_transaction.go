@@ -49,7 +49,7 @@ func (srv PointTransactionService) FindBy(by repository.FindPointTransactionBy) 
 	pt := srv.repo.FindBy(by)
 	return &pt, nil
 }
-func (srv PointTransactionService) GetPageListBy(by GetPointTransactionPageListBy) ([]PointRecord, int64, error) {
+func (srv PointTransactionService) PagePointRecord(by GetPointTransactionPageListBy) ([]PointRecord, int64, error) {
 	recordList := make([]PointRecord, 0)
 	isEmptyCondition, openIds, err := srv.filterPointRecordOpenIds(FilterPointRecordOpenIds{
 		OpenId:   by.OpenId,
@@ -187,7 +187,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 		}
 		csvList := make([]csv, 0)
 		for {
-			list, _, err := srv.GetPageListBy(getPageListBy)
+			list, _, err := srv.PagePointRecord(getPageListBy)
 			if err != nil {
 				_, err := DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 					Status:  entity.FileExportStatusFailed,
@@ -254,7 +254,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 	return nil
 }
 
-func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustRecordPageListParam) ([]PointRecord, int64, error) {
+func (srv PointTransactionService) PageAdjustPointRecord(param GetPointAdjustRecordPageListParam) ([]PointRecord, int64, error) {
 	types := make([]entity.PointTransactionType, 0)
 	if param.Type != "" {
 		types = append(types, param.Type)
@@ -265,7 +265,7 @@ func (srv PointTransactionService) GetAdjustRecordPageList(param GetPointAdjustR
 		}
 	}
 
-	return srv.GetPageListBy(GetPointTransactionPageListBy{
+	return srv.PagePointRecord(GetPointTransactionPageListBy{
 		UserId:    param.UserId,
 		AdminId:   param.AdminId,
 		Nickname:  param.Nickname,
@@ -290,4 +290,11 @@ func (srv PointTransactionService) GetAdjustPointTransactionTypeList() []PointTr
 			TypeText: entity.POINT_SYSTEM_ADD.RealText(),
 		},
 	}
+}
+
+func (srv PointTransactionService) CountByToday(openIds []string, types entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
+	return srv.repo.CountByToday(repository.GetPointTransactionCountBy{
+		OpenIds: openIds,
+		Type:    types,
+	})
 }

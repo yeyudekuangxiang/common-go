@@ -56,7 +56,7 @@ func (srv StepService) UpdateStepTotal(openId string) error {
 
 	//查询未统计在内的步行数据历史
 	stepHistoryList, err := DefaultStepHistoryService.GetStepHistoryList(GetStepHistoryListBy{
-		StartRecordedTime: step.LastSumHistoryTime,
+		StartRecordedTime: model.Time{Time: step.LastSumHistoryTime.Add(time.Nanosecond)},
 		OpenId:            openId,
 		OrderBy:           entity.OrderByList{entity.OrderByStepHistoryTimeDesc},
 	})

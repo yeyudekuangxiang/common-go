@@ -278,6 +278,7 @@ type InviteInfo struct {
 	Nickname  string     `json:"nickname"`
 	AvatarUrl string     `json:"avatarUrl"`
 	Time      model.Time `json:"time"`
+	Point     int        `json:"point"`
 }
 type GetPartnershipPromotionListBy struct {
 	Partnership  entity.PartnershipType
@@ -360,10 +361,12 @@ type UpdateDuiBaPointAddLog struct {
 	TransactionId string
 }
 type UpdateUserInfoParam struct {
-	UserId   int64
-	Nickname string
-	Avatar   string
-	Gender   entity.UserGender
+	UserId      int64
+	Nickname    string
+	Avatar      string
+	Gender      *entity.UserGender
+	Birthday    *time.Time
+	PhoneNumber *string
 }
 
 type UpdateUserRiskParam struct {
@@ -405,4 +408,34 @@ type CreateCarbonTransactionParam struct {
 	BizId        string
 	Note         string
 	AdditionInfo string
+}
+
+type CommentCount struct {
+	Date    time.Time
+	TotalID int64
+	Total   int64
+}
+
+type ChangeUserState struct {
+	UserId int64 `json:"userId"`
+	State  int   `json:"state"`
+}
+
+type ChangeUserPosition struct {
+	UserId       int64  `json:"userId"`
+	Position     string `json:"position"`
+	PositionIcon string `json:"positionIcon"`
+}
+
+type XingXingSignResult struct {
+	OperatorID         string `json:"operatorID,omitempty"`
+	SucStat            int    `json:"sucStat,omitempty"`
+	AccessToken        string `json:"accessToken,omitempty"`
+	TokenAvailableTime int    `json:"tokenAvailableTime,omitempty"`
+	FailReason         int    `json:"failReason,omitempty"`
+}
+
+type XingXingSendCouponResult struct {
+	FailReason int `json:"failReason,omitempty"`
+	SuccStat   int `json:"succStat,omitempty"`
 }

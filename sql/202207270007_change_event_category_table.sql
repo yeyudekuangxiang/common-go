@@ -1,3 +1,4 @@
+/*ok*/
 ALTER TABLE "public"."event_category"
     ADD COLUMN "sort" int4 NOT NULL DEFAULT 0,
     ADD COLUMN "icon" varchar(500) NOT NULL DEFAULT '';

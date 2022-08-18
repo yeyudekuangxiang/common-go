@@ -43,3 +43,10 @@ mp2c-go
 2. 下载所需库文件 `go mod download`
 3. 复制配置文件`copy config.ini.example config.ini` 并且完善配置文件config.ini
 4. `go run cmd/mp2c/main.go`
+
+## [开发规范](DEVELOPMENT_GUIDE.md)
+## [避坑指南](NOTES.md)
+
+## 注意!!! 
+### 1. 版本发布不允许更改字段名称、字段删除等影响回滚的操作。可以进行较小影响的修改(如字段长度、字段备注、索引、是否为null等) 发布时将需要废弃的字段标识为即将废弃,标识删除例子(v2.0.0-delete),并切在发版稳定运行没有bug后再去删除字段
+

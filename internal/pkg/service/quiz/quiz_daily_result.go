@@ -21,7 +21,7 @@ func (srv QuizDailyResultService) IsAnsweredToday(openId string) (bool, error) {
 }
 func (srv QuizDailyResultService) FindTodayResult(openId string) (*entity.QuizDailyResult, error) {
 	result := entity.QuizDailyResult{}
-	err := app.DB.Where("openid = ? and answer_date = ?", openId, timeutils.NowDate().FullString()).Take(&result).Error
+	err := app.DB.Where("openid = ? and answer_time >= ? and answer_time< ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Take(&result).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
@@ -35,7 +35,6 @@ func (srv QuizDailyResultService) CompleteTodayQuiz(openid string) (*entity.Quiz
 	if todayResult.ID != 0 {
 		return nil, errors.New("请勿重复提交答题")
 	}
-
 	todaySummary := DefaultQuizSingleRecordService.GetTodaySummary(openid)
 	if todaySummary.AnsweredNum < OneDayAnswerNum {
 		return nil, errors.New("答题未完成")

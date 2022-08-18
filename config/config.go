@@ -17,6 +17,8 @@ var Config = app{
 	OSS:      ossSetting{},
 	BaiDu:    baiDuSetting{},
 	Java:     javaConfig{},
+	Zhuge:    zhugeConfig{},
+	AMQP:     amqpSetting{},
 }
 
 type app struct {
@@ -30,8 +32,10 @@ type app struct {
 	Redis    redisSetting    `ini:"redis"`
 	DuiBa    duiBaSetting    `ini:"duiba"`
 	OSS      ossSetting      `ini:"oss"`
+	AMQP     amqpSetting     `ini:"amqp"`
 	BaiDu    baiDuSetting    `ini:"baidu"`
 	Java     javaConfig      `ini:"java"`
+	Zhuge    zhugeConfig     `ini:"zhuge"`
 }
 type appSetting struct {
 	TokenKey string
@@ -85,6 +89,9 @@ type ossSetting struct {
 	AccessSecret string
 	BasePath     string
 }
+type amqpSetting struct {
+	Url string
+}
 type baiDuSetting struct {
 	AppKey    string
 	AppSecret string
@@ -92,6 +99,10 @@ type baiDuSetting struct {
 type javaConfig struct {
 	JavaLoginUrl string `binding:"required"`
 	JavaWhoAmi   string `binding:"required"`
+}
+type zhugeConfig struct {
+	AppKey    string
+	AppSecret string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {

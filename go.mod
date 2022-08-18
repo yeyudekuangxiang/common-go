@@ -7,7 +7,6 @@ require (
 	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/locales v0.14.0
 	github.com/go-playground/universal-translator v0.18.0
@@ -16,7 +15,7 @@ require (
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
 	github.com/jszwec/csvutil v1.6.0
-	github.com/medivhzhan/weapp/v3 v3.6.6
+	github.com/medivhzhan/weapp/v3 v3.6.12
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/mlogclub/simple v1.1.14
 	github.com/nacos-group/nacos-sdk-go v1.0.6
@@ -29,6 +28,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.0
 	github.com/ulule/limiter/v3 v3.8.0
+	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.5.0
 	go.uber.org/zap v1.16.0
 	gopkg.in/ini.v1 v1.62.0
@@ -101,6 +101,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.3 // indirect
 	github.com/richardlehane/msoleps v1.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -124,7 +125,6 @@ require (
 	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
-	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -15,12 +15,36 @@ var DefaultUserController = UserController{}
 type UserController struct {
 }
 
-func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
-	var form GetUserForm
+func (ctr UserController) List(c *gin.Context) (gin.H, error) {
+	form := UserPageListForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user, err := service.DefaultUserService.GetUserById(form.Id)
+	list, total := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+		User: repository.GetUserListBy{
+			Mobile:   form.Mobile,
+			UserId:   form.ID,
+			State:    form.State,
+			Nickname: form.Nickname,
+		},
+		OrderBy: "id desc",
+	})
+	return gin.H{
+		"users":    list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
+func (ctr UserController) Detail(c *gin.Context) (gin.H, error) {
+	var form IDForm
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user, err := service.DefaultUserService.GetUserById(form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -29,24 +53,36 @@ func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func GetUserPageListBy(c *gin.Context) (gin.H, error) {
-	form := UserPageListForm{}
+func (ctr UserController) ChangeState(c *gin.Context) (gin.H, error) {
+	var form ChangeUserState
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	list, count := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
-		Limit:   10,
-		Offset:  0,
-		User:    repository.GetUserListBy{Mobile: form.Mobile},
-		OrderBy: "id desc",
-	})
-	return gin.H{
-		"users": list,
-		"page":  count,
-	}, nil
+	if err := service.DefaultUserService.ChangeUserState(service.ChangeUserState{
+		UserId: form.ID,
+		State:  form.State,
+	}); err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
 
-func UpdateUserRisk(c *gin.Context) (gin.H, error) {
+func (ctr UserController) ChangePosition(c *gin.Context) (gin.H, error) {
+	var form changeUserPosition
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if err := service.DefaultUserService.ChangeUserPosition(service.ChangeUserPosition{
+		UserId:       form.ID,
+		Position:     form.Position,
+		PositionIcon: form.PositionIcon,
+	}); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 	i := 0
 	for {
 		list, _ := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{

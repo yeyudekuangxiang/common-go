@@ -6,11 +6,13 @@ import (
 
 func Initialize(configPath string) {
 	InitIni(configPath)
-	InitLog()
+	InitConsoleLog()
 	InitDB()
 	InitRedis()
 	InitValidator()
 	InitWeapp()
-	initOss()
+	InitOss()
+	InitWxoa()
+	initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
 }

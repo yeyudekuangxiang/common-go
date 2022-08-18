@@ -27,6 +27,8 @@ func (repo BdSceneRepository) SceneToType(ch string) entity.PointTransactionType
 		return entity.POINT_ECAR
 	case "jinhuaxing":
 		return entity.POINT_JHX
+	case "fastElectricity":
+		return entity.POINT_FAST_ELECTRICITY
 	}
 	return entity.POINT_ECAR
 }

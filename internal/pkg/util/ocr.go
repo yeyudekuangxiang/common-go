@@ -17,7 +17,6 @@ type OCRResult struct {
 }
 
 func OCRPush(src string) *OCRResult {
-
 	url := "https://aip.baidubce.com/rest/2.0/ocr/v1/webimage?access_token=24.6157c4c9729181acc1bac04d6bd5ecbe.2592000.1650680140.282335-25833266"
 	method := "POST"
 
@@ -41,7 +40,7 @@ func OCRPush(src string) *OCRResult {
 
 	body, err := ioutil.ReadAll(res.Body)
 	var o OCRResult
-	err = json.Unmarshal([]byte(string(body)), &o)
+	err = json.Unmarshal(body, &o)
 	fmt.Println("OCRPush ", payload, string(body))
 
 	return &o

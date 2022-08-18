@@ -7,8 +7,12 @@ import (
 	"github.com/go-redis/redis/v8"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"time"
@@ -17,9 +21,16 @@ import (
 var (
 	ZeroActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-13 00:00:00")
 )
-var DefaultZeroService = ZeroService{}
+var DefaultZeroService = ZeroService{repo: repository.NewPointTransactionRepository(mioContext.NewMioContext())}
 
 type ZeroService struct {
+	repo *repository.PointTransactionRepository
+}
+
+func NewZeroService(ctx *mioContext.MioContext) *ZeroService {
+	return &ZeroService{
+		repo: repository.NewPointTransactionRepository(ctx),
+	}
 }
 
 func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
@@ -55,7 +66,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	})
 }
 func (srv ZeroService) StoreUrl(url string) (string, error) {
-	key := util.Md5(url)
+	key := encrypt.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
@@ -98,7 +109,7 @@ type DuiBaActivity struct {
 const DUIBAIndex = "https://88543.activity-12.m.duiba.com.cn/chw/visual-editor/skins?id=239935"
 
 func (srv ZeroService) DuiBaStoreUrl(activityId string, url string) (string, error) {
-	key := activityId + "_" + util.Md5(url)
+	key := activityId + "_" + encrypt.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
@@ -115,6 +126,7 @@ func (srv ZeroService) GetDuiBaUrlByShort(short string) (string, error) {
 	return u, nil
 }
 func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdParty string, cip string) (string, error) {
+	//userId = 30
 	userInfo, err := service.DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return "", err
@@ -126,7 +138,8 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	path := DUIBAIndex
 	isNewUser := false
 
-	activity, err := service.DefaultDuiBaActivityService.FindActivity(activityId)
+	pointService := service.NewDuiBaActivityService(mioContext.NewMioContext())
+	activity, err := pointService.FindActivity(activityId)
 	if err != nil {
 		return "", err
 	}
@@ -151,23 +164,71 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	}
 
 	//检测用户风险等级
-	resp, err := service.DefaultUserService.CheckUserRisk(wxapp.UserRiskRankParam{
+	userRiskRankParam := wxapp.UserRiskRankParam{
 		AppId:    config.Config.Weapp.AppId,
 		OpenId:   userInfo.OpenId,
-		Scene:    1,
+		Scene:    0,
 		ClientIp: cip,
-	})
-	if err != nil {
+	}
+	//风险等级4,代表不需要验证.0-3代表需要做出限制
+	if activity.RiskLimit < 4 {
+		//判断用户手机号,警告:必须是非首页
+		if userInfo.PhoneNumber == "" {
+			return "", errno.ErrNotBindMobile
+		}
+		userRiskRankParam.MobileNo = userInfo.PhoneNumber
+	}
+	resp, err := service.DefaultUserService.CheckUserRisk(userRiskRankParam)
+	if err != nil && activityId != "index" {
 		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
 	} else {
 		if resp.RiskRank > activity.RiskLimit {
-			return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
+			return "", nil
+			//return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
 		}
 	}
 
 	vip := 0
-	if thirdParty == "thirdParty" && isNewUser {
+	/*if thirdParty == "thirdParty" && isNewUser {
 		vip = 2
+	}*/
+
+	switch activity.VipType {
+	case entity.DuiBaActivityVipTypeNewUser:
+		if thirdParty == "thirdParty" && isNewUser {
+			vip = 2
+		}
+		break
+	case entity.DuiBaActivityIsPhoneAnniversaryActivity:
+		//需求地址：https://confluence.miotech.com/pages/viewpage.action?pageId=26613756
+		var pointTypes = []string{"STEP", "COFFEE_CUP", "BIKE_RIDE", "ECAR"}
+		count := srv.repo.GetListByFenQunCount(repository.GetPointTransactionListByQun{
+			StartTime: "2022-08-01:00:00:01",
+			EndTime:   "2022-08-15:00:00:01",
+			Types:     pointTypes,
+			OpenId:    userInfo.OpenId,
+		})
+		switch {
+		case count == 3:
+			{
+				vip = 57
+			}
+		case count >= 4 && count <= 7:
+			{
+				vip = 58
+			}
+		case count >= 8 && count <= 14:
+			{
+				vip = 59
+			}
+		default:
+			{
+				break
+			}
+		}
+		break
+	default:
+		break
 	}
 
 	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()

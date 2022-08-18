@@ -16,6 +16,7 @@ import (
 	repository2 "mio/internal/pkg/repository"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"strconv"
@@ -35,9 +36,6 @@ type UserService struct {
 }
 
 func (u UserService) GetUserById(id int64) (*entity.User, error) {
-	if id == 0 {
-		return &entity.User{}, nil
-	}
 	user := u.r.GetUserById(id)
 	return &user, nil
 }
@@ -155,6 +153,26 @@ func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.Use
 	})
 }
 
+// BindMobileByYZM 绑定手机号
+func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
+	if mobile == "" {
+		return errors.New("手机号不能为空")
+	}
+	userBy := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{Mobile: mobile})
+	if userBy.ID != 0 {
+		return errors.New("该号码已被绑定，请更换号码重新绑定")
+	}
+	user := repository2.DefaultUserRepository.GetUserById(userId)
+	if user.ID == 0 {
+		return errors.New("未查到用户信息")
+	}
+	if user.PhoneNumber != "" {
+		return errors.New("您已绑定号码，请勿重复操作")
+	}
+	user.PhoneNumber = mobile
+	return repository2.DefaultUserRepository.Save(&user)
+}
+
 // FindUserBySource 根据用户id 获取指定平台的用户
 func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
 	if userId == 0 {
@@ -198,7 +216,7 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 
 	return false
 }
-func (u UserService) BindPhoneByCode(userId int64, code string) error {
+func (u UserService) BindPhoneByCode(userId int64, code string, cip string) error {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
 		return errors.New("未查到用户信息")
@@ -214,6 +232,28 @@ func (u UserService) BindPhoneByCode(userId int64, code string) error {
 		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
 	}
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
+
+	//检测用户风险等级
+	userRiskRankParam := wxapp.UserRiskRankParam{
+		AppId:    config.Config.Weapp.AppId,
+		OpenId:   userInfo.OpenId,
+		Scene:    0,
+		ClientIp: cip,
+		MobileNo: userInfo.PhoneNumber,
+	}
+	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
+	if err != nil {
+		app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
+	}
+	userInfo.Risk = rest.RiskRank
+
+	//获取用户地址  todo 加入队列
+	city, err := baidu.IpToCity(cip)
+	if err != nil {
+		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+	}
+	userInfo.CityCode = city.Content.AddressDetail.Adcode
+	userInfo.Ip = cip
 	return u.r.Save(&userInfo)
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
@@ -373,9 +413,22 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+	if param.PhoneNumber != nil {
+		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
+			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
+		}
+
+		user.PhoneNumber = *param.PhoneNumber
+	}
+	if param.Birthday != nil {
+		user.Birthday = model.Date{Time: *param.Birthday}
+	}
+	if param.Gender != nil {
+		user.Gender = *param.Gender
+	}
+
 	user.AvatarUrl = param.Avatar
 	user.Nickname = param.Nickname
-	user.Gender = param.Gender
 	return u.r.Save(&user)
 }
 
@@ -432,4 +485,38 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 		CarbonToday: carbonInfo.CarbonToday,
 		CarbonAll:   carbonInfo.Carbon,
 	}, nil
+}
+
+func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile string) bool {
+	user := u.r.GetUserBy(repository2.GetUserBy{
+		Source: source,
+		Mobile: mobile,
+	})
+
+	if user.ID == 0 || user.ID == id {
+		return false
+	}
+	return true
+}
+
+func (u UserService) ChangeUserState(param ChangeUserState) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	return u.r.Save(&user)
+}
+
+func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	if param.Position != "" {
+		user.Position = entity.UserPosition(param.Position)
+	}
+	if param.PositionIcon != "" {
+		user.PositionIcon = param.PositionIcon
+	}
+	return u.r.Save(&user)
 }

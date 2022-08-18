@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
@@ -196,7 +197,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		if orderItem.MerchantCode != "" {
 			itemId = "duiba-" + orderItem.MerchantCode
 		} else {
-			itemId = "duiba-" + form.OrderNum + "-" + util.Md5(orderItem.Title)
+			itemId = "duiba-" + form.OrderNum + "-" + encrypt.Md5(orderItem.Title)
 		}
 		orderItemList[i].MerchantCode = itemId
 
@@ -227,6 +228,17 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 func (srv DuiBaService) CheckSign(param duiba.Param) error {
 	return srv.client.CheckSign(param)
 }
+
+var duibaPointAddTypeMap = map[duibaApi.PointAddType]entity.PointTransactionType{
+	duibaApi.PointAddTypeGame:       entity.POINT_DUIBA_GAME,
+	duibaApi.PointAddTypeSign:       entity.POINT_DUIBA_SIGN,
+	duibaApi.PointAddTypeTask:       entity.POINT_DUIBA_TASK,
+	duibaApi.PointAddTypeReSign:     entity.POINT_DUIBA_SIGN,       //补签
+	duibaApi.PointAddTypePostSale:   entity.POINT_DUIBA_POSTSALE,   //售后退积分
+	duibaApi.PointAddTypeCancelShip: entity.POINT_DUIBA_CANCELSHIP, //取消发货
+	duibaApi.PointAddTypeHdTool:     entity.POINT_DUIBA_HDTOOL,
+}
+
 func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string, err error) {
 	log, err := DefaultDuiBaPointAddLogService.FindBy(FindDuiBaPointAddLogBy{
 		OrderNum: form.OrderNum,
@@ -255,10 +267,14 @@ func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string,
 		return
 	}
 
+	pointType := duibaPointAddTypeMap[form.Type]
+	if pointType == "" {
+		pointType = entity.POINT_ADJUSTMENT
+	}
 	bizId := util.UUID()
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
-		Type:         entity.POINT_ADJUSTMENT,
+		Type:         pointType,
 		ChangePoint:  form.Credits.ToInt(),
 		BizId:        bizId,
 		AdminId:      0,
@@ -294,7 +310,7 @@ var virtualGoodMap = map[string]int{
 }
 
 func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId string, credit int64, err error) {
-	lockKey := fmt.Sprintf("VirtualGoodCallback%s", util.Md5(form.OrderNum+form.Params))
+	lockKey := fmt.Sprintf("VirtualGoodCallback%s", encrypt.Md5(form.OrderNum+form.Params))
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
 		return "", 0, errors.New("操作频繁,请稍后再试")
 	}
@@ -344,7 +360,7 @@ func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productIte
 	pointService := NewPointService(context.NewMioContext())
 	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openid,
-		Type:         entity.POINT_ADJUSTMENT,
+		Type:         entity.POINT_DUIBA_INTEGRAL_RECHARGE,
 		ChangePoint:  int64(point),
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprintf("兑吧虚拟商品兑换 orderNum:%s productItemId:%s", orderNum, productItemId),

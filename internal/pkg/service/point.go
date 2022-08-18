@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"time"
 )
@@ -18,7 +19,7 @@ func NewPointService(ctx *context.MioContext) PointService {
 
 type PointService struct {
 	ctx  *context.MioContext
-	repo repository.PointRepository
+	repo *repository.PointRepository
 }
 
 // FindByUserId 获取用户积分
@@ -70,6 +71,7 @@ func (srv PointService) DecUserPoint(dto srv_types.DecUserPointDTO) (int64, erro
 func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64, error) {
 	lockKey := "changeUserPoint" + dto.OpenId
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
+		go srv.trackPoint(dto, "操作频繁")
 		return 0, errors.New("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
@@ -79,6 +81,8 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		limitService := NewPointTransactionCountLimitService(srv.ctx)
 		err := limitService.CheckLimitAndUpdate(dto.Type, dto.OpenId)
 		if err != nil {
+			//积分打点
+			go srv.trackPoint(dto, err.Error())
 			return 0, err
 		}
 	}
@@ -131,13 +135,69 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		}
 		return nil
 	})
+
+	//积分打点
+	if err != nil {
+		go srv.trackPoint(dto, err.Error())
+	} else {
+		go srv.trackPoint(dto, "")
+	}
+
+	return balance, err
+}
+
+//ChangeUserPointByOffline 线下发积分
+func (srv PointService) ChangeUserPointByOffline(dto srv_types.ChangeUserPointDTO) (int64, error) {
+	var balance int64 = 0
+	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
+		//查询积分账户
+		pointRepo := repository.NewPointRepository(ctx)
+		point, err := pointRepo.FindForUpdate(dto.OpenId)
+		if err != nil {
+			return err
+		}
+		//判读积分余额是否充足
+		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
+			return errors.New("积分不足")
+		}
+		if point.Id == 0 {
+			//创建积分账户
+			point.OpenId = dto.OpenId
+			point.Balance += dto.ChangePoint
+			if err := pointRepo.Create(&point); err != nil {
+				return err
+			}
+		} else {
+			//更新积分账户
+			point.Balance += dto.ChangePoint
+			if err := pointRepo.Save(&point); err != nil {
+				return err
+			}
+		}
+		balance = point.Balance
+		//增加积分变动记录
+		tranService := NewPointTransactionService(ctx)
+		_, err = tranService.CreateTransaction(CreatePointTransactionParam{
+			BizId:        dto.BizId,
+			OpenId:       dto.OpenId,
+			Type:         dto.Type,
+			Value:        dto.ChangePoint,
+			AdminId:      dto.AdminId,
+			Note:         dto.Note,
+			AdditionInfo: dto.AdditionInfo,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	return balance, err
 }
 
 //AdminAdjustUserPoint 管理员变动积分
 func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserPointParam) error {
 
-	if err := util.ValidatorStruct(param); err != nil {
+	if err := validator.ValidatorStruct(param); err != nil {
 		app.Logger.Error(param, err)
 		return err
 	}
@@ -165,4 +225,15 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 		Note:        param.Note,
 	})
 	return err
+}
+
+func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage string) {
+	go DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
+		OpenId:      dto.OpenId,
+		PointType:   dto.Type,
+		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "desc").String(),
+		Value:       uint(dto.ChangePoint),
+		IsFail:      util.Ternary(failMessage == "", false, true).Bool(),
+		FailMessage: failMessage,
+	})
 }

@@ -13,8 +13,9 @@ type ITopicRepository interface {
 	GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
 	FindById(topicId int64) entity.Topic
 	Save(topic *entity.Topic) error
+	//FindTopicOneBy() entity.Topic
 	AddTopicLikeCount(topicId int64, num int) error
-	GetTopicList(by GetTopicListBy) []entity.Topic
+	GetTopicList(by FindTopicBy) []entity.Topic
 	GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
 	UpdateColumn(id int64, key string, value interface{}) error
 }
@@ -44,7 +45,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 	err := db.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
-		Order("topic.sort desc,topic.updated_at desc,topic.id desc").
+		Order("is_top desc, is_essence desc, sort desc,updated_at desc,id desc").
 		Preload("Tags").
 		Find(&list).Error
 	if err != nil {
@@ -52,6 +53,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 	}
 	return
 }
+
 func (u TopicRepository) FindById(topicId int64) entity.Topic {
 	topic := entity.Topic{}
 	err := u.DB.Model(entity.Topic{}).Where("id = ?", topicId).First(&topic).Error
@@ -60,6 +62,7 @@ func (u TopicRepository) FindById(topicId int64) entity.Topic {
 	}
 	return topic
 }
+
 func (u TopicRepository) Save(topic *entity.Topic) error {
 	return u.DB.Save(topic).Error
 }
@@ -72,7 +75,8 @@ func (u TopicRepository) AddTopicLikeCount(topicId int64, num int) error {
 	}
 	return db.Update("like_count", gorm.Expr("like_count + ?", num)).Error
 }
-func (u TopicRepository) GetTopicList(by GetTopicListBy) []entity.Topic {
+
+func (u TopicRepository) GetTopicList(by FindTopicBy) []entity.Topic {
 	list := make([]entity.Topic, 0)
 	db := u.DB.Model(entity.Topic{})
 	if len(by.TopicIds) > 0 {
