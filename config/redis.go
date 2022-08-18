@@ -15,6 +15,7 @@ type redisKey struct {
 	BaiDu                 string
 	BadgeImageCode        string
 	CheckBusinessUser     string
+	BlackList             string
 }
 
 var RedisKey = redisKey{
@@ -32,4 +33,5 @@ var RedisKey = redisKey{
 	BaiDu:                 "mp2c:baidu:",                     //用于百度接口
 	BadgeImageCode:        "mp2c:updateBadgeImage:",          //上传证书图片凭证
 	CheckBusinessUser:     "mp2c:checkBusinessUser:%s",       //检测用户token是否有更新
+	BlackList:             "mp2c:blacklist",                  //黑产白名单
 }

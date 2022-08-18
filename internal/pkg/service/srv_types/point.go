@@ -10,6 +10,7 @@ type ChangeUserPointDTO struct {
 	Note         string
 	AdditionInfo string
 	BizId        string
+	InviteId     int64
 }
 type IncUserPointDTO struct {
 	OpenId       string                      `binding:"required"`
@@ -19,6 +20,7 @@ type IncUserPointDTO struct {
 	AdminId      int
 	Note         string
 	AdditionInfo string
+	InviteId     int64
 }
 type DecUserPointDTO struct {
 	OpenId       string                      `binding:"required"`

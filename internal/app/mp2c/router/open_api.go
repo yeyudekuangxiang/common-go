@@ -62,6 +62,8 @@ func openRouter(router *gin.Engine) {
 
 		//订单同步接口 （星星充电、快电）
 		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
+		//噢啦订单同步接口
+		openRouter.POST("/recycle/oola", apiutil.Format(api.DefaultRecycleController.OolaOrderSync))
 
 		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
 	}

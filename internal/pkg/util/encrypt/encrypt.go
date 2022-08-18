@@ -4,17 +4,21 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
-	"fmt"
 )
 
 func Md5(str string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
+	encrypt := md5.New()
+	encrypt.Write([]byte(str))
+	md5Data := encrypt.Sum([]byte(""))
+	return hex.EncodeToString(md5Data)
 }
 
-func AesEncrypt(orig, key string) string {
+func AesEncrypt(orig string, key, iv string) string {
 	origData := []byte(orig)
 	k := []byte(key)
 	// 分组秘钥 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
@@ -24,7 +28,7 @@ func AesEncrypt(orig, key string) string {
 	// 补全码
 	origData = pkcs7Padding(origData, blockSize)
 	// 加密模式
-	blockMode := cipher.NewCBCEncrypter(block, k[:blockSize])
+	blockMode := cipher.NewCBCEncrypter(block, []byte(iv))
 	// 创建数组
 	cryted := make([]byte, len(origData))
 	// 加密
@@ -32,7 +36,7 @@ func AesEncrypt(orig, key string) string {
 	return base64.StdEncoding.EncodeToString(cryted)
 }
 
-func AesDecrypt(cryted, key string) (string, error) {
+func AesDecrypt(cryted, key, iv string) (string, error) {
 	// 转成字节数组
 	crytedByte, _ := base64.StdEncoding.DecodeString(cryted)
 
@@ -40,9 +44,9 @@ func AesDecrypt(cryted, key string) (string, error) {
 	// 分组秘钥
 	block, _ := aes.NewCipher(k)
 	// 获取秘钥块的长度
-	blockSize := block.BlockSize()
+	//blockSize := block.BlockSize()
 	// 加密模式 cbc
-	blockMode := cipher.NewCBCDecrypter(block, k[:blockSize])
+	blockMode := cipher.NewCBCDecrypter(block, []byte(iv))
 	// 创建数组
 	origin := make([]byte, len(crytedByte))
 	// 解密
@@ -53,6 +57,12 @@ func AesDecrypt(cryted, key string) (string, error) {
 		return "", err
 	}
 	return string(origin), nil
+}
+
+func HMacMd5(orig, key string) string {
+	h := hmac.New(md5.New, []byte(key))
+	h.Write([]byte(orig))
+	return hex.EncodeToString(h.Sum([]byte("")))
 }
 
 //补码

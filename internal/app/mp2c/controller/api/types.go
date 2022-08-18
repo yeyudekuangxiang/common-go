@@ -43,6 +43,20 @@ type GetChargeForm struct {
 	Sign       string `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
 
+type RecyclePushForm struct {
+	Type                int    `json:"type" form:"type" binding:"required"`                      //业务类型 1：回首订单成功
+	OrderNo             string `json:"orderNo" form:"orderNo" binding:"required"`                //订单号，同类型同订单视为重复订单
+	Name                string `json:"name,omitempty" form:"name" binding:"required"`            //type = 1，回收物品名称
+	ProductCategoryName string `json:"productCategoryName,omitempty" form:"productCategoryName"` //物品所属分类名称
+	Qua                 string `json:"qua,omitempty" form:"qua"`                                 //用户下单时的数量&重量
+	Unit                string `json:"unit,omitempty" form:"unit"`                               //与下单数量&重量关联的计量单位 如：公斤，个 等
+	OolaUserId          int    `json:"oolaUserId" form:"oolaUserId" binding:"required"`          //噢啦平台用户id
+	ClientId            string `json:"clientId" form:"clientId" binding:"required"`              //lvmiao用户id
+	CreateTime          string `json:"createTime" form:"createTime" binding:"required"`          //订单创建时间
+	CompletionTime      string `json:"completionTime" form:"completionTime" binding:"required"`  //订单完成时间
+	Sign                string `json:"sign" form:"sign" binding:"required"`                      //加密串
+}
+
 type QueryTokenForm struct {
 	OperatorID     string `json:"operatorID" form:"operatorID" alias:"运营商标识" binding:"required"`
 	OperatorSecret string `json:"operatorSecret" form:"operatorSecret" alias:"运营商密钥" binding:"required"`
@@ -52,7 +66,8 @@ type DuibaAutoLoginForm struct {
 	Path string `json:"path" form:"path"`
 }
 type BindMobileByCodeForm struct {
-	Code string `json:"code" form:"code" binding:"required" alias:"code"`
+	Code      string `json:"code" form:"code" binding:"required" alias:"code"`
+	InvitedBy string `json:"invitedBy" form:"invitedBy" alias:"invitedBy"`
 }
 type GetPointTransactionListForm struct {
 	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`

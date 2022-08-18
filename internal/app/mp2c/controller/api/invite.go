@@ -14,9 +14,8 @@ type InviteController struct {
 
 func (InviteController) GetShareQrCode(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-
-	page := "/pages/home/index?invitedBy=" + user.OpenId + "&cid=2"
-
+	//page := "/pages/home/index?invitedBy=" + user.OpenId + "&cid=2"
+	page := "/pages/invitation/index?invitedBy=" + user.OpenId + "&cid=2"
 	info, err := service.NewQRCodeService().GetLimitedQRCode(entity.QrCodeSceneInvite, page, 100, user.OpenId)
 	if err != nil {
 		return nil, err

@@ -292,9 +292,16 @@ func (srv PointTransactionService) GetAdjustPointTransactionTypeList() []PointTr
 	}
 }
 
-func (srv PointTransactionService) CountByToday(openIds []string, types entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
+func (srv PointTransactionService) CountByToday(openId string, types entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
 	return srv.repo.CountByToday(repository.GetPointTransactionCountBy{
-		OpenIds: openIds,
-		Type:    types,
+		OpenId: openId,
+		Type:   types,
+	})
+}
+
+func (srv PointTransactionService) CountByMonth(openId string, types entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
+	return srv.repo.CountByMonth(repository.GetPointTransactionCountBy{
+		OpenId: openId,
+		Type:   types,
 	})
 }
