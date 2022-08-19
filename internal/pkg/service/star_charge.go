@@ -6,12 +6,29 @@ import (
 	"fmt"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
 	"time"
 )
 
+func NewStarChargeService(context *context.MioContext) *StarChargeService {
+	return &StarChargeService{
+		ctx:            context,
+		OperatorSecret: "acb93539fc9bg78k",
+		OperatorID:     "MA1G55M81",
+		SigSecret:      "9af2e7b2d7562ad5",
+		DataSecret:     "a2164ada0026ccf7",
+		DataSecretIV:   "82c91325e74bef0f",
+		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
+		Batch:          "JC_20220818174826241",
+	}
+}
+
 type StarChargeService struct {
+	ctx            *context.MioContext
 	OperatorSecret string `json:"OperatorSecret,omitempty"` //运营商密钥
 	OperatorID     string `json:"OperatorID,omitempty"`     //运营商标识
 	SigSecret      string `json:"SigSecret,omitempty"`      //签名密钥
@@ -19,7 +36,6 @@ type StarChargeService struct {
 	DataSecretIV   string `json:"DataSecretIV,omitempty"`   //消息密钥初始化向量
 	Domain         string `json:"Domain,omitempty"`         //域名
 	Batch          string `json:"Batch,omitempty"`
-	TypeId         int64  `json:"TypeId,omitempty"`
 }
 
 type getToken struct {
@@ -40,8 +56,8 @@ type queryRequest struct {
 }
 
 // GetAccessToken 星星充电 query token
-func (srv StarChargeService) GetAccessToken(ctx *context.MioContext) (string, error) {
-	redisCmd := app.Redis.Get(ctx, "token:"+srv.OperatorID)
+func (srv StarChargeService) GetAccessToken() (string, error) {
+	redisCmd := app.Redis.Get(srv.ctx, "token:"+srv.OperatorID)
 	result, err := redisCmd.Result()
 	if err != nil {
 		return "", err
@@ -94,11 +110,11 @@ func (srv StarChargeService) GetAccessToken(ctx *context.MioContext) (string, er
 	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
-	app.Redis.Set(ctx, "token:"+srv.OperatorID, accessResult.AccessToken, time.Second*time.Duration(accessResult.TokenAvailableTime))
+	app.Redis.Set(srv.ctx, "token:"+srv.OperatorID, accessResult.AccessToken, time.Second*time.Duration(accessResult.TokenAvailableTime))
 	return accessResult.AccessToken, nil
 }
 
-func (srv StarChargeService) SendCoupon(phoneNumber string, provideId string, token string) error {
+func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId string, token string) error {
 	r := struct {
 		PhoneNumber string `json:"phoneNumber"`
 		ProvideId   string `json:"provideId"`
@@ -129,6 +145,16 @@ func (srv StarChargeService) SendCoupon(phoneNumber string, provideId string, to
 	if provideResult.SuccStat != 0 {
 		return errors.New(provideResult.FailReasonMsg)
 	}
-
+	//保存记录
+	history := entity.CouponHistory{
+		OpenId:     openId,
+		CouponType: "star_charge",
+		Code:       provideResult.CouponCode,
+		CreateTime: model.CreatedTime{},
+	}
+	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
+	if err != nil {
+		return err
+	}
 	return nil
 }

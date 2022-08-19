@@ -11,7 +11,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -90,32 +89,22 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		if err != nil {
 			fmt.Println("charge 加积分失败 ", form)
 		}
+		// todo 发券
+		startTime, _ := time.Parse("20060102", "2022-08-22")
+		endTime, _ := time.Parse("20060102", "2022-08-30")
+		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
+			starChargeService := service.NewStarChargeService(context.NewMioContext())
+			token, err := starChargeService.GetAccessToken()
+			if err != nil {
+				return nil, err
+			}
+			//send coupon
+			err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.Batch, token)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
-	return gin.H{}, nil
-}
-
-// SendCoupon 星星充电 发放优惠券
-func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
-	user := apiutil.GetAuthUser(c)
-	if user.PhoneNumber == "" {
-		return nil, errno.ErrBind.WithMessage("未绑定手机号")
-	}
-	StarChargeService := service.StarChargeService{
-		OperatorID:     "MA1G55M81",
-		OperatorSecret: "acb93539fc9bg78k",
-		SigSecret:      "9af2e7b2d7562ad5",
-		DataSecret:     "a2164ada0026ccf7",
-		DataSecretIV:   "82c91325e74bef0f",
-		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
-	}
-	token, err := StarChargeService.GetAccessToken(context.NewMioContext())
-	if err != nil {
-		return nil, err
-	}
-	err = StarChargeService.SendCoupon(user.PhoneNumber, "JC_20220816144920341", token)
-	if err != nil {
-		return nil, err
-	}
 	return gin.H{}, nil
 }
