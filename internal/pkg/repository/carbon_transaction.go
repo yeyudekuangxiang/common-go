@@ -30,7 +30,7 @@ func (repo CarbonTransactionRepository) GetListBy(by repotypes.GetCarbonTransact
 	if by.OpenId != "" {
 		db.Where("openid = ?", by.OpenId)
 	}
-	if by.StartTime == "" {
+	if by.StartTime != "" {
 		db.Where("created_at >= ?", by.StartTime)
 	}
 	if by.EndTime != "" {

@@ -196,14 +196,14 @@ type KVPair struct {
 
 func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionClassifyDto) (retDto api_types.CarbonTransactionClassify, err error) {
 	UserIdString := strconv.FormatInt(dto.UserId, 10) //我的uid string
-	DataMap := map[entity.CarbonTransactionType]float64{entity.CARBON_STEP: 5, entity.CARBON_COFFEE_CUP: 4, entity.CARBON_BIKE_RIDE: 3, entity.CARBON_ECAR: 2}
+	/*DataMap := map[entity.CarbonTransactionType]float64{entity.CARBON_STEP: 5, entity.CARBON_COFFEE_CUP: 4, entity.CARBON_BIKE_RIDE: 3, entity.CARBON_ECAR: 2}
 	marshal, err := json.Marshal(DataMap)
 	if err != nil {
 		fmt.Printf("Map转化为byte数组失败,异常:%s\n", err)
 		return
 	}
 	app.Redis.HSet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString, string(marshal))
-
+	*/
 	/******上面造数据用的*****/
 
 	dataStr := app.Redis.HGet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
@@ -328,7 +328,11 @@ func (srv CarbonTransactionService) AddClassify(dto api_types.GetCarbonTransacti
 			fmt.Printf("Map转化为byte数组失败,异常:%s\n", err)
 			return
 		}
-		app.Redis.HSet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, k, string(marshal))
+		UserIdString := strconv.FormatInt(k, 10) //我的uid string
+		//redisKey := fmt.Sprintf(config.RedisKey.UserCarbonClassify, k)
+		app.Redis.HDel(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
+		ret := app.Redis.HSet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString, string(marshal))
+		println(ret)
 	}
 }
 

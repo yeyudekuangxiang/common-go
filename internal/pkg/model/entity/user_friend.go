@@ -11,3 +11,7 @@ type UserFriend struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+func (UserFriend) TableName() string {
+	return "user_friend"
+}
