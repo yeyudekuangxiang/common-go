@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -62,7 +63,7 @@ func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, 
 		ExpireTime:  time.Minute * 5,
 		MaxSize:     uploadScene.MaxSize,
 		UploadDir:   uploadScene.OssDir,
-		CallbackUrl: config.Config.App.Domain + "/api/mp2c/upload/callback",
+		CallbackUrl: util.LinkJoin(config.Config.App.Domain, "/api/mp2c/upload/callback?logId="+log.LogId),
 		MimeTypes:   uploadScene.MimeTypes,
 		MaxAge:      uploadScene.MaxAge,
 	})
@@ -82,6 +83,9 @@ func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, 
 }
 func (srv UploadService) UploadCallback(param srv_types.UploadCallbackParam) error {
 	_, err := DefaultUploadLogService.UpdateLog(param.LogId, param.Filename, param.Size)
+	if err != nil {
+		app.Logger.Error("上传文件回调失败", param, err)
+	}
 	return err
 }
 func (srv UploadService) GetUrlByLogId(logId string) (string, error) {
