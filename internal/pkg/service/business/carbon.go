@@ -349,7 +349,7 @@ func (srv CarbonService) CalcGreenBusinessTripCity(from, to string) (decimal.Dec
 		return decimal.Decimal{}, errno.ErrCommon.WithMessage("计算距离错误")
 	}
 	distance := util.CalcLngLatDistance(lng1, lat1, lng2, lat2)
-	return decimal.NewFromFloat(distance).Div(decimal.NewFromInt32(1000)).Round(2), nil
+	return decimal.NewFromFloat(distance).Div(decimal.NewFromInt32(10000)).Round(2), nil
 }
 
 var defaultHotCity = map[int64]string{
