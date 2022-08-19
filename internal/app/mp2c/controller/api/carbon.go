@@ -140,12 +140,13 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 	for _, j := range list {
 		listMap[j.VDate.Format("01-02")] = j
 	}
+
 	//整理最终列表 近2周的数据 i = 14
 	var ListDateVo []string
 	var ListValueVo []float64
 	var ListValueStrVo []string
 
-	for i := 14; i >= 1; i-- {
+	for i := 13; i >= 1; i-- {
 		day := time.Now().AddDate(0, 0, -i).Format("01-02")
 		ListDateVo = append(ListDateVo, day)
 		l, ok := listMap[day] //判断是否存在map集合中
@@ -157,6 +158,11 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 			ListValueStrVo = append(ListValueStrVo, "0g")
 		}
 	}
+	//今天的先加入进去
+	carbonToday := c.service.GetTodayCarbon(user.ID)
+	ListDateVo = append(ListDateVo, time.Now().Format("01-02"))
+	ListValueVo = append(ListValueVo, carbonToday)
+	ListValueStrVo = append(ListValueStrVo, util.CarbonToRate(carbonToday))
 	return gin.H{"dateList": ListDateVo, "valueList": ListValueVo, "valueListStr": ListValueStrVo}, nil
 }
 

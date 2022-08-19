@@ -3,7 +3,6 @@ package util
 import "github.com/shopspring/decimal"
 
 /*
-
 树木碳吸引量换算：
 按1棵成年的沙棘树每年吸收二氧化碳 1.66 kg 来计算；
 若用户碳减排量为A千克，则相当于B（B = A / 1.66 kg）棵沙棘树1年碳吸收量；
@@ -37,12 +36,10 @@ func CarbonToTree(carbon float64) (string, string) {
 */
 
 func CarbonToRate(carbon float64) string {
-	rateKgDec := decimal.NewFromFloat(10000)     //kg转化率
-	rateTonDec := decimal.NewFromFloat(10000000) //吨转化率
 	carbonDec := decimal.NewFromFloat(carbon)
-	if carbonDec.Cmp(rateKgDec) == -1 {
+	if carbonDec.Cmp(decimal.NewFromFloat(10000)) == -1 {
 		return carbonDec.Round(1).String() + "g"
-	} else if carbonDec.Cmp(rateTonDec) == 1 {
+	} else if carbonDec.Cmp(decimal.NewFromFloat(10000000)) == 1 {
 		return carbonDec.Div(decimal.NewFromInt(1000000)).Round(1).String() + "吨"
 	} else {
 		return carbonDec.Div(decimal.NewFromInt(1000)).Round(1).String() + "kg"
