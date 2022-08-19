@@ -1,6 +1,9 @@
 package srv_types
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/pkg/model/entity"
+	"time"
+)
 
 type TrackPoint struct {
 	OpenId      string
@@ -18,4 +21,25 @@ type TrackPoints struct {
 	Value       uint   //变动数量
 	IsFail      bool   //是否失败
 	FailMessage string //失败信息
+}
+
+type TrackBusinessPoints struct {
+	Uid        string //用户编号
+	Value      int
+	ChangeType string    //获取或者消耗 dec(消耗) inc(获取)
+	Nickname   string    //昵称
+	Username   string    //姓名
+	Department string    //部门
+	Company    string    //公司
+	ChangeTime time.Time //时间
+}
+type TrackBusinessCredit struct {
+	Uid        string //用户编号
+	Value      float64
+	ChangeType string    //获取或者消耗 dec(消耗) inc(获取)
+	Nickname   string    //昵称
+	Username   string    //姓名
+	Department string    //部门
+	Company    string    //公司
+	ChangeTime time.Time //时间
 }

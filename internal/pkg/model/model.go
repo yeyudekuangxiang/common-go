@@ -299,3 +299,18 @@ func (d *NullInt) Scan(value interface{}) error {
 	*d = NullInt(t)
 	return nil
 }
+
+type LongID int64
+
+func (id LongID) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + strconv.FormatInt(int64(id), 10) + "\""), nil
+}
+
+func (id *LongID) UnmarshalJSON(data []byte) error {
+	d, err := strconv.ParseInt(strings.Trim(string(data), "\""), 10, 64)
+	if err != nil {
+		return err
+	}
+	*id = LongID(d)
+	return nil
+}
