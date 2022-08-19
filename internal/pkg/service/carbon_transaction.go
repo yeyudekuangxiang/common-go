@@ -260,12 +260,6 @@ func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionC
 
 // History 我的减碳成就-近2周减碳
 func (srv CarbonTransactionService) History(dto api_types.GetCarbonTransactionHistoryDto) ([]entity.CarbonTransactionDay, error) {
-	/*	srv.repoDay.Create(&entity.CarbonTransactionDay{
-		OpenId: "1",
-		UserId: 30,
-		VDate:  time.Now().AddDate(0, 0, -1),
-		Value:  30.0,
-	})*/
 	list, err := srv.repoDay.GetList(repotypes.GetCarbonTransactionDayGetListDO{
 		StartTime: dto.StartTime,
 		EndTime:   dto.EndTime,

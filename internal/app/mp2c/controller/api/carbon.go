@@ -20,14 +20,13 @@ type CarbonController struct {
 var DefaultCarbonController = CarbonController{
 	service.NewCarbonTransactionService(context.NewMioContext())}
 
-//测试
-
+//Create 测试用
 func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
+	return nil, nil
 	form := api_types.GetCarbonTransactionCreateForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	//user := apiutil.GetAuthUser(ctx)
 	//判断名称和图片是否存在
 	info, err := c.service.Create(api_types.CreateCarbonTransactionDto{
 		OpenId:  form.OpenId,
@@ -158,7 +157,7 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 			ListValueStrVo = append(ListValueStrVo, "0g")
 		}
 	}
-	//今天的先加入进去
+	//今天的数据加入进去
 	carbonToday := c.service.GetTodayCarbon(user.ID)
 	ListDateVo = append(ListDateVo, time.Now().Format("01-02"))
 	ListValueVo = append(ListValueVo, carbonToday)
