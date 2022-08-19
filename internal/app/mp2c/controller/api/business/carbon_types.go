@@ -39,10 +39,11 @@ type GetCarbonCreditLogSortedListForm struct {
 }
 
 type CarbonCollectOEPForm struct {
-	Voucher string `json:"voucher" form:"voucher" `
+	Photo string `json:"photo" form:"photo" binding:"required" alias:"凭证图片"`
 }
 type CarbonGreenBusinessTripForm struct {
-	Type string `json:"type" form:"type" binding:"oneof=hsr train plane" alias:"交通工具"`
-	From string `json:"from" form:"from" binding:"required" alias:"出发地"`
-	To   string `json:"to" form:"to" binding:"required" alias:"目的地"`
+	Type  string `json:"type" form:"type" binding:"oneof=hsr train plane" alias:"交通工具"`
+	From  string `json:"from" form:"from" binding:"required" alias:"出发地"`
+	To    string `json:"to" form:"to" binding:"required" alias:"目的地"`
+	Photo string `json:"photo" form:"photo" binding:"required" alias:"凭证图片"`
 }

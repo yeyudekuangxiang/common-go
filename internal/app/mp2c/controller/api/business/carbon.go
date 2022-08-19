@@ -1,18 +1,12 @@
 package business
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"mio/internal/app/mp2c/controller/api/business/businesstypes"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/errno"
-	"path/filepath"
 	"time"
 )
 
@@ -92,31 +86,15 @@ func (CarbonController) CollectPublicTransport(ctx *gin.Context) (gin.H, error) 
 	}, err
 }
 func (CarbonController) CollectOEP(ctx *gin.Context) (gin.H, error) {
-	log.Println("获取图片")
-	fh, err := ctx.FormFile("photo")
-	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.ErrCommon.WithMessage("上传图片失败,请稍后再试")
+	form := CarbonCollectOEPForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
 	}
-	log.Println("打开图片")
-	f, err := fh.Open()
-	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.ErrCommon.WithMessage("上传图片失败,请稍后再试")
-	}
-	defer f.Close()
 
 	user := apiutil.GetAuthBusinessUser(ctx)
-	log.Println("上传图片", fh.Size, float64(fh.Size)/float64(1000))
-	path := fmt.Sprintf("business/carbon/oep/%d%d%s", user.ID, time.Now().UnixMilli(), filepath.Ext(fh.Filename))
-	path, err = service.DefaultOssService.PutObject(path, f)
-	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.ErrCommon.WithMessage("上传图片失败,请稍后再试")
-	}
-	log.Println("减碳逻辑")
+
 	carbonSrv := business.NewCarbonService(context.NewMioContext(context.WithContext(ctx)))
-	result, err := carbonSrv.CarbonCreditOEP(user.ID, path)
+	result, err := carbonSrv.CarbonCreditOEP(user.ID, form.Photo)
 	if err != nil {
 		return nil, err
 	}
@@ -130,29 +108,9 @@ func (CarbonController) CollectGreenBusinessTrip(ctx *gin.Context) (gin.H, error
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-
-	fh, err := ctx.FormFile("photo")
-	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.ErrCommon.WithMessage("上传图片失败,请稍后再试")
-	}
-	f, err := fh.Open()
-	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.ErrCommon.WithMessage("上传图片失败,请稍后再试")
-	}
-	defer f.Close()
-
 	user := apiutil.GetAuthBusinessUser(ctx)
-	path := fmt.Sprintf("business/carbon/gbt/%d%d%s", user.ID, time.Now().UnixMilli(), filepath.Ext(fh.Filename))
-	path, err = service.DefaultOssService.PutObject(path, f)
-	if err != nil {
-		app.Logger.Error(err)
-		return nil, errno.ErrCommon.WithMessage("上传图片失败,请稍后再试")
-	}
-
 	carbonSrv := business.NewCarbonService(context.NewMioContext(context.WithContext(ctx)))
-	result, err := carbonSrv.CarbonCreditGreenBusinessTrip(user.ID, ebusiness.TripType(form.Type), form.From, form.To, path)
+	result, err := carbonSrv.CarbonCreditGreenBusinessTrip(user.ID, ebusiness.TripType(form.Type), form.From, form.To, form.Photo)
 	if err != nil {
 		return nil, err
 	}
