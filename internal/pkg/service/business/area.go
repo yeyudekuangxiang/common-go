@@ -58,6 +58,10 @@ func (srv AreaService) GroupCityProvinceList(dto CityProvinceListDTO) ([]GroupCi
 
 	ctMap := make(map[string][]CityProvince)
 
+	sort.Slice(cityList, func(i, j int) bool {
+		return cityList[i].Py < cityList[j].Py
+	})
+
 	for _, city := range cityList {
 		c := ShortArea{}
 		if err := util.MapTo(city, &c); err != nil {
