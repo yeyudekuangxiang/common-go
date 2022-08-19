@@ -15,7 +15,7 @@ type ISystemAdminService interface {
 	// GetAdminById 根据管理员id获取管理员信息
 	GetAdminById(int) (*entity.SystemAdmin, error)
 	// GetAdminByToken 根据token获取管理员
-	GetAdminByToken(string) (*entity.SystemAdmin, error)
+	GetAdminByToken(string) (*entity.SystemAdmin, bool, error)
 	GetAdminList(by repository.GetAdminListBy) ([]entity.SystemAdmin, error)
 	Login(account, password string) (string, error)
 }
@@ -30,14 +30,17 @@ type SystemAdminService struct {
 	r repository.ISystemAdminRepository
 }
 
-func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, error) {
+func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, bool, error) {
 	var authAdmin auth.Admin
 	err := util.ParseToken(token, &authAdmin)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	admin := a.r.GetAdminById(authAdmin.ID)
-	return &admin, nil
+	if admin.ID == 0 {
+		return nil, false, nil
+	}
+	return &admin, true, nil
 }
 
 func (a SystemAdminService) GetAdminById(id int) (*entity.SystemAdmin, error) {

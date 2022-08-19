@@ -112,8 +112,18 @@ type SendPointPublicTransportParam struct {
 	UserId        int64
 	Bus           float64
 	Metro         float64
+	Step          float64
+	Bike          float64
 	BusCredit     decimal.Decimal
 	MetroCredit   decimal.Decimal
+	StepCredit    decimal.Decimal
+	BikeCredit    decimal.Decimal
+	TransactionId string
+}
+type SendPointOEPParam struct {
+	UserId        int64
+	Voucher       string
+	CarbonCredit  decimal.Decimal
 	TransactionId string
 }
 type GetCarbonCreditLogSortedListParam struct {
@@ -126,4 +136,15 @@ type GetCarbonCreditLogSortedListByCidParam struct {
 	Cid       int
 	StartTime time.Time
 	EndTime   time.Time
+}
+
+type SendPointGreenBusinessTripParam struct {
+	TripType      business.TripType
+	From          string
+	To            string
+	Voucher       string
+	Distance      decimal.Decimal
+	UserId        int64
+	TransactionId string
+	CarbonCredit  decimal.Decimal
 }

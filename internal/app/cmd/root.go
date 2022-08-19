@@ -5,6 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"mio/internal/app/cmd/auth"
 	"mio/internal/app/cmd/certificate"
 	"mio/internal/app/cmd/db"
 	"mio/internal/app/cmd/gitlab"
@@ -59,4 +60,5 @@ func cmds() {
 	RootCmd.AddCommand(gitlab.GitlabCmd)
 	RootCmd.AddCommand(db.DBCmd)
 	RootCmd.AddCommand(certificate.CertificateCmd)
+	RootCmd.AddCommand(auth.AuthCmd)
 }

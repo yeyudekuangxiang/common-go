@@ -3,16 +3,22 @@ package business
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
+	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"time"
 )
 
-var DefaultCarbonCreditsService = CarbonCreditsService{repo: rbusiness.DefaultCarbonCreditsRepository}
-
 type CarbonCreditsService struct {
-	repo rbusiness.CarbonCreditsRepository
+	ctx  *context.MioContext
+	repo *rbusiness.CarbonCreditsRepository
+}
+
+func NewCarbonCreditsService(ctx *context.MioContext) *CarbonCreditsService {
+	return &CarbonCreditsService{ctx: ctx, repo: rbusiness.NewCarbonCreditsRepository(ctx)}
 }
 
 // SendCarbonCredit 发放碳积分 返回用户积分账户 本次实际发放的碳积分数量
@@ -47,6 +53,7 @@ func (srv CarbonCreditsService) SendCarbonCredit(param SendCarbonCreditParam) (*
 	if err != nil {
 		return nil, decimal.Decimal{}, err
 	}
+	srv.trackCreditChange(param.UserId, param.AddCredit)
 	return carbonCredit, param.AddCredit, nil
 }
 
@@ -75,7 +82,7 @@ func (srv CarbonCreditsService) SendCarbonCreditEvCar(param SendCarbonCreditEvCa
 	credits := DefaultCarbonCreditCalculatorService.CalcEvCar(param.Electricity)
 
 	//发放碳积分
-	_, credits, err := DefaultCarbonCreditsService.SendCarbonCredit(SendCarbonCreditParam{
+	_, credits, err := srv.SendCarbonCredit(SendCarbonCreditParam{
 		UserId:        param.UserId,
 		AddCredit:     credits,
 		Type:          ebusiness.CarbonTypeEvCar,
@@ -141,15 +148,19 @@ func (srv CarbonCreditsService) SendCarbonCreditSaveWaterElectricity(param SendC
 func (srv CarbonCreditsService) SendCarbonCreditSavePublicTransport(param SendCarbonCreditSavePublicTransportParam) (*SendCarbonCreditSavePublicTransportResult, error) {
 	busCredits := DefaultCarbonCreditCalculatorService.CalcBus(param.Bus)
 	metroCredits := DefaultCarbonCreditCalculatorService.CalcMetro(param.Metro)
+	stepCredits := DefaultCarbonCreditCalculatorService.CalcStep(param.Step)
+	bikeCredits := DefaultCarbonCreditCalculatorService.CalcBike(param.Bike)
 
 	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
 		UserId:        param.UserId,
-		AddCredit:     busCredits.Add(metroCredits),
+		AddCredit:     busCredits.Add(metroCredits).Add(stepCredits).Add(bikeCredits),
 		Type:          ebusiness.CarbonTypePublicTransport,
 		TransactionId: param.TransactionId,
 		Info: ebusiness.CarbonTypeInfoPublicTransport{
 			Bus:   param.Bus,
 			Metro: param.Metro,
+			Step:  param.Step,
+			Bike:  param.Bike,
 		}.CarbonTypeInfo(),
 	})
 	if err != nil {
@@ -158,5 +169,74 @@ func (srv CarbonCreditsService) SendCarbonCreditSavePublicTransport(param SendCa
 	return &SendCarbonCreditSavePublicTransportResult{
 		BusCredits:   busCredits,
 		MetroCredits: metroCredits,
+		StepCredits:  stepCredits,
+		BikeCredits:  bikeCredits,
 	}, err
+}
+
+// SendCarbonCreditOEP 光盘行动得积分
+func (srv CarbonCreditsService) SendCarbonCreditOEP(param SendCarbonCreditOEPParam) (*SendCarbonCreditOEPResult, error) {
+	oepCredits := DefaultCarbonCreditCalculatorService.CalcOEP()
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     oepCredits,
+		Type:          ebusiness.CarbonTypeOEP,
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoOEP{
+			Voucher: param.Voucher,
+		}.CarbonTypeInfo(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditOEPResult{
+		Credits: oepCredits,
+	}, err
+}
+
+func (srv CarbonCreditsService) SendCarbonGreenBusinessTrip(param SendCarbonGreenBusinessTripParam) (*SendCarbonCreditOEPResult, error) {
+	oepCredits := DefaultCarbonCreditCalculatorService.CalcTrip(param.TripType, param.Distance)
+	_, _, err := srv.SendCarbonCredit(SendCarbonCreditParam{
+		UserId:        param.UserId,
+		AddCredit:     oepCredits,
+		Type:          ebusiness.CarbonTypeGreenBusinessTrip,
+		TransactionId: param.TransactionId,
+		Info: ebusiness.CarbonTypeInfoGreenBusinessTrip{
+			TripType: param.TripType,
+			Distance: param.Distance,
+			From:     param.From,
+			To:       param.To,
+			Voucher:  param.Voucher,
+		}.CarbonTypeInfo(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &SendCarbonCreditOEPResult{
+		Credits: oepCredits,
+	}, err
+}
+func (srv CarbonCreditsService) trackCreditChange(userId int64, value decimal.Decimal) {
+	go func() {
+		userInfo, err := DefaultUserService.GetBusinessUserById(userId)
+		if err != nil {
+			return
+		}
+		department, err := DefaultDepartmentService.GetBusinessDepartmentById(userInfo.BDepartmentId)
+		if err != nil {
+			return
+		}
+		company := DefaultCompanyService.GetCompanyById(userInfo.BCompanyId)
+
+		service.DefaultZhuGeService().TrackBusinessCredit(srv_types.TrackBusinessCredit{
+			Uid:        userInfo.Uid,
+			Value:      value.InexactFloat64(),
+			ChangeType: "inc",
+			Nickname:   userInfo.Nickname,
+			Username:   userInfo.Realname,
+			Department: department.Title,
+			Company:    company.Name,
+			ChangeTime: time.Now(),
+		})
+	}()
 }
