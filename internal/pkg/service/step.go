@@ -185,8 +185,8 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string, uid int64, ip 
 		OpenId:  openId,
 		UserId:  uid,
 		Type:    entity.CARBON_STEP,
-		Value:   float64(stepHistory.Count),
-		Info:    fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
+		Value:   float64(pendingStep),
+		Info:    fmt.Sprintf("{time=%v, count=%d,allCount=%d， point=%d}", time.Now(), stepHistory.Count, pendingStep, pendingPoint),
 		AdminId: 0,
 		Ip:      ip,
 	})
