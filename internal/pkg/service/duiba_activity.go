@@ -163,14 +163,14 @@ func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64,
 
 // GetActivityViewQrCode 生成兑吧页面预览小程序码
 // path 小程序路径 pages/duiba_v2/duiba/duiba-share/index?activityId=001&cid=12&bind=bind
-// 返回时 https://resources.miotech.com/qrcode/activity_view/sdoiojadsiod.png
-func (srv DuiBaActivityService) GetActivityViewQrCode(path string) (string, error) {
+// 返回时 小程序码字节数组
+func (srv DuiBaActivityService) GetActivityViewQrCode(path string) ([]byte, error) {
 
-	qrCode, err := NewQRCodeService().GetLimitedQRCode(entity.QrCodeSceneDuibaView, path, 256, "")
+	qrCode, err := NewQRCodeService().GetLimitedQRCodeRaw(path, 256)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return DefaultOssService.FullUrl(qrCode.ImagePath), nil
+	return qrCode, nil
 }
 
 // GetActivityH5 获取兑吧h5免登录链接

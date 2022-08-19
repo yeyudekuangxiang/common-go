@@ -93,12 +93,12 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	page := "pages/community/details/index"
 	scene := fmt.Sprintf("tid=%d&uid=%d&s=p", form.TopicId, user.ID)
 
-	qr, err := service.NewQRCodeService().GetUnlimitedQRCode(entity.QrCodeSceneTopicShare, page, scene, 100, user.OpenId)
+	qr, err := service.NewQRCodeService().GetUnlimitedQRCodeRaw(page, scene, 100)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
-		"qrcode": service.DefaultOssService.FullUrl(qr.ImagePath),
+		"qrcode": qr,
 	}, nil
 }
 
