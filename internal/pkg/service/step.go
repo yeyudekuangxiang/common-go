@@ -11,7 +11,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
-	"strconv"
 	"time"
 )
 
@@ -182,16 +181,11 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string, uid int64, ip 
 
 	//发碳
 	//int64转float64
-	pend := strconv.FormatInt(pendingPoint, 10)         //int64到string
-	pendFloat, errFloat := strconv.ParseFloat(pend, 64) //string到float32(float64)
-	if errFloat != nil {
-		pendFloat = 0
-	}
 	carbon, errCarbon := NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 		OpenId:  openId,
 		UserId:  uid,
 		Type:    entity.CARBON_STEP,
-		Value:   pendFloat,
+		Value:   float64(stepHistory.Count),
 		Info:    fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
 		AdminId: 0,
 		Ip:      ip,

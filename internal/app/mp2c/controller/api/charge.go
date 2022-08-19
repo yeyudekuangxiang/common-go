@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
@@ -89,6 +90,22 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		})
 		if err != nil {
 			fmt.Println("charge 加积分失败 ", form)
+		}
+
+		//加积分
+		typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+
+		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  userInfo.OpenId,
+			UserId:  userInfo.ID,
+			Type:    typeCarbonStr,
+			Value:   1,
+			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+			AdminId: 0,
+			Ip:      "",
+		})
+		if errCarbon != nil {
+			fmt.Println("charge 加碳失败", form)
 		}
 	}
 

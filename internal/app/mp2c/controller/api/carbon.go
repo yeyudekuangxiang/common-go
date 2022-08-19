@@ -145,7 +145,7 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 	var ListValueVo []float64
 	var ListValueStrVo []string
 
-	for i := 1; i <= 14; i++ {
+	for i := 14; i >= 1; i-- {
 		day := time.Now().AddDate(0, 0, -i).Format("01-02")
 		ListDateVo = append(ListDateVo, day)
 		l, ok := listMap[day] //判断是否存在map集合中

@@ -86,7 +86,7 @@ func (srv CarbonTransactionService) Bank(dto api_types.GetCarbonTransactionBankD
 		Offset: int64(dto.Offset), // 类似sql的limit, 表示开始偏移量
 		Count:  int64(dto.Limit),  // 一次返回多少数据
 	}
-	bank, err := app.Redis.ZRangeByScoreWithScores(contextRedis.Background(), redisKey, op).Result()
+	bank, err := app.Redis.ZRevRangeByScoreWithScores(contextRedis.Background(), redisKey, op).Result()
 	if err != nil {
 		return nil, 0, err
 	}
