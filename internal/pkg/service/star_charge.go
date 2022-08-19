@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/encrypt"
@@ -18,12 +17,12 @@ func NewStarChargeService(context *context.MioContext) *StarChargeService {
 	return &StarChargeService{
 		ctx:            context,
 		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
-		OperatorID:     "MA1G55M81",
+		OperatorID:     "MA1G55M81", //要换
 		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
 		DataSecret:     "FyTx5OwuTpEEPQJ5",
 		DataSecretIV:   "ULxxy31gh7Qw67k5",
 		Domain:         "https://evcs.starcharge.com/evcs/starcharge/",
-		ProvideId:      "JC_20220818174826241",
+		ProvideId:      "JC_20220818174826241", //要换
 	}
 }
 
@@ -150,7 +149,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		OpenId:     openId,
 		CouponType: "star_charge",
 		Code:       provideResult.CouponCode,
-		CreateTime: model.CreatedTime{},
+		CreateTime: time.Time{},
 	}
 	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
 	if err != nil {
