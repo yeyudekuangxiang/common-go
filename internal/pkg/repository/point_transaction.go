@@ -125,6 +125,9 @@ func (repo PointTransactionRepository) GetListByFenQunCount(by GetPointTransacti
 func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountBy) ([]map[string]interface{}, int64, error) {
 	var result []map[string]interface{}
 	db := repo.ctx.DB.Model(&entity.PointTransaction{})
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
 	if len(by.OpenIds) > 0 {
 		db.Where("openid in (?)", by.OpenIds)
 	}
@@ -138,6 +141,32 @@ func (repo PointTransactionRepository) CountByToday(by GetPointTransactionCountB
 		db.Where("admin_id = ?", by.AdminId)
 	}
 	db.Where("date(create_time) = CURRENT_DATE")
+	var count int64
+	if err := db.Count(&count).Find(&result).Error; err != nil {
+		return result, count, err
+	}
+	return result, count, nil
+}
+
+func (repo PointTransactionRepository) CountByMonth(by GetPointTransactionCountBy) ([]map[string]interface{}, int64, error) {
+	var result []map[string]interface{}
+	db := repo.ctx.DB.Model(&entity.PointTransaction{})
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
+	if len(by.OpenIds) > 0 {
+		db.Where("openid in (?)", by.OpenIds)
+	}
+	if by.Type != "" {
+		db.Where("type = ?", by.Type)
+	}
+	if len(by.Types) > 0 {
+		db.Where("type in (?)", by.Types)
+	}
+	if by.AdminId != 0 {
+		db.Where("admin_id = ?", by.AdminId)
+	}
+	db.Where("to_char(create_time,'YYYY-MM') = to_char(now(),'YYYY-MM')")
 	var count int64
 	if err := db.Count(&count).Find(&result).Error; err != nil {
 		return result, count, err

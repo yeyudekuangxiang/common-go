@@ -10,6 +10,7 @@ type CreateDuiBaActivityDTO struct {
 	IsPhone     entity.DuiBaActivityIsPhone
 	ActivityUrl string
 	ActivityId  string
+	RiskLimit   int
 }
 
 type UpdateDuiBaActivityDTO struct {
@@ -21,6 +22,7 @@ type UpdateDuiBaActivityDTO struct {
 	IsPhone     entity.DuiBaActivityIsPhone
 	ActivityUrl string
 	ActivityId  string
+	RiskLimit   int
 }
 
 type DeleteDuiBaActivityDTO struct {
