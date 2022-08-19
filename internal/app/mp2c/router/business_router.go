@@ -61,5 +61,7 @@ func BusinessRouter(router *gin.Engine) {
 		}
 
 		authRouter.GET("/carbon/city-province/list", apiutil.Format(business.DefaultCarbonController.CityProvinceList))
+
+		authRouter.GET("/upload/token", apiutil.Format(business.DefaultUploadController.GetUploadTokenInfo))
 	}
 }
