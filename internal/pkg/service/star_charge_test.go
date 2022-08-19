@@ -18,8 +18,9 @@ func TestGetAccessToken(t *testing.T) {
 		SigSecret:      "9af2e7b2d7562ad5",
 		DataSecret:     "a2164ada0026ccf7",
 		DataSecretIV:   "82c91325e74bef0f",
-		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
+		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge", //MA1FY5992
 	}
+
 	token, err := getXingAccessToken(context.NewMioContext(), Xing)
 	if err != nil {
 		fmt.Printf("get token error: %e\n", err)
@@ -138,6 +139,5 @@ func sendCoupon(phoneNumber string, provideId string, token string, xing StarCha
 	encryptStr, _ := encrypt.AesDecrypt(signResult.Data, xing.DataSecret, xing.DataSecretIV)
 	fmt.Printf("sendcoupon encrypt data: %s\n", encryptStr)
 	//最终解密
-
 	return nil
 }

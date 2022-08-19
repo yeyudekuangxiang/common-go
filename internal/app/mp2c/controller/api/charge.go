@@ -25,13 +25,18 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-
 	fmt.Println("charge", form)
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
 		return nil, errors.New("渠道查询失败")
+	}
+	//白名单验证
+	ip := c.ClientIP()
+	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.Ch); err != nil {
+		app.Logger.Info("校验白名单失败", ip)
+		return nil, errors.New("非白名单ip:" + ip)
 	}
 
 	//校验sign
