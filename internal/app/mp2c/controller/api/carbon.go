@@ -168,19 +168,11 @@ func (c CarbonController) History(ctx *gin.Context) (gin.H, error) {
 /****定时器*****/
 
 func (c CarbonController) AddClassify(ctx *gin.Context) (gin.H, error) {
-	c.service.AddClassify(api_types.GetCarbonTransactionClassifyDto{
-		StartTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
-		EndTime:   time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
-	})
+	c.service.AddClassify()
 	return nil, nil
 }
 
 func (c CarbonController) AddHistory(ctx *gin.Context) (gin.H, error) {
-	user := apiutil.GetAuthUser(ctx)
-	c.service.AddHistory(api_types.GetCarbonTransactionClassifyDto{
-		UserId:    user.ID,
-		StartTime: time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
-		EndTime:   time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
-	})
+	c.service.AddHistory()
 	return nil, nil
 }

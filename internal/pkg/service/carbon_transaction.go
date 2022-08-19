@@ -53,10 +53,10 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 		return 0, errors.New("不存在该场景")
 	}
 	//判断是否有限制
-	errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId, scene.MaxCount)
+	/*errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId, scene.MaxCount)
 	if errCheck != nil {
 		return 0, errCheck
-	}
+	}*/
 	//获取碳量
 	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
@@ -308,10 +308,10 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 	return info, nil
 }
 
-func (srv CarbonTransactionService) AddClassify(dto api_types.GetCarbonTransactionClassifyDto) {
+func (srv CarbonTransactionService) AddClassify() {
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
-		StartTime: dto.StartTime,
-		EndTime:   dto.EndTime,
+		StartTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
+		EndTime:   time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
 	})
 	//a	:= map[string] map[string]float32 {"C":{"C":5, "Go":4.5, "Python":4.5, "C++":2 }}
 	DateMap := make(map[int64]map[entity.CarbonTransactionType]float64)
@@ -337,11 +337,10 @@ func (srv CarbonTransactionService) AddClassify(dto api_types.GetCarbonTransacti
 }
 
 //每天总结碳量
-
-func (srv CarbonTransactionService) AddHistory(dto api_types.GetCarbonTransactionClassifyDto) {
+func (srv CarbonTransactionService) AddHistory() {
 	list := srv.repo.GetListByDay(repotypes.GetCarbonTransactionListByDO{
-		StartTime: dto.StartTime,
-		EndTime:   dto.EndTime,
+		StartTime: time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+		EndTime:   time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
 	})
 	for _, v := range list {
 		srv.repoDay.Create(&entity.CarbonTransactionDay{
