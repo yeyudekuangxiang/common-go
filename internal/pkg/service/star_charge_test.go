@@ -12,7 +12,7 @@ import (
 )
 
 func TestGetAccessToken(t *testing.T) {
-	Xing := XingXingService{
+	Xing := StarChargeService{
 		OperatorSecret: "acb93539fc9bg78k",
 		OperatorID:     "MA1G55M81",
 		SigSecret:      "9af2e7b2d7562ad5",
@@ -20,12 +20,12 @@ func TestGetAccessToken(t *testing.T) {
 		DataSecretIV:   "82c91325e74bef0f",
 		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
 	}
-	//token, err := getXingAccessToken(context.NewMioContext(), Xing)
-	//if err != nil {
-	//	fmt.Printf("get token error: %e\n", err)
-	//}
-	//fmt.Printf("getXingAccessToken token: %s\n", token)
-	err := sendCoupon("13083605153", "JC_20220725142041920", "1805e341-cdf8-4062-92d0-e4d427cd9a09", Xing)
+	token, err := getXingAccessToken(context.NewMioContext(), Xing)
+	if err != nil {
+		fmt.Printf("get token error: %e\n", err)
+	}
+	fmt.Printf("getXingAccessToken token: %s\n", token)
+	err = sendCoupon("13083605153", "JC_20220818174826241", token, Xing)
 	if err != nil {
 		fmt.Printf("sendCoupon error: %e\n", err)
 		return
@@ -33,7 +33,7 @@ func TestGetAccessToken(t *testing.T) {
 	fmt.Printf("success")
 }
 
-func getXingAccessToken(ctx *context.MioContext, xing XingXingService) (string, error) {
+func getXingAccessToken(ctx *context.MioContext, xing StarChargeService) (string, error) {
 	data := getToken{
 		OperatorSecret: xing.OperatorSecret,
 		OperatorID:     xing.OperatorID,
@@ -75,7 +75,7 @@ func getXingAccessToken(ctx *context.MioContext, xing XingXingService) (string, 
 		return "", err
 	}
 
-	signResult := XingResponse{}
+	signResult := StarChargeResponse{}
 	err = json.Unmarshal(body, &signResult)
 	if err != nil {
 		return "", err
@@ -86,7 +86,7 @@ func getXingAccessToken(ctx *context.MioContext, xing XingXingService) (string, 
 	//data解密
 	encryptStr, _ := encrypt.AesDecrypt(signResult.Data, xing.DataSecret, xing.DataSecretIV)
 	fmt.Printf("encrypt data: %s\n", encryptStr)
-	signAccess := XingAccessResult{}
+	signAccess := StarChargeAccessResult{}
 	_ = json.Unmarshal([]byte(encryptStr), &signAccess)
 	//fmt.Printf("access response: %v\n", signAccess)
 	//存redis
@@ -94,7 +94,7 @@ func getXingAccessToken(ctx *context.MioContext, xing XingXingService) (string, 
 	return signAccess.AccessToken, nil
 }
 
-func sendCoupon(phoneNumber string, provideId string, token string, xing XingXingService) error {
+func sendCoupon(phoneNumber string, provideId string, token string, xing StarChargeService) error {
 	r := struct {
 		PhoneNumber string `json:"PhoneNumber"`
 		ProvideId   string `json:"ProvideId"`
@@ -126,7 +126,7 @@ func sendCoupon(phoneNumber string, provideId string, token string, xing XingXin
 		return err
 	}
 	//data解密
-	signResult := XingResponse{}
+	signResult := StarChargeResponse{}
 	err = json.Unmarshal(body, &signResult)
 	if err != nil {
 		return err

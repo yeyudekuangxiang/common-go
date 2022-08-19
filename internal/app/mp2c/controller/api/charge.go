@@ -101,7 +101,7 @@ func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
 	if user.PhoneNumber == "" {
 		return nil, errno.ErrBind.WithMessage("未绑定手机号")
 	}
-	XingService := service.XingXingService{
+	StarChargeService := service.StarChargeService{
 		OperatorID:     "MA1G55M81",
 		OperatorSecret: "acb93539fc9bg78k",
 		SigSecret:      "9af2e7b2d7562ad5",
@@ -109,12 +109,11 @@ func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
 		DataSecretIV:   "82c91325e74bef0f",
 		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
 	}
-	token, err := XingService.GetXingAccessToken(context.NewMioContext())
+	token, err := StarChargeService.GetAccessToken(context.NewMioContext())
 	if err != nil {
 		return nil, err
 	}
-	//todo
-	err = XingService.SendCoupon(user.PhoneNumber, "JC_20220816144920341", token)
+	err = StarChargeService.SendCoupon(user.PhoneNumber, "JC_20220816144920341", token)
 	if err != nil {
 		return nil, err
 	}

@@ -11,13 +11,15 @@ import (
 	"time"
 )
 
-type XingXingService struct {
+type StarChargeService struct {
 	OperatorSecret string `json:"OperatorSecret,omitempty"` //运营商密钥
 	OperatorID     string `json:"OperatorID,omitempty"`     //运营商标识
 	SigSecret      string `json:"SigSecret,omitempty"`      //签名密钥
 	DataSecret     string `json:"DataSecret,omitempty"`     //消息密钥
 	DataSecretIV   string `json:"DataSecretIV,omitempty"`   //消息密钥初始化向量
 	Domain         string `json:"Domain,omitempty"`         //域名
+	Batch          string `json:"Batch,omitempty"`
+	TypeId         int64  `json:"TypeId,omitempty"`
 }
 
 type getToken struct {
@@ -37,8 +39,8 @@ type queryRequest struct {
 	Seq        string `json:"Seq"`
 }
 
-// GetXingAccessToken 星星充电 query token
-func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, error) {
+// GetAccessToken 星星充电 query token
+func (srv StarChargeService) GetAccessToken(ctx *context.MioContext) (string, error) {
 	redisCmd := app.Redis.Get(ctx, "token:"+srv.OperatorID)
 	result, err := redisCmd.Result()
 	if err != nil {
@@ -76,7 +78,7 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 		return "", err
 	}
 	//response
-	signResponse := XingResponse{}
+	signResponse := StarChargeResponse{}
 	err = json.Unmarshal(body, &signResponse)
 	if err != nil {
 		return "", err
@@ -88,7 +90,7 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 		return "", errors.New("请求错误")
 	}
 	//result.data解密
-	accessResult := XingAccessResult{}
+	accessResult := StarChargeAccessResult{}
 	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
@@ -96,7 +98,7 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 	return accessResult.AccessToken, nil
 }
 
-func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, token string) error {
+func (srv StarChargeService) SendCoupon(phoneNumber string, provideId string, token string) error {
 	r := struct {
 		PhoneNumber string `json:"phoneNumber"`
 		ProvideId   string `json:"provideId"`
@@ -112,7 +114,7 @@ func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, toke
 		return err
 	}
 	// response
-	provideResponse := XingResponse{}
+	provideResponse := StarChargeResponse{}
 	err = json.Unmarshal(body, &provideResponse)
 	if err != nil {
 		return err
@@ -121,11 +123,12 @@ func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, toke
 		return errors.New(provideResponse.Msg)
 	}
 	// result.data解密
-	provideResult := XingProvideResult{}
+	provideResult := StarChargeProvideResult{}
 	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
 	if provideResult.SuccStat != 0 {
 		return errors.New(provideResult.FailReasonMsg)
 	}
+
 	return nil
 }

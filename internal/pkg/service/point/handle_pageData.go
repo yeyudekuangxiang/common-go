@@ -37,30 +37,6 @@ func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, er
 	return res, nil
 }
 
-func (c *defaultClientHandle) coffeeCupPageData() (map[string]interface{}, error) {
-	//_, _, err := c.getTodayData()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//减碳量计算
-	//if _, ok := data["total"]; ok {
-	//	data["co2"] = data["total"] * 511
-	//}
-	return nil, nil
-}
-
-func (c *defaultClientHandle) bikeRidePageData() (map[string]interface{}, error) {
-	//_, _, err := c.getTodayData()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//减碳量计算
-	//if _, ok := data["total"]; ok {
-	//	data["co2"] = data["total"] * 511
-	//}
-	return nil, nil
-}
-
 //oola旧物回收before弹框数据
 func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, error) {
 	types := []entity.PointTransactionType{
@@ -85,6 +61,35 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 	//返回数据
 	res["count"] = count
 	res["co2"] = co2
+	return res, nil
+}
+
+//快电
+func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{}, error) {
+	openIds := []string{c.clientHandle.OpenId}
+	types := []entity.PointTransactionType{entity.POINT_FAST_ELECTRICITY}
+	result, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	//减碳量计算
+	m := make(map[string]interface{}, 0)
+	res := make(map[string]interface{}, 0)
+	//kwh
+	kwhTotal := decimal.NewFromFloat(0)
+	for _, item := range result {
+		s := item["additional_info"].(entity.AdditionalInfo)
+		err := json.Unmarshal([]byte(s), &m)
+		if err != nil {
+			return nil, err
+		}
+		fromString, _ := decimal.NewFromString(m["kwh"].(string))
+		kwhTotal = fromString.Add(kwhTotal)
+	}
+	//返回数据
+	//res["total"] = kwhTotal.String()
+	res["count"] = count
+	res["co2"] = kwhTotal.Mul(decimal.NewFromFloat(511)).String()
 	return res, nil
 }
 
