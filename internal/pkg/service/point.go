@@ -240,7 +240,7 @@ func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage
 	go DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
 		OpenId:      dto.OpenId,
 		PointType:   dto.Type,
-		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "desc").String(),
+		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "dec").String(),
 		Value:       uint(dto.ChangePoint),
 		IsFail:      util.Ternary(failMessage == "", false, true).Bool(),
 		FailMessage: failMessage,
