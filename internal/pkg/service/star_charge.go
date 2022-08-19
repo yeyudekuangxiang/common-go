@@ -17,13 +17,13 @@ import (
 func NewStarChargeService(context *context.MioContext) *StarChargeService {
 	return &StarChargeService{
 		ctx:            context,
-		OperatorSecret: "acb93539fc9bg78k",
+		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
 		OperatorID:     "MA1G55M81",
-		SigSecret:      "9af2e7b2d7562ad5",
-		DataSecret:     "a2164ada0026ccf7",
-		DataSecretIV:   "82c91325e74bef0f",
-		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
-		Batch:          "JC_20220818174826241",
+		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
+		DataSecret:     "FyTx5OwuTpEEPQJ5",
+		DataSecretIV:   "ULxxy31gh7Qw67k5",
+		Domain:         "https://evcs.starcharge.com/evcs/starcharge/",
+		ProvideId:      "JC_20220818174826241",
 	}
 }
 
@@ -35,7 +35,7 @@ type StarChargeService struct {
 	DataSecret     string `json:"DataSecret,omitempty"`     //消息密钥
 	DataSecretIV   string `json:"DataSecretIV,omitempty"`   //消息密钥初始化向量
 	Domain         string `json:"Domain,omitempty"`         //域名
-	Batch          string `json:"Batch,omitempty"`
+	ProvideId      string `json:"Batch,omitempty"`
 }
 
 type getToken struct {

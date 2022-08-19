@@ -73,23 +73,16 @@ func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{},
 		return nil, err
 	}
 	//减碳量计算
-	m := make(map[string]interface{}, 0)
 	res := make(map[string]interface{}, 0)
 	//kwh
-	kwhTotal := decimal.NewFromFloat(0)
+	var kwhTotal int64
 	for _, item := range result {
-		s := item["additional_info"].(entity.AdditionalInfo)
-		err := json.Unmarshal([]byte(s), &m)
-		if err != nil {
-			return nil, err
-		}
-		fromString, _ := decimal.NewFromString(m["kwh"].(string))
-		kwhTotal = fromString.Add(kwhTotal)
+		kwhTotal += item["value"].(int64) / 10
 	}
 	//返回数据
 	//res["total"] = kwhTotal.String()
 	res["count"] = count
-	res["co2"] = kwhTotal.Mul(decimal.NewFromFloat(511)).String()
+	res["co2"] = kwhTotal * 511
 	return res, nil
 }
 

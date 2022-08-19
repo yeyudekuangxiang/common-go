@@ -104,7 +104,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 				return nil, err
 			}
 			//send coupon
-			err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.Batch, token)
+			err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token)
 			if err != nil {
 				return nil, err
 			}
