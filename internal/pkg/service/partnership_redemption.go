@@ -25,6 +25,9 @@ func (srv PartnershipRedemptionService) ProcessPromotionInformation(openId strin
 		return nil, err
 	}
 
+	if len(promotionList) == 0 {
+		return nil, nil
+	}
 	t := time.Now()
 	infoList := make([]entity.PartnershipRedemption, 0)
 	app.Logger.Infof("循环第三方活动列表 %+v", promotionList)
