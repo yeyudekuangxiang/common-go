@@ -414,19 +414,25 @@ type ChangeUserPosition struct {
 	PositionIcon string `json:"positionIcon"`
 }
 
-type XingSignResponse struct {
+type StarChargeResponse struct {
 	Ret  int    `json:"Ret"`
 	Msg  string `json:"Msg"`
 	Data string `json:"Data"`
 	Sig  string `json:"Sig"`
 }
 
-type XingAccessResult struct {
+type StarChargeAccessResult struct {
 	OperatorID         string `json:"operatorID,omitempty"`
 	SucStat            int    `json:"sucStat,omitempty"`
 	AccessToken        string `json:"accessToken,omitempty"`
 	TokenAvailableTime int    `json:"tokenAvailableTime,omitempty"`
 	FailReason         int    `json:"failReason,omitempty"`
+}
+type StarChargeProvideResult struct {
+	SuccStat      int    `json:"succStat,omitempty"`
+	FailReason    int    `json:"failReason,omitempty"`
+	FailReasonMsg string `json:"failReasonMsg,omitempty"`
+	CouponCode    string `json:"couponCode,omitempty"`
 }
 
 type OolaSignParams struct {

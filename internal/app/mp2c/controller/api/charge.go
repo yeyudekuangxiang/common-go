@@ -11,7 +11,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -26,13 +25,18 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-
 	fmt.Println("charge", form)
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
 		return nil, errors.New("渠道查询失败")
+	}
+	//白名单验证
+	ip := c.ClientIP()
+	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.Ch); err != nil {
+		app.Logger.Info("校验白名单失败", ip)
+		return nil, errors.New("非白名单ip:" + ip)
 	}
 
 	//校验sign
@@ -90,33 +94,22 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		if err != nil {
 			fmt.Println("charge 加积分失败 ", form)
 		}
+		// todo 发券
+		startTime, _ := time.Parse("20060102", "2022-08-22")
+		endTime, _ := time.Parse("20060102", "2022-08-30")
+		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
+			starChargeService := service.NewStarChargeService(context.NewMioContext())
+			token, err := starChargeService.GetAccessToken()
+			if err != nil {
+				return nil, err
+			}
+			//send coupon
+			err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
-	return gin.H{}, nil
-}
-
-// SendCoupon 星星充电 发放优惠券
-func (ctr ChargeController) SendCoupon(c *gin.Context) (gin.H, error) {
-	user := apiutil.GetAuthUser(c)
-	if user.PhoneNumber == "" {
-		return nil, errno.ErrBind.WithMessage("未绑定手机号")
-	}
-	XingService := service.XingXingService{
-		OperatorID:     "MA1G55M81",
-		OperatorSecret: "acb93539fc9bg78k",
-		SigSecret:      "9af2e7b2d7562ad5",
-		DataSecret:     "a2164ada0026ccf7",
-		DataSecretIV:   "82c91325e74bef0f",
-		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge",
-	}
-	token, err := XingService.GetXingAccessToken(context.NewMioContext())
-	if err != nil {
-		return nil, err
-	}
-	//todo
-	err = XingService.SendCoupon(user.PhoneNumber, "MA1G55M8X", token)
-	if err != nil {
-		return nil, err
-	}
 	return gin.H{}, nil
 }

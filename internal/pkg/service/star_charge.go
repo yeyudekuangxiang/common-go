@@ -6,18 +6,35 @@ import (
 	"fmt"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
 	"time"
 )
 
-type XingXingService struct {
+func NewStarChargeService(context *context.MioContext) *StarChargeService {
+	return &StarChargeService{
+		ctx:            context,
+		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
+		OperatorID:     "MA1FY5992", //要换
+		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
+		DataSecret:     "FyTx5OwuTpEEPQJ5",
+		DataSecretIV:   "ULxxy31gh7Qw67k5",
+		Domain:         "https://evcs.starcharge.com/evcs/starcharge/",
+		ProvideId:      "JC_20220820094600625", //要换
+	}
+}
+
+type StarChargeService struct {
+	ctx            *context.MioContext
 	OperatorSecret string `json:"OperatorSecret,omitempty"` //运营商密钥
 	OperatorID     string `json:"OperatorID,omitempty"`     //运营商标识
 	SigSecret      string `json:"SigSecret,omitempty"`      //签名密钥
 	DataSecret     string `json:"DataSecret,omitempty"`     //消息密钥
 	DataSecretIV   string `json:"DataSecretIV,omitempty"`   //消息密钥初始化向量
 	Domain         string `json:"Domain,omitempty"`         //域名
+	ProvideId      string `json:"Batch,omitempty"`
 }
 
 type getToken struct {
@@ -37,9 +54,9 @@ type queryRequest struct {
 	Seq        string `json:"Seq"`
 }
 
-// GetXingAccessToken 星星充电 query token
-func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, error) {
-	redisCmd := app.Redis.Get(ctx, "token:"+srv.OperatorID)
+// GetAccessToken 星星充电 query token
+func (srv StarChargeService) GetAccessToken() (string, error) {
+	redisCmd := app.Redis.Get(srv.ctx, "token:"+srv.OperatorID)
 	result, err := redisCmd.Result()
 	if err != nil {
 		return "", err
@@ -75,7 +92,8 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 	if err != nil {
 		return "", err
 	}
-	signResponse := XingSignResponse{}
+	//response
+	signResponse := StarChargeResponse{}
 	err = json.Unmarshal(body, &signResponse)
 	if err != nil {
 		return "", err
@@ -86,16 +104,16 @@ func (srv XingXingService) GetXingAccessToken(ctx *context.MioContext) (string, 
 	if signResponse.Ret != 0 {
 		return "", errors.New("请求错误")
 	}
-	//data解密
+	//result.data解密
+	accessResult := StarChargeAccessResult{}
 	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
-	signAccess := XingAccessResult{}
-	_ = json.Unmarshal([]byte(encryptStr), &signAccess)
+	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
-	app.Redis.Set(ctx, "token:"+srv.OperatorID, signAccess.AccessToken, time.Second*time.Duration(signAccess.TokenAvailableTime))
-	return signAccess.AccessToken, nil
+	app.Redis.Set(srv.ctx, "token:"+srv.OperatorID, accessResult.AccessToken, time.Second*time.Duration(accessResult.TokenAvailableTime))
+	return accessResult.AccessToken, nil
 }
 
-func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, token string) error {
+func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId string, token string) error {
 	r := struct {
 		PhoneNumber string `json:"phoneNumber"`
 		ProvideId   string `json:"provideId"`
@@ -104,10 +122,36 @@ func (srv XingXingService) SendCoupon(phoneNumber string, provideId string, toke
 		ProvideId:   provideId,
 	}
 	url := srv.Domain + "/query_delivery_provide"
-	contentType := httputil.HttpWithHeader("Content-Type", "application/json; charset=utf-8")
-	authToken := httputil.HttpWithHeader("Authorization", token)
-	body, err := httputil.PostJson(url, r, contentType, authToken)
+	authToken := httputil.HttpWithHeader("Authorization", "Bearer "+token)
+	body, err := httputil.PostJson(url, r, authToken)
 	fmt.Printf("%s\n", body)
+	if err != nil {
+		return err
+	}
+	// response
+	provideResponse := StarChargeResponse{}
+	err = json.Unmarshal(body, &provideResponse)
+	if err != nil {
+		return err
+	}
+	if provideResponse.Ret != 0 {
+		return errors.New(provideResponse.Msg)
+	}
+	// result.data解密
+	provideResult := StarChargeProvideResult{}
+	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
+	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
+	if provideResult.SuccStat != 0 {
+		return errors.New(provideResult.FailReasonMsg)
+	}
+	//保存记录
+	history := entity.CouponHistory{
+		OpenId:     openId,
+		CouponType: "star_charge",
+		Code:       provideResult.CouponCode,
+		CreateTime: time.Time{},
+	}
+	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
 	if err != nil {
 		return err
 	}

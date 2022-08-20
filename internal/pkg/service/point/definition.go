@@ -40,8 +40,7 @@ var commandMap = map[string]*commandDescription{
 
 //before弹框页面获取数据
 var pageDataMap = map[string]*commandDescription{
-	"POWER_REPLACE":       {FnPageData: (*defaultClientHandle).powerReplacePageData}, //换电
-	"COFFEE_CUP":          {FnPageData: (*defaultClientHandle).coffeeCupPageData},    //自带杯子
-	"BIKE_RIDE":           {FnPageData: (*defaultClientHandle).bikeRidePageData},     //骑行
-	"OLD_STUFF_RECYCLING": {FnPageData: (*defaultClientHandle).oldStuffRecyclingPageData},
+	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData},    //换电
+	"OOLA_RECYCLE":     {FnPageData: (*defaultClientHandle).oolaRecyclePageData},     //oola旧物回收
+	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData}, //快电
 }
