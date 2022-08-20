@@ -17,12 +17,12 @@ func NewStarChargeService(context *context.MioContext) *StarChargeService {
 	return &StarChargeService{
 		ctx:            context,
 		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
-		OperatorID:     "MA1G55M81", //要换
+		OperatorID:     "MA1FY5992", //要换
 		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
 		DataSecret:     "FyTx5OwuTpEEPQJ5",
 		DataSecretIV:   "ULxxy31gh7Qw67k5",
 		Domain:         "https://evcs.starcharge.com/evcs/starcharge/",
-		ProvideId:      "JC_20220818174826241", //要换
+		ProvideId:      "JC_20220820094600625", //要换
 	}
 }
 

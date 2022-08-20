@@ -13,12 +13,13 @@ import (
 
 func TestGetAccessToken(t *testing.T) {
 	Xing := StarChargeService{
-		OperatorSecret: "acb93539fc9bg78k",
-		OperatorID:     "MA1G55M81",
-		SigSecret:      "9af2e7b2d7562ad5",
-		DataSecret:     "a2164ada0026ccf7",
-		DataSecretIV:   "82c91325e74bef0f",
-		Domain:         "http://test-evcs.starcharge.com/evcs/starcharge", //MA1FY5992
+		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
+		OperatorID:     "MA1FY5992", //要换
+		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
+		DataSecret:     "FyTx5OwuTpEEPQJ5",
+		DataSecretIV:   "ULxxy31gh7Qw67k5",
+		Domain:         "https://evcs.starcharge.com/evcs/starcharge/",
+		ProvideId:      "JC_20220820094600625", //要换
 	}
 
 	token, err := getXingAccessToken(context.NewMioContext(), Xing)
@@ -26,7 +27,7 @@ func TestGetAccessToken(t *testing.T) {
 		fmt.Printf("get token error: %e\n", err)
 	}
 	fmt.Printf("getXingAccessToken token: %s\n", token)
-	err = sendCoupon("13083605153", "JC_20220818174826241", token, Xing)
+	err = sendCoupon("13083605153", Xing.ProvideId, token, Xing)
 	if err != nil {
 		fmt.Printf("sendCoupon error: %e\n", err)
 		return
