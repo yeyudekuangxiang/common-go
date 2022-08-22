@@ -37,3 +37,13 @@ func (srv PointRateSettingService) EncodePointExchangeRate(rate ebusiness.PointR
 	}
 	return ebusiness.PointRateSetting(data)
 }
+func (srv PointRateSettingService) ParsePointOEPRate(setting ebusiness.PointRateSetting) (*ebusiness.PointRate, error) {
+	rate := ebusiness.PointRate{}
+	err := json.Unmarshal([]byte(setting), &rate)
+	return &rate, err
+}
+func (srv PointRateSettingService) ParseGreenBusinessTripExchangeRate(setting ebusiness.PointRateSetting) (*ebusiness.PointRateGreenBusinessTrip, error) {
+	rate := ebusiness.PointRateGreenBusinessTrip{}
+	err := json.Unmarshal([]byte(setting), &rate)
+	return &rate, err
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -26,7 +27,7 @@ func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filenam
 	return DefaultOssService.FullUrl(ocrPath), nil
 }
 
-//CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 scene上传场景
+//CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
 func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, scene string) (*srv_types.UploadTokenInfo, error) {
 	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
 		Scene: scene,
@@ -42,7 +43,7 @@ func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, 
 	}
 
 	if operatorId != 0 {
-		lockKey := fmt.Sprintf("UploadToken%d", operatorId)
+		lockKey := fmt.Sprintf("UploadToken%d%d", operatorType, operatorId)
 		if !util.DefaultLock.LockNum(lockKey, uploadScene.MaxCount, time.Hour*24) {
 			return nil, errno.ErrLimit.WithCaller()
 		}
@@ -62,7 +63,7 @@ func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, 
 		ExpireTime:  time.Minute * 5,
 		MaxSize:     uploadScene.MaxSize,
 		UploadDir:   uploadScene.OssDir,
-		CallbackUrl: config.Config.App.Domain + "/api/mp2c/upload/callback",
+		CallbackUrl: util.LinkJoin(config.Config.App.Domain, "/api/mp2c/upload/callback?logId="+log.LogId),
 		MimeTypes:   uploadScene.MimeTypes,
 		MaxAge:      uploadScene.MaxAge,
 	})
@@ -82,6 +83,9 @@ func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, 
 }
 func (srv UploadService) UploadCallback(param srv_types.UploadCallbackParam) error {
 	_, err := DefaultUploadLogService.UpdateLog(param.LogId, param.Filename, param.Size)
+	if err != nil {
+		app.Logger.Error("上传文件回调失败", param, err)
+	}
 	return err
 }
 func (srv UploadService) GetUrlByLogId(logId string) (string, error) {

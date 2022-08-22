@@ -80,3 +80,64 @@ func (srv ZhuGeService) TrackPoints(point srv_types.TrackPoints) {
 		app.Logger.Errorf("积分打点失败 %+v %+v", err, point)
 	}
 }
+
+func (srv ZhuGeService) TrackBusinessPoints(point srv_types.TrackBusinessPoints) {
+	if !srv.Open {
+		app.Logger.Info("诸葛打点已关闭", point)
+		return
+	}
+	err := srv.client.Track(types.Event{
+		Dt:    "evt",
+		Pl:    "js",
+		Debug: 0,
+		Pr: types.EventJs{
+			Ct:   time.Now().UnixMilli(),
+			Eid:  "企业版积分变动",
+			Cuid: point.Uid,
+			Sid:  time.Now().UnixMilli(),
+		},
+	}, map[string]interface{}{
+		"用户编号": point.Uid,
+		"变动类型": util.Ternary(point.ChangeType == "dec", "积分减少", "积分增加").String(),
+		"变动数量": util.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
+		"用户昵称": point.Nickname,
+		"用户姓名": point.Username,
+		"部门":   point.Department,
+		"公司":   point.Company,
+		"变动时间": point.ChangeTime.Format("2006/01/02 15:04:05"),
+	})
+
+	if err != nil {
+		app.Logger.Errorf("企业版积分打点失败 %+v %+v", err, point)
+	}
+}
+func (srv ZhuGeService) TrackBusinessCredit(credit srv_types.TrackBusinessCredit) {
+	if !srv.Open {
+		app.Logger.Info("诸葛打点已关闭", credit)
+		return
+	}
+	err := srv.client.Track(types.Event{
+		Dt:    "evt",
+		Pl:    "js",
+		Debug: 0,
+		Pr: types.EventJs{
+			Ct:   time.Now().UnixMilli(),
+			Eid:  "企业版碳积分变动",
+			Cuid: credit.Uid,
+			Sid:  time.Now().UnixMilli(),
+		},
+	}, map[string]interface{}{
+		"用户编号": credit.Uid,
+		"变动类型": util.Ternary(credit.ChangeType == "dec", "积分减少", "积分增加").String(),
+		"变动数量": util.Ternary(credit.ChangeType == "dec", -int(credit.Value), int(credit.Value)).Int(),
+		"用户昵称": credit.Nickname,
+		"用户姓名": credit.Username,
+		"部门":   credit.Department,
+		"公司":   credit.Company,
+		"变动时间": credit.ChangeTime.Format("2006/01/02 15:04:05"),
+	})
+
+	if err != nil {
+		app.Logger.Errorf("企业版碳积分打点失败 %+v %+v", err, credit)
+	}
+}

@@ -84,27 +84,41 @@ func (srv PointTransactionCountLimitService) CheckLimit(transactionType entity.P
 	return limit.CurrentCount < limitNum, nil
 }
 
-//每天最多获取多少分
-func (srv PointTransactionCountLimitService) CheckMaxPoint(transactionType entity.PointTransactionType, openId string, currPoint *int64) error {
-	dayPoint, ok := entity.PointCollectValueMapDay[transactionType]
-	if !ok {
-		return errors.New("未匹配到日积分限制规则")
-	}
-	today, _, err := NewPointTransactionService(srv.ctx).CountByToday([]string{openId}, transactionType)
+//每天最多获取多少分 currPoint : 要加的积分。 maxPoint : 上限积分
+func (srv PointTransactionCountLimitService) CheckMaxPoint(transactionType entity.PointTransactionType, openId string, currPoint int64, maxPoint int64) (int64, error) {
+	today, _, err := NewPointTransactionService(srv.ctx).CountByToday(openId, transactionType)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	var todayValue int64
 	for _, item := range today {
 		todayValue += item["value"].(int64)
 	}
-	point := int64(dayPoint)
-	if point-todayValue <= 0 {
-		return errors.New("今日积分已达上限")
+	if maxPoint-todayValue <= 0 {
+		return 0, errors.New("今日积分已达上限")
 	}
-	if point-todayValue > 0 && point-todayValue < *currPoint {
-		*currPoint = point - todayValue
+	if maxPoint-todayValue > 0 && maxPoint-todayValue < currPoint {
+		return maxPoint - todayValue, nil
 	}
 	//正常加积分
-	return nil
+	return currPoint, nil
+}
+
+func (srv PointTransactionCountLimitService) CheckMaxPointByMonth(transactionType entity.PointTransactionType, openId string, currPoint int64, maxPoint int64) (int64, error) {
+	month, _, err := NewPointTransactionService(srv.ctx).CountByMonth(openId, transactionType)
+	if err != nil {
+		return 0, err
+	}
+	var todayValue int64
+	for _, item := range month {
+		todayValue += item["value"].(int64)
+	}
+	if maxPoint-todayValue <= 0 {
+		return 0, errors.New("此回收分类已达到本月获取积分上限")
+	}
+	if maxPoint-todayValue > 0 && maxPoint-todayValue < currPoint {
+		return maxPoint - todayValue, nil
+	}
+	//正常加积分
+	return currPoint, nil
 }

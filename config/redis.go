@@ -15,6 +15,8 @@ type redisKey struct {
 	BaiDu                 string
 	BadgeImageCode        string
 	CheckBusinessUser     string
+	BusinessCarbonHotCity string
+	BlackList             string
 	UserCarbonRank        string
 	UserCarbonClassify    string
 }
@@ -34,6 +36,8 @@ var RedisKey = redisKey{
 	BaiDu:                 "mp2c:baidu:",                     //用于百度接口
 	BadgeImageCode:        "mp2c:updateBadgeImage:",          //上传证书图片凭证
 	CheckBusinessUser:     "mp2c:checkBusinessUser:%s",       //检测用户token是否有更新
+	BusinessCarbonHotCity: "business:carbon:hotcity",         //低碳场景中热门城市
+	BlackList:             "mp2c:blacklist",                  //黑产白名单
 	UserCarbonRank:        "user_carbon_rank:%s",             //排行榜
 	UserCarbonClassify:    "user_carbon_classify",            //碳分类
 }

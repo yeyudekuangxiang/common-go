@@ -29,6 +29,9 @@ func BusinessRouter(router *gin.Engine) {
 			carbonRouter.POST("/collect/online-meeting", apiutil.Format(business.DefaultCarbonController.CollectOnlineMeeting))
 			carbonRouter.POST("/collect/public-transport", apiutil.Format(business.DefaultCarbonController.CollectPublicTransport))
 			carbonRouter.POST("/collect/save-water-electricity", apiutil.Format(business.DefaultCarbonController.CollectSaveWaterElectricity))
+			carbonRouter.POST("/collect/green-business-trip", apiutil.Format(business.DefaultCarbonController.CollectGreenBusinessTrip))
+			carbonRouter.POST("/collect/oep", apiutil.Format(business.DefaultCarbonController.CollectOEP))
+
 			//获取企业的本月减碳来源列表（按本月减碳量排序）（任务3
 			carbonRouter.GET("/sorted/list", apiutil.Format(business.DefaultCarbonCreditsController.GetCarbonCreditLogSortedList))
 			//9 返回当前用户减碳来源以及本月减碳数量（按减碳量排序）（任务3）
@@ -56,5 +59,9 @@ func BusinessRouter(router *gin.Engine) {
 			//获取企业信息以及碳减排信息（任务1）
 			CompanyRouter.GET("/info", apiutil.Format(business.DefaultCompanyController.GetCompanyInfo))
 		}
+
+		authRouter.GET("/carbon/city-province/list", apiutil.Format(business.DefaultCarbonController.CityProvinceList))
+
+		authRouter.GET("/upload/token", apiutil.Format(business.DefaultUploadController.GetUploadTokenInfo))
 	}
 }

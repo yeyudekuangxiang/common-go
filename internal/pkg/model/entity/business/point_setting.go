@@ -30,6 +30,8 @@ func (o PointRateSaveWaterElectricity) PointRateSetting() PointRateSetting {
 type PointRatePublicTransport struct {
 	Bus   PointRate `json:"bus"`
 	Metro PointRate `json:"metro"`
+	Step  PointRate `json:"step"`
+	Bike  PointRate `json:"bike"`
 }
 
 func (o PointRatePublicTransport) PointRateSetting() PointRateSetting {
@@ -47,6 +49,21 @@ type PointRateOnlineMeeting struct {
 }
 
 func (o PointRateOnlineMeeting) PointRateSetting() PointRateSetting {
+	data, err := json.Marshal(o)
+	if err != nil {
+		panic(err)
+	}
+	return PointRateSetting(data)
+}
+
+// PointRateGreenBusinessTrip 低碳旅行
+type PointRateGreenBusinessTrip struct {
+	HighSpeed PointRate `json:"highSpeed"` //高铁
+	Train     PointRate `json:"train"`     //火车
+	Airplane  PointRate `json:"airplane"`  //飞机
+}
+
+func (o PointRateGreenBusinessTrip) PointRateSetting() PointRateSetting {
 	data, err := json.Marshal(o)
 	if err != nil {
 		panic(err)

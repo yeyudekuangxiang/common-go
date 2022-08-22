@@ -112,6 +112,7 @@ type GetPointTransactionPageListBy struct {
 }
 type GetPointTransactionCountBy struct {
 	AdminId int
+	OpenId  string
 	OpenIds []string
 	Type    entity.PointTransactionType
 	Types   []entity.PointTransactionType

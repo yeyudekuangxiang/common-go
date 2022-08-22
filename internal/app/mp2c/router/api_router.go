@@ -62,7 +62,10 @@ func apiRouter(router *gin.Engine) {
 
 		authRouter.GET("banner/list", apiutil.Format(api.DefaultBannerController.GetBannerList))
 		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
-		authRouter.GET("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
+		authRouter.Any("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
+		//星星发券接口限制
+		authRouter.POST("/set-exception", apiutil.Format(api.DefaultChargeController.SetException))
+		authRouter.POST("/del-exception", apiutil.Format(api.DefaultChargeController.DelException))
 	}
 
 	//必须登陆的路由

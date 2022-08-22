@@ -2,6 +2,7 @@ package business
 
 import (
 	"github.com/shopspring/decimal"
+	"mio/internal/pkg/model/entity/business"
 	"time"
 )
 
@@ -36,9 +37,35 @@ func (srv CarbonCreditCalculatorService) CalcBus(bus float64) decimal.Decimal {
 	return decimal.NewFromFloat(bus).Mul(decimal.NewFromFloat(111.45)).Round(2)
 }
 
+// CalcOEP 光盘行动
+func (srv CarbonCreditCalculatorService) CalcOEP() decimal.Decimal {
+	return decimal.NewFromFloat(147).Round(2)
+}
+func (srv CarbonCreditCalculatorService) CalcTrip(tripType business.TripType, distance decimal.Decimal) decimal.Decimal {
+	switch tripType {
+	case business.TripTypeAirPlane:
+		return decimal.NewFromInt(0).Mul(distance).Round(2)
+	case business.TripTypeTrain:
+		return decimal.NewFromInt(90).Mul(distance).Round(2)
+	case business.TripTypeHighSpeed:
+		return decimal.NewFromInt(90).Mul(distance).Round(2)
+	}
+	return decimal.NewFromInt(0).Mul(distance).Round(2)
+}
+
 //CalcMetro 乘坐地铁 km
 func (srv CarbonCreditCalculatorService) CalcMetro(metro float64) decimal.Decimal {
 	return decimal.NewFromFloat(metro).Mul(decimal.NewFromFloat(134.05)).Round(2)
+}
+
+//CalcStep 步行	 km
+func (srv CarbonCreditCalculatorService) CalcStep(step float64) decimal.Decimal {
+	return decimal.NewFromFloat(step).Mul(decimal.NewFromFloat(67)).Round(2)
+}
+
+//CalcBike 骑行	 km
+func (srv CarbonCreditCalculatorService) CalcBike(bike float64) decimal.Decimal {
+	return decimal.NewFromFloat(bike).Mul(decimal.NewFromFloat(67)).Round(2)
 }
 
 /*

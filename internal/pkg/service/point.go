@@ -14,12 +14,13 @@ import (
 )
 
 func NewPointService(ctx *context.MioContext) PointService {
-	return PointService{ctx: ctx, repo: repository.NewPointRepository(ctx)}
+	return PointService{ctx: ctx, repo: repository.NewPointRepository(ctx), repoInvite: repository.NewInviteRepository(ctx)}
 }
 
 type PointService struct {
-	ctx  *context.MioContext
-	repo *repository.PointRepository
+	ctx        *context.MioContext
+	repo       *repository.PointRepository
+	repoInvite *repository.InviteRepository
 }
 
 // FindByUserId 获取用户积分
@@ -133,6 +134,14 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		if err != nil {
 			return err
 		}
+		//发完积分，更新邀请表发积分状态
+		if dto.InviteId != 0 && dto.Type == entity.POINT_INVITE {
+			//更新状态
+			err = srv.repoInvite.UpdateIsReward(dto.InviteId)
+			if err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 
@@ -231,7 +240,7 @@ func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage
 	go DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
 		OpenId:      dto.OpenId,
 		PointType:   dto.Type,
-		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "desc").String(),
+		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "dec").String(),
 		Value:       uint(dto.ChangePoint),
 		IsFail:      util.Ternary(failMessage == "", false, true).Bool(),
 		FailMessage: failMessage,
