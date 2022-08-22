@@ -22,7 +22,7 @@ type (
 		FindPageListByIdASC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CouponHistory, error)
 		//Delete(id, userId int64) error
 		//DeleteSoft(id, userId int64) error
-		//Update(data *entity.CouponHistory) error
+		Update(data *entity.CouponHistory) error
 		//UpdateWithVersion()
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 		RowBuilder() *gorm.DB
@@ -34,6 +34,18 @@ type (
 		Model *gorm.DB
 	}
 )
+
+func (m *defaultCouponHistoryRepository) Update(data *entity.CouponHistory) error {
+	var result entity.CommentIndex
+	err := m.Model.Where("open_id = ?", data.OpenId).First(&result).Error
+	if err != nil {
+		return err
+	}
+	if data.Code != "" {
+		result.Message = data.Code
+	}
+	return m.Model.Model(&result).Updates(&result).Error
+}
 
 func NewCouponHistoryRepository(db *gorm.DB) CouponHistoryModel {
 	return &defaultCouponHistoryRepository{
