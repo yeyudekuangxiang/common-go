@@ -41,12 +41,12 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	//if scene.Ch != "lvmiao" {
-	if !service.DefaultBdSceneService.CheckSign(form.Mobile, form.OutTradeNo, form.TotalPower, form.Sign, scene) {
-		app.Logger.Info("校验sign失败", form)
-		return nil, errors.New("sign:" + form.Sign + " 验证失败")
+	if scene.Ch != "lvmiao" {
+		if !service.DefaultBdSceneService.CheckSign(form.Mobile, form.OutTradeNo, form.TotalPower, form.Sign, scene) {
+			app.Logger.Info("校验sign失败", form)
+			return nil, errors.New("sign:" + form.Sign + " 验证失败")
+		}
 	}
-	//}
 	//避开重放
 	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
 		fmt.Println("charge 重复提交订单", form)
