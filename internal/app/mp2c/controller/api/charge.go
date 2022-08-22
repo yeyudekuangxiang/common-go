@@ -41,13 +41,12 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	if scene.Ch != "lvmiao" {
-		if !service.DefaultBdSceneService.CheckSign(form.Mobile, form.OutTradeNo, form.TotalPower, form.Sign, scene) {
-			app.Logger.Info("校验sign失败", form)
-			return nil, errors.New("sign:" + form.Sign + " 验证失败")
-		}
+	//if scene.Ch != "lvmiao" {
+	if !service.DefaultBdSceneService.CheckSign(form.Mobile, form.OutTradeNo, form.TotalPower, form.Sign, scene) {
+		app.Logger.Info("校验sign失败", form)
+		return nil, errors.New("sign:" + form.Sign + " 验证失败")
 	}
-
+	//}
 	//避开重放
 	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
 		fmt.Println("charge 重复提交订单", form)
@@ -102,8 +101,9 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 	// todo 发券
 	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 {
-		startTime, _ := time.Parse("20060102", "2022-08-22")
-		endTime, _ := time.Parse("20060102", "2022-08-30")
+		fmt.Println("星星充电 发券start")
+		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
+		endTime, _ := time.Parse("2006-01-02", "2022-08-30")
 		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
 			starChargeService := service.NewStarChargeService(context.NewMioContext())
 			token, err := starChargeService.GetAccessToken()
@@ -112,14 +112,18 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			}
 			//限制一次
 			if err = starChargeService.CheckLimit(userInfo.OpenId); err != nil {
+				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
 				return nil, err
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
+				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
 				return nil, err
 			}
 		}
+		fmt.Println("星星充电 发券end")
 	}
+	fmt.Println("end")
 	return gin.H{}, nil
 }
 

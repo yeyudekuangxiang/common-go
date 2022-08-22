@@ -17,12 +17,12 @@ func NewStarChargeService(context *context.MioContext) *StarChargeService {
 	return &StarChargeService{
 		ctx:            context,
 		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
-		OperatorID:     "MA1FY5992", //要换
+		OperatorID:     "MA1FY5992",
 		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
 		DataSecret:     "FyTx5OwuTpEEPQJ5",
 		DataSecretIV:   "ULxxy31gh7Qw67k5",
 		Domain:         "https://evcs.starcharge.com/evcs/starcharge/",
-		ProvideId:      "JC_20220820094600625", //要换
+		ProvideId:      "JC_20220820094600625",
 	}
 }
 
@@ -56,13 +56,9 @@ type queryRequest struct {
 
 // GetAccessToken 星星充电 query token
 func (srv StarChargeService) GetAccessToken() (string, error) {
-	redisCmd := app.Redis.Get(srv.ctx, "token:"+srv.OperatorID)
-	result, err := redisCmd.Result()
-	if err != nil {
-		return "", err
-	}
-	if result != "" {
-		return result, nil
+	token := app.Redis.Get(srv.ctx, "token:"+srv.OperatorID).Val()
+	if token != "" {
+		return token, nil
 	}
 	timeStr := time.Now().Format("20060102150405")
 	//data加密
@@ -122,18 +118,33 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	}
 	_, err := repository.DefaultCouponHistoryRepository.Insert(&history)
 	if err != nil {
+		fmt.Printf("星星充电,insert error:%s", err.Error())
 		return err
 	}
 	r := struct {
-		PhoneNumber string `json:"phoneNumber"`
-		ProvideId   string `json:"provideId"`
+		PhoneNumber string `json:"PhoneNumber"`
+		ProvideId   string `json:"ProvideId"`
 	}{
 		PhoneNumber: phoneNumber,
 		ProvideId:   provideId,
 	}
+	//data加密
+	marshal, _ := json.Marshal(r)
+	encryptData := encrypt.AesEncrypt(string(marshal), srv.DataSecret, srv.DataSecretIV)
+	//sign加密
+	timeStr := time.Now().Format("20060102150405")
+	signStr := srv.OperatorID + encryptData + timeStr + "0001"
+	encryptSig := encrypt.HMacMd5(signStr, srv.SigSecret)
+	queryParams := queryRequest{
+		Sig:        encryptSig,
+		Data:       encryptData,
+		OperatorID: srv.OperatorID,
+		TimeStamp:  timeStr,
+		Seq:        "0001",
+	}
 	url := srv.Domain + "/query_delivery_provide"
 	authToken := httputil.HttpWithHeader("Authorization", "Bearer "+token)
-	body, err := httputil.PostJson(url, r, authToken)
+	body, err := httputil.PostJson(url, queryParams, authToken)
 	fmt.Printf("%s\n", body)
 	if err != nil {
 		return err
