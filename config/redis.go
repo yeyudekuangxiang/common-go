@@ -17,6 +17,7 @@ type redisKey struct {
 	CheckBusinessUser     string
 	BusinessCarbonHotCity string
 	BlackList             string
+	EventLimit            string
 }
 
 var RedisKey = redisKey{
@@ -36,4 +37,5 @@ var RedisKey = redisKey{
 	CheckBusinessUser:     "mp2c:checkBusinessUser:%s",       //检测用户token是否有更新
 	BusinessCarbonHotCity: "business:carbon:hotcity",         //低碳场景中热门城市
 	BlackList:             "mp2c:blacklist",                  //黑产白名单
+	EventLimit:            "mp2c:eventlimit",                 //公益兑换限制
 }
