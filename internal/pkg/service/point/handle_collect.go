@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"mio/internal/pkg/model/entity"
 	"strconv"
 )
 
@@ -50,7 +51,7 @@ func (c *defaultClientHandle) powerReplace() error {
 		fmt.Printf("error: %s", err.Error())
 		return err
 	}
-	data, _, err := c.getTodayData()
+	data, _, err := c.getTodayData([]string{c.clientHandle.OpenId}, []entity.PointTransactionType{c.clientHandle.Type})
 	if err != nil {
 		return err
 	}

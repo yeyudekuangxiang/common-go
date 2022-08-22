@@ -114,7 +114,7 @@ func (srv PointTransactionCountLimitService) CheckMaxPointByMonth(transactionTyp
 		todayValue += item["value"].(int64)
 	}
 	if maxPoint-todayValue <= 0 {
-		return 0, errors.New("本月积分已达上限")
+		return 0, errors.New("此回收分类已达到本月获取积分上限")
 	}
 	if maxPoint-todayValue > 0 && maxPoint-todayValue < currPoint {
 		return maxPoint - todayValue, nil
