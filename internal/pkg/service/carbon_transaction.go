@@ -310,8 +310,8 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 
 func (srv CarbonTransactionService) AddClassify() {
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
-		StartTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
-		EndTime:   time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
+		//StartTime: time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
 	})
 	//a	:= map[string] map[string]float32 {"C":{"C":5, "Go":4.5, "Python":4.5, "C++":2 }}
 	DateMap := make(map[int64]map[entity.CarbonTransactionType]float64)
@@ -344,8 +344,8 @@ func (srv CarbonTransactionService) AddHistory() {
 	})
 	for _, v := range list {
 		srv.repoDay.Create(&entity.CarbonTransactionDay{
-			OpenId: v.OpenId,
-			UserId: v.UserId,
+			OpenId: "oy_BA5FK1t3dEwrMZndhlUoI2-HY",
+			UserId: 412925,
 			VDate:  time.Now().AddDate(0, 0, -1),
 			Value:  v.Sum,
 		})

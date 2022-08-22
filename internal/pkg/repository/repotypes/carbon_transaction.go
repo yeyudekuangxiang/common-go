@@ -17,5 +17,5 @@ type GetCarbonTransactionListBy struct {
 	Type   entity.CarbonTransactionType
 	Sum    float64
 	UserId int64
-	OpenId string
+	Openid string
 }

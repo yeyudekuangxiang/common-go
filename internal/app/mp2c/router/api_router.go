@@ -209,7 +209,7 @@ func apiRouter(router *gin.Engine) {
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 		//星星充电发放优惠券
-		mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
+		//mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
 
 		//碳成就相关路由
 		carbonRouter := mustAuthRouter.Group("/carbon")

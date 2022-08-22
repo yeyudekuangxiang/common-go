@@ -50,13 +50,13 @@ func (repo CarbonTransactionRepository) GetListByDay(by repotypes.GetCarbonTrans
 	list := make([]repotypes.GetCarbonTransactionListBy, 0)
 	db := repo.ctx.DB.Model(entity.CarbonTransaction{})
 	db.Select("sum(value)", "user_id", "openid")
-	if by.StartTime == "" {
+	if by.StartTime != "" {
 		db.Where("created_at >= ?", by.StartTime)
 	}
 	if by.EndTime != "" {
-		db.Where("created_at <= ?", by.EndTime)
+		db.Where("created_at < ?", by.EndTime)
 	}
-	db.Group("user_id")
+	db.Group("user_id,openid")
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
