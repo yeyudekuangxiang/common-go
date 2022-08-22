@@ -101,7 +101,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		fmt.Println("charge 加积分失败 ", form)
 	}
 	// todo 发券
-	if app.Redis.Exists(ctx, scene.Ch+"Exception").Val() == 0 {
+	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 {
 		startTime, _ := time.Parse("20060102", "2022-08-22")
 		endTime, _ := time.Parse("20060102", "2022-08-30")
 		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
@@ -124,21 +124,24 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
-	form := GetChargeForm{}
+	form := ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	ctx := context.NewMioContext()
-	app.Redis.Set(ctx, form.Ch+"Exception", 1, 0)
+	err := app.Redis.Set(ctx, form.Ch+"_"+"ChargeException", 1, 0).Err()
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
 
 func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
-	form := GetChargeForm{}
+	form := ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	ctx := context.NewMioContext()
-	app.Redis.Del(ctx, form.Ch+"Exception")
+	app.Redis.Del(ctx, form.Ch+"_"+"ChargeException")
 	return nil, nil
 }

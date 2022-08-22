@@ -42,6 +42,9 @@ type GetChargeForm struct {
 	TotalPower string `json:"totalPower" form:"totalPower" binding:"required" alias:"统计总量"`
 	Sign       string `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
+type ChangeChargeExceptionForm struct {
+	Ch string `json:"ch" form:"ch" binding:"required" alias:"渠道参数"`
+}
 
 type RecyclePushForm struct {
 	Type                int    `json:"type" form:"type" binding:"required"`                      //业务类型 1：回首订单成功
