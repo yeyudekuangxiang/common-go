@@ -178,9 +178,9 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 }
 
 func (srv StarChargeService) CheckLimit(openId string) error {
-	builder := repository.DefaultCommentRepository.RowBuilder()
+	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
 	builder.Where("open_id = ?", openId)
-	_, err := repository.DefaultCommentRepository.FindOneQuery(builder)
+	_, err := repository.DefaultCouponHistoryRepository.FindOneQuery(builder)
 	if err == nil {
 		//已经存在
 		return errors.New("每位用户只限一次")
