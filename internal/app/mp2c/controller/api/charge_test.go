@@ -21,5 +21,4 @@ func TestCheckTime(t *testing.T) {
 
 	fmt.Println(time.Now().After(startTime))
 	fmt.Println(time.Now().Before(endTime))
-
 }

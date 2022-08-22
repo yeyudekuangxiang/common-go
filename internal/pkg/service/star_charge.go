@@ -114,6 +114,16 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 }
 
 func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId string, token string) error {
+	//保存记录
+	history := entity.CouponHistory{
+		OpenId:     openId,
+		CouponType: "star_charge",
+		CreateTime: time.Time{},
+	}
+	_, err := repository.DefaultCouponHistoryRepository.Insert(&history)
+	if err != nil {
+		return err
+	}
 	r := struct {
 		PhoneNumber string `json:"phoneNumber"`
 		ProvideId   string `json:"provideId"`
@@ -144,16 +154,25 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	if provideResult.SuccStat != 0 {
 		return errors.New(provideResult.FailReasonMsg)
 	}
-	//保存记录
-	history := entity.CouponHistory{
-		OpenId:     openId,
-		CouponType: "star_charge",
-		Code:       provideResult.CouponCode,
-		CreateTime: time.Time{},
+	//更新code
+	upResp := entity.CouponHistory{
+		OpenId: openId,
+		Code:   provideResult.CouponCode,
 	}
-	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
+	err = repository.DefaultCouponHistoryRepository.Update(&upResp)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (srv StarChargeService) CheckLimit(openId string) error {
+	builder := repository.DefaultCommentRepository.RowBuilder()
+	builder.Where("open_id = ?", openId)
+	_, err := repository.DefaultCommentRepository.FindOneQuery(builder)
+	if err == nil {
+		//已经存在
+		return errors.New("每位用户只限一次")
 	}
 	return nil
 }
