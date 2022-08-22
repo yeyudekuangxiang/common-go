@@ -36,13 +36,13 @@ type (
 )
 
 func (m *defaultCouponHistoryRepository) Update(data *entity.CouponHistory) error {
-	var result entity.CommentIndex
+	var result entity.CouponHistory
 	err := m.Model.Where("open_id = ?", data.OpenId).First(&result).Error
 	if err != nil {
 		return err
 	}
 	if data.Code != "" {
-		result.Message = data.Code
+		result.Code = data.Code
 	}
 	return m.Model.Model(&result).Updates(&result).Error
 }
