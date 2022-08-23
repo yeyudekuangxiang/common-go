@@ -144,5 +144,5 @@ func sendCoupon(phoneNumber string, provideId string, token string, xing StarCha
 }
 
 func TestTime(t *testing.T) {
-	fmt.Printf("%s", time.Now())
+	fmt.Printf("%s", time.Now().Format("20060102150405"))
 }
