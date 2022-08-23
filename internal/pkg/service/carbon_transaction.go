@@ -338,13 +338,13 @@ func (srv CarbonTransactionService) AddClassify() {
 //每天总结碳量
 func (srv CarbonTransactionService) AddHistory() {
 	list := srv.repo.GetListByDay(repotypes.GetCarbonTransactionListByDO{
-		StartTime: time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
-		EndTime:   time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+		StartTime: time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+		EndTime:   time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
 	})
 	for _, v := range list {
 		srv.repoDay.Create(&entity.CarbonTransactionDay{
-			OpenId: "oy_BA5FK1t3dEwrMZndhlUoI2-HY",
-			UserId: 412925,
+			OpenId: v.Openid,
+			UserId: v.UserId,
 			VDate:  time.Now().AddDate(0, 0, -1),
 			Value:  v.Sum,
 		})

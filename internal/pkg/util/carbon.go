@@ -15,13 +15,14 @@ func CarbonToTree(carbon float64) (string, string) {
 	if carbonDec.Cmp(rateDec) == -1 {
 		//大于等于一棵树
 		oneDayCarbon := rateDec.Div(decimal.NewFromInt(365))
+
 		val := carbonDec.Div(oneDayCarbon).Round(1).String()
-		msg := "1棵沙棘树," + val + "天的碳吸收量"
-		return val, msg
+		msg := "棵沙棘树," + val + "天的碳吸收量"
+		return "1", msg
 	} else {
 		//不够一棵树
 		val := carbonDec.Div(rateDec).Round(1).String()
-		msg := val + "棵沙棘树,1年碳吸收量"
+		msg := "棵沙棘树,1年碳吸收量"
 		return val, msg
 	}
 }
