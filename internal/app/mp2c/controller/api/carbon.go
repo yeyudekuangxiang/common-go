@@ -99,7 +99,7 @@ func (c CarbonController) Classify(ctx *gin.Context) (gin.H, error) {
 		UserId: user.ID,
 	})
 	if err != nil {
-		return nil, err
+		return gin.H{}, err
 	}
 	//返回前整理
 	var ListDateVo []string

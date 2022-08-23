@@ -207,6 +207,13 @@ func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionC
 	/******上面造数据用的*****/
 
 	dataStr := app.Redis.HGet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
+	if dataStr.Val() == "" {
+		//用默认的
+		retDto.List = []api_types.CarbonTransactionClassifyList{{Key: entity.CARBON_STEP.Text(), Val: 0}, {Key: entity.CARBON_BIKE_RIDE.Text(), Val: 0}, {Key: entity.CARBON_ECAR.Text(), Val: 0}, {Key: "其他", Val: 0}}
+		retDto.Cover = entity.CARBON_STEP.Cover()
+		retDto.Total = 0
+		return
+	}
 	var dataMap map[entity.CarbonTransactionType]float64
 	err = json.Unmarshal([]byte(dataStr.Val()), &dataMap)
 	if err != nil {
@@ -244,16 +251,8 @@ func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionC
 			other += n.Val
 		}
 	}
-	if len(ret) == 0 {
-		//用默认的
-		ret = []api_types.CarbonTransactionClassifyList{{Key: entity.CARBON_STEP.Text(), Val: 0}, {Key: entity.CARBON_BIKE_RIDE.Text(), Val: 0}, {Key: entity.CARBON_ECAR.Text(), Val: 0}}
-		retDto.Cover = entity.CARBON_STEP.Cover()
-	}
 	ret = append(ret, api_types.CarbonTransactionClassifyList{Key: "其他", Val: other})
 	retDto.Total = total
-	for _, pair := range ret {
-		fmt.Printf("key: %v value: %v \n", pair.Key, pair.Val)
-	}
 	retDto.List = ret
 	return
 }
