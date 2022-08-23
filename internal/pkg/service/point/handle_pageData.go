@@ -5,7 +5,8 @@ import (
 	"github.com/shopspring/decimal"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
+	"strconv"
+	"strings"
 )
 
 //电池换电 奥动 before 弹框数据
@@ -40,10 +41,10 @@ func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, er
 //oola旧物回收before弹框数据
 func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, error) {
 	types := []entity.PointTransactionType{
-		entity.POINT_OOLA_RECYCLING_CLOTHING,
-		entity.POINT_OOLA_RECYCLING_DIGITAL,
-		entity.POINT_OOLA_RECYCLING_APPLIANCE,
-		entity.POINT_OOLA_RECYCLING_BOOK,
+		entity.POINT_RECYCLING_CLOTHING,
+		entity.POINT_RECYCLING_DIGITAL,
+		entity.POINT_RECYCLING_APPLIANCE,
+		entity.POINT_RECYCLING_BOOK,
 	}
 	openIds := []string{c.clientHandle.OpenId}
 	result, count, err := c.getTodayData(openIds, types)
@@ -51,16 +52,17 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 		return nil, err
 	}
 	//减碳量计算
-	var co2 int64
+	var co2, co2Count int64
 	res := make(map[string]interface{}, 0)
-	//kwh
+	//co2
 	for _, item := range result {
-		temp := service.DefaultRecycleService.GetCo2(entity.PointTransactionType(item["type"].(string)), item["value"].(int64))
-		co2 += temp
+		additionalInfo := strings.Split(item["additional_info"].(string), "#")
+		co2, _ = strconv.ParseInt(additionalInfo[1], 10, 64)
+		co2Count += co2
 	}
 	//返回数据
 	res["count"] = count
-	res["co2"] = co2
+	res["co2"] = co2Count
 	return res, nil
 }
 

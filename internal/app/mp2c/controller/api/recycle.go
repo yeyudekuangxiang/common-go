@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"strconv"
 )
 
 var DefaultRecycleController = RecycleController{}
@@ -83,7 +84,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//本次可得积分
 	currPoint, _ := RecycleService.GetPoint(form.Name, form.Qua)
 	//本次可得减碳量 todo
-	//currCo2 := RecycleService.GetCo2(form.Name, form.Qua)
+	currCo2, _ := RecycleService.GetCo2(form.Name, form.Qua)
 	//本月可获得积分上限
 	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
 
@@ -98,7 +99,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Type:         typeName,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.OrderNo + "#" + form.ClientId,
+		AdditionInfo: form.OrderNo + "#" + strconv.FormatInt(currCo2, 10) + "#" + form.ClientId,
 		Note:         form.OrderNo,
 	})
 	if err != nil {
