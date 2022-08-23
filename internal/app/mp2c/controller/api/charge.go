@@ -57,7 +57,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//通过手机号查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile})
+	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile, Source: "mio"})
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
 		return nil, errors.New("未找到用户")
