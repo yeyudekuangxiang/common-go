@@ -60,7 +60,7 @@ func (EventController) GetEventList(ctx *gin.Context) (gin.H, error) {
 	list, err := event.DefaultEventService.GetEventShortInfoList(event.GetEventListParam{
 		EventCategoryId: form.EventCategoryId,
 		OrderBy:         entity.OrderByList{eevent.OrderByEventSortDesc},
-		Active:          sql.NullBool{Bool: true},
+		Active:          sql.NullBool{Bool: true, Valid: true},
 		IsShow:          1,
 	})
 	if err != nil {
