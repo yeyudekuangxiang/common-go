@@ -107,7 +107,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		fmt.Println("charge 加积分失败 ", form)
 	}
 	// todo 发券
-	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 {
+	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 && thisPoint0 > 0 {
 		fmt.Println("星星充电 发券start")
 		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
 		endTime, _ := time.Parse("2006-01-02", "2022-08-30")

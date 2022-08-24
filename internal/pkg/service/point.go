@@ -232,6 +232,7 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 		ChangePoint: value,
 		AdminId:     adminId,
 		Note:        param.Note,
+		BizId:       util.UUID(),
 	})
 	return err
 }

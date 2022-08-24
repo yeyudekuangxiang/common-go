@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
+	"log"
 	"math/rand"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -428,10 +429,49 @@ func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventP
 	app.Redis.Set(context.NewMioContext(), config.RedisKey.BadgeImageCode+code, badge.ID, time.Minute*5)
 
 	srv.addEventLimit(param.UserId, ev.EventId, ev.Limit)
+
+	srv.afterSubmitEventOrder(param.UserId, ev.EventId, ev.Limit, badge)
 	return &srv_types.SubmitOrderForEventResult{
 		CertificateNo: badge.Code,
 		UploadCode:    code,
 	}, nil
+}
+func (srv OrderService) afterSubmitEventOrder(userId int64, evId string, limit eevent.EventLimit, badge *entity.Badge) {
+	app.Logger.Info("提交兑换订单后", evId, config.Constants.StarCouponEventId)
+	if config.Constants.StarCouponEventId == evId {
+		log.Println("发送星星充电券", evId)
+		srv.sendEventStarCoupon(userId, evId)
+	}
+
+	return
+}
+func (srv OrderService) sendEventStarCoupon(userId int64, evId string) {
+	userInfo, exist, err := DefaultUserService.GetUserByID(userId)
+	if err != nil {
+		app.Logger.Error("兑换证书发星星券失败,查询用户信息异常", err, userId, evId)
+		return
+	}
+	if !exist {
+		app.Logger.Error("兑换证书发星星券失败,未查询到用户信息", userId, evId)
+		return
+	}
+	if userInfo.PhoneNumber == "" {
+		app.Logger.Error("兑换证书发星星券失败,用户未绑定手机号", userId, evId)
+		return
+	}
+
+	starChargeService := NewStarChargeService(context.NewMioContext())
+	token, err := starChargeService.GetAccessToken()
+	if err != nil {
+		app.Logger.Error("兑换证书发星星券失败,获取星星token失败", err, userId, evId)
+		return
+	}
+	err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token)
+	if err != nil {
+		app.Logger.Error("兑换证书发星星券失败", err, userId, evId)
+		return
+	}
+	app.Logger.Info("发送星星充电券成功", userInfo.OpenId, userInfo.PhoneNumber, evId)
 }
 func (srv OrderService) addEventLimit(userId int64, evId string, limit eevent.EventLimit) {
 	redisKey := fmt.Sprintf("%s:%d%s", config.RedisKey.EventLimit, userId, evId)
@@ -452,8 +492,7 @@ func (srv OrderService) addEventLimit(userId int64, evId string, limit eevent.Ev
 	}
 
 	if usedCount >= c {
-		app.Logger.Error("已达到兑换次数上限", userId, limit, usedCount)
-		return
+		app.Logger.Error("超过兑换次数上限", userId, limit, usedCount)
 	}
 
 	if err == redis.Nil {
