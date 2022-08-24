@@ -69,6 +69,7 @@ type GetEventListParam struct {
 	EventCategoryId string
 	OrderBy         entity.OrderByList
 	Active          sql.NullBool
+	IsShow          int //1显示 2不显示
 }
 
 type GetEventCategoryListParam struct {
