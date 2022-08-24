@@ -216,7 +216,6 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 		return 0, errors.New("系统异常,请稍后再试")
 	}
 
-	fmt.Printf("%+v %+v\n", param, pointRate)
 	addPoint := pointRate.Bus.Calc(param.BusCredit)
 	addPoint += pointRate.Metro.Calc(param.MetroCredit)
 	addPoint += pointRate.Step.Calc(param.StepCredit)

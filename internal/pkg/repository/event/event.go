@@ -56,6 +56,10 @@ func (repo EventRepository) GetEventPageList(by GetEventPageListBy) (list []even
 		db.Where("event_category_id = ?", by.EventCategoryId)
 	}
 
+	if by.IsShow != 0 {
+		db.Where("is_show = ?", by.IsShow)
+	}
+
 	err = db.Count(&total).Offset(by.Offset).Limit(by.Limit).Find(&list).Error
 
 	return
@@ -77,6 +81,10 @@ func (repo EventRepository) GetEventList(by GetEventListBy) (list []event.Event,
 	}
 	if by.Active.Valid {
 		db.Where("active = ?", by.Active.Bool)
+	}
+
+	if by.IsShow != 0 {
+		db.Where("is_show = ?", by.IsShow)
 	}
 
 	err = db.Find(&list).Error

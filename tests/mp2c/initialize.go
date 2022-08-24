@@ -8,9 +8,7 @@ import (
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
-	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/util"
-	mock_repository "mio/mock/repository"
 	"net/http"
 	"os"
 	"strings"
@@ -41,8 +39,8 @@ func setupMock() {
 	//real 真实环境 mock mock环境测试
 	if TestEnv != "real" {
 		onceMock.Do(func() {
-			service2.DefaultSystemAdminService = service2.NewSystemAdminService(mock_repository.NewAdminMockRepository())
-			service2.DefaultUserService = service2.NewUserService(mock_repository.NewUserMockRepository())
+			//service2.DefaultSystemAdminService = service2.NewSystemAdminService(mock_repository.NewAdminMockRepository())
+			//service2.DefaultUserService = service2.NewUserService(mock_repository.NewUserMockRepository())
 		})
 	}
 }

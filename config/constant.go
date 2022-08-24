@@ -7,6 +7,7 @@ var Constants = struct {
 	DuiBaActivityStaticH5Link  string
 	DuiBaActivityInsideLink    string
 	DuiBaActivityEwmLink       string
+	StarCouponEventId          string
 }{
 	WxWorkBugRobotKey:          "e46174d1-9e2a-493c-ac9c-84f2423457f6",
 	WxWorkGitlabRobotKey:       "3c14f523-ebb5-4716-9aa5-d865bfda48c5",
@@ -14,4 +15,5 @@ var Constants = struct {
 	DuiBaActivityStaticH5Link:  "https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_bind_phone.html?activityId=%s&cid=s%", //静态网站 H5 跳小程序链接：                                              //静态网站 H5 跳小程序链接
 	DuiBaActivityInsideLink:    "pages/duiba_v2/duiba/index?activityId=%s",                                                                //小程序内路径
 	DuiBaActivityEwmLink:       "",                                                                                                        //二维码                                                                                                      //
+	StarCouponEventId:          "4e4b7557-db53-4d14-9c18-9836d31abf65",
 }
