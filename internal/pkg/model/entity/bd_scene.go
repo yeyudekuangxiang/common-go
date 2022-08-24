@@ -7,6 +7,7 @@ type BdScene struct {
 	PointLimit int
 	Override   int
 	WhiteIp    string
+	AppId      string
 }
 
 func (BdScene) TableName() string {
