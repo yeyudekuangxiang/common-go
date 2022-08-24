@@ -118,13 +118,16 @@ func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
 	}
 	userInfo := apiutil.GetAuthUser(c)
 	oolaPkg := oola.NewOola(context.NewMioContext(), scene.AppId, userInfo.OpenId, scene.Domain, app.Redis)
-	oolaUserKey, err := oolaPkg.GetToken()
+	oolaPkg.WithHeadImgUrl(userInfo.AvatarUrl)
+	oolaPkg.WithUserName(userInfo.Nickname)
+	oolaPkg.WithPhone(userInfo.PhoneNumber)
+	channelCode, LoginKey, err := oolaPkg.GetToken()
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
-		"oolaUserKey": oolaUserKey,
-		"channelCode": "xxx",
+		"oolaUserKey": LoginKey,
+		"channelCode": channelCode,
 	}, nil
 }
 

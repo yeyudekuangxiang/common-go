@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-redis/redis/v8"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/httputil"
 	"mio/pkg/duiba/util"
 	"net/url"
+	"time"
 )
 
 type Oola struct {
@@ -19,6 +19,9 @@ type Oola struct {
 	oolaUserId string
 	domain     string
 	redis      *redis.Client
+	headImgUrl string
+	userName   string
+	phone      string
 }
 
 type oolaResponse struct {
@@ -29,17 +32,36 @@ type oolaResponse struct {
 }
 
 type responseInfo struct {
-	OolaUserId   string `json:"oolaUserId,omitempty"`
-	AutologinKey string `json:"autologinKey,omitempty"`
+	OolaUserId   string `json:"oolaUserId"`
+	AutologinKey string `json:"autologinKey"`
+	ChannelCode  string `json:"channelCode"`
 }
 
-func NewOola(context *context.MioContext, appId, clientId, domain string, client *redis.Client) *Oola {
+func NewOola(context *context.MioContext, domain string, appId, clientId string, client *redis.Client) *Oola {
 	return &Oola{
 		ctx:      context,
 		appId:    appId,
 		clientId: clientId,
 		domain:   domain,
 		redis:    client,
+	}
+}
+
+func (o Oola) WithPhone(phone string) {
+	if phone != "" {
+		o.phone = phone
+	}
+}
+
+func (o Oola) WithHeadImgUrl(headImgUrl string) {
+	if headImgUrl != "" {
+		o.headImgUrl = headImgUrl
+	}
+}
+
+func (o Oola) WithUserName(userName string) {
+	if userName != "" {
+		o.userName = userName
 	}
 }
 
@@ -52,24 +74,13 @@ func (o Oola) getSign(ch string) (sign string, err error) {
 	return util.Md5(scene.Key + "appId=" + scene.AppId + ";clientId=" + o.clientId + ";"), nil
 }
 
-func (o Oola) GetToken() (string, error) {
-	autoLoginKey, err := o.redis.Get(o.ctx, "oola_login_key:"+o.clientId).Result()
-	if err != nil {
-		if err == redis.Nil {
-			//重新获取token
-			_, oolaUserLoginKey, err := o.register()
-			if err != nil {
-				return "", err
-			}
-			return oolaUserLoginKey, nil
-		}
-		app.Logger.Error(err)
-		return "", err
+func (o Oola) GetToken() (string, string, error) {
+	autoLoginKey, _ := o.redis.Get(o.ctx, "oola_login_key:"+o.clientId).Result()
+	channelCode, _ := o.redis.Get(o.ctx, "oola_login_key:"+o.clientId).Result()
+	if autoLoginKey == "" || channelCode == "" {
+		return o.register()
 	}
-	if autoLoginKey == "" {
-		return "", errors.New("数据异常")
-	}
-	return autoLoginKey, nil
+	return channelCode, autoLoginKey, nil
 }
 
 func (o Oola) register() (string, string, error) {
@@ -81,6 +92,17 @@ func (o Oola) register() (string, string, error) {
 	params.Set("appId", o.appId)
 	params.Set("clientId", o.clientId)
 	params.Set("sign", sign)
+
+	if o.userName != "" {
+		params.Set("userName", o.userName)
+	}
+	if o.phone != "" {
+		params.Set("phone", o.phone)
+	}
+	if o.headImgUrl != "" {
+		params.Set("headImgUrl", o.headImgUrl)
+	}
+
 	u := o.domain + "/api/user/register"
 	body, err := httputil.PostFrom(u, params)
 	if err != nil {
@@ -98,8 +120,10 @@ func (o Oola) register() (string, string, error) {
 		}
 		return "", "", errors.New(res.Msg)
 	}
-	//记录redis todo
-	return res.Info.OolaUserId, res.Info.AutologinKey, nil
+	//记录redis
+	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 10*time.Minute)
+	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 10*time.Minute)
+	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
 
 func (o Oola) getUserAutoLoginKey() (string, string, error) {
@@ -125,6 +149,8 @@ func (o Oola) getUserAutoLoginKey() (string, string, error) {
 	if res.Code != "200" {
 		return "", "", errors.New(res.Msg)
 	}
-	//记录redis todo
-	return res.Info.OolaUserId, res.Info.AutologinKey, nil
+	//记录redis
+	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 10*time.Minute)
+	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 10*time.Minute)
+	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
