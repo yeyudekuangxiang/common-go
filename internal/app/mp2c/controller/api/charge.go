@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
@@ -55,16 +56,22 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//通过手机号查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile})
+	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
+		Mobile: form.Mobile,
+		Source: entity.UserSourceMio,
+	})
+
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
 		return nil, errors.New("未找到用户")
 	}
+
 	//风险登记验证
 	if userInfo.Risk >= 2 {
 		fmt.Println("用户风险登记过高 ", form)
 		return nil, errors.New("账户风险等级过高")
 	}
+
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
@@ -88,7 +95,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//加积分
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
-	pointService := service.NewPointService(context.NewMioContext())
+	pointService := service.NewPointService(ctx)
 	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         typeString,
@@ -105,7 +112,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
 		endTime, _ := time.Parse("2006-01-02", "2022-08-30")
 		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := service.NewStarChargeService(context.NewMioContext())
+			starChargeService := service.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
 				return nil, err

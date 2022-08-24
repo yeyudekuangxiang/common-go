@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"mio/pkg/oola"
 	"strconv"
 	"time"
 )
@@ -42,48 +43,95 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	if err := service.DefaultRecycleService.CheckSign(dst, scene.Key); err != nil {
+	//new RecycleService
+	ctx := context.NewMioContext()
+	RecycleService := service.NewRecycleService(ctx)
+	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
+	PointService := service.NewPointService(ctx)
+	//校验sign
+	if err := RecycleService.CheckSign(dst, scene.Key); err != nil {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errors.New("sign:" + form.Sign + " 验证失败")
 	}
-	//避开重放
-	if !util.DefaultLock.Lock(strconv.Itoa(form.Type)+form.OrderNo, 24*3600*30*time.Second) {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
-	}
+
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
 	if userInfo.ID == 0 {
 		fmt.Println("charge 未找到用户 ", form)
 		return nil, errno.ErrUserNotFound
 	}
-	//查询今日获取积分次数
-	limitKey := time.Now().Format("20060102") + form.Name + userInfo.OpenId
-	if !util.DefaultLock.Lock(limitKey, time.Hour*24) {
-		return nil, errors.New("今日该回收分类获取积分次数已达到上限")
+
+	//避开重放
+	if !util.DefaultLock.Lock(strconv.Itoa(form.Type)+form.OrderNo, 24*3600*30*time.Second) {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
 	}
-	//匹配类型
-	typeName := service.DefaultRecycleService.GetType(form.Name)
-	//查询今日积分上限
-	currPoint, _ := service.DefaultRecycleService.GetPoint(form.ProductCategoryName, form.Qua, form.Unit)
-	maxPoint := service.DefaultRecycleService.GetMaxPointByMonth(form.ProductCategoryName)
-	point, err := service.NewPointTransactionCountLimitService(context.NewMioContext()).
-		CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, maxPoint)
+	//if err = RecycleService.CheckOrder(userInfo.OpenId, form.OrderNo); err != nil {
+	//	return nil, err
+	//}
+
+	//匹配大类型
+	typeName := RecycleService.GetType(form.ProductCategoryName)
+	if typeName == "" {
+		return nil, errors.New("未识别回收分类")
+	}
+
+	//查询今日该类型获取积分次数
+	err = RecycleService.CheckLimit(userInfo.OpenId, form.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	//本次可得积分
+	currPoint, _ := RecycleService.GetPoint(form.Name, form.Qua)
+	//本次可得减碳量 todo
+	currCo2, _ := RecycleService.GetCo2(form.Name, form.Qua)
+	//本月可获得积分上限
+	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
+
+	//最终本次回收可获得积分
+	point, err := TransActionLimitService.CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, monthPoint)
 	if err != nil {
 		return nil, err
 	}
 	//加积分
-	pointService := service.NewPointService(context.NewMioContext())
-	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         typeName,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.OrderNo + "#" + form.ClientId,
+		AdditionInfo: form.OrderNo + "#" + strconv.FormatInt(currCo2, 10) + "#" + form.ClientId,
+		Note:         form.OrderNo,
 	})
 	if err != nil {
 		fmt.Println("oola 旧物回收 加积分失败 ", form)
 	}
 	return gin.H{}, nil
+}
+
+func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh("oola")
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errors.New("渠道查询失败")
+	}
+	userInfo := apiutil.GetAuthUser(c)
+	oolaPkg := oola.NewOola(context.NewMioContext(), scene.AppId, userInfo.OpenId, scene.Domain, app.Redis)
+	oolaPkg.WithHeadImgUrl(userInfo.AvatarUrl)
+	oolaPkg.WithUserName(userInfo.Nickname)
+	oolaPkg.WithPhone(userInfo.PhoneNumber)
+	channelCode, LoginKey, err := oolaPkg.GetToken()
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"oolaUserKey": LoginKey,
+		"channelCode": channelCode,
+	}, nil
+}
+
+func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
+
+	return nil, nil
 }

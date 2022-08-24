@@ -94,9 +94,6 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err != nil {
-		return "", err
-	}
 	if signResponse.Ret != 0 {
 		return "", errors.New("请求错误")
 	}

@@ -143,6 +143,9 @@ type CheckStockItem struct {
 }
 type FindPointTransactionBy struct {
 	TransactionId string
+	OpenId        string
+	Type          string
+	Note          string
 }
 type FindStepHistoryBy struct {
 	OpenId        string
