@@ -17,7 +17,6 @@ type Oola struct {
 	appId      string
 	clientId   string
 	oolaUserId string
-	sign       string
 	domain     string
 	redis      *redis.Client
 }
@@ -34,12 +33,11 @@ type responseInfo struct {
 	AutologinKey string `json:"autologinKey,omitempty"`
 }
 
-func NewOola(context *context.MioContext, appId, clientId, sign, domain string, client *redis.Client) *Oola {
+func NewOola(context *context.MioContext, appId, clientId, domain string, client *redis.Client) *Oola {
 	return &Oola{
 		ctx:      context,
 		appId:    appId,
 		clientId: clientId,
-		sign:     sign,
 		domain:   domain,
 		redis:    client,
 	}

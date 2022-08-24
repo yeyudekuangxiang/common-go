@@ -8,6 +8,7 @@ type BdScene struct {
 	Override   int
 	WhiteIp    string
 	AppId      string
+	Domain     string
 }
 
 func (BdScene) TableName() string {

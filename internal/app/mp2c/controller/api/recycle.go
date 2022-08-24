@@ -11,7 +11,9 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"mio/pkg/oola"
 	"strconv"
+	"time"
 )
 
 var DefaultRecycleController = RecycleController{}
@@ -59,15 +61,15 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrUserNotFound
 	}
 
-	//避开重放 todo
-	//if !util.DefaultLock.Lock(strconv.Itoa(form.Type)+form.OrderNo, 24*3600*30*time.Second) {
-	//	fmt.Println("charge 重复提交订单", form)
-	//	app.Logger.Info("charge 重复提交订单", form)
-	//	return nil, errors.New("重复提交订单")
-	//}
-	if err = RecycleService.CheckOrder(userInfo.OpenId, form.OrderNo); err != nil {
-		return nil, err
+	//避开重放
+	if !util.DefaultLock.Lock(strconv.Itoa(form.Type)+form.OrderNo, 24*3600*30*time.Second) {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
 	}
+	//if err = RecycleService.CheckOrder(userInfo.OpenId, form.OrderNo); err != nil {
+	//	return nil, err
+	//}
 
 	//匹配大类型
 	typeName := RecycleService.GetType(form.ProductCategoryName)
@@ -106,6 +108,24 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		fmt.Println("oola 旧物回收 加积分失败 ", form)
 	}
 	return gin.H{}, nil
+}
+
+func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh("oola")
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errors.New("渠道查询失败")
+	}
+	userInfo := apiutil.GetAuthUser(c)
+	oolaPkg := oola.NewOola(context.NewMioContext(), scene.AppId, userInfo.OpenId, scene.Domain, app.Redis)
+	oolaUserKey, err := oolaPkg.GetToken()
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"oolaUserKey": oolaUserKey,
+		"channelCode": "xxx",
+	}, nil
 }
 
 func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
