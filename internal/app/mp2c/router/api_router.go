@@ -11,6 +11,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
+	"mio/internal/app/mp2c/controller/api/qnr"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -18,6 +19,9 @@ import (
 func apiRouter(router *gin.Engine) {
 
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
+	//答题相关路由
+	router.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
+	router.GET("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
@@ -72,6 +76,12 @@ func apiRouter(router *gin.Engine) {
 	mustAuthRouter := router.Group("/api/mp2c")
 	mustAuthRouter.Use(middleware.MustAuth2(), middleware.Throttle())
 	{
+		qnrRouter := mustAuthRouter.Group("/qnr")
+		{
+			//答题相关路由
+			qnrRouter.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
+			qnrRouter.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
+		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
@@ -208,6 +218,7 @@ func apiRouter(router *gin.Engine) {
 
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+
 	}
 
 }
