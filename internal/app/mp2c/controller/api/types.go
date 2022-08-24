@@ -54,7 +54,7 @@ type RecyclePushForm struct {
 	ClientId            string `json:"clientId" form:"clientId" binding:"required"`             //lvmiao用户id
 	CreateTime          string `json:"createTime" form:"createTime" binding:"required"`         //订单创建时间
 	CompletionTime      string `json:"completionTime" form:"completionTime" binding:"required"` //订单完成时间
-	BeanNum             int64  `json:"beanNum" form:"beanNum"`
+	BeanNum             int    `json:"beanNum" form:"beanNum"`
 	Sign                string `json:"sign" form:"sign" binding:"required"`                      //加密串
 	ProductCategoryName string `json:"productCategoryName,omitempty" form:"productCategoryName"` //物品所属分类名称
 	Qua                 string `json:"qua,omitempty" form:"qua"`                                 //用户下单时的数量&重量
