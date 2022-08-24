@@ -37,7 +37,7 @@ type responseInfo struct {
 	ChannelCode  string `json:"channelCode"`
 }
 
-func NewOola(context *context.MioContext, domain string, appId, clientId string, client *redis.Client) *Oola {
+func NewOola(context *context.MioContext, appId, clientId, domain string, client *redis.Client) *Oola {
 	return &Oola{
 		ctx:      context,
 		appId:    appId,
