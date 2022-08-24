@@ -27,7 +27,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if form.Type != 1 {
+	if form.Type != "1" {
 		return nil, errors.New("非回收订单")
 	}
 	//查询 渠道信息
@@ -62,7 +62,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	}
 
 	//避开重放
-	if !util.DefaultLock.Lock(strconv.Itoa(form.Type)+form.OrderNo, 24*3600*30*time.Second) {
+	if !util.DefaultLock.Lock(form.Type+form.OrderNo, 24*3600*30*time.Second) {
 		fmt.Println("charge 重复提交订单", form)
 		app.Logger.Info("charge 重复提交订单", form)
 		return nil, errors.New("重复提交订单")

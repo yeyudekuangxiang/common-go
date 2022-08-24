@@ -56,7 +56,7 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 	res := make(map[string]interface{}, 0)
 	//co2
 	for _, item := range result {
-		additionalInfo := strings.Split(item["additional_info"].(string), "#")
+		additionalInfo := strings.Split(string(item["additional_info"].(entity.AdditionalInfo)), "#")
 		co2, _ = strconv.ParseInt(additionalInfo[1], 10, 64)
 		co2Count += co2
 	}
