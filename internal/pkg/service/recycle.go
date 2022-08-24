@@ -2,10 +2,12 @@ package service
 
 import (
 	"errors"
+	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"sort"
@@ -108,7 +110,7 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	sort.Strings(slice)
 	var signStr string
 	for _, v := range slice {
-		signStr += v + "=" + params[v].(string) + ";"
+		signStr += v + "=" + util.InterfaceToString(params[v]) + ";"
 	}
 	//验证签名
 	signMd5 := encrypt.Md5(secret + signStr)
@@ -139,16 +141,16 @@ func (srv RecycleService) GetType(typeName string) entity.PointTransactionType {
 
 // GetPoint 获取积分 qua: 数量&重量 unit: 公斤，个
 func (srv RecycleService) GetPoint(typeName, qua string) (int64, error) {
-	num, _ := strconv.Atoi(qua)
+	num, _ := strconv.ParseFloat(qua, 64)
 	point := srv.getPoint(typeName, num)
 	if point == 0 {
-		return 0, errors.New("为匹配到" + typeName + "积分规则")
+		return 0, errors.New("未匹配到" + typeName + "积分规则")
 	}
 	return point, nil
 }
 
 func (srv RecycleService) GetCo2(typeName, qua string) (int64, error) {
-	num, _ := strconv.Atoi(qua)
+	num, _ := strconv.ParseFloat(qua, 64)
 	co2 := srv.getCo2(typeName, num)
 	if co2 == 0 {
 		return 0, errors.New("未匹配到" + typeName + "减碳量规则")
@@ -175,27 +177,27 @@ func (srv RecycleService) getMaxPointByMonth(typeName entity.PointTransactionTyp
 }
 
 //返回积分
-func (srv RecycleService) getPoint(typeName string, number int) int64 {
+func (srv RecycleService) getPoint(typeName string, number float64) int64 {
 	var point int64
 	if typeName == "" || number == 0 {
 		return 0
 	}
 	//获取point
 	if pointByOne, ok := recyclePointByNum[typeName]; ok {
-		point = pointByOne * int64(number)
+		point = pointByOne * int64(math.Floor(number))
 	}
 	return point
 }
 
 //返回减碳量 单位 g
-func (srv RecycleService) getCo2(typeName string, number int) int64 {
+func (srv RecycleService) getCo2(typeName string, number float64) int64 {
 	var co2 int64
 	if typeName == "" || number == 0 {
 		return 0
 	}
 	//获取co2
 	if co2ByOne, ok := recycleCo2ByNum[typeName]; ok {
-		co2 = co2ByOne * int64(number)
+		co2 = co2ByOne * int64(math.Floor(number))
 	}
 	return co2
 }
