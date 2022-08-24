@@ -102,13 +102,13 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	sign := params["sign"]
 	delete(params, "sign")
 	var slice []string
-	for k := range params {
+	for k, _ := range params {
 		slice = append(slice, k)
 	}
 	sort.Strings(slice)
 	var signStr string
 	for _, v := range slice {
-		signStr += params[v].(string)
+		signStr += v + "=" + params[v].(string) + ";"
 	}
 	//验证签名
 	signMd5 := encrypt.Md5(secret + signStr)
