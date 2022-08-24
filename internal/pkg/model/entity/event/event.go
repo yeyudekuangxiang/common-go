@@ -2,7 +2,6 @@ package event
 
 import (
 	"errors"
-	"fmt"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"strconv"
@@ -47,7 +46,6 @@ func (e EventLimit) Parse() (time.Duration, int64, error) {
 		return 0, 0, nil
 	}
 	sl := strings.Split(string(e), "-")
-	fmt.Println(sl)
 	if len(sl) != 2 {
 		return 0, 0, errors.New("event limit format err")
 	}
@@ -55,7 +53,6 @@ func (e EventLimit) Parse() (time.Duration, int64, error) {
 	if err != nil {
 		return 0, 0, errors.New("event limit format err")
 	}
-	fmt.Println(count)
 
 	var tNum int64 = 1
 	if len(sl[1]) > 1 {
@@ -67,10 +64,8 @@ func (e EventLimit) Parse() (time.Duration, int64, error) {
 			return 0, 0, errors.New("event limit format err")
 		}
 	}
-	fmt.Println(tNum)
 
 	tFlag := sl[1][len(sl[1])-1:]
-	fmt.Println(tNum, tFlag)
 	now := time.Now()
 	switch strings.ToUpper(tFlag) {
 	case "D":
