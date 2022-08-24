@@ -40,11 +40,15 @@ func Intersect(nums1 []string, nums2 []string) []string {
 }
 func IntersectContains(identify []string, rules []string) map[string]string {
 	m := map[string]string{}
-	for _, v := range identify {
+	for i, v := range identify {
 		for _, rule := range rules {
 			if strings.Contains(v, rule) {
 				//匹配字符 到map
-				m[rule] = strings.Trim(v, rule)
+				val := strings.Trim(v, rule)
+				if val == "" {
+					val = identify[i+1]
+				}
+				m[rule] = val
 			}
 		}
 	}
