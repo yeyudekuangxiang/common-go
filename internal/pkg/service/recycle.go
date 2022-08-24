@@ -160,7 +160,7 @@ func (srv RecycleService) GetCo2(typeName, qua string) (int64, error) {
 
 func (srv RecycleService) checkLimit(openId string, typeName string) error {
 	num := recycleLimit[typeName]
-	timeStr := time.Now().Format("20060102150405")
+	timeStr := time.Now().Format("20060102")
 	limit, _ := app.Redis.Get(srv.ctx, openId+typeName+timeStr).Int()
 	if limit >= num {
 		return errors.New(typeName + "回收积分已达到本日次数上限")
