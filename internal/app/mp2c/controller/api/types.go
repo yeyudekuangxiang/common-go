@@ -50,7 +50,7 @@ type RecyclePushForm struct {
 	Type                int    `json:"type" form:"type" binding:"required"`                     //业务类型 1：回首订单成功
 	OrderNo             string `json:"orderNo" form:"orderNo" binding:"required"`               //订单号，同类型同订单视为重复订单
 	Name                string `json:"name,omitempty" form:"name" binding:"required"`           //type = 1，回收物品名称
-	OolaUserId          int    `json:"oolaUserId" form:"oolaUserId" binding:"required"`         //噢啦平台用户id
+	OolaUserId          string `json:"oolaUserId" form:"oolaUserId" binding:"required"`         //噢啦平台用户id
 	ClientId            string `json:"clientId" form:"clientId" binding:"required"`             //lvmiao用户id
 	CreateTime          string `json:"createTime" form:"createTime" binding:"required"`         //订单创建时间
 	CompletionTime      string `json:"completionTime" form:"completionTime" binding:"required"` //订单完成时间
