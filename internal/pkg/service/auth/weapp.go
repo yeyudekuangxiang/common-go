@@ -109,6 +109,12 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		if err != nil {
 			app.Logger.Error(user, invitedBy, err)
 		}
+		println(err)
+		//进入好友关系表
+		_, errFriend := service.DefaultUserFriendService.Create(user, invitedBy)
+		if errFriend != nil {
+			app.Logger.Error(user, invitedBy, errFriend)
+		}
 	}
 
 	if partnershipType != "" {

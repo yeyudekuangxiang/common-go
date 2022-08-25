@@ -58,6 +58,15 @@ func (repo PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.
 	if by.TransactionId != "" {
 		db.Where("transaction_id", by.TransactionId)
 	}
+	if by.Type != "" {
+		db.Where("type", by.Type)
+	}
+	if by.OpenId != "" {
+		db.Where("open_id", by.OpenId)
+	}
+	if by.Note != "" {
+		db.Where("note", by.Note)
+	}
 	err := db.First(&pt).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
