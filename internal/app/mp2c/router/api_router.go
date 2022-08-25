@@ -32,7 +32,7 @@ func apiRouter(router *gin.Engine) {
 
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
-		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
+		authRouter.GET("/tag/list", apiutil.Format(api.DefaultTagController.List))
 
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
@@ -130,6 +130,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
+			topicRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic))
 		}
 		//评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
@@ -138,7 +139,10 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.POST("/update", apiutil.Format(api.DefaultCommentController.Update))
 			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
 			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
+			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
 		}
+
+		//话题相关
 
 		//积分相关路由
 		pointRouter := mustAuthRouter.Group("/point")
