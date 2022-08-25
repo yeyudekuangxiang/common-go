@@ -13,6 +13,11 @@ type QnrListVo struct {
 	List  []QnrVo `json:"list"`
 }
 
+type QnrCategory struct {
+	Id    int64  `json:"id"`
+	Title string `json:"title"`
+}
+
 type QnrVo struct {
 	ID     int64      `json:"id"`
 	Title  string     `json:"title"`

@@ -88,20 +88,21 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	}
 
 	//题目和分类组装
-	list := make([]api_types.QnrListVo, 0)
-	BannerTypeMap := map[int64]string{
-		1: "一、 个人信息",
-		2: "二、 绿色金融市场建设",
-		3: "三、 绿色金融工具",
-		4: "四、 配套保障与政府支持",
-		5: "五、 企业活动",
-		6: "六、 生态空间和城市基建",
-		7: "总评分",
+
+	typeMap := []api_types.QnrCategory{
+		{Id: 1, Title: "一、 个人信息"},
+		{Id: 2, Title: "二、 绿色金融市场建设"},
+		{Id: 3, Title: "三、 绿色金融工具"},
+		{Id: 4, Title: "四、 配套保障与政府支持"},
+		{Id: 5, Title: "五、 企业活动"},
+		{Id: 6, Title: "六、 生态空间和城市基建"},
+		{Id: 7, Title: "七、 总评分"},
 	}
-	for k, v := range BannerTypeMap {
-		l, err := subjectMap[k]
+	list := make([]api_types.QnrListVo, 0)
+	for _, v := range typeMap {
+		l, err := subjectMap[v.Id]
 		if err {
-			list = append(list, api_types.QnrListVo{Title: v, List: l})
+			list = append(list, api_types.QnrListVo{Title: v.Title, List: l})
 		}
 	}
 	return gin.H{"subject": list, "isSubmit": 0}, nil
