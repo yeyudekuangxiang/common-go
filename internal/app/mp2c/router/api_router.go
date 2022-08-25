@@ -34,7 +34,7 @@ func apiRouter(router *gin.Engine) {
 
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
-		authRouter.GET("/tag/list", apiutil.Format(api.DefaultTagController.List))
+		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
 
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
