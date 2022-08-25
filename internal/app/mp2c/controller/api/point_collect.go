@@ -35,7 +35,7 @@ func (PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		point, err = service.DefaultPointCollectService.CollectPowerReplace(user.OpenId, user.Risk, form.ImgUrl)
 	}
 	carbon := 0.0
-	if err != nil {
+	if err == nil {
 		//发碳量
 		carbon, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 			OpenId:  user.OpenId,
