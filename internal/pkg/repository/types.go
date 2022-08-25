@@ -98,6 +98,7 @@ type GetPointTransactionListBy struct {
 	OrderBy   entity.OrderByList
 	Type      entity.PointTransactionType
 }
+
 type GetPointTransactionPageListBy struct {
 	AdminId   int
 	OpenIds   []string
@@ -232,4 +233,8 @@ type GetPointTransactionListByQun struct {
 	StartTime string
 	EndTime   string
 	Types     []string
+}
+
+type FindCarbonBy struct {
+	OpenId string
 }

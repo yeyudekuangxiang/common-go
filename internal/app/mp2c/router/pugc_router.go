@@ -17,5 +17,7 @@ func pugcRouter(router *gin.Engine) {
 		pugcRouter.GET("/sendPoint", apiutil.Format(pugc.DefaultPugcController.SendPoint))
 
 		//pugcRouter.POST("/phoneTen", apiutil.Format(pugc.DefaultPugcController.SendTwentyYuanByExcel))
+		pugcRouter.GET("/addCity", apiutil.Format(pugc.DefaultPugcController.AddCity))
+		//pugcRouter.GET("/sendPoint", apiutil.Format(pugc.DefaultPugcController.SendPoint))
 	}
 }

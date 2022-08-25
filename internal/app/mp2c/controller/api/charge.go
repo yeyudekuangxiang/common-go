@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -68,7 +70,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//风险登记验证
 	if userInfo.Risk >= 2 {
-		fmt.Println("用户风险登记过高 ", form)
+		fmt.Println("用户风险等级过高 ", form)
 		return nil, errors.New("账户风险等级过高")
 	}
 
@@ -106,6 +108,26 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		fmt.Println("charge 加积分失败 ", form)
 	}
+	//加碳量
+	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	if typeCarbonStr != "" {
+		pointDec := decimal.NewFromInt(int64(thisPoint))
+		electric := pointDec.Div(decimal.NewFromInt(10))
+		f, _ := electric.Float64()
+		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  userInfo.OpenId,
+			UserId:  userInfo.ID,
+			Type:    typeCarbonStr,
+			Value:   f,
+			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+			AdminId: 0,
+			Ip:      "",
+		})
+		if errCarbon != nil {
+			fmt.Println("charge 加碳失败", form)
+		}
+	}
+
 	// todo 发券
 	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 && thisPoint0 > 0 {
 		fmt.Println("星星充电 发券start")
