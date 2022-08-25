@@ -20,6 +20,12 @@ type CarbonController struct {
 var DefaultCarbonController = CarbonController{
 	service.NewCarbonTransactionService(context.NewMioContext())}
 
+func (c CarbonController) PointToCarbon(ctx *gin.Context) (gin.H, error) {
+	c.service.PointToCarbon()
+
+	return gin.H{}, nil
+}
+
 //Create 测试用
 func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
 	return nil, nil

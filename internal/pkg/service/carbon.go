@@ -82,7 +82,6 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 		return 0, errors.New("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
-
 	//检测积分发放次数限制
 	/*if dto.ChangePoint >= 0 {
 		limitService := NewPointTransactionCountLimitService(srv.ctx)

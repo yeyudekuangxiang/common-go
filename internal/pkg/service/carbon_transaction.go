@@ -28,6 +28,7 @@ func NewCarbonTransactionService(ctx *context.MioContext) CarbonTransactionServi
 		repo:      repository.NewCarbonTransactionRepository(ctx),
 		repoDay:   repository.NewCarbonTransactionDayRepository(ctx),
 		repoScene: repository.NewCarbonSceneRepository(ctx),
+		repoPoint: repository.NewPointTransactionRepository(ctx),
 	}
 }
 
@@ -36,6 +37,77 @@ type CarbonTransactionService struct {
 	repo      repository.CarbonTransactionRepository
 	repoDay   repository.CarbonTransactionDayRepository
 	repoScene repository.CarbonSceneRepository
+	repoPoint *repository.PointTransactionRepository
+}
+
+func (srv CarbonTransactionService) PointToCarbon() {
+
+	var types []entity.PointTransactionType
+	types = append(types, entity.POINT_STEP, entity.POINT_BIKE_RIDE, entity.POINT_COFFEE_CUP, entity.POINT_ECAR)
+
+	//查询场景配置
+	sceneInfoSTEP := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: entity.CARBON_STEP})
+	sceneInfoBIKERIDE := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: entity.CARBON_BIKE_RIDE})
+	sceneInfoCOFFEECUP := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: entity.CARBON_COFFEE_CUP})
+	sceneInfoECAR := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: entity.CARBON_ECAR})
+	var uid int64 = 70
+	Offset := 1
+	for true {
+		list, _ := srv.repoPoint.GetPageListBy(repository.GetPointTransactionPageListBy{
+			Types:  types,
+			Offset: Offset,
+			Limit:  1000,
+		})
+		Offset = Offset + 1
+		if len(list) == 0 {
+			println("跑完了ok")
+			return
+		}
+		continue
+		Offset = Offset + 1
+		for _, transaction := range list {
+			valNew := 0.0
+			var a entity.CarbonScene
+			var scene entity.CarbonTransactionType
+			var info string
+			if transaction.Type == entity.POINT_STEP {
+				scene = entity.CARBON_STEP
+				a = sceneInfoSTEP
+				valNew, _ = decimal.NewFromInt(transaction.Value).Mul(decimal.NewFromInt(100)).Float64()
+				info = fmt.Sprintf("{time=%v, count=%d}", time.Now(), valNew)
+			}
+			if transaction.Type == entity.POINT_BIKE_RIDE {
+				scene = entity.CARBON_BIKE_RIDE
+				a = sceneInfoBIKERIDE
+				valNew = 1
+				info = string(transaction.AdditionalInfo)
+			}
+			if transaction.Type == entity.POINT_COFFEE_CUP {
+				scene = entity.CARBON_COFFEE_CUP
+				a = sceneInfoCOFFEECUP
+				valNew = 1
+				info = string(transaction.AdditionalInfo)
+			}
+			if transaction.Type == entity.POINT_ECAR {
+				scene = entity.CARBON_ECAR
+				a = sceneInfoECAR
+				valNew, _ = decimal.NewFromInt(transaction.Value).Div(decimal.NewFromInt(10)).Round(2).Float64()
+				info = fmt.Sprintf("{time=%v, count=%d}", time.Now(), valNew)
+			}
+			carbon := srv.repoScene.GetValue(a, valNew) //增加的碳量
+			ret, _ := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
+				OpenId:       transaction.OpenId,
+				Type:         scene,
+				BizId:        transaction.TransactionId,
+				ChangePoint:  carbon,
+				AdditionInfo: info,
+				CityCode:     "",
+				Uid:          uid,
+			})
+			println(ret)
+			uid = uid + 1
+		}
+	}
 }
 
 //  添加发放碳量记录并且更新用户剩余碳量
@@ -152,7 +224,11 @@ func (srv CarbonTransactionService) MyBank(dto api_types.GetCarbonTransactionMyB
 	myCarbon := app.Redis.ZScore(contextRedis.Background(), redisKey, uidStr) //我的碳量
 	allCount := app.Redis.ZCard(contextRedis.Background(), redisKey)          //总人数
 
-	mySortDec := decimal.NewFromInt(mySort.Val()).Add(decimal.NewFromInt(1))
+	mySortDec := decimal.NewFromInt(0)
+	if mySort.Val() != 0 {
+		mySortDec = decimal.NewFromInt(mySort.Val()).Add(decimal.NewFromInt(1))
+	}
+
 	allCountDec := decimal.NewFromInt(allCount.Val())
 
 	//超越**%用户
@@ -196,16 +272,6 @@ type KVPair struct {
 
 func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionClassifyDto) (retDto api_types.CarbonTransactionClassify, err error) {
 	UserIdString := strconv.FormatInt(dto.UserId, 10) //我的uid string
-	/*DataMap := map[entity.CarbonTransactionType]float64{entity.CARBON_STEP: 5, entity.CARBON_COFFEE_CUP: 4, entity.CARBON_BIKE_RIDE: 3, entity.CARBON_ECAR: 2}
-	marshal, err := json.Marshal(DataMap)
-	if err != nil {
-		fmt.Printf("Map转化为byte数组失败,异常:%s\n", err)
-		return
-	}
-	app.Redis.HSet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString, string(marshal))
-	*/
-	/******上面造数据用的*****/
-
 	dataStr := app.Redis.HGet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
 	if dataStr.Val() == "" {
 		//用默认的
@@ -273,14 +339,6 @@ func (srv CarbonTransactionService) History(dto api_types.GetCarbonTransactionHi
 
 // Info 我的减碳成就-基础信息
 func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoDto) (api_types.CarbonTransactionInfo, error) {
-	/*	userTest, err := DefaultUserService.GetUserByOpenId("oy_BA5H3iQ_G9IReahNfyKFOQpLc")
-		if err != nil {
-
-		}
-		DefaultUserFriendService.Create(userTest, "oy_BA5MllpkMNC9y-rJ9zc6OPkLs")
-
-		return api_types.CarbonTransactionInfo{}, nil
-	*/
 	user, err := DefaultUserService.GetUserById(dto.UserId)
 	if err != nil {
 		return api_types.CarbonTransactionInfo{}, err
@@ -309,10 +367,8 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 
 func (srv CarbonTransactionService) AddClassify() {
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
-		//StartTime: time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
 		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
 	})
-	//a	:= map[string] map[string]float32 {"C":{"C":5, "Go":4.5, "Python":4.5, "C++":2 }}
 	DateMap := make(map[int64]map[entity.CarbonTransactionType]float64)
 	for _, by := range list {
 		_, ok := DateMap[by.UserId]
@@ -328,7 +384,6 @@ func (srv CarbonTransactionService) AddClassify() {
 			return
 		}
 		UserIdString := strconv.FormatInt(k, 10) //我的uid string
-		//redisKey := fmt.Sprintf(config.RedisKey.UserCarbonClassify, k)
 		app.Redis.HDel(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
 		ret := app.Redis.HSet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString, string(marshal))
 		println(ret)
