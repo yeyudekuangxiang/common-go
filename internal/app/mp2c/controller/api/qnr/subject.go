@@ -105,5 +105,5 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 			list = append(list, api_types.QnrListVo{Title: v.Title, List: l})
 		}
 	}
-	return gin.H{"subject": list, "isSubmit": 0}, nil
+	return gin.H{"subject": list, "isSubmit": 0, "subjectCount": len(list)}, nil
 }
