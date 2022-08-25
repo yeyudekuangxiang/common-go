@@ -7,10 +7,10 @@ import (
 )
 
 func mp2cCron() {
-	AddFunc("0 0 * * ?", func() {
+	/*	AddFunc("0 0 * * ?", func() {
 		log.Println("每天执行一次")
 		service.NewCarbonTransactionService(context.NewMioContext()).AddClassify()
-	})
+	})*/
 
 	AddFunc("0 0 * * ?", func() {
 		log.Println("每天执行一次")
