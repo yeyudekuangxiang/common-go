@@ -94,9 +94,6 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err != nil {
-		return "", err
-	}
 	if signResponse.Ret != 0 {
 		return "", errors.New("请求错误")
 	}
@@ -114,7 +111,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	history := entity.CouponHistory{
 		OpenId:     openId,
 		CouponType: "star_charge",
-		CreateTime: time.Time{},
+		CreateTime: time.Now(),
 	}
 	_, err := repository.DefaultCouponHistoryRepository.Insert(&history)
 	if err != nil {
@@ -167,8 +164,9 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	}
 	//更新code
 	upResp := entity.CouponHistory{
-		OpenId: openId,
-		Code:   provideResult.CouponCode,
+		OpenId:     openId,
+		Code:       provideResult.CouponCode,
+		UpdateTime: time.Now(),
 	}
 	err = repository.DefaultCouponHistoryRepository.Update(&upResp)
 	if err != nil {

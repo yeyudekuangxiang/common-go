@@ -118,11 +118,9 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 	}
 
 	if partnershipType != "" {
-		list, err := service.DefaultPartnershipRedemptionService.ProcessPromotionInformation(user.OpenId, partnershipType, entity.PartnershipPromotionTriggerREGISTER)
+		_, err := service.DefaultPartnershipRedemptionService.ProcessPromotionInformation(user.OpenId, partnershipType, entity.PartnershipPromotionTriggerREGISTER)
 		if err != nil {
 			app.Logger.Errorf("添加第三方活动信息失败 %+v %s %s %v", user, invitedBy, partnershipType, err)
-		} else {
-			app.Logger.Errorf("添加第三方活动信息成功 %+v %s %s %+v", user, invitedBy, partnershipType, list)
 		}
 	}
 }

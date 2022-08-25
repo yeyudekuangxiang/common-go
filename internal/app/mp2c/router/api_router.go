@@ -19,9 +19,6 @@ func apiRouter(router *gin.Engine) {
 
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 
-	router.GET("/addClassify", apiutil.Format(api.DefaultCarbonController.AddClassify))
-	router.GET("/addHistory", apiutil.Format(api.DefaultCarbonController.AddHistory))
-
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
@@ -211,6 +208,8 @@ func apiRouter(router *gin.Engine) {
 
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+		//第三方
+		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(api.DefaultRecycleController.GetOolaKey))
 		//星星充电发放优惠券
 		//mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
 
