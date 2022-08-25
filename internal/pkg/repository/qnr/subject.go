@@ -25,7 +25,7 @@ func (repo SubjectRepository) List(do repotypes.GetQuestSubjectGetListBy) ([]qnr
 	if do.QnrId != 0 {
 		db.Where("qnr_id = ?", do.QnrId)
 	}
-	db.Order("sort asc,id desc")
+	db.Order("sort desc,id asc")
 	list := make([]qnrEntity.Subject, 0)
 	return list, db.Find(&list).Error
 }

@@ -26,7 +26,7 @@ func (repo OptionRepository) GetListBy(by repotypes.GetQuestOptionGetListBy) ([]
 	if len(by.SubjectIds) != 0 {
 		db.Where("subject_id in (?) ", by.SubjectIds)
 	}
-	db.Order("sort desc")
+	db.Order("sort desc,id asc")
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
