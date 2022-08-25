@@ -459,7 +459,6 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
 			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
 		}
-
 		user.PhoneNumber = *param.PhoneNumber
 	}
 	if param.Birthday != nil {
@@ -467,6 +466,18 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	}
 	if param.Gender != nil {
 		user.Gender = *param.Gender
+	}
+	if param.Position != "" {
+		user.Position = entity.UserPosition(param.Position)
+	}
+	if param.Partner >= 0 {
+		user.Partners = entity.Partner(param.Partner)
+	}
+	if param.Status >= 0 {
+		user.Status = param.Status
+	}
+	if param.Auth >= 0 {
+		user.Auth = param.Auth
 	}
 
 	user.AvatarUrl = param.Avatar

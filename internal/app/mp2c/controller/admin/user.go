@@ -29,6 +29,7 @@ func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 			UserId:   form.ID,
 			Status:   form.State,
 			Nickname: form.Nickname,
+			Position: entity.UserPosition(form.Position),
 			Partner:  entity.Partner(form.Partner),
 		},
 		OrderBy: "id desc",
@@ -55,47 +56,29 @@ func (ctr UserController) Detail(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr UserController) ChangeState(c *gin.Context) (gin.H, error) {
-	var form ChangeUserState
+func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
+	var form UpdateUser
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if err := service.DefaultUserService.ChangeUserState(service.ChangeUserState{
-		UserId: form.ID,
-		Status: form.Status,
+	if err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+		UserId:   form.ID,
+		Status:   form.Status,
+		Position: form.Position,
+		Partner:  form.Partner,
+		Auth:     form.Auth,
 	}); err != nil {
 		return nil, err
 	}
 	return nil, nil
 }
 
-func (ctr UserController) ChangePosition(c *gin.Context) (gin.H, error) {
-	var form changeUserPosition
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-	if err := service.DefaultUserService.ChangeUserPosition(service.ChangeUserPosition{
-		UserId:       form.ID,
-		Position:     form.Position,
-		PositionIcon: form.PositionIcon,
-	}); err != nil {
-		return nil, err
-	}
-	return nil, nil
-}
-
-func (ctr UserController) ChangePartner(c *gin.Context) (gin.H, error) {
-	var form ChangeUserPartner
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-	if err := service.DefaultUserService.ChangeUserPartner(service.ChangeUserPartner{
-		UserId:  form.ID,
-		Partner: form.Partner,
-	}); err != nil {
-		return nil, err
-	}
-	return nil, nil
+func (ctr UserController) PositionList(c *gin.Context) (gin.H, error) {
+	var position []string
+	position = append(position, "yellow", "blue", "ordinary")
+	return gin.H{
+		"position": position,
+	}, nil
 }
 
 func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {

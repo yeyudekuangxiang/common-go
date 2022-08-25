@@ -367,6 +367,10 @@ type UpdateUserInfoParam struct {
 	Gender      *entity.UserGender
 	Birthday    *time.Time
 	PhoneNumber *string
+	Position    string
+	Status      int
+	Partner     int
+	Auth        int
 }
 
 type UpdateUserRiskParam struct {

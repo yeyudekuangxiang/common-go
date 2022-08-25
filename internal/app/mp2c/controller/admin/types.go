@@ -235,25 +235,22 @@ type ShowDuiBaActivityForm struct {
 /*
 user start
 */
-type ChangeUserState struct {
+type UpdateUser struct {
 	IDForm
-	Status int `json:"status" binding:"required"`
+	Status   int    `json:"status"`
+	Position string `json:"position"`
+	Partner  int    `json:"partner"`
+	Auth     int    `json:"auth"`
 }
 
 type ChangeUserPosition struct {
 	IDForm
-	Position int `json:"position" binding:"required"`
+	Position string `json:"position" binding:"required"`
 }
 
 type ChangeUserPartner struct {
 	IDForm
-	Partner int `json:"partner" binding:"required"`
-}
-
-type changeUserPosition struct {
-	IDForm
-	Position     string `json:"position"`
-	PositionIcon string `json:"positionIcon"`
+	Partner int `json:"partner" binding:"required;min=1"`
 }
 
 /*

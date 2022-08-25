@@ -175,9 +175,11 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	return nil
 }
 
-func (srv StarChargeService) CheckLimit(openId string) error {
+// CheckLimit 充电检测
+func (srv StarChargeService) CheckChargeLimit(openId string) error {
 	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId)
+	builder.Where("open_id = ?", openId).
+		Where("coupon_type = ?", "star_charge")
 	_, err := repository.DefaultCouponHistoryRepository.FindOneQuery(builder)
 	if err == nil {
 		//已经存在

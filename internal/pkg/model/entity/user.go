@@ -46,7 +46,7 @@ type User struct {
 	UnionId      string       `gorm:"column:unionid" json:"unionId"`
 	Time         model.Time   `gorm:"time" json:"time"`
 	GUID         string       `gorm:"guid" json:"guid"`
-	Partners     Partner      `gorm:"partners" json:"partners"` //合作商 0:全部 1:乐活家
+	Partners     Partner      `gorm:"partners" json:"partners"` //合作商 0:非乐活家 1:乐活家
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`
@@ -54,6 +54,7 @@ type User struct {
 	Ip           string       `json:"ip"`
 	CityCode     string       `json:"city_code"`
 	Status       int          `json:"status"` //0全部 1正常 2禁言 3封号
+	Auth         int          `json:"auth"`   //0浏览 1评论 2评论发帖
 }
 
 func (u User) ShortUser() ShortUser {
