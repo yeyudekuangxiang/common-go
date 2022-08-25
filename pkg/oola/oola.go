@@ -76,7 +76,7 @@ func (o Oola) getSign(ch string) (sign string, err error) {
 
 func (o Oola) GetToken() (string, string, error) {
 	autoLoginKey, _ := o.redis.Get(o.ctx, "oola_login_key:"+o.clientId).Result()
-	channelCode, _ := o.redis.Get(o.ctx, "oola_login_key:"+o.clientId).Result()
+	channelCode, _ := o.redis.Get(o.ctx, "oola_channel_code:"+o.clientId).Result()
 	if autoLoginKey == "" || channelCode == "" {
 		return o.register()
 	}
@@ -121,8 +121,8 @@ func (o Oola) register() (string, string, error) {
 		return "", "", errors.New(res.Msg)
 	}
 	//记录redis
-	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 10*time.Minute)
-	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 10*time.Minute)
+	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 9*time.Minute)
+	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 9*time.Minute)
 	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
 
@@ -150,7 +150,7 @@ func (o Oola) getUserAutoLoginKey() (string, string, error) {
 		return "", "", errors.New(res.Msg)
 	}
 	//记录redis
-	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 10*time.Minute)
-	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 10*time.Minute)
+	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 9*time.Minute)
+	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 9*time.Minute)
 	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
