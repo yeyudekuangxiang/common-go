@@ -16,9 +16,9 @@ const (
 type UserPosition string
 
 const (
-	UserPositionBlue   UserPosition = "blue"   //蓝v
-	UserPositionYellow UserPosition = "yellow" //黄v
-	UserPositionLohoja UserPosition = "lohoja" //乐活家
+	UserPositionOrdinary UserPosition = "ordinary"
+	UserPositionBlue     UserPosition = "blue"   //蓝v
+	UserPositionYellow   UserPosition = "yellow" //黄v
 )
 
 type UserGender string
@@ -26,6 +26,12 @@ type UserGender string
 const (
 	UserGenderMale   UserGender = "MALE"
 	UserGenderFemale UserGender = "FEMALE"
+)
+
+type Partner int
+
+const (
+	PartnerLoHoJa Partner = 1
 )
 
 type User struct {
@@ -40,12 +46,14 @@ type User struct {
 	UnionId      string       `gorm:"column:unionid" json:"unionId"`
 	Time         model.Time   `gorm:"time" json:"time"`
 	GUID         string       `gorm:"guid" json:"guid"`
+	Partners     Partner      `gorm:"partners" json:"partners"` //合作商 0:全部 1:乐活家
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`
 	ChannelId    int64        `gorm:"column:channel_id" json:"channel_id"`
 	Ip           string       `json:"ip"`
 	CityCode     string       `json:"city_code"`
+	Status       int          `json:"status"` //0全部 1正常 2禁言 3封号
 }
 
 func (u User) ShortUser() ShortUser {
@@ -54,6 +62,7 @@ func (u User) ShortUser() ShortUser {
 		AvatarUrl:    u.AvatarUrl,
 		Gender:       u.Gender,
 		Nickname:     u.Nickname,
+		Partner:      u.Partners,
 		Position:     u.Position,
 		PositionIcon: u.PositionIcon,
 	}
@@ -64,6 +73,7 @@ type ShortUser struct {
 	AvatarUrl    string       `gorm:"column:avatar_url" json:"avatarUrl"`
 	Gender       UserGender   `gorm:"column:gender" json:"gender"`
 	Nickname     string       `gorm:"column:nick_name" json:"nickname"`
+	Partner      Partner      `gorm:"partner" json:"partner"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
 }

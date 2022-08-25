@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
@@ -26,8 +27,9 @@ func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 		User: repository.GetUserListBy{
 			Mobile:   form.Mobile,
 			UserId:   form.ID,
-			State:    form.State,
+			Status:   form.State,
 			Nickname: form.Nickname,
+			Partner:  entity.Partner(form.Partner),
 		},
 		OrderBy: "id desc",
 	})

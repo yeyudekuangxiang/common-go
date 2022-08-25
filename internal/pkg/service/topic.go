@@ -94,6 +94,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := app.DB.Model(&entity.Topic{}).
+		Preload("User").
 		Preload("Tags").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
@@ -123,7 +124,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 		Offset(param.Offset).
 		Find(&topList).Error
 	if err != nil {
-		return nil, 0, nil
+		return nil, 0, err
 	}
 	return topList, total, nil
 }
