@@ -32,12 +32,12 @@ type Topic struct {
 	LikeCount     int64          `gorm:"not null" json:"likeCount" form:"likeCount"`                     // 点赞数量
 	Status        TopicStatus    `gorm:"index:idx_topic_status;" json:"status" form:"status"`            // 状态：1 待审核 2审核失败 3已发布 4已下架
 	Sort          int            `gorm:"index:idx_sort_" json:"sort" form:"sort"`                        // 排序编号
-	Avatar        string         `gorm:"-" json:"avatar"`
-	Nickname      string         `gorm:"-" json:"nickname"`
+	Avatar        string         `json:"avatar"`
+	Nickname      string         `json:"nickname"`
 	Tags          []Tag          `json:"tags" gorm:"many2many:topic_tag;"`
 	Comment       []CommentIndex `json:"comment" gorm:"foreignKey:ObjId"`
-	TopicTagId    string         `gorm:"-" json:"topicTagId"` // 类型
-	SeeCount      int            `json:"seeCount"`            //浏览次数
+	TopicTagId    string         `json:"topicTagId"` // 类型
+	SeeCount      int            `json:"seeCount"`   //浏览次数
 	CreatedAt     model.Time     `json:"createdAt"`
 	UpdatedAt     model.Time     `json:"updatedAt"`
 	ImportId      int            `json:"-"`
