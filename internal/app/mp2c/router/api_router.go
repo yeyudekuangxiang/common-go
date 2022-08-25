@@ -19,6 +19,8 @@ func apiRouter(router *gin.Engine) {
 
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 
+	router.GET("/pointToCarbon", apiutil.Format(api.DefaultCarbonController.PointToCarbon))
+
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
@@ -221,6 +223,7 @@ func apiRouter(router *gin.Engine) {
 		carbonRouter := mustAuthRouter.Group("/carbon")
 		{
 			carbonRouter.POST("/create", apiutil.Format(api.DefaultCarbonController.Create))
+			carbonRouter.POST("/pointToCarbon", apiutil.Format(api.DefaultCarbonController.PointToCarbon))
 			carbonRouter.GET("/info", apiutil.Format(api.DefaultCarbonController.Info))
 			carbonRouter.GET("/bank", apiutil.Format(api.DefaultCarbonController.Bank))
 			carbonRouter.GET("/myBank", apiutil.Format(api.DefaultCarbonController.MyBank))

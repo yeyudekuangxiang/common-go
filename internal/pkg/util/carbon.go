@@ -41,7 +41,7 @@ func CarbonToRate(carbon float64) string {
 	if carbonDec.Cmp(decimal.NewFromFloat(10000)) == -1 {
 		return carbonDec.Round(1).String() + "g"
 	} else if carbonDec.Cmp(decimal.NewFromFloat(10000000)) == 1 {
-		return carbonDec.Div(decimal.NewFromInt(1000000)).Round(1).String() + "吨"
+		return carbonDec.Div(decimal.NewFromInt(1000000)).Round(1).String() + "t"
 	} else {
 		return carbonDec.Div(decimal.NewFromInt(1000)).Round(1).String() + "kg"
 	}

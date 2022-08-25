@@ -44,7 +44,7 @@ func (repo CarbonSceneRepository) GetValue(ret entity.CarbonScene, initVal float
 		unitNumerator := decimal.NewFromFloat(ret.UnitNumerator)
 		unitDenominator := decimal.NewFromFloat(ret.UnitDenominator)
 		initValDec := decimal.NewFromFloat(initVal)
-		val, _ := initValDec.Mul(unitNumerator).Div(unitDenominator).Round(4).Float64()
+		val, _ := initValDec.Mul(unitNumerator).Div(unitDenominator).Round(2).Float64()
 		return val
 	}
 	return 0
