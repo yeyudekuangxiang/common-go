@@ -365,6 +365,32 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 	return info, nil
 }
 
+func (srv CarbonTransactionService) AddClassifyV2(uid int64) {
+	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
+		Uid:     uid,
+		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
+	})
+	DateMap := make(map[int64]map[entity.CarbonTransactionType]float64)
+	for _, by := range list {
+		_, ok := DateMap[by.UserId]
+		if !ok {
+			DateMap[by.UserId] = make(map[entity.CarbonTransactionType]float64)
+		}
+		DateMap[by.UserId][by.Type] = by.Sum
+	}
+	for k, v := range DateMap {
+		marshal, err := json.Marshal(v)
+		if err != nil {
+			fmt.Printf("Map转化为byte数组失败,异常:%s\n", err)
+			return
+		}
+		UserIdString := strconv.FormatInt(k, 10) //我的uid string
+		app.Redis.HDel(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
+		ret := app.Redis.HSet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString, string(marshal))
+		println(ret)
+	}
+}
+
 func (srv CarbonTransactionService) AddClassify() {
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
 		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
