@@ -22,7 +22,7 @@ func (p PointTransactionType) Text() string {
 		return "每日签到"
 	case POINT_BIKE_RIDE:
 		return "骑行"
-	case POINT_ECAR:
+	case POINT_ECAR, POINT_FAST_ELECTRICITY:
 		return "新能源充电"
 	case POINT_COUPON:
 		return "券码兑换"
@@ -64,8 +64,6 @@ func (p PointTransactionType) Text() string {
 		return "新能源换电" //oola
 	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK:
 		return "旧物回收"
-	case POINT_FAST_ELECTRICITY:
-		return "快电"
 	}
 	return "未知积分"
 }
