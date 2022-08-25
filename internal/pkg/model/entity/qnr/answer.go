@@ -5,7 +5,7 @@ type Answer struct {
 	QnrId     int64
 	SubjectId int64
 	UserId    int64
-	answer    string
+	Answer    string
 }
 
 func (Answer) TableName() string {

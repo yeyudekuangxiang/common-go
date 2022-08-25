@@ -8,3 +8,21 @@ type GetQnrSubjectDTO struct {
 type GetQnrOptionDTO struct {
 	SubjectIds []int64
 }
+
+type GetQnrUserDTO struct {
+	UserId int64
+	OpenId string
+}
+
+type CreateQnrAnswerDTO struct {
+	QnrId     int64
+	SubjectId int64
+	UserId    int64
+	Answer    string
+}
+
+type AddQnrAnswerDTO struct {
+	OpenId string
+	Answer string
+	UserId int64
+}

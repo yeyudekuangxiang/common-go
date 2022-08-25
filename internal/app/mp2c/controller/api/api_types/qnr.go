@@ -1,15 +1,11 @@
 package api_types
 
-import "mio/internal/pkg/model/entity"
-
 type GetSubjectListForm struct {
 	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
 }
 
-type GetQnrSubjectListDTO struct {
-	Scene  entity.BannerScene
-	Type   entity.BannerType
-	Status entity.BannerStatus
+type GetQnrSubjectCreateDTO struct {
+	Answer string `json:"answer"`
 }
 
 type QnrListVo struct {

@@ -5,8 +5,7 @@ type User struct {
 	ThirdId     string
 	InvitedById string
 	Phone       string
-	AddressId   string
-	channel     string
+	Channel     string
 	Ip          string
 	City        string
 }

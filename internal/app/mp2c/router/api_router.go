@@ -21,7 +21,7 @@ func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 	//答题相关路由
 	router.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
-	router.GET("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
+	router.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")

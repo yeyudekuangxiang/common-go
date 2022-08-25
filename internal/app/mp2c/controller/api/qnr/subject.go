@@ -14,34 +14,52 @@ var DefaultSubjectController = SubjectController{}
 type SubjectController struct {
 }
 
+type Ans struct {
+	Id     int64  `json:"id"`
+	Answer string `json:"answer"`
+}
+
 func (SubjectController) Create(ctx *gin.Context) (gin.H, error) {
-	form := api_types.GetQnrSubjectListDTO{}
+	answerServer := qnrService.NewAnswerService(context.NewMioContext(context.WithContext(ctx)))
+	form := api_types.GetQnrSubjectCreateDTO{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(ctx)
+	err := answerServer.Add(srv_types.AddQnrAnswerDTO{
+		OpenId: user.OpenId,
+		UserId: user.ID,
+		Answer: form.Answer})
+	if err != nil {
 		return nil, err
 	}
 	return gin.H{}, nil
 }
+
 func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
-	form := api_types.GetQnrSubjectListDTO{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
-		return nil, err
-	}
 	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
+	optionServer := qnrService.NewOptionService(context.NewMioContext(context.WithContext(ctx)))
 
 	//所有的题目
-	subjectList, _ := subjectServer.GetPageList(srv_types.GetQnrSubjectDTO{
-		QnrId: 1,
+	subjectList, subjectErr := subjectServer.GetPageList(srv_types.GetQnrSubjectDTO{
+		QnrId: 1, //金融调查问卷
 	})
+	if subjectErr != nil {
+		return gin.H{}, nil
+	}
 	var subjectIds []int64 //获取所有的题目id
 	for _, val := range subjectList {
 		subjectIds = append(subjectIds, val.ID)
 	}
 
 	//所有的答案
-	optionServer := qnrService.NewOptionService(context.NewMioContext(context.WithContext(ctx)))
-	optionList, _ := optionServer.GetPageList(srv_types.GetQnrOptionDTO{
+	optionList, optionErr := optionServer.GetPageList(srv_types.GetQnrOptionDTO{
 		SubjectIds: subjectIds,
 	})
+	if optionErr != nil {
+		return gin.H{}, nil
+	}
+
 	optionMap := make(map[int64][]api_types.OptionVO)
 	for _, val := range optionList {
 		optionMap[val.SubjectId] = append(optionMap[val.SubjectId], api_types.OptionVO{
@@ -69,35 +87,22 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 		})
 	}
 
+	//题目和分类组装
 	list := make([]api_types.QnrListVo, 0)
-
-	a1, err := subjectMap[1]
-	if err {
-		list = append(list, api_types.QnrListVo{Title: "一、 个人信息", List: a1})
+	BannerTypeMap := map[int64]string{
+		1: "一、 个人信息",
+		2: "二、 绿色金融市场建设",
+		3: "三、 绿色金融工具",
+		4: "四、 配套保障与政府支持",
+		5: "五、 企业活动",
+		6: "六、 生态空间和城市基建",
+		7: "总评分",
 	}
-	a2, err2 := subjectMap[2]
-	if err2 {
-		list = append(list, api_types.QnrListVo{Title: "二、 绿色金融市场建设", List: a2})
-	}
-	a3, err3 := subjectMap[3]
-	if err3 {
-		list = append(list, api_types.QnrListVo{Title: "三、 绿色金融工具", List: a3})
-	}
-	a4, err4 := subjectMap[4]
-	if err4 {
-		list = append(list, api_types.QnrListVo{Title: "四、 配套保障与政府支持", List: a4})
-	}
-	a5, err5 := subjectMap[5]
-	if err5 {
-		list = append(list, api_types.QnrListVo{Title: "五、 企业活动", List: a5})
-	}
-	a6, err6 := subjectMap[6]
-	if err6 {
-		list = append(list, api_types.QnrListVo{Title: "六、 生态空间和城市基建", List: a6})
-	}
-	a7, err7 := subjectMap[7]
-	if err7 {
-		list = append(list, api_types.QnrListVo{Title: "总评分", List: a7})
+	for k, v := range BannerTypeMap {
+		l, err := subjectMap[k]
+		if err {
+			list = append(list, api_types.QnrListVo{Title: v, List: l})
+		}
 	}
 	return gin.H{"subject": list, "isSubmit": 0}, nil
 }
