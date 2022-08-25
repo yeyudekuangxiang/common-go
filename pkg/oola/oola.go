@@ -71,7 +71,20 @@ func (o *Oola) getSign(ch string) (sign string, err error) {
 	if scene.Key == "" || scene.Key == "e" {
 		return "", errors.New("渠道查询失败")
 	}
-	return util.Md5(scene.Key + "appId=" + scene.AppId + ";clientId=" + o.clientId + ";"), nil
+	var signStr string
+	signStr = scene.Key + "appId=" + scene.AppId + ";clientId=" + o.clientId + ";"
+	if o.headImgUrl != "" {
+		signStr = signStr + o.headImgUrl
+	}
+	if o.phone != "" {
+		signStr = signStr + o.phone
+	}
+
+	if o.userName != "" {
+		signStr = signStr + o.userName
+	}
+
+	return util.Md5(signStr), nil
 }
 
 func (o *Oola) GetToken() (string, string, error) {
@@ -84,15 +97,10 @@ func (o *Oola) GetToken() (string, string, error) {
 }
 
 func (o *Oola) register() (string, string, error) {
-	sign, err := o.getSign("oola")
-	if err != nil {
-		return "", "", err
-	}
+
 	params := make(url.Values)
 	params.Set("appId", o.appId)
 	params.Set("clientId", o.clientId)
-	params.Set("sign", sign)
-
 	if o.userName != "" {
 		params.Set("userName", o.userName)
 	}
@@ -102,7 +110,11 @@ func (o *Oola) register() (string, string, error) {
 	if o.headImgUrl != "" {
 		params.Set("headImgUrl", o.headImgUrl)
 	}
-
+	sign, err := o.getSign("oola")
+	if err != nil {
+		return "", "", err
+	}
+	params.Set("sign", sign)
 	u := o.domain + "/api/user/register"
 	body, err := httputil.PostFrom(u, params)
 	if err != nil {
