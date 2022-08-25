@@ -184,7 +184,7 @@ func (srv CarbonTransactionService) Bank(dto api_types.GetCarbonTransactionBankD
 		}
 	}
 	//4 根据当前页的uid和我的uid去好友表查到存在的uid
-	friends, _ := DefaultUserFriendService.GetUserFriendList(3, uids)
+	friends, _ := DefaultUserFriendService.GetUserFriendList(dto.UserId, uids)
 
 	//5 根据用户信息和好友信息进行信息整理
 	CarbonBankList := make([]api_types.CarbonTransactionBank, 0)
@@ -365,7 +365,12 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 	return info, nil
 }
 
-func (srv CarbonTransactionService) AddClassifyV2(uid int64) {
+func (srv CarbonTransactionService) AddClassifyByUid(uid int64) {
+	UserIdString := strconv.FormatInt(uid, 10) //我的uid string
+	dataStr := app.Redis.HGet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
+	if dataStr.Val() != "" {
+		return
+	}
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
 		Uid:     uid,
 		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),

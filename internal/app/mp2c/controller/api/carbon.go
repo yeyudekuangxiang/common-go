@@ -101,6 +101,7 @@ func (c CarbonController) Info(ctx *gin.Context) (gin.H, error) {
 
 func (c CarbonController) Classify(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
+	c.service.AddClassifyByUid(user.ID)
 	ret, err := c.service.Classify(api_types.GetCarbonTransactionClassifyDto{
 		UserId: user.ID,
 	})
