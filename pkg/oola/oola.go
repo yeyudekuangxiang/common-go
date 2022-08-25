@@ -47,25 +47,25 @@ func NewOola(context *context.MioContext, appId, clientId, domain string, client
 	}
 }
 
-func (o Oola) WithPhone(phone string) {
+func (o *Oola) WithPhone(phone string) {
 	if phone != "" {
 		o.phone = phone
 	}
 }
 
-func (o Oola) WithHeadImgUrl(headImgUrl string) {
+func (o *Oola) WithHeadImgUrl(headImgUrl string) {
 	if headImgUrl != "" {
 		o.headImgUrl = headImgUrl
 	}
 }
 
-func (o Oola) WithUserName(userName string) {
+func (o *Oola) WithUserName(userName string) {
 	if userName != "" {
 		o.userName = userName
 	}
 }
 
-func (o Oola) getSign(ch string) (sign string, err error) {
+func (o *Oola) getSign(ch string) (sign string, err error) {
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(ch)
 	if scene.Key == "" || scene.Key == "e" {
@@ -74,16 +74,16 @@ func (o Oola) getSign(ch string) (sign string, err error) {
 	return util.Md5(scene.Key + "appId=" + scene.AppId + ";clientId=" + o.clientId + ";"), nil
 }
 
-func (o Oola) GetToken() (string, string, error) {
-	autoLoginKey, _ := o.redis.Get(o.ctx, "oola_login_key:"+o.clientId).Result()
-	channelCode, _ := o.redis.Get(o.ctx, "oola_channel_code:"+o.clientId).Result()
+func (o *Oola) GetToken() (string, string, error) {
+	autoLoginKey, _ := o.redis.GetDel(o.ctx, "oola_login_key:"+o.clientId).Result()
+	channelCode, _ := o.redis.GetDel(o.ctx, "oola_channel_code:"+o.clientId).Result()
 	if autoLoginKey == "" || channelCode == "" {
 		return o.register()
 	}
 	return channelCode, autoLoginKey, nil
 }
 
-func (o Oola) register() (string, string, error) {
+func (o *Oola) register() (string, string, error) {
 	sign, err := o.getSign("oola")
 	if err != nil {
 		return "", "", err
@@ -121,12 +121,12 @@ func (o Oola) register() (string, string, error) {
 		return "", "", errors.New(res.Msg)
 	}
 	//记录redis
-	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 9*time.Minute)
-	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 9*time.Minute)
+	o.redis.SetNX(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 9*time.Minute)
+	o.redis.SetNX(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 9*time.Minute)
 	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
 
-func (o Oola) getUserAutoLoginKey() (string, string, error) {
+func (o *Oola) getUserAutoLoginKey() (string, string, error) {
 	sign, err := o.getSign("oola")
 	if err != nil {
 		return "", "", err
@@ -150,7 +150,7 @@ func (o Oola) getUserAutoLoginKey() (string, string, error) {
 		return "", "", errors.New(res.Msg)
 	}
 	//记录redis
-	o.redis.Set(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 9*time.Minute)
-	o.redis.Set(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 9*time.Minute)
+	o.redis.SetNX(o.ctx, "oola_login_key:"+o.clientId, res.Info.AutologinKey, 9*time.Minute)
+	o.redis.SetNX(o.ctx, "oola_channel_code:"+o.clientId, res.Info.ChannelCode, 9*time.Minute)
 	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
