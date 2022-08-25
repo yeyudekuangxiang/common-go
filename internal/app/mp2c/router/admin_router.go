@@ -90,6 +90,7 @@ func adminRouter(router *gin.Engine) {
 			userRouter.GET("/detail", apiutil.Format(admin.DefaultUserController.Detail))                   //用户详情
 			userRouter.POST("/change-state", apiutil.Format(admin.DefaultUserController.ChangeState))       //更新用户状态
 			userRouter.POST("/change-position", apiutil.Format(admin.DefaultUserController.ChangePosition)) //更新用户身份
+			userRouter.POST("/change-partner", apiutil.Format(admin.DefaultUserController.ChangePartner))   //更新用户身份
 		}
 
 	}

@@ -405,13 +405,18 @@ type CommentCount struct {
 
 type ChangeUserState struct {
 	UserId int64 `json:"userId"`
-	State  int   `json:"state"`
+	Status int   `json:"state"`
 }
 
 type ChangeUserPosition struct {
 	UserId       int64  `json:"userId"`
 	Position     string `json:"position"`
 	PositionIcon string `json:"positionIcon"`
+}
+
+type ChangeUserPartner struct {
+	UserId  int64 `json:"userId"`
+	Partner int   `json:"partner"`
 }
 
 type StarChargeResponse struct {

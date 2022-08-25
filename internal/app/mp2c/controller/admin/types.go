@@ -237,7 +237,17 @@ user start
 */
 type ChangeUserState struct {
 	IDForm
-	State int `json:"state" binding:"min:1,max=3"`
+	Status int `json:"status" binding:"required"`
+}
+
+type ChangeUserPosition struct {
+	IDForm
+	Position int `json:"position" binding:"required"`
+}
+
+type ChangeUserPartner struct {
+	IDForm
+	Partner int `json:"partner" binding:"required"`
 }
 
 type changeUserPosition struct {

@@ -62,7 +62,7 @@ func (ctr UserController) ChangeState(c *gin.Context) (gin.H, error) {
 	}
 	if err := service.DefaultUserService.ChangeUserState(service.ChangeUserState{
 		UserId: form.ID,
-		State:  form.State,
+		Status: form.Status,
 	}); err != nil {
 		return nil, err
 	}
@@ -78,6 +78,20 @@ func (ctr UserController) ChangePosition(c *gin.Context) (gin.H, error) {
 		UserId:       form.ID,
 		Position:     form.Position,
 		PositionIcon: form.PositionIcon,
+	}); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr UserController) ChangePartner(c *gin.Context) (gin.H, error) {
+	var form ChangeUserPartner
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if err := service.DefaultUserService.ChangeUserPartner(service.ChangeUserPartner{
+		UserId:  form.ID,
+		Partner: form.Partner,
 	}); err != nil {
 		return nil, err
 	}

@@ -543,6 +543,9 @@ func (u UserService) ChangeUserState(param ChangeUserState) error {
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+	if param.Status >= 0 {
+		user.Status = param.Status
+	}
 	return u.r.Save(&user)
 }
 
@@ -556,6 +559,17 @@ func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
 	}
 	if param.PositionIcon != "" {
 		user.PositionIcon = param.PositionIcon
+	}
+	return u.r.Save(&user)
+}
+
+func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	if param.Partner >= 0 {
+		user.Partners = entity.Partner(param.Partner)
 	}
 	return u.r.Save(&user)
 }
