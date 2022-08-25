@@ -36,8 +36,8 @@ type Topic struct {
 	Nickname      string         `gorm:"-" json:"-"`
 	Tags          []Tag          `json:"tags" gorm:"many2many:topic_tag;"`
 	Comment       []CommentIndex `json:"comment" gorm:"foreignKey:ObjId"`
-	TopicTagId    string         `gorm:"-" json:"topicTagId" form:"topicTagId"` // 类型
-	SeeCount      int            `json:"seeCount"`                              //浏览次数
+	TopicTagId    string         `gorm:"-" json:"-"` // 类型
+	SeeCount      int            `json:"seeCount"`   //浏览次数
 	CreatedAt     model.Time     `json:"createdAt"`
 	UpdatedAt     model.Time     `json:"updatedAt"`
 	ImportId      int            `json:"-"`

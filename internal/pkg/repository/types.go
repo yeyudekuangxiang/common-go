@@ -67,19 +67,20 @@ type UpdateTag struct {
 }
 
 type GetUserListBy struct {
-	Mobile     string            `json:"mobile,omitempty"`
-	Mobiles    []string          `json:"mobiles,omitempty"`
-	Source     entity.UserSource `json:"source,omitempty"`
-	UserIds    []int64           `json:"userIds,omitempty"`
-	Nickname   string            `json:"nickname,omitempty"`   //模糊查询
-	LikeMobile string            `json:"likeMobile,omitempty"` //手机号模糊查询
-	UserId     int64             `json:"userId,omitempty"`
-	Status     int               `json:"status,omitempty"` //0全部 1正常 2禁言 3封号
-	OpenId     string            `json:"openId,omitempty"`
-	StartTime  time.Time         `json:"startTime"`
-	EndTime    time.Time         `json:"endTime"`
-	Risk       int               `json:"risk,omitempty"`
-	Partner    entity.Partner    `json:"partner"` //0:全部 1:乐活家
+	Mobile     string              `json:"mobile,omitempty"`
+	Mobiles    []string            `json:"mobiles,omitempty"`
+	Source     entity.UserSource   `json:"source,omitempty"`
+	UserIds    []int64             `json:"userIds,omitempty"`
+	Nickname   string              `json:"nickname,omitempty"`   //模糊查询
+	LikeMobile string              `json:"likeMobile,omitempty"` //手机号模糊查询
+	UserId     int64               `json:"userId,omitempty"`
+	Status     int                 `json:"status,omitempty"` //0全部 1正常 2禁言 3封号
+	OpenId     string              `json:"openId,omitempty"`
+	StartTime  time.Time           `json:"startTime"`
+	EndTime    time.Time           `json:"endTime"`
+	Risk       int                 `json:"risk,omitempty"`
+	Position   entity.UserPosition `json:"position"`
+	Partner    entity.Partner      `json:"partner"` //0:全部 1:乐活家
 }
 
 type GetUserPageListBy struct {
