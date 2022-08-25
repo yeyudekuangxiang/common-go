@@ -76,7 +76,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	totalPoint := lastPoint + thisPoint
 	fmt.Println("charge 累计积分 ", form, totalPoint)
 	if lastPoint >= scene.PointLimit {
-		fmt.Println("charge 充电量已达到上线 ", form)
+		fmt.Println("charge 充电量已达到上限 ", form)
 	} else {
 		if totalPoint > scene.PointLimit {
 			fmt.Println("charge 充电量限制修正 ", form, thisPoint, lastPoint)
@@ -100,7 +100,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		fmt.Println("charge 加积分失败 ", form)
 	}
 	// todo 发券
-	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 && thisPoint0 > 0 {
+	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 && thisPoint > 0 {
 		fmt.Println("星星充电 发券start")
 		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
 		endTime, _ := time.Parse("2006-01-02", "2022-08-30")
