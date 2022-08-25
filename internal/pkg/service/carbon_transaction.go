@@ -366,11 +366,6 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 }
 
 func (srv CarbonTransactionService) AddClassifyByUid(uid int64) {
-	UserIdString := strconv.FormatInt(uid, 10) //我的uid string
-	dataStr := app.Redis.HGet(contextRedis.Background(), config.RedisKey.UserCarbonClassify, UserIdString)
-	if dataStr.Val() != "" {
-		return
-	}
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
 		Uid:     uid,
 		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
