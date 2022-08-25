@@ -101,23 +101,24 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		fmt.Println("charge 加积分失败 ", form)
 	}
-
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
-	pointDec := decimal.NewFromInt(int64(thisPoint))
-	electric := pointDec.Div(decimal.NewFromInt(10))
-	f, _ := electric.Float64()
-	_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
-		OpenId:  userInfo.OpenId,
-		UserId:  userInfo.ID,
-		Type:    typeCarbonStr,
-		Value:   f,
-		Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
-		AdminId: 0,
-		Ip:      "",
-	})
-	if errCarbon != nil {
-		fmt.Println("charge 加碳失败", form)
+	if typeCarbonStr != "" {
+		pointDec := decimal.NewFromInt(int64(thisPoint))
+		electric := pointDec.Div(decimal.NewFromInt(10))
+		f, _ := electric.Float64()
+		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  userInfo.OpenId,
+			UserId:  userInfo.ID,
+			Type:    typeCarbonStr,
+			Value:   f,
+			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+			AdminId: 0,
+			Ip:      "",
+		})
+		if errCarbon != nil {
+			fmt.Println("charge 加碳失败", form)
+		}
 	}
 
 	// todo 发券

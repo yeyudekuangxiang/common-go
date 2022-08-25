@@ -38,5 +38,5 @@ func (repo BdSceneRepository) SceneToCarbonType(ch string) entity.CarbonTransact
 	case "lvmiao":
 		return entity.CARBON_ECAR
 	}
-	return entity.CARBON_ECAR
+	return ""
 }
