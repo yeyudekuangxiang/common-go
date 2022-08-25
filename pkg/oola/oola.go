@@ -6,9 +6,11 @@ import (
 	"github.com/go-redis/redis/v8"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
-	"mio/pkg/duiba/util"
 	"net/url"
+	"sort"
 	"time"
 )
 
@@ -65,26 +67,24 @@ func (o *Oola) WithUserName(userName string) {
 	}
 }
 
-func (o *Oola) getSign(ch string) (sign string, err error) {
+func (o *Oola) getSign(ch string, params url.Values) (sign string, err error) {
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(ch)
 	if scene.Key == "" || scene.Key == "e" {
 		return "", errors.New("渠道查询失败")
 	}
 	var signStr string
-	signStr = scene.Key + "appId=" + scene.AppId + ";clientId=" + o.clientId + ";"
-	if o.headImgUrl != "" {
-		signStr = signStr + o.headImgUrl
+	var slice []string
+	for k, _ := range params {
+		slice = append(slice, k)
 	}
-	if o.phone != "" {
-		signStr = signStr + o.phone
+	sort.Strings(slice)
+	for _, v := range slice {
+		//fmt.Printf("%v\n", params[v])
+		//fmt.Printf("%v\n", params[v][0])
+		signStr += v + "=" + util.InterfaceToString(params[v][0]) + ";"
 	}
-
-	if o.userName != "" {
-		signStr = signStr + o.userName
-	}
-
-	return util.Md5(signStr), nil
+	return encrypt.Md5(scene.Key + signStr), nil
 }
 
 func (o *Oola) GetToken() (string, string, error) {
@@ -97,7 +97,6 @@ func (o *Oola) GetToken() (string, string, error) {
 }
 
 func (o *Oola) register() (string, string, error) {
-
 	params := make(url.Values)
 	params.Set("appId", o.appId)
 	params.Set("clientId", o.clientId)
@@ -110,7 +109,8 @@ func (o *Oola) register() (string, string, error) {
 	if o.headImgUrl != "" {
 		params.Set("headImgUrl", o.headImgUrl)
 	}
-	sign, err := o.getSign("oola")
+
+	sign, err := o.getSign("oola", params)
 	if err != nil {
 		return "", "", err
 	}
@@ -139,13 +139,13 @@ func (o *Oola) register() (string, string, error) {
 }
 
 func (o *Oola) getUserAutoLoginKey() (string, string, error) {
-	sign, err := o.getSign("oola")
-	if err != nil {
-		return "", "", err
-	}
 	params := make(url.Values)
 	params.Set("appId", o.appId)
 	params.Set("clientId", o.clientId)
+	sign, err := o.getSign("oola", params)
+	if err != nil {
+		return "", "", err
+	}
 	params.Set("sign", sign)
 	u := o.domain + "/api/user/getUserAutoLoginKey"
 	body, err := httputil.PostFrom(u, params)
