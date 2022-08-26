@@ -457,7 +457,7 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	}
 	if param.PhoneNumber != nil {
 		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
-			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
+			return errno.ErrCommon.WithMessage("该手机号已被其他账号绑定")
 		}
 		user.PhoneNumber = *param.PhoneNumber
 	}
