@@ -24,12 +24,13 @@ type QnrCategory struct {
 }
 
 type QnrVo struct {
-	ID     int64      `json:"id"`
-	Title  string     `json:"title"`
-	Type   int8       `json:"type"`
-	Remind string     `json:"remind"`
-	IsHide int8       `json:"isHide"`
-	Option []OptionVO `json:"option"`
+	ID        int64      `json:"id"`
+	Title     string     `json:"title"`
+	Type      int8       `json:"type"`
+	Remind    string     `json:"remind"`
+	IsHide    int8       `json:"isHide"`
+	Option    []OptionVO `json:"option"`
+	SubjectId int64
 }
 
 type OptionVO struct {

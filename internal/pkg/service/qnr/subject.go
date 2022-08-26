@@ -29,3 +29,8 @@ func (srv SubjectService) GetPageList(dto srv_types.GetQnrSubjectDTO) ([]qnrEnti
 	}
 	return list, nil
 }
+
+func (srv SubjectService) CreateInBatches(dto []qnrEntity.Subject) error {
+	err := srv.repo.CreateInBatches(dto)
+	return err
+}

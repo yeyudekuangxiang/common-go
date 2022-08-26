@@ -32,3 +32,7 @@ func (repo OptionRepository) GetListBy(by repotypes.GetQuestOptionGetListBy) ([]
 	}
 	return list, nil
 }
+
+func (repo OptionRepository) CreateInBatches(transaction []qnrEntity.Option) error {
+	return repo.ctx.DB.CreateInBatches(transaction, len(transaction)).Error
+}

@@ -2,6 +2,7 @@ package qnr
 
 type Subject struct {
 	ID         int64
+	SubjectId  int64
 	QnrId      int64
 	CategoryId int64
 	Title      string

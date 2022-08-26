@@ -2,8 +2,6 @@ package question
 
 import (
 	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/model"
-	"mio/internal/pkg/model/entity"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	repo "mio/internal/pkg/repository"
 	repoQnr "mio/internal/pkg/repository/qnr"
@@ -58,7 +56,7 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 	//查询用户是否入库，入库并回答过问题
 	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestUserGetById{OpenId: dto.OpenId})
 	if info.UserId != 0 {
-		//return errno.ErrCommon.WithMessage("您已经提交了")
+		return errno.ErrCommon.WithMessage("您已经提交了")
 	}
 	//获取用户信息
 	userInfo := srv.user.GetUserById(dto.UserId)
@@ -80,12 +78,6 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 		InvitedByOpenId = inviteInfo.InvitedByOpenId
 	}
 
-	bannerDo := entity.Banner{
-		UpdateTime: model.NewTime()}
-	if err := util.MapTo(dto, &bannerDo); err != nil {
-		return err
-	}
-
 	//保存用户信息
 	errUser := srv.qrnUserRepo.Create(&qnrEntity.User{
 		UserId:      id.Int64(),
@@ -100,14 +92,7 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 	if errUser != nil {
 		return errno.ErrCommon.WithMessage("用户信息保存失败")
 	}
-
 	//保存答案
-	/*Answer := dto.Answer
-	var list []*Ans
-	err := json.Unmarshal([]byte(Answer), &list)
-	if err != nil {
-		return errno.ErrCommon.WithMessage("问卷调查答案，解析json字符串异常")
-	}*/
 	createList := make([]srv_types.CreateQnrAnswerDTO, 0)
 	for _, l := range dto.Answer {
 		createList = append(createList, srv_types.CreateQnrAnswerDTO{

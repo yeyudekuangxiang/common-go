@@ -29,3 +29,8 @@ func (srv OptionService) GetPageList(dto srv_types.GetQnrOptionDTO) ([]qnrEntity
 	}
 	return list, nil
 }
+
+func (srv OptionService) CreateInBatches(dto []qnrEntity.Option) error {
+	err := srv.repo.CreateInBatches(dto)
+	return err
+}

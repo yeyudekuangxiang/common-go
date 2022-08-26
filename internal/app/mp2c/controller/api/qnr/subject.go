@@ -49,7 +49,7 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	}
 	var subjectIds []int64 //获取所有的题目id
 	for _, val := range subjectList {
-		subjectIds = append(subjectIds, val.ID)
+		subjectIds = append(subjectIds, val.SubjectId)
 	}
 
 	//所有的答案
@@ -74,17 +74,18 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	//答案和题目组装
 	subjectMap := make(map[int64][]api_types.QnrVo, 0)
 	for _, val := range subjectList {
-		option, ok := optionMap[val.ID]
+		option, ok := optionMap[val.SubjectId]
 		if !ok {
 			option = []api_types.OptionVO{}
 		}
 		subjectMap[val.CategoryId] = append(subjectMap[val.CategoryId], api_types.QnrVo{
-			ID:     val.ID,
-			Title:  val.Title,
-			Type:   val.Type,
-			Remind: val.Remind,
-			IsHide: val.IsHide,
-			Option: option,
+			ID:        val.ID,
+			Title:     val.Title,
+			Type:      val.Type,
+			Remind:    val.Remind,
+			IsHide:    val.IsHide,
+			Option:    option,
+			SubjectId: val.SubjectId,
 		})
 	}
 

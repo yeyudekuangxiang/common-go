@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model/entity/pugc"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	"mio/internal/pkg/service"
+	qnrService "mio/internal/pkg/service/qnr"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/wxapp"
@@ -139,8 +140,8 @@ func (PugcController) SendPoint(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (c PugcController) carbonInit() {
-	f, err := excelize.OpenFile("/Users/leo/Desktop/10元话费充值名单test.xlsx")
+func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
+	f, err := excelize.OpenFile("/Users/apple/Desktop/liumei.xlsx")
 	rows, err := f.GetRows("Sheet1")
 	if err != nil {
 		fmt.Println(err)
@@ -149,32 +150,42 @@ func (c PugcController) carbonInit() {
 
 	var option []qnrEntity.Option
 	var subject []qnrEntity.Subject
-	for _, row := range rows {
-		var typeSub int8
-
-		if row[3] == "正常" {
-			typeSub = 1
+	for i, row := range rows {
+		if i == 0 {
+			continue
 		}
-		if row[3] == "正常" {
-			typeSub = 1
+		id, err2 := util.SnowflakeID()
+		if err2 != nil {
+			return nil, nil
 		}
-
+		var typeSub int8 = 1
+		if row[5] == "填空" {
+			typeSub = 2
+		}
+		cate, _ := strconv.ParseInt(row[1], 10, 64)
 		subject = append(subject, qnrEntity.Subject{
-			Title:      row[1],
-			Remind:     row[2],
+			Title:      row[2],
+			Remind:     row[3],
 			Type:       typeSub,
 			IsHide:     1,
 			QnrId:      1,
-			CategoryId: 1,
+			CategoryId: cate,
+			SubjectId:  id.Int64(),
 		})
-
-		option = append(option, qnrEntity.Option{
-			Title:  row[1],
-			Remind: row[2],
-		})
+		for i := 6; i < len(row); i++ {
+			if row[i] == "" {
+				break
+			}
+			option = append(option, qnrEntity.Option{
+				Title:     row[i],
+				SubjectId: id.Int64(),
+			})
+		}
 	}
-
-	//qnrService.NewSubjectService(context.NewMioContext()).Create()
-
+	println(subject)
+	println(option)
+	qnrService.NewSubjectService(context.NewMioContext()).CreateInBatches(subject)
+	qnrService.NewOptionService(context.NewMioContext()).CreateInBatches(option)
 	os.Exit(0)
+	return nil, nil
 }

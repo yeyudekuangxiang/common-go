@@ -29,3 +29,7 @@ func (repo SubjectRepository) List(do repotypes.GetQuestSubjectGetListBy) ([]qnr
 	list := make([]qnrEntity.Subject, 0)
 	return list, db.Find(&list).Error
 }
+
+func (repo SubjectRepository) CreateInBatches(transaction []qnrEntity.Subject) error {
+	return repo.ctx.DB.CreateInBatches(transaction, len(transaction)).Error
+}
