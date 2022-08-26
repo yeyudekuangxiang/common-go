@@ -31,7 +31,7 @@ const (
 type Partner int
 
 const (
-	PartnerLoHoJa Partner = 1
+	PartnerLoHoJa Partner = 1 //乐活家
 )
 
 type User struct {
