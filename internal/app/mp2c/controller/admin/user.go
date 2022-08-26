@@ -30,7 +30,7 @@ func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 			Status:   form.State,
 			Nickname: form.Nickname,
 			Position: entity.UserPosition(form.Position),
-			Partner:  entity.Partner(form.Partner),
+			Partners: entity.Partner(form.Partner),
 		},
 		OrderBy: "id desc",
 	})

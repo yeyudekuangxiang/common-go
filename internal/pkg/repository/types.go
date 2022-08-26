@@ -80,7 +80,7 @@ type GetUserListBy struct {
 	EndTime    time.Time           `json:"endTime"`
 	Risk       int                 `json:"risk,omitempty"`
 	Position   entity.UserPosition `json:"position"`
-	Partner    entity.Partner      `json:"partner"` //0:全部 1:乐活家
+	Partners   entity.Partner      `json:"partner"` //0:全部 1:乐活家 2:非乐活家
 }
 
 type GetUserPageListBy struct {

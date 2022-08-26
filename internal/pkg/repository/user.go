@@ -148,8 +148,11 @@ func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, 
 	if by.Status != 0 {
 		db.Where("status = ?", by.Status)
 	}
-	if by.Partner != 0 {
-		db.Where("partners = ?", by.Partner)
+	if by.Partners != 0 {
+		db.Where("partners = ?", by.Partners)
+	}
+	if by.Position != "" {
+		db.Where("position = ?", by.Position)
 	}
 
 	if err := db.Count(&count).Limit(bp.Limit).Offset(bp.Offset).Order(bp.OrderBy).Find(&list).Error; err != nil {

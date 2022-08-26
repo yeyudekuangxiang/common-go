@@ -64,6 +64,8 @@ func (p PointTransactionType) Text() string {
 		return "新能源换电" //oola
 	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK:
 		return "旧物回收"
+	case POINT_ARTICLE, POINT_RECOMMEND:
+		return "酷喵圈"
 	}
 	return "未知积分"
 }
@@ -184,7 +186,7 @@ const (
 	OrderByPointTranCTDESC OrderBy = "order_by_point_ct_desc"
 )
 
-// 积分限制 每天
+// 积分限制
 var PointCollectValueMap = map[PointTransactionType]int{
 	POINT_COFFEE_CUP:    39,  //	每次
 	POINT_BIKE_RIDE:     42,  //	每次

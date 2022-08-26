@@ -505,7 +505,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 	if content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			return err
+			return errors.New("内容审核未通过，发布失败。")
 		}
 	}
 
