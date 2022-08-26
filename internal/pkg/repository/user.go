@@ -154,6 +154,9 @@ func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, 
 	if by.Position != "" {
 		db.Where("position = ?", by.Position)
 	}
+	if by.Auth != 0 {
+		db.Where("auth = ?", by.Auth)
+	}
 
 	if err := db.Count(&count).Limit(bp.Limit).Offset(bp.Offset).Order(bp.OrderBy).Find(&list).Error; err != nil {
 		panic(err)

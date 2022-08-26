@@ -70,7 +70,8 @@ type UserPageListForm struct {
 	Nickname  string    `json:"nickname" form:"nickname" alias:"昵称"`
 	State     int       `json:"state" form:"state" alias:"状态" binding:"min=0,max=3"`
 	Position  string    `json:"position" form:"position" alias:"身份"`
-	Partner   int       `json:"partner" form:"partner" alias:"合作伙伴"`
+	Partners  int       `json:"partners" form:"partners" alias:"合作伙伴"`
+	Auth      int       `json:"auth"`
 	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 	controller.PageFrom

@@ -81,6 +81,7 @@ type GetUserListBy struct {
 	Risk       int                 `json:"risk,omitempty"`
 	Position   entity.UserPosition `json:"position"`
 	Partners   entity.Partner      `json:"partner"` //0:全部 1:乐活家 2:非乐活家
+	Auth       int                 `json:"auth"`
 }
 
 type GetUserPageListBy struct {
