@@ -479,9 +479,12 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if param.Auth != 0 {
 		user.Auth = param.Auth
 	}
-
-	user.AvatarUrl = param.Avatar
-	user.Nickname = param.Nickname
+	if param.Nickname != "" {
+		user.Nickname = param.Nickname
+	}
+	if param.Avatar != "" {
+		user.AvatarUrl = param.Avatar
+	}
 	return u.r.Save(&user)
 }
 
