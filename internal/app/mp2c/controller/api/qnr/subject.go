@@ -83,6 +83,7 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 			Title:  val.Title,
 			Type:   val.Type,
 			Remind: val.Remind,
+			IsHide: val.IsHide,
 			Option: option,
 		})
 	}
