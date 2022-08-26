@@ -470,13 +470,13 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if param.Position != "" {
 		user.Position = entity.UserPosition(param.Position)
 	}
-	if param.Partner >= 0 {
-		user.Partners = entity.Partner(param.Partner)
+	if param.Partners != 0 {
+		user.Partners = entity.Partner(param.Partners)
 	}
-	if param.Status >= 0 {
+	if param.Status != 0 {
 		user.Status = param.Status
 	}
-	if param.Auth >= 0 {
+	if param.Auth != 0 {
 		user.Auth = param.Auth
 	}
 

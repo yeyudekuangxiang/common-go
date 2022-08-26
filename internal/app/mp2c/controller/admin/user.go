@@ -65,7 +65,7 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 		UserId:   form.ID,
 		Status:   form.Status,
 		Position: form.Position,
-		Partner:  form.Partner,
+		Partners: form.Partners,
 		Auth:     form.Auth,
 	}); err != nil {
 		return nil, err

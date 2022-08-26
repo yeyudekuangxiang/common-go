@@ -369,7 +369,7 @@ type UpdateUserInfoParam struct {
 	PhoneNumber *string
 	Position    string
 	Status      int
-	Partner     int
+	Partners    int
 	Auth        int
 }
 

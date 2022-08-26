@@ -240,7 +240,7 @@ type UpdateUser struct {
 	IDForm
 	Status   int    `json:"status"`
 	Position string `json:"position"`
-	Partner  int    `json:"partner"`
+	Partners int    `json:"partners"`
 	Auth     int    `json:"auth"`
 }
 
