@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller"
@@ -170,7 +171,9 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-
+	if user.Auth != 1 {
+		return nil, errors.New("无权限")
+	}
 	//创建帖子
 	err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
@@ -200,6 +203,9 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	}
 	//user
 	user := apiutil.GetAuthUser(c)
+	if user.Auth != 1 {
+		return nil, errors.New("无权限")
+	}
 	//更新帖子
 	err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
