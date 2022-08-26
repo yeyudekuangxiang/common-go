@@ -131,6 +131,8 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
+			topicRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic))
+
 		}
 		//评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
