@@ -238,20 +238,10 @@ user start
 */
 type UpdateUser struct {
 	IDForm
-	Status   int    `json:"status"`
-	Position string `json:"position"`
-	Partners int    `json:"partners"`
-	Auth     int    `json:"auth"`
-}
-
-type ChangeUserPosition struct {
-	IDForm
-	Position string `json:"position" binding:"required"`
-}
-
-type ChangeUserPartner struct {
-	IDForm
-	Partner int `json:"partner" binding:"required;min=1"`
+	Status   int    `json:"status,omitempty" form:"status" alias:"status"`
+	Position string `json:"position,omitempty" form:"position" alias:"position"`
+	Partners int    `json:"partners,omitempty" form:"partners" alias:"partners"`
+	Auth     int    `json:"auth,omitempty" form:"auth" alias:"auth"`
 }
 
 /*
