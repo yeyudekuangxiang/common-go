@@ -14,9 +14,10 @@ var DefaultSubjectService = SubjectService{ctx: context.NewMioContext()}
 
 func NewSubjectService(ctx *context.MioContext) *SubjectService {
 	return &SubjectService{
-		ctx:        ctx,
-		repo:       repoQnr.NewSubjectRepository(ctx),
-		repoOption: repoQnr.NewOptionRepository(ctx),
+		ctx:         ctx,
+		repo:        repoQnr.NewSubjectRepository(ctx),
+		repoOption:  repoQnr.NewOptionRepository(ctx),
+		repoSubject: repoQnr.NewSubjectRepository(ctx),
 	}
 }
 
@@ -40,7 +41,7 @@ func (srv SubjectService) CreateInBatches(dto []qnrEntity.Subject) error {
 	return err
 }
 
-func (srv SubjectService) GetList(ctx *gin.Context) (gin.H, error) {
+func (srv SubjectService) GetList() (gin.H, error) {
 	//所有的题目
 	subjectList, subjectErr := srv.repoSubject.List(repotypes.GetQuestSubjectGetListBy{
 		QnrId: 1, //金融调查问卷
@@ -89,9 +90,7 @@ func (srv SubjectService) GetList(ctx *gin.Context) (gin.H, error) {
 			SubjectId: val.SubjectId,
 		})
 	}
-
 	//题目和分类组装
-
 	typeMap := []api_types.QnrCategory{
 		{Id: 1, Title: "一、 个人信息"},
 		{Id: 2, Title: "二、 绿色金融市场建设"},
