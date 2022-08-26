@@ -1,6 +1,8 @@
 package question
 
 import (
+	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	repoQnr "mio/internal/pkg/repository/qnr"
@@ -12,14 +14,17 @@ var DefaultSubjectService = SubjectService{ctx: context.NewMioContext()}
 
 func NewSubjectService(ctx *context.MioContext) *SubjectService {
 	return &SubjectService{
-		ctx:  ctx,
-		repo: repoQnr.NewSubjectRepository(ctx),
+		ctx:        ctx,
+		repo:       repoQnr.NewSubjectRepository(ctx),
+		repoOption: repoQnr.NewOptionRepository(ctx),
 	}
 }
 
 type SubjectService struct {
-	ctx  *context.MioContext
-	repo *repoQnr.SubjectRepository
+	ctx         *context.MioContext
+	repo        *repoQnr.SubjectRepository
+	repoOption  *repoQnr.OptionRepository
+	repoSubject *repoQnr.SubjectRepository
 }
 
 func (srv SubjectService) GetPageList(dto srv_types.GetQnrSubjectDTO) ([]qnrEntity.Subject, error) {
@@ -33,4 +38,75 @@ func (srv SubjectService) GetPageList(dto srv_types.GetQnrSubjectDTO) ([]qnrEnti
 func (srv SubjectService) CreateInBatches(dto []qnrEntity.Subject) error {
 	err := srv.repo.CreateInBatches(dto)
 	return err
+}
+
+func (srv SubjectService) GetList(ctx *gin.Context) (gin.H, error) {
+	//所有的题目
+	subjectList, subjectErr := srv.repoSubject.List(repotypes.GetQuestSubjectGetListBy{
+		QnrId: 1, //金融调查问卷
+	})
+	if subjectErr != nil {
+		return gin.H{}, nil
+	}
+	var subjectIds []int64 //获取所有的题目id
+	for _, val := range subjectList {
+		subjectIds = append(subjectIds, val.SubjectId)
+	}
+
+	//所有的答案
+	optionList, optionErr := srv.repoOption.GetListBy(repotypes.GetQuestOptionGetListBy{
+		SubjectIds: subjectIds,
+	})
+	if optionErr != nil {
+		return gin.H{}, nil
+	}
+
+	optionMap := make(map[int64][]api_types.OptionVO)
+	for _, val := range optionList {
+		optionMap[val.SubjectId] = append(optionMap[val.SubjectId], api_types.OptionVO{
+			ID:             val.ID,
+			Title:          val.Title,
+			Remind:         val.Remind,
+			JumpSubject:    val.JumpSubject,
+			RelatedSubject: val.RelatedSubject,
+		})
+	}
+
+	//答案和题目组装
+	subjectMap := make(map[int64][]api_types.QnrVo, 0)
+	for _, val := range subjectList {
+		option, ok := optionMap[val.SubjectId]
+		if !ok {
+			option = []api_types.OptionVO{}
+		}
+		subjectMap[val.CategoryId] = append(subjectMap[val.CategoryId], api_types.QnrVo{
+			ID:        val.ID,
+			Title:     val.Title,
+			Type:      val.Type,
+			Remind:    val.Remind,
+			IsHide:    val.IsHide,
+			Option:    option,
+			SubjectId: val.SubjectId,
+		})
+	}
+
+	//题目和分类组装
+
+	typeMap := []api_types.QnrCategory{
+		{Id: 1, Title: "一、 个人信息"},
+		{Id: 2, Title: "二、 绿色金融市场建设"},
+		{Id: 3, Title: "三、 绿色金融工具"},
+		{Id: 4, Title: "四、 配套保障与政府支持"},
+		{Id: 5, Title: "五、 企业活动"},
+		{Id: 6, Title: "六、 生态空间和城市基建"},
+		{Id: 7, Title: "七、 总评分"},
+	}
+	list := make([]api_types.QnrListVo, 0)
+	for _, v := range typeMap {
+		l, err := subjectMap[v.Id]
+		if err {
+			list = append(list, api_types.QnrListVo{Title: v.Title, List: l})
+		}
+	}
+	return gin.H{"subject": list, "isSubmit": 0, "subjectCount": len(subjectList)}, nil
 }
