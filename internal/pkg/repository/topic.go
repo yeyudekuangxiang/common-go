@@ -56,7 +56,7 @@ func (u TopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.
 
 func (u TopicRepository) FindById(topicId int64) entity.Topic {
 	topic := entity.Topic{}
-	err := u.DB.Model(entity.Topic{}).Where("id = ?", topicId).First(&topic).Error
+	err := u.DB.Model(entity.Topic{}).Preload("User").Where("id = ?", topicId).First(&topic).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}

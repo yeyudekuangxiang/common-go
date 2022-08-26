@@ -37,7 +37,8 @@ func apiRouter(router *gin.Engine) {
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
 		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
-		userRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		authRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+
 		//文章评论列表
 		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
 		authRouter.GET("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
@@ -130,7 +131,6 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			topicRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic))
 		}
 		//评论相关
 		commentRouter := mustAuthRouter.Group("/comment")

@@ -63,7 +63,7 @@ func (u User) ShortUser() ShortUser {
 		AvatarUrl:    u.AvatarUrl,
 		Gender:       u.Gender,
 		Nickname:     u.Nickname,
-		Partner:      u.Partners,
+		Partners:     u.Partners,
 		Position:     u.Position,
 		PositionIcon: u.PositionIcon,
 	}
@@ -74,7 +74,7 @@ type ShortUser struct {
 	AvatarUrl    string       `gorm:"column:avatar_url" json:"avatarUrl"`
 	Gender       UserGender   `gorm:"column:gender" json:"gender"`
 	Nickname     string       `gorm:"column:nick_name" json:"nickname"`
-	Partner      Partner      `gorm:"partner" json:"partner"`
+	Partners     Partner      `gorm:"partners" json:"partners"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
 }
