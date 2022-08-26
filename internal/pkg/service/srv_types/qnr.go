@@ -1,5 +1,7 @@
 package srv_types
 
+import "mio/internal/app/mp2c/controller/api/api_types"
+
 type GetQnrSubjectDTO struct {
 	QnrId int64
 	Scene string `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
@@ -23,6 +25,6 @@ type CreateQnrAnswerDTO struct {
 
 type AddQnrAnswerDTO struct {
 	OpenId string
-	Answer string
+	Answer []api_types.GetQnrTypeAnswer
 	UserId int64
 }

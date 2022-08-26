@@ -1,8 +1,6 @@
 package question
 
 import (
-	"encoding/json"
-	"fmt"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -104,14 +102,14 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 	}
 
 	//保存答案
-	Answer := dto.Answer
+	/*Answer := dto.Answer
 	var list []*Ans
 	err := json.Unmarshal([]byte(Answer), &list)
 	if err != nil {
-		fmt.Printf("问卷调查答案，解析json字符串异常：%s\n", err)
-	}
+		return errno.ErrCommon.WithMessage("问卷调查答案，解析json字符串异常")
+	}*/
 	createList := make([]srv_types.CreateQnrAnswerDTO, 0)
-	for _, l := range list {
+	for _, l := range dto.Answer {
 		createList = append(createList, srv_types.CreateQnrAnswerDTO{
 			Answer:    l.Answer,
 			QnrId:     1,
@@ -119,7 +117,7 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 			UserId:    id.Int64(),
 		})
 	}
-	err = srv.CreateInBatches(createList)
+	err := srv.CreateInBatches(createList)
 	if err != nil {
 		return errno.ErrCommon.WithMessage("保存答案失败")
 	}

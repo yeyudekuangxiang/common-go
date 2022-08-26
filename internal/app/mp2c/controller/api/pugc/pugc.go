@@ -8,10 +8,12 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/pugc"
+	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/wxapp"
+	"os"
 	"strconv"
 	"time"
 )
@@ -103,7 +105,6 @@ func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 //周年庆双倍积分奖励明细
 
 func (PugcController) SendPoint(c *gin.Context) (gin.H, error) {
-	return nil, nil
 	f, err := excelize.OpenFile("/Users/apple/Desktop/0808.xlsx")
 	if err != nil {
 		fmt.Println(err)
@@ -136,4 +137,44 @@ func (PugcController) SendPoint(c *gin.Context) (gin.H, error) {
 	}
 	fmt.Println("发完了")
 	return nil, nil
+}
+
+func (c PugcController) carbonInit() {
+	f, err := excelize.OpenFile("/Users/leo/Desktop/10元话费充值名单test.xlsx")
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(rows)
+
+	var option []qnrEntity.Option
+	var subject []qnrEntity.Subject
+	for _, row := range rows {
+		var typeSub int8
+
+		if row[3] == "正常" {
+			typeSub = 1
+		}
+		if row[3] == "正常" {
+			typeSub = 1
+		}
+
+		subject = append(subject, qnrEntity.Subject{
+			Title:      row[1],
+			Remind:     row[2],
+			Type:       typeSub,
+			IsHide:     1,
+			QnrId:      1,
+			CategoryId: 1,
+		})
+
+		option = append(option, qnrEntity.Option{
+			Title:  row[1],
+			Remind: row[2],
+		})
+	}
+
+	//qnrService.NewSubjectService(context.NewMioContext()).Create()
+
+	os.Exit(0)
 }

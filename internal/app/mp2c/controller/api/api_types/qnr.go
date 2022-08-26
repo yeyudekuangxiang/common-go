@@ -5,6 +5,11 @@ type GetSubjectListForm struct {
 }
 
 type GetQnrSubjectCreateDTO struct {
+	Answer []GetQnrTypeAnswer `json:"answer"`
+}
+
+type GetQnrTypeAnswer struct {
+	Id     int64  `json:"id"`
 	Answer string `json:"answer"`
 }
 
