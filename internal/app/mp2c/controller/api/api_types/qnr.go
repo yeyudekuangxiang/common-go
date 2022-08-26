@@ -30,7 +30,7 @@ type QnrVo struct {
 	Remind    string     `json:"remind"`
 	IsHide    int8       `json:"isHide"`
 	Option    []OptionVO `json:"option"`
-	SubjectId int64
+	SubjectId int64      `json:"subjectId"`
 }
 
 type OptionVO struct {
