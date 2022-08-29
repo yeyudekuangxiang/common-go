@@ -15,20 +15,18 @@ var DefaultSubjectService = SubjectService{ctx: context.NewMioContext()}
 
 func NewSubjectService(ctx *context.MioContext) *SubjectService {
 	return &SubjectService{
-		ctx:         ctx,
-		repo:        repoQnr.NewSubjectRepository(ctx),
-		repoOption:  repoQnr.NewOptionRepository(ctx),
-		repoSubject: repoQnr.NewSubjectRepository(ctx),
-		repoUser:    repoQnr.NewUserRepository(ctx),
+		ctx:        ctx,
+		repo:       repoQnr.NewSubjectRepository(ctx),
+		repoOption: repoQnr.NewOptionRepository(ctx),
+		repoUser:   repoQnr.NewUserRepository(ctx),
 	}
 }
 
 type SubjectService struct {
-	ctx         *context.MioContext
-	repo        *repoQnr.SubjectRepository
-	repoOption  *repoQnr.OptionRepository
-	repoSubject *repoQnr.SubjectRepository
-	repoUser    *repoQnr.UserRepository
+	ctx        *context.MioContext
+	repo       *repoQnr.SubjectRepository
+	repoOption *repoQnr.OptionRepository
+	repoUser   *repoQnr.UserRepository
 }
 
 func (srv SubjectService) GetPageList(dto srv_types.GetQnrSubjectDTO) ([]qnrEntity.Subject, error) {
@@ -53,7 +51,7 @@ func (srv SubjectService) GetList(openid string) (gin.H, error) {
 	}
 
 	//所有的题目
-	subjectList, subjectErr := srv.repoSubject.List(repotypes.GetQuestSubjectGetListBy{
+	subjectList, subjectErr := srv.repo.List(repotypes.GetQuestSubjectGetListBy{
 		QnrId: 1, //金融调查问卷
 	})
 	if subjectErr != nil {

@@ -38,7 +38,6 @@ func (SubjectController) Create(ctx *gin.Context) (gin.H, error) {
 
 func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-
 	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
 	ret, err := subjectServer.GetList(user.OpenId)
 	return ret, err
