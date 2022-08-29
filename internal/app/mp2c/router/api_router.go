@@ -19,6 +19,8 @@ func apiRouter(router *gin.Engine) {
 
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 
+	//router.GET("/pointToCarbon", apiutil.Format(api.DefaultCarbonController.PointToCarbon))
+
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
@@ -213,6 +215,21 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 		//第三方
 		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(api.DefaultRecycleController.GetOolaKey))
+		//星星充电发放优惠券
+		//mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
+
+		//碳成就相关路由
+		carbonRouter := mustAuthRouter.Group("/carbon")
+		{
+			//	carbonRouter.POST("/create", apiutil.Format(api.DefaultCarbonController.Create))
+			//	carbonRouter.POST("/pointToCarbon", apiutil.Format(api.DefaultCarbonController.PointToCarbon))
+			carbonRouter.GET("/info", apiutil.Format(api.DefaultCarbonController.Info))
+			carbonRouter.GET("/bank", apiutil.Format(api.DefaultCarbonController.Bank))
+			carbonRouter.GET("/myBank", apiutil.Format(api.DefaultCarbonController.MyBank))
+			carbonRouter.GET("/classify", apiutil.Format(api.DefaultCarbonController.Classify))
+			carbonRouter.GET("/history", apiutil.Format(api.DefaultCarbonController.History))
+		}
+
 	}
 
 }

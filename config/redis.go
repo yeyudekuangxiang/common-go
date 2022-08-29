@@ -18,6 +18,9 @@ type redisKey struct {
 	BusinessCarbonHotCity string
 	BlackList             string
 	EventLimit            string
+	UserCarbonRank        string
+	UserCarbonClassify    string
+	UserCarbonStep        string
 }
 
 var RedisKey = redisKey{
@@ -38,4 +41,7 @@ var RedisKey = redisKey{
 	BusinessCarbonHotCity: "business:carbon:hotcity",         //低碳场景中热门城市
 	BlackList:             "mp2c:blacklist",                  //黑产白名单
 	EventLimit:            "mp2c:eventlimit",                 //公益兑换限制
+	UserCarbonRank:        "user_carbon_rank:%s",             //排行榜
+	UserCarbonClassify:    "user_carbon_classify",            //碳分类
+	UserCarbonStep:        "user_carbon_step:%s",             //用户已经转化碳的步数
 }

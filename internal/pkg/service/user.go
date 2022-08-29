@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"math/rand"
 	"mio/config"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -534,9 +535,12 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
 	return &UserAccountInfo{
-		Balance: point.Balance,
-		CertNum: certCount,
+		Balance:     point.Balance,
+		CertNum:     certCount,
+		CarbonToday: carbonInfo.CarbonToday,
+		CarbonAll:   carbonInfo.Carbon,
 	}, nil
 }
 

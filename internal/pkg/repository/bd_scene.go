@@ -32,3 +32,11 @@ func (repo BdSceneRepository) SceneToType(ch string) entity.PointTransactionType
 	}
 	return entity.POINT_ECAR
 }
+
+func (repo BdSceneRepository) SceneToCarbonType(ch string) entity.CarbonTransactionType {
+	switch ch {
+	case "lvmiao":
+		return entity.CARBON_ECAR
+	}
+	return ""
+}
