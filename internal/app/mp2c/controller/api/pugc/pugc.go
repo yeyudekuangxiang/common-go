@@ -8,14 +8,18 @@ import (
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	activity2 "mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/model/entity/pugc"
+	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	"mio/internal/pkg/service"
 	service2 "mio/internal/pkg/service/activity"
+	qnrService "mio/internal/pkg/service/qnr"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/wxapp"
+	"os"
 	"strconv"
 	"time"
 )
@@ -4775,5 +4779,55 @@ func (PugcController) AddCity(c *gin.Context) (gin.H, error) {
 		}
 	}
 	fmt.Println("入库完成")
+	return nil, nil
+}
+
+func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
+	f, err := excelize.OpenFile("/Users/apple/Desktop/liumei.xlsx")
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(rows)
+
+	var option []qnrEntity.Option
+	var subject []qnrEntity.Subject
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		id, err2 := util.SnowflakeID()
+		if err2 != nil {
+			return nil, nil
+		}
+		var typeSub int8 = 1
+		if row[5] == "填空" {
+			typeSub = 2
+		}
+		cate, _ := strconv.ParseInt(row[1], 10, 64)
+		subject = append(subject, qnrEntity.Subject{
+			Title:      row[2],
+			Remind:     row[3],
+			Type:       typeSub,
+			IsHide:     1,
+			QnrId:      1,
+			CategoryId: cate,
+			SubjectId:  model.LongID(id.Int64()),
+		})
+		for i := 6; i < len(row); i++ {
+			if row[i] == "" {
+				break
+			}
+			option = append(option, qnrEntity.Option{
+				Title:     row[i],
+				SubjectId: model.LongID(id),
+			})
+		}
+	}
+	println(subject)
+	println(option)
+	qnrService.NewSubjectService(context.NewMioContext()).CreateInBatches(subject)
+	qnrService.NewOptionService(context.NewMioContext()).CreateInBatches(option)
+	os.Exit(0)
 	return nil, nil
 }
