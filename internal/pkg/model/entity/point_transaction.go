@@ -214,9 +214,9 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_BIKE_RIDE:     2, //	次/天
 	POINT_INVITE:        5, //	次/天
 	POINT_POWER_REPLACE: 1, //	次/天
-	POINT_ARTICLE:       2, //	次/天
-	POINT_COMMENT:       3, // 次
-	POINT_LIKE:          6, // 次
+	//	POINT_ARTICLE:       2, //	次/天
+	//	POINT_COMMENT: 3, // 次
+	//	POINT_LIKE:    6, // 次
 }
 
 type PointTransaction struct {

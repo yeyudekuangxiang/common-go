@@ -119,7 +119,39 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 
 	err := query.Count(&total).
 		Group("topic.id").
-		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
+		Order("is_top desc, updated_at desc,id desc").
+		Limit(param.Limit).
+		Offset(param.Offset).
+		Find(&topList).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return topList, total, nil
+}
+
+func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+	topList := make([]*entity.Topic, 0)
+	var total int64
+	query := app.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Preload("Comment", func(db *gorm.DB) *gorm.DB {
+			return db.Where("comment_index.to_comment_id = ?", 0).
+				Order("like_count desc").Limit(10)
+		}).
+		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Order("comment_index.like_count desc")
+		}).
+		Preload("Comment.RootChild.Member").
+		Preload("Comment.Member").
+		Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
+
+	query.Where("topic.user_id = ?", param.UserId)
+
+	err := query.Count(&total).
+		Group("topic.id").
+		Order("is_top desc, updated_at desc, id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
