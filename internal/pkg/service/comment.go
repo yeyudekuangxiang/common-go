@@ -23,6 +23,7 @@ type (
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
 		Like(userId, commentId int64) error
+		AddTopicLikeCount(commentId int64, num int) error
 	}
 )
 
@@ -250,6 +251,14 @@ func (srv *defaultCommentService) Like(userId, commentId int64) error {
 		return err
 	}
 	_, err = DefaultCommentLikeService.Like(userId, commentId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {
+	err := srv.commentModel.AddTopicLikeCount(commentId, num)
 	if err != nil {
 		return err
 	}

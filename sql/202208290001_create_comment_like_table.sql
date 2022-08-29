@@ -1,13 +1,13 @@
 create table comment_like
 (
-    id          bigint            not null
+    id         bigint            not null
         constraint id
             primary key,
-    comment_id  bigint            not null,
-    user_id     bigint            not null,
-    status      integer default 1 not null,
-    created_at timestamp with time zone using created_at::timestamp with time zone           not null,
-    updated_at timestamp with time zone using updated_at::timestamp with time zone
+    comment_id bigint            not null,
+    user_id    bigint            not null,
+    status     integer default 1 not null,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone
 );
 
 comment on table comment_like is '评论点赞记录表';
