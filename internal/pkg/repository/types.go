@@ -241,3 +241,12 @@ type GetPointTransactionListByQun struct {
 type FindCarbonBy struct {
 	OpenId string
 }
+
+type FindCommentLikeBy struct {
+	CommentId int64
+	UserId    int64
+}
+type GetCommentLikeListBy struct {
+	CommentIds []int64
+	UserId     int64
+}

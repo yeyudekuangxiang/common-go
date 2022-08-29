@@ -242,5 +242,16 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 }
 
 func (srv *defaultCommentService) Like(userId, commentId int64) error {
-	panic("no")
+	_, err := srv.commentModel.FindOne(commentId)
+	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil
+		}
+		return err
+	}
+	_, err = DefaultCommentLikeService.Like(userId, commentId)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -28,6 +28,7 @@ type (
 		RowBuilder() *gorm.DB
 		CountBuilder(field string) *gorm.DB
 		SumBuilder(field string) *gorm.DB
+		AddTopicLikeCount(commentId int64, num int) error
 	}
 
 	defaultCommentRepository struct {
@@ -244,4 +245,13 @@ func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 		result.HateCount = data.HateCount
 	}
 	return m.Model.Model(&result).Updates(&result).Error
+}
+
+func (m *defaultCommentRepository) AddTopicLikeCount(commentId int64, num int) error {
+	db := m.Model.Model(&entity.CommentIndex{}).Where("id = ?", commentId)
+	//避免点赞数为负数
+	if num < 0 {
+		db.Where("like_count >= ?", -num)
+	}
+	return db.Update("like_count", gorm.Expr("like_count + ?", num)).Error
 }
