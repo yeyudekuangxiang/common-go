@@ -143,9 +143,6 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
 		}
-
-		//话题相关
-
 		//积分相关路由
 		pointRouter := mustAuthRouter.Group("/point")
 		{

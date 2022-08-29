@@ -191,9 +191,13 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 		AdditionInfo: "笔记\" " + form.Title + " \"审核通过，发布成功",
 	})
 	if err != nil {
-		return nil, err
+		return gin.H{
+			"point": 0,
+		}, err
 	}
-	return nil, nil
+	return gin.H{
+		"point": int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
+	}, nil
 }
 
 func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {

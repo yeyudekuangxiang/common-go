@@ -2,9 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"strconv"
 )
 
 var DefaultCommentController = &CommentController{}
@@ -64,7 +68,25 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return gin.H{}, err
 	}
-	return gin.H{}, nil
+	//发放积分
+	pointService := service.NewPointService(context.NewMioContext())
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       user.OpenId,
+		Type:         entity.POINT_COMMENT,
+		BizId:        util.UUID(),
+		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
+		AdminId:      0,
+		Note:         "发布成功",
+		AdditionInfo: "评论\" " + form.Message + " \"审核通过, 发布成功。 评论主体" + strconv.Itoa(int(form.ObjId)),
+	})
+	if err != nil {
+		return gin.H{
+			"point": 0,
+		}, err
+	}
+	return gin.H{
+		"point": int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
+	}, nil
 }
 
 func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
