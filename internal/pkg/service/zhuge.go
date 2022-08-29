@@ -14,6 +14,8 @@ type ZhuGeService struct {
 	client *zhuge.Client
 	//是否开启打点
 	Open bool
+
+	Debug bool
 }
 
 func DefaultZhuGeService() *ZhuGeService {
@@ -139,5 +141,27 @@ func (srv ZhuGeService) TrackBusinessCredit(credit srv_types.TrackBusinessCredit
 
 	if err != nil {
 		app.Logger.Errorf("企业版碳积分打点失败 %+v %+v", err, credit)
+	}
+}
+
+func (srv ZhuGeService) Track(eventName, openId string, attr map[string]interface{}) {
+	if !srv.Open {
+		app.Logger.Infof("积分打点失败 %+v %v %+v", eventName, openId, attr)
+		return
+	}
+	err := srv.client.Track(types.Event{
+		Dt:    "evt",
+		Pl:    "js",
+		Debug: util.Ternary(srv.Debug, int(1), int(0)).Int(),
+		Pr: types.EventJs{
+			Ct:   time.Now().UnixMilli(),
+			Eid:  eventName,
+			Cuid: openId,
+			Sid:  time.Now().UnixMilli(),
+		},
+	}, attr)
+
+	if err != nil {
+		app.Logger.Errorf("积分打点失败 %+v %v %+v", eventName, openId, attr)
 	}
 }

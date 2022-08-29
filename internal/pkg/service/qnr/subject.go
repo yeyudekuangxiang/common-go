@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	repoQnr "mio/internal/pkg/repository/qnr"
 	"mio/internal/pkg/repository/repotypes"
@@ -49,7 +50,7 @@ func (srv SubjectService) GetList() (gin.H, error) {
 	if subjectErr != nil {
 		return gin.H{}, nil
 	}
-	var subjectIds []int64 //获取所有的题目id
+	var subjectIds []model.LongID //获取所有的题目id
 	for _, val := range subjectList {
 		subjectIds = append(subjectIds, val.SubjectId)
 	}
@@ -62,7 +63,7 @@ func (srv SubjectService) GetList() (gin.H, error) {
 		return gin.H{}, nil
 	}
 
-	optionMap := make(map[int64][]api_types.OptionVO)
+	optionMap := make(map[model.LongID][]api_types.OptionVO)
 	for _, val := range optionList {
 		optionMap[val.SubjectId] = append(optionMap[val.SubjectId], api_types.OptionVO{
 			ID:             val.ID,

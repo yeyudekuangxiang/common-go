@@ -1,11 +1,13 @@
 package question
 
 import (
+	"mio/config"
 	"mio/internal/pkg/core/context"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	repo "mio/internal/pkg/repository"
 	repoQnr "mio/internal/pkg/repository/qnr"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -103,8 +105,20 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 		})
 	}
 	err := srv.CreateInBatches(createList)
+	var attr map[string]interface{}
+
+	attr["nickname"] = userInfo.Nickname
+	attr["phone"] = userInfo.PhoneNumber
+	attr["channel"] = channelName
+	srv.ToZhuGe(userInfo.OpenId, attr) //上报
+
 	if err != nil {
 		return errno.ErrCommon.WithMessage("保存答案失败")
 	}
 	return nil
+}
+
+func (srv AnswerService) ToZhuGe(openId string, attr map[string]interface{}) {
+	eventName := config.ZhuGeEventName.Qnr
+	service.DefaultZhuGeService().Track(eventName, openId, attr)
 }

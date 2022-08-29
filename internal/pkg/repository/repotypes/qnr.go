@@ -1,6 +1,9 @@
 package repotypes
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity"
+)
 
 type GetQuestAnswerGetListBy struct {
 	Openid      string
@@ -11,7 +14,7 @@ type GetQuestAnswerGetListBy struct {
 }
 
 type GetQuestOptionGetListBy struct {
-	SubjectIds []int64
+	SubjectIds []model.LongID
 }
 
 type GetQuestOptionGetListByUid struct {

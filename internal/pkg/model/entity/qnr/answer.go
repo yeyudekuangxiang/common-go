@@ -1,9 +1,11 @@
 package qnr
 
+import "mio/internal/pkg/model"
+
 type Answer struct {
 	ID        int64
 	QnrId     int64
-	SubjectId int64
+	SubjectId model.LongID
 	UserId    int64
 	Answer    string
 }

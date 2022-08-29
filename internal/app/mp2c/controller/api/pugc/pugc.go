@@ -6,6 +6,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"mio/config"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/pugc"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
@@ -170,7 +171,7 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 			IsHide:     1,
 			QnrId:      1,
 			CategoryId: cate,
-			SubjectId:  id.Int64(),
+			SubjectId:  model.LongID(id.Int64()),
 		})
 		for i := 6; i < len(row); i++ {
 			if row[i] == "" {
@@ -178,7 +179,7 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 			}
 			option = append(option, qnrEntity.Option{
 				Title:     row[i],
-				SubjectId: id.Int64(),
+				SubjectId: model.LongID(id),
 			})
 		}
 	}

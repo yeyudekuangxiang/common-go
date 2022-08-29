@@ -1,5 +1,7 @@
 package api_types
 
+import "mio/internal/pkg/model"
+
 type GetSubjectListForm struct {
 	Scene string `json:"scene" form:"scene" binding:"oneof=home event topic" alias:"banner场景"`
 }
@@ -9,8 +11,8 @@ type GetQnrSubjectCreateDTO struct {
 }
 
 type GetQnrTypeAnswer struct {
-	Id     int64  `json:"id"`
-	Answer string `json:"answer"`
+	Id     model.LongID `json:"id"`
+	Answer string       `json:"answer"`
 }
 
 type QnrListVo struct {
@@ -24,13 +26,13 @@ type QnrCategory struct {
 }
 
 type QnrVo struct {
-	ID        int64      `json:"id"`
-	Title     string     `json:"title"`
-	Type      int8       `json:"type"`
-	Remind    string     `json:"remind"`
-	IsHide    int8       `json:"isHide"`
-	Option    []OptionVO `json:"option"`
-	SubjectId int64      `json:"subjectId"`
+	ID        int64        `json:"id"`
+	Title     string       `json:"title"`
+	Type      int8         `json:"type"`
+	Remind    string       `json:"remind"`
+	IsHide    int8         `json:"isHide"`
+	Option    []OptionVO   `json:"option"`
+	SubjectId model.LongID `json:"subjectId"`
 }
 
 type OptionVO struct {

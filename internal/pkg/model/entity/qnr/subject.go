@@ -1,8 +1,10 @@
 package qnr
 
+import "mio/internal/pkg/model"
+
 type Subject struct {
 	ID         int64
-	SubjectId  int64
+	SubjectId  model.LongID
 	QnrId      int64
 	CategoryId int64
 	Title      string
