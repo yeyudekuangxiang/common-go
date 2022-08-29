@@ -251,7 +251,7 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	form := controller.PageFrom{}
 	user := apiutil.GetAuthUser(c)
-	list, total, err := service.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
+	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
