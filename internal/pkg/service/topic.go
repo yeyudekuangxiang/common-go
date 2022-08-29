@@ -558,9 +558,10 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
-	tagModel := make([]entity.Tag, 0)
+
 	if len(tagIds) > 0 {
 		//tag
+		tagModel := make([]entity.Tag, 0)
 		for _, tagId := range tagIds {
 			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
@@ -569,13 +570,12 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		tag := DefaultTagService.r.GetById(tagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
+		topicModel.Tags = tagModel
 	}
-	topicModel.Tags = tagModel
-	topicModel.Comment = make([]entity.CommentIndex, 0)
 	if err := srv.repo.Save(&topicModel); err != nil {
 		return topicModel, err
 	}
-	return topicModel, nil
+	return srv.repo.FindById(topicModel.Id), nil
 }
 
 // UpdateTopic 更新帖子
@@ -636,14 +636,7 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 	if topic.Id == 0 {
 		return entity.Topic{}, errors.New("数据不存在")
 	}
-	//查找关联关系
-	tagModels := make([]entity.Tag, 0)
-	err := app.DB.Model(entity.Topic{}).Association("Tags").Find(&tagModels)
-	if err != nil {
-		return entity.Topic{}, err
-	}
-	topic.Tags = tagModels
-	//更新查看次数
+	//更新查看次数 todo
 	return topic, nil
 }
 
