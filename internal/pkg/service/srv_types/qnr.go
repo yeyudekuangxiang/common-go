@@ -21,7 +21,7 @@ type GetQnrUserDTO struct {
 type CreateQnrAnswerDTO struct {
 	QnrId     int64
 	SubjectId model.LongID
-	UserId    int64
+	UserId    model.LongID
 	Answer    string
 }
 

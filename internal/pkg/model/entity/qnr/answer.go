@@ -6,7 +6,7 @@ type Answer struct {
 	ID        int64
 	QnrId     int64
 	SubjectId model.LongID
-	UserId    int64
+	UserId    model.LongID
 	Answer    string
 }
 

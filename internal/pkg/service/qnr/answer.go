@@ -3,6 +3,7 @@ package question
 import (
 	"mio/config"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model"
 	qnrEntity "mio/internal/pkg/model/entity/qnr"
 	repo "mio/internal/pkg/repository"
 	repoQnr "mio/internal/pkg/repository/qnr"
@@ -100,7 +101,7 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 			Answer:    l.Answer,
 			QnrId:     1,
 			SubjectId: l.Id,
-			UserId:    id.Int64(),
+			UserId:    model.LongID(id.Int64()),
 		})
 	}
 	err := srv.CreateInBatches(createList)
