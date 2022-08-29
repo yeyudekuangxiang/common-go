@@ -175,7 +175,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("无权限")
 	}
 	//创建帖子
-	err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -190,12 +190,12 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 		Note:         "发布成功",
 		AdditionInfo: "笔记\" " + form.Title + " \"审核通过，发布成功",
 	})
+
 	if err != nil {
-		return gin.H{
-			"point": 0,
-		}, err
+		return gin.H{"topic": nil, "point": 0}, err
 	}
 	return gin.H{
+		"topic": topic,
 		"point": int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
 	}, nil
 }

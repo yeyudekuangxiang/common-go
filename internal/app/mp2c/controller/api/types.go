@@ -152,3 +152,7 @@ type CommentEditForm struct {
 	CommentId int64  `json:"commentId" form:"commentId" alias:"commentId" binding:"required,min=1"`
 	Message   string `json:"message" form:"message" alias:"message" binding:"required,min=1"`
 }
+
+type ChangeCommentLikeForm struct {
+	CommentId int64 `json:"commentId" form:"commentId" binding:"required" alias:"评论id"`
+}

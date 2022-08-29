@@ -62,11 +62,11 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	form := CommentCreateForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		return gin.H{}, err
+		return gin.H{"comment": nil, "point": 0}, err
 	}
-	err := service.DefaultCommentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
+	comment, err := service.DefaultCommentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
 	if err != nil {
-		return gin.H{}, err
+		return gin.H{"comment": nil, "point": 0}, err
 	}
 	//发放积分
 	pointService := service.NewPointService(context.NewMioContext())
@@ -80,12 +80,11 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		AdditionInfo: "评论\" " + form.Message + " \"审核通过, 发布成功。 评论主体" + strconv.Itoa(int(form.ObjId)),
 	})
 	if err != nil {
-		return gin.H{
-			"point": 0,
-		}, err
+		return gin.H{"comment": nil, "point": 0}, err
 	}
 	return gin.H{
-		"point": int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
+		"comment": comment,
+		"point":   int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
 	}, nil
 }
 
@@ -116,7 +115,6 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *CommentController) Detail(c *gin.Context) (gin.H, error) {
-	//user := apiutil.GetAuthUser(c)
 	form := IdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, nil
@@ -131,6 +129,16 @@ func (ctr *CommentController) Detail(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
+	form := ChangeCommentLikeForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	user := apiutil.GetAuthUser(c)
+
+	err := service.DefaultCommentService.Like(user.ID, form.CommentId)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{}, nil
 }

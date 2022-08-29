@@ -18,10 +18,11 @@ type (
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
 		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
-		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) error
+		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, error)
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
+		Like(userId, commentId int64) error
 	}
 )
 
@@ -168,14 +169,15 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) error {
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, error) {
+	comment := entity.CommentIndex{}
 	//to user info
 	var toUser *entity.User
 	if ToCommentId != 0 {
 		toComment, _ := srv.FindOne(ToCommentId)
 		toUser, _ = DefaultUserService.GetUserById(toComment.MemberId)
 	}
-	data := &entity.CommentIndex{
+	comment = entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
 		MemberId:      userId,
@@ -185,9 +187,9 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		CreatedAt:     time.Time{},
 		UpdatedAt:     time.Time{},
 	}
-	_, err := srv.commentModel.Insert(data)
+	_, err := srv.commentModel.Insert(&comment)
 	if err != nil {
-		return err
+		return comment, err
 	}
 	//更新count数据
 	if ToCommentId != 0 {
@@ -211,9 +213,9 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			if ToCommentIdRow.RootCommentId != 0 {
 				ToCommentId = ToCommentIdRow.RootCommentId
 			}
-			data.RootCommentId = ToCommentId          //更新RootCommentId
-			data.Floor = int32(ToCommentIdChildCount) //更新楼层
-			err = app.DB.Model(data).Select("RootCommentId", "floor").Updates(data).Error
+			comment.RootCommentId = ToCommentId          //更新RootCommentId
+			comment.Floor = int32(ToCommentIdChildCount) //更新楼层
+			err = app.DB.Model(comment).Select("RootCommentId", "floor").Updates(comment).Error
 			if err != nil {
 				return errors.WithMessage(err, "update dataRow:")
 			}
@@ -233,8 +235,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return nil
 		})
 		if err != nil {
-			return err
+			return comment, err
 		}
 	}
-	return nil
+	return comment, nil
+}
+
+func (srv *defaultCommentService) Like(userId, commentId int64) error {
+	panic("no")
 }

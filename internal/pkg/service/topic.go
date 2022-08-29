@@ -533,12 +533,13 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) error {
+func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
+	topicModel := entity.Topic{}
 	if content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
 			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-			return errors.New("内容审核未通过，发布失败。")
+			return topicModel, errors.New("内容审核未通过，发布失败。")
 		}
 	}
 
@@ -546,7 +547,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 	imageStr := strings.Join(images, ",")
 
 	//topic
-	topicModel := &entity.Topic{
+	topicModel = entity.Topic{
 		UserId:    userId,
 		Title:     title,
 		Content:   content,
@@ -572,10 +573,10 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.Tags = tagModel
 	}
 
-	if err := srv.repo.Save(topicModel); err != nil {
-		return err
+	if err := srv.repo.Save(&topicModel); err != nil {
+		return topicModel, err
 	}
-	return nil
+	return topicModel, nil
 }
 
 // UpdateTopic 更新帖子
