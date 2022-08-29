@@ -11,6 +11,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
+	"mio/internal/app/mp2c/controller/api/qnr"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -74,6 +75,12 @@ func apiRouter(router *gin.Engine) {
 	mustAuthRouter := router.Group("/api/mp2c")
 	mustAuthRouter.Use(middleware.MustAuth2(), middleware.Throttle())
 	{
+		qnrRouter := mustAuthRouter.Group("/qnr")
+		{
+			//答题相关路由
+			qnrRouter.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
+			qnrRouter.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
+		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
@@ -230,6 +237,7 @@ func apiRouter(router *gin.Engine) {
 			carbonRouter.GET("/classify", apiutil.Format(api.DefaultCarbonController.Classify))
 			carbonRouter.GET("/history", apiutil.Format(api.DefaultCarbonController.History))
 		}
+
 
 	}
 
