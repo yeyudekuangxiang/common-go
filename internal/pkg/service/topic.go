@@ -650,7 +650,7 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 		return errors.New("无权限删除")
 	}
 	topicModel.Status = 4
-	if err := app.DB.Model(&entity.Topic{}).Save(topicModel).Error; err != nil {
+	if err := app.DB.Model(&topicModel).Update("status", 4).Error; err != nil {
 		return err
 	}
 	return nil

@@ -225,6 +225,9 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	}
 	//user
 	user := apiutil.GetAuthUser(c)
+	if user.Auth != 1 {
+		return nil, errors.New("无权限")
+	}
 	//更新帖子
 	err := service.DefaultTopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
