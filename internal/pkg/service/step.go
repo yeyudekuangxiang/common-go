@@ -1,8 +1,13 @@
 package service
 
 import (
+	contextRedis "context"
 	"errors"
 	"fmt"
+	"github.com/shopspring/decimal"
+	"mio/config"
+	"mio/internal/app/mp2c/controller/api/api_types"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -10,6 +15,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"strconv"
 	"time"
 )
 
@@ -145,6 +151,7 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 		OpenId: openId,
 		Day:    model.NewTime().StartOfDay(),
 	})
+
 	if err != nil {
 		return 0, err
 	}
@@ -178,6 +185,46 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 		AdditionInfo: fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
 	})
 	return int(pendingPoint), err
+}
+
+// RedeemCarbonFromPendingSteps 领取步行碳量
+func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip string) (float64, error) {
+	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemCarbonFromPendingSteps%s", openId), time.Second*5) {
+		return 0, errors.New("操作频繁,请稍后再试")
+	}
+	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemCarbonFromPendingSteps%s", openId))
+
+	stepHistory, err := DefaultStepHistoryService.FindStepHistory(FindStepHistoryBy{
+		OpenId: openId,
+		Day:    model.NewTime().StartOfDay(),
+	})
+	allStep := decimal.NewFromFloat(float64(stepHistory.Count)) //当天总步数
+	UserIdString := strconv.FormatInt(uid, 10)
+	todayDate := time.Now().Format("20060102") //当天时间 年月日
+	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonStep, todayDate)
+
+	nowTep := app.Redis.ZScore(contextRedis.Background(), redisKey, UserIdString) //已被转化碳的步数
+	addStep := allStep.Sub(decimal.NewFromFloat(nowTep.Val()))                    //本次增加的
+	addStepFloat, _ := addStep.Float64()
+	errRedis := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, addStepFloat, UserIdString).Err()
+	if errRedis != nil {
+		return 0, errors.New("步数更新失败")
+	}
+	//发碳
+	//int64转float64
+	carbon, errCarbon := NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		OpenId:  openId,
+		UserId:  uid,
+		Type:    entity.CARBON_STEP,
+		Value:   addStepFloat,
+		Info:    fmt.Sprintf("{time=%v, count=%d,allCount=%d}", time.Now(), stepHistory.Count, addStepFloat),
+		AdminId: 0,
+		Ip:      ip,
+	})
+	if errCarbon != nil {
+		return 0, errCarbon
+	}
+	return carbon, err
 }
 
 func (srv StepService) computeLastCheckedSteps(lastCheckedTime time.Time, lastCheckedCount int) int {

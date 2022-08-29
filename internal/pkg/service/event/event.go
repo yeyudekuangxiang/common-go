@@ -126,17 +126,14 @@ func (srv EventService) AddEventParticipationCount(eventId string, count int) er
 }
 func (srv EventService) GetEventList(param GetEventListParam) ([]event.Event, error) {
 	return srv.repo.GetEventList(revent.GetEventListBy{
+		IsShow:          param.IsShow,
 		EventCategoryId: param.EventCategoryId,
 		OrderBy:         param.OrderBy,
 		Active:          param.Active,
 	})
 }
 func (srv EventService) GetEventShortInfoList(param GetEventListParam) ([]EventShortInfo, error) {
-	eventList, err := srv.repo.GetEventList(revent.GetEventListBy{
-		EventCategoryId: param.EventCategoryId,
-		OrderBy:         param.OrderBy,
-		Active:          sql.NullBool{Bool: true, Valid: true},
-	})
+	eventList, err := srv.GetEventList(param)
 
 	if err != nil {
 		return nil, err

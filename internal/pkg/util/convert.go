@@ -41,3 +41,20 @@ func StrToArrayInt(str string, sep string) ([]int, error) {
 	}
 	return list, nil
 }
+
+func InterfaceToString(data interface{}) string {
+	var key string
+	switch data.(type) {
+	case string:
+		key = data.(string)
+	case int:
+		key = strconv.Itoa(data.(int))
+	case int64:
+		it := data.(int64)
+		key = strconv.FormatInt(it, 10)
+	case float64:
+		it := data.(float64)
+		key = strconv.FormatFloat(it, 'f', -1, 64)
+	}
+	return key
+}

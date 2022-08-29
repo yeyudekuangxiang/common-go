@@ -7,12 +7,13 @@ import (
 	"github.com/pkg/errors"
 	"math/rand"
 	"mio/config"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
@@ -24,9 +25,9 @@ import (
 	"time"
 )
 
-var DefaultUserService = NewUserService(repository2.DefaultUserRepository, repository2.InviteRepository{})
+var DefaultUserService = NewUserService(repository.DefaultUserRepository, repository.InviteRepository{})
 
-func NewUserService(r repository2.IUserRepository, rInvite repository2.InviteRepository) UserService {
+func NewUserService(r repository.UserRepository, rInvite repository.InviteRepository) UserService {
 	return UserService{
 		r:       r,
 		rInvite: rInvite,
@@ -34,10 +35,21 @@ func NewUserService(r repository2.IUserRepository, rInvite repository2.InviteRep
 }
 
 type UserService struct {
-	r       repository2.IUserRepository
-	rInvite repository2.InviteRepository
+	r       repository.UserRepository
+	rInvite repository.InviteRepository
 }
 
+// GetUser 查询用户信息
+func (u UserService) GetUser(by repository.GetUserBy) (*entity.User, bool, error) {
+	return u.r.GetUser(by)
+}
+
+// GetUserByID 根据用户id获取用户信息
+func (u UserService) GetUserByID(id int64) (*entity.User, bool, error) {
+	return u.r.GetUserByID(id)
+}
+
+// GetUserById 请使用 GetUserByID 代替此方法
 func (u UserService) GetUserById(id int64) (*entity.User, error) {
 	user := u.r.GetUserById(id)
 	return &user, nil
@@ -46,7 +58,7 @@ func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
 	if openId == "" {
 		return &entity.User{}, nil
 	}
-	user := u.r.GetUserBy(repository2.GetUserBy{
+	user := u.r.GetUserBy(repository.GetUserBy{
 		OpenId: openId,
 	})
 	return &user, nil
@@ -78,7 +90,7 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 }
 
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
-	user := u.r.GetUserBy(repository2.GetUserBy{
+	user := u.r.GetUserBy(repository.GetUserBy{
 		OpenId: param.OpenId,
 		Source: param.Source,
 	})
@@ -106,7 +118,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	}
 	channelId := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
 	user.ChannelId = channelId
-	return &user, repository2.DefaultUserRepository.Save(&user)
+	return &user, repository.DefaultUserRepository.Save(&user)
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {
 	if unionid == "" || id == 0 {
@@ -130,15 +142,17 @@ func (u UserService) UpdateUserUnionId(id int64, unionid string) {
 		app.Logger.Error("更新unionid失败", id, unionid, err)
 	}
 }
-func (u UserService) GetUserBy(by repository2.GetUserBy) (*entity.User, error) {
-	user := repository2.DefaultUserRepository.GetUserBy(by)
+
+// GetUserBy 请使用 GetUser 代替此方法
+func (u UserService) GetUserBy(by repository.GetUserBy) (*entity.User, error) {
+	user := repository.DefaultUserRepository.GetUserBy(by)
 	return &user, nil
 }
 func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.User, error) {
 	if mobile == "" {
 		return nil, errors.New("手机号不能为空")
 	}
-	user := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{
+	user := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
 		Mobile: mobile,
 		Source: entity.UserSourceMobile,
 	})
@@ -161,11 +175,11 @@ func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
 	if mobile == "" {
 		return errors.New("手机号不能为空")
 	}
-	userBy := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{Mobile: mobile})
+	userBy := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{Mobile: mobile})
 	if userBy.ID != 0 {
 		return errors.New("该号码已被绑定，请更换号码重新绑定")
 	}
-	user := repository2.DefaultUserRepository.GetUserById(userId)
+	user := repository.DefaultUserRepository.GetUserById(userId)
 	if user.ID == 0 {
 		return errors.New("未查到用户信息")
 	}
@@ -173,7 +187,7 @@ func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
 		return errors.New("您已绑定号码，请勿重复操作")
 	}
 	user.PhoneNumber = mobile
-	return repository2.DefaultUserRepository.Save(&user)
+	return repository.DefaultUserRepository.Save(&user)
 }
 
 // FindUserBySource 根据用户id 获取指定平台的用户
@@ -182,13 +196,13 @@ func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*
 		return &entity.User{}, nil
 	}
 
-	user := repository2.DefaultUserRepository.GetUserById(userId)
+	user := repository.DefaultUserRepository.GetUserById(userId)
 
 	if user.ID == 0 || user.PhoneNumber == "" {
 		return &entity.User{}, nil
 	}
 
-	sourceUer := repository2.DefaultUserRepository.GetUserBy(repository2.GetUserBy{
+	sourceUer := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
 		Mobile: user.PhoneNumber,
 		Source: source,
 	})
@@ -376,7 +390,7 @@ func (u UserService) calculateStepPointsOfToday(userId int64) (int64, error) {
 
 	t := model.NewTime()
 	pointTranService := NewPointTransactionService(mioctx.NewMioContext())
-	list := pointTranService.GetListBy(repository2.GetPointTransactionListBy{
+	list := pointTranService.GetListBy(repository.GetPointTransactionListBy{
 		OpenId:    userInfo.OpenId,
 		StartTime: t.StartOfDay(),
 		EndTime:   t.EndOfDay(),
@@ -434,7 +448,7 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 	}
 	return stepHistory1.Count - stepHistory2.Count, nil
 }
-func (u UserService) GetUserListBy(by repository2.GetUserListBy) ([]entity.User, error) {
+func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, error) {
 	return u.r.GetUserListBy(by), nil
 }
 func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
@@ -461,7 +475,7 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	return u.r.Save(&user)
 }
 
-func (u UserService) GetUserPageListBy(by repository2.GetUserPageListBy) ([]entity.User, int64) {
+func (u UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
 	return u.r.GetUserPageListBy(by)
 }
 
@@ -507,14 +521,17 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
 	return &UserAccountInfo{
-		Balance: point.Balance,
-		CertNum: certCount,
+		Balance:     point.Balance,
+		CertNum:     certCount,
+		CarbonToday: carbonInfo.CarbonToday,
+		CarbonAll:   carbonInfo.Carbon,
 	}, nil
 }
 
 func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile string) bool {
-	user := u.r.GetUserBy(repository2.GetUserBy{
+	user := u.r.GetUserBy(repository.GetUserBy{
 		Source: source,
 		Mobile: mobile,
 	})

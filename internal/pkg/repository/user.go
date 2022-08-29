@@ -6,17 +6,7 @@ import (
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultUserRepository IUserRepository = NewUserRepository()
-
-type IUserRepository interface {
-	Save(user *entity.User) error
-	// GetUserById 根据用id获取用户信息
-	GetUserById(int64) entity.User
-	GetUserBy(by GetUserBy) entity.User
-	GetUserListBy(by GetUserListBy) []entity.User
-	GetGuid(unionId string) string
-	GetUserPageListBy(by GetUserPageListBy) ([]entity.User, int64)
-}
+var DefaultUserRepository = NewUserRepository()
 
 func NewUserRepository() UserRepository {
 	return UserRepository{}
@@ -155,12 +145,54 @@ func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, 
 	if by.Risk != 0 {
 		db.Where("risk = ?", by.Risk)
 	}
-	if by.State != 0 {
-		db.Where("state = ?", by.State)
+	if by.Status != 0 {
+		db.Where("status = ?", by.Status)
+	}
+	if by.Partner != 0 {
+		db.Where("partners = ?", by.Partner)
 	}
 
 	if err := db.Count(&count).Limit(bp.Limit).Offset(bp.Offset).Order(bp.OrderBy).Find(&list).Error; err != nil {
 		panic(err)
 	}
 	return list, count
+}
+
+func (u UserRepository) GetUserByID(id int64) (*entity.User, bool, error) {
+	var user entity.User
+	if err := app.DB.First(&user, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return &user, true, nil
+}
+func (u UserRepository) GetUser(by GetUserBy) (*entity.User, bool, error) {
+	user := entity.User{}
+	db := app.DB.Model(user)
+
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
+	if by.Mobile != "" {
+		db.Where("phone_number = ?", by.Mobile)
+	}
+	if by.LikeMobile != "" {
+		db.Where("phone_number like ?", "%"+by.LikeMobile+"%")
+	}
+	if by.UnionId != "" {
+		db.Where("unionid = ?", by.UnionId)
+	}
+
+	if err := db.First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return &user, true, nil
 }

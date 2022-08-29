@@ -2,7 +2,6 @@ package event
 
 import (
 	"errors"
-	"fmt"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"strconv"
@@ -31,6 +30,7 @@ type Event struct {
 	Tag                   model.ArrayString    `json:"tag" gorm:"type:varchar(255);default:'';comment:标签,多个标签用英文逗号隔开"`
 	TemplateSetting       EventTemplateSetting `json:"templateSetting" gorm:"type:varchar(2000);not null;default:'';comment:公益活动模版配置"`
 	Limit                 EventLimit           `json:"limit" gorm:"comment:空表示不限制1-1D 按天限制次数1-1W 按周限制次数1-1M 按月限制次数1-1Y 按年限制次数"`
+	IsShow                int8                 `json:"isShow" gorm:"comment:是否显示 1显示 2不显示"`
 }
 
 func (Event) TableName() string {
@@ -46,7 +46,6 @@ func (e EventLimit) Parse() (time.Duration, int64, error) {
 		return 0, 0, nil
 	}
 	sl := strings.Split(string(e), "-")
-	fmt.Println(sl)
 	if len(sl) != 2 {
 		return 0, 0, errors.New("event limit format err")
 	}
@@ -54,7 +53,6 @@ func (e EventLimit) Parse() (time.Duration, int64, error) {
 	if err != nil {
 		return 0, 0, errors.New("event limit format err")
 	}
-	fmt.Println(count)
 
 	var tNum int64 = 1
 	if len(sl[1]) > 1 {
@@ -66,10 +64,8 @@ func (e EventLimit) Parse() (time.Duration, int64, error) {
 			return 0, 0, errors.New("event limit format err")
 		}
 	}
-	fmt.Println(tNum)
 
 	tFlag := sl[1][len(sl[1])-1:]
-	fmt.Println(tNum, tFlag)
 	now := time.Now()
 	switch strings.ToUpper(tFlag) {
 	case "D":

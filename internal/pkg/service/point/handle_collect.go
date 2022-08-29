@@ -10,7 +10,8 @@ import (
 
 //奥动 电车换电
 func (c *defaultClientHandle) powerReplace() error {
-	c.withMessage(fmt.Sprintf("powerReplace=%v", c.clientHandle.message))
+
+	//c.clientHandle.message
 	//c.clientHandle.identifyImg 里只有kwh和orderId;
 	m := c.clientHandle.identifyImg
 	//检查orderId
@@ -69,7 +70,6 @@ func (c *defaultClientHandle) powerReplace() error {
 
 //发贴获取积分
 func (c *defaultClientHandle) article() error {
-	c.withMessage(fmt.Sprintf("article=%v", c.clientHandle.message))
 	_, err := c.incPoint(c.clientHandle.point)
 	if err != nil {
 		return err

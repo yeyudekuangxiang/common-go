@@ -138,6 +138,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	//获取顶级评论数量
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
+
 		ids = append(ids, item.Id)
 	}
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)

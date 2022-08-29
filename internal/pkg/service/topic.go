@@ -94,6 +94,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := app.DB.Model(&entity.Topic{}).
+		Preload("User").
 		Preload("Tags").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
@@ -123,7 +124,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 		Offset(param.Offset).
 		Find(&topList).Error
 	if err != nil {
-		return nil, 0, nil
+		return nil, 0, err
 	}
 	return topList, total, nil
 }
@@ -501,11 +502,13 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 
 //CreateTopic 创建文章
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) error {
-	//检查内容
-	err := validator.CheckMsgWithOpenId(openid, content)
-	if err != nil {
-		return err
+	if content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
+			return err
+		}
 	}
+
 	//处理images
 	imageStr := strings.Join(images, ",")
 
@@ -536,7 +539,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.Tags = tagModel
 	}
 
-	if err = srv.repo.Save(topicModel); err != nil {
+	if err := srv.repo.Save(topicModel); err != nil {
 		return err
 	}
 	return nil
@@ -544,8 +547,13 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 
 // UpdateTopic 更新帖子
 func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) error {
-	//检查内容
-	err := validator.CheckMsgWithOpenId(openid, content)
+	if content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
+			return err
+		}
+	}
+
 	//查询记录是否存在
 	topicModel := srv.repo.FindById(topicId)
 	if topicModel.Id == 0 {
@@ -577,12 +585,12 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		tag := DefaultTagService.r.GetById(tagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
-		err = app.DB.Model(&topicModel).Association("Tags").Replace(tagModel)
-		if err != nil {
+		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
 			return err
 		}
+
 	}
-	if err = app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
+	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
 		return err
 	}
 	return nil

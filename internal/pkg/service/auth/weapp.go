@@ -109,14 +109,18 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		if err != nil {
 			app.Logger.Error(user, invitedBy, err)
 		}
+		println(err)
+		//进入好友关系表
+		_, errFriend := service.DefaultUserFriendService.Create(user, invitedBy)
+		if errFriend != nil {
+			app.Logger.Error(user, invitedBy, errFriend)
+		}
 	}
 
 	if partnershipType != "" {
-		list, err := service.DefaultPartnershipRedemptionService.ProcessPromotionInformation(user.OpenId, partnershipType, entity.PartnershipPromotionTriggerREGISTER)
+		_, err := service.DefaultPartnershipRedemptionService.ProcessPromotionInformation(user.OpenId, partnershipType, entity.PartnershipPromotionTriggerREGISTER)
 		if err != nil {
 			app.Logger.Errorf("添加第三方活动信息失败 %+v %s %s %v", user, invitedBy, partnershipType, err)
-		} else {
-			app.Logger.Errorf("添加第三方活动信息成功 %+v %s %s %+v", user, invitedBy, partnershipType, list)
 		}
 	}
 }

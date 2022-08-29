@@ -4,8 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
@@ -55,16 +58,22 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//通过手机号查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile})
+	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
+		Mobile: form.Mobile,
+		Source: entity.UserSourceMio,
+	})
+
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
 		return nil, errors.New("未找到用户")
 	}
+
 	//风险登记验证
 	if userInfo.Risk >= 2 {
-		fmt.Println("用户风险登记过高 ", form)
+		fmt.Println("用户风险等级过高 ", form)
 		return nil, errors.New("账户风险等级过高")
 	}
+
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
@@ -88,7 +97,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//加积分
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
-	pointService := service.NewPointService(context.NewMioContext())
+	pointService := service.NewPointService(ctx)
 	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         typeString,
@@ -99,13 +108,33 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		fmt.Println("charge 加积分失败 ", form)
 	}
+	//加碳量
+	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	if typeCarbonStr != "" {
+		pointDec := decimal.NewFromInt(int64(thisPoint))
+		electric := pointDec.Div(decimal.NewFromInt(10))
+		f, _ := electric.Float64()
+		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  userInfo.OpenId,
+			UserId:  userInfo.ID,
+			Type:    typeCarbonStr,
+			Value:   f,
+			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+			AdminId: 0,
+			Ip:      "",
+		})
+		if errCarbon != nil {
+			fmt.Println("charge 加碳失败", form)
+		}
+	}
+
 	// todo 发券
-	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 {
+	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 && thisPoint > 0 {
 		fmt.Println("星星充电 发券start")
 		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
 		endTime, _ := time.Parse("2006-01-02", "2022-08-30")
 		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := service.NewStarChargeService(context.NewMioContext())
+			starChargeService := service.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
 				return nil, err
