@@ -44,7 +44,14 @@ func (srv SubjectService) CreateInBatches(dto []qnrEntity.Subject) error {
 	return err
 }
 
-func (srv SubjectService) GetList() (gin.H, error) {
+func (srv SubjectService) GetList(openid string) (gin.H, error) {
+	//查询用户是否入库，入库并回答过问题
+	info := srv.repoUser.FindBy(repotypes.GetQuestUserGetById{OpenId: openid})
+	isSubmit := 0
+	if info.UserId != 0 {
+		isSubmit = 1
+	}
+
 	//所有的题目
 	subjectList, subjectErr := srv.repoSubject.List(repotypes.GetQuestSubjectGetListBy{
 		QnrId: 1, //金融调查问卷
@@ -110,5 +117,5 @@ func (srv SubjectService) GetList() (gin.H, error) {
 			list = append(list, api_types.QnrListVo{Title: v.Title, List: l})
 		}
 	}
-	return gin.H{"subject": list, "isSubmit": 0, "subjectCount": len(subjectList)}, nil
+	return gin.H{"subject": list, "isSubmit": isSubmit, "subjectCount": len(subjectList)}, nil
 }
