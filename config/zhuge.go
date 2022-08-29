@@ -6,5 +6,5 @@ type zhuGeEventName struct {
 }
 
 var ZhuGeEventName = zhuGeEventName{
-	Qnr: "zhu_ge_qnr_green_finance", // 金融调查问卷
+	Qnr: "绿色金融调查问卷", // 金融调查问卷
 }

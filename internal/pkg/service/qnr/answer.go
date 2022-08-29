@@ -90,7 +90,6 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 		Ip:          userInfo.Ip,
 		City:        userInfo.CityCode,
 	})
-
 	if errUser != nil {
 		return errno.ErrCommon.WithMessage("用户信息保存失败")
 	}
@@ -105,16 +104,16 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 		})
 	}
 	err := srv.CreateInBatches(createList)
-	var attr map[string]interface{}
-
-	attr["nickname"] = userInfo.Nickname
-	attr["phone"] = userInfo.PhoneNumber
-	attr["channel"] = channelName
-	srv.ToZhuGe(userInfo.OpenId, attr) //上报
-
 	if err != nil {
 		return errno.ErrCommon.WithMessage("保存答案失败")
 	}
+	//诸葛上报
+	attr := make(map[string]interface{}, 8)
+	attr["昵称"] = userInfo.Nickname
+	attr["手机号"] = userInfo.PhoneNumber
+	attr["渠道名称"] = channelName
+	attr["邀请人的openid"] = InvitedByOpenId
+	srv.ToZhuGe(userInfo.OpenId, attr) //上报
 	return nil
 }
 

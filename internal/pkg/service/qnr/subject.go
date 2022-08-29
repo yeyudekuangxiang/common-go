@@ -19,6 +19,7 @@ func NewSubjectService(ctx *context.MioContext) *SubjectService {
 		repo:        repoQnr.NewSubjectRepository(ctx),
 		repoOption:  repoQnr.NewOptionRepository(ctx),
 		repoSubject: repoQnr.NewSubjectRepository(ctx),
+		repoUser:    repoQnr.NewUserRepository(ctx),
 	}
 }
 
@@ -27,6 +28,7 @@ type SubjectService struct {
 	repo        *repoQnr.SubjectRepository
 	repoOption  *repoQnr.OptionRepository
 	repoSubject *repoQnr.SubjectRepository
+	repoUser    *repoQnr.UserRepository
 }
 
 func (srv SubjectService) GetPageList(dto srv_types.GetQnrSubjectDTO) ([]qnrEntity.Subject, error) {
