@@ -3,9 +3,12 @@ package service
 import (
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/pkg/wxoa"
 	"strconv"
 	"strings"
@@ -182,15 +185,33 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
+
+	var point int64
+	if status == 3 {
+		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	}
+	if topic.Status == 3 && status == 4 {
+		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	}
+
 	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
 		return err
 	}
-	//积分变动
-	//pointService := NewPointService(context.NewMioContext())
-	//point, err := pointService.IncUserPoint()
-	//if err != nil {
-	//	return err
-	//}
+	userInfo, _ := DefaultUserService.GetUserById(topic.UserId)
+	//发放积分
+	pointService := NewPointService(context.NewMioContext())
+	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       userInfo.OpenId,
+		Type:         entity.POINT_ARTICLE,
+		BizId:        util.UUID(),
+		ChangePoint:  point,
+		AdminId:      0,
+		Note:         "发布成功",
+		AdditionInfo: "笔记\" " + topic.Title + " \"审核通过，发布成功",
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

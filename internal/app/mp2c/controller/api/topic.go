@@ -6,12 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -179,21 +176,21 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	//发放积分
-	pointService := service.NewPointService(context.NewMioContext())
-	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       user.OpenId,
-		Type:         entity.POINT_ARTICLE,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
-		AdminId:      0,
-		Note:         "发布成功",
-		AdditionInfo: "笔记\" " + form.Title + " \"审核通过，发布成功",
-	})
-
-	if err != nil {
-		return gin.H{"topic": nil, "point": 0}, err
-	}
+	////发放积分
+	//pointService := service.NewPointService(context.NewMioContext())
+	//_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+	//	OpenId:       user.OpenId,
+	//	Type:         entity.POINT_ARTICLE,
+	//	BizId:        util.UUID(),
+	//	ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
+	//	AdminId:      0,
+	//	Note:         "发布成功",
+	//	AdditionInfo: "笔记\" " + form.Title + " \"审核通过，发布成功",
+	//})
+	//
+	//if err != nil {
+	//	return gin.H{"topic": nil, "point": 0}, err
+	//}
 	return gin.H{
 		"topic": topic,
 		"point": int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
