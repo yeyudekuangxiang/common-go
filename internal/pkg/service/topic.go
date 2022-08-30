@@ -579,21 +579,21 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) error {
+func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
 	if content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			return err
+			return entity.Topic{}, err
 		}
 	}
 
 	//查询记录是否存在
 	topicModel := srv.repo.FindById(topicId)
 	if topicModel.Id == 0 {
-		return errors.New("该帖子不存在")
+		return entity.Topic{}, errors.New("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
-		return errors.New("无权限修改")
+		return entity.Topic{}, errors.New("无权限修改")
 	}
 	//处理images
 	imageStr := strings.Join(images, ",")
@@ -619,14 +619,14 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
-			return err
+			return entity.Topic{}, err
 		}
 
 	}
 	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
-		return err
+		return entity.Topic{}, err
 	}
-	return nil
+	return topicModel, nil
 }
 
 // DetailTopic 获取topic详情
