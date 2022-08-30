@@ -109,8 +109,9 @@ func (srv *defaultCommentService) FindListAndChild(params *entity.CommentIndex, 
 	err := app.DB.Model(&entity.CommentIndex{}).
 		Preload("RootChild", func(db *gorm.DB) *gorm.DB {
 			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
-				Order("comment_index.like_count desc")
+				Order("comment_index.like_count desc").Preload("Member")
 		}).
+		Preload("Member").
 		Where("to_comment_id = ?", 0).
 		Where("obj_id = ?", params.ObjId).
 		Where("state = ?", 0).
@@ -130,6 +131,7 @@ func (srv *defaultCommentService) FindSubList(data *entity.CommentIndex, offSize
 	commentList := make([]*entity.CommentIndex, 0)
 	var total int64
 	err := srv.commentModel.RowBuilder().
+		Preload("Member").
 		Where("root_comment_id = ?", data.RootCommentId).
 		Where("state = ?", 0).
 		Count(&total).
@@ -171,23 +173,22 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 }
 
 func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, error) {
-	comment := entity.CommentIndex{}
-	//to user info
-	var toUser *entity.User
-	if ToCommentId != 0 {
-		toComment, _ := srv.FindOne(ToCommentId)
-		toUser, _ = DefaultUserService.GetUserById(toComment.MemberId)
-	}
-	comment = entity.CommentIndex{
+	comment := entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
 		MemberId:      userId,
 		RootCommentId: RootCommentId,
 		ToCommentId:   ToCommentId,
-		ToNickName:    toUser.Nickname,
 		CreatedAt:     time.Time{},
 		UpdatedAt:     time.Time{},
 	}
+	//to user info
+	//var toUser *entity.User
+	//if ToCommentId != 0 {
+	//	toComment, _ := srv.FindOne(ToCommentId)
+	//	toUser, _ = DefaultUserService.GetUserById(toComment.MemberId)
+	//	comment.ToNickName = toUser.Nickname
+	//}
 	_, err := srv.commentModel.Insert(&comment)
 	if err != nil {
 		return comment, err
