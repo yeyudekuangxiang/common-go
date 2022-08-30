@@ -623,7 +623,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		}
 
 	}
-	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
+	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
 		return err
 	}
 	return nil
@@ -649,8 +649,7 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 	if topicModel.UserId != userId {
 		return errors.New("无权限删除")
 	}
-	topicModel.Status = 4
-	if err := app.DB.Model(&topicModel).Update("status", 4).Error; err != nil {
+	if err := app.DB.Delete(&topicModel).Error; err != nil {
 		return err
 	}
 	return nil
