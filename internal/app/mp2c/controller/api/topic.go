@@ -211,11 +211,13 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("无权限")
 	}
 	//更新帖子
-	err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"topic": topic,
+	}, nil
 }
 
 func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
