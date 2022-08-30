@@ -637,6 +637,10 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 		return entity.Topic{}, errors.New("数据不存在")
 	}
 	//更新查看次数 todo
+	err := srv.repo.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
+	if err != nil {
+		return entity.Topic{}, err
+	}
 	return topic, nil
 }
 
