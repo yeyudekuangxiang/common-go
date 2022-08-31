@@ -20,6 +20,7 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	list, total, err := service.DefaultTagService.GetTagPageList(repository.GetTagPageListBy{
+		ID:      form.ID,
 		Offset:  form.Offset(),
 		Limit:   form.Limit(),
 		OrderBy: entity2.OrderByList{entity2.OrderByTagSortDesc},
