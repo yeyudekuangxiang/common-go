@@ -115,5 +115,5 @@ func (srv SubjectService) GetList(openid string) (gin.H, error) {
 			list = append(list, api_types.QnrListVo{Title: v.Title, List: l})
 		}
 	}
-	return gin.H{"subject": list, "isSubmit": isSubmit, "subjectCount": 30}, nil
+	return gin.H{"subject": list, "isSubmit": isSubmit, "subjectCount": 31}, nil
 }
