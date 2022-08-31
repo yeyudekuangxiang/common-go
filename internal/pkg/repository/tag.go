@@ -55,6 +55,10 @@ func (u TagRepository) List(cnd *simple.SqlCnd) (list []entity.Tag) {
 func (u TagRepository) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64) {
 	list = make([]entity.Tag, 0)
 	db := app.DB.Model(entity.Tag{})
+	if by.ID != 0 {
+		db.Where("id = ?", by.ID)
+	}
+
 	if by.Description != "" {
 		db.Where("description like ?", by.Description+"%")
 	}
