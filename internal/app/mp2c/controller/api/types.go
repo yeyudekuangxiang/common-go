@@ -17,7 +17,7 @@ type ChangeTopicLikeForm struct {
 	TopicId int `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 type GetTagForm struct {
-	ID int `json:"id" form:"id" binding:"gte=0" alias:"tag id"`
+	ID int64 `json:"id" form:"id" binding:"gte=0" alias:"tag id"`
 	controller.PageFrom
 }
 type GetYZMForm struct {
