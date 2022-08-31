@@ -167,6 +167,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		CouponType: "star_charge",
 		Code:       provideResult.CouponCode,
 		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
 	}
 	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
 	if err != nil {

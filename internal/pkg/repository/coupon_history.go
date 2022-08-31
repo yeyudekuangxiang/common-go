@@ -107,7 +107,7 @@ func (m *defaultCouponHistoryRepository) FindOneQuery(builder *gorm.DB) (*entity
 
 func (m *defaultCouponHistoryRepository) FindCount(builder *gorm.DB) (int64, error) {
 	var resp int64
-	err := builder.Find(&resp).Error
+	err := builder.Count(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
