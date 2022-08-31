@@ -27,7 +27,7 @@ func (repo InviteRepository) Create(transaction *entity.Invite) error {
 
 func (repo InviteRepository) GetInvite(openid string) *entity.Invite {
 	invite := entity.Invite{}
-	err := app.DB.Where("new_user_openid = ? and invited_by_openid <> '' and is_reward = 1", openid).First(&invite).Error
+	err := app.DB.Where("new_user_openid = ? and invited_by_openid <> ''", openid).First(&invite).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
