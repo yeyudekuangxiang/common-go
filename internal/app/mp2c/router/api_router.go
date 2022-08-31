@@ -34,7 +34,9 @@ func apiRouter(router *gin.Engine) {
 
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
+		//tag
 		authRouter.GET("/tag/list", apiutil.Format(api.DefaultTagController.List))
+		authRouter.GET("/tag/detail", apiutil.Format(api.DefaultTagController.DetailTag))
 
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
@@ -145,6 +147,7 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
 		}
+
 		//积分相关路由
 		pointRouter := mustAuthRouter.Group("/point")
 		{

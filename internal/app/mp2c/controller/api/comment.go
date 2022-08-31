@@ -136,9 +136,25 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	err := service.DefaultCommentService.Like(user.ID, form.CommentId)
+	like, err := service.DefaultCommentService.Like(user.ID, form.CommentId)
 	if err != nil {
 		return nil, err
 	}
-	return gin.H{}, nil
+
+	//发放积分
+	pointService := service.NewPointService(context.NewMioContext())
+	_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       user.OpenId,
+		Type:         entity.POINT_LIKE,
+		BizId:        util.UUID(),
+		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+		AdminId:      0,
+		Note:         "点赞成功",
+		AdditionInfo: "评论\" " + strconv.FormatInt(form.CommentId, 10) + " \"点赞成功",
+	})
+
+	return gin.H{
+		"status": like.Status,
+		"point":  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+	}, nil
 }

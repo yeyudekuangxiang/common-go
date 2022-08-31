@@ -6,10 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"strconv"
 )
 
 var DefaultTopicController = TopicController{}
@@ -116,7 +120,19 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	//发放积分
+	pointService := service.NewPointService(context.NewMioContext())
+	_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       user.OpenId,
+		Type:         entity.POINT_LIKE,
+		BizId:        util.UUID(),
+		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+		AdminId:      0,
+		Note:         "点赞成功",
+		AdditionInfo: "文章\" " + strconv.Itoa(form.TopicId) + " \"点赞成功",
+	})
 	return gin.H{
+		"point":  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
 		"status": like.Status,
 	}, nil
 }

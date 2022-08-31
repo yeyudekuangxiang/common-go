@@ -22,7 +22,7 @@ type (
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
-		Like(userId, commentId int64) error
+		Like(userId, commentId int64) (*entity.CommentLike, error)
 		AddTopicLikeCount(commentId int64, num int) error
 	}
 )
@@ -173,6 +173,11 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 }
 
 func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, error) {
+
+	topic, err := DefaultTopicService.DetailTopic(topicId)
+	if err != nil {
+		return entity.CommentIndex{}, err
+	}
 	comment := entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
@@ -182,16 +187,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		CreatedAt:     time.Time{},
 		UpdatedAt:     time.Time{},
 	}
-	//to user info
-	//var toUser *entity.User
-	//if ToCommentId != 0 {
-	//	toComment, _ := srv.FindOne(ToCommentId)
-	//	toUser, _ = DefaultUserService.GetUserById(toComment.MemberId)
-	//	comment.ToNickName = toUser.Nickname
-	//}
-	_, err := srv.commentModel.Insert(&comment)
+	if topic.UserId == userId {
+		comment.IsAuthor = 1
+	}
+	_, err = srv.commentModel.Insert(&comment)
 	if err != nil {
-		return comment, err
+		return entity.CommentIndex{}, err
 	}
 	//更新count数据
 	if ToCommentId != 0 {
@@ -237,25 +238,23 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return nil
 		})
 		if err != nil {
-			return comment, err
+			return entity.CommentIndex{}, err
 		}
 	}
+
 	return comment, nil
 }
 
-func (srv *defaultCommentService) Like(userId, commentId int64) error {
+func (srv *defaultCommentService) Like(userId, commentId int64) (*entity.CommentLike, error) {
 	_, err := srv.commentModel.FindOne(commentId)
 	if err != nil {
-		if err == entity.ErrNotFount {
-			return nil
-		}
-		return err
+		return &entity.CommentLike{}, err
 	}
-	_, err = DefaultCommentLikeService.Like(userId, commentId)
+	like, err := DefaultCommentLikeService.Like(userId, commentId)
 	if err != nil {
-		return err
+		return &entity.CommentLike{}, err
 	}
-	return nil
+	return like, nil
 }
 
 func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {

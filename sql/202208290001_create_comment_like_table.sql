@@ -1,7 +1,6 @@
 create table comment_like
 (
     id         bigint            not null
-        constraint id
             primary key,
     comment_id bigint            not null,
     user_id    bigint            not null,
@@ -20,4 +19,12 @@ comment on column comment_like.status is '0取消赞 1点赞 ';
 
 alter table comment_like
     owner to miniprogram;
+
+
+
+
+alter table comment_index
+    add is_author integer default 0 not null;
+
+comment on column comment_index.is_author is '是否作者 0否1是';
 

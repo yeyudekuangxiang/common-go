@@ -30,6 +30,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	if form.Type != "1" {
 		return nil, errors.New("非回收订单")
 	}
+
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh("oola")
 	if scene.Key == "" || scene.Key == "e" {
@@ -53,7 +54,6 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errors.New("sign:" + form.Sign + " 验证失败")
 	}
-
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
 	if userInfo.ID == 0 {
