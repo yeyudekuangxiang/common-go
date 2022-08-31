@@ -13,10 +13,10 @@ func adminRouter(router *gin.Engine) {
 	adminRouter := router.Group("/admin")
 	adminRouter.Use(middleware.AuthAdmin())
 	{
-
 		adminRouter.GET("/info/list", apiutil.Format(admin.DefaultAdminController.GetAdminList))
 		adminRouter.GET("/login/info", apiutil.Format(admin.DefaultAdminController.GetLoginAdminInfo))
 		adminRouter.GET("/constant", apiutil.Format(admin.DefaultConstantController.List))
+		adminRouter.POST("/coupon/star-charge", apiutil.Format(admin.DefaultStarChargeController.SendCoupon))
 		pointRouter := adminRouter.Group("/point")
 		{
 			pointRouter.GET("/record/list", apiutil.Format(admin.DefaultPointController.GetPointRecordPageList))
@@ -91,7 +91,6 @@ func adminRouter(router *gin.Engine) {
 			userRouter.POST("/change-state", apiutil.Format(admin.DefaultUserController.ChangeState))       //更新用户状态
 			userRouter.POST("/change-position", apiutil.Format(admin.DefaultUserController.ChangePosition)) //更新用户身份
 		}
-
 	}
 	//adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))
 }

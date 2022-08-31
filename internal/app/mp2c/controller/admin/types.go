@@ -249,3 +249,7 @@ type changeUserPosition struct {
 /*
 user end
 */
+
+type StarChargeSendCoupon struct {
+	OpenId string `json:"openId" form:"openId" binding:"required"`
+}
