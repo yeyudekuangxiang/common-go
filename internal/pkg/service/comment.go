@@ -267,8 +267,8 @@ func (srv *defaultCommentService) Like(userId, commentId int64) (*entity.Comment
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
 			AdminId:      0,
-			Note:         strconv.FormatInt(like.Id, 10),
-			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
+			Note:         strconv.FormatInt(like.ID, 10),
+			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.ID, 10),
 		})
 	}
 	return like, nil

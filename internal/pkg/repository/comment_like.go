@@ -21,9 +21,18 @@ type CommentLikeRepository struct {
 func (t CommentLikeRepository) Save(like *entity.CommentLike) error {
 	return t.DB.Save(like).Error
 }
+
+func (t CommentLikeRepository) Create(commentLike *entity.CommentLike) error {
+	return t.DB.Debug().Create(commentLike).Error
+}
+
+func (t CommentLikeRepository) Update(commentLike *entity.CommentLike) error {
+	return t.DB.Debug().Updates(commentLike).Error
+}
+
 func (t CommentLikeRepository) FindBy(by FindCommentLikeBy) entity.CommentLike {
 	like := entity.CommentLike{}
-	db := t.DB.Model(like)
+	db := t.DB.Model(&like)
 	if by.CommentId > 0 {
 		db.Where("comment_id = ?", by.CommentId)
 	}
@@ -39,7 +48,7 @@ func (t CommentLikeRepository) FindBy(by FindCommentLikeBy) entity.CommentLike {
 }
 func (t CommentLikeRepository) GetListBy(by GetCommentLikeListBy) []entity.CommentLike {
 	list := make([]entity.CommentLike, 0)
-	db := t.DB.Model(entity.CommentLike{})
+	db := t.DB.Model(&entity.CommentLike{})
 	if len(by.CommentIds) > 0 {
 		db.Where("comment_id in (?)", by.CommentIds)
 	}

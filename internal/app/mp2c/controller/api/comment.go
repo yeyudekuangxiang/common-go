@@ -138,9 +138,12 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	var point int64
+	if like.Status == 1 {
+		point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+	}
 	return gin.H{
 		"status": like.Status,
-		"point":  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+		"point":  point,
 	}, nil
 }

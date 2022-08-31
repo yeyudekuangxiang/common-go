@@ -18,11 +18,13 @@ func (t CommentLikeService) Like(userId, commentId int64) (*entity.CommentLike, 
 		CommentId: commentId,
 		UserId:    userId,
 	})
-	if like.Id == 0 {
-		like.Status = 1
-		like.CommentId = commentId
-		like.UserId = userId
-		like.CreatedAt = model.Time{Time: time.Now()}
+	if like.ID == 0 {
+		like = entity.CommentLike{
+			CommentId: commentId,
+			UserId:    userId,
+			Status:    1,
+			CreatedAt: model.Time{Time: time.Now()},
+		}
 	} else {
 		like.UpdatedAt = model.Time{Time: time.Now()}
 		like.Status = (like.Status + 1) % 2
@@ -32,6 +34,8 @@ func (t CommentLikeService) Like(userId, commentId int64) (*entity.CommentLike, 
 	} else {
 		_ = DefaultCommentService.AddTopicLikeCount(commentId, -1)
 	}
-
-	return &like, t.repo.Save(&like)
+	if err := t.repo.Save(&like); err != nil {
+		return nil, err
+	}
+	return &like, nil
 }

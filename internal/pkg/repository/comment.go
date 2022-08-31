@@ -96,7 +96,7 @@ func (m *defaultCommentRepository) FindOneQuery(builder *gorm.DB) (*entity.Comme
 
 func (m *defaultCommentRepository) FindCount(builder *gorm.DB) (int64, error) {
 	var resp int64
-	err := builder.Find(&resp).Error
+	err := builder.Count(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil

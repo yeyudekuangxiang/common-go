@@ -5,10 +5,10 @@ import (
 )
 
 type CommentLike struct {
-	Id        int64      `json:"id"`
-	CommentId int64      `json:"commentId"`
-	UserId    int64      `json:"userId"`
-	Status    int8       `json:"status"`
+	ID        int64      `gorm:"primaryKey;autoIncrement" json:"id"`
+	CommentId int64      `gorm:"type:int8;not null" json:"commentId"`
+	UserId    int64      `gorm:"type:int8;not null" json:"userId"`
+	Status    int8       `gorm:"type:int2;not null" json:"status"`
 	CreatedAt model.Time `json:"createdAt"`
 	UpdatedAt model.Time `json:"updatedAt"`
 }
