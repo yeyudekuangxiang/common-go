@@ -216,7 +216,7 @@ func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
 
 func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 	var result entity.CommentIndex
-	err := m.Model.Where("id = ? and member_id = ?", data.ID, data.MemberId).First(&result).Error
+	err := m.Model.Where("id = ? and member_id = ?", data.Id, data.MemberId).First(&result).Error
 	if err != nil {
 		return err
 	}

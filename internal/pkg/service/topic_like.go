@@ -3,16 +3,20 @@ package service
 import (
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
+	"strconv"
 	"time"
 )
 
 type TopicLikeService struct {
 }
 
-func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLike, error) {
+func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, error) {
 	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
 	if topic.Id == 0 {
 		return nil, errors.New("帖子不存在")
@@ -34,7 +38,16 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLi
 	}
 	if like.Status == 1 {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
-
+		pointService := NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+			AdminId:      0,
+			Note:         "为文章 \"" + topic.Title[0:8] + "...\" 点赞",
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
 	} else {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
 	}

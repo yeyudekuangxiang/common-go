@@ -5,7 +5,7 @@ import (
 )
 
 type CommentLike struct {
-	ID        int64      `gorm:"primaryKey;autoIncrement" json:"id"`
+	Id        int64      `gorm:"primaryKey;autoIncrement" json:"id"`
 	CommentId int64      `gorm:"type:int8;not null" json:"commentId"`
 	UserId    int64      `gorm:"type:int8;not null" json:"userId"`
 	Status    int8       `gorm:"type:int2;not null" json:"status"`

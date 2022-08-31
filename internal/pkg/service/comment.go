@@ -22,11 +22,11 @@ type (
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
 		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
-		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, error)
+		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, int64, error)
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
-		Like(userId, commentId int64) (*entity.CommentLike, error)
+		Like(userId, commentId int64, openId string) (*entity.CommentLike, error)
 		AddTopicLikeCount(commentId int64, num int) error
 	}
 )
@@ -51,8 +51,8 @@ func (srv *defaultCommentService) FindOne(commentId int64) (*entity.CommentIndex
 
 func (srv *defaultCommentService) FindOneQuery(data *entity.CommentIndex) (*entity.CommentIndex, error) {
 	builder := srv.commentModel.RowBuilder()
-	if data.ID != 0 {
-		builder.Where("id = ?", data.ID)
+	if data.Id != 0 {
+		builder.Where("id = ?", data.Id)
 	}
 	if data.MemberId != 0 {
 		builder.Where("member_id = ?", data.MemberId)
@@ -149,7 +149,7 @@ func (srv *defaultCommentService) FindSubList(data *entity.CommentIndex, offSize
 
 func (srv *defaultCommentService) UpdateComment(userId, commentId int64, message string) error {
 	req := entity.CommentIndex{
-		ID:       commentId,
+		Id:       commentId,
 		Message:  message,
 		MemberId: userId,
 	}
@@ -176,11 +176,10 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, error) {
-
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, int64, error) {
 	topic, err := DefaultTopicService.DetailTopic(topicId)
 	if err != nil {
-		return entity.CommentIndex{}, err
+		return entity.CommentIndex{}, 0, err
 	}
 	comment := entity.CommentIndex{
 		ObjId:         topicId,
@@ -196,7 +195,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	}
 	_, err = srv.commentModel.Insert(&comment)
 	if err != nil {
-		return entity.CommentIndex{}, err
+		return entity.CommentIndex{}, 0, err
 	}
 	//更新count数据
 	if ToCommentId != 0 {
@@ -242,14 +241,29 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return nil
 		})
 		if err != nil {
-			return entity.CommentIndex{}, err
+			return entity.CommentIndex{}, 0, err
 		}
 	}
-	return comment, nil
+	//更新积分
+	point := int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+	pointService := NewPointService(context.NewMioContext())
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       openId,
+		Type:         entity.POINT_LIKE,
+		BizId:        util.UUID(),
+		ChangePoint:  point,
+		AdminId:      0,
+		Note:         "评论笔记 \"" + topic.Title[0:8] + "...\" 成功",
+		AdditionInfo: strconv.FormatInt(topic.Id, 10) + "#" + strconv.FormatInt(comment.Id, 10),
+	})
+	if err != nil {
+		point = 0
+	}
+	return comment, point, nil
 }
 
-func (srv *defaultCommentService) Like(userId, commentId int64) (*entity.CommentLike, error) {
-	_, err := srv.commentModel.FindOne(commentId)
+func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, error) {
+	comment, err := srv.commentModel.FindOne(commentId)
 	if err != nil {
 		return &entity.CommentLike{}, err
 	}
@@ -259,16 +273,15 @@ func (srv *defaultCommentService) Like(userId, commentId int64) (*entity.Comment
 	}
 	//发放积分
 	if like.Status == 1 {
-		user, _ := DefaultUserService.GetUserById(userId)
 		pointService := NewPointService(context.NewMioContext())
 		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
+			OpenId:       openId,
 			Type:         entity.POINT_LIKE,
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
 			AdminId:      0,
-			Note:         strconv.FormatInt(like.ID, 10),
-			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.ID, 10),
+			Note:         "为评论 \"" + comment.Message[0:8] + "...\" 点赞",
+			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
 		})
 	}
 	return like, nil

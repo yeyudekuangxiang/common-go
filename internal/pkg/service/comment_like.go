@@ -18,7 +18,7 @@ func (t CommentLikeService) Like(userId, commentId int64) (*entity.CommentLike, 
 		CommentId: commentId,
 		UserId:    userId,
 	})
-	if like.ID == 0 {
+	if like.Id == 0 {
 		like = entity.CommentLike{
 			CommentId: commentId,
 			UserId:    userId,

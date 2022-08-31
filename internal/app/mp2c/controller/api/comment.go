@@ -2,13 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"strconv"
 )
 
 var DefaultCommentController = &CommentController{}
@@ -64,22 +60,10 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
-	comment, err := service.DefaultCommentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
+	comment, point, err := service.DefaultCommentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
-	//发放积分
-	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
-	pointService := service.NewPointService(context.NewMioContext())
-	_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       user.OpenId,
-		Type:         entity.POINT_COMMENT,
-		BizId:        util.UUID(),
-		ChangePoint:  point,
-		AdminId:      0,
-		Note:         strconv.FormatInt(comment.ID, 10),
-		AdditionInfo: strconv.FormatInt(form.ObjId, 10) + "#" + strconv.FormatInt(comment.ID, 10),
-	})
 	return gin.H{
 		"comment": comment,
 		"point":   point,
@@ -134,7 +118,7 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	like, err := service.DefaultCommentService.Like(user.ID, form.CommentId)
+	like, err := service.DefaultCommentService.Like(user.ID, form.CommentId, user.OpenId)
 	if err != nil {
 		return nil, err
 	}

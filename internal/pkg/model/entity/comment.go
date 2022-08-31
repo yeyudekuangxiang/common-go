@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type CommentIndex struct {
-	ID            int64          `gorm:"primaryKey;autoIncrement" json:"id"`
+	Id            int64          `gorm:"primaryKey;autoIncrement" json:"id"`
 	ObjId         int64          `gorm:"type:int8;not null" json:"objId" json:"objId"` // 对象id （文章）
 	ObjType       int8           `gorm:"type:int2" json:"objType"`                     // 保留字段
 	Message       string         `gorm:"type:text;not null" json:"message"`
