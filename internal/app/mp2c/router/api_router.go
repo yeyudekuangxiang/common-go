@@ -84,9 +84,10 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
-			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic)) //我的帖子列表
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM)) //绑定手机
+			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic))                  //我的帖子列表
+			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                //我的奖励
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
@@ -127,7 +128,7 @@ func apiRouter(router *gin.Engine) {
 			activityRouter.POST("/answer/close-late-tips", apiutil.Format(activityApi.DefaultAnswerController.CloseLateTips))
 		}
 
-		//酷喵圈相关路由
+		//社区2.0 文章相关路由
 		topicRouter := mustAuthRouter.Group("/topic")
 		{
 			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
@@ -135,10 +136,8 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			topicRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic))
-
 		}
-		//评论相关
+		//社区2.0 评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
 		{
 			commentRouter.POST("/create", apiutil.Format(api.DefaultCommentController.Create))
@@ -153,7 +152,6 @@ func apiRouter(router *gin.Engine) {
 		{
 			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
 			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
-			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward)) //我的奖励
 		}
 
 		//步行相关的路由

@@ -76,6 +76,7 @@ type BindMobileByCodeForm struct {
 type GetPointTransactionListForm struct {
 	StartTime time.Time `json:"startTime" form:"startTime"  time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
 	EndTime   time.Time `json:"endTime" form:"endTime"  time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	controller.PageFrom
 }
 type UpdateStepTotalForm struct {
 	EncryptedData string `json:"encryptedData" form:"encryptedData" binding:"required" alias:"encryptedData"`
