@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -65,11 +66,10 @@ func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
 }
 
 func (PointsController) MyReward(ctx *gin.Context) (gin.H, error) {
-	form := GetPointTransactionListForm{}
+	form := controller.PageFrom{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-
 	user := apiutil.GetAuthUser(ctx)
 	//我的奖励分类
 	var myRewardType []entity.PointTransactionType

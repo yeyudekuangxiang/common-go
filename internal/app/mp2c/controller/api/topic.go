@@ -272,6 +272,10 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	form := controller.PageFrom{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
 	user := apiutil.GetAuthUser(c)
 	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
