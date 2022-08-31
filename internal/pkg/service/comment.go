@@ -4,8 +4,12 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
+	"strconv"
 	"time"
 )
 
@@ -241,7 +245,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return entity.CommentIndex{}, err
 		}
 	}
-
 	return comment, nil
 }
 
@@ -253,6 +256,20 @@ func (srv *defaultCommentService) Like(userId, commentId int64) (*entity.Comment
 	like, err := DefaultCommentLikeService.Like(userId, commentId)
 	if err != nil {
 		return &entity.CommentLike{}, err
+	}
+	//发放积分
+	if like.Status == 1 {
+		user, _ := DefaultUserService.GetUserById(userId)
+		pointService := NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+			AdminId:      0,
+			Note:         strconv.FormatInt(like.Id, 10),
+			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
+		})
 	}
 	return like, nil
 }

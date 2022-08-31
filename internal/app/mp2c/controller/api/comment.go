@@ -69,22 +69,20 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
 	//发放积分
+	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
 	pointService := service.NewPointService(context.NewMioContext())
-	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+	_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       user.OpenId,
 		Type:         entity.POINT_COMMENT,
 		BizId:        util.UUID(),
-		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
+		ChangePoint:  point,
 		AdminId:      0,
-		Note:         "发布成功",
-		AdditionInfo: "评论\" " + form.Message + " \"审核通过, 发布成功。 评论主体" + strconv.Itoa(int(form.ObjId)),
+		Note:         strconv.FormatInt(comment.ID, 10),
+		AdditionInfo: strconv.FormatInt(form.ObjId, 10) + "#" + strconv.FormatInt(comment.ID, 10),
 	})
-	if err != nil {
-		return gin.H{"comment": nil, "point": 0}, err
-	}
 	return gin.H{
 		"comment": comment,
-		"point":   int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
+		"point":   point,
 	}, nil
 }
 
@@ -140,18 +138,6 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//发放积分
-	pointService := service.NewPointService(context.NewMioContext())
-	_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       user.OpenId,
-		Type:         entity.POINT_LIKE,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-		AdminId:      0,
-		Note:         "点赞成功",
-		AdditionInfo: "评论\" " + strconv.FormatInt(form.CommentId, 10) + " \"点赞成功",
-	})
 
 	return gin.H{
 		"status": like.Status,

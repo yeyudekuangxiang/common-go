@@ -197,20 +197,19 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
 		return err
 	}
-	userInfo, _ := DefaultUserService.GetUserById(topic.UserId)
 	//发放积分
-	pointService := NewPointService(context.NewMioContext())
-	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       userInfo.OpenId,
-		Type:         entity.POINT_ARTICLE,
-		BizId:        util.UUID(),
-		ChangePoint:  point,
-		AdminId:      0,
-		Note:         "发布成功",
-		AdditionInfo: "笔记\" " + topic.Title + " \"审核通过，发布成功",
-	})
-	if err != nil {
-		return err
+	if status == 3 {
+		user, _ := DefaultUserService.GetUserById(topic.UserId)
+		pointService := NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_ARTICLE,
+			BizId:        util.UUID(),
+			ChangePoint:  point,
+			AdminId:      0,
+			Note:         strconv.FormatInt(topic.Id, 10),
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
 	}
 	return nil
 }
@@ -239,6 +238,20 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 	}
 	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
 		return err
+	}
+	//发放积分
+	if isEssence == 1 {
+		user, _ := DefaultUserService.GetUserById(topic.UserId)
+		pointService := NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_RECOMMEND,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
+			AdminId:      0,
+			Note:         strconv.FormatInt(topic.Id, 10),
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
 	}
 	return nil
 }

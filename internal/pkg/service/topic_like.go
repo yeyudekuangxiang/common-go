@@ -34,6 +34,7 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int) (*entity.TopicLi
 	}
 	if like.Status == 1 {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
+
 	} else {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
 	}

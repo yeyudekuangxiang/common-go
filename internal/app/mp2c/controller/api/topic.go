@@ -121,18 +121,22 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//发放积分
-	pointService := service.NewPointService(context.NewMioContext())
-	_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       user.OpenId,
-		Type:         entity.POINT_LIKE,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-		AdminId:      0,
-		Note:         "点赞成功",
-		AdditionInfo: "文章\" " + strconv.Itoa(form.TopicId) + " \"点赞成功",
-	})
+	var point int64
+	if like.Status == 1 {
+		point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		pointService := service.NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  point,
+			AdminId:      0,
+			Note:         "点赞成功",
+			AdditionInfo: "文章\" " + strconv.Itoa(form.TopicId) + " \"点赞成功",
+		})
+	}
 	return gin.H{
-		"point":  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+		"point":  point,
 		"status": like.Status,
 	}, nil
 }
