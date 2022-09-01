@@ -80,7 +80,7 @@ func apiRouter(router *gin.Engine) {
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
-			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
+			userRouter.GET("", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
@@ -151,7 +151,7 @@ func apiRouter(router *gin.Engine) {
 		pointRouter := mustAuthRouter.Group("/point")
 		{
 			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
-			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
+			pointRouter.GET("", apiutil.Format(api.DefaultPointController.GetPoint))
 		}
 
 		//步行相关的路由
