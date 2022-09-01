@@ -211,12 +211,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			}
 			ToCommentIdRow.RootCount++ //更新父评论的根评论数量
 			ToCommentIdRow.Count++     //更新父评论的评论数量
-			err = app.DB.Model(ToCommentIdRow).Select("RootCommentId_count", "count").Updates(ToCommentIdRow).Error
+			err = app.DB.Model(ToCommentIdRow).Select("root_count", "count").Updates(ToCommentIdRow).Error
 			if err != nil {
 				return errors.WithMessage(err, "update ToCommentIdRow:")
 			}
 			//本条评论
-			ToCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("ToCommentId = ?", ToCommentId))
+			ToCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("to_comment_id = ?", ToCommentId))
 			if err != nil {
 				return err
 			}
@@ -225,14 +225,14 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			}
 			comment.RootCommentId = ToCommentId          //更新RootCommentId
 			comment.Floor = int32(ToCommentIdChildCount) //更新楼层
-			err = app.DB.Model(comment).Select("RootCommentId", "floor").Updates(comment).Error
+			err = app.DB.Model(comment).Select("root_comment_id", "floor").Updates(comment).Error
 			if err != nil {
 				return errors.WithMessage(err, "update dataRow:")
 			}
 
 			//顶级评论
 			if ToCommentIdRow.RootCommentId != 0 {
-				RootCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("RootCommentId = ?", ToCommentIdRow.RootCommentId))
+				RootCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("root_comment_id = ?", ToCommentIdRow.RootCommentId))
 				if err != nil {
 					return err
 				}

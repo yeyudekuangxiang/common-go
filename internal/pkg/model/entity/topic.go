@@ -44,6 +44,7 @@ type Topic struct {
 	IsTop         int            `json:"isTop"`     //是否置顶
 	IsEssence     int            `json:"isEssence"` //是否精华
 	DelReason     string         `json:"delReason"` //审核不通过 or 删除 的理由
+	IsLike        int            `json:"isLike"`    //是否点赞
 }
 
 func (Topic) TableName() string {

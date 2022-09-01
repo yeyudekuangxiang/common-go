@@ -23,6 +23,7 @@ type CommentIndex struct {
 	UpdatedAt     time.Time      `json:"updatedAt"`
 	Member        ShortUser      `gorm:"foreignKey:ID;references:MemberId" json:"member"` // 评论用户
 	IsAuthor      int8           `gorm:"type:int2" json:"isAuthor"`                       // 是否作者
+	IsLike        int            `json:"isLike"`
 	RootChild     []CommentIndex `gorm:"foreignKey:RootCommentId;association_foreignKey:Id" json:"rootChild"`
 }
 

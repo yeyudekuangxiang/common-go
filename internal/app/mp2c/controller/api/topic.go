@@ -142,10 +142,15 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	//点赞数据
+	var likeMap map[int]int
+	likeList, err := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	for _, item := range likeList {
+		likeMap[item.TopicId] = 1
+	}
 	//获取顶级评论数量
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
-
 		ids = append(ids, item.Id)
 	}
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
@@ -156,6 +161,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	for _, item := range list {
 		item.CommentCount = topic2comment[item.Id]
+		item.IsLike = likeMap[int(item.Id)]
 	}
 
 	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)

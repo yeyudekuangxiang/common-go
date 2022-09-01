@@ -39,3 +39,7 @@ func (t CommentLikeService) Like(userId, commentId int64) (*entity.CommentLike, 
 	}
 	return &like, nil
 }
+
+func (t CommentLikeService) GetLikeInfoByUser(userId int64) []entity.CommentLike {
+	return t.repo.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
+}

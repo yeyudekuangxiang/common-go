@@ -2,8 +2,17 @@ package repository
 
 import (
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 )
+
+var DefaultTopicLikeRepository = NewTopicLikeRepository(app.DB)
+
+func NewTopicLikeRepository(db *gorm.DB) TopicLikeRepository {
+	return TopicLikeRepository{
+		DB: db,
+	}
+}
 
 type TopicLikeRepository struct {
 	DB *gorm.DB

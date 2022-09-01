@@ -14,16 +14,32 @@ type CommentController struct {
 
 // RootList 分页获取顶级评论 及 每条顶级评论下3条子评论
 func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
+
 	form := ListFormById{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	user := apiutil.GetAuthUser(c)
 	req := entity.CommentIndex{
 		ObjId: form.ID,
 	}
 	list, total, err := service.DefaultCommentService.FindListAndChild(&req, form.Offset(), form.Limit())
 	if err != nil {
 		return nil, err
+	}
+	//获取点赞记录
+	var likeMap map[int64]int
+	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
+	for _, item := range commentLike {
+		likeMap[item.CommentId] = 1
+	}
+	for _, item := range list {
+		item.IsLike = likeMap[item.Id]
+		if item.RootChild != nil {
+			for _, childItem := range item.RootChild {
+				childItem.IsLike = likeMap[childItem.Id]
+			}
+		}
 	}
 	return gin.H{
 		"list":     list,

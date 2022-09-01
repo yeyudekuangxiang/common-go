@@ -13,7 +13,16 @@ import (
 	"time"
 )
 
+var DefaultTopicLikeService = NewDefaultTopicLikeService()
+
+func NewDefaultTopicLikeService() TopicLikeService {
+	return TopicLikeService{
+		repo: repository.DefaultTopicLikeRepository,
+	}
+}
+
 type TopicLikeService struct {
+	repo repository.TopicLikeRepository
 }
 
 func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, error) {
@@ -56,4 +65,12 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 	}
 
 	return &like, r.Save(&like)
+}
+
+func (t TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {
+	list := t.repo.GetListBy(repository.GetTopicLikeListBy{UserId: userId})
+	if len(list) == 0 {
+		return nil, errors.New("未找到数据")
+	}
+	return list, nil
 }
