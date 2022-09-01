@@ -144,7 +144,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	var resList []entity.TopicItemRes
 	//点赞数据
-	var likeMap map[int]int
+	likeMap := make(map[int]int, 0)
 	likeList, err := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
 	for _, item := range likeList {
 		likeMap[item.TopicId] = 1
