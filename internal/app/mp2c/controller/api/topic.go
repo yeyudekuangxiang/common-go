@@ -142,6 +142,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	var resList []entity.TopicItemRes
 	//点赞数据
 	var likeMap map[int]int
 	likeList, err := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
@@ -157,16 +158,17 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
-		topic2comment[item.TotalID] = item.Total
+		topic2comment[item.TopicId] = item.Total
 	}
 	for _, item := range list {
-		item.CommentCount = topic2comment[item.Id]
-		item.IsLike = likeMap[int(item.Id)]
+		res := item.TopicItemRes()
+		res.IsLike = likeMap[int(res.Id)]
+		res.CommentCount = topic2comment[res.Id]
+		resList = append(resList, res)
 	}
-
 	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
 	return gin.H{
-		"list":     list,
+		"list":     resList,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,

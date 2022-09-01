@@ -665,7 +665,7 @@ func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) 
 }
 
 func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount) {
-	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as total_id, count(*) as total").
+	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("to_comment_id = 0").
 		Group("obj_id").

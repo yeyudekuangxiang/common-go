@@ -27,6 +27,7 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	var commentRes []entity.CommentRes
 	//获取点赞记录
 	var likeMap map[int64]int
 	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
@@ -34,15 +35,19 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 		likeMap[item.CommentId] = 1
 	}
 	for _, item := range list {
-		item.IsLike = likeMap[item.Id]
+		res := item.CommentRes()
+		res.IsLike = likeMap[item.Id]
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
-				childItem.IsLike = likeMap[childItem.Id]
+				childRes := childItem.CommentRes()
+				childRes.IsLike = likeMap[childItem.Id]
+				res.RootChild = append(res.RootChild, childRes)
 			}
 		}
+		commentRes = append(commentRes, res)
 	}
 	return gin.H{
-		"list":     list,
+		"list":     commentRes,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,

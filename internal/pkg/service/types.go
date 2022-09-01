@@ -416,7 +416,7 @@ type CreateCarbonTransactionParam struct {
 
 type CommentCount struct {
 	Date    time.Time
-	TotalID int64
+	TopicId int64
 	Total   int64
 }
 
