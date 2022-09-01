@@ -193,6 +193,10 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
 	}
+	title := topic.Title
+	if len(topic.Title) > 8 {
+		title = topic.Title[0:8] + "..."
+	}
 	_, err = srv.commentModel.Insert(&comment)
 	if err != nil {
 		return entity.CommentIndex{}, 0, err
@@ -244,6 +248,11 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return entity.CommentIndex{}, 0, err
 		}
 	}
+	//find comment
+	one, err := srv.commentModel.FindOne(comment.Id)
+	if err != nil {
+		return entity.CommentIndex{}, 0, err
+	}
 	//更新积分
 	point := int64(entity.PointCollectValueMap[entity.POINT_LIKE])
 	pointService := NewPointService(context.NewMioContext())
@@ -253,13 +262,13 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		BizId:        util.UUID(),
 		ChangePoint:  point,
 		AdminId:      0,
-		Note:         "评论笔记 \"" + topic.Title[0:8] + "...\" 成功",
+		Note:         "评论笔记 \"" + title + "\" 成功",
 		AdditionInfo: strconv.FormatInt(topic.Id, 10) + "#" + strconv.FormatInt(comment.Id, 10),
 	})
 	if err != nil {
 		point = 0
 	}
-	return comment, point, nil
+	return *one, point, nil
 }
 
 func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, error) {
@@ -284,7 +293,7 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
 			AdminId:      0,
-			Note:         "评论" + message + "点赞",
+			Note:         "评论 \"" + message + "\" 点赞",
 			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
 		})
 	}
