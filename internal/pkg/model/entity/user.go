@@ -66,6 +66,7 @@ func (u User) ShortUser() ShortUser {
 		Partners:     u.Partners,
 		Position:     u.Position,
 		PositionIcon: u.PositionIcon,
+		Auth:         u.Auth,
 	}
 }
 
@@ -77,6 +78,7 @@ type ShortUser struct {
 	Partners     Partner      `gorm:"partners" json:"partners"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
+	Auth         int          `json:"auth"` //发帖权限 0无权限 1有权限
 }
 
 func (ShortUser) TableName() string {
