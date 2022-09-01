@@ -267,6 +267,10 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	if err != nil {
 		return &entity.CommentLike{}, err
 	}
+	message := comment.Message
+	if len(comment.Message) > 8 {
+		message = comment.Message[0:8] + "..."
+	}
 	like, err := DefaultCommentLikeService.Like(userId, commentId)
 	if err != nil {
 		return &entity.CommentLike{}, err
@@ -280,7 +284,7 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
 			AdminId:      0,
-			Note:         "为评论 \"" + comment.Message[0:8] + "...\" 点赞",
+			Note:         "评论" + message + "点赞",
 			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
 		})
 	}

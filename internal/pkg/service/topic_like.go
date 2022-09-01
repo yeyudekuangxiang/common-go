@@ -21,7 +21,10 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 	if topic.Id == 0 {
 		return nil, errors.New("帖子不存在")
 	}
-
+	title := topic.Title
+	if len(topic.Title) > 8 {
+		title = "\" " + topic.Title[0:8] + " \"..."
+	}
 	r := repository.TopicLikeRepository{DB: app.DB}
 	like := r.FindBy(repository.FindTopicLikeBy{
 		TopicId: topicId,
@@ -45,7 +48,7 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
 			AdminId:      0,
-			Note:         "为文章 \"" + topic.Title[0:8] + "...\" 点赞",
+			Note:         "为文章 " + title + " 点赞",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
 	} else {
