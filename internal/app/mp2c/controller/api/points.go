@@ -79,6 +79,8 @@ func (PointsController) MyReward(ctx *gin.Context) (gin.H, error) {
 	record, total, err := pointTranactionService.PagePointRecord(service.GetPointTransactionPageListBy{
 		OpenId: user.OpenId,
 		Types:  myRewardType,
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
 	})
 	if err != nil {
 		return nil, err
