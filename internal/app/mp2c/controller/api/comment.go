@@ -31,16 +31,23 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	var commentRes []entity.CommentRes
 	likeMap := make(map[int64]int, 0)
 	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
-	for _, item := range commentLike {
-		likeMap[item.CommentId] = int(item.Status)
+	if len(commentLike) > 0 {
+		for _, item := range commentLike {
+			likeMap[item.CommentId] = int(item.Status)
+		}
 	}
+
 	for _, item := range list {
 		res := item.CommentRes()
-		res.IsLike = likeMap[item.Id]
+		if _, ok := likeMap[item.Id]; ok {
+			res.IsLike = likeMap[item.Id]
+		}
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
 				childRes := childItem.CommentRes()
-				childRes.IsLike = likeMap[childItem.Id]
+				if _, ok := likeMap[childItem.Id]; ok {
+					childRes.IsLike = likeMap[childItem.Id]
+				}
 				res.RootChild = append(res.RootChild, childRes)
 			}
 		}
@@ -73,23 +80,30 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 	var commentRes []entity.CommentRes
 	likeMap := make(map[int64]int, 0)
 	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
-	for _, item := range commentLike {
-		likeMap[item.CommentId] = int(item.Status)
+	if len(commentLike) > 0 {
+		for _, item := range commentLike {
+			likeMap[item.CommentId] = int(item.Status)
+		}
 	}
+
 	for _, item := range list {
 		res := item.CommentRes()
-		res.IsLike = likeMap[item.Id]
+		if _, ok := likeMap[item.Id]; ok {
+			res.IsLike = likeMap[item.Id]
+		}
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
 				childRes := childItem.CommentRes()
-				childRes.IsLike = likeMap[childItem.Id]
+				if _, ok := likeMap[childItem.Id]; ok {
+					childRes.IsLike = likeMap[childItem.Id]
+				}
 				res.RootChild = append(res.RootChild, childRes)
 			}
 		}
 		commentRes = append(commentRes, res)
 	}
 	return gin.H{
-		"list":     list,
+		"list":     commentRes,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,
