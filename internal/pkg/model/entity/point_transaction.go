@@ -64,6 +64,14 @@ func (p PointTransactionType) Text() string {
 		return "新能源换电" //oola
 	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK:
 		return "旧物回收"
+	case POINT_ARTICLE:
+		return "发帖"
+	case POINT_RECOMMEND:
+		return "推荐"
+	case POINT_COMMENT:
+		return "评论"
+	case POINT_LIKE:
+		return "点赞"
 	}
 	return "未知积分"
 }
@@ -129,14 +137,18 @@ const (
 	POINT_SYSTEM_ADD              PointTransactionType = "SYSTEM_ADD"          //系统补发
 	POINT_JHX                     PointTransactionType = "JHX"                 //金华行
 	POINT_POWER_REPLACE           PointTransactionType = "POWER_REPLACE"       //电车换电
-	POINT_ARTICLE                 PointTransactionType = "ARTICAL"             //发文章
-	POINT_RECOMMEND               PointTransactionType = "RECOMMEND"           //文章/评论被推荐
 	POINT_DUIBA_INTEGRAL_RECHARGE PointTransactionType = "INTEGRAL_RECHARGE"   //兑吧虚拟商品充值积分
 	POINT_RECYCLING_CLOTHING      PointTransactionType = "RECYCLING_CLOTHING"  //旧物回收 衣物鞋帽
 	POINT_RECYCLING_DIGITAL       PointTransactionType = "RECYCLING_COMPUTER"  //旧物回收 数码
 	POINT_RECYCLING_APPLIANCE     PointTransactionType = "RECYCLING_APPLIANCE" //旧物回收 家电
 	POINT_RECYCLING_BOOK          PointTransactionType = "RECYCLING_BOOK"      //旧物回收 书籍
-	POINT_FAST_ELECTRICITY        PointTransactionType = "FAST_ELECTRICITY"
+	POINT_FAST_ELECTRICITY        PointTransactionType = "FAST_ELECTRICITY"    //快电
+
+	POINT_ARTICLE   PointTransactionType = "ARTICAL"   //发文章
+	POINT_COMMENT   PointTransactionType = "COMMENT"   //评论
+	POINT_RECOMMEND PointTransactionType = "RECOMMEND" //推荐
+	POINT_LIKE      PointTransactionType = "LIKE"      //点赞
+
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -178,19 +190,24 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_RECYCLING_APPLIANCE,
 	POINT_RECYCLING_BOOK,
 	POINT_FAST_ELECTRICITY,
+	POINT_COMMENT,
+	POINT_LIKE,
 }
 
 const (
 	OrderByPointTranCTDESC OrderBy = "order_by_point_ct_desc"
 )
 
-// 积分限制 每天
+// 积分限制
 var PointCollectValueMap = map[PointTransactionType]int{
 	POINT_COFFEE_CUP:    39,  //	每次
 	POINT_BIKE_RIDE:     42,  //	每次
 	POINT_INVITE:        500, //	每人/天
 	POINT_POWER_REPLACE: 300, //	每人/天
 	POINT_ARTICLE:       150, //	每次
+	POINT_COMMENT:       10,  //每次
+	POINT_LIKE:          5,   //每次
+	POINT_RECOMMEND:     50,  //每次
 }
 
 var PointCollectValueMapDay = map[PointTransactionType]int{
@@ -205,6 +222,8 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_INVITE:        5, //	次/天
 	POINT_POWER_REPLACE: 1, //	次/天
 	POINT_ARTICLE:       2, //	次/天
+	POINT_COMMENT:       3, // 次
+	POINT_LIKE:          6, // 次
 }
 
 type PointTransaction struct {

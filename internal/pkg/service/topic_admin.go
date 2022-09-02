@@ -3,9 +3,12 @@ package service
 import (
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/pkg/wxoa"
 	"strconv"
 	"strings"
@@ -26,10 +29,10 @@ type TopicAdminService struct {
 	TokenServer *wxoa.AccessTokenServer
 }
 
-func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]entity.Topic, int64, error) {
-	topList := make([]entity.Topic, 0)
+func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]*entity.Topic, int64, error) {
+	topList := make([]*entity.Topic, 0)
 	var total int64
-	query := app.DB.Model(&entity.Topic{}).Preload("Tags")
+	query := app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User")
 
 	if param.ID != 0 {
 		query.Where("topic.id = ?", param.ID)
@@ -152,7 +155,7 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 	//查询数据是否存在
 	var topic entity.Topic
-	app.DB.Model(&entity.Topic{}).Preload("Tags").Where("id = ?", topicId).Find(&topic)
+	app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User").Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
 		return entity.Topic{}, errors.New("数据不存在")
 	}
@@ -182,15 +185,32 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	if topic.Id == 0 {
 		return errors.New("数据不存在")
 	}
+
+	var point int64
+	if status == 3 {
+		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	}
+	if topic.Status == 3 && status == 4 {
+		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	}
+
 	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
 		return err
 	}
-	//积分变动
-	//pointService := NewPointService(context.NewMioContext())
-	//point, err := pointService.IncUserPoint()
-	//if err != nil {
-	//	return err
-	//}
+	//发放积分
+	if status == 3 {
+		user, _ := DefaultUserService.GetUserById(topic.UserId)
+		pointService := NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_ARTICLE,
+			BizId:        util.UUID(),
+			ChangePoint:  point,
+			AdminId:      0,
+			Note:         "笔记 \"" + topic.Title[0:8] + "...\" 审核通过，发布成功",
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
+	}
 	return nil
 }
 
@@ -218,6 +238,20 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 	}
 	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
 		return err
+	}
+	//发放积分
+	if isEssence == 1 {
+		user, _ := DefaultUserService.GetUserById(topic.UserId)
+		pointService := NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_RECOMMEND,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
+			AdminId:      0,
+			Note:         "笔记 \"" + topic.Title[0:8] + "...\" 被设为精华",
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
 	}
 	return nil
 }

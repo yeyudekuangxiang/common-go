@@ -19,7 +19,9 @@ type FindTopicLikeBy struct {
 }
 type GetTopicLikeListBy struct {
 	TopicIds []int64
+	UserIds  []int64
 	UserId   int64
+	TopicId  int64
 }
 
 type GetTopicPageListBy struct {
@@ -80,7 +82,8 @@ type GetUserListBy struct {
 	EndTime    time.Time           `json:"endTime"`
 	Risk       int                 `json:"risk,omitempty"`
 	Position   entity.UserPosition `json:"position"`
-	Partner    entity.Partner      `json:"partner"` //0:全部 1:乐活家
+	Partners   entity.Partner      `json:"partner"` //0:全部 1:乐活家 2:非乐活家
+	Auth       int                 `json:"auth"`
 }
 
 type GetUserPageListBy struct {
@@ -239,4 +242,13 @@ type GetPointTransactionListByQun struct {
 
 type FindCarbonBy struct {
 	OpenId string
+}
+
+type FindCommentLikeBy struct {
+	CommentId int64
+	UserId    int64
+}
+type GetCommentLikeListBy struct {
+	CommentIds []int64
+	UserId     int64
 }

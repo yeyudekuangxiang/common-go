@@ -141,8 +141,9 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 				return nil, err
 			}
 			//限制一次
-			if err = starChargeService.CheckLimit(userInfo.OpenId); err != nil {
-				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 超出次数限制:%s\n", userInfo.OpenId, err.Error()))
+			if err = starChargeService.CheckChargeLimit(userInfo.OpenId); err != nil {
+				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
+				return nil, err
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
