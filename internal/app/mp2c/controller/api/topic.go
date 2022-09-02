@@ -157,7 +157,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
-	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
+	rootCommentCount := service.DefaultTopicService.GetCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
@@ -195,21 +195,6 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	////发放积分
-	//pointService := service.NewPointService(context.NewMioContext())
-	//_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-	//	OpenId:       user.OpenId,
-	//	Type:         entity.POINT_ARTICLE,
-	//	BizId:        util.UUID(),
-	//	ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
-	//	AdminId:      0,
-	//	Note:         "发布成功",
-	//	AdditionInfo: "笔记\" " + form.Title + " \"审核通过，发布成功",
-	//})
-	//
-	//if err != nil {
-	//	return gin.H{"topic": nil, "point": 0}, err
-	//}
 	return gin.H{
 		"topic": topic,
 		"point": int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),

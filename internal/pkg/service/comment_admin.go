@@ -39,7 +39,8 @@ func (d defaultCommentAdminService) CommentList(content string, userId int64, ob
 		}
 		return nil, 0, err
 	}
-	count, err := d.commentModel.FindCount(d.commentModel.CountBuilder("id"))
+
+	count, err := d.commentModel.FindCount(builder)
 	if err != nil {
 		return nil, 0, err
 	}
