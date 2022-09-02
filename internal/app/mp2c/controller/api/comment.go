@@ -32,7 +32,7 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	likeMap := make(map[int64]int, 0)
 	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
 	for _, item := range commentLike {
-		likeMap[item.CommentId] = 1
+		likeMap[item.CommentId] = int(item.Status)
 	}
 	for _, item := range list {
 		res := item.CommentRes()
@@ -74,7 +74,7 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 	likeMap := make(map[int64]int, 0)
 	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
 	for _, item := range commentLike {
-		likeMap[item.CommentId] = 1
+		likeMap[item.CommentId] = int(item.Status)
 	}
 	for _, item := range list {
 		res := item.CommentRes()

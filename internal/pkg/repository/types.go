@@ -19,7 +19,9 @@ type FindTopicLikeBy struct {
 }
 type GetTopicLikeListBy struct {
 	TopicIds []int64
+	UserIds  []int64
 	UserId   int64
+	TopicId  int64
 }
 
 type GetTopicPageListBy struct {

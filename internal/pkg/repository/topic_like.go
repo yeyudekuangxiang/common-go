@@ -43,6 +43,12 @@ func (t TopicLikeRepository) GetListBy(by GetTopicLikeListBy) []entity.TopicLike
 	if len(by.TopicIds) > 0 {
 		db.Where("topic_id in (?)", by.TopicIds)
 	}
+	if len(by.UserIds) > 0 {
+		db.Where("user_id in (?)", by.UserIds)
+	}
+	if by.TopicId > 0 {
+		db.Where("topic_id = ?", by.TopicId)
+	}
 	if by.UserId > 0 {
 		db.Where("user_id = ?", by.UserId)
 	}

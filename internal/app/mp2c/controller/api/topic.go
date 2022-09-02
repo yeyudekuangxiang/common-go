@@ -147,7 +147,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	likeMap := make(map[int]int, 0)
 	likeList, err := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
 	for _, item := range likeList {
-		likeMap[item.TopicId] = 1
+		likeMap[item.TopicId] = int(item.Status)
 	}
 	//获取顶级评论数量
 	ids := make([]int64, 0) //topicId
@@ -254,11 +254,19 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	user := apiutil.GetAuthUser(c)
 	//获取帖子
 	topic, err := service.DefaultTopicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
 	}
+	//获取点赞数据
+	like, err := service.DefaultTopicLikeService.GetOneByTopic(topic.Id, user.ID)
+	if err != nil {
+		return nil, err
+	}
+	topicRes := topic.TopicItemRes()
+	topicRes.IsLike = int(like.Status)
 	return gin.H{
 		"topic": topic,
 	}, nil

@@ -19,6 +19,7 @@ type Client struct {
 
 // GetUnlimitedQRCodeResponse 获取没有数量限制的小程序码
 func (c Client) GetUnlimitedQRCodeResponse(param *weapp.UnlimitedQRCode) (*QRCodeResponse, error) {
+
 	resp, cerr, err := c.GetUnlimitedQRCode(param)
 	if err != nil {
 		return nil, errors.WithStack(err)

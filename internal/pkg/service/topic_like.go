@@ -70,7 +70,15 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 func (t TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {
 	list := t.repo.GetListBy(repository.GetTopicLikeListBy{UserId: userId})
 	if len(list) == 0 {
-		return nil, errors.New("未找到数据")
+		return nil, errors.New("未找到点赞数据")
 	}
 	return list, nil
+}
+
+func (t TopicLikeService) GetOneByTopic(topicId int64, userId int64) (entity.TopicLike, error) {
+	like := t.repo.FindBy(repository.FindTopicLikeBy{TopicId: int(topicId), UserId: int(userId)})
+	if like.Id == 0 {
+		return entity.TopicLike{}, errors.New("未找到点赞数据")
+	}
+	return like, nil
 }
