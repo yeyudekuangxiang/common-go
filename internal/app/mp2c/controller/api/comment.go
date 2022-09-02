@@ -174,13 +174,9 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	like, err := service.DefaultCommentService.Like(user.ID, form.CommentId, user.OpenId)
+	like, point, err := service.DefaultCommentService.Like(user.ID, form.CommentId, user.OpenId)
 	if err != nil {
 		return nil, err
-	}
-	var point int64
-	if like.Status == 1 {
-		point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
 	}
 	return gin.H{
 		"status": like.Status,

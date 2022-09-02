@@ -30,3 +30,9 @@ func TestFmy_GetSign(t *testing.T) {
 	sign := rand1 + md5Str[7:21] + rand2
 	fmt.Println(sign)
 }
+
+func TestSlice(t *testing.T) {
+	s := []int{1, 2, 3, 4, 5}
+	s2 := s[len(s)-4:]
+	fmt.Println(s2)
+}

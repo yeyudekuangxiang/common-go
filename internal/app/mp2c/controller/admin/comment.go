@@ -25,8 +25,8 @@ func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"list":     list,
 		"total":    total,
-		"page":     form.Page,
-		"pageSize": form.PageSize,
+		"page":     form.Limit(),
+		"pageSize": form.Offset(),
 	}, nil
 }
 

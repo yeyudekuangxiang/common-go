@@ -660,7 +660,12 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 }
 
 func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) {
-	app.DB.Model(&entity.CommentIndex{}).Select("root_comment_id as total_id, count(*) as total").Where("root_comment_id in ?", ids).Group("root_comment_id").Find(&result)
+	app.DB.Model(&entity.CommentIndex{}).
+		Select("root_comment_id as total_id, count(*) as total").
+		Where("state = ?", 0).
+		Where("root_comment_id in ?", ids).
+		Group("root_comment_id").
+		Find(&result)
 	return result
 }
 
@@ -668,6 +673,7 @@ func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount)
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("to_comment_id = 0").
+		Where("state = ?", 0).
 		Group("obj_id").
 		Find(&result)
 	return result
@@ -676,6 +682,7 @@ func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount)
 func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCount) {
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
+		Where("state = ?", 0).
 		Group("obj_id").
 		Find(&result)
 	return result
