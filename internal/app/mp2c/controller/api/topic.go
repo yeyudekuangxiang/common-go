@@ -112,14 +112,9 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID), user.OpenId)
+	like, point, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID), user.OpenId)
 	if err != nil {
 		return nil, err
-	}
-	//发放积分
-	var point int64
-	if like.Status == 1 {
-		point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
 	}
 	return gin.H{
 		"point":  point,

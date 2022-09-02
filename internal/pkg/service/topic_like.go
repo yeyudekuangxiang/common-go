@@ -25,10 +25,10 @@ type TopicLikeService struct {
 	repo repository.TopicLikeRepository
 }
 
-func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, error) {
+func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, int64, error) {
 	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
 	if topic.Id == 0 {
-		return nil, errors.New("帖子不存在")
+		return nil, 0, errors.New("帖子不存在")
 	}
 	title := topic.Title
 	if len(topic.Title) > 8 {
@@ -48,10 +48,11 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 		like.UpdatedAt = model.Time{Time: time.Now()}
 		like.Status = (like.Status + 1) % 2
 	}
+	var point int64
 	if like.Status == 1 {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
 		pointService := NewPointService(context.NewMioContext())
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       openId,
 			Type:         entity.POINT_LIKE,
 			BizId:        util.UUID(),
@@ -60,11 +61,14 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 			Note:         "为文章 \"" + title + "\" 点赞",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
+		if err == nil {
+			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		}
 	} else {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
 	}
 
-	return &like, r.Save(&like)
+	return &like, point, r.Save(&like)
 }
 
 func (t TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {

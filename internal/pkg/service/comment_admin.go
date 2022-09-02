@@ -20,8 +20,7 @@ type defaultCommentAdminService struct {
 }
 
 func (d defaultCommentAdminService) CommentList(content string, userId int64, objId int64, limit, offset int) ([]*entity.CommentIndex, int64, error) {
-	builder := d.commentModel.RowBuilder()
-	builder.Limit(limit).Offset(offset).Preload("Member")
+	builder := d.commentModel.RowBuilder().Preload("Member")
 	if content != "" {
 		builder.Where("message like ?", "%"+content+"%")
 	}
@@ -32,6 +31,11 @@ func (d defaultCommentAdminService) CommentList(content string, userId int64, ob
 	if objId != 0 {
 		builder.Where("obj_id = ?", objId)
 	}
+	count, err := d.commentModel.FindCount(builder)
+	if err != nil {
+		return nil, 0, err
+	}
+	builder.Limit(limit).Offset(offset)
 	all, err := d.commentModel.FindAll(builder, "id desc, like_count desc")
 	if err != nil {
 		if err == entity.ErrNotFount {
@@ -40,10 +44,6 @@ func (d defaultCommentAdminService) CommentList(content string, userId int64, ob
 		return nil, 0, err
 	}
 
-	count, err := d.commentModel.FindCount(builder)
-	if err != nil {
-		return nil, 0, err
-	}
 	return all, count, nil
 }
 
