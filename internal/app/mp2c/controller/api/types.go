@@ -61,6 +61,25 @@ type RecyclePushForm struct {
 	Unit                string `json:"unit,omitempty" form:"unit"`                               //与下单数量&重量关联的计量单位 如：公斤，个 等
 }
 
+type RecycleFmyForm struct {
+	AppId          string `json:"type" form:"type" binding:"required"`               //业务类型 1：回首订单成功
+	NotificationAt string `json:"notification_at" form:"orderNo" binding:"required"` //订单号，同类型同订单视为重复订单
+	Sign           string `json:"sign,omitempty" form:"name" binding:"required"`     //type = 1，回收物品名称
+	Data           RecycleFmyData
+}
+
+type RecycleFmyData struct {
+	OrderSn          string `json:"order_sn,omitempty" binding:"required"`
+	Status           string `json:"status,omitempty" binding:"required"`
+	Weight           string `json:"weight,omitempty"`
+	Reason           string `json:"reason,omitempty"`
+	CourierRealName  string `json:"courier_real_name,omitempty"`
+	CourierPhone     string `json:"courier_phone,omitempty"`
+	CourierJobNumber string `json:"courier_job_number,omitempty"`
+	Waybill          string `json:"waybill,omitempty"`
+	Phone            string `json:"phone,omitempty"`
+}
+
 type QueryTokenForm struct {
 	OperatorID     string `json:"operatorID" form:"operatorID" alias:"运营商标识" binding:"required"`
 	OperatorSecret string `json:"operatorSecret" form:"operatorSecret" alias:"运营商密钥" binding:"required"`

@@ -36,7 +36,7 @@ func (f Fmy) GetSign(ch string, data []byte) (sign string, err error) {
 	rand1, rand2 := util.Rand4Number(), util.Rand4Number()
 	fmt.Println(rand1, rand2)
 	verifyData := rand1 + f.platformKey + string(data) + f.appSecret + rand2
-	sign = rand1 + verifyData[6:27] + rand2
+	sign = rand1 + verifyData[7:27] + rand2
 	fmt.Println(sign)
 	return sign, nil
 }
