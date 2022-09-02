@@ -145,10 +145,13 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	var resList []entity.TopicItemRes
 	//点赞数据
 	likeMap := make(map[int]int, 0)
-	likeList, err := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
-	for _, item := range likeList {
-		likeMap[item.TopicId] = int(item.Status)
+	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	if len(likeList) > 0 {
+		for _, item := range likeList {
+			likeMap[item.TopicId] = int(item.Status)
+		}
 	}
+
 	//获取顶级评论数量
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
@@ -162,8 +165,10 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	for _, item := range list {
 		res := item.TopicItemRes()
-		res.IsLike = likeMap[int(res.Id)]
 		res.CommentCount = topic2comment[res.Id]
+		if _, ok := likeMap[int(res.Id)]; ok {
+			res.IsLike = likeMap[int(res.Id)]
+		}
 		resList = append(resList, res)
 	}
 	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
@@ -260,15 +265,15 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	topicRes := topic.TopicItemRes()
+
 	//获取点赞数据
 	like, err := service.DefaultTopicLikeService.GetOneByTopic(topic.Id, user.ID)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		topicRes.IsLike = int(like.Status)
 	}
-	topicRes := topic.TopicItemRes()
-	topicRes.IsLike = int(like.Status)
 	return gin.H{
-		"topic": topic,
+		"topic": topicRes,
 	}, nil
 }
 
