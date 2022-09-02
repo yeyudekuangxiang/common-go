@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller"
@@ -111,11 +112,12 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	like, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID))
+	like, point, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID), user.OpenId)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
+		"point":  point,
 		"status": like.Status,
 	}, nil
 }
@@ -135,25 +137,38 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	resList := make([]entity.TopicItemRes, 0)
+	//点赞数据
+	likeMap := make(map[int]int, 0)
+	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	if len(likeList) > 0 {
+		for _, item := range likeList {
+			likeMap[item.TopicId] = int(item.Status)
+		}
+	}
+
 	//获取顶级评论数量
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
-
 		ids = append(ids, item.Id)
 	}
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
-		topic2comment[item.TotalID] = item.Total
+		topic2comment[item.TopicId] = item.Total
 	}
 	for _, item := range list {
-		item.CommentCount = topic2comment[item.Id]
+		res := item.TopicItemRes()
+		res.CommentCount = topic2comment[res.Id]
+		if _, ok := likeMap[int(res.Id)]; ok {
+			res.IsLike = likeMap[int(res.Id)]
+		}
+		resList = append(resList, res)
 	}
-
 	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
 	return gin.H{
-		"list":     list,
+		"list":     resList,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,
@@ -167,13 +182,18 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-
+	if user.Auth != 1 {
+		return nil, errors.New("无权限")
+	}
 	//创建帖子
-	err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"topic": topic,
+		"point": 0,
+	}, nil
 }
 
 func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
@@ -183,12 +203,17 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	}
 	//user
 	user := apiutil.GetAuthUser(c)
+	if user.Auth != 1 {
+		return nil, errors.New("无权限")
+	}
 	//更新帖子
-	err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"topic": topic,
+	}, nil
 }
 
 func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
@@ -198,6 +223,9 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	}
 	//user
 	user := apiutil.GetAuthUser(c)
+	if user.Auth != 1 {
+		return nil, errors.New("无权限")
+	}
 	//更新帖子
 	err := service.DefaultTopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
@@ -211,20 +239,38 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	user := apiutil.GetAuthUser(c)
 	//获取帖子
 	topic, err := service.DefaultTopicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
 	}
+	topicRes := topic.TopicItemRes()
+	//获取评论数量
+
+	CommentCount := service.DefaultTopicService.GetCommentCount([]int64{topicRes.Id})
+	//组装数据---帖子的顶级评论数量
+	if len(CommentCount) > 0 {
+		topicRes.CommentCount = CommentCount[0].Total
+	}
+	//获取点赞数据
+	like, err := service.DefaultTopicLikeService.GetOneByTopic(topic.Id, user.ID)
+	if err == nil {
+		topicRes.IsLike = int(like.Status)
+	}
 	return gin.H{
-		"topic": topic,
+		"topic": topicRes,
 	}, nil
 }
 
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	form := controller.PageFrom{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
 	user := apiutil.GetAuthUser(c)
-	list, total, err := service.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
+	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),

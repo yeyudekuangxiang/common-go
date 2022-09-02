@@ -28,6 +28,7 @@ type (
 		RowBuilder() *gorm.DB
 		CountBuilder(field string) *gorm.DB
 		SumBuilder(field string) *gorm.DB
+		AddTopicLikeCount(commentId int64, num int) error
 	}
 
 	defaultCommentRepository struct {
@@ -69,7 +70,7 @@ func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.Co
 
 func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
-	err := m.Model.First(&resp).Error
+	err := m.Model.First(&resp, id).Error
 	switch err {
 	case nil:
 		return &resp, nil
@@ -95,7 +96,7 @@ func (m *defaultCommentRepository) FindOneQuery(builder *gorm.DB) (*entity.Comme
 
 func (m *defaultCommentRepository) FindCount(builder *gorm.DB) (int64, error) {
 	var resp int64
-	err := builder.Find(&resp).Error
+	err := builder.Count(&resp).Error
 	switch err {
 	case nil:
 		return resp, nil
@@ -215,7 +216,7 @@ func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
 
 func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 	var result entity.CommentIndex
-	err := m.Model.Where("id = ? and member_id = ?", data.ID, data.MemberId).First(&result).Error
+	err := m.Model.Where("id = ? and member_id = ?", data.Id, data.MemberId).First(&result).Error
 	if err != nil {
 		return err
 	}
@@ -244,4 +245,13 @@ func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 		result.HateCount = data.HateCount
 	}
 	return m.Model.Model(&result).Updates(&result).Error
+}
+
+func (m *defaultCommentRepository) AddTopicLikeCount(commentId int64, num int) error {
+	db := m.Model.Model(&entity.CommentIndex{}).Where("id = ?", commentId)
+	//避免点赞数为负数
+	if num < 0 {
+		db.Where("like_count >= ?", -num)
+	}
+	return db.Update("like_count", gorm.Expr("like_count + ?", num)).Error
 }

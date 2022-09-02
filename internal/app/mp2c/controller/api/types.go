@@ -9,7 +9,7 @@ type GetWeappQrCodeFrom struct {
 	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 type GetTopicPageListForm struct {
-	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"topic id"`
+	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"文章id"`
 	TopicTagId int64 `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
 	controller.PageFrom
 }
@@ -59,6 +59,25 @@ type RecyclePushForm struct {
 	ProductCategoryName string `json:"productCategoryName,omitempty" form:"productCategoryName"` //物品所属分类名称
 	Qua                 string `json:"qua,omitempty" form:"qua"`                                 //用户下单时的数量&重量
 	Unit                string `json:"unit,omitempty" form:"unit"`                               //与下单数量&重量关联的计量单位 如：公斤，个 等
+}
+
+type RecycleFmyForm struct {
+	AppId          string `json:"type" form:"type" binding:"required"`               //业务类型 1：回首订单成功
+	NotificationAt string `json:"notification_at" form:"orderNo" binding:"required"` //订单号，同类型同订单视为重复订单
+	Sign           string `json:"sign,omitempty" form:"name" binding:"required"`     //type = 1，回收物品名称
+	Data           RecycleFmyData
+}
+
+type RecycleFmyData struct {
+	OrderSn          string `json:"order_sn,omitempty" binding:"required"`
+	Status           string `json:"status,omitempty" binding:"required"`
+	Weight           string `json:"weight,omitempty"`
+	Reason           string `json:"reason,omitempty"`
+	CourierRealName  string `json:"courier_real_name,omitempty"`
+	CourierPhone     string `json:"courier_phone,omitempty"`
+	CourierJobNumber string `json:"courier_job_number,omitempty"`
+	Waybill          string `json:"waybill,omitempty"`
+	Phone            string `json:"phone,omitempty"`
 }
 
 type QueryTokenForm struct {
@@ -115,10 +134,10 @@ type DuiBaNoLoginH5Form struct {
 }
 
 type CreateTopicForm struct {
-	Title   string   `json:"title" form:"title" alias:"title" binding:"required,min=2,max=64"`
-	Content string   `json:"content" form:"content" alias:"content" binding:"min=0,max=10000"`
-	Images  []string `json:"images" form:"images" alias:"images" binding:"required,min=1,max=12"`
-	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"tagIds" binding:"min=0,max=2"`
+	Title   string   `json:"title" form:"title" alias:"标题" binding:"required,min=2,max=64"`
+	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
+	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
+	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"min=0,max=2"`
 }
 
 type UpdateTopicForm struct {
@@ -142,13 +161,17 @@ type ListFormByLastId struct {
 }
 
 type CommentCreateForm struct {
-	Message string `json:"message" form:"message" alias:"message" binding:"required,min=1"`
-	Root    int64  `json:"root" form:"root" alias:"root" binding:"min=0"`
-	Parent  int64  `json:"parent" form:"parent" alias:"parent" binding:"min=0"`
+	Message string `json:"message" form:"message" alias:"评论内容" binding:"required,min=1"`
+	Root    int64  `json:"root" form:"root" alias:"rootId" binding:"min=0"`
+	Parent  int64  `json:"parent" form:"parent" alias:"parentId" binding:"min=0"`
 	ObjId   int64  `json:"objId" form:"objId" alias:"objId" binding:"required,min=1"`
 }
 
 type CommentEditForm struct {
 	CommentId int64  `json:"commentId" form:"commentId" alias:"commentId" binding:"required,min=1"`
-	Message   string `json:"message" form:"message" alias:"message" binding:"required,min=1"`
+	Message   string `json:"message" form:"message" alias:"评论内容" binding:"required,min=1"`
+}
+
+type ChangeCommentLikeForm struct {
+	CommentId int64 `json:"commentId" form:"commentId" binding:"required" alias:"评论id"`
 }

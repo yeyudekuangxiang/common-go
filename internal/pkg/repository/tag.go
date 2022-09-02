@@ -58,6 +58,10 @@ func (u TagRepository) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, t
 	if by.ID != 0 {
 		db.Where("id = ?", by.ID)
 	}
+
+	if by.ID != 0 {
+		db.Where("id = ?", by.ID)
+	}
 	if by.Description != "" {
 		db.Where("description like ?", by.Description+"%")
 	}

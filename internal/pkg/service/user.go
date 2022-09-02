@@ -458,9 +458,8 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	}
 	if param.PhoneNumber != nil {
 		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
-			return errno.ErrCommon.WithMessage("改手机号已被其他账号绑定")
+			return errno.ErrCommon.WithMessage("该手机号已被其他账号绑定")
 		}
-
 		user.PhoneNumber = *param.PhoneNumber
 	}
 	if param.Birthday != nil {
@@ -469,9 +468,24 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if param.Gender != nil {
 		user.Gender = *param.Gender
 	}
-
-	user.AvatarUrl = param.Avatar
-	user.Nickname = param.Nickname
+	if param.Position != "" {
+		user.Position = entity.UserPosition(param.Position)
+	}
+	if param.Partners != 0 {
+		user.Partners = entity.Partner(param.Partners)
+	}
+	if param.Status != 0 {
+		user.Status = param.Status
+	}
+	if param.Auth != 0 {
+		user.Auth = param.Auth
+	}
+	if param.Nickname != "" {
+		user.Nickname = param.Nickname
+	}
+	if param.Avatar != "" {
+		user.AvatarUrl = param.Avatar
+	}
 	return u.r.Save(&user)
 }
 
@@ -547,6 +561,9 @@ func (u UserService) ChangeUserState(param ChangeUserState) error {
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+	if param.Status >= 0 {
+		user.Status = param.Status
+	}
 	return u.r.Save(&user)
 }
 
@@ -560,6 +577,17 @@ func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
 	}
 	if param.PositionIcon != "" {
 		user.PositionIcon = param.PositionIcon
+	}
+	return u.r.Save(&user)
+}
+
+func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
+	user := u.r.GetUserById(param.UserId)
+	if user.ID == 0 {
+		return errno.ErrUserNotFound
+	}
+	if param.Partner >= 0 {
+		user.Partners = entity.Partner(param.Partner)
 	}
 	return u.r.Save(&user)
 }

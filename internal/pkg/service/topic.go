@@ -119,7 +119,39 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 
 	err := query.Count(&total).
 		Group("topic.id").
-		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
+		Order("is_top desc, updated_at desc,id desc").
+		Limit(param.Limit).
+		Offset(param.Offset).
+		Find(&topList).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return topList, total, nil
+}
+
+func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+	topList := make([]*entity.Topic, 0)
+	var total int64
+	query := app.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Preload("Comment", func(db *gorm.DB) *gorm.DB {
+			return db.Where("comment_index.to_comment_id = ?", 0).
+				Order("like_count desc").Limit(10)
+		}).
+		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Order("comment_index.like_count desc")
+		}).
+		Preload("Comment.RootChild.Member").
+		Preload("Comment.Member").
+		Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
+
+	query.Where("topic.user_id = ?", param.UserId)
+
+	err := query.Count(&total).
+		Group("topic.id").
+		Order("is_top desc, updated_at desc, id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
@@ -501,11 +533,13 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) error {
+func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
+	topicModel := entity.Topic{}
 	if content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			return err
+			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			return topicModel, errors.New("内容审核未通过，发布失败。")
 		}
 	}
 
@@ -513,7 +547,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 	imageStr := strings.Join(images, ",")
 
 	//topic
-	topicModel := &entity.Topic{
+	topicModel = entity.Topic{
 		UserId:    userId,
 		Title:     title,
 		Content:   content,
@@ -538,29 +572,28 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
 	}
-
-	if err := srv.repo.Save(topicModel); err != nil {
-		return err
+	if err := srv.repo.Save(&topicModel); err != nil {
+		return topicModel, err
 	}
-	return nil
+	return srv.repo.FindById(topicModel.Id), nil
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) error {
+func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
 	if content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			return err
+			return entity.Topic{}, err
 		}
 	}
 
 	//查询记录是否存在
 	topicModel := srv.repo.FindById(topicId)
 	if topicModel.Id == 0 {
-		return errors.New("该帖子不存在")
+		return entity.Topic{}, errors.New("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
-		return errors.New("无权限修改")
+		return entity.Topic{}, errors.New("无权限修改")
 	}
 	//处理images
 	imageStr := strings.Join(images, ",")
@@ -586,14 +619,14 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
-			return err
+			return entity.Topic{}, err
 		}
 
 	}
-	if err := app.DB.Model(&entity.Topic{}).Updates(topicModel).Error; err != nil {
-		return err
+	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
+		return entity.Topic{}, err
 	}
-	return nil
+	return topicModel, nil
 }
 
 // DetailTopic 获取topic详情
@@ -603,14 +636,11 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 	if topic.Id == 0 {
 		return entity.Topic{}, errors.New("数据不存在")
 	}
-	//查找关联关系
-	tagModels := make([]entity.Tag, 0)
-	err := app.DB.Model(entity.Topic{}).Association("Tags").Find(&tagModels)
+	//更新查看次数 todo
+	err := srv.repo.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
 	if err != nil {
 		return entity.Topic{}, err
 	}
-	topic.Tags = tagModels
-	//更新查看次数
 	return topic, nil
 }
 
@@ -623,22 +653,36 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 	if topicModel.UserId != userId {
 		return errors.New("无权限删除")
 	}
-	topicModel.Status = 4
-	if err := app.DB.Model(&entity.Topic{}).Save(topicModel).Error; err != nil {
+	if err := app.DB.Delete(&topicModel).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) {
-	app.DB.Model(&entity.CommentIndex{}).Select("root_comment_id as total_id, count(*) as total").Where("root_comment_id in ?", ids).Group("root_comment_id").Find(&result)
+	app.DB.Model(&entity.CommentIndex{}).
+		Select("root_comment_id as total_id, count(*) as total").
+		Where("state = ?", 0).
+		Where("root_comment_id in ?", ids).
+		Group("root_comment_id").
+		Find(&result)
 	return result
 }
 
 func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount) {
-	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as total_id, count(*) as total").
+	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("to_comment_id = 0").
+		Where("state = ?", 0).
+		Group("obj_id").
+		Find(&result)
+	return result
+}
+
+func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCount) {
+	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
+		Where("obj_id in ?", ids).
+		Where("state = ?", 0).
 		Group("obj_id").
 		Find(&result)
 	return result

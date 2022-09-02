@@ -35,3 +35,17 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		"pageSize": form.PageSize,
 	}, nil
 }
+
+func (TagController) DetailTag(c *gin.Context) (gin.H, error) {
+	form := IdForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	tag, err := service.DefaultTagService.GetOne(form.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"topic": tag,
+	}, nil
+}

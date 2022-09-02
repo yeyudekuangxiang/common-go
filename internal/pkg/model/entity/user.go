@@ -31,7 +31,7 @@ const (
 type Partner int
 
 const (
-	PartnerLoHoJa Partner = 1
+	PartnerLoHoJa Partner = 1 //乐活家
 )
 
 type User struct {
@@ -46,14 +46,15 @@ type User struct {
 	UnionId      string       `gorm:"column:unionid" json:"unionId"`
 	Time         model.Time   `gorm:"time" json:"time"`
 	GUID         string       `gorm:"guid" json:"guid"`
-	Partners     Partner      `gorm:"partners" json:"partners"` //合作商 0:全部 1:乐活家
-	Position     UserPosition `json:"position"`
+	Partners     Partner      `gorm:"partners" json:"partners"` //合作商 0:全部 1:乐活家 2:非乐活家
+	Position     UserPosition `json:"position"`                 //身份 blue:蓝v yellow:黄v ordinary:普通用户
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`
 	ChannelId    int64        `gorm:"column:channel_id" json:"channel_id"`
 	Ip           string       `json:"ip"`
 	CityCode     string       `json:"city_code"`
-	Status       int          `json:"status"` //0全部 1正常 2禁言 3封号
+	Status       int          `json:"status"` //0全部 1正常 2禁言 3封号 //暂时不用
+	Auth         int          `json:"auth"`   //发帖权限 0无权限 1有权限
 }
 
 func (u User) ShortUser() ShortUser {
@@ -62,9 +63,10 @@ func (u User) ShortUser() ShortUser {
 		AvatarUrl:    u.AvatarUrl,
 		Gender:       u.Gender,
 		Nickname:     u.Nickname,
-		Partner:      u.Partners,
+		Partners:     u.Partners,
 		Position:     u.Position,
 		PositionIcon: u.PositionIcon,
+		Auth:         u.Auth,
 	}
 }
 
@@ -73,9 +75,10 @@ type ShortUser struct {
 	AvatarUrl    string       `gorm:"column:avatar_url" json:"avatarUrl"`
 	Gender       UserGender   `gorm:"column:gender" json:"gender"`
 	Nickname     string       `gorm:"column:nick_name" json:"nickname"`
-	Partner      Partner      `gorm:"partner" json:"partner"`
+	Partners     Partner      `gorm:"partners" json:"partners"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
+	Auth         int          `json:"auth"` //发帖权限 0无权限 1有权限
 }
 
 func (ShortUser) TableName() string {

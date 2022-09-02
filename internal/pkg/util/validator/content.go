@@ -16,7 +16,7 @@ func CheckMsgWithOpenId(openid, content string) error {
 			buffer.WriteString(string(str))
 			if i > 0 && (i+1)%2500 == 0 {
 				params := &security.MsgSecCheckRequest{
-					Content: "",
+					Content: buffer.String(),
 					Version: 2,
 					Scene:   3,
 					Openid:  openid,
@@ -29,7 +29,7 @@ func CheckMsgWithOpenId(openid, content string) error {
 			}
 		}
 		params := &security.MsgSecCheckRequest{
-			Content: "",
+			Content: buffer.String(),
 			Version: 2,
 			Scene:   3,
 			Openid:  openid,

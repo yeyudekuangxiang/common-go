@@ -32,12 +32,15 @@ func apiRouter(router *gin.Engine) {
 
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
-		authRouter.POST("/tag/list", apiutil.Format(api.DefaultTagController.List))
+		//tag
+		authRouter.GET("/tag/list", apiutil.Format(api.DefaultTagController.List))
+		authRouter.GET("/tag/detail", apiutil.Format(api.DefaultTagController.DetailTag))
 
 		//社区文章列表
 		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
 		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
-		userRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		authRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+
 		//文章评论列表
 		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
 		authRouter.GET("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
@@ -81,13 +84,14 @@ func apiRouter(router *gin.Engine) {
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
-			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
+			userRouter.GET("", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
-			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic)) //我的帖子列表
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM)) //绑定手机
+			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic))                  //我的帖子列表
+			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                //我的奖励
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
@@ -128,7 +132,7 @@ func apiRouter(router *gin.Engine) {
 			activityRouter.POST("/answer/close-late-tips", apiutil.Format(activityApi.DefaultAnswerController.CloseLateTips))
 		}
 
-		//酷喵圈相关路由
+		//社区2.0 文章相关路由
 		topicRouter := mustAuthRouter.Group("/topic")
 		{
 			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
@@ -136,9 +140,8 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
-			topicRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic))
 		}
-		//评论相关
+		//社区2.0 评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
 		{
 			commentRouter.POST("/create", apiutil.Format(api.DefaultCommentController.Create))
@@ -148,14 +151,11 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
 		}
 
-		//话题相关
-
 		//积分相关路由
 		pointRouter := mustAuthRouter.Group("/point")
 		{
 			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
-			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
-			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward)) //我的奖励
+			pointRouter.GET("", apiutil.Format(api.DefaultPointController.GetPoint))
 		}
 
 		//步行相关的路由
@@ -220,6 +220,7 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 		//第三方
 		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(api.DefaultRecycleController.GetOolaKey))
+
 		//星星充电发放优惠券
 		//mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
 

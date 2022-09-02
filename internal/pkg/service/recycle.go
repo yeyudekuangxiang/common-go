@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
 	"mio/internal/pkg/core/app"
@@ -114,6 +115,22 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	}
 	//验证签名
 	signMd5 := encrypt.Md5(secret + signStr)
+	if signMd5 != sign {
+		return errno.ErrValidation
+	}
+	return nil
+}
+
+func (srv RecycleService) CheckFmySign(params map[string]interface{}, appId string, secret string) error {
+	sign := params["sign"].(string)
+	delete(params, "sign")
+	rand1 := sign[0:4]
+	rand2 := sign[len(sign)-4:]
+	marshal, _ := json.Marshal(params)
+	verifyData := rand1 + appId + string(marshal) + secret + rand2
+	md5Str := encrypt.Md5(verifyData)
+	signMd5 := rand1 + md5Str[7:21] + rand2
+	//验证签名
 	if signMd5 != sign {
 		return errno.ErrValidation
 	}

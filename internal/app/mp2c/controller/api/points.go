@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -54,7 +55,7 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 }
 func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	pointService := service.NewPointService(context.NewMioContext(context.WithContext(ctx)))
+	pointService := service.NewPointService(context.NewMioContext())
 	point, err := pointService.FindByUserId(user.ID)
 	if err != nil {
 		return nil, err
@@ -65,5 +66,29 @@ func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
 }
 
 func (PointsController) MyReward(ctx *gin.Context) (gin.H, error) {
-	return nil, nil
+	form := controller.PageFrom{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(ctx)
+	//我的奖励分类
+	var myRewardType []entity.PointTransactionType
+	myRewardType = append(myRewardType, entity.POINT_ARTICLE, entity.POINT_LIKE, entity.POINT_RECOMMEND, entity.POINT_COMMENT)
+
+	pointTranactionService := service.NewPointTransactionService(context.NewMioContext())
+	record, total, err := pointTranactionService.PagePointRecord(service.GetPointTransactionPageListBy{
+		OpenId: user.OpenId,
+		Types:  myRewardType,
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list":     record,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
 }

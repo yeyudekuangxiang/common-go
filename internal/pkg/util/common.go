@@ -3,8 +3,10 @@ package util
 import (
 	"github.com/shopspring/decimal"
 	"math"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 func IsTesting() bool {
@@ -94,4 +96,10 @@ func CalcLngLatDistance(lng1 float64, lat1 float64, lng2 float64, lat2 float64) 
 	distance := decimal.NewFromFloat(math.Asin(math.Sqrt(f))).Mul(decimal.NewFromInt32(2)).Mul(decimal.NewFromInt32(6378137))
 	v, _ := distance.Round(2).Float64()
 	return v
+}
+
+// Rand4Number 生成一个随机四位数
+func Rand4Number() string {
+	return string(rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(10000))
+	//生成一个rand
 }
