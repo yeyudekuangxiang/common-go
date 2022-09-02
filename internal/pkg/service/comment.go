@@ -26,7 +26,7 @@ type (
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
-		Like(userId, commentId int64, openId string) (*entity.CommentLike, error)
+		Like(userId, commentId int64, openId string) (*entity.CommentLike, int64, error)
 		AddTopicLikeCount(commentId int64, num int) error
 	}
 )
@@ -267,10 +267,10 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	return *one, point, nil
 }
 
-func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, error) {
+func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, int64, error) {
 	comment, err := srv.commentModel.FindOne(commentId)
 	if err != nil {
-		return &entity.CommentLike{}, err
+		return &entity.CommentLike{}, 0, err
 	}
 	message := comment.Message
 	if len(comment.Message) > 8 {
@@ -278,12 +278,13 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	}
 	like, err := DefaultCommentLikeService.Like(userId, commentId)
 	if err != nil {
-		return &entity.CommentLike{}, err
+		return &entity.CommentLike{}, 0, err
 	}
 	//发放积分
+	var point int64
 	if like.Status == 1 {
 		pointService := NewPointService(context.NewMioContext())
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       openId,
 			Type:         entity.POINT_LIKE,
 			BizId:        util.UUID(),
@@ -292,8 +293,11 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 			Note:         "评论 \"" + message + "\" 点赞",
 			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
 		})
+		if err == nil {
+			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		}
 	}
-	return like, nil
+	return like, point, nil
 }
 
 func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {
