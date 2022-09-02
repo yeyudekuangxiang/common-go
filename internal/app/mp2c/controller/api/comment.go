@@ -77,7 +77,7 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//获取点赞记录
-	var commentRes []*entity.CommentRes
+	commentRes := make([]*entity.CommentRes, 0)
 	likeMap := make(map[int64]int, 0)
 	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
 	if len(commentLike) > 0 {
