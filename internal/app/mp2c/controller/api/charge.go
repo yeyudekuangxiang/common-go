@@ -132,11 +132,12 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if app.Redis.Exists(ctx, form.Ch+"_"+"ChargeException").Val() == 0 && thisPoint > 0 {
 		fmt.Println("星星充电 发券start")
 		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
-		endTime, _ := time.Parse("2006-01-02", "2022-08-30")
+		endTime, _ := time.Parse("2006-01-02", "2022-08-31")
 		if scene.Ch == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
 			starChargeService := service.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
+				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
 				return nil, err
 			}
 			//限制一次
@@ -146,13 +147,11 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
-				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
+				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
 				return nil, err
 			}
 		}
-		fmt.Println("星星充电 发券end")
 	}
-	fmt.Println("end")
 	return gin.H{}, nil
 }
 

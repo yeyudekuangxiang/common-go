@@ -107,16 +107,15 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 }
 
 func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId string, token string) error {
-	//保存记录
-	history := entity.CouponHistory{
-		OpenId:     openId,
-		CouponType: "star_charge",
-		CreateTime: time.Now(),
-	}
-	_, err := repository.DefaultCouponHistoryRepository.Insert(&history)
+	//查询是否已经存在
+	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
+	builder.Where("open_id = ?", openId).Where("coupon_type = ?", "star_charge")
+	count, err := repository.DefaultCouponHistoryRepository.FindCount(builder)
 	if err != nil {
-		fmt.Printf("星星充电,insert error:%s", err.Error())
 		return err
+	}
+	if count != 0 {
+		return errors.New("每位用户限领一次")
 	}
 	r := struct {
 		PhoneNumber string `json:"PhoneNumber"`
@@ -162,14 +161,17 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	if provideResult.SuccStat != 0 {
 		return errors.New(provideResult.FailReasonMsg)
 	}
-	//更新code
-	upResp := entity.CouponHistory{
+	//保存记录
+	history := entity.CouponHistory{
 		OpenId:     openId,
+		CouponType: "star_charge",
 		Code:       provideResult.CouponCode,
+		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
 	}
-	err = repository.DefaultCouponHistoryRepository.Update(&upResp)
+	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
 	if err != nil {
+		fmt.Printf("星星充电,insert error:%s", err.Error())
 		return err
 	}
 	return nil
@@ -178,12 +180,14 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 // CheckLimit 充电检测
 func (srv StarChargeService) CheckChargeLimit(openId string) error {
 	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId).
-		Where("coupon_type = ?", "star_charge")
-	_, err := repository.DefaultCouponHistoryRepository.FindOneQuery(builder)
+	builder.Where("open_id = ?", openId).Where("coupon_type = ?", "star_charge")
+	count, err := repository.DefaultCouponHistoryRepository.FindCount(builder)
 	if err == nil {
 		//已经存在
-		return errors.New("每位用户只限一次")
+		return err
+	}
+	if count != 0 {
+		return errors.New("每位用户限制领取一次")
 	}
 	return nil
 }
