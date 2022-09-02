@@ -673,6 +673,14 @@ func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount)
 	return result
 }
 
+func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCount) {
+	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
+		Where("obj_id in ?", ids).
+		Group("obj_id").
+		Find(&result)
+	return result
+}
+
 func (srv TopicService) getTopicImage(importId int, p string) ([]string, error) {
 	files, err := ioutil.ReadDir(path.Join(p, strconv.Itoa(importId)))
 	if err != nil {

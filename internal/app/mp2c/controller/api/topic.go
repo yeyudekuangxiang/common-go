@@ -266,7 +266,11 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	topicRes := topic.TopicItemRes()
+	//获取评论数量
 
+	CommentCount := service.DefaultTopicService.GetCommentCount([]int64{topicRes.Id})
+	//组装数据---帖子的顶级评论数量
+	topicRes.CommentCount = CommentCount[0].Total
 	//获取点赞数据
 	like, err := service.DefaultTopicLikeService.GetOneByTopic(topic.Id, user.ID)
 	if err == nil {

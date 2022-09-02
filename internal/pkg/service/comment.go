@@ -193,10 +193,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
 	}
-	title := topic.Title
-	if len(topic.Title) > 8 {
-		title = topic.Title[0:8] + "..."
-	}
 	_, err = srv.commentModel.Insert(&comment)
 	if err != nil {
 		return entity.CommentIndex{}, 0, err
@@ -211,7 +207,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			}
 			ToCommentIdRow.RootCount++ //更新父评论的根评论数量
 			ToCommentIdRow.Count++     //更新父评论的评论数量
-			err = app.DB.Model(ToCommentIdRow).Select("root_count", "count").Updates(ToCommentIdRow).Error
+			err = tx.Model(ToCommentIdRow).Select("root_count", "count").Updates(ToCommentIdRow).Error
 			if err != nil {
 				return errors.WithMessage(err, "update ToCommentIdRow:")
 			}
@@ -225,7 +221,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			}
 			comment.RootCommentId = ToCommentId          //更新RootCommentId
 			comment.Floor = int32(ToCommentIdChildCount) //更新楼层
-			err = app.DB.Model(comment).Select("root_comment_id", "floor").Updates(comment).Error
+			err = tx.Model(comment).Select("root_comment_id", "floor").Updates(comment).Error
 			if err != nil {
 				return errors.WithMessage(err, "update dataRow:")
 			}
@@ -237,7 +233,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 					return err
 				}
 				//更新顶级评论下的评论数量
-				err = app.DB.Model(&entity.CommentIndex{}).Where("id = ?", ToCommentIdRow.RootCommentId).Update("count", RootCommentIdChildCount).Error
+				err = tx.Model(&entity.CommentIndex{}).Where("id = ?", ToCommentIdRow.RootCommentId).Update("count", RootCommentIdChildCount).Error
 				if err != nil {
 					return errors.WithMessage(err, "update RootCommentIdRow:")
 				}
@@ -254,15 +250,15 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		return entity.CommentIndex{}, 0, err
 	}
 	//更新积分
-	point := int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
 	pointService := NewPointService(context.NewMioContext())
 	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openId,
-		Type:         entity.POINT_LIKE,
+		Type:         entity.POINT_COMMENT,
 		BizId:        util.UUID(),
 		ChangePoint:  point,
 		AdminId:      0,
-		Note:         "评论笔记 \"" + title + "\" 成功",
+		Note:         "评论成功",
 		AdditionInfo: strconv.FormatInt(topic.Id, 10) + "#" + strconv.FormatInt(comment.Id, 10),
 	})
 	if err != nil {

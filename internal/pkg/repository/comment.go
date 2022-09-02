@@ -70,7 +70,7 @@ func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.Co
 
 func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
-	err := m.Model.First(&resp).Error
+	err := m.Model.First(&resp, id).Error
 	switch err {
 	case nil:
 		return &resp, nil
