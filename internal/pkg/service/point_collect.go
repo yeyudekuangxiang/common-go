@@ -32,6 +32,10 @@ var (
 	powerReplaceRuleOne = []string{
 		"订单编号",
 	}
+	PointCollectBaiGuoYuanOne = []string{
+		"购物袋",
+		"袋",
+	}
 )
 var DefaultPointCollectService = PointCollectService{}
 
@@ -42,6 +46,7 @@ const (
 	PointCollectBikeRideType     PointCollectType = "BIKE_RIDE"
 	PointCollectPowerReplaceType PointCollectType = "POWER_REPLACE"
 	PointCollectDiDiType         PointCollectType = "DIDI"
+	PointCollectBaiGuoYuan       PointCollectType = ""
 )
 
 type PointCollectService struct {

@@ -152,6 +152,7 @@ type FindPointTransactionBy struct {
 	OpenId        string
 	Type          string
 	Note          string
+	AdditionInfo  string
 }
 type FindStepHistoryBy struct {
 	OpenId        string

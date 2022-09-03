@@ -16,6 +16,6 @@ alter table "user"
 comment on column "user".status is '0全部 1正常 2禁言 3封号';
 
 alter table "user"
-    add auth integer default 1 not null;
+    add auth integer default 2 not null;
 
-comment on column "user".auth is '权限字段：0浏览 1评论 2发帖评论';
+comment on column "user".auth is '权限字段：0浏览 1评论 2无权限';

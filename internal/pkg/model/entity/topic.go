@@ -80,8 +80,8 @@ type TopicItemRes struct {
 	IsLike        int            `json:"isLike"`
 }
 
-func (t Topic) TopicItemRes() TopicItemRes {
-	return TopicItemRes{
+func (t Topic) TopicItemRes() *TopicItemRes {
+	return &TopicItemRes{
 		Id:            t.Id,
 		TopicTag:      t.TopicTag,
 		UserId:        t.UserId,

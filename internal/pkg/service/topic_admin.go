@@ -43,9 +43,6 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 	if param.UserId != 0 {
 		query.Where("topic.user_id = ?", param.UserId)
 	}
-	if param.UserName != "" {
-		query.Where("topic.nickname = ?", param.UserName)
-	}
 	if param.Status > 0 {
 		query.Where("topic.status = ?", param.Status)
 	}
@@ -186,21 +183,31 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 		return errors.New("数据不存在")
 	}
 
-	var point int64
-	if status == 3 {
-		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-	}
-	if topic.Status == 3 && status == 4 {
-		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-	}
-
 	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
 		return err
 	}
+	ctx := context.NewMioContext()
+
+	pointService := NewPointService(ctx)
+	pointTransService := NewPointTransactionService(ctx)
+	user, _ := DefaultUserService.GetUserById(topic.UserId)
+
+	by, err := pointTransService.FindBy(repository.FindPointTransactionBy{
+		OpenId:       user.OpenId,
+		Type:         string(entity.POINT_ARTICLE),
+		AdditionInfo: strconv.FormatInt(topic.Id, 10),
+	})
+	if err != nil {
+		return err
+	}
+
+	var point int64
+	if topic.Status == 3 && status == 4 {
+		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	}
 	//发放积分
-	if status == 3 {
-		user, _ := DefaultUserService.GetUserById(topic.UserId)
-		pointService := NewPointService(context.NewMioContext())
+	if status == 3 && by.ID == 0 {
+		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
 		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       user.OpenId,
 			Type:         entity.POINT_ARTICLE,
