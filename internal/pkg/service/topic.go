@@ -105,19 +105,16 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 				Order("comment_index.like_count desc")
 		}).
 		Preload("Comment.RootChild.Member").
-		Preload("Comment.Member").
-		Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
-
+		Preload("Comment.Member")
 	if param.TopicTagId != 0 {
-		query.Where("topic_tag.tag_id = ?", param.TopicTagId)
+		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TopicTagId)
 	}
 	if param.UserId != 0 {
 		query.Where("topic.user_id = ?", param.UserId)
 	}
 
 	query.Where("topic.status = ?", entity.TopicStatusPublished)
-
-	err := query.
+	err := query.Count(&total).
 		Group("topic.id").
 		Order("is_top desc, is_essence desc,like_count desc,updated_at desc").
 		Limit(param.Limit).
@@ -126,7 +123,6 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	if err != nil {
 		return nil, 0, err
 	}
-	total = int64(len(topList))
 	return topList, total, nil
 }
 
@@ -145,21 +141,14 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 				Order("comment_index.like_count desc")
 		}).
 		Preload("Comment.RootChild.Member").
-		Preload("Comment.Member").
-		Joins("inner join topic_tag on topic.id = topic_tag.topic_id")
-
-	if param.TopicTagId != 0 {
-		query.Where("topic_tag.tag_id = ?", param.TopicTagId)
-	}
+		Preload("Comment.Member")
 	query.Where("topic.user_id = ?", param.UserId)
-
-	err := query.
+	err := query.Count(&total).
 		Group("topic.id").
 		Order("is_top desc, is_essence desc,like_count desc,updated_at desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
-	total = int64(len(topList))
 	if err != nil {
 		return nil, 0, err
 	}
