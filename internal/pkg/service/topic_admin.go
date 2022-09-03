@@ -214,7 +214,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 			BizId:        util.UUID(),
 			ChangePoint:  point,
 			AdminId:      0,
-			Note:         "笔记 \"" + topic.Title[0:8] + "...\" 审核通过，发布成功",
+			Note:         "笔记 \"" + string([]rune(topic.Title)[0:8]) + "...\" 审核通过，发布成功",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
 	}
