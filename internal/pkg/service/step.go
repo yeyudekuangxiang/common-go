@@ -217,7 +217,7 @@ func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip
 		UserId:  uid,
 		Type:    entity.CARBON_STEP,
 		Value:   addStepFloat,
-		Info:    fmt.Sprintf("{time=%v, count=%d,allCount=%d}", time.Now(), stepHistory.Count, addStepFloat),
+		Info:    fmt.Sprintf("{time=%v, count=%d,allCount=%f}", time.Now(), stepHistory.Count, addStepFloat),
 		AdminId: 0,
 		Ip:      ip,
 	})

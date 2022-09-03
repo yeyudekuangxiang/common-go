@@ -144,5 +144,10 @@ func sendCoupon(phoneNumber string, provideId string, token string, xing StarCha
 }
 
 func TestTime(t *testing.T) {
-	fmt.Printf("%s", time.Now().Format("20060102150405"))
+	createTime, _ := time.Parse(time.RFC3339Nano, "2022-08-30T14:33:49.807482+08:00")
+	updateTime, _ := time.Parse(time.RFC3339Nano, "2022-09-02T13:16:56.369145+08:00")
+	fmt.Printf("%s\n", createTime)
+	fmt.Printf("%s\n", updateTime)
+	fmt.Printf("%v\n", updateTime.After(createTime))
+
 }
