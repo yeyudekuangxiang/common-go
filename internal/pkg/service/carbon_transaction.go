@@ -74,7 +74,7 @@ func (srv CarbonTransactionService) PointToCarbon() {
 				scene = entity.CARBON_STEP
 				a = sceneInfoSTEP
 				valNew, _ = decimal.NewFromInt(transaction.Value).Mul(decimal.NewFromInt(100)).Float64()
-				info = fmt.Sprintf("{time=%v, count=%d}", time.Now(), valNew)
+				info = fmt.Sprintf("{time=%v, count=%f}", time.Now(), valNew)
 			}
 			if transaction.Type == entity.POINT_BIKE_RIDE {
 				scene = entity.CARBON_BIKE_RIDE
@@ -92,7 +92,7 @@ func (srv CarbonTransactionService) PointToCarbon() {
 				scene = entity.CARBON_ECAR
 				a = sceneInfoECAR
 				valNew, _ = decimal.NewFromInt(transaction.Value).Div(decimal.NewFromInt(10)).Round(2).Float64()
-				info = fmt.Sprintf("{time=%v, count=%d}", time.Now(), valNew)
+				info = fmt.Sprintf("{time=%v, count=%f}", time.Now(), valNew)
 			}
 			carbon := srv.repoScene.GetValue(a, valNew) //增加的碳量
 			ret, _ := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{

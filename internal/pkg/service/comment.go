@@ -120,7 +120,7 @@ func (srv *defaultCommentService) FindListAndChild(params *entity.CommentIndex, 
 		Where("obj_id = ?", params.ObjId).
 		Where("state = ?", 0).
 		Count(&total).
-		Order("like_count desc, id asc").
+		Order("like_count desc, updated_at desc").
 		Limit(limit).
 		Offset(offset).
 		Find(&commentList).Error
@@ -139,7 +139,7 @@ func (srv *defaultCommentService) FindSubList(data *entity.CommentIndex, offSize
 		Where("root_comment_id = ?", data.RootCommentId).
 		Where("state = ?", 0).
 		Count(&total).
-		Order("like_count desc, id asc").
+		Order("like_count desc, updated_at desc").
 		Find(&commentList).Error
 	if err != nil {
 		return nil, 0, err
@@ -258,7 +258,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		BizId:        util.UUID(),
 		ChangePoint:  point,
 		AdminId:      0,
-		Note:         "评论成功",
+		Note:         "评论" + string([]rune(comment.Message)[0:8]) + "..." + "成功",
 		AdditionInfo: strconv.FormatInt(topic.Id, 10) + "#" + strconv.FormatInt(comment.Id, 10),
 	})
 	if err != nil {
@@ -272,30 +272,10 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	if err != nil {
 		return &entity.CommentLike{}, 0, err
 	}
-	message := comment.Message
-	if len(comment.Message) > 8 {
-		message = comment.Message[0:8] + "..."
-	}
-	like, err := DefaultCommentLikeService.Like(userId, commentId)
+
+	like, point, err := DefaultCommentLikeService.Like(userId, commentId, comment.Message, openId)
 	if err != nil {
 		return &entity.CommentLike{}, 0, err
-	}
-	//发放积分
-	var point int64
-	if like.Status == 1 {
-		pointService := NewPointService(context.NewMioContext())
-		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       openId,
-			Type:         entity.POINT_LIKE,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-			AdminId:      0,
-			Note:         "评论 \"" + message + "\" 点赞",
-			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
-		})
-		if err == nil {
-			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
-		}
 	}
 	return like, point, nil
 }

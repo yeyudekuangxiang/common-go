@@ -137,7 +137,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	resList := make([]entity.TopicItemRes, 0)
+	resList := make([]*entity.TopicItemRes, 0)
 	//点赞数据
 	likeMap := make(map[int]int, 0)
 	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
@@ -278,8 +278,37 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	resList := make([]*entity.TopicItemRes, 0)
+	//点赞数据
+	likeMap := make(map[int]int, 0)
+	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	if len(likeList) > 0 {
+		for _, item := range likeList {
+			likeMap[item.TopicId] = int(item.Status)
+		}
+	}
+
+	//获取顶级评论数量
+	ids := make([]int64, 0) //topicId
+	for _, item := range list {
+		ids = append(ids, item.Id)
+	}
+	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
+	//组装数据---帖子的顶级评论数量
+	topic2comment := make(map[int64]int64, 0)
+	for _, item := range rootCommentCount {
+		topic2comment[item.TopicId] = item.Total
+	}
+	for _, item := range list {
+		res := item.TopicItemRes()
+		res.CommentCount = topic2comment[res.Id]
+		if _, ok := likeMap[int(res.Id)]; ok {
+			res.IsLike = likeMap[int(res.Id)]
+		}
+		resList = append(resList, res)
+	}
 	return gin.H{
-		"list":     list,
+		"list":     resList,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,

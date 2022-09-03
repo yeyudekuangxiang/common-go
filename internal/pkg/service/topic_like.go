@@ -32,24 +32,27 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 	}
 	title := topic.Title
 	if len(topic.Title) > 8 {
-		title = topic.Title[0:8] + "..."
+		title = string([]rune(topic.Title)[0:8]) + "..."
 	}
 	r := repository.TopicLikeRepository{DB: app.DB}
 	like := r.FindBy(repository.FindTopicLikeBy{
 		TopicId: topicId,
 		UserId:  userId,
 	})
+	var isFirst bool
 	if like.Id == 0 {
 		like.Status = 1
 		like.TopicId = topicId
 		like.UserId = userId
 		like.CreatedAt = model.Time{Time: time.Now()}
+		isFirst = true
 	} else {
 		like.UpdatedAt = model.Time{Time: time.Now()}
 		like.Status = (like.Status + 1) % 2
+		isFirst = false
 	}
 	var point int64
-	if like.Status == 1 {
+	if like.Status == 1 && isFirst == true {
 		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
 		pointService := NewPointService(context.NewMioContext())
 		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
