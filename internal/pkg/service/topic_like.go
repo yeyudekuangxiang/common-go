@@ -31,7 +31,7 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 		return nil, 0, errors.New("帖子不存在")
 	}
 	title := topic.Title
-	if len(topic.Title) > 8 {
+	if len([]rune(title)) > 8 {
 		title = string([]rune(topic.Title)[0:8]) + "..."
 	}
 	r := repository.TopicLikeRepository{DB: app.DB}

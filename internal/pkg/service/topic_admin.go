@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -205,18 +206,23 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	if topic.Status == 3 && status == 4 {
 		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
 	}
+	title := topic.Title
+	if len([]rune(title)) > 8 {
+		title = string([]rune(title)[0:8]) + "..."
+	}
 	//发放积分
 	if status == 3 && by.ID == 0 {
 		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       user.OpenId,
 			Type:         entity.POINT_ARTICLE,
 			BizId:        util.UUID(),
 			ChangePoint:  point,
 			AdminId:      0,
-			Note:         "笔记 \"" + string([]rune(topic.Title)[0:8]) + "...\" 审核通过，发布成功",
+			Note:         "笔记 " + title + "... 审核通过，发布成功",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
+		fmt.Printf("%s\n", err.Error())
 	}
 	return nil
 }
@@ -248,6 +254,10 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 	}
 	//发放积分
 	if isEssence == 1 {
+		title := topic.Title
+		if len([]rune(title)) > 8 {
+			title = string([]rune(title)[0:8]) + "..."
+		}
 		user, _ := DefaultUserService.GetUserById(topic.UserId)
 		pointService := NewPointService(context.NewMioContext())
 		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
@@ -256,7 +266,7 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
 			AdminId:      0,
-			Note:         "笔记 \"" + string([]rune(topic.Title)[0:9]) + "...\" 被设为精华",
+			Note:         "笔记 \"" + title + "...\" 被设为精华",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
 	}

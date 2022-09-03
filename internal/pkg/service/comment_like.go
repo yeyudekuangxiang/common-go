@@ -41,7 +41,7 @@ func (t CommentLikeService) Like(userId, commentId int64, message, openId string
 	} else {
 		_ = DefaultCommentService.AddTopicLikeCount(commentId, -1)
 	}
-	if len(message) > 8 {
+	if len([]rune(message)) > 8 {
 		message = string([]rune(message)[0:8]) + "..."
 	}
 	//发放积分
