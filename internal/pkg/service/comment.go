@@ -250,6 +250,11 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		return entity.CommentIndex{}, 0, err
 	}
 	//更新积分
+	messagerune := []rune(comment.Message)
+	if len(messagerune) > 8 {
+		message = string(messagerune[0:8])
+	}
+
 	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
 	pointService := NewPointService(context.NewMioContext())
 	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
@@ -258,7 +263,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		BizId:        util.UUID(),
 		ChangePoint:  point,
 		AdminId:      0,
-		Note:         "评论" + string([]rune(comment.Message)[0:8]) + "..." + "成功",
+		Note:         "评论" + message + "..." + "成功",
 		AdditionInfo: strconv.FormatInt(topic.Id, 10) + "#" + strconv.FormatInt(comment.Id, 10),
 	})
 	if err != nil {
