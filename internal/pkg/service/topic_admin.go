@@ -55,7 +55,6 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 	if param.TagId != 0 {
 		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
 	}
-	query.Count(&total)
 	err := query.Group("topic.id").
 		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
 		Limit(param.Limit).
@@ -64,6 +63,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 	if err != nil {
 		return topList, total, err
 	}
+	total = int64(len(topList))
 	return topList, total, nil
 }
 
@@ -256,7 +256,7 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 			BizId:        util.UUID(),
 			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
 			AdminId:      0,
-			Note:         "笔记 \"" + topic.Title[0:8] + "...\" 被设为精华",
+			Note:         "笔记 \"" + string([]rune(topic.Title)[0:9]) + "...\" 被设为精华",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
 	}

@@ -62,7 +62,7 @@ func (repo PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.
 		db.Where("type", by.Type)
 	}
 	if by.OpenId != "" {
-		db.Where("open_id", by.OpenId)
+		db.Where("openid", by.OpenId)
 	}
 	if by.Note != "" {
 		db.Where("note", by.Note)
