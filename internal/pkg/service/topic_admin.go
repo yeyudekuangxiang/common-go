@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -213,7 +212,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	//发放积分
 	if status == 3 && by.ID == 0 {
 		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       user.OpenId,
 			Type:         entity.POINT_ARTICLE,
 			BizId:        util.UUID(),
@@ -222,7 +221,6 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 			Note:         "笔记 " + title + "... 审核通过，发布成功",
 			AdditionInfo: strconv.FormatInt(topic.Id, 10),
 		})
-		fmt.Printf("%s\n", err.Error())
 	}
 	return nil
 }
