@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -32,7 +33,12 @@ type TopicAdminService struct {
 func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
-	query := app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User")
+	query := app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User", func(db *gorm.DB) *gorm.DB {
+		if param.UserName != "" {
+			db.Where("user.nick_name = ?", param.UserName)
+		}
+		return db
+	})
 
 	if param.ID != 0 {
 		query.Where("topic.id = ?", param.ID)
