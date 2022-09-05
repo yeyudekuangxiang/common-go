@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -32,7 +33,12 @@ type TopicAdminService struct {
 func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
-	query := app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User")
+	query := app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User", func(db *gorm.DB) *gorm.DB {
+		if param.UserName != "" {
+			db.Where("user.nick_name = ?", param.UserName)
+		}
+		return db
+	})
 
 	if param.ID != 0 {
 		query.Where("topic.id = ?", param.ID)
@@ -69,12 +75,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 }
 
 //CreateTopic 创建文章
-func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, title, content string, tagIds []int64, images []string) error {
-	//检查内容
-	//err := srv.checkMsgs(openid, content)
-	//if err != nil {
-	//	return err
-	//}
+func (srv TopicAdminService) CreateTopic(userId int64, title, content string, tagIds []int64, images []string) error {
 	//处理images
 	imageStr := strings.Join(images, ",")
 	//topic
@@ -84,8 +85,6 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 		Content:   content,
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
-		Avatar:    avatarUrl,
-		Nickname:  "绿喵",
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
@@ -112,8 +111,6 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 
 // UpdateTopic 更新帖子
 func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, tagIds []int64, images []string) error {
-	//检查内容
-	//err := srv.checkMsgs(openid, content)
 	//查询记录是否存在
 	topicModel := srv.topic.FindById(topicId)
 	if topicModel.Id == 0 {
