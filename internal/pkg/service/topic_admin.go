@@ -75,12 +75,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 }
 
 //CreateTopic 创建文章
-func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, title, content string, tagIds []int64, images []string) error {
-	//检查内容
-	//err := srv.checkMsgs(openid, content)
-	//if err != nil {
-	//	return err
-	//}
+func (srv TopicAdminService) CreateTopic(userId int64, title, content string, tagIds []int64, images []string) error {
 	//处理images
 	imageStr := strings.Join(images, ",")
 	//topic
@@ -90,8 +85,6 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 		Content:   content,
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
-		Avatar:    avatarUrl,
-		Nickname:  "绿喵",
 		CreatedAt: model.Time{},
 		UpdatedAt: model.Time{},
 	}
@@ -118,8 +111,6 @@ func (srv TopicAdminService) CreateTopic(userId int64, avatarUrl, nikeName, titl
 
 // UpdateTopic 更新帖子
 func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, tagIds []int64, images []string) error {
-	//检查内容
-	//err := srv.checkMsgs(openid, content)
 	//查询记录是否存在
 	topicModel := srv.topic.FindById(topicId)
 	if topicModel.Id == 0 {
