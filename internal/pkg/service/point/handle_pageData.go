@@ -66,6 +66,30 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 	return res, nil
 }
 
+func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, error) {
+	types := []entity.PointTransactionType{
+		entity.POINT_FMY_RECYCLING_CLOTHING,
+	}
+	openIds := []string{c.clientHandle.OpenId}
+	result, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	//减碳量计算
+	var co2, co2Count int64
+	res := make(map[string]interface{}, 0)
+	//co2
+	for _, item := range result {
+		additionalInfo := strings.Split(string(item["additional_info"].(entity.AdditionalInfo)), "#")
+		co2, _ = strconv.ParseInt(additionalInfo[1], 10, 64)
+		co2Count += co2
+	}
+	//返回数据
+	res["count"] = count
+	res["co2"] = co2Count
+	return res, nil
+}
+
 //快电
 func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}

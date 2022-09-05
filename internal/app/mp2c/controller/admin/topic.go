@@ -17,7 +17,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	
+
 	//get topic by params
 	list, total, err := service.DefaultTopicAdminService.GetTopicList(repository.TopicListRequest{
 		ID:        form.ID,
