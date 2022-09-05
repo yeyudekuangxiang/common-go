@@ -51,9 +51,13 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 		like.Status = (like.Status + 1) % 2
 		isFirst = false
 	}
+	if like.Status == 1 {
+		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
+	} else {
+		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
+	}
 	var point int64
 	if like.Status == 1 && isFirst == true {
-		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
 		pointService := NewPointService(context.NewMioContext())
 		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       openId,
@@ -67,10 +71,7 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 		if err == nil {
 			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
 		}
-	} else {
-		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
 	}
-
 	return &like, point, r.Save(&like)
 }
 

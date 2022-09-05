@@ -17,6 +17,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	
 	//get topic by params
 	list, total, err := service.DefaultTopicAdminService.GetTopicList(repository.TopicListRequest{
 		ID:        form.ID,
@@ -76,9 +77,8 @@ func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//user
-	user := apiutil.GetAuthAdmin(c)
 	//创建帖子
-	err := service.DefaultTopicAdminService.CreateTopic(int64(user.ID), user.Avatar, user.Nickname, form.Title, form.Content, form.TagIds, form.Images)
+	err := service.DefaultTopicAdminService.CreateTopic(int64(1451), form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
