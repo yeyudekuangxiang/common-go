@@ -178,7 +178,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		}
 		userRiskRankParam.MobileNo = userInfo.PhoneNumber
 	}
-	resp, err := service.DefaultUserService.CheckUserRisk(userRiskRankParam)
+	/*resp, err := service.DefaultUserService.CheckUserRisk(userRiskRankParam)
 	if err != nil && activityId != "index" {
 		app.Logger.Info("DuiBaAutoLogin 风险等级查询查询出错", err.Error())
 	} else {
@@ -186,6 +186,10 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			return "", nil
 			//return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
 		}
+	}*/
+	if userInfo.Risk > activity.RiskLimit {
+		return "", nil
+		//return "", errors.New("该活动仅限部分地区用户参与,请看看其他活动")
 	}
 
 	vip := 0
