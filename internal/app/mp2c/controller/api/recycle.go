@@ -215,7 +215,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	//加积分
 	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
-		Type:         typeName,
+		Type:         entity.POINT_FMY_RECYCLING_CLOTHING,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
 		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatInt(currCo2, 10) + "#" + form.Data.Phone,
