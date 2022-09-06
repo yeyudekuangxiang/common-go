@@ -62,10 +62,10 @@ type RecyclePushForm struct {
 }
 
 type RecycleFmyForm struct {
-	AppId          string         `json:"app_id,omitempty" form:"app_id" binding:"required"`                   //业务类型 1：回首订单成功
-	NotificationAt string         `json:"notification_at,omitempty" form:"notification_at" binding:"required"` //订单号，同类型同订单视为重复订单
-	Sign           string         `json:"sign,omitempty" form:"sign" binding:"required"`                       //type = 1，回收物品名称
-	Data           RecycleFmyData `json:"data,omitempty" form:"data"`
+	AppId          string         `json:"app_id" form:"app_id" binding:"required"`
+	NotificationAt string         `json:"notification_at" form:"notification_at" binding:"required"`
+	Data           RecycleFmyData `json:"data" form:"data"`
+	Sign           string         `json:"sign" form:"sign" binding:"required"`
 }
 
 type RecycleFmyData struct {

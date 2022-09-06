@@ -116,7 +116,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	query.Where("topic.status = ?", entity.TopicStatusPublished)
 	err := query.Count(&total).
 		Group("topic.id").
-		Order("is_top desc, is_essence desc,like_count desc,updated_at desc").
+		Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.like_count desc, topic.updated_at desc, topic.id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
