@@ -68,11 +68,16 @@ func TestHMAC_Md5(t *testing.T) {
 }
 
 func TestMd5(t *testing.T) {
-	Md5 := md5.New()
-	Md5.Write([]byte("123"))
-	md5Data := Md5.Sum([]byte(""))
+	h1 := md5.New()
+	h1.Write([]byte("123456"))
+	md5Data := h1.Sum([]byte(""))
 	str := hex.EncodeToString(md5Data)
 	fmt.Printf("%s\n", str)
+
+	h := md5.New()
+	h.Write([]byte("123456"))
+	re := h.Sum(nil)
+	fmt.Printf("%x\n", re)
 }
 
 func TestAES(t *testing.T) {
@@ -98,7 +103,7 @@ func aesEncrypt(orig string, key, iv string) string {
 	block, _ := aes.NewCipher(k)
 	// 获取秘钥块的长度
 	blockSize := block.BlockSize()
-	// 补全码
+	// 补全 码
 	origData = pkcs7Padding(origData, blockSize)
 	// 加密模式
 	blockMode := cipher.NewCBCEncrypter(block, []byte(iv))
@@ -125,7 +130,7 @@ func aesDecrypt(cryted string, key, iv string) string {
 	origin := make([]byte, len(crytedByte))
 	// 解密
 	blockMode.CryptBlocks(origin, crytedByte)
-	// 去补全码
+	// 去 补全 码
 	origin, err := pkcs7Trimming(origin)
 	if err != nil {
 		return err.Error()

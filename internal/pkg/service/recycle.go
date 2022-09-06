@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -28,10 +29,11 @@ type RecycleService struct {
 
 //每个大分类对应的每月获取积分上限
 var recycleMonthPoint = map[entity.PointTransactionType]int64{
-	entity.POINT_RECYCLING_CLOTHING:  2709, // 旧衣回收
-	entity.POINT_RECYCLING_BOOK:      322,  // 书籍课本
-	entity.POINT_RECYCLING_DIGITAL:   1911, // 数码产品
-	entity.POINT_RECYCLING_APPLIANCE: 1840, // 家电回收
+	entity.POINT_RECYCLING_CLOTHING:     2709, // 旧衣回收
+	entity.POINT_RECYCLING_BOOK:         322,  // 书籍课本
+	entity.POINT_RECYCLING_DIGITAL:      1911, // 数码产品
+	entity.POINT_RECYCLING_APPLIANCE:    1840, // 家电回收
+	entity.POINT_FMY_RECYCLING_CLOTHING: 2709,
 }
 
 //获取分类
@@ -40,6 +42,7 @@ var pointRecycleByRules = map[string]entity.PointTransactionType{
 	"书籍课本": entity.POINT_RECYCLING_BOOK,      // 人/月
 	"数码产品": entity.POINT_RECYCLING_DIGITAL,   // 人/月
 	"家电回收": entity.POINT_RECYCLING_APPLIANCE, // 人/月
+	"旧物回收": entity.POINT_FMY_RECYCLING_CLOTHING,
 }
 
 // 回收 台 单位对应积分 比如 电视机 1台 获得 69积分
@@ -54,6 +57,7 @@ var recyclePointByNum = map[string]int64{
 	"电视机":   69,
 	"衣帽鞋包":  21, //1000g : 21 积分
 	"书籍课本":  6,  //1000g : 6 积分
+	"旧物回收":  21,
 }
 
 // 回收 台/重量 单位对应减碳量 比如 电视机 1台 获得 15000g 减碳量
@@ -68,6 +72,7 @@ var recycleCo2ByNum = map[string]int64{
 	"电视机":   15000,
 	"衣帽鞋包":  4500, //1000g : 4500g
 	"书籍课本":  1400, //1000g : 1400g
+	"旧物回收":  4500,
 }
 
 //每个类型对应次数
@@ -82,11 +87,11 @@ var recycleLimit = map[string]int{
 	"洗衣机":   1,
 	"空调":    1,
 	"电视机":   1,
+	"旧物回收":  1,
 }
 
 // CheckLimit 检查该类型今日获取次数
 func (srv RecycleService) CheckLimit(openId, typeName string) error {
-
 	if err := srv.checkLimit(openId, typeName); err != nil {
 		return err
 	}
@@ -121,15 +126,16 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	return nil
 }
 
-func (srv RecycleService) CheckFmySign(params map[string]interface{}, appId string, secret string) error {
-	sign := params["sign"].(string)
-	delete(params, "sign")
-	rand1 := sign[0:4]
-	rand2 := sign[len(sign)-4:]
+func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secret string) error {
+	sign := params.Sign
+	params.Sign = ""
+	rand1 := string([]rune(sign)[0:4])
+	rand2 := string([]rune(sign)[len(sign)-4:])
 	marshal, _ := json.Marshal(params)
+	fmt.Printf("marshal:%s\n", marshal)
 	verifyData := rand1 + appId + string(marshal) + secret + rand2
 	md5Str := encrypt.Md5(verifyData)
-	signMd5 := rand1 + md5Str[7:21] + rand2
+	signMd5 := rand1 + md5Str[7:28] + rand2
 	//验证签名
 	if signMd5 != sign {
 		return errno.ErrValidation
@@ -149,8 +155,17 @@ func (srv RecycleService) GetMaxPointByMonth(typeName entity.PointTransactionTyp
 // GetType 获取大类型
 func (srv RecycleService) GetType(typeName string) entity.PointTransactionType {
 	for name, typeN := range pointRecycleByRules {
-		if typeName == name {
+		if typeName == name || typeName == string(typeN) {
 			return typeN
+		}
+	}
+	return ""
+}
+
+func (srv RecycleService) GetText(typeName entity.PointTransactionType) string {
+	for name, typeN := range pointRecycleByRules {
+		if typeName == typeN {
+			return name
 		}
 	}
 	return ""
@@ -232,4 +247,38 @@ func (srv RecycleService) checkOrder(openId, orderNo string) error {
 		return errors.New("重复订单")
 	}
 	return nil
+}
+
+func (srv RecycleService) getText(typeText entity.PointTransactionType) string {
+	switch typeText {
+	case entity.POINT_RECYCLING_CLOTHING:
+		return "衣物鞋帽"
+	case entity.POINT_RECYCLING_DIGITAL:
+		return "数码产品"
+	case entity.POINT_RECYCLING_BOOK:
+		return "书籍课本"
+	case entity.POINT_RECYCLING_APPLIANCE:
+		return "家电回收"
+	case entity.POINT_FMY_RECYCLING_CLOTHING:
+		return "旧物回收"
+	default:
+		return "未知类型"
+	}
+}
+
+func (srv RecycleService) getPointType(typeText string) entity.PointTransactionType {
+	switch typeText {
+	case "衣物鞋帽":
+		return entity.POINT_RECYCLING_CLOTHING
+	case "数码产品":
+		return entity.POINT_RECYCLING_DIGITAL
+	case "书籍课本":
+		return entity.POINT_RECYCLING_BOOK
+	case "家电回收":
+		return entity.POINT_RECYCLING_APPLIANCE
+	case "旧物回收":
+		return entity.POINT_FMY_RECYCLING_CLOTHING
+	default:
+		return entity.PointTransactionType("未知类型")
+	}
 }

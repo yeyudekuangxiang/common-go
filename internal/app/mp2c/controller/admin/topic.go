@@ -35,12 +35,15 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(list) == 0 {
+		return nil, nil
+	}
 	//获取顶级评论数量
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
-	rootCommentCount := service.DefaultTopicService.GetCommentCount(ids)
+	rootCommentCount := service.DefaultTopicAdminService.GetCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {

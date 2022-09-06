@@ -62,7 +62,7 @@ func (p PointTransactionType) Text() string {
 		return "活动奖励"
 	case POINT_POWER_REPLACE:
 		return "新能源换电" //oola
-	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK:
+	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK, POINT_FMY_RECYCLING_CLOTHING:
 		return "旧物回收"
 	case POINT_ARTICLE:
 		return "发帖"
@@ -72,6 +72,8 @@ func (p PointTransactionType) Text() string {
 		return "评论"
 	case POINT_LIKE:
 		return "点赞"
+	case POINT_REDUCE_PLASTIC:
+		return "环保减塑"
 	}
 	return "未知积分"
 }
@@ -152,6 +154,7 @@ const (
 	POINT_RECOMMEND PointTransactionType = "RECOMMEND" //推荐
 	POINT_LIKE      PointTransactionType = "LIKE"      //点赞
 
+	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC" //环保减塑
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -195,6 +198,7 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_FAST_ELECTRICITY,
 	POINT_COMMENT,
 	POINT_LIKE,
+	POINT_REDUCE_PLASTIC,
 }
 
 const (
@@ -203,14 +207,15 @@ const (
 
 // 积分限制
 var PointCollectValueMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:    39,  //	每次
-	POINT_BIKE_RIDE:     42,  //	每次
-	POINT_INVITE:        500, //	每人/天
-	POINT_POWER_REPLACE: 300, //	每人/天
-	POINT_ARTICLE:       150, //	每次
-	POINT_COMMENT:       10,  //每次
-	POINT_LIKE:          5,   //每次
-	POINT_RECOMMEND:     50,  //每次
+	POINT_COFFEE_CUP:     39,  //	每次
+	POINT_BIKE_RIDE:      42,  //	每次
+	POINT_INVITE:         500, //	每人/天
+	POINT_POWER_REPLACE:  300, //	每人/天
+	POINT_ARTICLE:        150, //	每次
+	POINT_COMMENT:        10,  //每次
+	POINT_LIKE:           5,   //每次
+	POINT_RECOMMEND:      50,  //每次
+	POINT_REDUCE_PLASTIC: 28,  //每次
 }
 
 var PointCollectValueMapDay = map[PointTransactionType]int{
@@ -220,13 +225,14 @@ var PointCollectValueMapDay = map[PointTransactionType]int{
 
 //每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:    2, //	次/天
-	POINT_BIKE_RIDE:     2, //	次/天
-	POINT_INVITE:        5, //	次/天
-	POINT_POWER_REPLACE: 1, //	次/天
-	POINT_ARTICLE:       2, //	次/天
-	POINT_COMMENT:       3, // 次
-	POINT_LIKE:          6, // 次
+	POINT_COFFEE_CUP:     2, //	次/天
+	POINT_BIKE_RIDE:      2, //	次/天
+	POINT_INVITE:         5, //	次/天
+	POINT_POWER_REPLACE:  1, //	次/天
+	POINT_ARTICLE:        2, //	次/天
+	POINT_COMMENT:        3, // 次
+	POINT_LIKE:           6, // 次
+	POINT_REDUCE_PLASTIC: 2, // 次
 }
 
 type PointTransaction struct {

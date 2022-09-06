@@ -18,7 +18,7 @@ func CheckMsgWithOpenId(openid, content string) error {
 				params := &security.MsgSecCheckRequest{
 					Content: buffer.String(),
 					Version: 2,
-					Scene:   3,
+					Scene:   2,
 					Openid:  openid,
 				}
 				err := checkMsg(params)
@@ -31,7 +31,7 @@ func CheckMsgWithOpenId(openid, content string) error {
 		params := &security.MsgSecCheckRequest{
 			Content: buffer.String(),
 			Version: 2,
-			Scene:   3,
+			Scene:   2,
 			Openid:  openid,
 		}
 		err := checkMsg(params)
@@ -45,7 +45,7 @@ func CheckMsgWithOpenId(openid, content string) error {
 	params := &security.MsgSecCheckRequest{
 		Content: content,
 		Version: 2,
-		Scene:   3,
+		Scene:   2,
 		Openid:  openid,
 	}
 	err := checkMsg(params)
@@ -62,6 +62,9 @@ func checkMsg(params *security.MsgSecCheckRequest) error {
 	}
 	if check.ErrCode != 0 {
 		return fmt.Errorf("check error: %s", check.ErrMSG)
+	}
+	if check.Result.Suggest != "pass" && check.Result.Label != 100 {
+		return fmt.Errorf("check error: %s", "内容不合规，请重新输入")
 	}
 	return nil
 }

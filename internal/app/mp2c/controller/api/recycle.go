@@ -150,7 +150,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("渠道查询失败")
 	}
 
-	dst := make(map[string]interface{}, 0)
+	dst := service.FmySignParams{}
 	err := util.MapTo(&form, &dst)
 	if err != nil {
 		return nil, err
@@ -179,31 +179,23 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	}
 
 	//避开重放
-	if !util.DefaultLock.Lock(form.NotificationAt+form.Data.OrderSn, 24*3600*30*time.Second) {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
-	}
 	if err = RecycleService.CheckOrder(userInfo.OpenId, form.Data.OrderSn); err != nil {
 		return nil, err
 	}
 
-	//匹配大类型
-	typeName := RecycleService.GetType(string(entity.POINT_RECYCLING_CLOTHING))
-	if typeName == "" {
-		return nil, errors.New("未识别回收分类")
-	}
-
+	//默认只有衣物
+	typeName := entity.POINT_FMY_RECYCLING_CLOTHING
+	typeText := RecycleService.GetText(typeName)
 	//查询今日该类型获取积分次数
-	err = RecycleService.CheckLimit(userInfo.OpenId, string(typeName))
+	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
 	if err != nil {
 		return nil, err
 	}
 
 	//本次可得积分
-	currPoint, _ := RecycleService.GetPoint(string(typeName), form.Data.Weight)
+	currPoint, _ := RecycleService.GetPoint(typeText, form.Data.Weight)
 	//本次可得减碳量 todo
-	currCo2, _ := RecycleService.GetCo2(string(typeName), form.Data.Weight)
+	currCo2, _ := RecycleService.GetCo2(typeText, form.Data.Weight)
 	//本月可获得积分上限
 	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
 
