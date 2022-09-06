@@ -66,6 +66,7 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 	return res, nil
 }
 
+//飞蚂蚁
 func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, error) {
 	types := []entity.PointTransactionType{
 		entity.POINT_FMY_RECYCLING_CLOTHING,
@@ -87,6 +88,21 @@ func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, erro
 	//返回数据
 	res["count"] = count
 	res["co2"] = co2Count
+	return res, nil
+}
+
+//环保减塑
+func (c *defaultClientHandle) reducePlasticPageData() (map[string]interface{}, error) {
+	types := []entity.PointTransactionType{c.clientHandle.Type}
+	openIds := []string{c.clientHandle.OpenId}
+	_, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	//返回数据
+	res := make(map[string]interface{}, 0)
+	res["count"] = count
+	res["co2"] = 55 * count
 	return res, nil
 }
 

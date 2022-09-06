@@ -44,4 +44,5 @@ var pageDataMap = map[string]*commandDescription{
 	"OOLA_RECYCLE":     {FnPageData: (*defaultClientHandle).oolaRecyclePageData},     //oola旧物回收
 	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData}, //快电
 	"FMY_RECYCLE":      {FnPageData: (*defaultClientHandle).fmyRecyclePageData},
+	"REDUCE_PLASTIC":   {FnPageData: (*defaultClientHandle).reducePlasticPageData},
 }
