@@ -131,7 +131,7 @@ func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secre
 	fmt.Printf("marshal:%s\n", marshal)
 	verifyData := rand1 + appId + string(marshal) + secret + rand2
 	md5Str := encrypt.Md5(verifyData)
-	signMd5 := rand1 + md5Str[7:21] + rand2
+	signMd5 := rand1 + md5Str[7:28] + rand2
 	//验证签名
 	if signMd5 != sign {
 		return errno.ErrValidation
