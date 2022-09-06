@@ -13,6 +13,14 @@ type GetUserBy struct {
 	LikeMobile string //手机号模糊匹配
 	UnionId    string
 }
+
+type UpdateUserRisk struct {
+	UserIdSlice []int64  `json:"UserIdSlice"`
+	OpenIdSlice []string `json:"OpenIdSlice"`
+	PhoneSlice  []string `json:"PhoneSlice"`
+	Risk        int      `json:"Risk"`
+}
+
 type FindTopicLikeBy struct {
 	TopicId int
 	UserId  int
@@ -95,6 +103,10 @@ type GetUserPageListBy struct {
 
 type FindPointBy struct {
 	OpenId string
+}
+
+type FindListPoint struct {
+	OpenIds []string
 }
 type GetPointTransactionListBy struct {
 	OpenId    string
@@ -220,13 +232,14 @@ type FindUserChannelBy struct {
 }
 
 type GetUserChannelPageListBy struct {
-	Name    string             `json:"name" `
-	Code    string             `json:"code" `
-	Cid     int                `json:"cid"`
-	Pid     int                `json:"pid"`
-	Offset  int                `json:"offset"`
-	Limit   int                `json:"limit"` //limit为0时不限制数量
-	OrderBy entity.OrderByList `json:"orderBy"`
+	Name     string             `json:"name" `
+	Code     string             `json:"code" `
+	Cid      int                `json:"cid"`
+	CidSlice []int64            `json:"cidSlice"`
+	Pid      int                `json:"pid"`
+	Offset   int                `json:"offset"`
+	Limit    int                `json:"limit"` //limit为0时不限制数量
+	OrderBy  entity.OrderByList `json:"orderBy"`
 }
 
 type FindTopicBy struct {

@@ -233,9 +233,8 @@ type ShowDuiBaActivityForm struct {
 	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
 }
 
-/*
-user start
-*/
+//user start
+
 type UpdateUser struct {
 	IDForm
 	Status   int    `json:"status,omitempty" form:"status" alias:"status"`
@@ -244,10 +243,15 @@ type UpdateUser struct {
 	Auth     int    `json:"auth,omitempty" form:"auth" alias:"auth"`
 }
 
-/*
-user end
-*/
+//user end
 
 type StarChargeSendCoupon struct {
 	OpenId string `json:"openId" form:"openId" binding:"required"`
+}
+
+type UpdateUserRisk struct {
+	UserIdSlice []int64  `json:"UserIdSlice"`
+	OpenIdSlice []string `json:"OpenIdSlice"`
+	PhoneSlice  []string `json:"PhoneSlice"`
+	Risk        int      `json:"Risk"`
 }

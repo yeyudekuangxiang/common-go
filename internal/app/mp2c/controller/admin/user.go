@@ -126,3 +126,56 @@ func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 
 	return nil, nil
 }
+
+//用户列表
+
+func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
+	form := UserPageListForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	list, total := service.DefaultUserService.GetUserRiskPageListBy(repository.GetUserPageListBy{
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+		User: repository.GetUserListBy{
+			Mobile:   form.Mobile,
+			UserId:   form.ID,
+			Status:   form.State,
+			Nickname: form.Nickname,
+		},
+		OrderBy: "id desc",
+	})
+	return gin.H{
+		"users":    list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
+//risk统计分类
+
+func (ctr UserController) RiskStatistics(c *gin.Context) (gin.H, error) {
+	list := service.DefaultUserService.GetUserRiskStatisticst()
+	return gin.H{
+		"date": list,
+	}, nil
+}
+
+//更新用户风险等级
+
+func (ctr UserController) UpdateRisk(c *gin.Context) (gin.H, error) {
+	var form UpdateUserRisk
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if err := service.DefaultUserService.BatchUpdateUserRisk(service.UpdateRiskParam{
+		UserIdSlice: form.UserIdSlice,
+		PhoneSlice:  form.PhoneSlice,
+		OpenIdSlice: form.OpenIdSlice,
+		Risk:        form.Risk,
+	}); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}

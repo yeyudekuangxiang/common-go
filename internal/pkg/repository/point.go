@@ -34,6 +34,18 @@ func (repo PointRepository) FindBy(by FindPointBy) entity.Point {
 	return point
 }
 
+func (repo PointRepository) FindListPoint(by FindListPoint) []entity.Point {
+	list := make([]entity.Point, 0)
+	point := entity.Point{}
+	db := repo.ctx.DB.Model(point)
+	if len(by.OpenIds) != 0 {
+		db.Where("openid in(?)", by.OpenIds)
+	}
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}
 func (repo PointRepository) FindForUpdate(openId string) (entity.Point, error) {
 	point := entity.Point{}
 	err := repo.ctx.DB.

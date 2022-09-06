@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
@@ -25,18 +26,24 @@ import (
 	"time"
 )
 
-var DefaultUserService = NewUserService(repository.DefaultUserRepository, repository.InviteRepository{})
+var DefaultUserService = NewUserService(repository.DefaultUserRepository, repository.InviteRepository{}, repository.CityRepository{}, repository.UserChannelRepository{}, repository.PointRepository{})
 
-func NewUserService(r repository.UserRepository, rInvite repository.InviteRepository) UserService {
+func NewUserService(r repository.UserRepository, rInvite repository.InviteRepository, rCity repository.CityRepository, rChannel repository.UserChannelRepository, rPoint repository.PointRepository) UserService {
 	return UserService{
-		r:       r,
-		rInvite: rInvite,
+		r:        r,
+		rInvite:  rInvite,
+		rCity:    rCity,
+		rChannel: &rChannel,
+		rPoint:   rPoint,
 	}
 }
 
 type UserService struct {
-	r       repository.UserRepository
-	rInvite repository.InviteRepository
+	r        repository.UserRepository
+	rInvite  repository.InviteRepository
+	rCity    repository.CityRepository
+	rChannel *repository.UserChannelRepository
+	rPoint   repository.PointRepository
 }
 
 // GetUser 查询用户信息
@@ -451,6 +458,7 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, error) {
 	return u.r.GetUserListBy(by), nil
 }
+
 func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	user := u.r.GetUserById(param.UserId)
 	if user.ID == 0 {
@@ -489,10 +497,102 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	return u.r.Save(&user)
 }
 
+func (u UserService) BatchUpdateUserRisk(param UpdateRiskParam) error {
+	err := u.r.BatchUpdateUserRisk(repository.UpdateUserRisk{
+		UserIdSlice: param.UserIdSlice,
+		OpenIdSlice: param.OpenIdSlice,
+		PhoneSlice:  param.PhoneSlice,
+		Risk:        param.Risk,
+	})
+	return err
+}
+
 func (u UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
 	return u.r.GetUserPageListBy(by)
 }
 
+func (u UserService) GetUserRiskPageListBy(by repository.GetUserPageListBy) ([]api_types.UserVO, int64) {
+	list, total := u.r.GetUserPageListBy(by)
+	var cidSlice []int64
+	var openidSlice, citySlice []string
+	cityMap := make(map[string]entity.City)
+	pointMap := make(map[string]entity.Point)
+	channelMap := make(map[int64]entity.UserChannel)
+
+	for _, user := range list {
+		cidSlice = append(cidSlice, user.ChannelId)
+		openidSlice = append(openidSlice, user.OpenId)
+		citySlice = append(citySlice, user.CityCode)
+	}
+
+	//获取渠道信息
+	if len(cidSlice) != 0 {
+		channelList, _ := u.rChannel.GetUserChannelPageList(repository.GetUserChannelPageListBy{CidSlice: cidSlice})
+		for _, channel := range channelList {
+			channelMap[channel.Cid] = channel
+		}
+	}
+
+	//获取积分信息
+	if len(openidSlice) != 0 {
+		pointList := u.rPoint.FindListPoint(repository.FindListPoint{OpenIds: openidSlice})
+		for _, point := range pointList {
+			pointMap[point.OpenId] = point
+		}
+	}
+
+	//城市信息
+	if len(citySlice) != 0 {
+		cityList, _ := u.rCity.GetList(repotypes.GetCityListDO{CityCodeSlice: citySlice})
+		for _, city := range cityList {
+			cityMap[city.CityCode] = city
+		}
+	}
+
+	userVoList := make([]api_types.UserVO, 0)
+	for _, l := range list {
+
+		//初始化
+		var balance int64
+		var cityName, channelName string
+
+		//积分值
+		point, ok := pointMap[l.OpenId]
+		if ok {
+			balance = point.Balance
+		}
+
+		//城市名
+		city, ok2 := cityMap[l.CityCode]
+		if ok2 {
+			cityName = city.Name
+		}
+
+		//渠道名
+		channel, ok3 := channelMap[l.ChannelId]
+		if ok3 {
+			channelName = channel.Name
+		}
+
+		//整理
+		userVoList = append(userVoList, api_types.UserVO{
+			OpenId:      l.OpenId,
+			Nickname:    l.Nickname,
+			AvatarUrl:   l.AvatarUrl,
+			PhoneNumber: l.PhoneNumber,
+			Risk:        l.Risk,
+			Point:       balance,
+			CityName:    cityName,
+			ChannelName: channelName,
+		})
+	}
+	return userVoList, total
+}
+
+func (u UserService) GetUserRiskStatisticst() []repository.RiskStatistics {
+	list := u.r.GetRiskStatistics()
+	return list
+}
 func (u UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
 	user := u.r.GetUserById(param.UserId)
 	if user.ID == 0 {
