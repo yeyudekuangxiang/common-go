@@ -10,6 +10,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
@@ -21,15 +22,20 @@ import (
 var (
 	ZeroActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-13 00:00:00")
 )
-var DefaultZeroService = ZeroService{repo: repository.NewPointTransactionRepository(mioContext.NewMioContext())}
+var DefaultZeroService = ZeroService{
+	repo:      repository.NewPointTransactionRepository(mioContext.NewMioContext()),
+	repoOrder: repository.NewOrderRepository(app.DB),
+}
 
 type ZeroService struct {
-	repo *repository.PointTransactionRepository
+	repo      *repository.PointTransactionRepository
+	repoOrder repository.OrderRepository
 }
 
 func NewZeroService(ctx *mioContext.MioContext) *ZeroService {
 	return &ZeroService{
-		repo: repository.NewPointTransactionRepository(ctx),
+		repo:      repository.NewPointTransactionRepository(ctx),
+		repoOrder: repository.NewOrderRepository(app.DB),
 	}
 }
 
@@ -203,6 +209,21 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			vip = 2
 		}
 		break
+
+	case entity.DuiBaActivityRecyclingPublicWelfareWeekActivity:
+		//需求地址：https://jira.miotech.com/browse/MP2C-1591
+		var pointTypes = []string{"RECYCLING_CLOTHING", "RECYCLING_COMPUTER", "RECYCLING_APPLIANCE", "RECYCLING_BOOK"}
+		count := srv.repo.GetListByFenQunCount(repository.GetPointTransactionListByQun{
+			StartTime: "2022-09-07:00:00:01",
+			EndTime:   "2022-09-14:00:00:01",
+			Types:     pointTypes,
+			OpenId:    userInfo.OpenId,
+		})
+		var ItemIdSlice = []string{"28ee4e3e60f403512b79968b11d86c15", "b00064a760f400a42850b68e1f783c22"}
+		orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{Openid: userInfo.OpenId, ItemIdSlice: ItemIdSlice})
+		if count >= 1 && orderTotal >= 1 {
+			vip = 56
+		}
 	case entity.DuiBaActivityIsPhoneAnniversaryActivity:
 		//需求地址：https://confluence.miotech.com/pages/viewpage.action?pageId=26613756
 		var pointTypes = []string{"STEP", "COFFEE_CUP", "BIKE_RIDE", "ECAR"}
@@ -231,6 +252,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			}
 		}
 		break
+
 	default:
 		break
 	}
