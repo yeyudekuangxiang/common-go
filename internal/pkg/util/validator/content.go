@@ -63,5 +63,8 @@ func checkMsg(params *security.MsgSecCheckRequest) error {
 	if check.ErrCode != 0 {
 		return fmt.Errorf("check error: %s", check.ErrMSG)
 	}
+	if check.Result.Suggest != "pass" && check.Result.Label != 100 {
+		return fmt.Errorf("check error: %s", "内容不合规，请重新输入")
+	}
 	return nil
 }
