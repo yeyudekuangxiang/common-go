@@ -62,7 +62,7 @@ func (p PointTransactionType) Text() string {
 		return "活动奖励"
 	case POINT_POWER_REPLACE:
 		return "新能源换电" //oola
-	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK:
+	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK, POINT_FMY_RECYCLING_CLOTHING:
 		return "旧物回收"
 	case POINT_ARTICLE:
 		return "发帖"
@@ -152,7 +152,7 @@ const (
 	POINT_RECOMMEND PointTransactionType = "RECOMMEND" //推荐
 	POINT_LIKE      PointTransactionType = "LIKE"      //点赞
 
-	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC"
+	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC" //环保减塑
 )
 
 var PointTransactionTypeList = []PointTransactionType{
