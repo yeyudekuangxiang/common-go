@@ -72,6 +72,8 @@ func (p PointTransactionType) Text() string {
 		return "评论"
 	case POINT_LIKE:
 		return "点赞"
+	case POINT_REDUCE_PLASTIC:
+		return "环保减塑"
 	}
 	return "未知积分"
 }
