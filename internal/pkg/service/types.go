@@ -470,3 +470,22 @@ type OolaSignParams struct {
 	CompletionTime      string `json:"completionTime" form:"completionTime" binding:"required"` //订单完成时间
 	//Sign                string `json:"sign" form:"sign" binding:"required"`                     //加密串
 }
+
+type FmySignParams struct {
+	AppId          string         `json:"app_id" form:"app_id" binding:"required"`
+	NotificationAt string         `json:"notification_at" form:"notification_at" binding:"required"`
+	Data           RecycleFmyData `json:"data" form:"data"`
+	Sign           string         `json:"sign,omitempty"`
+}
+
+type RecycleFmyData struct {
+	OrderSn          string `json:"order_sn,omitempty" binding:"required"`
+	Status           string `json:"status,omitempty" binding:"required"`
+	Weight           string `json:"weight,omitempty"`
+	Reason           string `json:"reason,omitempty"`
+	CourierRealName  string `json:"courier_real_name,omitempty"`
+	CourierPhone     string `json:"courier_phone,omitempty"`
+	CourierJobNumber string `json:"courier_job_number,omitempty"`
+	Waybill          string `json:"waybill,omitempty"`
+	Phone            string `json:"phone,omitempty"`
+}

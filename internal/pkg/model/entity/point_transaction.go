@@ -152,6 +152,7 @@ const (
 	POINT_RECOMMEND PointTransactionType = "RECOMMEND" //推荐
 	POINT_LIKE      PointTransactionType = "LIKE"      //点赞
 
+	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC"
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -195,6 +196,7 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_FAST_ELECTRICITY,
 	POINT_COMMENT,
 	POINT_LIKE,
+	POINT_REDUCE_PLASTIC,
 }
 
 const (
@@ -203,14 +205,15 @@ const (
 
 // 积分限制
 var PointCollectValueMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:    39,  //	每次
-	POINT_BIKE_RIDE:     42,  //	每次
-	POINT_INVITE:        500, //	每人/天
-	POINT_POWER_REPLACE: 300, //	每人/天
-	POINT_ARTICLE:       150, //	每次
-	POINT_COMMENT:       10,  //每次
-	POINT_LIKE:          5,   //每次
-	POINT_RECOMMEND:     50,  //每次
+	POINT_COFFEE_CUP:     39,  //	每次
+	POINT_BIKE_RIDE:      42,  //	每次
+	POINT_INVITE:         500, //	每人/天
+	POINT_POWER_REPLACE:  300, //	每人/天
+	POINT_ARTICLE:        150, //	每次
+	POINT_COMMENT:        10,  //每次
+	POINT_LIKE:           5,   //每次
+	POINT_RECOMMEND:      50,  //每次
+	POINT_REDUCE_PLASTIC: 28,  //每次
 }
 
 var PointCollectValueMapDay = map[PointTransactionType]int{
@@ -220,13 +223,14 @@ var PointCollectValueMapDay = map[PointTransactionType]int{
 
 //每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:    2, //	次/天
-	POINT_BIKE_RIDE:     2, //	次/天
-	POINT_INVITE:        5, //	次/天
-	POINT_POWER_REPLACE: 1, //	次/天
-	POINT_ARTICLE:       2, //	次/天
-	POINT_COMMENT:       3, // 次
-	POINT_LIKE:          6, // 次
+	POINT_COFFEE_CUP:     2, //	次/天
+	POINT_BIKE_RIDE:      2, //	次/天
+	POINT_INVITE:         5, //	次/天
+	POINT_POWER_REPLACE:  1, //	次/天
+	POINT_ARTICLE:        2, //	次/天
+	POINT_COMMENT:        3, // 次
+	POINT_LIKE:           6, // 次
+	POINT_REDUCE_PLASTIC: 2, // 次
 }
 
 type PointTransaction struct {

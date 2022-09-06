@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -33,13 +32,7 @@ type TopicAdminService struct {
 func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
-	query := app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User", func(db *gorm.DB) *gorm.DB {
-		if param.UserName != "" {
-			db.Where("user.nick_name = ?", param.UserName)
-		}
-		return db
-	})
-
+	query := app.DB.Model(&entity.Topic{})
 	if param.ID != 0 {
 		query.Where("topic.id = ?", param.ID)
 	}
@@ -61,10 +54,15 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 	if param.TagId != 0 {
 		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
 	}
+	if param.UserName != "" {
+		query.Joins("left join \"user\" on \"user\".id = topic.user_id").Where("\"user\".nick_name = ?", "绿喵")
+	}
 
-	err := query.Count(&total).
+	query.Preload("Tags").Preload("User")
+	err := query.
+		Count(&total).
 		Group("topic.id").
-		Order("is_top desc, is_essence desc, updated_at desc, created_at desc, id desc").
+		Order("topic.is_top desc, topic.is_essence desc, topic.see_count, topic.updated_at desc, topic.id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
@@ -267,4 +265,12 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 		})
 	}
 	return nil
+}
+
+func (srv TopicAdminService) GetCommentCount(ids []int64) (result []CommentCount) {
+	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
+		Where("obj_id in ?", ids).
+		Group("obj_id").
+		Find(&result)
+	return result
 }

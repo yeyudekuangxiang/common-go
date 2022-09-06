@@ -367,8 +367,7 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 
 func (srv CarbonTransactionService) AddClassifyByUid(uid int64) {
 	list := srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
-		Uid:     uid,
-		EndTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
+		Uid: uid,
 	})
 	DateMap := make(map[int64]map[entity.CarbonTransactionType]float64)
 	for _, by := range list {

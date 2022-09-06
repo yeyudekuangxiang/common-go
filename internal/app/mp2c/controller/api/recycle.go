@@ -150,7 +150,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("渠道查询失败")
 	}
 
-	dst := make(map[string]interface{}, 0)
+	dst := service.FmySignParams{}
 	err := util.MapTo(&form, &dst)
 	if err != nil {
 		return nil, err

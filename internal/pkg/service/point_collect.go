@@ -46,7 +46,7 @@ const (
 	PointCollectBikeRideType     PointCollectType = "BIKE_RIDE"
 	PointCollectPowerReplaceType PointCollectType = "POWER_REPLACE"
 	PointCollectDiDiType         PointCollectType = "DIDI"
-	PointCollectBaiGuoYuan       PointCollectType = ""
+	PointCollectReducePlastic    PointCollectType = "REDUCE_PLASTIC"
 )
 
 type PointCollectService struct {
@@ -65,6 +65,7 @@ func (srv PointCollectService) validateCoffeeCupImage(imageUrl string) (bool, []
 	}
 	return false, nil, nil
 }
+
 func (srv PointCollectService) validatePointRule(texts []string, rules []string) string {
 	for _, text := range texts {
 		for _, rule := range rules {
@@ -75,6 +76,7 @@ func (srv PointCollectService) validatePointRule(texts []string, rules []string)
 	}
 	return ""
 }
+
 func (srv PointCollectService) validateBikeRideImage(imageUrl string) (bool, []string, error) {
 	results, err := DefaultOCRService.Scan(imageUrl)
 	if err != nil {
@@ -86,6 +88,7 @@ func (srv PointCollectService) validateBikeRideImage(imageUrl string) (bool, []s
 	}
 	return false, nil, nil
 }
+
 func (srv PointCollectService) validatePowerReplaceImage(imageUrl string) (bool, []string, error) {
 	results, err := DefaultOCRService.Scan(imageUrl)
 	fmt.Println(results, err)
@@ -98,6 +101,20 @@ func (srv PointCollectService) validatePowerReplaceImage(imageUrl string) (bool,
 	}
 	return false, nil, nil
 }
+
+func (srv PointCollectService) validateReducePlasticImage(imageUrl string) (bool, []string, error) {
+	results, err := DefaultOCRService.Scan(imageUrl)
+	fmt.Println(results, err)
+	if err != nil {
+		return false, nil, err
+	}
+	result := srv.validatePointRule(results, PointCollectBaiGuoYuanOne)
+	if result != "" {
+		return true, []string{result}, nil
+	}
+	return false, nil, nil
+}
+
 func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl string) (int, error) {
 	err := DefaultOCRService.CheckIdempotent(openId)
 	if err != nil {
@@ -143,6 +160,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	})
 	return value, err
 }
+
 func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUrl string) (int, error) {
 	err := DefaultOCRService.CheckIdempotent(openId)
 	if err != nil {
@@ -188,6 +206,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 	})
 	return value, err
 }
+
 func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imageUrl string) (int, error) {
 	err := DefaultOCRService.CheckIdempotent(openId)
 	if err != nil {
@@ -227,6 +246,54 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openId,
 		Type:         entity.POINT_POWER_REPLACE,
+		BizId:        util.UUID(),
+		ChangePoint:  int64(value),
+		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+	})
+	return value, err
+}
+
+func (srv PointCollectService) CollectReducePlastic(openId string, risk int, imageUrl string) (int, error) {
+
+	err := DefaultOCRService.CheckIdempotent(openId)
+	if err != nil {
+		return 0, err
+	}
+	err = DefaultOCRService.CheckRisk(risk)
+	if err != nil {
+		return 0, err
+	}
+	ok, err := NewPointTransactionCountLimitService(context.NewMioContext()).
+		CheckLimit(entity.POINT_REDUCE_PLASTIC, openId)
+	if err != nil {
+		return 0, err
+	}
+	if !ok {
+		return 0, errors.New("达到当日该类别最大积分限制")
+	}
+
+	valid, result, err := srv.validateReducePlasticImage(imageUrl)
+	if err != nil {
+		return 0, err
+	}
+	//true
+	if valid {
+		return 0, nil
+	}
+
+	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
+		OpenId:          openId,
+		TransactionType: entity.POINT_REDUCE_PLASTIC,
+		Info:            fmt.Sprintf("reducePlastic=%v", result),
+	})
+	if err != nil {
+		app.Logger.Error("添加环保减塑记录失败", openId, imageUrl, err)
+	}
+
+	value := entity.PointCollectValueMap[entity.POINT_REDUCE_PLASTIC]
+	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       openId,
+		Type:         entity.POINT_REDUCE_PLASTIC,
 		BizId:        util.UUID(),
 		ChangePoint:  int64(value),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
