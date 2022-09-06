@@ -106,11 +106,11 @@ type AnswerQuizQuestionForm struct {
 	Choice     string `json:"choice" form:"choice" binding:"required" alias:"choice"`
 }
 type UploadPointCollectImageForm struct {
-	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE" alias:"类型"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC" alias:"类型"`
 }
 type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
-	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE" alias:"类型"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC" alias:"类型"`
 }
 
 type NewCollectForm struct {
