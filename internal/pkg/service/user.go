@@ -26,9 +26,18 @@ import (
 	"time"
 )
 
-var DefaultUserService = NewUserService(repository.DefaultUserRepository, repository.InviteRepository{}, repository.CityRepository{}, repository.UserChannelRepository{}, repository.PointRepository{})
+var DefaultUserService = NewUserService(
+	repository.DefaultUserRepository,
+	repository.InviteRepository{},
+	repository.CityRepository{},
+	repository.UserChannelRepository{app.DB},
+	repository.PointRepository{})
 
-func NewUserService(r repository.UserRepository, rInvite repository.InviteRepository, rCity repository.CityRepository, rChannel repository.UserChannelRepository, rPoint repository.PointRepository) UserService {
+func NewUserService(r repository.UserRepository,
+	rInvite repository.InviteRepository,
+	rCity repository.CityRepository,
+	rChannel repository.UserChannelRepository,
+	rPoint repository.PointRepository) UserService {
 	return UserService{
 		r:        r,
 		rInvite:  rInvite,
