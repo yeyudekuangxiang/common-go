@@ -55,7 +55,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
 	}
 	if param.UserName != "" {
-		query.Joins("left join \"user\" on \"user\".id = topic.user_id").Where("\"user\".nick_name = ?", "绿喵")
+		query.Joins("left join \"user\" on \"user\".id = topic.user_id").Where("\"user\".nick_name = ?", param.UserName)
 	}
 
 	query.Preload("Tags").Preload("User")

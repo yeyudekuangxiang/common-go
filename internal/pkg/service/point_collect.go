@@ -36,6 +36,9 @@ var (
 		"购物袋",
 		"袋",
 	}
+	PointCollectBaiGuoYuanTwo = []string{
+		"百果园",
+	}
 )
 var DefaultPointCollectService = PointCollectService{}
 
@@ -109,7 +112,8 @@ func (srv PointCollectService) validateReducePlasticImage(imageUrl string) (bool
 		return false, nil, err
 	}
 	result := srv.validatePointRule(results, PointCollectBaiGuoYuanOne)
-	if result != "" {
+	result2 := srv.validatePointRule(results, PointCollectBaiGuoYuanTwo)
+	if result == "" && result2 != "" {
 		return true, []string{result}, nil
 	}
 	return false, nil, nil
@@ -276,9 +280,8 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 	if err != nil {
 		return 0, err
 	}
-	//true
-	if valid {
-		return 0, nil
+	if !valid {
+		return 0, errors.New("不是有效的图片")
 	}
 
 	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
