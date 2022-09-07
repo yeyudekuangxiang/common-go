@@ -8,3 +8,8 @@ type GetPageFullOrderDO struct {
 	Limit       int
 	Offset      int
 }
+
+type GetOrderTotalByItemIdDO struct {
+	Openid      string
+	ItemIdSlice []string
+}

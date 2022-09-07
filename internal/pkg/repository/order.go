@@ -54,3 +54,16 @@ func (repo OrderRepository) GetPageFullOrder(do repotypes.GetPageFullOrderDO) ([
 
 	return list, total, db.Count(&total).Offset(do.Offset).Limit(do.Limit).Preload("OrderGoods").Find(&list).Error
 }
+
+func (repo OrderRepository) GetOrderTotalByItemId(by repotypes.GetOrderTotalByItemIdDO) int64 {
+	var total int64
+	db := repo.DB.Model(entity.Order{})
+	db.Joins("left join order_item on \"order\".order_id = order_item.order_id ")
+	db.Where("order.openid", by.Openid)
+	db.Where("order_item.item_id in (?)", by.ItemIdSlice)
+	err := db.Count(&total).Error
+	if err != nil {
+		return 0
+	}
+	return total
+}
