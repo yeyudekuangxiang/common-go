@@ -296,6 +296,10 @@ type RedeemCouponParam struct {
 	CouponId  string
 	OrderType entity.OrderType
 }
+type RedeemCouponByCodeParam struct {
+	OpenId       string
+	RedeemCodeId string
+}
 type RedeemCouponWithTransactionParam struct {
 	OpenId               string
 	CouponId             string
@@ -318,9 +322,8 @@ type RedeemCouponWithTransactionResult struct {
 	OrderId string `json:"orderId"`
 }
 type GenerateCouponBatchParam struct {
-	CouponTypeId       string
-	BatchSize          int
-	GenerateRedeemCode bool
+	CouponTypeId string
+	BatchSize    int
 }
 
 type ProcessPromotionInformationInfo struct {
