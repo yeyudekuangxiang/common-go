@@ -219,7 +219,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			Types:     pointTypes,
 			OpenId:    userInfo.OpenId,
 		})
-		var ItemIdSlice = []string{"28ee4e3e60f403512b79968b11d86c15", "b00064a760f400a42850b68e1f783c22"}
+		var ItemIdSlice = []string{"cbddf0af60f402f717b0987b79709209", "b00064a760f400a42850b68e1f783c22"}
 		orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{
 			Openid:      userInfo.OpenId,
 			ItemIdSlice: ItemIdSlice,
