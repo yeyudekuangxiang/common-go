@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 )
 
 var DefaultQuizSingleRecordService = QuizSingleRecordService{}
@@ -30,6 +31,20 @@ func (srv QuizSingleRecordService) CreateSingleRecord(param CreateSingleRecordPa
 		AnswerDate: t.Date(),
 	}
 	return &record, app.DB.Create(&record).Error
+}
+func (srv QuizSingleRecordService) IsAnswered(openId string, questionId string) error {
+	record := entity.QuizSingleRecord{}
+	err := app.DB.Where("openid = ? and question_id = ? and answer_date = ?", openId, questionId, timeutils.NowDate().Time).Take(&record).Error
+
+	if err == nil {
+		return errno.ErrLimit.WithMessage("重复提交")
+	}
+
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	}
+
+	return err
 }
 
 // GetTodayAnswerNum 获取今天已答题数量
