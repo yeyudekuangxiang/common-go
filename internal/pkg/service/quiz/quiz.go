@@ -41,6 +41,10 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 	}
 	defer util.DefaultLock.UnLock("QuizAnswerQuestion" + openid)
 
+	if err := DefaultQuizSingleRecordService.IsAnswered(openid, questionId); err != nil {
+		return nil, err
+	}
+
 	todayAnsweredNum := DefaultQuizSingleRecordService.GetTodayAnswerNum(openid)
 	if todayAnsweredNum >= OneDayAnswerNum {
 		return nil, errors.New("答题数量超出限制")
