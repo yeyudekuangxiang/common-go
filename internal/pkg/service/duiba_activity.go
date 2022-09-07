@@ -154,9 +154,9 @@ func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64,
 	path := ""
 	isCheckPhone := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "true", "false").String()
 	if needShare == entity.DuiBaActivityIsShareYes {
-		path = fmt.Sprintf("pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
+		path = fmt.Sprintf("/pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
 	} else {
-		path = fmt.Sprintf("pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
+		path = fmt.Sprintf("/pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
 	}
 	return path
 }
