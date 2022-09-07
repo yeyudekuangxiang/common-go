@@ -373,6 +373,13 @@ type UpdateUserInfoParam struct {
 	Auth        int
 }
 
+type UpdateRiskParam struct {
+	UserIdSlice []string
+	OpenIdSlice []string
+	PhoneSlice  []string
+	Risk        int
+}
+
 type UpdateUserRiskParam struct {
 	UserId int64
 	Risk   int

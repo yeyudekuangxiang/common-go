@@ -233,9 +233,8 @@ type ShowDuiBaActivityForm struct {
 	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
 }
 
-/*
-user start
-*/
+//user start
+
 type UpdateUser struct {
 	IDForm
 	Status   int    `json:"status,omitempty" form:"status" alias:"status"`
@@ -244,10 +243,14 @@ type UpdateUser struct {
 	Auth     int    `json:"auth,omitempty" form:"auth" alias:"auth"`
 }
 
-/*
-user end
-*/
+//user end
 
 type StarChargeSendCoupon struct {
 	OpenId string `json:"openId" form:"openId" binding:"required"`
+}
+
+type UpdateUserRisk struct {
+	Ids  string `json:"ids" form:"ids"    binding:"required"`
+	Type int    `json:"type" form:"type"  binding:"oneof=1 2 3" alias:"提交类型  1 uid、2 手机号、3 openid "`
+	Risk int    `json:"risk" form:"risk"  binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
 }

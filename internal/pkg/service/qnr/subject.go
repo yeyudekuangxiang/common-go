@@ -49,7 +49,6 @@ func (srv SubjectService) GetList(openid string) (gin.H, error) {
 	if info.UserId != 0 {
 		isSubmit = 1
 	}
-
 	//所有的题目
 	subjectList, subjectErr := srv.repo.List(repotypes.GetQuestSubjectGetListBy{
 		QnrId: 1, //金融调查问卷
