@@ -10,6 +10,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
+
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
@@ -30,7 +31,7 @@ var DefaultUserService = NewUserService(
 	repository.DefaultUserRepository,
 	repository.InviteRepository{},
 	repository.CityRepository{},
-	repository.UserChannelRepository{app.DB},
+	repository.UserChannelRepository{DB: app.DB},
 	repository.PointRepository{})
 
 func NewUserService(r repository.UserRepository,
@@ -43,7 +44,7 @@ func NewUserService(r repository.UserRepository,
 		rInvite:  rInvite,
 		rCity:    rCity,
 		rChannel: &rChannel,
-		rPoint:   rPoint,
+		rPoint:   &rPoint,
 	}
 }
 
@@ -52,7 +53,7 @@ type UserService struct {
 	rInvite  repository.InviteRepository
 	rCity    repository.CityRepository
 	rChannel *repository.UserChannelRepository
-	rPoint   repository.PointRepository
+	rPoint   *repository.PointRepository
 }
 
 // GetUser 查询用户信息
