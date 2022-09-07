@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -35,6 +36,11 @@ func (srv QuizService) Availability(openid string) (bool, error) {
 	return !isAnsweredToday, nil
 }
 func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*AnswerQuestionResult, error) {
+	if !util.DefaultLock.Lock("QuizAnswerQuestion"+openid, time.Second*5) {
+		return nil, errno.ErrLimit
+	}
+	defer util.DefaultLock.UnLock("QuizAnswerQuestion" + openid)
+
 	todayAnsweredNum := DefaultQuizSingleRecordService.GetTodayAnswerNum(openid)
 	if todayAnsweredNum >= OneDayAnswerNum {
 		return nil, errors.New("答题数量超出限制")
@@ -68,7 +74,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 }
 func (srv QuizService) Submit(openId string) error {
 	if !util.DefaultLock.Lock(fmt.Sprintf("QUIZ_Ssubmit%s", openId), time.Second*10) {
-		return errors.New("操作频繁,请稍后再试")
+		return errno.ErrLimit
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
