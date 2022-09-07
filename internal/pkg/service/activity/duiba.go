@@ -220,7 +220,11 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			OpenId:    userInfo.OpenId,
 		})
 		var ItemIdSlice = []string{"28ee4e3e60f403512b79968b11d86c15", "b00064a760f400a42850b68e1f783c22"}
-		orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{Openid: userInfo.OpenId, ItemIdSlice: ItemIdSlice})
+		orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{
+			Openid:      userInfo.OpenId,
+			ItemIdSlice: ItemIdSlice,
+			StartTime:   "2022-09-07:00:00:01",
+			EndTime:     "2022-09-14:00:00:01"})
 		if count >= 1 && orderTotal >= 1 {
 			vip = 56
 		}

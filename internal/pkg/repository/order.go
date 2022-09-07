@@ -61,6 +61,7 @@ func (repo OrderRepository) GetOrderTotalByItemId(by repotypes.GetOrderTotalByIt
 	db.Joins("left join order_item on \"order\".order_id = order_item.order_id ")
 	db.Where("order.openid", by.Openid)
 	db.Where("order_item.item_id in (?)", by.ItemIdSlice)
+	db.Where("paid_time >= ?", by.StartTime).Where("paid_time <= ?", by.EndTime)
 	err := db.Count(&total).Error
 	if err != nil {
 		return 0
