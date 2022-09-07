@@ -56,8 +56,9 @@ const (
 type DuiBaActivityVipType int8
 
 const (
-	DuiBaActivityVipTypeNewUser             DuiBaActivityVipType = 1
-	DuiBaActivityIsPhoneAnniversaryActivity DuiBaActivityVipType = 2
+	DuiBaActivityVipTypeNewUser                     DuiBaActivityVipType = 1
+	DuiBaActivityIsPhoneAnniversaryActivity         DuiBaActivityVipType = 2
+	DuiBaActivityRecyclingPublicWelfareWeekActivity DuiBaActivityVipType = 3
 )
 
 const (
