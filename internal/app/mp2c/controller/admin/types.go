@@ -250,8 +250,7 @@ type StarChargeSendCoupon struct {
 }
 
 type UpdateUserRisk struct {
-	UserIdSlice []int64  `json:"UserIdSlice"`
-	OpenIdSlice []string `json:"OpenIdSlice"`
-	PhoneSlice  []string `json:"PhoneSlice"`
-	Risk        int      `json:"Risk"`
+	Ids  string `json:"ids" form:"ids"    binding:"required"`
+	Type int    `json:"type" form:"type"  binding:"oneof=1 2 3" alias:"提交类型  1 uid、2 手机号、3 openid "`
+	Risk int    `json:"risk" form:"risk"  binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
 }

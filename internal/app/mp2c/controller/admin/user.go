@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
@@ -170,10 +171,30 @@ func (ctr UserController) UpdateRisk(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	idsSlice := strings.Split(form.Ids, ",")
+	var UserIdSlice, PhoneSlice, OpenIdSlice []string
+
+	if len(idsSlice) == 0 {
+		return nil, errors.New("请输出要提交的id")
+	}
+	switch form.Type {
+	case 1:
+		UserIdSlice = idsSlice
+		break
+	case 2:
+		PhoneSlice = idsSlice
+		break
+	case 3:
+		OpenIdSlice = idsSlice
+		break
+	default:
+		break
+	}
+
 	if err := service.NewUserRiskService(context.NewMioContext()).BatchUpdateUserRisk(service.UpdateRiskParam{
-		UserIdSlice: form.UserIdSlice,
-		PhoneSlice:  form.PhoneSlice,
-		OpenIdSlice: form.OpenIdSlice,
+		UserIdSlice: UserIdSlice,
+		PhoneSlice:  PhoneSlice,
+		OpenIdSlice: OpenIdSlice,
 		Risk:        form.Risk,
 	}); err != nil {
 		return nil, err

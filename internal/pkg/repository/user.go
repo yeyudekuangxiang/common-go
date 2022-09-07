@@ -30,7 +30,7 @@ func (u UserRepository) GetUserById(id int64) entity.User {
 func (u UserRepository) BatchUpdateUserRisk(by UpdateUserRisk) error {
 	db := app.DB.Model(entity.User{})
 	if len(by.UserIdSlice) != 0 {
-		db.Where("user_id in (?)", by.UserIdSlice)
+		db.Where("id in (?)", by.UserIdSlice)
 	}
 	if len(by.PhoneSlice) != 0 {
 		db.Where("phone_number in (?)", by.PhoneSlice)

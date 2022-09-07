@@ -15,7 +15,7 @@ type GetUserBy struct {
 }
 
 type UpdateUserRisk struct {
-	UserIdSlice []int64  `json:"UserIdSlice"`
+	UserIdSlice []string `json:"UserIdSlice"`
 	OpenIdSlice []string `json:"OpenIdSlice"`
 	PhoneSlice  []string `json:"PhoneSlice"`
 	Risk        int      `json:"Risk"`

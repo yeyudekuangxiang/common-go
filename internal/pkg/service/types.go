@@ -374,7 +374,7 @@ type UpdateUserInfoParam struct {
 }
 
 type UpdateRiskParam struct {
-	UserIdSlice []int64
+	UserIdSlice []string
 	OpenIdSlice []string
 	PhoneSlice  []string
 	Risk        int
