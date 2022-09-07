@@ -28,7 +28,7 @@ func (repo CityRepository) GetList(by repotypes.GetCityListDO) ([]entity.City, e
 	list := make([]entity.City, 0)
 	db := repo.ctx.DB.Model(entity.City{})
 	if len(by.CityCodeSlice) != 0 {
-		db.Where("city_code in (?) ?", by.CityCodeSlice)
+		db.Where("city_code in (?)", by.CityCodeSlice)
 	}
 	if by.CityCode != "" {
 		db.Where("city_code", by.CityCode)

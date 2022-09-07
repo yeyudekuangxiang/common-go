@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -134,7 +135,7 @@ func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	list, total := service.DefaultUserService.GetUserRiskPageListBy(repository.GetUserPageListBy{
+	list, total := service.NewUserRiskService(context.NewMioContext()).GetUserRiskPageListBy(repository.GetUserPageListBy{
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 		User: repository.GetUserListBy{
@@ -156,7 +157,7 @@ func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
 //risk统计分类
 
 func (ctr UserController) RiskStatistics(c *gin.Context) (gin.H, error) {
-	list := service.DefaultUserService.GetUserRiskStatisticst()
+	list := service.NewUserRiskService(context.NewMioContext()).GetUserRiskStatisticst()
 	return gin.H{
 		"date": list,
 	}, nil
@@ -169,7 +170,7 @@ func (ctr UserController) UpdateRisk(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if err := service.DefaultUserService.BatchUpdateUserRisk(service.UpdateRiskParam{
+	if err := service.NewUserRiskService(context.NewMioContext()).BatchUpdateUserRisk(service.UpdateRiskParam{
 		UserIdSlice: form.UserIdSlice,
 		PhoneSlice:  form.PhoneSlice,
 		OpenIdSlice: form.OpenIdSlice,
