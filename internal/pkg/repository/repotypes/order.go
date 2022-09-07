@@ -12,4 +12,6 @@ type GetPageFullOrderDO struct {
 type GetOrderTotalByItemIdDO struct {
 	Openid      string
 	ItemIdSlice []string
+	StartTime   string
+	EndTime     string
 }
