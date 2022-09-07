@@ -183,8 +183,9 @@ func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, 
 }
 
 type RiskStatistics struct {
-	Risk  int64
-	Total int64
+	Risk  int64  `json:"risk"`
+	Total int64  `json:"total"`
+	Desc  string `json:"desc"`
 }
 
 //统计每个risk的总数
@@ -193,7 +194,7 @@ func (u UserRepository) GetRiskStatistics() []RiskStatistics {
 	list := make([]RiskStatistics, 0)
 	db := app.DB.Model(entity.User{})
 	db.Group("risk")
-	db.Where("risk,count(*) as total")
+	db.Select("risk,count(*) as total")
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
