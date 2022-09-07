@@ -27,6 +27,7 @@ type UserRiskService struct {
 	rPoint   *repository.PointRepository
 }
 
+// BatchUpdateUserRisk 批量更新risk
 func (u UserRiskService) BatchUpdateUserRisk(param UpdateRiskParam) error {
 	err := u.r.BatchUpdateUserRisk(repository.UpdateUserRisk{
 		UserIdSlice: param.UserIdSlice,
@@ -37,10 +38,7 @@ func (u UserRiskService) BatchUpdateUserRisk(param UpdateRiskParam) error {
 	return err
 }
 
-func (u UserRiskService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
-	return u.r.GetUserPageListBy(by)
-}
-
+//GetUserRiskPageListBy 列表
 func (u UserRiskService) GetUserRiskPageListBy(by repository.GetUserPageListBy) ([]api_types.UserVO, int64) {
 	list, total := u.r.GetUserPageListBy(by)
 	var cidSlice []int64
@@ -120,20 +118,23 @@ func (u UserRiskService) GetUserRiskPageListBy(by repository.GetUserPageListBy) 
 	return userVoList, total
 }
 
+//GetUserRiskStatisticst 统计
 func (u UserRiskService) GetUserRiskStatisticst() []repository.RiskStatistics {
 	list := u.r.GetRiskStatistics()
 	RiskMap := make(map[int64]repository.RiskStatistics)
+	total := int64(0)
 	for _, val := range list {
 		RiskMap[val.Risk] = val
+		total += val.Total
 	}
 	type RiskStruct struct {
 		Id    int64
 		Title string
 	}
-	//题目和分类组装
+
+	//风险等级
 	typeMap := []RiskStruct{
 		{Id: -2, Title: "总人数"},
-		{Id: -1, Title: "未初始化风险等级"},
 		{Id: 0, Title: "风险等级0"},
 		{Id: 1, Title: "风险等级1"},
 		{Id: 2, Title: "风险等级2"},
@@ -143,10 +144,15 @@ func (u UserRiskService) GetUserRiskStatisticst() []repository.RiskStatistics {
 
 	riskList := make([]repository.RiskStatistics, 0)
 	for _, v := range typeMap {
+		count := int64(0)
+		if v.Id == -2 {
+			count = total
+		}
 		l, err := RiskMap[v.Id]
 		if err {
-			riskList = append(riskList, repository.RiskStatistics{Risk: v.Id, Total: l.Total, Desc: v.Title})
+			count = l.Total
 		}
+		riskList = append(riskList, repository.RiskStatistics{Risk: v.Id, Total: count, Desc: v.Title})
 	}
 	return riskList
 }
