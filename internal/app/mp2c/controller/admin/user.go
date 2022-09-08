@@ -129,7 +129,7 @@ func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-//用户列表
+//用户列表 test
 
 func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
 	form := UserPageListForm{}
