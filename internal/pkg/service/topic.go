@@ -116,7 +116,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	query.Where("topic.status = ?", entity.TopicStatusPublished)
 	err := query.Count(&total).
 		Group("topic.id").
-		Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.like_count desc, topic.updated_at desc, topic.id desc").
+		Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
@@ -549,8 +549,8 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		Status:    entity.TopicStatusNeedVerify,
 		Avatar:    avatarUrl,
 		Nickname:  nikeName,
-		CreatedAt: model.Time{},
-		UpdatedAt: model.Time{},
+		CreatedAt: model.Time{Time: time.Now()},
+		UpdatedAt: model.Time{Time: time.Now()},
 	}
 
 	if len(tagIds) > 0 {

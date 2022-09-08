@@ -178,14 +178,15 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrUserNotFound
 	}
 
+	//默认只有衣物
+	typeName := entity.POINT_FMY_RECYCLING_CLOTHING
+	typeText := RecycleService.GetText(typeName)
+
 	//避开重放
 	if err = RecycleService.CheckOrder(userInfo.OpenId, form.Data.OrderSn); err != nil {
 		return nil, err
 	}
 
-	//默认只有衣物
-	typeName := entity.POINT_FMY_RECYCLING_CLOTHING
-	typeText := RecycleService.GetText(typeName)
 	//查询今日该类型获取积分次数
 	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
 	if err != nil {
