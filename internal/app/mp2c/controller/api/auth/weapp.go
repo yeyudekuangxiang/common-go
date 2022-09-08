@@ -40,7 +40,20 @@ func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 		auth.DefaultWeappService.ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserLoginErr)
 		return nil, err
 	}
+
 	auth.DefaultWeappService.ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserLoginSuc)
+	zhuGeUserIdentifyAttr := make(map[string]interface{}, 0)
+	zhuGeUserIdentifyAttr["id"] = user.ID
+	zhuGeUserIdentifyAttr["openid"] = user.OpenId
+	zhuGeUserIdentifyAttr["性别"] = user.Gender
+	zhuGeUserIdentifyAttr["注册来源"] = user.Source
+	zhuGeUserIdentifyAttr["注册时间"] = user.Time.Format("2006/01/02")
+	zhuGeUserIdentifyAttr["注册定位城市"] = user.CityCode
+	zhuGeUserIdentifyAttr["用户渠道分类"] = user.ChannelId
+	zhuGeUserIdentifyAttr["子渠道"] = user.ChannelId
+	zhuGeUserIdentifyAttr["ip"] = user.Ip
+	auth.DefaultWeappService.ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserIdentify)
+
 	return gin.H{
 		"token":  token,
 		"cookie": cookie,

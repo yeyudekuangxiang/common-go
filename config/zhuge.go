@@ -7,6 +7,7 @@ type zhuGeEventName struct {
 	UserLoginSuc           string
 	UserCertificateSendErr string
 	UserCertificateSendSuc string
+	UserIdentify           string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -15,4 +16,5 @@ var ZhuGeEventName = zhuGeEventName{
 	UserLoginSuc:           "用户登陆成功",   //用户登陆成功
 	UserCertificateSendErr: "携手同行-证书-发放成功",
 	UserCertificateSendSuc: "携手同行-证书-发放失败",
+	UserIdentify:           "用户属性",
 }
