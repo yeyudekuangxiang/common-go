@@ -31,6 +31,7 @@ type TrackLoginZhuGe struct {
 	OpenId      string
 	IsFail      bool   //是否失败
 	FailMessage string //失败信息
+	Event       string
 }
 type TrackPoints struct {
 	OpenId      string

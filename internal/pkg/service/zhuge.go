@@ -37,7 +37,7 @@ func (srv ZhuGeService) TrackLogin(login srv_types.TrackLoginZhuGe) {
 		Debug: 0,
 		Pr: types.EventJs{
 			Ct:   time.Now().UnixMilli(),
-			Eid:  "用户登陆",
+			Eid:  login.Event,
 			Cuid: login.OpenId,
 			Sid:  time.Now().UnixMilli(),
 		},
