@@ -369,6 +369,7 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 				Partnership:   param.PartnershipType,
 			})
 
+			//根据商品id，查询证书id
 			eventInfo, errEvent := event.DefaultEventService.FindEventAndCate(event.FindEventParam{ProductItemId: orderItem.ItemId})
 			var title, cateTitle string
 			if errEvent != nil {
