@@ -19,7 +19,6 @@ import (
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util"
-	utilPkg "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/duiba/util"
 	"mio/pkg/errno"
@@ -380,38 +379,27 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 				cateTitle = eventInfo.CateTitle
 			}
 			//证书诸葛打点
-			ZhuGe := TrackOrderZhuGe{
-				OpenId:        user.OpenId,
-				CertificateId: cert.CertificateId,
-				ProductItemId: orderItem.ItemId,
-				OrderId:       order.OrderId,
-				Partnership:   param.PartnershipType,
-				Title:         title,
-				CateTitle:     cateTitle,
-			}
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["分类名称"] = cateTitle
+			zhuGeAttr["证书id"] = cert.CertificateId
+			zhuGeAttr["商品id"] = orderItem.ItemId
+			zhuGeAttr["项目名称"] = title
+
 			if err != nil {
 				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
-				trackOrder(ZhuGe, "发放证书失败"+err.Error())
+				zhuGeAttr["是否失败"] = "操作失败"
+				zhuGeAttr["失败原因"] = err.Error()
+				ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserCertificateSendErr)
 				continue
 			}
-			trackOrder(ZhuGe, "")
+			zhuGeAttr["是否失败"] = "操作成功"
+			ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserCertificateSendSuc)
 		}
 	}
 }
 
-//订单证书打点
-func trackOrder(dto TrackOrderZhuGe, failMessage string) {
-	go DefaultZhuGeService().TrackOrder(srv_types.TrackOrderZhuGe{
-		OpenId:        dto.OpenId,
-		CertificateId: dto.CertificateId,
-		ProductItemId: dto.ProductItemId,
-		OrderId:       dto.OrderId,
-		Partnership:   dto.Partnership,
-		Title:         dto.Title,
-		CateTitle:     dto.CateTitle,
-		IsFail:        utilPkg.Ternary(failMessage == "", false, true).Bool(),
-		FailMessage:   failMessage,
-	})
+func ToZhuGe(openId string, attr map[string]interface{}, eventName string) {
+	DefaultZhuGeService().Track(eventName, openId, attr)
 }
 
 func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventParam) (*srv_types.SubmitOrderForEventResult, error) {

@@ -26,60 +26,6 @@ func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
 	return &ZhuGeService{client: client, Open: true, Debug: true}
 }
 
-// TrackLogin 登陆打点
-func (srv ZhuGeService) TrackLogin(login srv_types.TrackLoginZhuGe) {
-	if !srv.Open {
-		app.Logger.Info("诸葛打点已关闭", login)
-		return
-	}
-	err := srv.client.Track(types.Event{
-		Dt:    "evt",
-		Pl:    "js",
-		Debug: 0,
-		Pr: types.EventJs{
-			Ct:   time.Now().UnixMilli(),
-			Eid:  login.Event,
-			Cuid: login.OpenId,
-			Sid:  time.Now().UnixMilli(),
-		},
-	}, map[string]interface{}{
-		"是否失败": util.Ternary(login.IsFail, "操作失败", "操作成功").String(),
-		"失败原因": login.FailMessage,
-	})
-	if err != nil {
-		app.Logger.Errorf("用户登陆打点失败 %+v %+v", err, login)
-	}
-}
-
-// TrackOrder 订单打点
-func (srv ZhuGeService) TrackOrder(order srv_types.TrackOrderZhuGe) {
-	if !srv.Open {
-		app.Logger.Info("诸葛打点已关闭", order)
-		return
-	}
-	err := srv.client.Track(types.Event{
-		Dt:    "evt",
-		Pl:    "js",
-		Debug: 0,
-		Pr: types.EventJs{
-			Ct:   time.Now().UnixMilli(),
-			Eid:  "携手同行-证书",
-			Cuid: order.OpenId,
-			Sid:  time.Now().UnixMilli(),
-		},
-	}, map[string]interface{}{
-		"分类名称": order.CateTitle,
-		"证书id": order.CertificateId,
-		"商品id": order.ProductItemId,
-		"项目名称": order.Title,
-		"是否失败": util.Ternary(order.IsFail, "操作失败", "操作成功").String(),
-	})
-
-	if err != nil {
-		app.Logger.Errorf("积分打点失败 %+v %+v", err, order)
-	}
-}
-
 // TrackPoint 积分打点
 func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 	if !srv.Open {
