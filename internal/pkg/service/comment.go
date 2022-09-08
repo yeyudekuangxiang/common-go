@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
@@ -197,6 +198,8 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	if err != nil {
 		return entity.CommentIndex{}, 0, err
 	}
+	//更新topic
+	app.DB.Model(&topic).Update("updated_at", model.Time{Time: time.Now()})
 	//更新count数据
 	if ToCommentId != 0 {
 		err = srv.commentModel.Trans(func(tx *gorm.DB) error {
