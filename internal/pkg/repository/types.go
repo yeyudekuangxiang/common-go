@@ -214,6 +214,7 @@ type GetStepHistoryPageListBy struct {
 type FindCouponBy struct {
 	CouponTypeId string
 	CouponId     string
+	OpenId       string
 }
 type FindCouponTypeBy struct {
 	CouponTypeId string
@@ -265,4 +266,9 @@ type FindCommentLikeBy struct {
 type GetCommentLikeListBy struct {
 	CommentIds []int64
 	UserId     int64
+}
+
+type GetRedeemCodeBy struct {
+	CodeId   string
+	CouponId string
 }
