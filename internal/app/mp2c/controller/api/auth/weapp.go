@@ -40,7 +40,7 @@ func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 		auth.DefaultWeappService.ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserLoginErr)
 		return nil, err
 	}
-
+	zhuGeAttr["注册成功"] = "注册成功"
 	auth.DefaultWeappService.ToZhuGe(user.OpenId, zhuGeAttr, config.ZhuGeEventName.UserLoginSuc)
 	zhuGeUserIdentifyAttr := make(map[string]interface{}, 0)
 	zhuGeUserIdentifyAttr["id"] = user.ID
