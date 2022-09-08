@@ -62,7 +62,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 	err := query.
 		Count(&total).
 		Group("topic.id").
-		Order("topic.updated_at desc, topic.id asc").
+		Order("topic.id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
