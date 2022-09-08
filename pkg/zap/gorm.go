@@ -46,10 +46,6 @@ var (
 )
 
 func (g *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
-
-	sql, rows := fc()
-	g.logger.Debugf("begin:%v sql:%s rows:%+v err:%v", begin, sql, rows, err)
-
 	elapsed := time.Since(begin)
 	switch {
 	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):
