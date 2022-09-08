@@ -43,6 +43,8 @@ func (srv ZhuGeService) TrackOrder(order srv_types.TrackOrderZhuGe) {
 		},
 	}, map[string]interface{}{
 		"分类名称": order.CateTitle,
+		"证书id": order.CertificateId,
+		"商品id": order.ProductItemId,
 		"项目名称": order.Title,
 		"是否失败": util.Ternary(order.IsFail, "操作失败", "操作成功").String(),
 	})

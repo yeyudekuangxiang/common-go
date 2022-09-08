@@ -370,10 +370,14 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 			})
 
 			eventInfo, errEvent := event.DefaultEventService.FindEventAndCate(event.FindEventParam{ProductItemId: orderItem.ItemId})
+			var title, cateTitle string
 			if errEvent != nil {
-
+				title = ""
+				cateTitle = ""
+			} else {
+				title = eventInfo.Title
+				cateTitle = eventInfo.CateTitle
 			}
-
 			//证书诸葛打点
 			ZhuGe := TrackOrderZhuGe{
 				OpenId:        user.OpenId,
@@ -381,8 +385,8 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 				ProductItemId: orderItem.ItemId,
 				OrderId:       order.OrderId,
 				Partnership:   param.PartnershipType,
-				Title:         eventInfo.Title,
-				CateTitle:     eventInfo.CateTitle,
+				Title:         title,
+				CateTitle:     cateTitle,
 			}
 			if err != nil {
 				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
