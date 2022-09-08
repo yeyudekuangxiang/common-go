@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity/event"
+	"mio/internal/pkg/repository/repotypes"
 )
 
 var DefaultEventRepository = EventRepository{DB: app.DB}
@@ -40,6 +41,25 @@ func (repo EventRepository) FindEvent(by FindEventBy) (event.Event, error) {
 
 	return ev, nil
 }
+
+func (repo EventRepository) FindEventCate(by FindEventBy) (repotypes.EventRet, error) {
+	ev := event.Event{}
+	var Ret repotypes.EventRet
+
+	db := repo.DB.Model(ev)
+	db.Select("event.title as title,event_category.title as cateTitle")
+	if by.ProductItemId != "" {
+		db.Where("product_item_id = ?", by.ProductItemId)
+	}
+	db.Joins("left join event_category on event_category.id = event.event_category_id ")
+	err := db.First(&Ret).Error
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return Ret, err
+	}
+	return Ret, nil
+}
+
 func (repo EventRepository) GetEventPageList(by GetEventPageListBy) (list []event.Event, total int64, err error) {
 
 	list = make([]event.Event, 0)

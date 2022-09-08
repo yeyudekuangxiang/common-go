@@ -6,12 +6,25 @@ import (
 )
 
 type TrackPoint struct {
-	OpenId      string
-	PointType   entity.PointTransactionType //变动类型
-	ChangeType  string                      //获取或者消耗 dec(消耗) inc(获取)
-	Value       uint                        //变动数量
-	IsFail      bool                        //是否失败
-	FailMessage string                      //失败信息
+	OpenId       string
+	PointType    entity.PointTransactionType //变动类型
+	ChangeType   string                      //获取或者消耗 dec(消耗) inc(获取)
+	Value        uint                        //变动数量
+	IsFail       bool                        //是否失败
+	FailMessage  string                      //失败信息
+	AdditionInfo string                      //备注
+}
+
+type TrackOrderZhuGe struct {
+	OpenId        string
+	CertificateId string
+	ProductItemId string
+	OrderId       string
+	Partnership   entity.PartnershipType
+	Title         string
+	CateTitle     string
+	IsFail        bool   //是否失败
+	FailMessage   string //失败信息
 }
 
 type TrackPoints struct {

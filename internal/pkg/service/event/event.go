@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/event"
 	revent "mio/internal/pkg/repository/event"
+	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/util/timeutils"
 	"strconv"
@@ -33,6 +34,19 @@ func (srv EventService) FindEvent(param FindEventParam) (*event.Event, error) {
 	}
 	return &ev, nil
 }
+
+func (srv EventService) FindEventAndCate(param FindEventParam) (*repotypes.EventRet, error) {
+	ev, err := srv.repo.FindEventCate(revent.FindEventBy{
+		ProductItemId: param.ProductItemId,
+		EventId:       param.EventId,
+		Active:        param.Active,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ev, nil
+}
+
 func (srv EventService) GetEventFullInfo(eventId string) (*EventFullInfo, error) {
 	ev, err := srv.FindEvent(FindEventParam{
 		EventId: eventId,

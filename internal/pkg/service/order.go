@@ -19,6 +19,7 @@ import (
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util"
+	utilPkg "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/duiba/util"
 	"mio/pkg/errno"
@@ -367,13 +368,47 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 				OrderId:       order.OrderId,
 				Partnership:   param.PartnershipType,
 			})
+
+			eventInfo, errEvent := event.DefaultEventService.FindEventAndCate(event.FindEventParam{ProductItemId: orderItem.ItemId})
+			if errEvent != nil {
+
+			}
+
+			//证书诸葛打点
+			ZhuGe := TrackOrderZhuGe{
+				OpenId:        user.OpenId,
+				CertificateId: cert.CertificateId,
+				ProductItemId: orderItem.ItemId,
+				OrderId:       order.OrderId,
+				Partnership:   param.PartnershipType,
+				Title:         eventInfo.Title,
+				CateTitle:     eventInfo.CateTitle,
+			}
 			if err != nil {
 				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
+				trackOrder(ZhuGe, "发放证书失败"+err.Error())
 				continue
 			}
+			trackOrder(ZhuGe, "")
 		}
 	}
 }
+
+//订单证书打点
+func trackOrder(dto TrackOrderZhuGe, failMessage string) {
+	go DefaultZhuGeService().TrackOrder(srv_types.TrackOrderZhuGe{
+		OpenId:        dto.OpenId,
+		CertificateId: dto.CertificateId,
+		ProductItemId: dto.ProductItemId,
+		OrderId:       dto.OrderId,
+		Partnership:   dto.Partnership,
+		Title:         dto.Title,
+		CateTitle:     dto.CateTitle,
+		IsFail:        utilPkg.Ternary(failMessage == "", false, true).Bool(),
+		FailMessage:   failMessage,
+	})
+}
+
 func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventParam) (*srv_types.SubmitOrderForEventResult, error) {
 	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
 		EventId: param.EventId,

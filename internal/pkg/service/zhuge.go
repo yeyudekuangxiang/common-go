@@ -25,6 +25,33 @@ func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
 	return &ZhuGeService{client: client, Open: open}
 }
 
+// TrackOrder 订单打点
+func (srv ZhuGeService) TrackOrder(order srv_types.TrackOrderZhuGe) {
+	if !srv.Open {
+		app.Logger.Info("诸葛打点已关闭", order)
+		return
+	}
+	err := srv.client.Track(types.Event{
+		Dt:    "evt",
+		Pl:    "js",
+		Debug: 0,
+		Pr: types.EventJs{
+			Ct:   time.Now().UnixMilli(),
+			Eid:  "携手同行-证书",
+			Cuid: order.OpenId,
+			Sid:  time.Now().UnixMilli(),
+		},
+	}, map[string]interface{}{
+		"分类名称": order.CateTitle,
+		"项目名称": order.Title,
+		"是否失败": util.Ternary(order.IsFail, "操作失败", "操作成功").String(),
+	})
+
+	if err != nil {
+		app.Logger.Errorf("积分打点失败 %+v %+v", err, order)
+	}
+}
+
 // TrackPoint 积分打点
 func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 	if !srv.Open {
@@ -47,6 +74,7 @@ func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 		"变动数量": util.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
 		"是否失败": util.Ternary(point.IsFail, "操作失败", "操作成功").String(),
 		"失败原因": point.FailMessage,
+		"备注":   point.AdditionInfo,
 	})
 
 	if err != nil {
