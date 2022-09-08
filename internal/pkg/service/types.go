@@ -400,6 +400,10 @@ type TrackOrderZhuGe struct {
 	CateTitle     string
 }
 
+type TrackLoginZhuGe struct {
+	CateTitle string
+}
+
 type OCRResult struct {
 	WordsResult []struct {
 		Words string `json:"words"`

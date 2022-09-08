@@ -25,6 +25,31 @@ func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
 	return &ZhuGeService{client: client, Open: open}
 }
 
+// TrackLogin 登陆打点
+func (srv ZhuGeService) TrackLogin(login srv_types.TrackLoginZhuGe) {
+	if !srv.Open {
+		app.Logger.Info("诸葛打点已关闭", login)
+		return
+	}
+	err := srv.client.Track(types.Event{
+		Dt:    "evt",
+		Pl:    "js",
+		Debug: 0,
+		Pr: types.EventJs{
+			Ct:   time.Now().UnixMilli(),
+			Eid:  "用户登陆",
+			Cuid: login.OpenId,
+			Sid:  time.Now().UnixMilli(),
+		},
+	}, map[string]interface{}{
+		"是否失败": util.Ternary(login.IsFail, "操作失败", "操作成功").String(),
+		"失败原因": login.FailMessage,
+	})
+	if err != nil {
+		app.Logger.Errorf("用户登陆打点失败 %+v %+v", err, login)
+	}
+}
+
 // TrackOrder 订单打点
 func (srv ZhuGeService) TrackOrder(order srv_types.TrackOrderZhuGe) {
 	if !srv.Open {
