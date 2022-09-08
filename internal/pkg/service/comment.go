@@ -121,7 +121,7 @@ func (srv *defaultCommentService) FindListAndChild(params *entity.CommentIndex, 
 		Where("obj_id = ?", params.ObjId).
 		Where("state = ?", 0).
 		Count(&total).
-		Order("comment_index.like_count desc,comment_index.updated_at desc,comment_index.id desc").
+		Order("comment_index.like_count desc,comment_index.id asc").
 		Limit(limit).
 		Offset(offset).
 		Find(&commentList).Error
@@ -140,7 +140,7 @@ func (srv *defaultCommentService) FindSubList(data *entity.CommentIndex, offSize
 		Where("root_comment_id = ?", data.RootCommentId).
 		Where("state = ?", 0).
 		Count(&total).
-		Order("comment_index.like_count desc, comment_index.updated_at desc, comment_index.id desc").
+		Order("comment_index.like_count desc, comment_index.id asc").
 		Find(&commentList).Error
 	if err != nil {
 		return nil, 0, err

@@ -138,7 +138,6 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	// type fmy
 	form := RecycleFmyForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		app.Logger.Errorf("fmy order sync err : %s", err.Error())
 		return nil, err
 	}
 	if strings.ToUpper(form.Data.Status) != "COMPLETE" {
@@ -183,14 +182,14 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	typeName := entity.POINT_FMY_RECYCLING_CLOTHING
 	typeText := RecycleService.GetText(typeName)
 
-	//查询今日该类型获取积分次数
-	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
-	if err != nil {
+	//避开重放
+	if err = RecycleService.CheckOrder(userInfo.OpenId, form.Data.OrderSn); err != nil {
 		return nil, err
 	}
 
-	//避开重放
-	if err = RecycleService.CheckOrder(userInfo.OpenId, form.Data.OrderSn); err != nil {
+	//查询今日该类型获取积分次数
+	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
+	if err != nil {
 		return nil, err
 	}
 
