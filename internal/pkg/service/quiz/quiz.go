@@ -118,6 +118,7 @@ func (srv QuizService) DailyResult(openId string) (*srv_types.QuizDailyResult, e
 	}
 	qdResult := srv_types.QuizDailyResult{
 		QuizDailyResult: *result,
+		Point:           result.CorrectNum * questionToPointRatio,
 	}
 	switch result.CorrectNum {
 	case 0:
