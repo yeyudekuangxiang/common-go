@@ -104,6 +104,7 @@ func (u UserRiskService) GetUserRiskPageListBy(by repository.GetUserPageListBy) 
 
 		//整理
 		userVoList = append(userVoList, api_types.UserVO{
+			ID:          l.ID,
 			OpenId:      l.OpenId,
 			Nickname:    l.Nickname,
 			AvatarUrl:   l.AvatarUrl,
