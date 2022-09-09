@@ -89,6 +89,10 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 	})
 }
 
+func (u UserService) GetUserIdentifyInfo() {
+
+}
+
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user := u.r.GetUserBy(repository.GetUserBy{
 		OpenId: param.OpenId,

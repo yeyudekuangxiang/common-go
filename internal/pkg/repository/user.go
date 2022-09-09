@@ -27,6 +27,13 @@ func (u UserRepository) GetUserById(id int64) entity.User {
 	}
 	return user
 }
+
+func (u UserRepository) GetUserIdentifyInfo() {
+	var user entity.User
+	db := app.DB.Model(user).Joins("")
+	db.Where("openid", "")
+
+}
 func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	user := entity.User{}
 	db := app.DB.Model(user)
