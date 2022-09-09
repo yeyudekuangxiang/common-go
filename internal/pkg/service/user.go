@@ -310,6 +310,8 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			app.Logger.Error("发放邀请积分失败", err)
 		}
 	}
+	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
+
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
