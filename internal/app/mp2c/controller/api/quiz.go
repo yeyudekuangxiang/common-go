@@ -2,8 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"math/rand"
 	"mio/internal/pkg/service/quiz"
 	"mio/internal/pkg/util/apiutil"
+	"sort"
 )
 
 var DefaultQuizController = QuizController{}
@@ -15,9 +17,19 @@ func (QuizController) GetDailyQuestions(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 
 	list, err := quiz.DefaultQuizService.DailyQuestions(user.OpenId)
+
+	for i, item := range list {
+		list[i].Choices = randomOptions(item.Choices)
+	}
 	return gin.H{
 		"list": list,
 	}, err
+}
+func randomOptions(options []string) []string {
+	sort.Slice(options, func(i, j int) bool {
+		return rand.Intn(2) == 0
+	})
+	return options
 }
 func (QuizController) Availability(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
@@ -41,7 +53,13 @@ func (QuizController) AnswerQuestion(ctx *gin.Context) (gin.H, error) {
 }
 func (QuizController) Submit(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	return nil, quiz.DefaultQuizService.Submit(user.OpenId)
+	point, err := quiz.DefaultQuizService.Submit(user.OpenId)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"point": point,
+	}, nil
 }
 
 func (QuizController) DailyResult(ctx *gin.Context) (gin.H, error) {
