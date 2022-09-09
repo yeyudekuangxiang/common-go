@@ -302,7 +302,7 @@ func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionC
 	ret := make([]api_types.CarbonTransactionClassifyList, 0)
 	other := 0.00 //其他碳量
 	total := 0.00 //总碳量
-	for i, _ := range tmpList {
+	for i := range tmpList {
 		n := tmpList[len(tmpList)-1-i]
 		total += n.Val
 		if i == 0 {

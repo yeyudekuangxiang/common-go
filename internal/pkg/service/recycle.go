@@ -110,7 +110,7 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	sign := params["sign"]
 	delete(params, "sign")
 	var slice []string
-	for k, _ := range params {
+	for k := range params {
 		slice = append(slice, k)
 	}
 	sort.Strings(slice)

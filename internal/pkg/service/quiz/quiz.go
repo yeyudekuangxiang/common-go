@@ -76,15 +76,15 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 		CurrentIndex:        DefaultQuizSingleRecordService.GetTodayAnswerNum(openid),
 	}, nil
 }
-func (srv QuizService) Submit(openId string) error {
+func (srv QuizService) Submit(openId string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("QUIZ_Ssubmit%s", openId), time.Second*10) {
-		return errno.ErrLimit
+		return 0, errno.ErrLimit
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	err = DefaultQuizSummaryService.UpdateTodaySummary(UpdateSummaryParam{
 		OpenId:           openId,
@@ -92,23 +92,24 @@ func (srv QuizService) Submit(openId string) error {
 		TodayAnsweredNum: todayResult.IncorrectNum + todayResult.CorrectNum,
 	})
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
 }
-func (srv QuizService) SendAnswerPoint(openId string, correctNum int) error {
+func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
 	if correctNum > OneDayAnswerNum {
 		correctNum = OneDayAnswerNum
 	}
 
+	point := correctNum * questionToPointRatio
 	_, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      openId,
 		Type:        entity.POINT_QUIZ,
 		BizId:       util.UUID(),
-		ChangePoint: int64(correctNum * questionToPointRatio),
+		ChangePoint: int64(point),
 	})
-	return err
+	return point, err
 }
 func (srv QuizService) DailyResult(openId string) (*srv_types.QuizDailyResult, error) {
 	result, err := DefaultQuizDailyResultService.FindTodayResult(openId)
