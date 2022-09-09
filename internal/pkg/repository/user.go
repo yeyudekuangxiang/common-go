@@ -28,7 +28,7 @@ func (u UserRepository) GetUserById(id int64) entity.User {
 	return user
 }
 
-func (u UserRepository) GetUserIdentifyInfo(openid string) GetUserIdentifyInfoBy {
+func (u UserRepository) GetUserIdentifyInfo(openid string) (info GetUserIdentifyInfoBy, exist bool, err error) {
 	var ret GetUserIdentifyInfoBy
 	var user entity.User
 	db := app.DB.Model(user).Joins("left join user_channel on user_channel.cid  = \"user\".channel_id")
@@ -39,13 +39,16 @@ func (u UserRepository) GetUserIdentifyInfo(openid string) GetUserIdentifyInfoBy
 	//db.Select("user.openid,user.nick_name,user.time")
 	db.Select("\"user\".openid,\"user\".nick_name,\"user\".time,\"user\".source,user_channel_type.name as channel_type_name,user_channel.name as channel_name,city.name as city_name,point.balance,invite.invited_by_openid ")
 	db.Where("user.openid", openid)
-	if err := db.First(&ret).Error; err != nil {
-		if err != gorm.ErrRecordNotFound {
-			panic(err)
+	err = db.First(&ret).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return ret, false, nil
 		}
+		return ret, false, err
 	}
-	return ret
+	return ret, true, nil
 }
+
 func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	user := entity.User{}
 	db := app.DB.Model(user)

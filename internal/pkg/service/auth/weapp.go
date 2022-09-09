@@ -98,7 +98,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 }
 
 func (srv WeappService) ToZhuGe(openId string, attr map[string]interface{}, eventName string) {
-	service.DefaultZhuGeService().Track(eventName, openId, attr)
+	go service.DefaultZhuGeService().Track(eventName, openId, attr)
 }
 
 func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {

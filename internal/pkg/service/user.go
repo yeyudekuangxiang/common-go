@@ -91,7 +91,13 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 
 //SendUserIdentifyToZhuGe 用户属性上报到诸葛
 func (u UserService) SendUserIdentifyToZhuGe(openid string) {
-	user := u.r.GetUserIdentifyInfo(openid)
+	if openid == "" {
+		return
+	}
+	user, exit, _ := u.r.GetUserIdentifyInfo(openid)
+	if !exit {
+		return //不存在用户信息，返回
+	}
 	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
 	zhuGeIdentifyAttr["openid"] = user.Openid
 	zhuGeIdentifyAttr["注册来源"] = user.Source
