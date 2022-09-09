@@ -86,6 +86,18 @@ type GetUserListBy struct {
 	Auth       int                 `json:"auth"`
 }
 
+type GetUserIdentifyInfoBy struct {
+	ChannelName     string     `json:"user_channel"`
+	CityName        string     `json:"city_name"`
+	Balance         string     `json:"balance"`
+	InvitedByOpenid string     `json:"invited_by_openid"`
+	Openid          string     `json:"openid"`
+	NickName        string     `json:"nick_name"`
+	ChannelTypeName string     `json:"channel_type_name"`
+	Time            model.Time `json:"time"`
+	Source          string     `json:"source"`
+}
+
 type GetUserPageListBy struct {
 	User    GetUserListBy
 	Offset  int    `json:"offset"`

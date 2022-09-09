@@ -89,8 +89,17 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 	})
 }
 
-func (u UserService) GetUserIdentifyInfo() {
-
+//SendUserIdentifyToZhuGe 用户属性上报到诸葛
+func (u UserService) SendUserIdentifyToZhuGe(openid string) {
+	user := u.r.GetUserIdentifyInfo(openid)
+	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
+	zhuGeIdentifyAttr["openid"] = user.Openid
+	zhuGeIdentifyAttr["注册来源"] = user.Source
+	zhuGeIdentifyAttr["注册时间"] = user.Time.Format("2006/01/02")
+	zhuGeIdentifyAttr["注册定位城市"] = user.CityName
+	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
+	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
+	DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
 }
 
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
@@ -535,11 +544,13 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	go DefaultUserService.SendUserIdentifyToZhuGe(point.OpenId) //用户基本信息诸葛打点
 	certCount, err := DefaultBadgeService.GetUserCertCountById(userId)
 	if err != nil {
 		return nil, err
 	}
 	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
+
 	return &UserAccountInfo{
 		Balance:     point.Balance,
 		CertNum:     certCount,
