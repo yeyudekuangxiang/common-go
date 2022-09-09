@@ -75,7 +75,7 @@ func (o *Oola) getSign(ch string, params url.Values) (sign string, err error) {
 	}
 	var signStr string
 	var slice []string
-	for k, _ := range params {
+	for k := range params {
 		slice = append(slice, k)
 	}
 	sort.Strings(slice)
