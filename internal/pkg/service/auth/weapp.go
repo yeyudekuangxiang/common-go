@@ -97,6 +97,10 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	return user, cookie, nil
 }
 
+func (srv WeappService) ToZhuGe(openId string, attr map[string]interface{}, eventName string) {
+	go service.DefaultZhuGeService().Track(eventName, openId, attr)
+}
+
 func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {
 	app.Logger.Infof("新用户创建后事件 %+v %s %s", user, invitedBy, partnershipType)
 	_, err := service.DefaultStepService.FindOrCreateStep(user.OpenId)

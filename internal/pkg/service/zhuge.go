@@ -23,6 +23,7 @@ func DefaultZhuGeService() *ZhuGeService {
 }
 func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
 	return &ZhuGeService{client: client, Open: open}
+	//return &ZhuGeService{client: client, Open: true, Debug: true}
 }
 
 // TrackPoint 积分打点
@@ -47,6 +48,7 @@ func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 		"变动数量": util.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
 		"是否失败": util.Ternary(point.IsFail, "操作失败", "操作成功").String(),
 		"失败原因": point.FailMessage,
+		"备注":   point.AdditionInfo,
 	})
 
 	if err != nil {

@@ -92,6 +92,25 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 	})
 }
 
+//SendUserIdentifyToZhuGe 用户属性上报到诸葛
+func (u UserService) SendUserIdentifyToZhuGe(openid string) {
+	if openid == "" {
+		return
+	}
+	user, exit, _ := u.r.GetUserIdentifyInfo(openid)
+	if !exit {
+		return //不存在用户信息，返回
+	}
+	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
+	zhuGeIdentifyAttr["openid"] = user.Openid
+	zhuGeIdentifyAttr["注册来源"] = user.Source
+	zhuGeIdentifyAttr["注册时间"] = user.Time.Format("2006/01/02")
+	zhuGeIdentifyAttr["注册定位城市"] = user.CityName
+	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
+	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
+	DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
+}
+
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user := u.r.GetUserBy(repository.GetUserBy{
 		OpenId: param.OpenId,
@@ -300,6 +319,8 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			app.Logger.Error("发放邀请积分失败", err)
 		}
 	}
+	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
+
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
@@ -533,11 +554,13 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	go DefaultUserService.SendUserIdentifyToZhuGe(point.OpenId) //用户基本信息诸葛打点
 	certCount, err := DefaultBadgeService.GetUserCertCountById(userId)
 	if err != nil {
 		return nil, err
 	}
 	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
+
 	return &UserAccountInfo{
 		Balance:     point.Balance,
 		CertNum:     certCount,
