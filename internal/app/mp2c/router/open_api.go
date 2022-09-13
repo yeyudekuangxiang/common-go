@@ -67,5 +67,7 @@ func openRouter(router *gin.Engine) {
 		openRouter.POST("/recycle/fmy", apiutil.Format(api.DefaultRecycleController.FmyOrderSync))
 
 		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
+		//外链跳转
+		openRouter.GET("/auth/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 	}
 }
