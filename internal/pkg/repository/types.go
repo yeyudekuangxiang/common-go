@@ -36,6 +36,15 @@ type GetTopicPageListBy struct {
 	OrderBy    entity.OrderByList `json:"orderBy"`
 }
 
+type GetTopicCountBy struct {
+	TopicTagId int64  `json:"topicTagId"`
+	Status     int    `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop      int    `json:"isTop"`
+	IsEssence  int    `json:"isEssence"`
+	UserId     int64  `json:"userId"` // 用于查询用户对帖子是否点赞
+	OpenId     string `json:"openId"`
+}
+
 type TopicListRequest struct {
 	ID        int64  `json:"id"` //帖子id
 	Title     string `json:"title"`
