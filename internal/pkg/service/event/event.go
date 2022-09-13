@@ -38,8 +38,6 @@ func (srv EventService) FindEvent(param FindEventParam) (*event.Event, error) {
 func (srv EventService) FindEventAndCate(param FindEventParam) (*repotypes.EventRet, error) {
 	ev, err := srv.repo.FindEventCate(revent.FindEventBy{
 		ProductItemId: param.ProductItemId,
-		EventId:       param.EventId,
-		Active:        param.Active,
 	})
 	if err != nil {
 		return nil, err

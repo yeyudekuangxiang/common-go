@@ -47,11 +47,11 @@ func (repo EventRepository) FindEventCate(by FindEventBy) (repotypes.EventRet, e
 	var Ret repotypes.EventRet
 
 	db := repo.DB.Model(ev)
-	db.Select("event.title as title,event_category.title as cateTitle")
+	db.Select("event.title as title")
 	if by.ProductItemId != "" {
 		db.Where("product_item_id = ?", by.ProductItemId)
 	}
-	db.Joins("left join event_category on event_category.id = event.event_category_id ")
+	db.Joins("left join event_category on event_category.event_category_id = \"event\".event_category_id ")
 	err := db.First(&Ret).Error
 
 	if err != nil && err != gorm.ErrRecordNotFound {
