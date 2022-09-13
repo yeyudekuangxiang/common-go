@@ -21,6 +21,22 @@ func (p CarbonTransactionType) Text() string {
 		return "骑行"
 	case CARBON_ECAR:
 		return "电动车"
+	case CARBON_POWER_REPLACE:
+		return "换电"
+	case CARBON_REDUCE_PLASTIC:
+		return "环保减塑"
+	case CARBON_RECYCLING_CLOTHING:
+		return "旧物回收 oola衣物鞋帽"
+	case CARBON_RECYCLING_DIGITAL:
+		return "旧物回收 oola数码"
+	case CARBON_RECYCLING_APPLIANCE:
+		return "旧物回收 oola家电"
+	case CARBON_RECYCLING_BOOK:
+		return "旧物回收 oola书籍"
+	case CARBON_FMY_RECYCLING_CLOTHING:
+		return "旧物回收 fmy衣物鞋帽"
+	case CARBON_JHX:
+		return "金华行"
 	}
 	return "未知积分"
 }
@@ -35,6 +51,22 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+	case CARBON_POWER_REPLACE:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/power_replace.png"
+	case CARBON_REDUCE_PLASTIC:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/reduce_plastic.png"
+	case CARBON_RECYCLING_CLOTHING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_clothing.png"
+	case CARBON_RECYCLING_DIGITAL:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_digital.png"
+	case CARBON_RECYCLING_APPLIANCE:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_appliance.png"
+	case CARBON_RECYCLING_BOOK:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_book.png"
+	case CARBON_FMY_RECYCLING_CLOTHING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/fmy_recycling_clothing.png"
+	case CARBON_JHX:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/jhx.png"
 	}
 	return ""
 }
@@ -50,15 +82,39 @@ func (p CarbonTransactionType) RealText() string {
 		return "骑行"
 	case CARBON_ECAR:
 		return "电动车"
+	case CARBON_POWER_REPLACE:
+		return "换电"
+	case CARBON_REDUCE_PLASTIC:
+		return "环保减塑"
+	case CARBON_RECYCLING_CLOTHING:
+		return "旧物回收 oola衣物鞋帽"
+	case CARBON_RECYCLING_DIGITAL:
+		return "旧物回收 oola数码"
+	case CARBON_RECYCLING_APPLIANCE:
+		return "旧物回收 oola家电"
+	case CARBON_RECYCLING_BOOK:
+		return "旧物回收 oola书籍"
+	case CARBON_FMY_RECYCLING_CLOTHING:
+		return "旧物回收 fmy衣物鞋帽"
+	case CARBON_JHX:
+		return "金华行"
 	}
 	return p.Text()
 }
 
 const (
-	CARBON_STEP       CarbonTransactionType = "STEP"       //步行
-	CARBON_COFFEE_CUP CarbonTransactionType = "COFFEE_CUP" //自带咖啡杯
-	CARBON_BIKE_RIDE  CarbonTransactionType = "BIKE_RIDE"  //骑行
-	CARBON_ECAR       CarbonTransactionType = "ECAR"       //电动车主
+	CARBON_STEP                   CarbonTransactionType = "STEP"                   //步行
+	CARBON_COFFEE_CUP             CarbonTransactionType = "COFFEE_CUP"             //自带咖啡杯
+	CARBON_BIKE_RIDE              CarbonTransactionType = "BIKE_RIDE"              //骑行
+	CARBON_ECAR                   CarbonTransactionType = "ECAR"                   //电动车主
+	CARBON_POWER_REPLACE          CarbonTransactionType = "POWER_REPLACE"          //换电
+	CARBON_REDUCE_PLASTIC         CarbonTransactionType = "REDUCE_PLASTIC"         //环保减塑
+	CARBON_RECYCLING_CLOTHING     CarbonTransactionType = "RECYCLING_CLOTHING"     //旧物回收 oola衣物鞋帽
+	CARBON_RECYCLING_DIGITAL      CarbonTransactionType = "RECYCLING_COMPUTER"     //旧物回收 oola数码
+	CARBON_RECYCLING_APPLIANCE    CarbonTransactionType = "RECYCLING_APPLIANCE"    //旧物回收 oola家电
+	CARBON_RECYCLING_BOOK         CarbonTransactionType = "RECYCLING_BOOK"         //旧物回收 oola书籍
+	CARBON_FMY_RECYCLING_CLOTHING CarbonTransactionType = "RECYCLING_FMY_CLOTHING" //旧物回收 fmy衣物鞋帽
+	CARBON_JHX                    CarbonTransactionType = "JHX"                    //金华行
 )
 
 type CarbonTransaction struct {
