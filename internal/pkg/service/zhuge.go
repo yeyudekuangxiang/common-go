@@ -22,8 +22,8 @@ func DefaultZhuGeService() *ZhuGeService {
 	return NewZhuGeService(zhuge.NewClient(config.Config.Zhuge.AppKey, config.Config.Zhuge.AppSecret), config.Config.App.Env == "prod")
 }
 func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
-	//return &ZhuGeService{client: client, Open: open}
-	return &ZhuGeService{client: client, Open: true, Debug: true}
+	return &ZhuGeService{client: client, Open: open}
+	//return &ZhuGeService{client: client, Open: true, Debug: true}
 }
 
 // TrackPoint 积分打点
