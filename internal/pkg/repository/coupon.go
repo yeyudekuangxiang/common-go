@@ -42,6 +42,9 @@ func (p CouponRepository) FindCoupon(by FindCouponBy) coupon.Coupon {
 	if by.CouponId != "" {
 		db.Where("coupon_id = ?", by.CouponId)
 	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
 
 	err := db.First(&cp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {

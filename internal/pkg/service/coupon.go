@@ -25,12 +25,14 @@ var DefaultCouponService = NewCouponService(repository.DefaultCouponRepository)
 
 func NewCouponService(r repository.ICouponRepository) CouponService {
 	return CouponService{
-		r: r,
+		r:              r,
+		redeemCodeRepo: repository.NewRedeemCodeRepository(context.NewMioContext()),
 	}
 }
 
 type CouponService struct {
-	r repository.ICouponRepository
+	r              repository.ICouponRepository
+	redeemCodeRepo *repository.RedeemCodeRepository
 }
 
 func (r CouponService) CouponListOfOpenid(openid string, couponTypeIds []string) ([]coupon.CouponRes, error) {
@@ -82,7 +84,7 @@ func (r CouponService) RetrieveUnassignedCoupon(couponTypeId string) (*coupon.Co
 	return &cp, err
 }
 
-// RedeemCoupon 兑换优惠券
+// RedeemCoupon 第三方合作兑换优惠券
 func (r CouponService) RedeemCoupon(param RedeemCouponParam) (*RedeemCouponWithTransactionResult, error) {
 	if param.OrderType == "" {
 		param.OrderType = entity.OrderTypeRedeem
@@ -101,6 +103,7 @@ func (r CouponService) RedeemCoupon(param RedeemCouponParam) (*RedeemCouponWithT
 		PointTransactionType: entity.POINT_COUPON,
 	})
 }
+
 func (r CouponService) RedeemCouponWithTransaction(param RedeemCouponWithTransactionParam) (*RedeemCouponWithTransactionResult, error) {
 	coupon := r.r.FindCoupon(repository.FindCouponBy{
 		CouponId: param.CouponId,
@@ -152,6 +155,61 @@ func (r CouponService) RedeemCouponWithTransaction(param RedeemCouponWithTransac
 		return nil, err
 	}
 	return &RedeemCouponWithTransactionResult{Point: int(contentType.Point), OrderId: orderId}, nil
+}
+func (r CouponService) RedeemCouponFromCode(param RedeemCouponByCodeParam) (*RedeemCouponWithTransactionResult, error) {
+	if !util.DefaultLock.Lock("RedeemCouponFromCode"+param.OpenId, time.Second*10) {
+		return nil, errno.ErrLimit
+	}
+	defer util.DefaultLock.UnLock("RedeemCouponFromCode" + param.OpenId)
+
+	if param.RedeemCodeId == "lvmiaoSH666" {
+		couponTypeId := "lvmiaoSH666"
+		coupon := r.r.FindCoupon(repository.FindCouponBy{
+			CouponTypeId: couponTypeId,
+			OpenId:       param.OpenId,
+		})
+		if coupon.ID != 0 {
+			return nil, errno.ErrCommon.WithMessage("该券码已被兑换")
+		}
+		_, err := r.GenerateCouponBatch(GenerateCouponBatchParam{
+			CouponTypeId: "lvmiaoSH666",
+			BatchSize:    1,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		unUsedCoupon, err := r.RetrieveUnassignedCoupon(couponTypeId)
+		if err != nil {
+			return nil, err
+		}
+		return r.RedeemCouponWithTransaction(RedeemCouponWithTransactionParam{
+			OpenId:               param.OpenId,
+			CouponId:             unUsedCoupon.CouponId,
+			PointTransactionType: entity.POINT_COUPON,
+		})
+	}
+
+	couponId, err := r.getCouponIdByRedeemCode(param.RedeemCodeId)
+	if err != nil {
+		return nil, err
+	}
+	result, err := r.RedeemCouponWithTransaction(RedeemCouponWithTransactionParam{
+		OpenId:               param.OpenId,
+		CouponId:             couponId,
+		PointTransactionType: entity.POINT_COUPON,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	err = r.redeemCode(param.RedeemCodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // IsActiveCoupon 判断优惠券是否在有效期
@@ -280,4 +338,32 @@ func (r CouponService) GetPageUserCouponRecord(getCouponDTO srv_types.GetPageCou
 		})
 	}
 	return couponRecordList, total, nil
+}
+
+func (r CouponService) getCouponIdByRedeemCode(redeemCode string) (string, error) {
+	redeemCodeInfo, exist, err := r.redeemCodeRepo.GetRedeemCode(repository.GetRedeemCodeBy{
+		CodeId: redeemCode,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	if !exist {
+		return "", errno.ErrCommon.WithMessage("不是有效的券码")
+	}
+
+	return redeemCodeInfo.CouponId, nil
+}
+func (r CouponService) redeemCode(redeemCode string) error {
+	redeemCodeInfo, exist, err := r.redeemCodeRepo.GetRedeemCode(repository.GetRedeemCodeBy{
+		CodeId: redeemCode,
+	})
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return errno.ErrCommon.WithMessage("不是有效的券码")
+	}
+	redeemCodeInfo.UpdateTime = time.Now()
+	return r.redeemCodeRepo.Save(redeemCodeInfo)
 }

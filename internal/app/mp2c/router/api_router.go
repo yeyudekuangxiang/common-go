@@ -217,6 +217,7 @@ func apiRouter(router *gin.Engine) {
 
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+		mustAuthRouter.POST("/coupon/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
 		//第三方
 		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(api.DefaultRecycleController.GetOolaKey))
 

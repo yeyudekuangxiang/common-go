@@ -13,6 +13,14 @@ type GetUserBy struct {
 	LikeMobile string //手机号模糊匹配
 	UnionId    string
 }
+
+type UpdateUserRisk struct {
+	UserIdSlice []string `json:"UserIdSlice"`
+	OpenIdSlice []string `json:"OpenIdSlice"`
+	PhoneSlice  []string `json:"PhoneSlice"`
+	Risk        int      `json:"Risk"`
+}
+
 type FindTopicLikeBy struct {
 	TopicId int
 	UserId  int
@@ -107,6 +115,10 @@ type GetUserPageListBy struct {
 
 type FindPointBy struct {
 	OpenId string
+}
+
+type FindListPoint struct {
+	OpenIds []string
 }
 type GetPointTransactionListBy struct {
 	OpenId    string
@@ -214,6 +226,7 @@ type GetStepHistoryPageListBy struct {
 type FindCouponBy struct {
 	CouponTypeId string
 	CouponId     string
+	OpenId       string
 }
 type FindCouponTypeBy struct {
 	CouponTypeId string
@@ -232,13 +245,14 @@ type FindUserChannelBy struct {
 }
 
 type GetUserChannelPageListBy struct {
-	Name    string             `json:"name" `
-	Code    string             `json:"code" `
-	Cid     int                `json:"cid"`
-	Pid     int                `json:"pid"`
-	Offset  int                `json:"offset"`
-	Limit   int                `json:"limit"` //limit为0时不限制数量
-	OrderBy entity.OrderByList `json:"orderBy"`
+	Name     string             `json:"name" `
+	Code     string             `json:"code" `
+	Cid      int                `json:"cid"`
+	CidSlice []int64            `json:"cidSlice"`
+	Pid      int                `json:"pid"`
+	Offset   int                `json:"offset"`
+	Limit    int                `json:"limit"` //limit为0时不限制数量
+	OrderBy  entity.OrderByList `json:"orderBy"`
 }
 
 type FindTopicBy struct {
@@ -264,4 +278,9 @@ type FindCommentLikeBy struct {
 type GetCommentLikeListBy struct {
 	CommentIds []int64
 	UserId     int64
+}
+
+type GetRedeemCodeBy struct {
+	CodeId   string
+	CouponId string
 }

@@ -57,6 +57,9 @@ func (u UserChannelRepository) GetUserChannelPageList(by GetUserChannelPageListB
 	if by.Cid > 0 {
 		db.Where("cid = ?", by.Cid)
 	}
+	if len(by.CidSlice) != 0 {
+		db.Where("cid in (?)", by.CidSlice)
+	}
 	if by.Name != "" {
 		db.Where("name like ?", "%"+by.Name+"%")
 	}
