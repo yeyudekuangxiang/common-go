@@ -399,6 +399,21 @@ type GenerateBadgeParam struct {
 	OrderId       string
 	Partnership   entity.PartnershipType
 }
+
+type TrackOrderZhuGe struct {
+	OpenId        string
+	CertificateId string
+	ProductItemId string
+	OrderId       string
+	Partnership   entity.PartnershipType
+	Title         string
+	CateTitle     string
+}
+
+type TrackLoginZhuGe struct {
+	CateTitle string
+}
+
 type OCRResult struct {
 	WordsResult []struct {
 		Words string `json:"words"`

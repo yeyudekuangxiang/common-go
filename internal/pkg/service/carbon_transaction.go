@@ -149,6 +149,23 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	return carbon, nil
 }
 
+func (srv CarbonTransactionService) CreateV2(dto api_types.CreateCarbonTransactionDto) (float64, error) {
+	//获取碳量
+	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
+		OpenId:       dto.OpenId,
+		Type:         dto.Type,
+		BizId:        util.UUID(),
+		ChangePoint:  dto.Value,
+		AdditionInfo: dto.Info,
+		CityCode:     "",
+		Uid:          dto.UserId,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return dto.Value, nil
+}
+
 // Bank 排行榜
 func (srv CarbonTransactionService) Bank(dto api_types.GetCarbonTransactionBankDto) ([]api_types.CarbonTransactionBank, int64, error) {
 	//1 获取排行榜信息

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -88,7 +89,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 
 	//本次可得积分
 	currPoint, _ := RecycleService.GetPoint(form.Name, form.Qua)
-	//本次可得减碳量 todo
+	//本次可得减碳量
 	currCo2, _ := RecycleService.GetCo2(form.Name, form.Qua)
 	//本月可获得积分上限
 	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
@@ -104,12 +105,25 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Type:         typeName,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.OrderNo + "#" + strconv.FormatInt(currCo2, 10) + "#" + form.ClientId,
+		AdditionInfo: form.OrderNo + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
 		Note:         form.OrderNo,
 	})
 	if err != nil {
 		fmt.Println("oola 旧物回收 加积分失败 ", form)
 	}
+	carbonString := fmt.Sprintf("%f", currCo2)
+
+	//发碳量
+	carbon, _ := service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
+		OpenId:  userInfo.OpenId,
+		UserId:  userInfo.ID,
+		Type:    entity.CarbonTransactionType(typeName),
+		Value:   currCo2,
+		Info:    form.OrderNo + "#" + carbonString + "#" + form.ClientId,
+		AdminId: 0,
+		Ip:      "",
+	})
+	println(carbon)
 	return gin.H{}, nil
 }
 
@@ -195,7 +209,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	//本次可得积分
 	currPoint, _ := RecycleService.GetPoint(typeText, form.Data.Weight)
-	//本次可得减碳量 todo
+	//本次可得减碳量
 	currCo2, _ := RecycleService.GetCo2(typeText, form.Data.Weight)
 	//本月可获得积分上限
 	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
@@ -211,9 +225,24 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		Type:         entity.POINT_FMY_RECYCLING_CLOTHING,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatInt(currCo2, 10) + "#" + form.Data.Phone,
+		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.Data.Phone,
 		Note:         form.Data.OrderSn,
 	})
+
+	carbonString := fmt.Sprintf("%f", currCo2)
+
+	//发碳量
+	carbon, _ := service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
+		OpenId:  userInfo.OpenId,
+		UserId:  userInfo.ID,
+		Type:    entity.CarbonTransactionType(typeName),
+		Value:   currCo2,
+		Info:    form.Data.OrderSn + "#" + carbonString + "#" + form.Data.Phone,
+		AdminId: 0,
+		Ip:      "",
+	})
+	println(carbon)
+
 	if err != nil {
 		fmt.Println("fmy 旧物回收 加积分失败 ", form)
 	}

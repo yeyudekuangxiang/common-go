@@ -61,7 +61,7 @@ var recyclePointByNum = map[string]int64{
 }
 
 // 回收 台/重量 单位对应减碳量 比如 电视机 1台 获得 15000g 减碳量
-var recycleCo2ByNum = map[string]int64{
+var recycleCo2ByNum = map[string]float64{
 	"手机":    25000,
 	"平板电脑":  89000,
 	"手提电脑":  224000,
@@ -181,7 +181,7 @@ func (srv RecycleService) GetPoint(typeName, qua string) (int64, error) {
 	return point, nil
 }
 
-func (srv RecycleService) GetCo2(typeName, qua string) (int64, error) {
+func (srv RecycleService) GetCo2(typeName, qua string) (float64, error) {
 	num, _ := strconv.ParseFloat(qua, 64)
 	co2 := srv.getCo2(typeName, num)
 	if co2 == 0 {
@@ -222,14 +222,14 @@ func (srv RecycleService) getPoint(typeName string, number float64) int64 {
 }
 
 //返回减碳量 单位 g
-func (srv RecycleService) getCo2(typeName string, number float64) int64 {
-	var co2 int64
+func (srv RecycleService) getCo2(typeName string, number float64) float64 {
+	var co2 float64
 	if typeName == "" || number == 0 {
 		return 0
 	}
 	//获取co2
 	if co2ByOne, ok := recycleCo2ByNum[typeName]; ok {
-		co2 = co2ByOne * int64(math.Floor(number))
+		co2 = co2ByOne * math.Floor(number)
 	}
 	return co2
 }

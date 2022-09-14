@@ -367,13 +367,37 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 				OrderId:       order.OrderId,
 				Partnership:   param.PartnershipType,
 			})
+
+			//根据商品id，查询证书id
+			eventInfo, errEvent := event.DefaultEventService.FindEventAndCate(event.FindEventParam{ProductItemId: orderItem.ItemId})
+			var title, cateTitle string
+			if errEvent != nil {
+				title = ""
+				cateTitle = ""
+			} else {
+				title = eventInfo.Title
+				cateTitle = eventInfo.CateTitle
+			}
+			//证书诸葛打点
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["分类名称"] = cateTitle
+			zhuGeAttr["证书id"] = cert.CertificateId
+			zhuGeAttr["商品id"] = orderItem.ItemId
+			zhuGeAttr["项目名称"] = title
+
 			if err != nil {
 				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
+				zhuGeAttr["是否失败"] = "操作失败"
+				zhuGeAttr["失败原因"] = err.Error()
+				DefaultZhuGeService().Track(config.ZhuGeEventName.UserCertificateSendErr, user.OpenId, zhuGeAttr)
 				continue
 			}
+			zhuGeAttr["是否失败"] = "操作成功"
+			DefaultZhuGeService().Track(config.ZhuGeEventName.UserCertificateSendSuc, user.OpenId, zhuGeAttr)
 		}
 	}
 }
+
 func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventParam) (*srv_types.SubmitOrderForEventResult, error) {
 	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
 		EventId: param.EventId,

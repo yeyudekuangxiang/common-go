@@ -4831,3 +4831,28 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 	os.Exit(0)
 	return nil, nil
 }
+
+func (PugcController) QnrInitChannel(c *gin.Context) (gin.H, error) {
+	return nil, nil
+	f, err := excelize.OpenFile("/Users/apple/Desktop/qnr.xlsx")
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(rows)
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		cid, _ := strconv.ParseInt(row[0], 10, 64)
+		service.DefaultUserChannelService.Create(&entity.UserChannel{
+			Cid:        cid,
+			Pid:        2,
+			Name:       row[2],
+			Code:       row[1],
+			CreateTime: model.NewTime(),
+			UpdateTime: model.NewTime(),
+		})
+	}
+	return nil, nil
+}
