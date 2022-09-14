@@ -22,6 +22,7 @@ import (
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -290,8 +291,6 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		}
 		userInfo.Risk = rest.RiskRank
 	}
-	//查看手机号是否已经存在
-	userByMobile, empty, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
 	//获取用户地址  todo 加入队列
 	city, err := baidu.IpToCity(cip)
 	if err != nil {
@@ -299,18 +298,26 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
 	userInfo.Ip = cip
-	ret := u.r.Save(&userInfo)
-	// todo topic数据批量修改 需要异步处理
-	if empty == true {
-		topicCount, _ := DefaultTopicService.CountTopic(repository.GetTopicCountBy{UserId: userInfo.ID})
-		if topicCount > 0 {
-			//更新topic userid
-			err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
-			if err != nil {
-				app.Logger.Info("用户数据更新失败", err.Error())
-			}
+
+	// todo topic数据批量修改
+	userByMobile, empty, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
+	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
+	if !u.checkOpenId(userInfo.OpenId) && specialUser.ID != 0 && specialUser.Status == 0 && empty == true {
+		//更新topic userid
+		err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
+		if err != nil {
+			app.Logger.Info("用户数据更新失败", err.Error())
+		}
+		specialUser.Status = 1
+		err = DefaultUserSpecialService.Save(&specialUser)
+		if err != nil {
+			app.Logger.Info("special用户状态更新失败", err.Error())
 		}
 	}
+
+	//更新保存用户信息
+	ret := u.r.Save(&userInfo)
+
 	if invitedBy != "" && userInfo.Risk > 2 {
 		return errors.New("很遗憾您暂无法参与活动")
 	}
@@ -626,4 +633,8 @@ func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
 		user.Partners = entity.Partner(param.Partner)
 	}
 	return u.r.Save(&user)
+}
+
+func (u UserService) checkOpenId(openId string) bool {
+	return strings.HasPrefix(openId, "oy_")
 }

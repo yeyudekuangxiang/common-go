@@ -2,6 +2,7 @@ package baidu
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,6 +33,9 @@ type CityResult struct {
 //根据ip获取城市
 
 func IpToCity(ip string) (*CityResult, error) {
+	if ip == "" {
+		return nil, errors.New("ip地址为空")
+	}
 	url := "https://api.map.baidu.com/location/ip?ak=32f38c9491f2da9eb61106aaab1e9739&ip=" + ip
 	method := "GET"
 	client := &http.Client{}
