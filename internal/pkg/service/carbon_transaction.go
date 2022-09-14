@@ -29,6 +29,7 @@ func NewCarbonTransactionService(ctx *context.MioContext) CarbonTransactionServi
 		repoDay:   repository.NewCarbonTransactionDayRepository(ctx),
 		repoScene: repository.NewCarbonSceneRepository(ctx),
 		repoPoint: repository.NewPointTransactionRepository(ctx),
+		repoUser:  repository.NewUserRepository(),
 	}
 }
 
@@ -38,6 +39,7 @@ type CarbonTransactionService struct {
 	repoDay   repository.CarbonTransactionDayRepository
 	repoScene repository.CarbonSceneRepository
 	repoPoint *repository.PointTransactionRepository
+	repoUser  repository.UserRepository
 }
 
 func (srv CarbonTransactionService) PointToCarbon() {
@@ -129,6 +131,13 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if errCheck != nil {
 		return 0, errCheck
 	}*/
+
+	if dto.UserId == 0 && dto.OpenId != "" {
+		infoV2 := srv.repoUser.GetUserBy(repository.GetUserBy{OpenId: dto.OpenId})
+		if infoV2.ID != 0 {
+			dto.UserId = infoV2.ID
+		}
+	}
 	//获取碳量
 	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
 	if carbon == 0 {
@@ -150,6 +159,13 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 }
 
 func (srv CarbonTransactionService) CreateV2(dto api_types.CreateCarbonTransactionDto) (float64, error) {
+	//当传入的userId为0，用openid查询userid
+	if dto.UserId == 0 && dto.OpenId != "" {
+		infoV2 := srv.repoUser.GetUserBy(repository.GetUserBy{OpenId: dto.OpenId})
+		if infoV2.ID != 0 {
+			dto.UserId = infoV2.ID
+		}
+	}
 	//获取碳量
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
