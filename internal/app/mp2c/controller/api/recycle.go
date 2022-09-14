@@ -105,7 +105,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Type:         typeName,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.OrderNo + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
+		AdditionInfo: form.OrderNo + "#" + strconv.FormatInt(currPoint, 10) + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + form.ClientId,
 		Note:         form.OrderNo,
 	})
 	if err != nil {
@@ -225,7 +225,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		Type:         entity.POINT_FMY_RECYCLING_CLOTHING,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.Data.Phone,
+		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatInt(currPoint, 10) + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + form.Data.Phone,
 		Note:         form.Data.OrderSn,
 	})
 
