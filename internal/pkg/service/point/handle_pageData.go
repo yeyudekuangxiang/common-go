@@ -56,7 +56,7 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 	//co2
 	for _, item := range result {
 		additionalInfo := strings.Split(string(item["additional_info"].(entity.AdditionalInfo)), "#")
-		co2, _ = decimal.NewFromString(additionalInfo[2])
+		co2, _ = decimal.NewFromString(additionalInfo[1])
 		co2Count = co2.Add(co2Count)
 	}
 	//返回数据
@@ -81,7 +81,7 @@ func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, erro
 	//co2
 	for _, item := range result {
 		additionalInfo := strings.Split(string(item["additional_info"].(entity.AdditionalInfo)), "#")
-		co2, _ = decimal.NewFromString(additionalInfo[2])
+		co2, _ = decimal.NewFromString(additionalInfo[1])
 		co2Count = co2.Add(co2Count)
 	}
 	//返回数据
