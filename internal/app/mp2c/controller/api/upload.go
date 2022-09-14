@@ -10,6 +10,7 @@ import (
 	"mio/pkg/errno"
 	"net/http"
 	"path"
+	"strings"
 )
 
 var DefaultUploadController = UploadController{}
@@ -88,4 +89,44 @@ func (UploadController) UploadCallback(ctx *gin.Context) (gin.H, error) {
 	})
 
 	return nil, err
+}
+func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
+	form := UploadImageForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+
+	fileHeader, err := ctx.FormFile("file")
+	if err != nil {
+		if err == http.ErrMissingFile {
+			return nil, errors.New("请选择文件")
+		}
+		return nil, err
+	}
+	uploadScene, err := service.DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
+		Scene: strings.ToLower(form.ImageScene),
+	})
+	if err != nil || uploadScene.ID == 0 {
+		return nil, errors.New("上传场景错误")
+	}
+
+	if fileHeader.Size > 5*1024*1024 {
+		return nil, errors.New("文件大小不能超过5M")
+	}
+
+	fileExt := path.Ext(fileHeader.Filename)
+	if fileExt != ".png" && fileExt != ".jpg" && fileExt != ".jpeg" {
+		return nil, errors.New("仅支持png、jpg格式的图片")
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	user := apiutil.GetAuthUser(ctx)
+	imgUrl, err := service.DefaultUploadService.UploadImage(user.OpenId, file, fileHeader.Filename, uploadScene.OssDir)
+	return gin.H{
+		"imgUrl": imgUrl,
+	}, err
 }
