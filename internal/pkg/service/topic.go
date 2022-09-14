@@ -693,3 +693,20 @@ func (srv TopicService) getTopicImage(importId int, p string) ([]string, error) 
 	}
 	return list, nil
 }
+
+func (srv TopicService) CountTopic(param repository.GetTopicCountBy) (int64, error) {
+	var total int64
+	query := app.DB.Model(&entity.Topic{})
+	if param.UserId != 0 {
+		query.Where("topic.user_id = ?", param.UserId)
+	}
+	err := query.Count(&total).Group("topic.id").Error
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (srv TopicService) UpdateAuthor(userId, passiveUserId int64) error {
+	return app.DB.Model(&entity.Topic{}).Where("topic.user_id = ?", passiveUserId).Update("user_id", userId).Error
+}

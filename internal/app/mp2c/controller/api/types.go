@@ -108,6 +108,11 @@ type AnswerQuizQuestionForm struct {
 type UploadPointCollectImageForm struct {
 	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC" alias:"类型"`
 }
+
+type UploadImageForm struct {
+	ImageScene string `json:"imageScene" form:"imageScene" alias:"上传场景"`
+}
+
 type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
 	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC" alias:"类型"`

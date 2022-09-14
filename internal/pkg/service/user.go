@@ -290,7 +290,8 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		}
 		userInfo.Risk = rest.RiskRank
 	}
-
+	//查看手机号是否已经存在
+	userByMobile, empty, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
 	//获取用户地址  todo 加入队列
 	city, err := baidu.IpToCity(cip)
 	if err != nil {
@@ -299,7 +300,17 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
 	userInfo.Ip = cip
 	ret := u.r.Save(&userInfo)
-
+	// todo topic数据批量修改 需要异步处理
+	if empty == true {
+		topicCount, _ := DefaultTopicService.CountTopic(repository.GetTopicCountBy{UserId: userInfo.ID})
+		if topicCount > 0 {
+			//更新topic userid
+			err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
+			if err != nil {
+				app.Logger.Info("用户数据更新失败", err.Error())
+			}
+		}
+	}
 	if invitedBy != "" && userInfo.Risk > 2 {
 		return errors.New("很遗憾您暂无法参与活动")
 	}
