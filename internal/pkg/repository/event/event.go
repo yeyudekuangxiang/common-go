@@ -47,7 +47,7 @@ func (repo EventRepository) FindEventCate(by FindEventBy) (repotypes.EventRet, e
 	var Ret repotypes.EventRet
 
 	db := repo.DB.Model(ev)
-	db.Select("event.title as title")
+	db.Select("event.title as title,event_category.title as cateTitle")
 	if by.ProductItemId != "" {
 		db.Where("product_item_id = ?", by.ProductItemId)
 	}
