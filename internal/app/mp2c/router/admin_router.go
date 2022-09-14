@@ -86,10 +86,13 @@ func adminRouter(router *gin.Engine) {
 		//后台接口-用户管理
 		userRouter := adminRouter.Group("/user")
 		{
-			userRouter.GET("/list", apiutil.Format(admin.DefaultUserController.List))                   //用户列表
-			userRouter.GET("/detail", apiutil.Format(admin.DefaultUserController.Detail))               //用户详情
-			userRouter.POST("/update", apiutil.Format(admin.DefaultUserController.Update))              //更新用户状态
-			userRouter.POST("/position-list", apiutil.Format(admin.DefaultUserController.PositionList)) //
+			userRouter.GET("/list", apiutil.Format(admin.DefaultUserController.List))                      //用户列表
+			userRouter.GET("/detail", apiutil.Format(admin.DefaultUserController.Detail))                  //用户详情
+			userRouter.POST("/update", apiutil.Format(admin.DefaultUserController.Update))                 //更新用户状态
+			userRouter.POST("/position-list", apiutil.Format(admin.DefaultUserController.PositionList))    //
+			userRouter.GET("/list/risk", apiutil.Format(admin.DefaultUserController.ListRisk))             //用户列表（风险等级管理）
+			userRouter.GET("/risk/statistics", apiutil.Format(admin.DefaultUserController.RiskStatistics)) //风险用户统计
+			userRouter.POST("/update/risk", apiutil.Format(admin.DefaultUserController.UpdateRisk))
 		}
 	}
 	//adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))

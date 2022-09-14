@@ -27,6 +27,24 @@ func (u UserRepository) GetUserById(id int64) entity.User {
 	}
 	return user
 }
+func (u UserRepository) BatchUpdateUserRisk(by UpdateUserRisk) error {
+	db := app.DB.Model(entity.User{})
+	if len(by.UserIdSlice) != 0 {
+		db.Where("id in (?)", by.UserIdSlice)
+	}
+	if len(by.PhoneSlice) != 0 {
+		db.Where("phone_number in (?)", by.PhoneSlice)
+	}
+	if len(by.OpenIdSlice) != 0 {
+		db.Where("openid in (?)", by.OpenIdSlice)
+	}
+
+	//防止没有参数，更新用户所有的数据
+	if len(by.UserIdSlice) == 0 && len(by.OpenIdSlice) == 0 && len(by.PhoneSlice) == 0 {
+		panic("参数有误")
+	}
+	return db.Update("risk", by.Risk).Error
+}
 func (u UserRepository) GetUserBy(by GetUserBy) entity.User {
 	user := entity.User{}
 	db := app.DB.Model(user)
@@ -162,6 +180,25 @@ func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, 
 		panic(err)
 	}
 	return list, count
+}
+
+type RiskStatistics struct {
+	Risk  int64  `json:"risk"`
+	Total int64  `json:"total"`
+	Desc  string `json:"desc"`
+}
+
+//统计每个risk的总数
+
+func (u UserRepository) GetRiskStatistics() []RiskStatistics {
+	list := make([]RiskStatistics, 0)
+	db := app.DB.Model(entity.User{})
+	db.Group("risk")
+	db.Select("risk,count(*) as total")
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
 }
 
 func (u UserRepository) GetUserByID(id int64) (*entity.User, bool, error) {

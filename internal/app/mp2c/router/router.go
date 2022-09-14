@@ -27,6 +27,10 @@ func Router(router *gin.Engine) {
 		context.String(200, "c915276f12c8d1c2c20604b8d77072db")
 	})
 
+	router.Any("8LF0rq9WPf.txt", func(context *gin.Context) {
+		context.String(200, "11d2f924ac51f2b502087d535c3c6b6e")
+	})
+
 	router.GET("/duiba/jump.html", func(context *gin.Context) {
 		context.Header("content-type", "text/html; charset=utf-8")
 		context.Writer.WriteString(`<!DOCTYPE html>

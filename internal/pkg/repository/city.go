@@ -24,23 +24,17 @@ func (repo CityRepository) Create(day *entity.City) error {
 	return repo.ctx.DB.Create(day).Error
 }
 
-func (repo CityRepository) GetList(by repotypes.GetCarbonTransactionDayGetListDO) ([]entity.City, error) {
+func (repo CityRepository) GetList(by repotypes.GetCityListDO) ([]entity.City, error) {
 	list := make([]entity.City, 0)
 	db := repo.ctx.DB.Model(entity.City{})
-	if by.StartTime != "" {
-		db.Where("v_date >= ?", by.StartTime)
+	if len(by.CityCodeSlice) != 0 {
+		db.Where("city_code in (?)", by.CityCodeSlice)
 	}
-	if by.EndTime != "" {
-		db.Where("v_date <= ?", by.EndTime)
+	if by.CityCode != "" {
+		db.Where("city_code", by.CityCode)
 	}
-	if by.UserId != 0 {
-		db.Where("user_id = ?", by.UserId)
-	}
-	for _, orderBy := range by.OrderBy {
-		switch orderBy {
-		case entity.OrderByCarbonTranDayVDate:
-			db.Order("v_date desc")
-		}
+	if by.Name != "" {
+		db.Where("name = ?", by.Name)
 	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)

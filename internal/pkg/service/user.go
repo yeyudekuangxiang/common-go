@@ -26,9 +26,12 @@ import (
 	"time"
 )
 
-var DefaultUserService = NewUserService(repository.DefaultUserRepository, repository.InviteRepository{})
+var DefaultUserService = NewUserService(
+	repository.DefaultUserRepository,
+	repository.InviteRepository{})
 
-func NewUserService(r repository.UserRepository, rInvite repository.InviteRepository) UserService {
+func NewUserService(r repository.UserRepository,
+	rInvite repository.InviteRepository) UserService {
 	return UserService{
 		r:       r,
 		rInvite: rInvite,
@@ -506,7 +509,6 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	}
 	return u.r.Save(&user)
 }
-
 func (u UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
 	return u.r.GetUserPageListBy(by)
 }

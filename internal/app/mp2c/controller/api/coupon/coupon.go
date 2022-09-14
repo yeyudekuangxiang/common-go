@@ -38,3 +38,19 @@ func (CouponController) GetPageUserCouponRecord(c *gin.Context) (interface{}, er
 	}
 	return controller.NewPageResult(list, total, form), nil
 }
+func (CouponController) RedeemCode(c *gin.Context) (interface{}, error) {
+	form := RedeemCodeForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+	result, err := service.DefaultCouponService.RedeemCouponFromCode(service.RedeemCouponByCodeParam{
+		OpenId:       user.OpenId,
+		RedeemCodeId: form.RedeemCodeId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

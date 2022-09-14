@@ -1,8 +1,10 @@
 package admin
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -124,5 +126,78 @@ func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 
 	}
 
+	return nil, nil
+}
+
+//用户列表
+
+func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
+	form := UserPageListForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	list, total := service.NewUserRiskService(context.NewMioContext()).GetUserRiskPageListBy(repository.GetUserPageListBy{
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+		User: repository.GetUserListBy{
+			Mobile:   form.Mobile,
+			UserId:   form.ID,
+			Status:   form.State,
+			Nickname: form.Nickname,
+		},
+		OrderBy: "id desc",
+	})
+	return gin.H{
+		"users":    list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
+//risk统计分类
+
+func (ctr UserController) RiskStatistics(c *gin.Context) (gin.H, error) {
+	list := service.NewUserRiskService(context.NewMioContext()).GetUserRiskStatisticst()
+	return gin.H{
+		"date": list,
+	}, nil
+}
+
+//更新用户风险等级
+
+func (ctr UserController) UpdateRisk(c *gin.Context) (gin.H, error) {
+	var form UpdateUserRisk
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	idsSlice := strings.Split(form.Ids, ",")
+	var UserIdSlice, PhoneSlice, OpenIdSlice []string
+
+	if len(idsSlice) == 0 {
+		return nil, errors.New("请输出要提交的id")
+	}
+	switch form.Type {
+	case 1:
+		UserIdSlice = idsSlice
+		break
+	case 2:
+		PhoneSlice = idsSlice
+		break
+	case 3:
+		OpenIdSlice = idsSlice
+		break
+	default:
+		break
+	}
+
+	if err := service.NewUserRiskService(context.NewMioContext()).BatchUpdateUserRisk(service.UpdateRiskParam{
+		UserIdSlice: UserIdSlice,
+		PhoneSlice:  PhoneSlice,
+		OpenIdSlice: OpenIdSlice,
+		Risk:        form.Risk,
+	}); err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
