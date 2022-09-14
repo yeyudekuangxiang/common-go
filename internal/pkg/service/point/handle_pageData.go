@@ -5,7 +5,6 @@ import (
 	"github.com/shopspring/decimal"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"strconv"
 	"strings"
 )
 
@@ -52,17 +51,17 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 		return nil, err
 	}
 	//减碳量计算
-	var co2, co2Count int64
+	var co2, co2Count decimal.Decimal
 	res := make(map[string]interface{}, 0)
 	//co2
 	for _, item := range result {
 		additionalInfo := strings.Split(string(item["additional_info"].(entity.AdditionalInfo)), "#")
-		co2, _ = strconv.ParseInt(additionalInfo[1], 10, 64)
-		co2Count += co2
+		co2, _ = decimal.NewFromString(additionalInfo[2])
+		co2Count = co2.Add(co2Count)
 	}
 	//返回数据
 	res["count"] = count
-	res["co2"] = co2Count
+	res["co2"] = co2Count.String()
 	return res, nil
 }
 
@@ -77,17 +76,17 @@ func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, erro
 		return nil, err
 	}
 	//减碳量计算
-	var co2, co2Count int64
+	var co2, co2Count decimal.Decimal
 	res := make(map[string]interface{}, 0)
 	//co2
 	for _, item := range result {
 		additionalInfo := strings.Split(string(item["additional_info"].(entity.AdditionalInfo)), "#")
-		co2, _ = strconv.ParseInt(additionalInfo[1], 10, 64)
-		co2Count += co2
+		co2, _ = decimal.NewFromString(additionalInfo[2])
+		co2Count = co2.Add(co2Count)
 	}
 	//返回数据
 	res["count"] = count
-	res["co2"] = co2Count
+	res["co2"] = co2Count.String()
 	return res, nil
 }
 
