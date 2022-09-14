@@ -17,7 +17,6 @@ import (
 )
 
 func apiRouter(router *gin.Engine) {
-
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")

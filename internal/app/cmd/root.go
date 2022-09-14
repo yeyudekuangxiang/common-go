@@ -9,6 +9,7 @@ import (
 	"mio/internal/app/cmd/certificate"
 	"mio/internal/app/cmd/db"
 	"mio/internal/app/cmd/gitlab"
+	"mio/internal/app/cmd/quiz"
 	"mio/internal/app/cmd/topic"
 	"mio/internal/app/cmd/user"
 	"os"
@@ -61,4 +62,5 @@ func cmds() {
 	RootCmd.AddCommand(db.DBCmd)
 	RootCmd.AddCommand(certificate.CertificateCmd)
 	RootCmd.AddCommand(auth.AuthCmd)
+	RootCmd.AddCommand(quiz.QuizCmd)
 }

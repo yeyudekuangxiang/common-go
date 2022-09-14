@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"mio/internal/app/mp2c/controller/api/api_types"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/service"
 	"strconv"
 )
 
@@ -45,6 +48,18 @@ func (c *defaultClientHandle) powerReplace() error {
 		if err != nil {
 			return err
 		}
+		kwh, _ := fromString.Float64() //本次碳量
+		//发碳量
+		carbon, _ := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  c.clientHandle.OpenId,
+			UserId:  0,
+			Type:    entity.CarbonTransactionType(c.clientHandle.Type),
+			Value:   kwh,
+			Info:    m["orderId"] + "#" + m["kwh"] + "#" + c.clientHandle.bizId + "#" + c.clientHandle.ImgUrl,
+			AdminId: 0,
+			Ip:      "",
+		})
+		println(carbon)
 		return nil
 	})
 
@@ -62,6 +77,7 @@ func (c *defaultClientHandle) powerReplace() error {
 	}
 	//计算减碳 需要返回本次积分 本次充电度数 本次减碳 今日累计获得
 	m["co2"] = fromString.Mul(decimal.NewFromFloat(511)).String()
+
 	m["point"] = strconv.FormatInt(c.clientHandle.point, 10)
 	m["todayPoint"] = strconv.FormatInt(todayPoint, 10)
 	delete(c.clientHandle.identifyImg, "orderId")

@@ -238,7 +238,7 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 }
 
 func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage string) {
-	go DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
+	DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
 		OpenId:      dto.OpenId,
 		PointType:   dto.Type,
 		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "dec").String(),
