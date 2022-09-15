@@ -1,4 +1,4 @@
-package qnr
+package question
 
 import (
 	"mio/internal/pkg/core/context"

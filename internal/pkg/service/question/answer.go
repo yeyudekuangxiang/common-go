@@ -1,12 +1,12 @@
-package qnr
+package question
 
 import (
 	"mio/config"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
-	qnrEntity "mio/internal/pkg/model/entity/qnr"
+	qnrEntity "mio/internal/pkg/model/entity/question"
 	repo "mio/internal/pkg/repository"
-	repoQnr "mio/internal/pkg/repository/qnr"
+	repoQnr "mio/internal/pkg/repository/question"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
