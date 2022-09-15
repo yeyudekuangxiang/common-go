@@ -389,10 +389,9 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 				app.Logger.Error("发放证书失败", orderItem.ItemId, err)
 				zhuGeAttr["是否失败"] = "操作失败"
 				zhuGeAttr["失败原因"] = err.Error()
-				DefaultZhuGeService().Track(config.ZhuGeEventName.UserCertificateSendErr, user.OpenId, zhuGeAttr)
-				continue
+			} else {
+				zhuGeAttr["是否失败"] = "操作成功"
 			}
-			zhuGeAttr["是否失败"] = "操作成功"
 			DefaultZhuGeService().Track(config.ZhuGeEventName.UserCertificateSendSuc, user.OpenId, zhuGeAttr)
 		}
 	}

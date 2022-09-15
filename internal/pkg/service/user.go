@@ -103,10 +103,6 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 		return //不存在用户信息，返回
 	}
 	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
-	zhuGeIdentifyAttr["openid"] = user.Openid
-	zhuGeIdentifyAttr["注册来源"] = user.Source
-	zhuGeIdentifyAttr["注册时间"] = user.Time.Format("2006/01/02")
-	zhuGeIdentifyAttr["注册定位城市"] = user.CityName
 	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
 	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
 	DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
