@@ -6,6 +6,7 @@ import (
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/open"
+	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -67,7 +68,10 @@ func openRouter(router *gin.Engine) {
 		openRouter.POST("/recycle/fmy", apiutil.Format(api.DefaultRecycleController.FmyOrderSync))
 
 		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
-		//外链跳转
-		openRouter.GET("/auth/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
+		//外部跳转 需要登陆
+		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
+		{
+			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
+		}
 	}
 }
