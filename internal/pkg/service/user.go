@@ -309,11 +309,10 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		if err != nil {
 			app.Logger.Info("special用户状态更新失败", err.Error())
 		}
-		userByMobile.Auth = 1
-		err = u.r.Save(userByMobile)
-		if err != nil {
-			return err
-		}
+		userInfo.Auth = 1
+		userInfo.PositionIcon = specialUser.Icon
+		userInfo.Partners = entity.Partner(specialUser.Partner)
+		userInfo.Position = entity.UserPosition(specialUser.Identity)
 	}
 
 	//更新保存用户信息
@@ -618,9 +617,9 @@ func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
 	}
 	if param.Position != "" {
 		user.Position = entity.UserPosition(param.Position)
-	}
-	if param.PositionIcon != "" {
-		user.PositionIcon = param.PositionIcon
+		if icon, ok := entity.IconMap[user.Position]; ok {
+			user.PositionIcon = icon
+		}
 	}
 	return u.r.Save(&user)
 }
@@ -632,6 +631,9 @@ func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
 	}
 	if param.Partner >= 0 {
 		user.Partners = entity.Partner(param.Partner)
+		if icon, ok := entity.IconPartnerMap[user.Partners]; ok {
+			user.PositionIcon = icon
+		}
 	}
 	return u.r.Save(&user)
 }
