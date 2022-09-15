@@ -27,6 +27,15 @@ func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filenam
 	return DefaultOssService.FullUrl(ocrPath), nil
 }
 
+func (srv UploadService) UploadImage(openid string, reader io.Reader, filename string, scene string) (string, error) {
+	key := fmt.Sprintf("%s%s/%s%s", strings.TrimLeft(scene, DefaultOssService.BasePath), openid, util.UUID(), path.Ext(filename))
+	ocrPath, err := DefaultOssService.PutObject(key, reader)
+	if err != nil {
+		return "", err
+	}
+	return DefaultOssService.FullUrl(ocrPath), nil
+}
+
 //CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
 func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, scene string) (*srv_types.UploadTokenInfo, error) {
 	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{

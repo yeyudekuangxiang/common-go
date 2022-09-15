@@ -22,6 +22,7 @@ import (
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -102,10 +103,6 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 		return //不存在用户信息，返回
 	}
 	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
-	zhuGeIdentifyAttr["openid"] = user.Openid
-	zhuGeIdentifyAttr["注册来源"] = user.Source
-	zhuGeIdentifyAttr["注册时间"] = user.Time.Format("2006/01/02")
-	zhuGeIdentifyAttr["注册定位城市"] = user.CityName
 	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
 	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
 	DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
@@ -290,7 +287,6 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		}
 		userInfo.Risk = rest.RiskRank
 	}
-
 	//获取用户地址  todo 加入队列
 	city, err := baidu.IpToCity(cip)
 	if err != nil {
@@ -298,6 +294,24 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
 	userInfo.Ip = cip
+
+	// todo topic数据批量修改
+	userByMobile, empty, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
+	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
+	if !u.checkOpenId(userInfo.OpenId) && specialUser.ID != 0 && specialUser.Status == 0 && empty == true {
+		//更新topic userid
+		err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
+		if err != nil {
+			app.Logger.Info("用户数据更新失败", err.Error())
+		}
+		specialUser.Status = 1
+		err = DefaultUserSpecialService.Save(&specialUser)
+		if err != nil {
+			app.Logger.Info("special用户状态更新失败", err.Error())
+		}
+	}
+
+	//更新保存用户信息
 	ret := u.r.Save(&userInfo)
 
 	if invitedBy != "" && userInfo.Risk > 2 {
@@ -615,4 +629,8 @@ func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
 		user.Partners = entity.Partner(param.Partner)
 	}
 	return u.r.Save(&user)
+}
+
+func (u UserService) checkOpenId(openId string) bool {
+	return strings.HasPrefix(openId, "oy_")
 }
