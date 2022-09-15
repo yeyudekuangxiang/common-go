@@ -135,8 +135,8 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	if param.UnionId != "" {
 		app.DB.Where("unionid = ? and guid =''", param.UnionId).Update("guid", guid)
 	}
-	channelId := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
-	user.ChannelId = channelId
+	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
+	user.ChannelId = ch.Cid
 	return &user, repository.DefaultUserRepository.Save(&user)
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {
@@ -178,14 +178,14 @@ func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.Use
 	if user.ID > 0 {
 		return &user, nil
 	}
-	channelId := DefaultUserChannelService.GetChannelByCid(cid) //获取渠道来源
+	ch := DefaultUserChannelService.GetChannelByCid(cid) //获取渠道来源
 	return u.CreateUser(CreateUserParam{
 		OpenId:      mobile,
 		Nickname:    "手机用户" + mobile[len(mobile)-4:],
 		PhoneNumber: mobile,
 		Source:      entity.UserSourceMobile,
 		UnionId:     mobile,
-		ChannelId:   channelId,
+		ChannelId:   ch.Cid,
 	})
 }
 
@@ -308,6 +308,11 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		err = DefaultUserSpecialService.Save(&specialUser)
 		if err != nil {
 			app.Logger.Info("special用户状态更新失败", err.Error())
+		}
+		userByMobile.Auth = 1
+		err = u.r.Save(userByMobile)
+		if err != nil {
+			return err
 		}
 	}
 
