@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"time"
@@ -52,9 +54,19 @@ func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//GetUserInfo 用户信息
 func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
+	userInfo := apiutil.GetAuthUser(c)
+	user := api_types.UserInfoVO{}
+	util.MapTo(userInfo, &user)
+	if userInfo.ChannelId != 0 {
+		channel, err := service.DefaultUserChannelService.GetChannelInfoByCid(userInfo.ChannelId)
+		if err == nil {
+			user.ChannelName = channel.Name
+		}
+	}
 	return gin.H{
-		"user": apiutil.GetAuthUser(c),
+		"user": user,
 	}, nil
 }
 
