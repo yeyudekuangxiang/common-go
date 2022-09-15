@@ -48,9 +48,9 @@ func (repo UserChannelRepository) Create(channel *entity.UserChannel) error {
 	return repo.DB.Create(channel).Error
 }
 
-func (u UserChannelRepository) GetUserChannelPageList(by GetUserChannelPageListBy) (list []entity.UserChannel, total int64) {
+func (repo UserChannelRepository) GetUserChannelPageList(by GetUserChannelPageListBy) (list []entity.UserChannel, total int64) {
 	list = make([]entity.UserChannel, 0)
-	db := u.DB.Table("user_channel")
+	db := repo.DB.Table("user_channel")
 	if by.Pid > 0 {
 		db.Where("pid = ?", by.Pid)
 	}
@@ -64,7 +64,7 @@ func (u UserChannelRepository) GetUserChannelPageList(by GetUserChannelPageListB
 		db.Where("name like ?", "%"+by.Name+"%")
 	}
 	db.Select("*")
-	db2 := u.DB.Table("(?) as t", db)
+	db2 := repo.DB.Table("(?) as t", db)
 	err := db2.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
