@@ -82,7 +82,6 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		//return user, cookie, nil
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
-
 	}
 
 	if isNewUser {

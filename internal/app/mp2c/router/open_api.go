@@ -6,6 +6,7 @@ import (
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/open"
+	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -59,15 +60,21 @@ func openRouter(router *gin.Engine) {
 				context.String(400, err.Error())
 			}
 		})
-
+		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
+		//绿喵跳转外部平台
 		//订单同步接口 （星星充电、快电）
 		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
 		//噢啦\飞蚂蚁旧物回收 订单同步接口
 		openRouter.POST("/recycle/oola", apiutil.Format(api.DefaultRecycleController.OolaOrderSync))
 		openRouter.POST("/recycle/fmy", apiutil.Format(api.DefaultRecycleController.FmyOrderSync))
 
-		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
-		//外链跳转
-		openRouter.GET("/auth/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
+		//外部平台跳转绿喵 需要登陆
+		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
+		{
+			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
+			openAuthRouter.GET("/SendPoint", apiutil.Format(open.DefaultPlatformController.SendPoint))
+		}
+		//外部平台跳转绿喵 不需要登陆
+
 	}
 }

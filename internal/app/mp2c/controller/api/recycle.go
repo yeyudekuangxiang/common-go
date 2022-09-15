@@ -248,3 +248,9 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	}
 	return gin.H{}, nil
 }
+
+//回调的回调
+func (ctr RecycleController) turnPlatform(params map[string]interface{}) map[string]interface{} {
+
+	return nil
+}

@@ -21,5 +21,5 @@ func (repo BdSceneUserRepository) FindByCh(ch string) entity.BdSceneUser {
 	return item
 }
 func (repo BdSceneUserRepository) Create(data *entity.BdSceneUser) error {
-	return repo.DB.Model(&entity.BdSceneUser{}).Save(data).Error
+	return repo.DB.Model(&entity.BdSceneUser{}).Create(data).Error
 }
