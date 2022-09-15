@@ -65,6 +65,7 @@ func (srv UserChannelService) GetChannelByCid(cid int64) int64 {
 }
 
 /**根据cid获取渠道信息*/
+
 func (srv UserChannelService) GetByCid(cid int64) (channel *entity.UserChannel, err error) {
 	ch := srv.r.FindByCid(repository.FindUserChannelBy{
 		Cid: cid,
