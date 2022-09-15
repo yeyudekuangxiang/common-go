@@ -60,7 +60,7 @@ func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	util.MapTo(userInfo, &user)
 	if userInfo.ChannelId != 0 {
 		channel, err := service.DefaultUserChannelService.GetByCid(userInfo.ChannelId)
-		if err != nil {
+		if err == nil {
 			user.ChannelName = channel.Name
 		}
 	}
