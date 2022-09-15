@@ -4,7 +4,11 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -45,5 +49,34 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 		return nil, nil
 	}
 	//调用第三方回调
+	return nil, nil
+}
+
+func (receiver PlatformController) SendPoint(ctx *gin.Context) (gin.H, error) {
+	form := platform{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	//查询渠道号
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		app.Logger.Info("渠道查询失败", form)
+		return nil, errors.New("渠道查询失败")
+	}
+	user := apiutil.GetAuthUser(ctx)
+	ch := service.DefaultUserChannelService.GetChannelByCid(user.ChannelId)
+	t := entity.ChToMap[ch.Code]
+	value := entity.PointCollectValueMap[t]
+	_, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:      user.OpenId,
+		Type:        t,
+		BizId:       util.UUID(),
+		ChangePoint: int64(value),
+		AdminId:     0,
+		Note:        "零碳小先锋注册领积分",
+	})
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }

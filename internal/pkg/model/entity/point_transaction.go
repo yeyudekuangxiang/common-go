@@ -74,6 +74,8 @@ func (p PointTransactionType) Text() string {
 		return "点赞"
 	case POINT_REDUCE_PLASTIC:
 		return "环保减塑"
+	case POINT_LTXXF:
+		return "零碳小先锋"
 	}
 	return "未知积分"
 }
@@ -155,6 +157,8 @@ const (
 	POINT_LIKE      PointTransactionType = "LIKE"      //点赞
 
 	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC" //环保减塑
+
+	POINT_LTXXF PointTransactionType = "零碳小先锋"
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -216,23 +220,28 @@ var PointCollectValueMap = map[PointTransactionType]int{
 	POINT_LIKE:           5,   //每次
 	POINT_RECOMMEND:      50,  //每次
 	POINT_REDUCE_PLASTIC: 28,  //每次
+	POINT_LTXXF:          2500,
 }
 
-var PointCollectValueMapDay = map[PointTransactionType]int{
-	POINT_INVITE:        500, //	每人/天
-	POINT_POWER_REPLACE: 300, //	每人/天
+var PointCollectLimitOnceMap = map[PointTransactionType]int{
+	POINT_COFFEE_CUP: 1,
 }
 
 //每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:     2, //	次/天
-	POINT_BIKE_RIDE:      2, //	次/天
-	POINT_INVITE:         5, //	次/天
-	POINT_POWER_REPLACE:  1, //	次/天
-	POINT_ARTICLE:        2, //	次/天
+	POINT_COFFEE_CUP:     2, //	次
+	POINT_BIKE_RIDE:      2, //	次
+	POINT_INVITE:         5, //	次
+	POINT_POWER_REPLACE:  1, //	次
+	POINT_ARTICLE:        2, //	次
 	POINT_COMMENT:        3, // 次
 	POINT_LIKE:           6, // 次
 	POINT_REDUCE_PLASTIC: 2, // 次
+}
+
+//渠道对应类型
+var ChToMap = map[string]PointTransactionType{
+	"ltxxf": POINT_LTXXF,
 }
 
 type PointTransaction struct {
