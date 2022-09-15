@@ -54,6 +54,7 @@ func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//GetUserInfo 用户信息
 func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	userInfo := apiutil.GetAuthUser(c)
 	user := api_types.UserInfoVO{}
