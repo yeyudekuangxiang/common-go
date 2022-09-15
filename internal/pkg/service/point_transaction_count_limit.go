@@ -20,15 +20,31 @@ func NewPointTransactionCountLimitService(ctx *context.MioContext) *PointTransac
 
 // CheckLimitAndUpdate 检查积分发送次数限制
 func (srv PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointTransactionType, openId string) error {
-	limitNum, ok := entity.PointCollectLimitMap[t]
+	var limitN, i, it int
+	var ok bool
+	var msg string
+	
+	if i, ok = entity.PointCollectLimitMap[t]; ok {
+		limitN = i
+		msg = "今日"
+	} else if i, ok = entity.PointCollectLimitOnceMap[t]; ok {
+		it = 1
+		limitN = i
+	}
+
 	if !ok {
 		return nil
 	}
-	limit := srv.repo.FindBy(repository.FindPointTransactionCountLimitBy{
+
+	limitWhere := repository.FindPointTransactionCountLimitBy{
 		OpenId:          openId,
 		TransactionType: t,
-		TransactionDate: model.Date{Time: time.Now()},
-	})
+	}
+	if it == 0 {
+		limitWhere.TransactionDate = model.Date{Time: time.Now()}
+	}
+
+	limit := srv.repo.FindBy(limitWhere)
 
 	if limit.Id == 0 {
 		newLimit, err := srv.createLimitOfToday(t, openId)
@@ -38,8 +54,8 @@ func (srv PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointT
 		limit = *newLimit
 	}
 
-	if limit.CurrentCount >= limitNum {
-		return errors.New("达到当日该类别最大积分限制")
+	if limit.CurrentCount >= limitN {
+		return errors.New("获取积分次数达到" + msg + "上限")
 	}
 
 	limit.CurrentCount++
