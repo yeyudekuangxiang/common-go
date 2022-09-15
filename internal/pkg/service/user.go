@@ -296,9 +296,9 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	userInfo.Ip = cip
 
 	// todo topic数据批量修改
-	userByMobile, empty, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
+	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
-	if !u.checkOpenId(userInfo.OpenId) && specialUser.ID != 0 && specialUser.Status == 0 && empty == true {
+	if ok && !u.checkOpenId(userByMobile.OpenId) && specialUser.ID != 0 && specialUser.Status == 0 {
 		//更新topic userid
 		err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
 		if err != nil {
