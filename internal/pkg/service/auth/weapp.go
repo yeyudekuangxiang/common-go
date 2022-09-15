@@ -119,6 +119,10 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		if errFriend != nil {
 			app.Logger.Error(user, invitedBy, errFriend)
 		}
+		zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["邀请人"] = invitedBy
+		zhuGeAttr["用户"] = user.OpenId
+		service.DefaultZhuGeService().Track(config.ZhuGeEventName.UserInvitedBy, user.OpenId, zhuGeAttr)
 	}
 
 	if partnershipType != "" {

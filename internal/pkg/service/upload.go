@@ -106,7 +106,7 @@ func (srv UploadService) GetUrlByLogId(logId string) (string, error) {
 }
 
 func (srv UploadService) MultipartUploadOcrImage(openid string, reader io.Reader, filename string) (string, error) {
-	key := fmt.Sprintf("lm/test/%s/%s/%s", openid, util.UUID(), path.Ext(filename))
+	key := fmt.Sprintf("multpart/%s/%s/%s", openid, util.UUID(), path.Ext(filename))
 	ocrPath, err := DefaultOssService.MultipartPutObject(key, reader, filename)
 	if err != nil {
 		return "", err

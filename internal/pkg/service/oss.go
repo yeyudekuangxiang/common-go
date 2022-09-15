@@ -124,7 +124,7 @@ func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFile
 	// 填写Object完整路径。Object完整路径中不能包含Bucket名称。
 	objectName := name
 	// 填写本地文件的完整路径。如果未指定本地路径，则默认从示例程序所属项目对应本地路径中上传文件。
-	locaFilename = "/Users/apple/Desktop/lm1.mp4"
+	locaFilename = "" ///Users/apple/Desktop/lm1.mp4
 	// 获取存储空间。
 	bucket, err := srv.client.Bucket(bucketName)
 	if err != nil {
