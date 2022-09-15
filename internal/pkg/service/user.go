@@ -313,6 +313,11 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		if err != nil {
 			app.Logger.Info("special用户状态更新失败", err.Error())
 		}
+		userByMobile.Auth = 1
+		err = u.r.Save(userByMobile)
+		if err != nil {
+			return err
+		}
 	}
 
 	//更新保存用户信息
