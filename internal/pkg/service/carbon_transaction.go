@@ -330,7 +330,7 @@ func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionC
 		Key: entity.CARBON_RECYCLING,
 	}
 	for k, v := range dataMap {
-		if find := strings.Contains(k.Text(), "RECYCLING_"); find {
+		if find := strings.Contains(string(k), "RECYCLING_"); find {
 			recyling.Val = recyling.Val + v
 			continue
 		}
