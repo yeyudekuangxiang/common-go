@@ -35,6 +35,8 @@ func (p CarbonTransactionType) Text() string {
 		return "旧物回收 oola书籍"
 	case CARBON_FMY_RECYCLING_CLOTHING:
 		return "旧物回收 fmy衣物鞋帽"
+	case CARBON_RECYCLING:
+		return "旧物回收"
 	case CARBON_JHX:
 		return "金华行"
 	}
@@ -67,6 +69,9 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/fmy_recycling_clothing.png"
 	case CARBON_JHX:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/jhx.png"
+	case CARBON_RECYCLING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling.png"
+
 	}
 	return ""
 }
@@ -98,6 +103,9 @@ func (p CarbonTransactionType) RealText() string {
 		return "旧物回收 fmy衣物鞋帽"
 	case CARBON_JHX:
 		return "金华行"
+	case CARBON_RECYCLING:
+		return "旧物回收"
+
 	}
 	return p.Text()
 }
@@ -115,6 +123,7 @@ const (
 	CARBON_RECYCLING_BOOK         CarbonTransactionType = "RECYCLING_BOOK"         //旧物回收 oola书籍
 	CARBON_FMY_RECYCLING_CLOTHING CarbonTransactionType = "RECYCLING_FMY_CLOTHING" //旧物回收 fmy衣物鞋帽
 	CARBON_JHX                    CarbonTransactionType = "JHX"                    //金华行
+	CARBON_RECYCLING              CarbonTransactionType = "RECYCLING"              //旧物回收总的
 )
 
 type CarbonTransaction struct {
