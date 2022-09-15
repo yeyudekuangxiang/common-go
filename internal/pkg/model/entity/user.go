@@ -21,6 +21,14 @@ const (
 	UserPositionYellow   UserPosition = "yellow"   //黄v
 )
 
+var IconMap = map[UserPosition]string{
+	UserPositionOrdinary: "",
+	UserPositionBlue:     "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/blue.png",
+	UserPositionYellow:   "https://resources.miotech.com/static/mp2c/user/positionIcon/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/d7e78457-5136-48ae-b64e-4c260e2a0c3a.png",
+}
+
+// https://resources.miotech.com/static/mp2c/event/cert/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/275cd192-6d9f-46e1-8023-ca8b16bd48fa.png
+
 type UserGender string
 
 const (
@@ -33,6 +41,10 @@ type Partner int
 const (
 	PartnerLoHoJa Partner = 1 //乐活家
 )
+
+var IconPartnerMap = map[Partner]string{
+	PartnerLoHoJa: "https://resources.miotech.com/static/mp2c/event/cert/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/275cd192-6d9f-46e1-8023-ca8b16bd48fa.png",
+}
 
 type User struct {
 	ID           int64        `gorm:"primary_key;column:id" json:"id"`
