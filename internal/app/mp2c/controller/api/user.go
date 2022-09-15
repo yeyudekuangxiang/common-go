@@ -58,9 +58,11 @@ func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	userInfo := apiutil.GetAuthUser(c)
 	user := api_types.UserInfoVO{}
 	util.MapTo(userInfo, &user)
-	channel, err := service.DefaultUserChannelService.GetByCid(userInfo.ChannelId)
-	if err != nil {
-		user.ChannelName = channel.Name
+	if userInfo.ChannelId != 0 {
+		channel, err := service.DefaultUserChannelService.GetByCid(userInfo.ChannelId)
+		if err == nil {
+			user.ChannelName = channel.Name
+		}
 	}
 	return gin.H{
 		"user": user,
