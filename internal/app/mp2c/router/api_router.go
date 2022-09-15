@@ -198,6 +198,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			uploadRouter.Any("/point-collect", apiutil.Format(api.DefaultUploadController.UploadPointCollectImage))
 			uploadRouter.Any("/", apiutil.Format(api.DefaultUploadController.UploadImage))
+			uploadRouter.Any("/multipart", apiutil.Format(api.DefaultUploadController.MultipartUploadImage))
 		}
 
 		mustAuthRouter.GET("/mobile-user", apiutil.Format(api.DefaultUserController.GetMobileUserInfo))

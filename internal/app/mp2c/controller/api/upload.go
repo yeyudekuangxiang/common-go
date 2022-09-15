@@ -52,6 +52,32 @@ func (UploadController) UploadPointCollectImage(ctx *gin.Context) (gin.H, error)
 		"imgUrl": imgUrl,
 	}, err
 }
+
+func (UploadController) MultipartUploadImage(ctx *gin.Context) (gin.H, error) {
+	fileHeader, err := ctx.FormFile("file")
+	if err != nil {
+		if err == http.ErrMissingFile {
+			return nil, errors.New("请选择文件")
+		}
+		return nil, err
+	}
+	//fileExt := path.Ext(fileHeader.Filename)
+	/*if fileExt != ".png" && fileExt != ".jpg" && fileExt != ".jpeg" {
+		return nil, errors.New("仅支持png、jpg格式的图片")
+	}*/
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	user := apiutil.GetAuthUser(ctx)
+	imgUrl, err := service.DefaultUploadService.MultipartUploadOcrImage(user.OpenId, file, fileHeader.Filename)
+	return gin.H{
+		"imgUrl": imgUrl,
+	}, err
+}
+
 func (UploadController) GetUploadTokenInfo(ctx *gin.Context) (gin.H, error) {
 
 	form := api_types.GetUploadTokenInfoForm{}

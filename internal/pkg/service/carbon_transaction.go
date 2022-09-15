@@ -20,6 +20,7 @@ import (
 	"mio/pkg/baidu"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -324,8 +325,20 @@ func (srv CarbonTransactionService) Classify(dto api_types.GetCarbonTransactionC
 
 	//map转化成切片,方便排序
 	tmpList := make([]KVPair, 0)
+
+	recyling := KVPair{
+		Key: entity.CARBON_RECYCLING,
+	}
 	for k, v := range dataMap {
+		if find := strings.Contains(k.Text(), "RECYCLING_"); find {
+			recyling.Val = recyling.Val + v
+			continue
+		}
 		tmpList = append(tmpList, KVPair{Key: k, Val: v})
+	}
+
+	if recyling.Val != 0 {
+		tmpList = append(tmpList, recyling)
 	}
 	//排序
 	sort.Slice(tmpList, func(i, j int) bool {
