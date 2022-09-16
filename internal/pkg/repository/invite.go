@@ -37,6 +37,18 @@ func (repo InviteRepository) GetInvite(openid string) *entity.Invite {
 	return &entity.Invite{}
 }
 
+func (repo InviteRepository) GetInviteNoReward(openid string) *entity.Invite {
+	invite := entity.Invite{}
+	err := app.DB.Where("new_user_openid = ? and invited_by_openid <> '' and is_reward = 1", openid).First(&invite).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	if invite.ID != 0 {
+		return &invite
+	}
+	return &entity.Invite{}
+}
+
 func (repo InviteRepository) UpdateIsReward(id int64) error {
 	var result entity.Invite
 	err := repo.ctx.DB.Where("id = ?", id).First(&result).Error

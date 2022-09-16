@@ -322,7 +322,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		return errors.New("很遗憾您暂无法参与活动")
 	}
 	//有邀请，并且没有发放奖励，不是黑产用户，给用户发放奖励
-	inviteInfo := u.rInvite.GetInvite(userInfo.OpenId)
+	inviteInfo := u.rInvite.GetInviteNoReward(userInfo.OpenId)
 	if inviteInfo.ID != 0 && userInfo.Risk <= 2 {
 		//发放积分奖励
 		_, err = NewPointService(mioctx.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
