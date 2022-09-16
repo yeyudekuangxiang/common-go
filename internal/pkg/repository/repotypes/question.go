@@ -30,3 +30,8 @@ type GetQuestionUserGetById struct {
 	UserId int64
 	OpenId string
 }
+
+type GetQuestionUserCarbon struct {
+	Uid        int64
+	QuestionId int64
+}

@@ -37,11 +37,11 @@ func (repo AnswerRepository) GetListBy(by repotypes.GetQuestOptionGetListBy) ([]
 	return list, nil
 }
 
-func (repo AnswerRepository) GetListByUid(by repotypes.GetQuestOptionGetListByUid) ([]QuestionEntity.Answer, error) {
+func (repo AnswerRepository) GetListByUid(by repotypes.GetQuestionOptionGetListByUid) ([]QuestionEntity.Answer, error) {
 	list := make([]QuestionEntity.Answer, 0)
 	db := repo.ctx.DB.Model(QuestionEntity.Answer{})
-	if by.QnrId != 0 {
-		db.Where("qnr_id", by.QnrId)
+	if by.QuestionId != 0 {
+		db.Where("question_id", by.QuestionId)
 	}
 	if by.Uid != 0 {
 		db.Where("user_id", by.Uid)
@@ -51,4 +51,20 @@ func (repo AnswerRepository) GetListByUid(by repotypes.GetQuestOptionGetListByUi
 		panic(err)
 	}
 	return list, nil
+}
+
+func (repo AnswerRepository) GetUserCarbon(by repotypes.GetQuestionUserCarbon) float64 {
+	carbon := float64(0)
+	db := repo.ctx.DB.Model(QuestionEntity.Answer{})
+	if by.QuestionId != 0 {
+		db.Where("question_id", by.QuestionId)
+	}
+	if by.Uid != 0 {
+		db.Where("user_id", by.Uid)
+	}
+	db.Select("sum(carbon) as carbon")
+	if err := db.Find(&carbon).Error; err != nil {
+		panic(err)
+	}
+	return carbon
 }

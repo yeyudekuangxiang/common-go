@@ -7,12 +7,13 @@ type GetQuestionSubjectListForm struct {
 }
 
 type GetQuestionSubjectCreateDTO struct {
-	Answer []GetQnrTypeAnswer `json:"answer"`
+	Answer []GetQuestionTypeAnswer `json:"answer"`
 }
 
 type GetQuestionTypeAnswer struct {
 	Id     model.LongID `json:"id"`
 	Answer string       `json:"answer"`
+	Carbon float64
 }
 
 type QuestionListVo struct {

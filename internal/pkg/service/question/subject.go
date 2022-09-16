@@ -19,6 +19,7 @@ func NewSubjectService(ctx *context.MioContext) *SubjectService {
 		repo:       repoQnr.NewSubjectRepository(ctx),
 		repoOption: repoQnr.NewOptionRepository(ctx),
 		repoUser:   repoQnr.NewUserRepository(ctx),
+		repoAnswer: repoQnr.NewAnswerRepository(ctx),
 	}
 }
 
@@ -27,10 +28,11 @@ type SubjectService struct {
 	repo       *repoQnr.SubjectRepository
 	repoOption *repoQnr.OptionRepository
 	repoUser   *repoQnr.UserRepository
+	repoAnswer *repoQnr.AnswerRepository
 }
 
-func (srv SubjectService) GetPageList(dto srv_types.GetQnrSubjectDTO) ([]qnrEntity.Subject, error) {
-	list, err := srv.repo.List(repotypes.GetQuestionSubjectGetListBy{QuestionId: dto.QnrId})
+func (srv SubjectService) GetPageList(dto srv_types.GetQuestionSubjectDTO) ([]qnrEntity.Subject, error) {
+	list, err := srv.repo.List(repotypes.GetQuestionSubjectGetListBy{QuestionId: dto.QuestionId})
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +44,7 @@ func (srv SubjectService) CreateInBatches(dto []qnrEntity.Subject) error {
 	return err
 }
 
-func (srv SubjectService) GetList(openid string) (gin.H, error) {
+func (srv SubjectService) GetList(openid string, questionId int64) (gin.H, error) {
 	//查询用户是否入库，入库并回答过问题
 	info := srv.repoUser.FindBy(repotypes.GetQuestionUserGetById{OpenId: openid})
 	isSubmit := 0
@@ -51,7 +53,7 @@ func (srv SubjectService) GetList(openid string) (gin.H, error) {
 	}
 	//所有的题目
 	subjectList, subjectErr := srv.repo.List(repotypes.GetQuestionSubjectGetListBy{
-		QuestionId: 1, //金融调查问卷
+		QuestionId: questionId, //金融调查问卷
 	})
 	if subjectErr != nil {
 		return gin.H{}, nil
@@ -114,4 +116,9 @@ func (srv SubjectService) GetList(openid string) (gin.H, error) {
 		}
 	}
 	return gin.H{"subject": list, "isSubmit": isSubmit, "subjectCount": len(list)}, nil
+}
+
+func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) float64 {
+
+	return srv.repoAnswer.GetUserCarbon(repotypes.GetQuestionUserCarbon{Uid: dto.UserId, QuestionId: dto.QuestionId})
 }
