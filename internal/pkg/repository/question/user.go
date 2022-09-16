@@ -26,7 +26,7 @@ func (repo UserRepository) Create(transaction *questionEntity.User) error {
 	return repo.ctx.DB.Create(transaction).Error
 }
 
-func (repo UserRepository) FindBy(by repotypes.GetQuestUserGetById) questionEntity.User {
+func (repo UserRepository) FindBy(by repotypes.GetQuestionUserGetById) questionEntity.User {
 	record := questionEntity.User{}
 	db := app.DB.Model(questionEntity.User{})
 	if by.UserId > 0 {

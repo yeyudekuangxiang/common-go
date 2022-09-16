@@ -9,7 +9,7 @@ CREATE TABLE "public"."question_answer"
     "answer"      text COLLATE "pg_catalog"."default",
     "created_at"  timestamptz(6) NOT NULL DEFAULT now(),
     "updated_at"  timestamptz(6) NOT NULL DEFAULT now(),
-    CONSTRAINT "ques_answer_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "question_answer_pkey" PRIMARY KEY ("id")
 );
 
 ALTER TABLE "public"."question_answer" OWNER TO "miniprogram";

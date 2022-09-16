@@ -20,10 +20,10 @@ func (repo SubjectRepository) Save(transaction *questionEntity.Subject) error {
 	return repo.ctx.DB.Save(transaction).Error
 }
 
-func (repo SubjectRepository) List(do repotypes.GetQuestSubjectGetListBy) ([]questionEntity.Subject, error) {
+func (repo SubjectRepository) List(do repotypes.GetQuestionSubjectGetListBy) ([]questionEntity.Subject, error) {
 	db := repo.ctx.DB.Model(questionEntity.Subject{})
-	if do.QnrId != 0 {
-		db.Where("qnr_id = ?", do.QnrId)
+	if do.QuestionId != 0 {
+		db.Where("question_id = ?", do.QuestionId)
 	}
 	db.Order("sort desc,id asc")
 	list := make([]questionEntity.Subject, 0)

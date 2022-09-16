@@ -57,7 +57,7 @@ type Ans struct {
 
 func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 	//查询用户是否入库，入库并回答过问题
-	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestUserGetById{OpenId: dto.OpenId})
+	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
 	if info.UserId != 0 {
 		return errno.ErrCommon.WithMessage("您已经提交了")
 	}

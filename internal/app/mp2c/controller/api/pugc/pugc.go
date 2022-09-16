@@ -12,10 +12,10 @@ import (
 	"mio/internal/pkg/model/entity"
 	activity2 "mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/model/entity/pugc"
-	qnrEntity "mio/internal/pkg/model/entity/qnr"
+	questionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/service"
 	service2 "mio/internal/pkg/service/activity"
-	qnrService "mio/internal/pkg/service/qnr"
+	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/wxapp"
@@ -4790,8 +4790,8 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 	}
 	fmt.Println(rows)
 
-	var option []qnrEntity.Option
-	var subject []qnrEntity.Subject
+	var option []questionEntity.Option
+	var subject []questionEntity.Subject
 	for i, row := range rows {
 		if i == 0 {
 			continue
@@ -4805,12 +4805,12 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 			typeSub = 2
 		}
 		cate, _ := strconv.ParseInt(row[1], 10, 64)
-		subject = append(subject, qnrEntity.Subject{
+		subject = append(subject, questionEntity.Subject{
 			Title:      row[2],
 			Remind:     row[3],
 			Type:       typeSub,
 			IsHide:     1,
-			QnrId:      1,
+			QuestionId: 1,
 			CategoryId: cate,
 			SubjectId:  model.LongID(id.Int64()),
 		})
@@ -4818,7 +4818,7 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 			if row[i] == "" {
 				break
 			}
-			option = append(option, qnrEntity.Option{
+			option = append(option, questionEntity.Option{
 				Title:     row[i],
 				SubjectId: model.LongID(id),
 			})
@@ -4826,8 +4826,8 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 	}
 	println(subject)
 	println(option)
-	qnrService.NewSubjectService(context.NewMioContext()).CreateInBatches(subject)
-	qnrService.NewOptionService(context.NewMioContext()).CreateInBatches(option)
+	questionService.NewSubjectService(context.NewMioContext()).CreateInBatches(subject)
+	questionService.NewOptionService(context.NewMioContext()).CreateInBatches(option)
 	os.Exit(0)
 	return nil, nil
 }
@@ -4854,5 +4854,51 @@ func (PugcController) QnrInitChannel(c *gin.Context) (gin.H, error) {
 			UpdateTime: model.NewTime(),
 		})
 	}
+	return nil, nil
+}
+
+func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
+	f, err := excelize.OpenFile("/Users/apple/Desktop/liumei1.xlsx")
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(rows)
+
+	var option []questionEntity.Option
+	var subject []questionEntity.Subject
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		id, err2 := util.SnowflakeID()
+		if err2 != nil {
+			return nil, nil
+		}
+		var typeSub int8 = 1
+		cate, _ := strconv.ParseInt(row[1], 10, 64)
+		subject = append(subject, questionEntity.Subject{
+			Title:      row[2],
+			Remind:     "",
+			Type:       typeSub,
+			IsHide:     0,
+			QuestionId: 1,
+			CategoryId: cate,
+			SubjectId:  model.LongID(id.Int64()),
+		})
+		for i := 3; i < len(row); i++ {
+			if row[i] == "" {
+				break
+			}
+			option = append(option, questionEntity.Option{
+				Title:     row[i],
+				SubjectId: model.LongID(id),
+			})
+		}
+	}
+	println(subject)
+	println(option)
+	questionService.NewSubjectService(context.NewMioContext()).CreateInBatches(subject)
+	questionService.NewOptionService(context.NewMioContext()).CreateInBatches(option)
 	return nil, nil
 }

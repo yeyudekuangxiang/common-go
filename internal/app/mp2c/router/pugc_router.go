@@ -20,5 +20,7 @@ func pugcRouter(router *gin.Engine) {
 		pugcRouter.GET("/addCity", apiutil.Format(pugc.DefaultPugcController.AddCity))
 		//pugcRouter.GET("/sendPoint", apiutil.Format(pugc.DefaultPugcController.SendPoint))
 		pugcRouter.GET("/qnrInitChannel", apiutil.Format(pugc.DefaultPugcController.QnrInitChannel))
+		pugcRouter.GET("/questionInit", apiutil.Format(pugc.DefaultPugcController.QuestionInit))
+
 	}
 }
