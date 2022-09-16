@@ -193,3 +193,24 @@ func (srv OaService) Sign(url string) (*OaSignResult, error) {
 		Signature: sign,
 	}, nil
 }
+
+func (srv OaService) SendMessage() error {
+	//setting := config.FindOaSetting(srv.Platform)
+	tickerServer := wxoa2.MessageServer{
+		TokenServer: &wxoa2.AccessTokenServer{
+			AppId:  "wx3279a0b1782e2d93",
+			Secret: "4028279bec13ece9155c7eae348de171",
+			Redis:  app.Redis,
+		},
+		AppId: "wx3279a0b1782e2d93",
+	}
+
+	ticker, err := tickerServer.SendMessage()
+	println(ticker)
+	if err != nil {
+		app.Logger.Error(err)
+		return errno.ErrInternalServer
+	}
+
+	return nil
+}
