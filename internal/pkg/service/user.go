@@ -334,7 +334,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			InviteId:     inviteInfo.ID,
 		})
 		if err != nil {
-			app.Logger.Error("发放邀请积分失败", err)
+			app.Logger.Errorf("发放邀请积分失败:%s, 用户openId:%s", err.Error(), userInfo.OpenId)
 		}
 	}
 	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
