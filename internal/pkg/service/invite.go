@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util/timeutils"
+	"sort"
 )
 
 var DefaultInviteService = InviteService{}
@@ -40,10 +41,18 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 			OpenId:    user.OpenId,
 			Nickname:  user.Nickname,
 			AvatarUrl: user.AvatarUrl,
-			Time:      user.Time,
+			Time:      timeutils.ToTime(user.Time.Time),
 			Point:     point,
 		})
 	}
+	sort.Slice(infoList, func(i, j int) bool {
+		prev := infoList[i]
+		next := infoList[j]
+		if prev.Time.StartOfDay().Equal(next.Time.StartOfDay().Time) {
+			return prev.Time.Before(next.Time.Time)
+		}
+		return prev.Time.After(next.Time.Time)
+	})
 	return infoList, nil
 }
 func (srv InviteService) AddInvite(openid, invitedByOpenId string) (*entity.Invite, bool, error) {
