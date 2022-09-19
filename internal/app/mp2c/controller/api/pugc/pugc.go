@@ -4811,7 +4811,7 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 			Type:       typeSub,
 			IsHide:     1,
 			QuestionId: 1,
-			CategoryId: cate,
+			CategoryId: questionEntity.QuestionCategoryType(cate),
 			SubjectId:  model.LongID(id.Int64()),
 		})
 		for i := 6; i < len(row); i++ {
@@ -4883,7 +4883,7 @@ func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
 			Type:       typeSub,
 			IsHide:     0,
 			QuestionId: 1,
-			CategoryId: cate,
+			CategoryId: questionEntity.QuestionCategoryType(cate),
 			SubjectId:  model.LongID(id.Int64()),
 		})
 		for i := 3; i < len(row); i++ {

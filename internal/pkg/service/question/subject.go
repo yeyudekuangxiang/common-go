@@ -2,13 +2,16 @@ package question
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	qnrEntity "mio/internal/pkg/model/entity/question"
 	repoQnr "mio/internal/pkg/repository/question"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 )
 
 var DefaultSubjectService = SubjectService{ctx: context.NewMioContext()}
@@ -84,7 +87,7 @@ func (srv SubjectService) GetList(openid string, questionId int64) (gin.H, error
 	}
 
 	//答案和题目组装
-	subjectMap := make(map[int64][]api_types.QuestionVo, 0)
+	subjectMap := make(map[qnrEntity.QuestionCategoryType][]api_types.QuestionVo, 0)
 	for _, val := range subjectList {
 		option, ok := optionMap[val.SubjectId]
 		if !ok {
@@ -100,25 +103,75 @@ func (srv SubjectService) GetList(openid string, questionId int64) (gin.H, error
 			SubjectId: val.SubjectId,
 		})
 	}
-	//题目和分类组装
-	typeMap := []api_types.QuestionCategory{
-		{Id: 1, Title: "衣", Desc: "1111"},
-		{Id: 2, Title: "食", Desc: "222"},
-		{Id: 3, Title: "住", Desc: "333"},
-		{Id: 4, Title: "用", Desc: "444"},
-		{Id: 5, Title: "行", Desc: "555"},
-	}
 	list := make([]api_types.QuestionListVo, 0)
-	for _, v := range typeMap {
-		l, err := subjectMap[v.Id]
+	for _, v := range qnrEntity.QuestionCategoryTypeMap {
+		l, err := subjectMap[v]
 		if err {
-			list = append(list, api_types.QuestionListVo{Title: v.Title, List: l, Desc: v.Desc})
+			list = append(list, api_types.QuestionListVo{Title: v.Text(), List: l, Desc: v.DescText()})
 		}
 	}
 	return gin.H{"subject": list, "isSubmit": isSubmit, "subjectCount": len(list)}, nil
 }
 
-func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) float64 {
+func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) srv_types.AddUserCarbonInfoDTO {
+	//总碳量
+	carbon := srv.repoAnswer.GetUserCarbon(repotypes.GetQuestionUserCarbon{Uid: dto.UserId, QuestionId: dto.QuestionId})
 
-	return srv.repoAnswer.GetUserCarbon(repotypes.GetQuestionUserCarbon{Uid: dto.UserId, QuestionId: dto.QuestionId})
+	//用户碳量分类汇总
+	carbonClassify := srv.repoAnswer.GetUserAnswer(repotypes.GetQuestionUserCarbon{Uid: dto.UserId, QuestionId: dto.QuestionId})
+
+	var userCarbonClassify []srv_types.UserCarbonClassify
+	for _, answerStruct := range carbonClassify {
+		userCarbonClassify = append(userCarbonClassify, srv_types.UserCarbonClassify{
+			CategoryId:   answerStruct.CategoryId,
+			Carbon:       util.CarbonToRate(answerStruct.Carbon),
+			CategoryName: answerStruct.CategoryId.Text(),
+		})
+	}
+
+	//今日碳量
+	carbonToday := service.NewCarbonTransactionService(context.NewMioContext()).GetTodayCarbon(dto.UserId) //今日碳量
+
+	//日均排放
+	carbonDes := decimal.NewFromFloat(carbon)
+	yesDes := decimal.NewFromFloat(365)
+	carbonDay := carbonDes.Div(yesDes).Round(2)
+	carbonDayFloat, _ := carbonDay.Float64()
+
+	//碳中和完成度
+	carbonTodayDes := decimal.NewFromFloat(carbonToday)
+	completion := carbonTodayDes.Div(carbonDay).Round(2).String()
+
+	//属于用户群里
+	personName := ""
+	switch {
+	case carbon > 1500:
+		{
+			personName = "低碳环保人群"
+		}
+	case carbon > 1500 && carbon <= 4000:
+		{
+			personName = "低碳环保人群1"
+		}
+	case carbon > 4000 && carbon <= 16000:
+		{
+			personName = "低碳环保人群2"
+		}
+	default:
+		{
+			personName = "低碳环保人群3"
+		}
+	}
+	compareWithCountry := "高于"
+	compareWithGlobal := "低于"
+	return srv_types.AddUserCarbonInfoDTO{
+		PersonName:         personName,                        //属于用户群里
+		CarbonYear:         util.CarbonToRate(carbon),         //总碳量
+		CarbonToday:        util.CarbonToRate(carbonToday),    //今日碳量
+		CarbonClassify:     userCarbonClassify,                //用户碳量分类汇总
+		CarbonDay:          util.CarbonToRate(carbonDayFloat), //日均排放
+		CarbonCompletion:   completion,                        //碳中和完成度
+		CompareWithCountry: compareWithCountry,
+		CompareWithGlobal:  compareWithGlobal,
+	}
 }

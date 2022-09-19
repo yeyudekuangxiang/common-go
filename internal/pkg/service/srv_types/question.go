@@ -3,6 +3,7 @@ package srv_types
 import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity/question"
 )
 
 type GetQuestionSubjectDTO struct {
@@ -32,4 +33,21 @@ type AddQuestionAnswerDTO struct {
 	Answer     []api_types.GetQuestionTypeAnswer
 	UserId     int64
 	QuestionId int64
+}
+
+type AddUserCarbonInfoDTO struct {
+	CarbonYear         string               `json:"carbonYear"`
+	CarbonToday        string               `json:"carbonToday"`
+	CarbonDay          string               `json:"carbonDay"`
+	CarbonCompletion   string               `json:"carbonCompletion"`
+	CarbonClassify     []UserCarbonClassify `json:"carbonClassify"`
+	CompareWithCountry string               `json:"comparisonWithCountry"`
+	CompareWithGlobal  string               `json:"compareWithGlobal"`
+	PersonName         string               `json:"personName"`
+}
+
+type UserCarbonClassify struct {
+	CategoryId   question.QuestionCategoryType `json:"categoryId"`
+	CategoryName string                        `json:"categoryName"`
+	Carbon       string                        `json:"carbon"`
 }

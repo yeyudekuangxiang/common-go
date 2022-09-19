@@ -54,7 +54,9 @@ func (repo AnswerRepository) GetListByUid(by repotypes.GetQuestionOptionGetListB
 }
 
 func (repo AnswerRepository) GetUserCarbon(by repotypes.GetQuestionUserCarbon) float64 {
-	carbon := float64(0)
+	sum := struct {
+		Carbon float64
+	}{}
 	db := repo.ctx.DB.Model(QuestionEntity.Answer{})
 	if by.QuestionId != 0 {
 		db.Where("question_id", by.QuestionId)
@@ -63,8 +65,27 @@ func (repo AnswerRepository) GetUserCarbon(by repotypes.GetQuestionUserCarbon) f
 		db.Where("user_id", by.Uid)
 	}
 	db.Select("sum(carbon) as carbon")
-	if err := db.Find(&carbon).Error; err != nil {
+	if err := db.Take(&sum).Error; err != nil {
 		panic(err)
 	}
-	return carbon
+	return sum.Carbon
+}
+
+func (repo AnswerRepository) GetUserAnswer(by repotypes.GetQuestionUserCarbon) []repotypes.UserAnswerStruct {
+	var list []repotypes.UserAnswerStruct
+	db := repo.ctx.DB.Model(QuestionEntity.Answer{})
+
+	db.Joins("left join question_subject on question_subject.subject_id = question_answer.subject_id")
+	if by.QuestionId != 0 {
+		db.Where("question_answer.question_id", by.QuestionId)
+	}
+	if by.Uid != 0 {
+		db.Where("question_answer.user_id", by.Uid)
+	}
+	db.Select("category_id,sum(carbon) as carbon")
+	db.Group("category_id")
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
 }

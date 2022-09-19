@@ -2,16 +2,8 @@ package repotypes
 
 import (
 	"mio/internal/pkg/model"
-	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity/question"
 )
-
-type GetQuestionAnswerGetListBy struct {
-	Openid      string
-	OrderSource entity.OrderSource
-	Limit       int
-	Offset      int
-	QuestionId  int64
-}
 
 type GetQuestionOptionGetListBy struct {
 	SubjectIds []model.LongID
@@ -34,4 +26,9 @@ type GetQuestionUserGetById struct {
 type GetQuestionUserCarbon struct {
 	Uid        int64
 	QuestionId int64
+}
+
+type UserAnswerStruct struct {
+	CategoryId question.QuestionCategoryType `json:"categoryId"`
+	Carbon     float64                       `json:"carbon"`
 }

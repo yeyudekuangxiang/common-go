@@ -25,6 +25,8 @@ func apiRouter(router *gin.Engine) {
 		//答题相关路由
 		questRouter.GET("/subject", apiutil.Format(question.DefaultSubjectController.GetList))
 		questRouter.POST("/create", apiutil.Format(question.DefaultSubjectController.Create))
+		questRouter.POST("/getUserQuestion", apiutil.Format(question.DefaultSubjectController.GetUserQuestion))
+
 	}
 
 	//非必须登陆的路由
