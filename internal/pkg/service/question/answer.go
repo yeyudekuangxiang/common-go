@@ -1,14 +1,12 @@
-package qnr
+package question
 
 import (
-	"mio/config"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
-	qnrEntity "mio/internal/pkg/model/entity/qnr"
+	qnrEntity "mio/internal/pkg/model/entity/question"
 	repo "mio/internal/pkg/repository"
-	repoQnr "mio/internal/pkg/repository/qnr"
+	repoQnr "mio/internal/pkg/repository/question"
 	"mio/internal/pkg/repository/repotypes"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -36,14 +34,15 @@ type AnswerService struct {
 	channel     repo.UserChannelRepository
 }
 
-func (srv AnswerService) CreateInBatches(dto []srv_types.CreateQnrAnswerDTO) error {
+func (srv AnswerService) CreateInBatches(dto []srv_types.CreateQuestionAnswerDTO) error {
 	list := make([]qnrEntity.Answer, 0)
 	for _, answerDTO := range dto {
 		list = append(list, qnrEntity.Answer{
-			QnrId:     answerDTO.QnrId,
-			SubjectId: answerDTO.SubjectId,
-			UserId:    answerDTO.UserId,
-			Answer:    answerDTO.Answer,
+			QuestionId: answerDTO.QuestionId,
+			SubjectId:  answerDTO.SubjectId,
+			UserId:     answerDTO.UserId,
+			Answer:     answerDTO.Answer,
+			Carbon:     answerDTO.Carbon,
 		})
 	}
 	err := srv.answerRepo.CreateInBatches(list)
@@ -55,11 +54,11 @@ type Ans struct {
 	Answer string `json:"answer"`
 }
 
-func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
+func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 	//查询用户是否入库，入库并回答过问题
-	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestUserGetById{OpenId: dto.OpenId})
+	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
 	if info.UserId != 0 {
-		return errno.ErrCommon.WithMessage("您已经提交了")
+		//	return errno.ErrCommon.WithMessage("您已经提交了")
 	}
 	//获取用户信息
 	userInfo := srv.user.GetUserById(dto.UserId)
@@ -95,30 +94,19 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 		return errno.ErrCommon.WithMessage("用户信息保存失败")
 	}
 	//保存答案
-	createList := make([]srv_types.CreateQnrAnswerDTO, 0)
+	createList := make([]srv_types.CreateQuestionAnswerDTO, 0)
 	for _, l := range dto.Answer {
-		createList = append(createList, srv_types.CreateQnrAnswerDTO{
-			Answer:    l.Answer,
-			QnrId:     1,
-			SubjectId: l.Id,
-			UserId:    model.LongID(id.Int64()),
+		createList = append(createList, srv_types.CreateQuestionAnswerDTO{
+			Answer:     l.Answer,
+			QuestionId: dto.QuestionId,
+			SubjectId:  l.Id,
+			UserId:     model.LongID(id.Int64()),
+			Carbon:     l.Carbon,
 		})
 	}
 	err := srv.CreateInBatches(createList)
 	if err != nil {
 		return errno.ErrCommon.WithMessage("保存答案失败")
 	}
-	//诸葛上报
-	attr := make(map[string]interface{}, 8)
-	attr["昵称"] = userInfo.Nickname
-	attr["手机号"] = userInfo.PhoneNumber
-	attr["渠道名称"] = channelName
-	attr["邀请人的openid"] = InvitedByOpenId
-	srv.ToZhuGe(userInfo.OpenId, attr) //上报
 	return nil
-}
-
-func (srv AnswerService) ToZhuGe(openId string, attr map[string]interface{}) {
-	eventName := config.ZhuGeEventName.Qnr
-	service.DefaultZhuGeService().Track(eventName, openId, attr)
 }

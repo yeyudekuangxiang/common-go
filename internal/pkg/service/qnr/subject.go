@@ -1,4 +1,4 @@
-package question
+package qnr
 
 import (
 	"github.com/gin-gonic/gin"

@@ -12,12 +12,14 @@ import (
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
+	"mio/internal/app/mp2c/controller/api/question"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
 )
 
 func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
+
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
@@ -79,6 +81,13 @@ func apiRouter(router *gin.Engine) {
 			//答题相关路由
 			qnrRouter.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
 			qnrRouter.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
+		}
+		questRouter := mustAuthRouter.Group("/question")
+		{
+			//答题相关路由
+			questRouter.GET("/subject", apiutil.Format(question.DefaultSubjectController.GetList))
+			questRouter.POST("/create", apiutil.Format(question.DefaultSubjectController.Create))
+			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
 		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
