@@ -50,10 +50,13 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	return ret, err
 }
 
-func (receiver SubjectController) GetUserQuestion(ctx *gin.Context) (gin.H, error) {
+func (receiver SubjectController) GetUserYearCarbon(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
 	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
 	//获取问卷碳量
-	ret := subjectServer.GetUserQuestion(srv_types.GetQuestionUserDTO{UserId: 1570653152666181632, QuestionId: 1})
-
-	return gin.H{"userCarbonInfo": ret}, nil
+	ret, err := subjectServer.GetUserQuestion(srv_types.GetQuestionUserDTO{QuestionId: 1, OpenId: user.OpenId})
+	if err != nil {
+		return gin.H{}, err
+	}
+	return gin.H{"userYearCarbon": ret}, err
 }
