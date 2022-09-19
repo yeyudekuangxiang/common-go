@@ -28,6 +28,11 @@ type CreateQuestionAnswerDTO struct {
 	Carbon     float64
 }
 
+type DeleteQuestionAnswerDTO struct {
+	QuestionId int64
+	UserId     int64
+}
+
 type AddQuestionAnswerDTO struct {
 	OpenId     string
 	Answer     []api_types.GetQuestionTypeAnswer

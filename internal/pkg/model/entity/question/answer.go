@@ -9,6 +9,7 @@ type Answer struct {
 	UserId     model.LongID
 	Answer     string
 	Carbon     float64
+	IsDelete   int8
 }
 
 func (Answer) TableName() string {
