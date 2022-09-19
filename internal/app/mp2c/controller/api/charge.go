@@ -26,14 +26,13 @@ type ChargeController struct {
 func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	form := GetChargeForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
+		app.Logger.Errorf("charge/push 参数错误: %s", form)
 		return nil, err
 	}
-	fmt.Println("charge", form)
 	ctx := context.NewMioContext()
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
-		app.Logger.Info("渠道查询失败", form)
 		return nil, errors.New("渠道查询失败")
 	}
 	//白名单验证
@@ -50,6 +49,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			return nil, errors.New("sign:" + form.Sign + " 验证失败")
 		}
 	}
+
 	//避开重放
 	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
 		fmt.Println("charge 重复提交订单", form)
@@ -78,12 +78,12 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
 	cmd := app.Redis.Get(ctx, key)
+
 	lastPoint, _ := strconv.Atoi(cmd.Val())
 	thisPoint0, _ := strconv.ParseFloat(form.TotalPower, 64)
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
 	totalPoint := lastPoint + thisPoint
-	fmt.Println("charge 累计积分 ", form, totalPoint)
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
 	} else {
@@ -93,6 +93,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			totalPoint = scene.PointLimit
 		}
 	}
+
 	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
 
 	//加积分

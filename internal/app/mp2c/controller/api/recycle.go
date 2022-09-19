@@ -196,7 +196,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	typeName := entity.POINT_FMY_RECYCLING_CLOTHING
 	typeText := RecycleService.GetText(typeName)
 
-	//避开重放
+	//幂等 检查重复订单
 	if err = RecycleService.CheckOrder(userInfo.OpenId, form.Data.OrderSn); err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	carbonString := fmt.Sprintf("%f", currCo2)
 
 	//发碳量
-	carbon, _ := service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
+	_, _ = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
 		OpenId:  userInfo.OpenId,
 		UserId:  userInfo.ID,
 		Type:    entity.CarbonTransactionType(typeName),
@@ -241,7 +241,6 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		AdminId: 0,
 		Ip:      "",
 	})
-	println(carbon)
 
 	if err != nil {
 		fmt.Println("fmy 旧物回收 加积分失败 ", form)
