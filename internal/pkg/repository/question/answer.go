@@ -1,6 +1,7 @@
 package question
 
 import (
+	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	QuestionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/repository/repotypes"
@@ -35,6 +36,18 @@ func (repo AnswerRepository) GetListBy(by repotypes.GetQuestOptionGetListBy) ([]
 		panic(err)
 	}
 	return list, nil
+}
+
+func (repo AnswerRepository) Delete(by *repotypes.DeleteQuestionAnswerDO) error {
+	db := repo.ctx.DB.Model(QuestionEntity.Answer{})
+	if by.Uid == 0 {
+		return errors.New("用户id不能为空")
+	}
+	db.Where("user_id", by.Uid)
+	if by.QuestionId != 0 {
+		db.Where("question_id", by.QuestionId)
+	}
+	return db.Updates(by).Error
 }
 
 func (repo AnswerRepository) GetListByUid(by repotypes.GetQuestionOptionGetListByUid) ([]QuestionEntity.Answer, error) {
@@ -82,6 +95,7 @@ func (repo AnswerRepository) GetUserAnswer(by repotypes.GetQuestionUserCarbon) [
 	if by.Uid != 0 {
 		db.Where("question_answer.user_id", by.Uid)
 	}
+	db.Where("is_delete", 0)
 	db.Select("category_id,sum(carbon) as carbon")
 	db.Group("category_id")
 	if err := db.Find(&list).Error; err != nil {

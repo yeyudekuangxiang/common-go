@@ -8,9 +8,20 @@ type GetQuestionOptionGetListBy struct {
 	SubjectIds []model.LongID
 }
 
+type Delete struct {
+	Uid        int64
+	QuestionId int64
+}
+
 type GetQuestionOptionGetListByUid struct {
 	Uid        int64
 	QuestionId int64
+}
+
+type DeleteQuestionAnswerDO struct {
+	Uid        int64
+	QuestionId int64
+	IsDelete   int8
 }
 
 type GetQuestionSubjectGetListBy struct {

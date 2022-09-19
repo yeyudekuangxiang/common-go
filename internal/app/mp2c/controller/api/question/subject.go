@@ -30,8 +30,8 @@ func (SubjectController) Create(ctx *gin.Context) (gin.H, error) {
 		//	return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
 	}
 	err := answerServer.Add(srv_types.AddQuestionAnswerDTO{
-		OpenId:     user.OpenId,
-		UserId:     user.ID,
+		OpenId:     "oy_BA5EwNEwvfhNKHxucDBNOGDwY", //user.OpenId
+		UserId:     202,                            //user.ID
 		Answer:     form.Answer,
 		QuestionId: 1})
 	if err != nil {

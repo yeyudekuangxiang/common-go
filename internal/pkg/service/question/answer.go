@@ -34,6 +34,15 @@ type AnswerService struct {
 	channel     repo.UserChannelRepository
 }
 
+func (srv AnswerService) DeleteByUid(dto srv_types.DeleteQuestionAnswerDTO) error {
+	do := repotypes.DeleteQuestionAnswerDO{
+		Uid:        dto.UserId,
+		IsDelete:   1,
+		QuestionId: dto.QuestionId,
+	}
+	return srv.answerRepo.Delete(&do)
+}
+
 func (srv AnswerService) CreateInBatches(dto []srv_types.CreateQuestionAnswerDTO) error {
 	list := make([]qnrEntity.Answer, 0)
 	for _, answerDTO := range dto {
@@ -57,9 +66,6 @@ type Ans struct {
 func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 	//查询用户是否入库，入库并回答过问题
 	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
-	if info.UserId != 0 {
-		//	return errno.ErrCommon.WithMessage("您已经提交了")
-	}
 	//获取用户信息
 	userInfo := srv.user.GetUserById(dto.UserId)
 	id, err2 := util.SnowflakeID()
@@ -79,34 +85,48 @@ func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 	if inviteInfo.InvitedByOpenId != "" {
 		InvitedByOpenId = inviteInfo.InvitedByOpenId
 	}
-
-	//保存用户信息
-	errUser := srv.qrnUserRepo.Create(&qnrEntity.User{
-		UserId:      id.Int64(),
-		ThirdId:     userInfo.OpenId,
-		InvitedById: InvitedByOpenId,
-		Phone:       userInfo.PhoneNumber,
-		Channel:     channelName,
-		Ip:          userInfo.Ip,
-		City:        userInfo.CityCode,
-	})
-	if errUser != nil {
-		return errno.ErrCommon.WithMessage("用户信息保存失败")
-	}
-	//保存答案
-	createList := make([]srv_types.CreateQuestionAnswerDTO, 0)
-	for _, l := range dto.Answer {
-		createList = append(createList, srv_types.CreateQuestionAnswerDTO{
-			Answer:     l.Answer,
+	//事务处理
+	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
+		//保存用户信息
+		if info.UserId == 0 {
+			errUser := srv.qrnUserRepo.Create(&qnrEntity.User{
+				UserId:      id.Int64(),
+				ThirdId:     userInfo.OpenId,
+				InvitedById: InvitedByOpenId,
+				Phone:       userInfo.PhoneNumber,
+				Channel:     channelName,
+				Ip:          userInfo.Ip,
+				City:        userInfo.CityCode,
+			})
+			if errUser != nil {
+				return errno.ErrCommon.WithMessage("年度碳排放用户信息保存失败")
+			}
+		}
+		//删除老数据
+		deleteErr := srv.DeleteByUid(srv_types.DeleteQuestionAnswerDTO{
 			QuestionId: dto.QuestionId,
-			SubjectId:  l.Id,
-			UserId:     model.LongID(id.Int64()),
-			Carbon:     l.Carbon,
+			UserId:     info.UserId,
 		})
-	}
-	err := srv.CreateInBatches(createList)
-	if err != nil {
-		return errno.ErrCommon.WithMessage("保存答案失败")
-	}
-	return nil
+		if deleteErr != nil {
+			return errno.ErrCommon.WithMessage("年度碳排放删除老数据失败")
+		}
+
+		//保存答案
+		createList := make([]srv_types.CreateQuestionAnswerDTO, 0)
+		for _, l := range dto.Answer {
+			createList = append(createList, srv_types.CreateQuestionAnswerDTO{
+				Answer:     l.Answer,
+				QuestionId: dto.QuestionId,
+				SubjectId:  l.Id,
+				UserId:     model.LongID(id.Int64()),
+				Carbon:     l.Carbon,
+			})
+		}
+		err := srv.CreateInBatches(createList)
+		if err != nil {
+			return errno.ErrCommon.WithMessage("年度碳排放保存答案失败")
+		}
+		return nil
+	})
+	return err
 }
