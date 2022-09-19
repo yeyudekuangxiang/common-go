@@ -3,6 +3,7 @@ package service
 import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/util/timeutils"
 	duibaApi "mio/pkg/duiba/api/model"
 	"time"
 )
@@ -274,11 +275,11 @@ type FilterPointRecordOpenIds struct {
 }
 
 type InviteInfo struct {
-	OpenId    string     `json:"openId"`
-	Nickname  string     `json:"nickname"`
-	AvatarUrl string     `json:"avatarUrl"`
-	Time      model.Time `json:"time"`
-	Point     int        `json:"point"`
+	OpenId    string         `json:"openId"`
+	Nickname  string         `json:"nickname"`
+	AvatarUrl string         `json:"avatarUrl"`
+	Time      timeutils.Time `json:"time"`
+	Point     int            `json:"point"`
 }
 type GetPartnershipPromotionListBy struct {
 	Partnership  entity.PartnershipType

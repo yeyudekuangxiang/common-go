@@ -18,9 +18,11 @@ type UserChannelService struct {
 }
 
 func (srv UserChannelService) Create(param *entity.UserChannel) error {
-	channel, _ := srv.getByCid(param.Cid)
-	if channel.Cid != 0 {
-		return errors.New("渠道已存在，不能重复创建")
+	channel, err := srv.getByCid(param.Cid)
+	if err == nil {
+		if channel.Cid != 0 {
+			return errors.New("渠道已存在，不能重复创建")
+		}
 	}
 	ch := srv.r.FindByCode(repository.FindUserChannelBy{Cid: param.Cid, Code: param.Code})
 	if ch.Code != "" {

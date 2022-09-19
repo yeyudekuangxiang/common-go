@@ -322,7 +322,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		return errors.New("很遗憾您暂无法参与活动")
 	}
 	//有邀请，并且没有发放奖励，不是黑产用户，给用户发放奖励
-	inviteInfo := u.rInvite.GetInvite(userInfo.OpenId)
+	inviteInfo := u.rInvite.GetInviteNoReward(userInfo.OpenId)
 	if inviteInfo.ID != 0 && userInfo.Risk <= 2 {
 		//发放积分奖励
 		_, err = NewPointService(mioctx.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
@@ -334,7 +334,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			InviteId:     inviteInfo.ID,
 		})
 		if err != nil {
-			app.Logger.Error("发放邀请积分失败", err)
+			app.Logger.Errorf("发放邀请积分失败:%s, 用户openId:%s", err.Error(), userInfo.OpenId)
 		}
 	}
 	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
