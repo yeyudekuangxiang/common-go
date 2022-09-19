@@ -38,8 +38,8 @@ type GetOCRForm struct {
 type GetChargeForm struct {
 	Ch         string `json:"ch" form:"ch" binding:"required" alias:"渠道参数"`
 	Mobile     string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
-	OutTradeNo string `json:"outTradeNo" form:"outTradeNo" binding:"required" alias:"唯一订单号"`
-	TotalPower string `json:"totalPower" form:"totalPower" binding:"required" alias:"统计总量"`
+	OutTradeNo string `json:"outTradeNo,omitempty" form:"outTradeNo" alias:"唯一订单号"`
+	TotalPower string `json:"totalPower,omitempty" form:"totalPower" alias:"统计总量"`
 	Sign       string `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
 type ChangeChargeExceptionForm struct {
