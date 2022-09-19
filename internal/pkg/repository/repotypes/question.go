@@ -2,7 +2,6 @@ package repotypes
 
 import (
 	"mio/internal/pkg/model"
-	"mio/internal/pkg/model/entity/question"
 )
 
 type GetQuestionOptionGetListBy struct {
@@ -29,6 +28,6 @@ type GetQuestionUserCarbon struct {
 }
 
 type UserAnswerStruct struct {
-	CategoryId question.QuestionCategoryType `json:"categoryId"`
-	Carbon     float64                       `json:"carbon"`
+	CategoryId string  `json:"category_id"`
+	Carbon     float64 `json:"carbon"`
 }

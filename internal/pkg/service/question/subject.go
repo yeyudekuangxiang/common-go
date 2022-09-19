@@ -1,6 +1,7 @@
 package question
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -113,19 +114,26 @@ func (srv SubjectService) GetList(openid string, questionId int64) (gin.H, error
 	return gin.H{"subject": list, "isSubmit": isSubmit, "subjectCount": len(list)}, nil
 }
 
-func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) srv_types.AddUserCarbonInfoDTO {
+func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv_types.AddUserCarbonInfoDTO, error) {
+	//查询用户是否入库，入库并回答过问题
+	info := srv.repoUser.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
+	if info.UserId == 0 {
+		return srv_types.AddUserCarbonInfoDTO{}, errors.New("未提交年度排放问卷")
+	}
+	userId := info.UserId //1570653152666181632
 	//总碳量
-	carbon := srv.repoAnswer.GetUserCarbon(repotypes.GetQuestionUserCarbon{Uid: dto.UserId, QuestionId: dto.QuestionId})
+	carbon := srv.repoAnswer.GetUserCarbon(repotypes.GetQuestionUserCarbon{Uid: userId, QuestionId: dto.QuestionId})
 
 	//用户碳量分类汇总
-	carbonClassify := srv.repoAnswer.GetUserAnswer(repotypes.GetQuestionUserCarbon{Uid: dto.UserId, QuestionId: dto.QuestionId})
+	carbonClassify := srv.repoAnswer.GetUserAnswer(repotypes.GetQuestionUserCarbon{Uid: userId, QuestionId: dto.QuestionId})
 
 	var userCarbonClassify []srv_types.UserCarbonClassify
 	for _, answerStruct := range carbonClassify {
 		userCarbonClassify = append(userCarbonClassify, srv_types.UserCarbonClassify{
-			CategoryId:   answerStruct.CategoryId,
+			CategoryId:   qnrEntity.QuestionCategoryType(answerStruct.CategoryId),
 			Carbon:       util.CarbonToRate(answerStruct.Carbon),
-			CategoryName: answerStruct.CategoryId.Text(),
+			CategoryName: qnrEntity.QuestionCategoryType(answerStruct.CategoryId).Text(),
+			CarbonValue:  answerStruct.Carbon,
 		})
 	}
 
@@ -143,29 +151,39 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) srv_
 	completion := carbonTodayDes.Div(carbonDay).Round(2).String()
 
 	//属于用户群里
-	personName := ""
+	userGroup := ""
+	userGroupTips := ""
 	switch {
 	case carbon > 1500:
 		{
-			personName = "低碳环保人群"
+			userGroup = "低碳环保人群"
+			userGroupTips = "希望您继续保持"
+			break
 		}
 	case carbon > 1500 && carbon <= 4000:
 		{
-			personName = "低碳环保人群1"
+			userGroup = "低碳环保人群1"
+			userGroupTips = "希望您继续保持"
+			break
 		}
 	case carbon > 4000 && carbon <= 16000:
 		{
-			personName = "低碳环保人群2"
+			userGroup = "低碳环保人群2"
+			userGroupTips = "希望您继续保持"
+			break
 		}
 	default:
 		{
-			personName = "低碳环保人群3"
+			userGroup = "低碳环保人群3"
+			userGroupTips = "希望您继续保持"
+			break
 		}
 	}
 	compareWithCountry := "高于"
 	compareWithGlobal := "低于"
 	return srv_types.AddUserCarbonInfoDTO{
-		PersonName:         personName,                        //属于用户群里
+		UserGroup:          userGroup, //属于用户群里
+		UserGroupTips:      userGroupTips,
 		CarbonYear:         util.CarbonToRate(carbon),         //总碳量
 		CarbonToday:        util.CarbonToRate(carbonToday),    //今日碳量
 		CarbonClassify:     userCarbonClassify,                //用户碳量分类汇总
@@ -173,5 +191,5 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) srv_
 		CarbonCompletion:   completion,                        //碳中和完成度
 		CompareWithCountry: compareWithCountry,
 		CompareWithGlobal:  compareWithGlobal,
-	}
+	}, nil
 }

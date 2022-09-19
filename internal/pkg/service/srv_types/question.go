@@ -43,11 +43,13 @@ type AddUserCarbonInfoDTO struct {
 	CarbonClassify     []UserCarbonClassify `json:"carbonClassify"`
 	CompareWithCountry string               `json:"comparisonWithCountry"`
 	CompareWithGlobal  string               `json:"compareWithGlobal"`
-	PersonName         string               `json:"personName"`
+	UserGroup          string               `json:"userGroup"`
+	UserGroupTips      string               `json:"userGroupDesc"`
 }
 
 type UserCarbonClassify struct {
 	CategoryId   question.QuestionCategoryType `json:"categoryId"`
 	CategoryName string                        `json:"categoryName"`
 	Carbon       string                        `json:"carbon"`
+	CarbonValue  float64                       `json:"carbonValue"`
 }
