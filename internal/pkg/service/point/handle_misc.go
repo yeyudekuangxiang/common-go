@@ -12,7 +12,13 @@ import (
 
 //检查图片
 func (c *defaultClientHandle) scanImage(imgUrl string) ([]string, error) {
-	results, err := service.DefaultOCRService.Scan(imgUrl)
+	ocrSrv := service.DefaultOCRService()
+	imageHash, err := ocrSrv.CheckImageScanCount(imgUrl, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := ocrSrv.ScanWithHash(imgUrl, imageHash)
 	if err != nil {
 		return nil, err
 	}

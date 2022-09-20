@@ -6,18 +6,21 @@ import (
 	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
 )
 
 func Md5(str string) string {
+	return Md5Byte([]byte(str))
+}
+func Md5Byte(data []byte) string {
 	encrypt := md5.New()
-	encrypt.Write([]byte(str))
+	encrypt.Write(data)
 	md5Data := encrypt.Sum([]byte(""))
 	return hex.EncodeToString(md5Data)
 }
-
 func AesEncrypt(orig string, key, iv string) string {
 	origData := []byte(orig)
 	k := []byte(key)
@@ -81,4 +84,12 @@ func pkcs7Trimming(encrypt []byte) ([]byte, error) {
 	//获取填充的个数
 	unPadding := int(encrypt[length-1])
 	return encrypt[:(length - unPadding)], nil
+}
+
+func Sha256Byte(data []byte) string {
+	encrypt := sha256.Sum256(data)
+	return hex.EncodeToString(encrypt[:])
+}
+func Sha256(str string) string {
+	return Sha256Byte([]byte(str))
 }

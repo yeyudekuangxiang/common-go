@@ -56,7 +56,14 @@ type PointCollectService struct {
 }
 
 func (srv PointCollectService) validateCoffeeCupImage(imageUrl string) (bool, []string, error) {
-	results, err := DefaultOCRService.Scan(imageUrl)
+
+	ocrSrv := DefaultOCRService()
+	imageHash, err := ocrSrv.CheckImageScanCount(imageUrl, 1)
+	if err != nil {
+		return false, nil, err
+	}
+	results, err := ocrSrv.ScanWithHash(imageUrl, imageHash)
+
 	if err != nil {
 		return false, nil, err
 	}
@@ -81,7 +88,12 @@ func (srv PointCollectService) validatePointRule(texts []string, rules []string)
 }
 
 func (srv PointCollectService) validateBikeRideImage(imageUrl string) (bool, []string, error) {
-	results, err := DefaultOCRService.Scan(imageUrl)
+	ocrSrv := DefaultOCRService()
+	imageHash, err := ocrSrv.CheckImageScanCount(imageUrl, 1)
+	if err != nil {
+		return false, nil, err
+	}
+	results, err := ocrSrv.ScanWithHash(imageUrl, imageHash)
 	if err != nil {
 		return false, nil, err
 	}
@@ -93,7 +105,12 @@ func (srv PointCollectService) validateBikeRideImage(imageUrl string) (bool, []s
 }
 
 func (srv PointCollectService) validatePowerReplaceImage(imageUrl string) (bool, []string, error) {
-	results, err := DefaultOCRService.Scan(imageUrl)
+	ocrSrv := DefaultOCRService()
+	imageHash, err := ocrSrv.CheckImageScanCount(imageUrl, 1)
+	if err != nil {
+		return false, nil, err
+	}
+	results, err := ocrSrv.ScanWithHash(imageUrl, imageHash)
 	fmt.Println(results, err)
 	if err != nil {
 		return false, nil, err
@@ -106,7 +123,12 @@ func (srv PointCollectService) validatePowerReplaceImage(imageUrl string) (bool,
 }
 
 func (srv PointCollectService) validateReducePlasticImage(imageUrl string) (bool, []string, error) {
-	results, err := DefaultOCRService.Scan(imageUrl)
+	ocrSrv := DefaultOCRService()
+	imageHash, err := ocrSrv.CheckImageScanCount(imageUrl, 1)
+	if err != nil {
+		return false, nil, err
+	}
+	results, err := ocrSrv.ScanWithHash(imageUrl, imageHash)
 	fmt.Println(results, err)
 	if err != nil {
 		return false, nil, err
@@ -120,11 +142,11 @@ func (srv PointCollectService) validateReducePlasticImage(imageUrl string) (bool
 }
 
 func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl string) (int, error) {
-	err := DefaultOCRService.CheckIdempotent(openId)
+	err := DefaultOCRService().CheckIdempotent(openId)
 	if err != nil {
 		return 0, err
 	}
-	err = DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService().CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}
@@ -166,11 +188,11 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 }
 
 func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUrl string) (int, error) {
-	err := DefaultOCRService.CheckIdempotent(openId)
+	err := DefaultOCRService().CheckIdempotent(openId)
 	if err != nil {
 		return 0, err
 	}
-	err = DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService().CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}
@@ -212,11 +234,11 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 }
 
 func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imageUrl string) (int, error) {
-	err := DefaultOCRService.CheckIdempotent(openId)
+	err := DefaultOCRService().CheckIdempotent(openId)
 	if err != nil {
 		return 0, err
 	}
-	err = DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService().CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}
@@ -259,11 +281,11 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 
 func (srv PointCollectService) CollectReducePlastic(openId string, risk int, imageUrl string) (int, error) {
 
-	err := DefaultOCRService.CheckIdempotent(openId)
+	err := DefaultOCRService().CheckIdempotent(openId)
 	if err != nil {
 		return 0, err
 	}
-	err = DefaultOCRService.CheckRisk(risk)
+	err = DefaultOCRService().CheckRisk(risk)
 	if err != nil {
 		return 0, err
 	}
