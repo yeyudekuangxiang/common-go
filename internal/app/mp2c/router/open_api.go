@@ -72,9 +72,8 @@ func openRouter(router *gin.Engine) {
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
 		{
 			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
-			openAuthRouter.GET("/SendPoint", apiutil.Format(open.DefaultPlatformController.SendPoint))
 		}
 		//外部平台跳转绿喵 不需要登陆
-
+		openRouter.POST("/sync/point", apiutil.Format(open.DefaultPlatformController.SyncPoint))
 	}
 }

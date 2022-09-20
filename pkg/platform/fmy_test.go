@@ -1,4 +1,4 @@
-package Fmy_test
+package platform
 
 import (
 	"encoding/json"

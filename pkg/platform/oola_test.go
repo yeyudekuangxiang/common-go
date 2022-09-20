@@ -1,4 +1,4 @@
-package oola
+package platform
 
 import (
 	"encoding/json"

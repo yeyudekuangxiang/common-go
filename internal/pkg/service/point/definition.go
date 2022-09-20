@@ -22,7 +22,7 @@ var rules = CollectRules{
 }
 
 var identifyChRules = CollectRules{
-	"POWER_REPLACE": []string{"订单编号", "度"},
+	"POWER_REPLACE": []string{"订单编号", "度", "支付状态", "充电量", "已支付"},
 }
 
 var identifyEnRules = RuleTranslate{

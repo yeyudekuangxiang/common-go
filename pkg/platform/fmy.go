@@ -1,4 +1,4 @@
-package Fmy
+package platform
 
 import (
 	"errors"

@@ -91,7 +91,11 @@ func (c *defaultClientHandle) HandleImageCollectCommand() (map[string]string, er
 		//记录日志 返回错误
 		return nil, err
 	}
-	imgInfo := c.identifyImg(content)
+	imgInfo, err := c.identifyImg(content)
+	if err != nil {
+		//记录日志 返回错误
+		return nil, err
+	}
 	//添加内容
 	marshal, _ := json.Marshal(imgInfo)
 	c.withAdditionInfo(string(marshal))

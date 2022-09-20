@@ -74,7 +74,7 @@ func (p PointTransactionType) Text() string {
 		return "点赞"
 	case POINT_REDUCE_PLASTIC:
 		return "环保减塑"
-	case POINT_LTXXF:
+	case POINT_ZCYP_SIGNUP, POINT_ZCYP_APPLY:
 		return "零碳小先锋"
 	}
 	return "未知积分"
@@ -170,7 +170,8 @@ const (
 
 	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC" //环保减塑
 
-	POINT_LTXXF PointTransactionType = "零碳小先锋"
+	POINT_ZCYP_SIGNUP PointTransactionType = "ZCYP_SIGNUP"
+	POINT_ZCYP_APPLY  PointTransactionType = "ZCYP_APPLY"
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -232,11 +233,13 @@ var PointCollectValueMap = map[PointTransactionType]int{
 	POINT_LIKE:           5,   //每次
 	POINT_RECOMMEND:      50,  //每次
 	POINT_REDUCE_PLASTIC: 28,  //每次
-	POINT_LTXXF:          2500,
+	POINT_ZCYP_SIGNUP:    2500,
+	POINT_ZCYP_APPLY:     50,
 }
 
 var PointCollectLimitOnceMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP: 1,
+	POINT_ZCYP_SIGNUP: 1,
+	POINT_ZCYP_APPLY:  1,
 }
 
 //每天获取 （多少）次积分
@@ -251,9 +254,10 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_REDUCE_PLASTIC: 2, // 次
 }
 
-//渠道对应类型
-var ChToMap = map[string]PointTransactionType{
-	"ltxxf": POINT_LTXXF,
+//b端渠道对应操作类型
+var PlatformMethodMap = map[string]PointTransactionType{
+	"zcyp_signup": POINT_ZCYP_SIGNUP,
+	"zcyp_apply":  POINT_ZCYP_APPLY,
 }
 
 type PointTransaction struct {
