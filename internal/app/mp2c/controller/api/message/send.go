@@ -2,6 +2,7 @@ package message
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	messageSrv "mio/internal/pkg/service/message"
 )
 
@@ -22,5 +23,14 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"code": code,
 		"err":  err,
+	}, nil
+}
+
+func (MessageController) GetTemplateId(c *gin.Context) (gin.H, error) {
+	var TemplateIds []string
+	TemplateIds = append(TemplateIds, config.MessageTemplateIds.SendPoint)
+	TemplateIds = append(TemplateIds, config.MessageTemplateIds.SendPoint)
+	return gin.H{
+		"templateIds": TemplateIds,
 	}, nil
 }

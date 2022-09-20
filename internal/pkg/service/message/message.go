@@ -10,6 +10,7 @@ import (
 type MessageService struct {
 }
 
+// SendMiniSubMessage  小程序订阅消息发送
 func (srv *MessageService) SendMiniSubMessage(toUser string, page string, template IMiniSubTemplate) (int, error) {
 	zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
 

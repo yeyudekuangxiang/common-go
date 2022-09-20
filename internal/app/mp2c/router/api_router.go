@@ -20,6 +20,7 @@ import (
 func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 	router.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
+	router.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
@@ -31,7 +32,6 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM)) //校验验证码
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
-
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		//tag
@@ -82,6 +82,12 @@ func apiRouter(router *gin.Engine) {
 			//答题相关路由
 			qnrRouter.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
 			qnrRouter.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
+		}
+		//小程序订阅消息
+		messageRouter := mustAuthRouter.Group("/message")
+		{
+			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
+			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
 		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
