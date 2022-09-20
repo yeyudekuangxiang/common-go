@@ -53,35 +53,6 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	return nil, nil
 }
 
-func (receiver PlatformController) AuthSyncPoint(ctx *gin.Context) (gin.H, error) {
-	form := platform{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
-		return nil, err
-	}
-	//查询渠道号
-	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
-	if scene.Key == "" || scene.Key == "e" {
-		app.Logger.Info("渠道查询失败", form)
-		return nil, errors.New("渠道查询失败")
-	}
-	user := apiutil.GetAuthUser(ctx)
-	ch := service.DefaultUserChannelService.GetChannelByCid(user.ChannelId)
-	t := entity.PlatformMethodMap[strings.ToLower(ch.Code)]
-	value := entity.PointCollectValueMap[t]
-	_, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:      user.OpenId,
-		Type:        t,
-		BizId:       util.UUID(),
-		ChangePoint: int64(value),
-		AdminId:     0,
-		Note:        t.Text(),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
-}
-
 func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	form := platform{}
 

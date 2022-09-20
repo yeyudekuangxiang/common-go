@@ -39,10 +39,13 @@ func (c *defaultClientHandle) validateRule(content []string, rules CollectRules)
 }
 
 //图片识别 根据rule匹配关键数据
-func (c *defaultClientHandle) identifyImg(identify []string) map[string]string {
+func (c *defaultClientHandle) identifyImg(identify []string) (map[string]string, error) {
 	rule := identifyChRules[c.clientHandle.Type] //汉字
 	enRules := identifyEnRules[c.clientHandle.Type]
-	m := util.IntersectContains(identify, rule)
+	m, valid := util.IntersectContains(identify, rule)
+	if !valid {
+		return nil, errors.New("无效图片")
+	}
 	enM := map[string]string{}
 	for k, v := range m {
 		if enRule, ok := enRules[k]; ok {
@@ -50,7 +53,7 @@ func (c *defaultClientHandle) identifyImg(identify []string) map[string]string {
 		}
 	}
 	c.clientHandle.identifyImg = enM
-	return enM
+	return enM, nil
 }
 
 //积分类型

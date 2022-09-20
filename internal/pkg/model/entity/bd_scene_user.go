@@ -7,7 +7,7 @@ import (
 type BdSceneUser struct {
 	ID             int64     `json:"ID"`
 	PlatformKey    string    `json:"platformKey"`
-	PlatformUserId int64     `json:"platformUserId,omitempty"` //外站用户id
+	PlatformUserId string    `json:"platformUserId,omitempty"` //外站用户id
 	Phone          string    `json:"phone,omitempty"`          //外站用户手机
 	OpenId         string    `json:"openId,omitempty"`         //本站用户openId
 	UnionId        string    `json:"unionId,omitempty"`

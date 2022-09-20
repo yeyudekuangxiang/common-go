@@ -50,7 +50,7 @@ func (c *defaultClientHandle) powerReplace() error {
 		}
 		kwh, _ := fromString.Float64() //本次碳量
 		//发碳量
-		carbon, _ := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		_, _ = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 			OpenId:  c.clientHandle.OpenId,
 			UserId:  0,
 			Type:    entity.CarbonTransactionType(c.clientHandle.Type),
@@ -59,7 +59,6 @@ func (c *defaultClientHandle) powerReplace() error {
 			AdminId: 0,
 			Ip:      "",
 		})
-		println(carbon)
 		return nil
 	})
 
