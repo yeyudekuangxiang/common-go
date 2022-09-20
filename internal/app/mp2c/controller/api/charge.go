@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -128,7 +129,11 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			fmt.Println("charge 加碳失败", form)
 		}
 	}
-	ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
+	//绿喵回调第三方
+	ccRingService := platform.NewCCRingService()
+	go ccRingService.CallBack(userInfo, thisPoint0, scene.Ch, scene)
+	//发券
+	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
 }
 
@@ -179,10 +184,4 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 			}
 		}
 	}
-}
-
-func (ctr ChargeController) callBack(userInfo *entity.User, platformKey string) {
-	sceneUser := service.DefaultBdSceneUserService.FindPlatformUser(userInfo.OpenId, platformKey)
-	fmt.Println(sceneUser)
-	// todo 回调
 }

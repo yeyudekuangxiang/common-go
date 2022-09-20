@@ -38,13 +38,13 @@ func Intersect(nums1 []string, nums2 []string) []string {
 	}
 	return intersection
 }
-func IntersectContains(identify []string, rules []string) map[string]string {
+func IntersectContains(identify []string, rules []string) (map[string]string, bool) {
 	m := map[string]string{}
 	for i, v := range identify {
 		for _, rule := range rules {
-			if strings.Contains(v, rule) {
+			if strings.Contains(strings.ToLower(v), strings.ToLower(rule)) {
 				//匹配字符 到map
-				val := strings.Trim(v, rule)
+				val := strings.Trim(strings.Trim(v, rule), ":")
 				if val == "" {
 					val = identify[i+1]
 				}
@@ -52,7 +52,7 @@ func IntersectContains(identify []string, rules []string) map[string]string {
 			}
 		}
 	}
-	return m
+	return m, len(rules) == len(m)
 }
 
 // SortArray 快速排序，基于比较，不稳定算法
