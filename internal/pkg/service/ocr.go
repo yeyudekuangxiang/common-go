@@ -128,7 +128,7 @@ func (srv OCRService) ScanWithHash(imageUrl string, imageHash string) ([]string,
 	if err != nil {
 		return nil, err
 	}
-	_, err = srv.UpdateImageScanCount(imageHash, imageUrl)
+	_, err = srv.UpdateImageScanCount(imageHash, imageUrl, result)
 	if err != nil {
 		app.Logger.Error("更新ocr扫描次数失败", imageUrl, imageHash, err)
 	}
@@ -141,7 +141,7 @@ func (srv OCRService) GetImageHash(imageUrl string) (string, error) {
 	}
 	return encrypt.Sha256Byte(data), nil
 }
-func (srv OCRService) UpdateImageScanCount(imageHash string, imageUrl string) (int, error) {
+func (srv OCRService) UpdateImageScanCount(imageHash string, imageUrl string, scanResult []string) (int, error) {
 	log, exist, err := srv.scanRepo.FindByHash(imageHash)
 	if err != nil {
 		return 0, err
@@ -151,9 +151,10 @@ func (srv OCRService) UpdateImageScanCount(imageHash string, imageUrl string) (i
 		return log.Count, srv.scanRepo.Save(log)
 	}
 	log = &entity.ScanLog{
-		ImageUrl: imageUrl,
-		Hash:     imageHash,
-		Count:    1,
+		ImageUrl:   imageUrl,
+		Hash:       imageHash,
+		Count:      1,
+		ScanResult: scanResult,
 	}
 	return log.Count, srv.scanRepo.Create(log)
 }
