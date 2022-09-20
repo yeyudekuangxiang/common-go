@@ -12,7 +12,7 @@ type MessageController struct {
 }
 
 func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
-	b := messageSrv.MiniPointSendTemplate{
+	b := messageSrv.MiniChangePointTemplate{
 		Point:    "222",
 		Source:   "222",
 		Time:     "2022年9月10日",
@@ -28,8 +28,8 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 
 func (MessageController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	var TemplateIds []string
-	TemplateIds = append(TemplateIds, config.MessageTemplateIds.SendPoint)
-	TemplateIds = append(TemplateIds, config.MessageTemplateIds.SendPoint)
+	TemplateIds = append(TemplateIds, config.MessageTemplateIds.ChangePoint)
+	TemplateIds = append(TemplateIds, config.MessageTemplateIds.ChangePoint)
 	return gin.H{
 		"templateIds": TemplateIds,
 	}, nil
