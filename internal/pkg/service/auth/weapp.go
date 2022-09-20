@@ -8,8 +8,10 @@ import (
 	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
@@ -79,7 +81,6 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			return nil, "", err
 		}
-		//return user, cookie, nil
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
 	}
@@ -87,6 +88,8 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
+			//注册领积分
+			srv.ReceivePoint(user)
 		})
 		if err != nil {
 			app.Logger.Errorf("提交新用户处理事件失败 %+v %s %s", user, invitedBy, partnershipWith)
@@ -128,6 +131,26 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		_, err := service.DefaultPartnershipRedemptionService.ProcessPromotionInformation(user.OpenId, partnershipType, entity.PartnershipPromotionTriggerREGISTER)
 		if err != nil {
 			app.Logger.Errorf("添加第三方活动信息失败 %+v %s %s %v", user, invitedBy, partnershipType, err)
+		}
+	}
+}
+
+func (srv WeappService) ReceivePoint(user *entity.User) {
+	//获取渠道信息
+	chInfo := service.DefaultUserChannelService.GetChannelByCid(user.ChannelId)
+	//判断该渠道是否可领取积分
+	if transactionType, ok := entity.PlatformMethodMap[chInfo.Code]; ok {
+		point := entity.PointCollectValueMap[transactionType]
+		_, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:      user.OpenId,
+			Type:        transactionType,
+			BizId:       util.UUID(),
+			ChangePoint: int64(point),
+			AdminId:     0,
+			Note:        transactionType.Text(),
+		})
+		if err != nil {
+			app.Logger.Errorf("注册领取积分失败 用户ID: %d; 渠道id:%d; 失败原因:%s\n", user.ID, user.ChannelId, err.Error())
 		}
 	}
 }

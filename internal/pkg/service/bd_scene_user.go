@@ -10,8 +10,13 @@ var DefaultBdSceneUserService = BdSceneUserService{}
 type BdSceneUserService struct {
 }
 
-func (srv BdSceneUserService) FindByCh(ch string) *entity.BdSceneUser {
-	item := repository.DefaultBdSceneUserRepository.FindByCh(ch)
+func (srv BdSceneUserService) FindByCh(platformKey string) *entity.BdSceneUser {
+	item := repository.DefaultBdSceneUserRepository.FindByCh(platformKey)
+	return &item
+}
+
+func (srv BdSceneUserService) FindPlatformUser(openId string, platformKey string) *entity.BdSceneUser {
+	item := repository.DefaultBdSceneUserRepository.FindPlatformUser(openId, platformKey)
 	return &item
 }
 
