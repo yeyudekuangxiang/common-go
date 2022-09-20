@@ -34,16 +34,15 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 		return nil, errors.New("渠道查询失败")
 	}
 
-	//查询手机号
 	if user.ID == 0 {
-		return nil, errors.New("用户未授权登陆")
+		return nil, errors.New("用户未登陆")
 	}
 
-	//保存渠道用户
-	sceneUser := service.DefaultBdSceneUserService.FindByCh(form.PlatformKey)
+	//保存渠道用户记录
+	sceneUser := service.DefaultBdSceneUserService.FindPlatformUser(user.OpenId, form.PlatformKey)
 	if sceneUser.ID == 0 {
-		sceneUser.Ch = scene.Ch
-		sceneUser.SceneUserId = form.MemberId
+		sceneUser.PlatformKey = scene.Ch
+		sceneUser.PlatformUserId = form.MemberId
 		sceneUser.Phone = user.PhoneNumber
 		sceneUser.OpenId = user.OpenId
 		sceneUser.UnionId = user.UnionId
@@ -51,7 +50,6 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 		app.Logger.Errorf("create db_scene_user error:%s", err.Error())
 		return nil, nil
 	}
-	//调用第三方回调
 	return nil, nil
 }
 

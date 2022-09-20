@@ -254,7 +254,7 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_REDUCE_PLASTIC: 2, // 次
 }
 
-//渠道对应操作类型
+//b端渠道对应操作类型
 var PlatformMethodMap = map[string]PointTransactionType{
 	"zcyp_signup": POINT_ZCYP_SIGNUP,
 	"zcyp_apply":  POINT_ZCYP_APPLY,

@@ -14,7 +14,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"mio/pkg/oola"
+	"mio/pkg/platform"
 	"strconv"
 	"strings"
 	"time"
@@ -134,7 +134,7 @@ func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("渠道查询失败")
 	}
 	userInfo := apiutil.GetAuthUser(c)
-	oolaPkg := oola.NewOola(context.NewMioContext(), scene.AppId, userInfo.OpenId, scene.Domain, app.Redis)
+	oolaPkg := platform.NewOola(context.NewMioContext(), scene.AppId, userInfo.OpenId, scene.Domain, app.Redis)
 	oolaPkg.WithHeadImgUrl(userInfo.AvatarUrl)
 	oolaPkg.WithUserName(userInfo.Nickname)
 	oolaPkg.WithPhone(userInfo.PhoneNumber)
