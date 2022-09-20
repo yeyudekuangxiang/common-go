@@ -105,6 +105,18 @@ func (p PointTransactionType) RealText() string {
 		return "平台活动奖励"
 	case POINT_DUIBA_INTEGRAL_RECHARGE:
 		return "兑吧积分充值"
+	case POINT_RECYCLING_CLOTHING:
+		return "oola衣物鞋帽回收"
+	case POINT_RECYCLING_DIGITAL:
+		return "oola数码回收"
+	case POINT_RECYCLING_APPLIANCE:
+		return "oola家电回收"
+	case POINT_RECYCLING_BOOK:
+		return "oola书籍回收"
+	case POINT_ECAR:
+		return "星星充电"
+	case POINT_FAST_ELECTRICITY:
+		return "快电"
 	}
 	return p.Text()
 }
