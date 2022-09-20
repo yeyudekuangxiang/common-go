@@ -21,13 +21,17 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	}
 
 	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
+	endTime := form.EndTime
+	if !endTime.IsZero() {
+		endTime = form.EndTime.Add(time.Hour*24 - time.Nanosecond)
+	}
 	list, total, err := pointTranService.PagePointRecord(service.GetPointTransactionPageListBy{
 		UserId:    form.UserId,
 		Nickname:  form.Nickname,
 		OpenId:    form.OpenId,
 		Phone:     form.Phone,
 		StartTime: model.Time{Time: form.StartTime},
-		EndTime:   model.Time{Time: form.EndTime.Add(time.Hour*24 - time.Nanosecond)},
+		EndTime:   model.Time{Time: endTime},
 		Type:      form.Type,
 		Offset:    form.Offset(),
 		Limit:     form.Limit(),
