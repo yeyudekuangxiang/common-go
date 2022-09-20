@@ -8,32 +8,43 @@ import (
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	repo "mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/encrypt"
+	"mio/internal/pkg/util/httputil"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"time"
 )
 
-var DefaultOCRService OCRService
+type OCRService struct {
+	ctx         *mioctx.MioContext
+	imageClient *baidu.ImageClient
+	scanRepo    *repo.ScanLogRepository
+}
 
-func InitDefaultOCRService() {
-	DefaultOCRService = OCRService{
-		imageClient: &baidu.ImageClient{
-			AccessToken: baidu.NewAccessToken(baidu.AccessTokenConfig{
-				RedisClient: app.Redis,
-				Prefix:      config.RedisKey.BaiDu,
-				AppKey:      config.Config.BaiDu.AppKey,
-				AppSecret:   config.Config.BaiDu.AppSecret,
-			}),
-		},
+func NewDefaultImageClient() *baidu.ImageClient {
+	return &baidu.ImageClient{
+		AccessToken: baidu.NewAccessToken(baidu.AccessTokenConfig{
+			RedisClient: app.Redis,
+			Prefix:      config.RedisKey.BaiDu,
+			AppKey:      config.Config.BaiDu.AppKey,
+			AppSecret:   config.Config.BaiDu.AppSecret,
+		}),
 	}
 }
 
-type OCRService struct {
-	imageClient *baidu.ImageClient
+func NewOCRService(mioContext *mioctx.MioContext, imageClient *baidu.ImageClient) *OCRService {
+	return &OCRService{
+		ctx:         mioContext,
+		imageClient: imageClient,
+		scanRepo:    repo.NewScanLogRepository(mioContext),
+	}
 }
-
+func DefaultOCRService() *OCRService {
+	return NewOCRService(mioctx.NewMioContext(), NewDefaultImageClient())
+}
 func (srv OCRService) CheckIdempotent(openId string) error {
 	if !util.DefaultLock.Lock("OCRIdempotent:"+openId, time.Second*10) {
 		return errno.ErrLimit
@@ -91,6 +102,8 @@ func (srv OCRService) OCRForGm(openid string, risk int, src string) error {
 
 	return err
 }
+
+// Scan 扫描图片  此方法不会更新扫描次数 想要更新扫描次数 请使用 ScanWithHash 方法
 func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 	rest, err := srv.imageClient.WebImage(baidu.WebImageParam{
 		ImageUrl: imgUrl,
@@ -107,4 +120,69 @@ func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 		results = append(results, word.Words)
 	}
 	return results, nil
+}
+
+// ScanWithHash 扫描图片 并且更新扫描次数
+func (srv OCRService) ScanWithHash(imageUrl string, imageHash string) ([]string, error) {
+	result, err := srv.Scan(imageUrl)
+	if err != nil {
+		return nil, err
+	}
+	_, err = srv.UpdateImageScanCount(imageHash, imageUrl)
+	if err != nil {
+		app.Logger.Error("更新ocr扫描次数失败", imageUrl, imageHash, err)
+	}
+	return result, nil
+}
+func (srv OCRService) GetImageHash(imageUrl string) (string, error) {
+	data, err := httputil.Get(imageUrl)
+	if err != nil {
+		return "", err
+	}
+	return encrypt.Sha256Byte(data), nil
+}
+func (srv OCRService) UpdateImageScanCount(imageHash string, imageUrl string) (int, error) {
+	log, exist, err := srv.scanRepo.FindByHash(imageHash)
+	if err != nil {
+		return 0, err
+	}
+	if exist {
+		log.Count++
+		return log.Count, srv.scanRepo.Save(log)
+	}
+	log = &entity.ScanLog{
+		ImageUrl: imageUrl,
+		Hash:     imageHash,
+		Count:    1,
+	}
+	return log.Count, srv.scanRepo.Create(log)
+}
+func (srv OCRService) GetImageScanCount(imageHash string) (int, error) {
+	log, exist, err := srv.scanRepo.FindByHash(imageHash)
+	if err != nil {
+		return 0, err
+	}
+	if exist {
+		return log.Count, nil
+	}
+	return 0, nil
+}
+
+// CheckImageScanCount 检查同一个hash图片扫描次数是否达到上限 并且返回图片的hash值
+func (srv OCRService) CheckImageScanCount(imageUrl string, maxCount int) (hash string, err error) {
+	hash, err = srv.GetImageHash(imageUrl)
+	if err != nil {
+		return "", err
+	}
+
+	count, err := srv.GetImageScanCount(hash)
+	if err != nil {
+		return "", err
+	}
+
+	if count >= maxCount {
+		return "", errno.ErrCommon.WithMessage("重复扫描")
+	}
+
+	return hash, nil
 }
