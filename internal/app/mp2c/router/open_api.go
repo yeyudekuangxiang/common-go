@@ -52,8 +52,6 @@ func openRouter(router *gin.Engine) {
 			oaRouter.Any("/login", apiutil.Format(authApi.DefaultOaController.Login))
 			//微信网页授权
 			oaRouter.POST("/sign", apiutil.Format(authApi.DefaultOaController.Sign))
-			//微信网页授权
-			oaRouter.POST("/sendMessage", apiutil.Format(authApi.DefaultOaController.SendMessage))
 		}
 
 		openRouter.POST("/weapp/auth", apiutil.Format(authApi.DefaultWeappController.LoginByCode))

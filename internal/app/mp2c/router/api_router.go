@@ -9,6 +9,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/business"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
+	"mio/internal/app/mp2c/controller/api/message"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
@@ -18,6 +19,8 @@ import (
 
 func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
+	router.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
+
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())

@@ -29,22 +29,6 @@ func (OaController) Sign(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (OaController) SendMessage(c *gin.Context) (gin.H, error) {
-	form := ConfigSignForm{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-
-	err := authSrv.OaService{Platform: entity.UserSource(form.Platform)}.SendMessage()
-	if err != nil {
-		return nil, err
-	}
-
-	return gin.H{
-		"sign": "",
-	}, nil
-}
-
 // AutoLogin 手机端完成一次授权后 调用端state未改变 回直接回调到callback而不会经过此方法
 func (OaController) AutoLogin(c *gin.Context) {
 	form := AutoLoginForm{}
