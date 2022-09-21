@@ -24,11 +24,11 @@ type WeappService struct {
 	client *weapp.Client
 }
 
-func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64) (*entity.User, string, error) {
+func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64) (*entity.User, string, bool, error) {
 	//调用java那边登陆接口
 	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
-		return nil, "", err
+		return nil, "", false, err
 	}
 
 	//获取用户信息
@@ -37,7 +37,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	app.Logger.Debug("cookie", cookie, invitedBy, partnershipWith)
 	whoAmiResult, err := httputil.OriginGet(config.Config.Java.JavaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
 	if err != nil {
-		return nil, "", err
+		return nil, "", false, err
 	}
 	whoAmiResp := struct {
 		Code    string `json:"code"`
@@ -53,16 +53,16 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 
 	err = json.Unmarshal(whoAmiResult.Body, &whoAmiResp)
 	if err != nil {
-		return nil, "", errors.WithStack(err)
+		return nil, "", false, errors.WithStack(err)
 	}
 
 	if whoAmiResp.Code != "success" {
-		return nil, "", errors.New(whoAmiResp.Message)
+		return nil, "", false, errors.New(whoAmiResp.Message)
 	}
 
 	user, err := service.DefaultUserService.GetUserByOpenId(whoAmiResp.Data.Openid)
 	if err != nil {
-		return nil, "", err
+		return nil, "", false, err
 	}
 	session, _ := service.DefaultSessionService.FindSessionByOpenId(whoAmiResp.Data.Openid)
 
@@ -79,12 +79,11 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 			ChannelId:   cid,
 		})
 		if err != nil {
-			return nil, "", err
+			return nil, "", false, err
 		}
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
 	}
-	user.IsNewUser = isNewUser
 	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
@@ -96,7 +95,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		}
 	}
 
-	return user, cookie, nil
+	return user, cookie, isNewUser, nil
 }
 
 func (srv WeappService) ToZhuGe(openId string, attr map[string]interface{}, eventName string) {
