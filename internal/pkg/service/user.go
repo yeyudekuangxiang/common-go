@@ -15,6 +15,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
@@ -105,7 +106,7 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
 	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
 	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
-	DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
+	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
 }
 
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {

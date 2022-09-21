@@ -30,6 +30,9 @@ func (MessageController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	var TemplateIds []string
 	TemplateIds = append(TemplateIds, config.MessageTemplateIds.ChangePoint)
 	TemplateIds = append(TemplateIds, config.MessageTemplateIds.ChangePoint)
+	service := messageSrv.MessageService{}
+	service.GetTemplateId("oy_BA5IGl1JgkJKbD14wq_-Yorqw")
+
 	return gin.H{
 		"templateIds": TemplateIds,
 	}, nil

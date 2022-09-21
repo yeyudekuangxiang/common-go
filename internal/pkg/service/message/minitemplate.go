@@ -19,7 +19,7 @@ type IMiniSubTemplate interface {
 累积积分 {{number3.DATA}}
 */
 
-//MiniPointSendTemplate 积分变更
+//MiniChangePointTemplate 积分变更
 type MiniChangePointTemplate struct {
 	Point    int64  `json:"point"`
 	Source   string `json:"source"`

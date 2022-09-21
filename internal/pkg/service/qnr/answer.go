@@ -8,8 +8,8 @@ import (
 	repo "mio/internal/pkg/repository"
 	repoQnr "mio/internal/pkg/repository/qnr"
 	"mio/internal/pkg/repository/repotypes"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 )
@@ -120,5 +120,5 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 
 func (srv AnswerService) ToZhuGe(openId string, attr map[string]interface{}) {
 	eventName := config.ZhuGeEventName.Qnr
-	service.DefaultZhuGeService().Track(eventName, openId, attr)
+	track.DefaultZhuGeService().Track(eventName, openId, attr)
 }

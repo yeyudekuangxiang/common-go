@@ -23,6 +23,7 @@ type redisKey struct {
 	UserCarbonStep         string
 	MessageLimitByTemplate string
 	MessageLimitByUser     string
+	MessageSignUser        string
 }
 
 var RedisKey = redisKey{
@@ -48,5 +49,6 @@ var RedisKey = redisKey{
 	UserCarbonStep:         "user_carbon_step:%s",               //用户已经转化碳的步数
 	MessageLimitByTemplate: "mp2c:message_limit_by_template:%s", //同一模板每人每天最多接收1条消息
 	MessageLimitByUser:     "mp2c:message_limit_by_user:%s",     //每人每天最多收到2个不同类型模板消息
+	MessageSignUser:        "mp2c:message_sign_user",            //小程序消息推送
 
 }

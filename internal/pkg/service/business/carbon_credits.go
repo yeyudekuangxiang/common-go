@@ -6,8 +6,8 @@ import (
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"time"
 )
@@ -228,7 +228,7 @@ func (srv CarbonCreditsService) trackCreditChange(userId int64, value decimal.De
 		}
 		company := DefaultCompanyService.GetCompanyById(userInfo.BCompanyId)
 
-		service.DefaultZhuGeService().TrackBusinessCredit(srv_types.TrackBusinessCredit{
+		track.DefaultZhuGeService().TrackBusinessCredit(srv_types.TrackBusinessCredit{
 			Uid:        userInfo.Uid,
 			Value:      value.InexactFloat64(),
 			ChangeType: "inc",
