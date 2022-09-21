@@ -23,7 +23,7 @@ func (srv PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointT
 	var limitN, i, it int
 	var ok bool
 	var msg string
-	
+
 	if i, ok = entity.PointCollectLimitMap[t]; ok {
 		limitN = i
 		msg = "今日"
@@ -68,10 +68,16 @@ func (srv PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointT
 
 //创建用户今天积分发送次数限制记录
 func (srv PointTransactionCountLimitService) createLimitOfToday(transactionType entity.PointTransactionType, openId string) (*entity.PointTransactionCountLimit, error) {
+	var maxCount int
+	if max, ok := entity.PointCollectLimitMap[transactionType]; ok {
+		maxCount = max
+	} else if max, ok = entity.PointCollectLimitOnceMap[transactionType]; ok {
+		maxCount = max
+	}
 	limit := entity.PointTransactionCountLimit{
 		OpenId:          openId,
 		TransactionType: transactionType,
-		MaxCount:        entity.PointCollectLimitMap[transactionType],
+		MaxCount:        maxCount,
 		CurrentCount:    0,
 		UpdateTime:      model.Time{Time: time.Now()},
 		TransactionDate: model.Date{Time: time.Now()},
