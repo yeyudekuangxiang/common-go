@@ -13,6 +13,7 @@ type redisKey struct {
 	ActivityZeroIsNewUser string
 	OaAuth                string
 	BaiDu                 string
+	BaiDuImageSearch      string
 	BadgeImageCode        string
 	CheckBusinessUser     string
 	BusinessCarbonHotCity string
@@ -36,12 +37,13 @@ var RedisKey = redisKey{
 	ActivityZeroIsNewUser: "mp2c:activity:zero:isnewuser:%d", //0元拿活动记录是否新用户
 	OaAuth:                "mp2c:oaauth:%s",                  //微信网页授权
 	BaiDu:                 "mp2c:baidu:",                     //用于百度接口
-	BadgeImageCode:        "mp2c:updateBadgeImage:",          //上传证书图片凭证
-	CheckBusinessUser:     "mp2c:checkBusinessUser:%s",       //检测用户token是否有更新
-	BusinessCarbonHotCity: "business:carbon:hotcity",         //低碳场景中热门城市
-	BlackList:             "mp2c:blacklist",                  //黑产白名单
-	EventLimit:            "mp2c:eventlimit",                 //公益兑换限制
-	UserCarbonRank:        "user_carbon_rank:%s",             //排行榜
-	UserCarbonClassify:    "user_carbon_classify",            //碳分类
-	UserCarbonStep:        "user_carbon_step:%s",             //用户已经转化碳的步数
+	BaiDuImageSearch:      "mp2c:baiduImageSearch",
+	BadgeImageCode:        "mp2c:updateBadgeImage:",    //上传证书图片凭证
+	CheckBusinessUser:     "mp2c:checkBusinessUser:%s", //检测用户token是否有更新
+	BusinessCarbonHotCity: "business:carbon:hotcity",   //低碳场景中热门城市
+	BlackList:             "mp2c:blacklist",            //黑产白名单
+	EventLimit:            "mp2c:eventlimit",           //公益兑换限制
+	UserCarbonRank:        "user_carbon_rank:%s",       //排行榜
+	UserCarbonClassify:    "user_carbon_classify",      //碳分类
+	UserCarbonStep:        "user_carbon_step:%s",       //用户已经转化碳的步数
 }
