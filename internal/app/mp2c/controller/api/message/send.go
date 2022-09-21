@@ -2,8 +2,9 @@ package message
 
 import (
 	"github.com/gin-gonic/gin"
-	"mio/config"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	messageSrv "mio/internal/pkg/service/message"
+	"mio/internal/pkg/util/apiutil"
 )
 
 var DefaultMessageController = MessageController{}
@@ -27,13 +28,13 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 }
 
 func (MessageController) GetTemplateId(c *gin.Context) (gin.H, error) {
-	var TemplateIds []string
-	TemplateIds = append(TemplateIds, config.MessageTemplateIds.ChangePoint)
-	TemplateIds = append(TemplateIds, config.MessageTemplateIds.ChangePoint)
+	form := api_types.MessageGetTemplateIdForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
 	service := messageSrv.MessageService{}
-	service.GetTemplateId("oy_BA5IGl1JgkJKbD14wq_-Yorqw")
-
 	return gin.H{
-		"templateIds": TemplateIds,
+		"templateIds": service.GetTemplateId(user.OpenId, form.Scene),
 	}, nil
 }

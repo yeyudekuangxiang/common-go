@@ -65,21 +65,36 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 	return ret.ErrCode, nil
 }
 
-func (srv *MessageService) GetTemplateId(toUser string) {
-
+//GetTemplateId 根据场景获取模版id
+func (srv *MessageService) GetTemplateId(openid string, scene string) (templateIds []string) {
+	switch scene {
+	case "topic":
+		templateIds = append(templateIds, config.MessageTemplateIds.TopicPass, config.MessageTemplateIds.TopicCarefullyChosen)
+		break
+	case "platform":
+		templateIds = append(templateIds, config.MessageTemplateIds.ChangePoint, config.MessageTemplateIds.SignRemind, config.MessageTemplateIds.OrderDeliver)
+		srv.ExtensionSignTime(openid)
+		break
+	default:
+		break
+	}
+	return
 }
 
+//ExtensionSignTime 签到时间设置提醒时间
 func (srv MessageService) ExtensionSignTime(openId string) {
 	messageSignUserKey := config.RedisKey.MessageSignUser
 	add := time.Now().Add(24 * time.Hour).Unix()
 	app.Redis.ZIncrBy(contextRedis.Background(), messageSignUserKey, float64(add), openId)
 }
 
+//DelExtensionSignTime 删除用户签到提醒
 func (srv MessageService) DelExtensionSignTime(openid string) {
 	messageSignUser := config.RedisKey.MessageSignUser
 	app.Redis.ZRem(contextRedis.Background(), messageSignUser, openid)
 }
 
+//SendMessageToSignUser 给用户发送签到提醒
 func (srv MessageService) SendMessageToSignUser() {
 	messageSignUserKey := config.RedisKey.MessageSignUser
 	time := time.Now().Unix()
