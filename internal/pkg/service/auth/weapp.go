@@ -84,7 +84,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
 	}
-
+	user.IsNewUser = isNewUser
 	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
