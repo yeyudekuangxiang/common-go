@@ -13,10 +13,10 @@ type MessageController struct {
 
 func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 	b := messageSrv.MiniChangePointTemplate{
-		Point:    "222",
+		Point:    2222,
 		Source:   "222",
 		Time:     "2022年9月10日",
-		AllPoint: "222",
+		AllPoint: 333,
 	}
 	service := messageSrv.MessageService{}
 	code, err := service.SendMiniSubMessage("oy_BA5IGl1JgkJKbD14wq_-Yorqw", "index", b)

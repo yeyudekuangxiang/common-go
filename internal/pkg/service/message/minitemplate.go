@@ -3,6 +3,7 @@ package message
 import (
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
 	"mio/config"
+	"strconv"
 )
 
 type IMiniSubTemplate interface {
@@ -20,18 +21,18 @@ type IMiniSubTemplate interface {
 
 //MiniPointSendTemplate 积分变更
 type MiniChangePointTemplate struct {
-	Point    string `json:"point"`
+	Point    int64  `json:"point"`
 	Source   string `json:"source"`
 	Time     string `json:"time"`
-	AllPoint string `json:"tip"`
+	AllPoint int64  `json:"tip"`
 }
 
 func (m MiniChangePointTemplate) ToData() map[string]subscribemessage.SendValue {
 	return map[string]subscribemessage.SendValue{
-		"number1": {Value: m.Point}, //strconv.Itoa(m.Money)strconv.Atoi(m.Point)
+		"number1": {Value: strconv.FormatInt(m.Point, 10)}, //strconv.Itoa(m.Money)strconv.Atoi(m.Point)
 		"thing5":  {Value: m.Source},
 		"time2":   {Value: m.Time},
-		"number3": {Value: m.AllPoint},
+		"number3": {Value: strconv.FormatInt(m.AllPoint, 10)},
 	}
 }
 

@@ -2,10 +2,12 @@ package service
 
 import (
 	"errors"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
@@ -134,6 +136,24 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		if err != nil {
 			return err
 		}
+
+		//积分变动需要提醒的type
+
+		//var types = []entity.PointTransactionType{entity.POINT_STEP, entity.POINT_BIKE_RIDE, entity.POINT_COFFEE_CUP, entity.POINT_ECAR}
+
+		//发小程序订阅消息
+		message := messageSrv.MiniChangePointTemplate{
+			Point:    dto.ChangePoint,
+			Source:   dto.Type.Text(),
+			Time:     time.Now().Format("2006年01月02日"),
+			AllPoint: point.Balance,
+		}
+		service := messageSrv.MessageService{}
+		_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
+		if messageErr != nil {
+
+		}
+
 		//发完积分，更新邀请表发积分状态
 		if dto.InviteId != 0 && dto.Type == entity.POINT_INVITE {
 			//更新状态
