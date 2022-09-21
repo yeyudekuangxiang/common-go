@@ -85,13 +85,14 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 		return nil, errors.New("用户不存在")
 	}
 
-	method := scene.Key
+	method := scene.Ch
 	if form.Method != "" {
 		method = strings.ToLower(method) + "_" + strings.ToLower(form.Method)
 	}
 	t := entity.PlatformMethodMap[method]
 
 	value := entity.PointCollectValueMap[t]
+
 	_, err = service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      user.OpenId,
 		Type:        t,
