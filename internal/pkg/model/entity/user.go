@@ -67,7 +67,6 @@ type User struct {
 	CityCode     string       `json:"city_code"`
 	Status       int          `json:"status"` //0全部 1正常 2禁言 3封号 //暂时不用
 	Auth         int          `json:"auth"`   //发帖权限 0无权限 1有权限
-	IsNewUser    bool         `json:"isNewUser"`
 }
 
 func (u User) ShortUser() ShortUser {
