@@ -177,17 +177,30 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	return nil
 }
 
-// CheckLimit 充电检测
-func (srv StarChargeService) CheckChargeLimit(openId string) error {
-	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId).Where("coupon_type = ?", "star_charge")
-	count, err := repository.DefaultCouponHistoryRepository.FindCount(builder)
-	if err == nil {
-		//已经存在
+// CheckChargeLimit 充电检测
+func (srv StarChargeService) CheckChargeLimit(openId string, starTime, endTime string) error {
+	todayBuilder := repository.DefaultCouponHistoryRepository.RowBuilder()
+	todayBuilder.Where("open_id = ?", openId).
+		Where("coupon_type = ?", "star_charge").
+		Where("date(create_time) = CURRENT_DATE")
+	count, err := repository.DefaultCouponHistoryRepository.FindCount(todayBuilder)
+	if err != nil {
 		return err
 	}
-	if count != 0 {
-		return errors.New("每位用户限制领取一次")
+	if count >= 1 {
+		return errors.New("每日每位用户限制领取 1 次")
+	}
+	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
+	builder.Where("open_id = ?", openId).
+		Where("coupon_type = ?", "star_charge").
+		Where("create_time > ?", starTime).
+		Where("create_time < ?", endTime)
+	count, err = repository.DefaultCouponHistoryRepository.FindCount(builder)
+	if err != nil {
+		return err
+	}
+	if count >= 2 {
+		return errors.New("活动期间每位用户限制领取 2 次")
 	}
 	return nil
 }
