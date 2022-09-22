@@ -10,10 +10,6 @@ type GetQuestionSubjectDTO struct {
 	QuestionId int64
 }
 
-type GetQuestionOptionDTO struct {
-	SubjectIds []model.LongID
-}
-
 type GetQuestionUserDTO struct {
 	UserId     int64
 	OpenId     string
