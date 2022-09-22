@@ -7,8 +7,8 @@ import (
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"time"
@@ -328,7 +328,7 @@ func (srv PointService) trackPointChange(userId int64, value int) {
 		}
 		company := DefaultCompanyService.GetCompanyById(userInfo.BCompanyId)
 
-		service.DefaultZhuGeService().TrackBusinessPoints(srv_types.TrackBusinessPoints{
+		track.DefaultZhuGeService().TrackBusinessPoints(srv_types.TrackBusinessPoints{
 			Uid:        userInfo.Uid,
 			Value:      value,
 			ChangeType: util.Ternary(value > 0, "inc", "dec").String(),
