@@ -28,7 +28,7 @@ func (SubjectController) Create(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 	if user.PhoneNumber == "" {
-		return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
+		//return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
 	}
 	err := answerServer.Add(srv_types.AddQuestionAnswerDTO{
 		OpenId:     "oy_BA5EwNEwvfhNKHxucDBNOGDwY", //user.OpenId

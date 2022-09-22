@@ -155,33 +155,45 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	userGroup := ""
 	userGroupTips := ""
 	switch {
-	case carbon > 1500:
+	case carbon > 0 && carbon <= 2000000:
 		{
-			userGroup = "低碳环保人群"
-			userGroupTips = "希望您继续保持"
+			userGroup = "极致低碳"
+			userGroupTips = "健康地球，感谢有你"
 			break
 		}
-	case carbon > 1500 && carbon <= 4000:
+	case carbon > 2000000 && carbon <= 6000000:
 		{
-			userGroup = "低碳环保人群1"
-			userGroupTips = "希望您继续保持"
+			userGroup = "低碳环保"
+			userGroupTips = "希望您继续保持~~"
 			break
 		}
-	case carbon > 4000 && carbon <= 16000:
+	case carbon > 6000000 && carbon <= 12000000:
 		{
-			userGroup = "低碳环保人群2"
-			userGroupTips = "希望您继续保持"
+			userGroup = "地球消耗者"
+			userGroupTips = "情况严重，要赶快行动起来，减少排放啦"
+			break
+		}
+	case carbon > 12000000 && carbon <= 24000000:
+		{
+			userGroup = "地球破坏者"
+			userGroupTips = "你的状态有点危险，节能减排从我们做起"
 			break
 		}
 	default:
 		{
-			userGroup = "低碳环保人群3"
-			userGroupTips = "希望您继续保持"
 			break
 		}
 	}
-	compareWithCountry := "高于"
+
+	compareWithCountry := "低于"
 	compareWithGlobal := "低于"
+	if carbon > 6800000 {
+		compareWithCountry = "高于"
+	}
+	if carbon > 4400000 {
+		compareWithGlobal = "高于"
+	}
+
 	return srv_types.AddUserCarbonInfoDTO{
 		UserGroup:          userGroup, //属于用户群里
 		UserGroupTips:      userGroupTips,
