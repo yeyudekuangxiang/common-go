@@ -55,7 +55,7 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 		return -3, err
 	}
 	zhuGeAttr["错误码"] = ret.ErrCode
-	zhuGeAttr["错误信息"] = ret.GetResponseError().Error()
+	zhuGeAttr["错误信息"] = ret.ErrMSG
 	if ret.ErrCode != 43101 && ret.ErrCode != 0 {
 		app.Logger.Info("小程序订阅消息发送失败，业务层，模版%s，toUser%s，错误信息%s", template.TemplateId(), toUser, ret.GetResponseError().Error())
 		return ret.ErrCode, ret.GetResponseError()
