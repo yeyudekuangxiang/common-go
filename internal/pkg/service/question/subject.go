@@ -84,6 +84,7 @@ func (srv SubjectService) GetList(openid string, questionId int64) (gin.H, error
 			JumpSubject:    val.JumpSubject,
 			RelatedSubject: val.RelatedSubject,
 			Carbon:         val.Carbon,
+			SubjectId:      val.SubjectId,
 		})
 	}
 
