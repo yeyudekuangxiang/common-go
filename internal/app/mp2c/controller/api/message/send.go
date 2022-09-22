@@ -12,6 +12,8 @@ var DefaultMessageController = MessageController{}
 type MessageController struct {
 }
 
+//todo 给测试用
+
 func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 	b := messageSrv.MiniChangePointTemplate{
 		Point:    2222,
@@ -24,6 +26,17 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"code": code,
 		"err":  err,
+	}, nil
+}
+
+//todo 给测试用
+
+func (MessageController) SendSign(c *gin.Context) (gin.H, error) {
+	service := messageSrv.MessageService{}
+	service.SendMessageToSignUser()
+	return gin.H{
+		"code": 0,
+		"err":  nil,
 	}, nil
 }
 

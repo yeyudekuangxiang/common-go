@@ -9,6 +9,7 @@ import (
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/track"
+	"strconv"
 	"time"
 )
 
@@ -69,7 +70,7 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 func (srv *MessageService) GetTemplateId(openid string, scene string) (templateIds []string) {
 	redisTemplateKey := fmt.Sprintf(config.RedisKey.MessageLimitShow, scene, time.Now().Format("20060102"))
 	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
-	if showCount >= 10 {
+	if showCount >= 1 {
 		return []string{}
 	}
 	switch scene {
@@ -89,9 +90,8 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 
 //ExtensionSignTime 签到时间设置提醒时间
 func (srv MessageService) ExtensionSignTime(openId string) {
-	messageSignUserKey := config.RedisKey.MessageSignUser
 	add := time.Now().Add(24 * time.Hour).Unix()
-	app.Redis.ZIncrBy(contextRedis.Background(), messageSignUserKey, float64(add), openId)
+	app.Redis.ZAdd(contextRedis.Background(), config.RedisKey.MessageSignUser, &redis.Z{Score: float64(add), Member: openId})
 }
 
 //DelExtensionSignTime 删除用户签到提醒
@@ -105,7 +105,7 @@ func (srv MessageService) SendMessageToSignUser() {
 	messageSignUserKey := config.RedisKey.MessageSignUser
 	time := time.Now().Unix()
 	op := &redis.ZRangeBy{
-		Max:    string(time),
+		Max:    strconv.FormatInt(time, 10),
 		Min:    "0",
 		Offset: 0,    //类似sql的limit, 表示开始偏移量
 		Count:  5000, //默认一次跑5000条数据，因为是每10分钟跑一次，根据现在的日活，5000是可以的，后续可以增加或者进行分页处理
