@@ -9,7 +9,14 @@ type platformForm struct {
 }
 
 //金华行 核销参数
-type jhxUseCodeFrom struct {
+type jhxCommonForm struct {
+	Version string `json:"version,omitempty"`
+	Appid   string `json:"appid,omitempty"`
+	Nonce   int    `json:"nonce,omitempty"`
+	Sign    string `json:"sign,omitempty"`
+}
+type jhxUseCodeForm struct {
+	jhxCommonForm
 	TicketNo string `json:"ticket_no" form:"ticket_no" binding:"required"`
 	Status   string `json:"status" form:"status" binding:"required"`
 	UsedTime string `json:"used_time" form:"used_time"`

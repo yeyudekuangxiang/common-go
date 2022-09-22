@@ -11,7 +11,7 @@ type JhxController struct {
 }
 
 func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
-	form := jhxUseCodeFrom{}
+	form := jhxUseCodeForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}

@@ -75,6 +75,6 @@ func openRouter(router *gin.Engine) {
 		}
 		//外部平台跳转绿喵 不需要登陆
 		openRouter.POST("/sync/point", apiutil.Format(open.DefaultPlatformController.SyncPoint))
-		openRouter.POST("busticket/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //金华行 消费通知
+		openRouter.POST("/busticket/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //金华行 消费通知
 	}
 }
