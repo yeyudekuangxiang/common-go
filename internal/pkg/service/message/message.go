@@ -68,23 +68,27 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 
 //GetTemplateId 根据场景获取模版id
 func (srv *MessageService) GetTemplateId(openid string, scene string) (templateIds []string) {
-	redisTemplateKey := fmt.Sprintf(config.RedisKey.MessageLimitShow, scene, time.Now().Format("20060102"))
-	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
-	if showCount >= 1 {
-		return []string{}
-	}
+	var redisTemplateKey string
 	switch scene {
 	case "topic":
 		templateIds = append(templateIds, config.MessageTemplateIds.TopicPass, config.MessageTemplateIds.TopicCarefullyChosen)
+		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitTopicShow, time.Now().Format("20060102"))
 		break
 	case "platform":
 		templateIds = append(templateIds, config.MessageTemplateIds.ChangePoint, config.MessageTemplateIds.SignRemind, config.MessageTemplateIds.OrderDeliver)
+		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitPlatformShow, time.Now().Format("20060102"))
 		srv.ExtensionSignTime(openid)
 		break
 	default:
 		break
 	}
-	app.Redis.ZIncrBy(contextRedis.Background(), redisTemplateKey, 1, openid) //同一模板每人每天最多接收1条消息
+	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
+	if showCount >= 1 {
+		return []string{}
+	}
+	if redisTemplateKey != "" {
+		app.Redis.ZIncrBy(contextRedis.Background(), redisTemplateKey, 1, openid) //同一模板每人每天最多接收1条消息
+	}
 	return
 }
 

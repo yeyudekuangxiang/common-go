@@ -25,7 +25,9 @@ type redisKey struct {
 	MessageLimitByTemplate string
 	MessageLimitByUser     string
 	MessageSignUser        string
-	MessageLimitShow       string
+	MessageLimitTopicShow    string
+	MessageLimitPlatformShow string
+
 }
 
 var RedisKey = redisKey{
@@ -53,5 +55,6 @@ var RedisKey = redisKey{
 	MessageLimitByTemplate: "mp2c:message_limit_by_template:%s", //同一模板每人每天最多接收1条消息
 	MessageLimitByUser:     "mp2c:message_limit_by_user:%s",     //每人每天最多收到2个不同类型模板消息
 	MessageSignUser:        "mp2c:message_sign_user",            //小程序消息推送
-	MessageLimitShow:       "mp2c:message_limit_show:%s_%s",     //订阅消息每天弹出限制
+	MessageLimitPlatformShow: "mp2c:message_limit_platform_show:%s", //订阅消息每天弹出限制 平台普通
+	MessageLimitTopicShow:    "mp2c:message_limit_topic_show:%s",    //订阅消息每天弹出限制 帖子
 }
