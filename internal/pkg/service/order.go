@@ -18,6 +18,7 @@ import (
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	util2 "mio/internal/pkg/util"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/duiba/util"
@@ -392,7 +393,7 @@ func generateBadgeFromOrderItems(param submitOrderParam, user *entity.User, orde
 			} else {
 				zhuGeAttr["是否失败"] = "操作成功"
 			}
-			DefaultZhuGeService().Track(config.ZhuGeEventName.UserCertificateSendSuc, user.OpenId, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserCertificateSendSuc, user.OpenId, zhuGeAttr)
 		}
 	}
 }

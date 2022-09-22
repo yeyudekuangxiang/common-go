@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
+	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
@@ -259,6 +260,12 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 
 	default:
 		break
+	}
+
+	//如果是签到的活动，对该用户签到提醒延期处理，以防签到完，24小时之内，对用户再次提醒造成打扰
+	if activityId == "db_bd_704_qiandao" {
+		messageService := messageSrv.MessageService{}
+		messageService.ExtensionSignTime(userInfo.OpenId)
 	}
 
 	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()

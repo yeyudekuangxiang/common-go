@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
@@ -99,7 +100,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 }
 
 func (srv WeappService) ToZhuGe(openId string, attr map[string]interface{}, eventName string) {
-	go service.DefaultZhuGeService().Track(eventName, openId, attr)
+	go track.DefaultZhuGeService().Track(eventName, openId, attr)
 }
 
 func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {
