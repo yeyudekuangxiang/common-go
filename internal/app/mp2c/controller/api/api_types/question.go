@@ -39,10 +39,11 @@ type QuestionVo struct {
 }
 
 type QuestionOptionVO struct {
-	ID             int64   `json:"id"`
-	Title          string  `json:"title"`
-	Remind         string  `json:"remind"`
-	JumpSubject    int64   `json:"jumpSubject"`
-	RelatedSubject string  `json:"relatedSubject"`
-	Carbon         float64 `json:"carbon"`
+	ID             int64        `json:"id"`
+	Title          string       `json:"title"`
+	Remind         string       `json:"remind"`
+	JumpSubject    int64        `json:"jumpSubject"`
+	RelatedSubject string       `json:"relatedSubject"`
+	Carbon         float64      `json:"carbon"`
+	SubjectId      model.LongID `json:"subjectId"`
 }
