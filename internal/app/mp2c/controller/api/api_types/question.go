@@ -13,7 +13,7 @@ type GetQuestionSubjectCreateDTO struct {
 type GetQuestionTypeAnswer struct {
 	Id     model.LongID `json:"id"`
 	Answer string       `json:"answer"`
-	Carbon float64
+	Carbon float64      `json:"carbon"`
 }
 
 type QuestionListVo struct {
