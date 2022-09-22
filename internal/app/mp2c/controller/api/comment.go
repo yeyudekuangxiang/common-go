@@ -116,6 +116,9 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 
 func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
+	if user.Auth == 0 {
+		return gin.H{"comment": nil, "point": 0}, errors.New("无权限")
+	}
 	form := CommentCreateForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
@@ -139,6 +142,9 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
+	if user.Auth == 0 {
+		return gin.H{"comment": nil, "point": 0}, errors.New("无权限")
+	}
 	form := CommentEditForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err

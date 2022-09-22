@@ -177,13 +177,13 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 
 //CreateTopic 创建帖子
 func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
-	form := CreateTopicForm{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
 	user := apiutil.GetAuthUser(c)
 	if user.Auth != 1 {
 		return nil, errors.New("无权限")
+	}
+	form := CreateTopicForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
 	}
 	//创建帖子
 	topic, err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
@@ -197,15 +197,17 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
-	form := UpdateTopicForm{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
 	//user
 	user := apiutil.GetAuthUser(c)
 	if user.Auth != 1 {
 		return nil, errors.New("无权限")
 	}
+
+	form := UpdateTopicForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
 	//更新帖子
 	topic, err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
