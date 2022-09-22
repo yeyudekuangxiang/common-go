@@ -23,7 +23,9 @@ func apiRouter(router *gin.Engine) {
 
 	router.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
 	router.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
+	router.GET("/sendSign", apiutil.Format(message.DefaultMessageController.SendSign))
 	router.Any("/multipart", apiutil.Format(api.DefaultUploadController.MultipartUploadImage))
+
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
