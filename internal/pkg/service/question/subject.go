@@ -121,6 +121,7 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	if info.UserId == 0 {
 		return srv_types.AddUserCarbonInfoDTO{}, errors.New("未提交年度排放问卷")
 	}
+	info.UserId = 1570653152666181632
 	userId := info.UserId //1570653152666181632
 	//总碳量
 	carbon := srv.repoAnswer.GetUserCarbon(repotypes.GetQuestionUserCarbon{Uid: userId, QuestionId: dto.QuestionId})
