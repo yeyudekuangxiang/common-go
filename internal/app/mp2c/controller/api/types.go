@@ -180,3 +180,7 @@ type CommentEditForm struct {
 type ChangeCommentLikeForm struct {
 	CommentId int64 `json:"commentId" form:"commentId" binding:"required" alias:"评论id"`
 }
+
+type JinHuaXingForm struct {
+	Mobile string `json:"mobile" form:"mobile" binding:"required"`
+}

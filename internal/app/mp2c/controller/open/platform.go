@@ -74,7 +74,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	}
 
 	//check sign
-	if err := platformUtil.CheckSign(dst); err != nil {
+	if err := platformUtil.CheckSign(dst, ";"); err != nil {
 		app.Logger.Errorf("校验sign失败: %s", err.Error())
 		return nil, err
 	}
@@ -88,6 +88,9 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	method := scene.Ch
 	if form.Method != "" {
 		method = strings.ToLower(method) + "_" + strings.ToLower(form.Method)
+	}
+	if _, ok := entity.PlatformMethodMap[method]; !ok {
+		return nil, errors.New("未找到匹配方法")
 	}
 	t := entity.PlatformMethodMap[method]
 
