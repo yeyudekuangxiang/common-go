@@ -95,6 +95,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 //ExtensionSignTime 签到时间设置提醒时间
 func (srv MessageService) ExtensionSignTime(openId string) {
 	add := time.Now().Add(24 * time.Hour).Unix()
+	app.Redis.ZRem(contextRedis.Background(), config.RedisKey.MessageSignUser, openId)
 	app.Redis.ZAdd(contextRedis.Background(), config.RedisKey.MessageSignUser, &redis.Z{Score: float64(add), Member: openId})
 }
 
