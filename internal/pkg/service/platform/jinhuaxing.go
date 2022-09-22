@@ -2,6 +2,7 @@ package platform
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"mio/internal/pkg/core/context"
@@ -41,7 +42,10 @@ type commonRequest struct {
 }
 
 type senCouponResponse struct {
-	QrcodeStr string `json:"qrcodestr"`
+	Code int                    `json:"code"`
+	Msg  string                 `json:"msg"`
+	Time string                 `json:"time"`
+	Data map[string]interface{} `json:"data"`
 }
 
 func (srv JinHuaXingService) SendCoupon(tradeno, mobile string) error {
@@ -62,7 +66,10 @@ func (srv JinHuaXingService) SendCoupon(tradeno, mobile string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s\n", response)
+	if response.Code != 0 {
+		return errors.New(response.Msg)
+	}
+	fmt.Printf("%v\n", response)
 	return nil
 }
 

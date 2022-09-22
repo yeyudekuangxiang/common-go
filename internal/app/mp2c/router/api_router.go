@@ -222,9 +222,8 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.POST("/coupon/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
 		//第三方
 		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(api.DefaultRecycleController.GetOolaKey))
-
 		//金华行发放优惠券
-		mustAuthRouter.POST("/jinhuaxing/send-coupon", apiutil.Format(api.DefaultJinHuaXingController.SendCoupon))
+		//mustAuthRouter.POST("/jinhuaxing/send-coupon", apiutil.Format(api.DefaultJinHuaXingController.SendCoupon))
 
 		//碳成就相关路由
 		carbonRouter := mustAuthRouter.Group("/carbon")

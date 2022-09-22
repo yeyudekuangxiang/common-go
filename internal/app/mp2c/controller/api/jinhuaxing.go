@@ -14,7 +14,6 @@ type JinHuaXingController struct {
 
 func (ctr *JinHuaXingController) SendCoupon(ctx *gin.Context) (gin.H, error) {
 	form := JinHuaXingForm{}
-
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
