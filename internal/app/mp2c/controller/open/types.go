@@ -7,3 +7,10 @@ type platform struct {
 	Mobile      string `json:"mobile,omitempty" form:"mobile"`
 	Sign        string `json:"sign,omitempty" form:"sign"`
 }
+
+//金华行 核销参数
+type JhxUseCode struct {
+	TicketNo string `json:"ticket_no" form:"ticket_no" binding:"required"`
+	Status   string `json:"status" form:"status" binding:"required"`
+	UsedTime string `json:"used_time" form:"used_time"`
+}
