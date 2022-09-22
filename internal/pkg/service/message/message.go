@@ -83,7 +83,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		break
 	}
 	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
-	if showCount >= 1 {
+	if showCount >= 100 {
 		return []string{}
 	}
 	if redisTemplateKey != "" {
