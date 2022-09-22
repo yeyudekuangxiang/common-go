@@ -1,6 +1,6 @@
 package open
 
-type platform struct {
+type platformForm struct {
 	PlatformKey string `json:"platformKey" form:"platformKey"`
 	MemberId    string `json:"memberId,omitempty" form:"memberId"`
 	Method      string `json:"method,omitempty" form:"method"`
@@ -9,7 +9,7 @@ type platform struct {
 }
 
 //金华行 核销参数
-type JhxUseCode struct {
+type jhxUseCodeFrom struct {
 	TicketNo string `json:"ticket_no" form:"ticket_no" binding:"required"`
 	Status   string `json:"status" form:"status" binding:"required"`
 	UsedTime string `json:"used_time" form:"used_time"`

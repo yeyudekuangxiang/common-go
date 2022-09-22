@@ -63,10 +63,10 @@ func openRouter(router *gin.Engine) {
 		openRouter.Any("/gitlab/webhook", apiutil.Format(open.DefaultGitlabController.WebHook))
 		//绿喵跳转外部平台
 		//订单同步接口 （星星充电、快电）
-		openRouter.GET("/charge/push", apiutil.Format(api.DefaultChargeController.Push))
+		openRouter.GET("/charge/push", apiutil.Format(open.DefaultChargeController.Push))
 		//噢啦\飞蚂蚁旧物回收 订单同步接口
-		openRouter.POST("/recycle/oola", apiutil.Format(api.DefaultRecycleController.OolaOrderSync))
-		openRouter.POST("/recycle/fmy", apiutil.Format(api.DefaultRecycleController.FmyOrderSync))
+		openRouter.POST("/recycle/oola", apiutil.Format(open.DefaultRecycleController.OolaOrderSync))
+		openRouter.POST("/recycle/fmy", apiutil.Format(open.DefaultRecycleController.FmyOrderSync))
 
 		//外部平台跳转绿喵 需要登陆
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
@@ -75,6 +75,6 @@ func openRouter(router *gin.Engine) {
 		}
 		//外部平台跳转绿喵 不需要登陆
 		openRouter.POST("/sync/point", apiutil.Format(open.DefaultPlatformController.SyncPoint))
-		openRouter.POST("busticket/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify))
+		openRouter.POST("busticket/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //金华行 消费通知
 	}
 }

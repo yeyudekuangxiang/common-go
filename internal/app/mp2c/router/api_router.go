@@ -12,6 +12,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
+	"mio/internal/app/mp2c/controller/open"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -66,8 +67,8 @@ func apiRouter(router *gin.Engine) {
 		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
 		authRouter.Any("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
 		//星星发券接口限制
-		authRouter.POST("/set-exception", apiutil.Format(api.DefaultChargeController.SetException))
-		authRouter.POST("/del-exception", apiutil.Format(api.DefaultChargeController.DelException))
+		authRouter.POST("/set-exception", apiutil.Format(open.DefaultChargeController.SetException))
+		authRouter.POST("/del-exception", apiutil.Format(open.DefaultChargeController.DelException))
 	}
 
 	//必须登陆的路由
@@ -221,7 +222,8 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 		mustAuthRouter.POST("/coupon/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
 		//第三方
-		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(api.DefaultRecycleController.GetOolaKey))
+		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))
+		mustAuthRouter.POST("/jhx/", apiutil.Format(open.DefaultRecycleController.GetOolaKey))
 
 		//星星充电发放优惠券
 		//mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))

@@ -1,15 +1,17 @@
-package api
+package open
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	platformService "mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -27,7 +29,7 @@ type RecycleController struct {
 
 func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	// type oola
-	form := RecyclePushForm{}
+	form := api.RecyclePushForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -50,7 +52,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 
 	//new RecycleService
 	ctx := context.NewMioContext()
-	RecycleService := service.NewRecycleService(ctx)
+	RecycleService := platformService.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
 	//校验sign
@@ -150,7 +152,7 @@ func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
 
 func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	// type fmy
-	form := RecycleFmyForm{}
+	form := api.RecycleFmyForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -164,7 +166,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("渠道查询失败")
 	}
 
-	dst := service.FmySignParams{}
+	dst := platformService.FmySignParams{}
 	err := util.MapTo(&form, &dst)
 	if err != nil {
 		return nil, err
@@ -172,7 +174,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	//new RecycleService
 	ctx := context.NewMioContext()
-	RecycleService := service.NewRecycleService(ctx)
+	RecycleService := platformService.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
 	//校验sign
