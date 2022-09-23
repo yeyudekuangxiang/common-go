@@ -2,6 +2,8 @@ package {{.PkgName}}
 
 import (
 	"net/http"
+	"{{.projectPath}}/common/result"
+	"{{.projectPath}}/common/tool/api"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	{{.ImportPackages}}
