@@ -221,12 +221,12 @@ func apiRouter(router *gin.Engine) {
 		//兑换券相关
 		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
 		mustAuthRouter.POST("/coupon/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
-		//第三方
-		mustAuthRouter.GET("/platform/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))
-		mustAuthRouter.POST("/jhx/", apiutil.Format(open.DefaultRecycleController.GetOolaKey))
-
-		//星星充电发放优惠券
-		//mustAuthRouter.GET("/charge/send-coupon", apiutil.Format(api.DefaultChargeController.SendCoupon))
+		//获取第三方数据
+		platformRouter := mustAuthRouter.Group("/platform")
+		{
+			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))           //获取oolaKey
+			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultRecycleController.GetOolaKey)) //金华行-发码
+		}
 
 		//碳成就相关路由
 		carbonRouter := mustAuthRouter.Group("/carbon")

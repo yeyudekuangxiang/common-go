@@ -68,12 +68,12 @@ func openRouter(router *gin.Engine) {
 		openRouter.POST("/recycle/oola", apiutil.Format(open.DefaultRecycleController.OolaOrderSync))
 		openRouter.POST("/recycle/fmy", apiutil.Format(open.DefaultRecycleController.FmyOrderSync))
 
-		//外部平台跳转绿喵 需要登陆
+		//外部平台调绿喵 需要登陆
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
 		{
 			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 		}
-		//外部平台跳转绿喵 不需要登陆
+		//外部平台调绿喵 不需要登陆
 		openRouter.POST("/sync/point", apiutil.Format(open.DefaultPlatformController.SyncPoint))
 		openRouter.POST("/busticket/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //金华行 消费通知
 	}

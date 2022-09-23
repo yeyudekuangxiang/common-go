@@ -19,7 +19,7 @@ type recycleFmyData struct {
 	Phone            string `json:"phone,omitempty"`
 }
 
-type OolaSignParams struct {
+type oolaSignParams struct {
 	Type                int    `json:"type" form:"type" binding:"required"`                     //业务类型 1：回首订单成功
 	OrderNo             string `json:"orderNo" form:"orderNo" binding:"required"`               //订单号，同类型同订单视为重复订单
 	Name                string `json:"name" form:"name" binding:"required"`                     //type = 1，回收物品名称
@@ -33,19 +33,19 @@ type OolaSignParams struct {
 	//Sign                string `json:"sign" form:"sign" binding:"required"`                     //加密串
 }
 
-type CcRingReqParams struct {
+type ccRingReqParams struct {
 	MemberId       string  `json:"memberId"`
 	DegreeOfCharge float64 `json:"degreeOfCharge"`
 }
 
-type StarChargeResponse struct {
+type starChargeResponse struct {
 	Ret  int    `json:"Ret"`
 	Msg  string `json:"Msg"`
 	Data string `json:"Data"`
 	Sig  string `json:"Sig"`
 }
 
-type StarChargeAccessResult struct {
+type starChargeAccessResult struct {
 	OperatorID         string `json:"operatorID,omitempty"`
 	SucStat            int    `json:"sucStat,omitempty"`
 	AccessToken        string `json:"accessToken,omitempty"`
@@ -53,9 +53,26 @@ type StarChargeAccessResult struct {
 	FailReason         int    `json:"failReason,omitempty"`
 }
 
-type StarChargeProvideResult struct {
+type starChargeProvideResult struct {
 	SuccStat      int    `json:"succStat,omitempty"`
 	FailReason    int    `json:"failReason,omitempty"`
 	FailReasonMsg string `json:"failReasonMsg,omitempty"`
 	CouponCode    string `json:"couponCode,omitempty"`
+}
+
+type jhxCommonResponse struct {
+	Code int                    `json:"code"`
+	Msg  string                 `json:"msg"`
+	Time string                 `json:"time"`
+	Data map[string]interface{} `json:"data"`
+}
+
+type jhxTicketCreateResponse struct {
+	QrCodeStr string `json:"qrcodestr" form:"qrcodestr"`
+}
+
+type jhxTicketStatusResponse struct {
+	TicketNo string `json:"ticket_no" form:"ticket_no"`
+	Status   string `json:"status" form:"status"`
+	UsedTime string `json:"used_time" form:"used_time"`
 }

@@ -22,7 +22,7 @@ func (c ccRing) CallBack(userInfo *entity.User, degree float64, platformKey stri
 	if sceneUser.ID != 0 {
 		url := scene.Domain + "/api/cc-ring/external/ev-charge"
 		authToken := httputil.HttpWithHeader("Authorization", "dsaflsdkfjxcmvoxiu123moicuvhoi123")
-		queryParams := CcRingReqParams{
+		queryParams := ccRingReqParams{
 			MemberId:       sceneUser.PlatformUserId,
 			DegreeOfCharge: degree,
 		}
