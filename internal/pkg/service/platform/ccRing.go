@@ -17,9 +17,9 @@ type ccRing struct {
 }
 
 //回调ccring
-func (c ccRing) CallBack(userInfo *entity.User, degree float64, platformKey string, scene *entity.BdScene) {
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUser(userInfo.OpenId, platformKey)
-	if sceneUser.ID != 0 {
+func (c ccRing) CallBack(userInfo *entity.User, degree float64, scene *entity.BdScene) {
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
+	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
 		url := scene.Domain + "/api/cc-ring/external/ev-charge"
 		authToken := httputil.HttpWithHeader("Authorization", "dsaflsdkfjxcmvoxiu123moicuvhoi123")
 		queryParams := ccRingReqParams{
