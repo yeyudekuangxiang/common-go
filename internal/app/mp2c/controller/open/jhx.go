@@ -48,14 +48,54 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	params := make(map[string]string, 0)
-	sign := params["sign"]
-	delete(params, "sign")
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
+	sign := params["sign"]
+	delete(params, "sign")
 	jhxService := platform.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
+	form := jhxCollectRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := params["sign"]
+	delete(params, "sign")
+	jhxService := platform.NewJhxService(context.NewMioContext())
+	err = jhxService.PreCollectPoint(sign, params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
+	form := jhxCollectRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := params["sign"]
+	delete(params, "sign")
+	jhxService := platform.NewJhxService(context.NewMioContext())
+	err = jhxService.PreCollectPoint(sign, params)
 	if err != nil {
 		return nil, err
 	}

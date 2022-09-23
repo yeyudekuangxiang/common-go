@@ -26,3 +26,8 @@ type jhxTicketNotifyRequest struct {
 type jhxTicketStatusRequest struct {
 	Tradeno string `json:"tradeno" form:"tradeno" binding:"required"`
 }
+
+type jhxCollectRequest struct {
+	jhxCommonRequest
+	MemberId string `json:"memberId"`
+}
