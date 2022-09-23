@@ -130,9 +130,16 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			fmt.Println("charge 加碳失败", form)
 		}
 	}
-	////绿喵回调第三方
-	//ccRingService := platform.NewCCRingService()
-	//go ccRingService.CallBack(userInfo, thisPoint0, scene.Ch, scene)
+
+	//绿喵回调第三方
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
+	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
+		ccRingService := platform.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", "/api/cc-ring/external/ev-charge",
+			platform.WithCCRingMemberId(sceneUser.PlatformUserId),
+			platform.WithCCRingDegreeOfCharge(thisPoint0),
+		)
+		go ccRingService.CallBack()
+	}
 	//发券
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil

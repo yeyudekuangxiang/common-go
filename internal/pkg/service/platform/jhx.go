@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-type Option struct {
+type jhxOption struct {
 	Domain    string
 	AppId     string
 	Version   string
@@ -24,10 +24,10 @@ type Option struct {
 	Nonce     string
 }
 
-type JhxOptions func(options *Option)
+type JhxOptions func(options *jhxOption)
 
 func NewJhxService(ctx *context.MioContext, jhxOptions ...JhxOptions) *JhxService {
-	options := &Option{
+	options := &jhxOption{
 		Domain:    "http://m.jinhuaxing.com.cn/api",
 		AppId:     "2498728d209d",
 		Version:   "1.0",
@@ -47,29 +47,29 @@ func NewJhxService(ctx *context.MioContext, jhxOptions ...JhxOptions) *JhxServic
 
 type JhxService struct {
 	ctx    *context.MioContext
-	option *Option
+	option *jhxOption
 }
 
-func (srv JhxService) WithDomain(domain string) JhxOptions {
-	return func(option *Option) {
+func WithJhxDomain(domain string) JhxOptions {
+	return func(option *jhxOption) {
 		option.Domain = domain
 	}
 }
 
-func (srv JhxService) WithAppId(appId string) JhxOptions {
-	return func(option *Option) {
+func WithJhxAppId(appId string) JhxOptions {
+	return func(option *jhxOption) {
 		option.AppId = appId
 	}
 }
 
-func (srv JhxService) WithTimestamp(timestamp string) JhxOptions {
-	return func(option *Option) {
+func WithJhxTimestamp(timestamp string) JhxOptions {
+	return func(option *jhxOption) {
 		option.Timestamp = timestamp
 	}
 }
 
-func (srv JhxService) WithNonce(nonce string) JhxOptions {
-	return func(option *Option) {
+func WithJhxNonce(nonce string) JhxOptions {
+	return func(option *jhxOption) {
 		option.Nonce = nonce
 	}
 }
@@ -101,7 +101,7 @@ func (srv JhxService) TicketCreate(tradeno string, user entity.User) error {
 	//if err != nil {
 	//	return err
 	//}
-	//入库
+	// todo 入库
 	//ticketCreateResponse.QrCodeStr
 	fmt.Printf("%v\n", response)
 	return nil

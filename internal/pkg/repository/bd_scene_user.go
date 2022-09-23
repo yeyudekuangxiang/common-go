@@ -33,6 +33,17 @@ func (repo BdSceneUserRepository) FindPlatformUser(openId, platformKey string) e
 	return item
 }
 
+func (repo BdSceneUserRepository) FindPlatformUserByOpenId(openId string) entity.BdSceneUser {
+	item := entity.BdSceneUser{}
+	err := repo.DB.
+		Where("open_id", openId).
+		First(&item).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return item
+}
+
 func (repo BdSceneUserRepository) Create(data *entity.BdSceneUser) error {
 	return repo.DB.Model(&entity.BdSceneUser{}).Create(data).Error
 }

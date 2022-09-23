@@ -19,7 +19,6 @@ import (
 	"mio/pkg/platform"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var DefaultRecycleController = RecycleController{}
@@ -67,15 +66,12 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrUserNotFound
 	}
 
-	//避开重放
-	if !util.DefaultLock.Lock(form.Type+form.OrderNo, 24*3600*30*time.Second) {
+	//查重
+	if err = RecycleService.CheckOrder(userInfo.OpenId, "oola"+"#"+form.OrderNo); err != nil {
 		fmt.Println("charge 重复提交订单", form)
 		app.Logger.Info("charge 重复提交订单", form)
 		return nil, errors.New("重复提交订单")
 	}
-	//if err = RecycleService.CheckOrder(userInfo.OpenId, form.OrderNo); err != nil {
-	//	return nil, err
-	//}
 
 	//匹配大类型
 	typeName := RecycleService.GetType(form.ProductCategoryName)
@@ -108,7 +104,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		ChangePoint:  point,
 		BizId:        util.UUID(),
 		AdditionInfo: form.OrderNo + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
-		Note:         form.OrderNo,
+		Note:         "oola" + "#" + form.OrderNo,
 	})
 	if err != nil {
 		fmt.Println("oola 旧物回收 加积分失败 ", form)
@@ -126,6 +122,17 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Ip:      "",
 	})
 	println(carbon)
+	//绿喵回调ccring
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
+	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
+		ccRingService := platformService.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", "/api/cc-ring/external/recycle",
+			platformService.WithCCRingMemberId(sceneUser.PlatformUserId),
+			platformService.WithCCRingProductCategoryName(form.ProductCategoryName),
+			platformService.WithCCRingName(form.Name),
+			platformService.WithCCRingQua(form.Qua),
+		)
+		go ccRingService.CallBack()
+	}
 	return gin.H{}, nil
 }
 
