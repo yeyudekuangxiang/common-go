@@ -17,9 +17,14 @@ type ccRing struct {
 }
 
 //回调ccring
-func (c ccRing) CallBack(userInfo *entity.User, degree float64, scene *entity.BdScene) {
+func (c ccRing) CallBack(userInfo *entity.User, degree float64) {
 	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
 	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
+		scene := repository.DefaultBdSceneRepository.FindByCh("ccring")
+		if scene.ID == 0 {
+			app.Logger.Errorf("回调光环错误:%s", "未设置scene")
+			return
+		}
 		url := scene.Domain + "/api/cc-ring/external/ev-charge"
 		authToken := httputil.HttpWithHeader("Authorization", "dsaflsdkfjxcmvoxiu123moicuvhoi123")
 		queryParams := ccRingReqParams{
@@ -29,6 +34,8 @@ func (c ccRing) CallBack(userInfo *entity.User, degree float64, scene *entity.Bd
 		_, err := httputil.PostJson(url, queryParams, authToken)
 		if err != nil {
 			app.Logger.Errorf("回调光环错误:%s", err.Error())
+			return
 		}
+		return
 	}
 }

@@ -132,7 +132,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 	//绿喵回调第三方
 	ccRingService := platform.NewCCRingService()
-	go ccRingService.CallBack(userInfo, thisPoint0, scene)
+	go ccRingService.CallBack(userInfo, thisPoint0)
 	//发券
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
