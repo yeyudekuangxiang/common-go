@@ -77,6 +77,7 @@ func (repo AnswerRepository) GetUserCarbon(by repotypes.GetQuestionUserCarbon) f
 	if by.Uid != 0 {
 		db.Where("user_id", by.Uid)
 	}
+	db.Where("is_delete", 0)
 	db.Select("sum(carbon) as carbon")
 	if err := db.Take(&sum).Error; err != nil {
 		panic(err)
@@ -95,7 +96,7 @@ func (repo AnswerRepository) GetUserAnswer(by repotypes.GetQuestionUserCarbon) [
 	if by.Uid != 0 {
 		db.Where("question_answer.user_id", by.Uid)
 	}
-	//	db.Where("is_delete", 0)
+	db.Where("is_delete", 0)
 	db.Select("category_id,sum(carbon) as carbon")
 	db.Group("category_id")
 	if err := db.Find(&list).Error; err != nil {
