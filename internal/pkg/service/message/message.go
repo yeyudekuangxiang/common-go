@@ -20,7 +20,7 @@ type MessageService struct {
 func (srv *MessageService) SendMiniSubMessage(toUser string, page string, template IMiniSubTemplate) (int, error) {
 	zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
 	zhuGeAttr["openid"] = toUser
-	redisTemplateKey := fmt.Sprintf(config.RedisKey.MessageLimitByTemplate, time.Now().Format("20060102"))
+	redisTemplateKey := fmt.Sprintf(config.RedisKey.MessageLimitByTemplate, template.TemplateId(), time.Now().Format("20060102"))
 	redisUserKey := fmt.Sprintf(config.RedisKey.MessageLimitByUser, time.Now().Format("20060102"))
 
 	defer track.DefaultZhuGeService().Track(config.ZhuGeEventName.MessageMiniSubscribe, toUser, zhuGeAttr)
@@ -95,6 +95,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 //ExtensionSignTime 签到时间设置提醒时间
 func (srv MessageService) ExtensionSignTime(openId string) {
 	add := time.Now().Add(24 * time.Hour).Unix()
+	app.Redis.ZRem(contextRedis.Background(), config.RedisKey.MessageSignUser, openId)
 	app.Redis.ZAdd(contextRedis.Background(), config.RedisKey.MessageSignUser, &redis.Z{Score: float64(add), Member: openId})
 }
 
