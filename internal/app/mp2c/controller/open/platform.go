@@ -22,7 +22,7 @@ type PlatformController struct {
 
 func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, error) {
 	//接收参数 platformKey, phone
-	form := platform{}
+	form := platformForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -54,8 +54,7 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 }
 
 func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
-	form := platform{}
-
+	form := platformForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}

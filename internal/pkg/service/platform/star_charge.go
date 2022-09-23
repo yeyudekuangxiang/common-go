@@ -1,4 +1,4 @@
-package service
+package platform
 
 import (
 	"encoding/json"
@@ -89,7 +89,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 		return "", err
 	}
 	//response
-	signResponse := StarChargeResponse{}
+	signResponse := starChargeResponse{}
 	err = json.Unmarshal(body, &signResponse)
 	if err != nil {
 		return "", err
@@ -98,7 +98,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 		return "", errors.New("请求错误")
 	}
 	//result.data解密
-	accessResult := StarChargeAccessResult{}
+	accessResult := starChargeAccessResult{}
 	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
@@ -146,7 +146,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		return err
 	}
 	// response
-	provideResponse := StarChargeResponse{}
+	provideResponse := starChargeResponse{}
 	err = json.Unmarshal(body, &provideResponse)
 	if err != nil {
 		return err
@@ -155,7 +155,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		return errors.New(provideResponse.Msg)
 	}
 	// result.data解密
-	provideResult := StarChargeProvideResult{}
+	provideResult := starChargeProvideResult{}
 	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
 	if provideResult.SuccStat != 0 {

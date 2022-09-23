@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -33,7 +34,7 @@ func (s StarChargeController) SendCoupon(ctx *gin.Context) (gin.H, error) {
 	if user.PhoneNumber == "" {
 		return nil, errors.New("用户未绑定手机号")
 	}
-	starChargeService := service.NewStarChargeService(context.NewMioContext())
+	starChargeService := platform.NewStarChargeService(context.NewMioContext())
 	token, err := starChargeService.GetAccessToken()
 	if err != nil {
 		return nil, err

@@ -1,10 +1,11 @@
-package api
+package open
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -25,7 +26,7 @@ type ChargeController struct {
 }
 
 func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
-	form := GetChargeForm{}
+	form := api.GetChargeForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("charge/push 参数错误: %s", form)
 		return nil, err
@@ -51,19 +52,13 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	//避开重放
-	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
-	}
-
 	//通过手机号查询用户
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
 		Mobile: form.Mobile,
 		Source: entity.UserSourceMio,
 	})
 
+	//用户验证
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
 		return nil, errors.New("未找到用户")
@@ -74,6 +69,31 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		fmt.Println("用户风险等级过高 ", form)
 		return nil, errors.New("账户风险等级过高")
 	}
+
+	//查重
+	transService := service.NewPointTransactionService(ctx)
+	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
+
+	by, err := transService.FindBy(repository.FindPointTransactionBy{
+		OpenId: userInfo.OpenId,
+		Type:   string(typeString),
+		Note:   form.Ch + "#" + form.OutTradeNo,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if by.ID != 0 {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
+	}
+
+	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
+	//	fmt.Println("charge 重复提交订单", form)
+	//	app.Logger.Info("charge 重复提交订单", form)
+	//	return nil, errors.New("重复提交订单")
+	//}
 
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
@@ -98,14 +118,14 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
 
 	//加积分
-	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 	pointService := service.NewPointService(ctx)
-	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         typeString,
 		ChangePoint:  int64(thisPoint),
 		BizId:        util.UUID(),
 		AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+		Note:         form.Ch + "#" + form.OutTradeNo,
 	})
 	if err != nil {
 		fmt.Println("charge 加积分失败 ", form)
@@ -138,7 +158,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
-	form := ChangeChargeExceptionForm{}
+	form := api.ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -151,7 +171,7 @@ func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
-	form := ChangeChargeExceptionForm{}
+	form := api.ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -160,13 +180,14 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+//调用星星充电
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
 	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 {
 		fmt.Println("星星充电 发券start")
 		startTime, _ := time.Parse("2006-01-02", "2022-09-24")
 		endTime, _ := time.Parse("2006-01-02", "2022-10-1")
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := service.NewStarChargeService(ctx)
+			starChargeService := platform.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
 				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())

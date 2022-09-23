@@ -1,4 +1,4 @@
-package service
+package platform
 
 import (
 	"encoding/json"
@@ -235,14 +235,11 @@ func (srv RecycleService) getCo2(typeName string, number float64) float64 {
 }
 
 func (srv RecycleService) checkOrder(openId, orderNo string) error {
-	transactionService := NewPointTransactionService(srv.ctx)
-	one, err := transactionService.FindBy(repository.FindPointTransactionBy{
+	pointTransactionRepository := repository.NewPointTransactionRepository(srv.ctx)
+	one := pointTransactionRepository.FindBy(repository.FindPointTransactionBy{
 		OpenId: openId,
 		Note:   orderNo,
 	})
-	if err != nil {
-		return err
-	}
 	if one.ID != 0 {
 		return errors.New("重复订单")
 	}

@@ -3,7 +3,7 @@ package platform
 import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/httputil"
 )
 
@@ -18,7 +18,7 @@ type ccRing struct {
 
 //回调ccring
 func (c ccRing) CallBack(userInfo *entity.User, degree float64, platformKey string, scene *entity.BdScene) {
-	sceneUser := service.DefaultBdSceneUserService.FindPlatformUser(userInfo.OpenId, platformKey)
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUser(userInfo.OpenId, platformKey)
 	if sceneUser.ID != 0 {
 		url := scene.Domain + "/api/cc-ring/external/ev-charge"
 		authToken := httputil.HttpWithHeader("Authorization", "dsaflsdkfjxcmvoxiu123moicuvhoi123")
