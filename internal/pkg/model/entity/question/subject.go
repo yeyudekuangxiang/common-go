@@ -36,15 +36,15 @@ func (p QuestionCategoryType) Text() string {
 func (p QuestionCategoryType) DescText() string {
 	switch p {
 	case CATEGORY_CLOTHES:
-		return "衣1"
+		return "小贴士：选择天然材质，提高衣物的使用率，回收利用，减少碳排放"
 	case CATEGORY_FOOD:
-		return "食2"
+		return "小贴士：我国每年的粮食浪费导致近5000万吨的二氧化碳排放。节约粮食，光盘行动势在必行"
 	case CATEGORY_LIVE:
-		return "住3"
+		return "小贴士：节水节电，减少煤气等能源过度使用，可减少碳排放"
 	case CATEGORY_USE:
-		return "用4"
+		return "小贴士：减少一次性制品、洗发水等物品的使用，将有效降低碳排放"
 	case CATEGORY_WALK:
-		return "行4"
+		return "小贴士：一天不开车，按上下班来回共10公里及每1公升汽油行驶10公里估算，可以减碳2240克"
 	}
 	return "未知"
 }
