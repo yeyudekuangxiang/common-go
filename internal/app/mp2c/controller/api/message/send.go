@@ -22,7 +22,7 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 		AllPoint: 333,
 	}
 	service := messageSrv.MessageService{}
-	code, err := service.SendMiniSubMessage("oy_BA5IGl1JgkJKbD14wq_-Yorqw", "index", b)
+	code, err := service.SendMiniSubMessage("oy_BA5Nwkt6hzECxIXwNYkhLyzSs", "index", b)
 	return gin.H{
 		"code": code,
 		"err":  err,
