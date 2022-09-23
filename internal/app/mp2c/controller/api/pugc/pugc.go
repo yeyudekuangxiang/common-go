@@ -4868,6 +4868,9 @@ func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
 	var option []questionEntity.Option
 	var subject []questionEntity.Subject
 	for i, row := range rows {
+		if len(row) == 0 {
+			break
+		}
 		if i == 0 {
 			continue
 		}
@@ -4876,9 +4879,9 @@ func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
 			return nil, nil
 		}
 		var typeSub int8 = 1
-		cate, _ := strconv.ParseInt(row[1], 10, 64)
+		cate, _ := strconv.ParseInt(row[0], 10, 64)
 		subject = append(subject, questionEntity.Subject{
-			Title:      row[2],
+			Title:      row[1],
 			Remind:     "",
 			Type:       typeSub,
 			IsHide:     0,
@@ -4886,13 +4889,21 @@ func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
 			CategoryId: questionEntity.QuestionCategoryType(cate),
 			SubjectId:  model.LongID(id.Int64()),
 		})
-		for i := 3; i < len(row); i++ {
+		q := 1
+		for i := 2; i < len(row); i++ {
+			q++
 			if row[i] == "" {
 				break
 			}
+			if q%2 != 0 {
+				continue
+			}
+			j := i + 1
+			qq, _ := strconv.ParseFloat(row[j], 10)
 			option = append(option, questionEntity.Option{
 				Title:     row[i],
 				SubjectId: model.LongID(id),
+				Carbon:    qq,
 			})
 		}
 	}

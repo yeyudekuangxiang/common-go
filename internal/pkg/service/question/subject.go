@@ -148,7 +148,7 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	carbonDayFloat, _ := carbonDay.Float64()
 
 	//碳中和完成度
-	completion := ""
+	completion := "0"
 	carbonTodayDes := decimal.NewFromFloat(carbonToday)
 	if !carbonDay.IsZero() {
 		completion = carbonTodayDes.Div(carbonDay).Round(2).String()
@@ -203,7 +203,7 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 		CarbonToday:        util.CarbonToRate(carbonToday),    //今日碳量
 		CarbonClassify:     userCarbonClassify,                //用户碳量分类汇总
 		CarbonDay:          util.CarbonToRate(carbonDayFloat), //日均排放
-		CarbonCompletion:   completion,                        //碳中和完成度
+		CarbonCompletion:   completion + "%",                  //碳中和完成度
 		CompareWithCountry: compareWithCountry,
 		CompareWithGlobal:  compareWithGlobal,
 	}, nil
