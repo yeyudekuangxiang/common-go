@@ -192,7 +192,7 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
 	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 {
 		fmt.Println("星星充电 发券start")
-		startTime, _ := time.Parse("2006-01-02", "2022-09-23")
+		startTime, _ := time.Parse("2006-01-02", "2022-09-24")
 		endTime, _ := time.Parse("2006-01-02", "2022-10-01")
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
 			starChargeService := platform.NewStarChargeService(ctx)
