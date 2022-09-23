@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/track"
@@ -33,13 +32,13 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 	if templateSendCount >= 1 {
 		zhuGeAttr["错误码"] = -1
 		zhuGeAttr["错误信息"] = "同一模板每人每天最多接收1条消息"
-		return -1, errors.New("同一模板每人每天最多接收1条消息")
+		//return -1, errors.New("同一模板每人每天最多接收1条消息")
 	}
 
 	if userSendCount >= 2 {
 		zhuGeAttr["错误码"] = -2
 		zhuGeAttr["错误信息"] = "每人每天最多收到2个不同类型模板消息"
-		return -2, errors.New("每人每天最多收到2个不同类型模板消息")
+		//	return -2, errors.New("每人每天最多收到2个不同类型模板消息")
 	}
 
 	ret, err := app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
