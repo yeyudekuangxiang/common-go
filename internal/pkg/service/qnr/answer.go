@@ -1,4 +1,4 @@
-package question
+package qnr
 
 import (
 	"mio/config"
