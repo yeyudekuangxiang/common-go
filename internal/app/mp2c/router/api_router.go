@@ -244,8 +244,8 @@ func apiRouter(router *gin.Engine) {
 		//获取第三方数据
 		platformRouter := mustAuthRouter.Group("/platform")
 		{
-			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))           //获取oolaKey
-			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultRecycleController.GetOolaKey)) //金华行-发码
+			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))         //获取oolaKey
+			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultJhxController.TicketCreate)) //金华行-发码
 		}
 
 		//碳成就相关路由

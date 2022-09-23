@@ -49,14 +49,17 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	params := make(map[string]interface{}, 0)
-	sign := params["sign"].(string)
+	params := make(map[string]string, 0)
+	sign := params["sign"]
 	delete(params, "sign")
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
 	jhxService := platform.NewJhxService(context.NewMioContext())
-	jhxService.TicketNotify(sign, params)
+	err = jhxService.TicketNotify(sign, params)
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
