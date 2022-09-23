@@ -24,8 +24,8 @@ func (repo BdSceneUserRepository) FindByCh(platformKey string) entity.BdSceneUse
 func (repo BdSceneUserRepository) FindPlatformUser(openId string, platformKey string) entity.BdSceneUser {
 	item := entity.BdSceneUser{}
 	err := repo.DB.
-		Where("open_id", openId).
-		Where("platform_key", platformKey).
+		Where("open_id = ?", openId).
+		Where("platform_key = ?", platformKey).
 		First(&item).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
@@ -36,7 +36,7 @@ func (repo BdSceneUserRepository) FindPlatformUser(openId string, platformKey st
 func (repo BdSceneUserRepository) FindPlatformUserByOpenId(openId string) entity.BdSceneUser {
 	item := entity.BdSceneUser{}
 	err := repo.DB.
-		Where("open_id", openId).
+		Where("open_id = ?", openId).
 		First(&item).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
