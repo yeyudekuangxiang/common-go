@@ -190,7 +190,6 @@ func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime 
 	if count >= 1 {
 		return errors.New("每日每位用户限制领取 1 次")
 	}
-// CheckLimit 充电检测
 	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
 	builder.Where("open_id = ?", openId).
 		Where("coupon_type = ?", "star_charge").
