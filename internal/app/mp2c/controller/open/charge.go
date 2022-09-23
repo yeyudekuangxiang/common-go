@@ -173,17 +173,22 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 			if err != nil {
 				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
+				return
 			}
 			//限制一次
-			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, startTime.String(), endTime.String()); err != nil {
+			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, startTime.Format("2006-01-02"), endTime.Format("2006-01-02")); err != nil {
 				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
+				return
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
 				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
+				return
 			}
+			return
 		}
+		return
 	}
 }
