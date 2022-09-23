@@ -72,7 +72,7 @@ func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 	//获取用户信息
 	userInfo := srv.user.GetUserById(dto.UserId)
 	uid := int64(0)
-	if userInfo.ID != 0 {
+	if info.UserId != 0 {
 		uid = info.UserId
 	} else {
 		id, err2 := util.SnowflakeID()
