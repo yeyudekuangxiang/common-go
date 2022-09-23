@@ -46,6 +46,7 @@ type AddUserCarbonInfoDTO struct {
 	CompareWithGlobal  string               `json:"compareWithGlobal"`
 	UserGroup          string               `json:"userGroup"`
 	UserGroupTips      string               `json:"userGroupDesc"`
+	Level              int8                 `json:"level"`
 }
 
 type UserCarbonClassify struct {
