@@ -114,7 +114,7 @@ func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 		//删除老数据
 		deleteErr := srv.DeleteByUid(srv_types.DeleteQuestionAnswerDTO{
 			QuestionId: dto.QuestionId,
-			UserId:     info.UserId,
+			UserId:     uid,
 		})
 		if deleteErr != nil {
 			return errno.ErrCommon.WithMessage("年度碳排放删除老数据失败")
