@@ -55,7 +55,7 @@ func (SubjectController) GetUserYearCarbon(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
 	//获取问卷碳量
-	ret, err := subjectServer.GetUserQuestion(srv_types.GetQuestionUserDTO{QuestionId: 1, OpenId: user.OpenId})
+	ret, err := subjectServer.GetUserQuestion(srv_types.GetQuestionUserDTO{QuestionId: 1, OpenId: user.OpenId, UserId: user.ID})
 	if err != nil {
 		return gin.H{}, err
 	}
