@@ -8,6 +8,7 @@ type zhuGeEventName struct {
 	UserCertificateSendSuc string
 	UserIdentify           string
 	UserInvitedBy          string
+	MessageMiniSubscribe   string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -17,4 +18,5 @@ var ZhuGeEventName = zhuGeEventName{
 	UserCertificateSendSuc: "携手同行-证书发放",
 	UserIdentify:           "用户渠道",
 	UserInvitedBy:          "用户邀请关系上报",
+	MessageMiniSubscribe:   "小程序订阅消息",
 }

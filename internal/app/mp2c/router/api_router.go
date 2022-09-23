@@ -9,6 +9,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/business"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
+	"mio/internal/app/mp2c/controller/api/message"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
@@ -29,7 +30,6 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM)) //校验验证码
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
-
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		//tag
@@ -87,6 +87,12 @@ func apiRouter(router *gin.Engine) {
 			questRouter.GET("/subject", apiutil.Format(question.DefaultSubjectController.GetList))
 			questRouter.POST("/create", apiutil.Format(question.DefaultSubjectController.Create))
 			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
+		}
+		//小程序订阅消息
+		messageRouter := mustAuthRouter.Group("/message")
+		{
+			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
+			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
 		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")

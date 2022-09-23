@@ -116,6 +116,12 @@ func (srv OssService) FullUrl(path string) string {
 }
 
 func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFilename string) (string, error) {
+	start := time.Now()
+	defer func() {
+		cost := time.Since(start)
+		fmt.Println("cost=", cost)
+	}()
+	// some computation
 	// 创建OSSClient实例。
 	// yourEndpoint填写Bucket所在地域对应的Endpoint。以华东1（杭州）为例，Endpoint填写为https://oss-cn-hangzhou.aliyuncs.com。
 	// 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
@@ -124,7 +130,7 @@ func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFile
 	// 填写Object完整路径。Object完整路径中不能包含Bucket名称。
 	objectName := name
 	// 填写本地文件的完整路径。如果未指定本地路径，则默认从示例程序所属项目对应本地路径中上传文件。
-	locaFilename = "" ///Users/apple/Desktop/lm1.mp4
+	locaFilename = "/Users/apple/Desktop/lm1.mp4" ///Users/apple/Desktop/lm1.mp4
 	// 获取存储空间。
 	bucket, err := srv.client.Bucket(bucketName)
 	if err != nil {
