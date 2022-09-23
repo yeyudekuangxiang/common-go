@@ -178,7 +178,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 }
 
 // CheckChargeLimit 充电检测
-func (srv StarChargeService) CheckChargeLimit(openId string, starTime, endTime string) error {
+func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime string) error {
 	todayBuilder := repository.DefaultCouponHistoryRepository.RowBuilder()
 	todayBuilder.Where("open_id = ?", openId).
 		Where("coupon_type = ?", "star_charge").
@@ -190,10 +190,11 @@ func (srv StarChargeService) CheckChargeLimit(openId string, starTime, endTime s
 	if count >= 1 {
 		return errors.New("每日每位用户限制领取 1 次")
 	}
+// CheckLimit 充电检测
 	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
 	builder.Where("open_id = ?", openId).
 		Where("coupon_type = ?", "star_charge").
-		Where("create_time > ?", starTime).
+		Where("create_time > ?", startTime).
 		Where("create_time < ?", endTime)
 	count, err = repository.DefaultCouponHistoryRepository.FindCount(builder)
 	if err != nil {
