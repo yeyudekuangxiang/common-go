@@ -64,6 +64,9 @@ type Ans struct {
 }
 
 func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
+	if dto.Answer == nil {
+		return errno.ErrCommon.WithMessage("答案不能为空")
+	}
 	//查询用户是否入库，入库并回答过问题
 	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
 	//获取用户信息
