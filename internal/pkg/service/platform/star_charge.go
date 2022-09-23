@@ -1,4 +1,4 @@
-package service
+package platform
 
 import (
 	"encoding/json"
@@ -89,7 +89,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 		return "", err
 	}
 	//response
-	signResponse := StarChargeResponse{}
+	signResponse := starChargeResponse{}
 	err = json.Unmarshal(body, &signResponse)
 	if err != nil {
 		return "", err
@@ -98,7 +98,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 		return "", errors.New("请求错误")
 	}
 	//result.data解密
-	accessResult := StarChargeAccessResult{}
+	accessResult := starChargeAccessResult{}
 	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
@@ -107,16 +107,6 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 }
 
 func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId string, token string) error {
-	//查询是否已经存在
-	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId).Where("coupon_type = ?", "star_charge")
-	count, err := repository.DefaultCouponHistoryRepository.FindCount(builder)
-	if err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("每位用户限领一次")
-	}
 	r := struct {
 		PhoneNumber string `json:"PhoneNumber"`
 		ProvideId   string `json:"ProvideId"`
@@ -146,7 +136,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		return err
 	}
 	// response
-	provideResponse := StarChargeResponse{}
+	provideResponse := starChargeResponse{}
 	err = json.Unmarshal(body, &provideResponse)
 	if err != nil {
 		return err
@@ -155,7 +145,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		return errors.New(provideResponse.Msg)
 	}
 	// result.data解密
-	provideResult := StarChargeProvideResult{}
+	provideResult := starChargeProvideResult{}
 	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
 	if provideResult.SuccStat != 0 {
@@ -178,16 +168,30 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 }
 
 // CheckLimit 充电检测
-func (srv StarChargeService) CheckChargeLimit(openId string) error {
-	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId).Where("coupon_type = ?", "star_charge")
-	count, err := repository.DefaultCouponHistoryRepository.FindCount(builder)
-	if err == nil {
-		//已经存在
+func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime string) error {
+	todayBuilder := repository.DefaultCouponHistoryRepository.RowBuilder()
+	todayBuilder.Where("open_id = ?", openId).
+		Where("coupon_type = ?", "star_charge").
+		Where("date(create_time) = CURRENT_DATE")
+	count, err := repository.DefaultCouponHistoryRepository.FindCount(todayBuilder)
+	if err != nil {
 		return err
 	}
-	if count != 0 {
-		return errors.New("每位用户限制领取一次")
+	if count >= 1 {
+		return errors.New("每日每位用户限制领取 1 次")
+	}
+	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
+	builder.Where("open_id = ?", openId).
+		Where("coupon_type = ?", "star_charge").
+		Where("create_time > ?", startTime).
+		Where("create_time < ?", endTime)
+	count, err = repository.DefaultCouponHistoryRepository.FindCount(builder)
+	if err != nil {
+		return err
+	}
+	if count >= 2 {
+		return errors.New("活动期间每位用户限制领取 2 次")
 	}
 	return nil
+
 }

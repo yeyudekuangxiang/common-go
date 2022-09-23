@@ -1,10 +1,11 @@
-package api
+package open
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -25,7 +26,7 @@ type ChargeController struct {
 }
 
 func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
-	form := GetChargeForm{}
+	form := api.GetChargeForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("charge/push 参数错误: %s", form)
 		return nil, err
@@ -131,14 +132,14 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 	//绿喵回调第三方
 	ccRingService := platform.NewCCRingService()
-	go ccRingService.CallBack(userInfo, thisPoint0, scene.Ch, scene)
+	go ccRingService.CallBack(userInfo, thisPoint0)
 	//发券
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
 }
 
 func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
-	form := ChangeChargeExceptionForm{}
+	form := api.ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -151,7 +152,7 @@ func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
-	form := ChangeChargeExceptionForm{}
+	form := api.ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -160,28 +161,34 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+//调用星星充电
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
 	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 {
 		fmt.Println("星星充电 发券start")
-		startTime, _ := time.Parse("2006-01-02", "2022-08-22")
-		endTime, _ := time.Parse("2006-01-02", "2022-08-31")
+		startTime, _ := time.Parse("2006-01-02", "2022-09-24")
+		endTime, _ := time.Parse("2006-01-02", "2022-10-01")
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := service.NewStarChargeService(ctx)
+			starChargeService := platform.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
 				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
+				return
 			}
 			//限制一次
-			if err = starChargeService.CheckChargeLimit(userInfo.OpenId); err != nil {
+			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, startTime.Format("2006-01-02"), endTime.Format("2006-01-02")); err != nil {
 				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
+				return
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
 				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
+				return
 			}
+			return
 		}
+		return
 	}
 }

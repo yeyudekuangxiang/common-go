@@ -1,8 +1,9 @@
-package api
+package open
 
 import (
 	"encoding/json"
 	"fmt"
+	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/util/encrypt"
@@ -28,11 +29,11 @@ func TestCheckTime(t *testing.T) {
 
 func TestMakeSign(t *testing.T) {
 
-	data := RecycleFmyForm{
+	data := api.RecycleFmyForm{
 		AppId:          "75133417",
 		NotificationAt: "2022-09-06 11:06:32",
 		Sign:           "02871058a4bfde2bffe88d6366865",
-		Data: RecycleFmyData{
+		Data: api.RecycleFmyData{
 			OrderSn: "20220906110237856327",
 			Status:  "COMPLETE",
 			Weight:  "20.00",
