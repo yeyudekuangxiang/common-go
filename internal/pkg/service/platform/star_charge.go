@@ -107,16 +107,6 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 }
 
 func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId string, token string) error {
-	//查询是否已经存在
-	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId).Where("coupon_type = ?", "star_charge")
-	count, err := repository.DefaultCouponHistoryRepository.FindCount(builder)
-	if err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("每位用户限领一次")
-	}
 	r := struct {
 		PhoneNumber string `json:"PhoneNumber"`
 		ProvideId   string `json:"ProvideId"`
@@ -203,4 +193,5 @@ func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime 
 		return errors.New("活动期间每位用户限制领取 2 次")
 	}
 	return nil
+
 }
