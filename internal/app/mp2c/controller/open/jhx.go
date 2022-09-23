@@ -23,8 +23,6 @@ func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	//入库
-
 	return nil, nil
 }
 
