@@ -20,6 +20,11 @@ func (srv BdSceneUserService) FindPlatformUser(openId string, platformKey string
 	return &item
 }
 
+func (srv BdSceneUserService) FindPlatformUserByOpenId(openId string) *entity.BdSceneUser {
+	item := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(openId)
+	return &item
+}
+
 func (srv BdSceneUserService) Create(data *entity.BdSceneUser) error {
 	return repository.DefaultBdSceneUserRepository.Create(data)
 }
