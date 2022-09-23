@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
@@ -99,7 +100,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 }
 
 func (srv WeappService) ToZhuGe(openId string, attr map[string]interface{}, eventName string) {
-	go service.DefaultZhuGeService().Track(eventName, openId, attr)
+	go track.DefaultZhuGeService().Track(eventName, openId, attr)
 }
 
 func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, partnershipType entity.PartnershipType) {
@@ -123,7 +124,7 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		zhuGeAttr := make(map[string]interface{}, 0)
 		zhuGeAttr["邀请人"] = invitedBy
 		zhuGeAttr["用户"] = user.OpenId
-		service.DefaultZhuGeService().Track(config.ZhuGeEventName.UserInvitedBy, user.OpenId, zhuGeAttr)
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserInvitedBy, user.OpenId, zhuGeAttr)
 	}
 
 	if partnershipType != "" {

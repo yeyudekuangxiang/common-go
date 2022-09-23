@@ -7,7 +7,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"sync"
@@ -37,7 +37,7 @@ type ClientHandle struct {
 
 //挂件
 type clientPlugin struct {
-	tracking         *service.ZhuGeService
+	tracking         *track.ZhuGeService
 	pointRepo        *repository.PointRepository
 	history          *repository.PointCollectHistoryRepository
 	transaction      *repository.PointTransactionRepository
@@ -60,7 +60,7 @@ func NewClientHandle(ctx *context.MioContext, params *ClientHandle) *defaultClie
 			AdminId: params.AdminId,
 		},
 		plugin: clientPlugin{
-			tracking:         service.DefaultZhuGeService(),
+			tracking:         track.DefaultZhuGeService(),
 			pointRepo:        repository.NewPointRepository(ctx),
 			history:          repository.NewPointCollectHistoryRepository(ctx),
 			transaction:      repository.NewPointTransactionRepository(ctx),

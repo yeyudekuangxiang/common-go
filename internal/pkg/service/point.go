@@ -2,11 +2,14 @@ package service
 
 import (
 	"errors"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
@@ -134,6 +137,36 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		if err != nil {
 			return err
 		}
+
+		//积分变动提醒
+
+		types := map[entity.PointTransactionType]string{
+			entity.POINT_JHX:                    "金华行",
+			entity.POINT_FAST_ELECTRICITY:       "快电",
+			entity.POINT_ECAR:                   "星星充电",
+			entity.POINT_RECYCLING_CLOTHING:     "旧物回收 oola衣物鞋帽",
+			entity.POINT_RECYCLING_DIGITAL:      "旧物回收 oola数码",
+			entity.POINT_RECYCLING_APPLIANCE:    "旧物回收 oola家电",
+			entity.POINT_RECYCLING_BOOK:         "旧物回收 oola书籍",
+			entity.POINT_FMY_RECYCLING_CLOTHING: "旧物回收 fmy衣物鞋帽",
+			entity.POINT_SYSTEM_ADD:             "系统补发",
+		}
+		_, ok := types[dto.Type]
+		if ok && (point.Balance > 0) {
+			//发小程序订阅消息
+			message := messageSrv.MiniChangePointTemplate{
+				Point:    dto.ChangePoint,
+				Source:   dto.Type.Text(),
+				Time:     time.Now().Format("2006年01月02日"),
+				AllPoint: point.Balance,
+			}
+			service := messageSrv.MessageService{}
+			_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
+			if messageErr != nil {
+
+			}
+		}
+
 		//发完积分，更新邀请表发积分状态
 		if dto.InviteId != 0 && dto.Type == entity.POINT_INVITE {
 			//更新状态
@@ -238,7 +271,7 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 }
 
 func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage string) {
-	DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
+	track.DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
 		OpenId:      dto.OpenId,
 		PointType:   dto.Type,
 		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "dec").String(),
