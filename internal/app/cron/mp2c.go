@@ -20,7 +20,7 @@ func mp2cCron() {
 	})
 
 	//签到提醒 每隔10分钟跑一次
-	AddFunc("0 */10 * * ?", func() {
+	AddFunc("0 0/30 8-9,11-14,17-20 * ?", func() {
 		log.Println("每天执行一次")
 		service := messageSrv.MessageService{}
 		service.SendMessageToSignUser()
