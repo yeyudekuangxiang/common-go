@@ -19,8 +19,20 @@ func mp2cCron() {
 		service.NewCarbonTransactionService(context.NewMioContext()).AddHistory()
 	})
 
-	//签到提醒 每隔10分钟跑一次
-	AddFunc("0 0/30 8-9,11-14,17-20 * ?", func() {
+	//签到提醒
+	AddFunc("0 0/30 8-9 * ?", func() {
+		log.Println("每天执行一次")
+		service := messageSrv.MessageService{}
+		service.SendMessageToSignUser()
+	})
+
+	AddFunc("0 0/30 11-14 * ?", func() {
+		log.Println("每天执行一次")
+		service := messageSrv.MessageService{}
+		service.SendMessageToSignUser()
+	})
+
+	AddFunc("0 0/30 17-20 * ?", func() {
 		log.Println("每天执行一次")
 		service := messageSrv.MessageService{}
 		service.SendMessageToSignUser()

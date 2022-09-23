@@ -17,6 +17,7 @@ type MessageController struct {
 
 func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 
+	return gin.H{}, nil
 	b := messageSrv.MiniSignRemindTemplate{
 		ActivityName: "2323",
 		Tip:          "232323",
@@ -59,6 +60,7 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 //todo 给测试用
 
 func (MessageController) SendSign(c *gin.Context) (gin.H, error) {
+	return gin.H{}, nil
 	service := messageSrv.MessageService{}
 	service.SendMessageToSignUser()
 	return gin.H{
