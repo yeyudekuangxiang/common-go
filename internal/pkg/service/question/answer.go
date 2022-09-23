@@ -68,9 +68,15 @@ func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 	info := srv.qrnUserRepo.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
 	//获取用户信息
 	userInfo := srv.user.GetUserById(dto.UserId)
-	id, err2 := util.SnowflakeID()
-	if err2 != nil {
-		return errno.ErrCommon.With(err2)
+	uid := int64(0)
+	if userInfo.ID != 0 {
+		uid = info.UserId
+	} else {
+		id, err2 := util.SnowflakeID()
+		if err2 != nil {
+			return errno.ErrCommon.With(err2)
+		}
+		uid = id.Int64()
 	}
 	//获取渠道信息
 	channelName := ""
@@ -90,7 +96,7 @@ func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 		//保存用户信息
 		if info.UserId == 0 {
 			errUser := srv.qrnUserRepo.Create(&qnrEntity.User{
-				UserId:      id.Int64(),
+				UserId:      uid,
 				ThirdId:     userInfo.OpenId,
 				InvitedById: InvitedByOpenId,
 				Phone:       userInfo.PhoneNumber,
@@ -118,7 +124,7 @@ func (srv AnswerService) Add(dto srv_types.AddQuestionAnswerDTO) error {
 				Answer:     l.Answer,
 				QuestionId: dto.QuestionId,
 				SubjectId:  l.Id,
-				UserId:     model.LongID(id.Int64()),
+				UserId:     model.LongID(uid),
 				Carbon:     l.Carbon,
 			})
 		}

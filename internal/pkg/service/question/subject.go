@@ -197,7 +197,6 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	if carbon > 4400000 {
 		compareWithGlobal = "高于"
 	}
-
 	return srv_types.AddUserCarbonInfoDTO{
 		UserGroup:          userGroup, //属于用户群里
 		UserGroupTips:      userGroupTips,
