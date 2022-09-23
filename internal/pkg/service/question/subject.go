@@ -149,8 +149,11 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	carbonDayFloat, _ := carbonDay.Float64()
 
 	//碳中和完成度
+	completion := ""
 	carbonTodayDes := decimal.NewFromFloat(carbonToday)
-	completion := carbonTodayDes.Div(carbonDay).Round(2).String()
+	if !carbonDay.IsZero() {
+		completion = carbonTodayDes.Div(carbonDay).Round(2).String()
+	}
 
 	//属于用户群里
 	userGroup := ""
