@@ -65,9 +65,6 @@ func (repo BdScenePrePointRepository) FindBy(by entity.BdScenePrePoint) []entity
 	if by.PlatformUserId != "" {
 		query.Where("platform_user_id = ?", by.PlatformUserId)
 	}
-	if by.CreatedAt.IsZero() {
-
-	}
 	err := query.Find(&items).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
