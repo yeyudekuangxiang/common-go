@@ -288,6 +288,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		}
 		userInfo.Risk = rest.RiskRank
 	}
+
 	//获取用户地址  todo 加入队列
 	city, err := baidu.IpToCity(cip)
 	if err != nil {
@@ -297,8 +298,12 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	userInfo.Ip = cip
 
 	// todo topic数据批量修改
-	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber})
+	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber, Source: entity.UserSourceMio})
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
+	if ok && specialUser.ID == 0 {
+		return errors.New("该号码已被绑定")
+	}
+
 	if ok && !u.checkOpenId(userByMobile.OpenId) && specialUser.ID != 0 && specialUser.Status == 0 {
 		//更新topic userid
 		err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
