@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
@@ -148,23 +149,29 @@ func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, er
 	return ticketStatusResponse, nil
 }
 
-func (srv JhxService) SendPreCollectPoint(sign string, params map[string]string) error {
-	if err := srv.checkSign(sign, params); err != nil {
-		return err
-	}
-	//根据 platform_member_id 获取 openid
-
-	//插入pre_point数据
-
-	return nil
-}
-
 func (srv JhxService) PreCollectPoint(sign string, params map[string]string) error {
 	if err := srv.checkSign(sign, params); err != nil {
 		return err
 	}
 	//根据 platform_member_id 获取 openid
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], "jhx")
+	if sceneUser.ID == 0 {
+		return errors.New("未找到绑定关系")
+	}
+	//创建数据
 
+	return nil
+}
+
+func (srv JhxService) GetPreCollectPointList(sign string, params map[string]string) error {
+	if err := srv.checkSign(sign, params); err != nil {
+		return err
+	}
+	//根据 platform_member_id 获取 openid
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], "jhx")
+	if sceneUser.ID == 0 {
+		return errors.New("未找到绑定关系")
+	}
 	//获取pre_point数据
 
 	return nil

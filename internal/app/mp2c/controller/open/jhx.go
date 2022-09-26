@@ -62,6 +62,7 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+//生产积分气泡
 func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	form := jhxCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
@@ -82,6 +83,7 @@ func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+//获取积分气泡
 func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
 	form := jhxCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
@@ -95,7 +97,7 @@ func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
 	sign := params["sign"]
 	delete(params, "sign")
 	jhxService := platform.NewJhxService(context.NewMioContext())
-	err = jhxService.PreCollectPoint(sign, params)
+	err = jhxService.CollectPoint(sign, params)
 	if err != nil {
 		return nil, err
 	}
