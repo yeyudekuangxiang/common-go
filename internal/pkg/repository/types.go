@@ -293,12 +293,3 @@ type GetRedeemCodeBy struct {
 	CodeId   string
 	CouponId string
 }
-
-type GetScenePrePoint struct {
-	PlatformKey    string    `json:"platformKey"`
-	PlatformUserId string    `json:"platformUserId"`   //外站用户id
-	OpenId         string    `json:"openId,omitempty"` //本站用户openId
-	Status         int       `json:"status,omitempty"`
-	StartTime      time.Time `json:"startTime,omitempty"`
-	EndTime        time.Time `json:"endTime,omitempty"`
-}
