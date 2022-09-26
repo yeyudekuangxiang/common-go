@@ -29,6 +29,6 @@ type jhxTicketStatusRequest struct {
 
 type jhxCollectRequest struct {
 	jhxCommonRequest
-	MemberId string `json:"memberId"`
-	Amount   string `json:"amount"`
+	MemberId   string `json:"memberId"`
+	PrePointId string `json:"prePointId"`
 }
