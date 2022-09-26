@@ -29,6 +29,13 @@ type jhxTicketStatusRequest struct {
 
 type jhxCollectRequest struct {
 	jhxCommonRequest
-	MemberId   string `json:"memberId"`
-	PrePointId string `json:"prePointId"`
+	PlatformKey string `json:"platformKey" form:"platformKey"`
+	MemberId    string `json:"memberId"`
+	PrePointId  string `json:"prePointId"`
+}
+
+type jhxGetCollectRequest struct {
+	jhxCommonRequest
+	PlatformKey string `json:"platformKey" form:"platformKey"`
+	MemberId    string `json:"memberId"`
 }

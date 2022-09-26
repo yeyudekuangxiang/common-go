@@ -56,7 +56,7 @@ func (repo BdScenePrePointRepository) FindAllByPlatformKey(platformKey string) [
 	return items
 }
 
-func (repo BdScenePrePointRepository) FindBy(by entity.BdScenePrePoint) []entity.BdScenePrePoint {
+func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) []entity.BdScenePrePoint {
 	var items []entity.BdScenePrePoint
 	query := repo.DB.Where("platform_key = ?", by.PlatformKey)
 	if by.OpenId != "" {
@@ -65,6 +65,15 @@ func (repo BdScenePrePointRepository) FindBy(by entity.BdScenePrePoint) []entity
 	if by.PlatformUserId != "" {
 		query.Where("platform_user_id = ?", by.PlatformUserId)
 	}
+	if by.Status != 0 {
+		query.Where("status = ?", by.Status)
+	}
+	if !by.StartTime.IsZero() {
+		query.Where("to_char(create_time,'YYYY-MM-DD') < ?", by.StartTime.Format("2006-01-02"))
+	}
+	if !by.EndTime.IsZero() {
+		query.Where("to_char(create_time,'YYYY-MM-DD') > ?", by.EndTime.Format("2006-01-02"))
+	}
 	err := query.Find(&items).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
@@ -72,6 +81,6 @@ func (repo BdScenePrePointRepository) FindBy(by entity.BdScenePrePoint) []entity
 	return items
 }
 
-func (repo BdScenePrePointRepository) Create(data *entity.BdScenePrePoint) error {
-	return repo.DB.Model(&entity.BdScenePrePoint{}).Create(data).Error
+func (repo BdScenePrePointRepository) Create(data entity.BdScenePrePoint) error {
+	return repo.DB.Model(&entity.BdScenePrePoint{}).Create(&data).Error
 }

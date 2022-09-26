@@ -85,6 +85,7 @@ func openRouter(router *gin.Engine) {
 				openBusticketRouter.POST("/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //消费通知
 				openBusticketRouter.POST("/pre_collect", apiutil.Format(open.DefaultJhxController.PreCollectPoint))   //生产积分气泡
 				openBusticketRouter.POST("/collect", apiutil.Format(open.DefaultJhxController.CollectPoint))          //收集积分气泡
+				openBusticketRouter.GET("/get_collect", apiutil.Format(open.DefaultJhxController.GetPreCollectPoint)) //收集积分气泡
 			}
 		}
 	}

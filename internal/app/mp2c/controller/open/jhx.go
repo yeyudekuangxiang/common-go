@@ -3,6 +3,7 @@ package open
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -68,13 +69,17 @@ func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
+	scene := service.DefaultBdSceneService.FindByCh("jhx")
+
 	params := make(map[string]string, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
+	params["key"] = scene.Key
 	sign := params["sign"]
 	delete(params, "sign")
+
 	jhxService := platform.NewJhxService(context.NewMioContext())
 	err = jhxService.PreCollectPoint(sign, params)
 	if err != nil {
@@ -84,16 +89,46 @@ func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 }
 
 //获取积分气泡
-func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
-	form := jhxCollectRequest{}
+func (ctr JhxController) GetPreCollectPoint(ctx *gin.Context) (gin.H, error) {
+	form := jhxGetCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
+	scene := service.DefaultBdSceneService.FindByCh("jhx")
+
 	params := make(map[string]string, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
+	params["key"] = scene.Key
+	sign := params["sign"]
+	delete(params, "sign")
+
+	jhxService := platform.NewJhxService(context.NewMioContext())
+	list, err := jhxService.GetPreCollectPointList(sign, params)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list": list,
+	}, nil
+}
+
+//获取积分气泡
+func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
+	form := jhxCollectRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	scene := service.DefaultBdSceneService.FindByCh("jhx")
+
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	params["key"] = scene.Key
 	sign := params["sign"]
 	delete(params, "sign")
 	jhxService := platform.NewJhxService(context.NewMioContext())
