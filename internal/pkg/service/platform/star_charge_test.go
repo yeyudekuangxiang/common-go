@@ -12,12 +12,10 @@ func TestTime(t *testing.T) {
 	//fmt.Printf("%s\n", createTime)
 	//fmt.Printf("%s\n", updateTime)
 	//fmt.Printf("%v\n", updateTime.After(createTime))
-	startTime, _ := time.Parse("2006-01-02", "2022-09-23")
-	endTime, _ := time.Parse("2006-01-02", "2022-10-01")
-	fmt.Printf("%v\n", startTime.Format("2006-01-02"))
-	fmt.Printf("%s\n", endTime)
+	startTime, _ := time.ParseInLocation("2006-01-02", "2022-09-24", time.Local)
+	endTime, _ := time.ParseInLocation("2006-01-02", "2022-10-01", time.Local)
+	//now, _ := time.Parse("2006-01-02", time.Now())
 	fmt.Printf("%s\n", startTime)
-	fmt.Printf("%s\n", endTime.String())
-	fmt.Printf("%v\n", time.Now())
-
+	fmt.Printf("%s\n", endTime)
+	fmt.Printf("%s\n", time.Now())
 }
