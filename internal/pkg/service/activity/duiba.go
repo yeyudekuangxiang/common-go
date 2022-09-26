@@ -216,7 +216,6 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		if err != nil {
 			break
 		}
-		inviteCount = 22
 		switch {
 		case inviteCount >= 3 && inviteCount <= 5:
 			{
