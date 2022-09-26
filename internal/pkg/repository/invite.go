@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository/repotypes"
 )
 
 func NewInviteRepository(ctx *context.MioContext) *InviteRepository {
@@ -57,4 +58,15 @@ func (repo InviteRepository) UpdateIsReward(id int64) error {
 	}
 	result.IsReward = 0
 	return repo.ctx.DB.Save(&result).Error
+}
+
+func (repo InviteRepository) GetInviteRewardFenQun(Do repotypes.GetInviteTotalDO) (total int64, err error) {
+	db := app.DB.Model(entity.Invite{})
+	db = db.Where("new_user_openid <> '' and invited_by_openid = ? and is_reward = 0", Do.Openid)
+	db.Where("time >= ?", Do.StartTime).Where("time <= ?", Do.EndTime)
+	var count int64
+	if err := db.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
