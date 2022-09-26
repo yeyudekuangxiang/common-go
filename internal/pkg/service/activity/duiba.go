@@ -208,6 +208,12 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	switch activity.VipType {
 	case entity.DuiBaActivityInviteActivity:
 		//jira: https://jira.miotech.com/browse/MP2C-1681?goToView=5
+		if userInfo.Risk == 4 {
+			break
+		}
+		if userInfo.ChannelId == 0 || userInfo.ChannelId == 1049 {
+			break
+		}
 		inviteCount, err := srv.repoInvite.GetInviteRewardFenQun(repotypes.GetInviteTotalDO{
 			StartTime: "2022-09-15:00:00:01",
 			EndTime:   "2022-09-22:00:00:01",
