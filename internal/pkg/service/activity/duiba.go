@@ -221,10 +221,12 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		case inviteCount >= 3 && inviteCount <= 5:
 			{
 				vip = 52
+				break
 			}
 		case inviteCount >= 6 && inviteCount <= 14:
 			{
 				vip = 53
+				break
 			}
 		case inviteCount >= 15:
 			{
@@ -236,6 +238,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 				if orderTotal >= 1 && inviteCount >= 21 {
 					vip = 55
 				}
+				break
 			}
 		default:
 			{
