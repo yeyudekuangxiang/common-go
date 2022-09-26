@@ -38,19 +38,15 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 		return nil, errors.New("用户未登陆")
 	}
 
-	//保存渠道用户记录
-	sceneUser := service.DefaultBdSceneUserService.FindPlatformUser(user.OpenId, form.PlatformKey)
-	if sceneUser.ID == 0 {
-		sceneUser.PlatformKey = scene.Ch
-		sceneUser.PlatformUserId = form.MemberId
-		sceneUser.Phone = user.PhoneNumber
-		sceneUser.OpenId = user.OpenId
-		sceneUser.UnionId = user.UnionId
-		err := service.DefaultBdSceneUserService.Create(sceneUser)
-		app.Logger.Errorf("create db_scene_user error:%s", err.Error())
-		return nil, nil
+	//绑定记录
+	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
+	if err != nil {
+		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"memberId":     sceneUser.PlatformUserId,
+		"lvmiaoUserId": sceneUser.OpenId,
+	}, nil
 }
 
 func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {

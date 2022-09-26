@@ -72,9 +72,20 @@ func openRouter(router *gin.Engine) {
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
 		{
 			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
+			openAuthRouter.GET("/platform/bind", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 		}
 		//外部平台调绿喵 不需要登陆
 		openRouter.POST("/sync/point", apiutil.Format(open.DefaultPlatformController.SyncPoint))
-		openRouter.POST("/busticket/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //金华行 消费通知
+
+		openPlatformRouter := openRouter.Group("/platform")
+		{
+			//金华行
+			openBusticketRouter := openPlatformRouter.Group("/busticket")
+			{
+				openBusticketRouter.POST("/ticket_notify", apiutil.Format(open.DefaultJhxController.BusTicketNotify)) //消费通知
+				openBusticketRouter.POST("/pre_collect", apiutil.Format(open.DefaultJhxController.PreCollectPoint))   //生产积分气泡
+				openBusticketRouter.POST("/collect", apiutil.Format(open.DefaultJhxController.CollectPoint))          //收集积分气泡
+			}
+		}
 	}
 }
