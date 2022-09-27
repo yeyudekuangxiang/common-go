@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	eevent "mio/internal/pkg/model/entity/event"
 	repository2 "mio/internal/pkg/repository"
+	repositoryActivity "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/platform"
@@ -28,14 +29,17 @@ import (
 	"time"
 )
 
-var DefaultOrderService = NewOrderService(repository2.DefaultOrderRepository)
+var DefaultOrderService = NewOrderService(repository2.DefaultOrderRepository, repository2.DefaultOrderRepository, repository2.DefaultUserRepository, repositoryActivity.DefaultGDDonationBookRepository)
 
-func NewOrderService(repo repository2.OrderRepository) OrderService {
-	return OrderService{repo: repo}
+func NewOrderService(repo repository2.OrderRepository, repository repository2.OrderRepository, userRepository repository2.UserRepository, repositoryActivity repositoryActivity.GDDonationBookRepository) OrderService {
+	return OrderService{repo: repo, repoOrder: repository, repoUser: userRepository, repoGDBook: repositoryActivity}
 }
 
 type OrderService struct {
-	repo repository2.OrderRepository
+	repo       repository2.OrderRepository
+	repoOrder  repository2.OrderRepository
+	repoUser   repository2.UserRepository
+	repoGDBook repositoryActivity.GDDonationBookRepository
 }
 
 // CalculateAndCheck 计算商品价格并且检查库存

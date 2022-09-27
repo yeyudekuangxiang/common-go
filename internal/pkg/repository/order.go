@@ -63,7 +63,12 @@ func (repo OrderRepository) GetOrderTotalByItemId(by repotypes.GetOrderTotalByIt
 	if len(by.ItemIdSlice) > 0 {
 		db.Where("order_item.item_id in (?)", by.ItemIdSlice)
 	}
-	db.Where("paid_time >= ?", by.StartTime).Where("paid_time <= ?", by.EndTime)
+	if by.StartTime != "" {
+		db.Where("paid_time >= ?", by.StartTime)
+	}
+	if by.EndTime != "" {
+		db.Where("paid_time <= ?", by.EndTime)
+	}
 	err := db.Count(&total).Error
 	if err != nil {
 		return 0
