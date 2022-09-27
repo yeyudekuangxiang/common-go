@@ -27,8 +27,22 @@ type jhxTicketStatusRequest struct {
 	Tradeno string `json:"tradeno" form:"tradeno" binding:"required"`
 }
 
-type jhxCollectRequest struct {
-	jhxCommonRequest
-	MemberId   string `json:"memberId"`
-	PrePointId string `json:"prePointId"`
+type PreCollectRequest struct {
+	MemberId    string `json:"memberId" from:"memberId"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	Amount      string `json:"amount,omitempty" form:"amount"`
+	PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
 }
+
+//type GetPreCollectRequest struct {
+//	MemberId    string `json:"memberId" from:"memberId"`
+//	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+//	//Amount      string `json:"amount,omitempty" form:"amount"`
+//	//PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
+//}
+//
+//type ConsumeCollectRequest struct {
+//	MemberId    string `json:"memberId" from:"memberId"`
+//	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+//	PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
+//}

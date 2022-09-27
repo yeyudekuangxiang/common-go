@@ -2,10 +2,13 @@ package open
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -64,10 +67,17 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 
 //生产积分气泡
 func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
-	form := jhxCollectRequest{}
+	form := PreCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		app.Logger.Info("渠道查询失败", form)
+		return nil, errno.ErrChannelNotFound
+	}
+
 	params := make(map[string]string, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
@@ -76,16 +86,44 @@ func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	sign := params["sign"]
 	delete(params, "sign")
 	jhxService := platform.NewJhxService(context.NewMioContext())
-	err = jhxService.PreCollectPoint(sign, params)
+	err = jhxService.PreCollectPoint(sign, params, scene.Ch)
 	if err != nil {
 		return nil, err
 	}
 	return nil, nil
 }
 
-//获取积分气泡
+//获取积分气泡list
+func (ctr JhxController) GetPreCollectPoint(ctx *gin.Context) (gin.H, error) {
+	form := PreCollectRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		app.Logger.Info("渠道查询失败", form)
+		return nil, errno.ErrChannelNotFound
+	}
+
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := params["sign"]
+	delete(params, "sign")
+	jhxService := platform.NewJhxService(context.NewMioContext())
+	err = jhxService.PreCollectPoint(sign, params, scene.Ch)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+//消费积分气泡
 func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
-	form := jhxCollectRequest{}
+	form := PreCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}

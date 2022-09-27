@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -102,9 +105,15 @@ func (srv JhxService) TicketCreate(tradeno string, user entity.User) error {
 		return err
 	}
 	// todo 入库
-	//code := ticketCreateResponse.QrCodeStr
-	//
-	fmt.Printf("%v\n", response)
+	coupon, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+		CouponCardTypeId:     123,
+		CouponCardQrcodeText: ticketCreateResponse.QrCodeStr,
+		UserId:               user.ID,
+	})
+	fmt.Printf("coupon: %v\n", coupon)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -149,26 +158,43 @@ func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, er
 	return ticketStatusResponse, nil
 }
 
-func (srv JhxService) PreCollectPoint(sign string, params map[string]string) error {
+//创建气泡数据
+func (srv JhxService) PreCollectPoint(sign string, params map[string]string, platformKey string) error {
 	if err := srv.checkSign(sign, params); err != nil {
 		return err
 	}
 	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], "jhx")
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], platformKey)
 	if sceneUser.ID == 0 {
 		return errors.New("未找到绑定关系")
 	}
 	//创建数据
-
+	fromString, err := decimal.NewFromString(params["amount"])
+	if err != nil {
+		return err
+	}
+	point := fromString.Mul(decimal.NewFromInt(10)).Round(2).String()
+	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
+		PlatformKey:    sceneUser.PlatformKey,
+		PlatformUserId: sceneUser.PlatformUserId,
+		Point:          point,
+		OpenId:         sceneUser.OpenId,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func (srv JhxService) GetPreCollectPointList(sign string, params map[string]string) error {
+//获取气泡数据
+func (srv JhxService) GetPreCollectPointList(sign string, params map[string]string, platformKey string) error {
 	if err := srv.checkSign(sign, params); err != nil {
 		return err
 	}
 	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], "jhx")
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], platformKey)
 	if sceneUser.ID == 0 {
 		return errors.New("未找到绑定关系")
 	}
@@ -177,6 +203,7 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 	return nil
 }
 
+//消费气泡数据
 func (srv JhxService) CollectPoint(sign string, params map[string]string) error {
 	if err := srv.checkSign(sign, params); err != nil {
 		return err
