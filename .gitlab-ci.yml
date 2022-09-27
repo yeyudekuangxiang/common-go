@@ -24,6 +24,13 @@ build-manual:
   only:
     - /^hotfix-.+$/
     - /^feature-.+$/
+  before_script:
+    - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
+    - eval $(ssh-agent -s)
+    - echo $SSH_PRIVATE_KEY
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
   script:
     - sh ./scripts/build.sh mp2c
   artifacts:
