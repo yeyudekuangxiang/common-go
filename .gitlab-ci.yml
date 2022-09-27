@@ -10,6 +10,10 @@ build:
     - develop
     - master
     - tags
+  cache:
+    key: mp2c-go-vendor-cache
+    paths:
+      - vendor
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
@@ -31,6 +35,10 @@ build-manual:
   only:
     - /^hotfix-.+$/
     - /^feature-.+$/
+  cache:
+    key: mp2c-go-vendor-cache
+    paths:
+      - vendor
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
