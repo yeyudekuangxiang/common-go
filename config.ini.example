@@ -47,12 +47,13 @@ MaxSize=100
 AppId=
 Secret=
 
-#绿喵服务号配置
-[mioSubOa]
-AppId=wxe5be614362f42f73
-Secret=eeb571fe4dced59328926a4169f846d9
 
 #绿喵订阅号配置
+[mioSubOa]
+AppId=
+Secret=
+
+#绿喵服务号配置
 [mioSrvOa]
 AppId=
 Secret=
@@ -82,3 +83,7 @@ AppSecret=
 
 [amqp]
 Url=amqp://guest:guest@localhost:5672
+
+[couponRpc]
+Endpoints=127.0.0.1:2006
+NonBlock=true
