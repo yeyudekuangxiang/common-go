@@ -23,13 +23,15 @@ var (
 	ZeroActivityStartTime, _ = time.Parse("2006-01-02 15:04:05", "2022-04-13 00:00:00")
 )
 var DefaultZeroService = ZeroService{
-	repo:      repository.NewPointTransactionRepository(mioContext.NewMioContext()),
-	repoOrder: repository.NewOrderRepository(app.DB),
+	repo:       repository.NewPointTransactionRepository(mioContext.NewMioContext()),
+	repoOrder:  repository.NewOrderRepository(app.DB),
+	repoInvite: repository.NewInviteRepository(mioContext.NewMioContext()),
 }
 
 type ZeroService struct {
-	repo      *repository.PointTransactionRepository
-	repoOrder repository.OrderRepository
+	repo       *repository.PointTransactionRepository
+	repoOrder  repository.OrderRepository
+	repoInvite *repository.InviteRepository
 }
 
 func NewZeroService(ctx *mioContext.MioContext) *ZeroService {
@@ -204,12 +206,54 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	}*/
 
 	switch activity.VipType {
+	case entity.DuiBaActivityInviteActivity:
+		//jira: https://jira.miotech.com/browse/MP2C-1681?goToView=5
+		if userInfo.Risk == 4 {
+			break
+		}
+		inviteCount, err := srv.repoInvite.GetInviteRewardFenQun(repotypes.GetInviteTotalDO{
+			StartTime: "2022-09-15:00:00:01",
+			EndTime:   "2022-09-22:00:00:01",
+			Openid:    userInfo.OpenId,
+		})
+		if err != nil {
+			break
+		}
+		switch {
+		case inviteCount >= 3 && inviteCount <= 5:
+			{
+				vip = 52
+				break
+			}
+		case inviteCount >= 6 && inviteCount <= 14:
+			{
+				vip = 53
+				break
+			}
+		case inviteCount >= 15:
+			{
+				vip = 54
+				orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{
+					Openid:    userInfo.OpenId,
+					StartTime: "2022-09-15:00:00:01",
+					EndTime:   "2022-09-22:00:00:01"})
+				if orderTotal >= 1 && inviteCount >= 21 {
+					vip = 55
+				}
+				break
+			}
+		default:
+			{
+				break
+			}
+		}
+		break
+
 	case entity.DuiBaActivityVipTypeNewUser:
 		if thirdParty == "thirdParty" && isNewUser {
 			vip = 2
 		}
 		break
-
 	case entity.DuiBaActivityRecyclingPublicWelfareWeekActivity:
 		//需求地址：https://jira.miotech.com/browse/MP2C-1591
 		var pointTypes = []string{"RECYCLING_CLOTHING", "RECYCLING_COMPUTER", "RECYCLING_APPLIANCE", "RECYCLING_BOOK"}

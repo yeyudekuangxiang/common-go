@@ -5,39 +5,41 @@ import (
 )
 
 var Config = app{
-	App:              appSetting{},
-	Http:             httpSetting{},
-	Database:         databaseSetting{},
-	Log:              logSetting{},
-	Weapp:            wxSetting{},
-	MioSubOA:         wxSetting{},
-	MioSrvOA:         wxSetting{},
-	Redis:            redisSetting{},
-	DuiBa:            duiBaSetting{},
-	OSS:              ossSetting{},
-	BaiDu:            baiDuSetting{},
+	App:       appSetting{},
+	Http:      httpSetting{},
+	Database:  databaseSetting{},
+	Log:       logSetting{},
+	Weapp:     wxSetting{},
+	MioSubOA:  wxSetting{},
+	MioSrvOA:  wxSetting{},
+	Redis:     redisSetting{},
+	DuiBa:     duiBaSetting{},
+	OSS:       ossSetting{},
+	BaiDu:     baiDuSetting{},
+	Java:      javaConfig{},
+	Zhuge:     zhugeConfig{},
+	AMQP:      amqpSetting{},
+	CouponRpc: rpcSetting{},
 	BaiDuImageSearch: baiDuImageSearchSetting{},
-	Java:             javaConfig{},
-	Zhuge:            zhugeConfig{},
-	AMQP:             amqpSetting{},
 }
 
 type app struct {
-	App              appSetting              `ini:"app"`
-	Http             httpSetting             `ini:"http"`
-	Database         databaseSetting         `ini:"database"`
-	Log              logSetting              `ini:"log"`
-	Weapp            wxSetting               `ini:"weapp"`
-	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis            redisSetting            `ini:"redis"`
-	DuiBa            duiBaSetting            `ini:"duiba"`
-	OSS              ossSetting              `ini:"oss"`
-	AMQP             amqpSetting             `ini:"amqp"`
-	BaiDu            baiDuSetting            `ini:"baidu"`
+	App       appSetting      `ini:"app"`
+	Http      httpSetting     `ini:"http"`
+	Database  databaseSetting `ini:"database"`
+	Log       logSetting      `ini:"log"`
+	Weapp     wxSetting       `ini:"weapp"`
+	MioSubOA  wxSetting       `ini:"mioSubOa"` //绿喵订阅号配置
+	MioSrvOA  wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
+	Redis     redisSetting    `ini:"redis"`
+	DuiBa     duiBaSetting    `ini:"duiba"`
+	OSS       ossSetting      `ini:"oss"`
+	AMQP      amqpSetting     `ini:"amqp"`
+	BaiDu     baiDuSetting    `ini:"baidu"`
+	Java      javaConfig      `ini:"java"`
+	Zhuge     zhugeConfig     `ini:"zhuge"`
+	CouponRpc rpcSetting      `ini:"couponRpc"`
 	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
-	Java             javaConfig              `ini:"java"`
-	Zhuge            zhugeConfig             `ini:"zhuge"`
 }
 type appSetting struct {
 	TokenKey string
@@ -109,6 +111,12 @@ type javaConfig struct {
 type zhugeConfig struct {
 	AppKey    string
 	AppSecret string
+}
+type rpcSetting struct {
+	Endpoints string
+	Target    string
+	NonBlock  bool
+	Timeout   int64
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {

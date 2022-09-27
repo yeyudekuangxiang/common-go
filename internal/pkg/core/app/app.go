@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"mio/pkg/wxoa"
@@ -25,4 +26,10 @@ var (
 	OssClient = new(oss.Client)
 
 	QueueProduct = new(rabbitmq.Publisher)
+
+	RpcService = new(RpcClient)
 )
+
+type RpcClient struct {
+	CouponRpcSrv couponclient.Coupon
+}

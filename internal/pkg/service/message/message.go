@@ -2,10 +2,10 @@ package message
 
 import (
 	contextRedis "context"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/track"
@@ -46,7 +46,7 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 		ToUser:           toUser,
 		TemplateID:       template.TemplateId(),
 		Page:             page,
-		MiniprogramState: subscribemessage.MiniprogramStateDeveloper,
+		MiniprogramState: subscribemessage.MiniprogramStateFormal,
 		Data:             template.ToData(),
 	})
 	if err != nil {
@@ -61,8 +61,10 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 		app.Logger.Info("小程序订阅消息发送失败，业务层，模版%s，toUser%s，错误信息%s", template.TemplateId(), toUser, ret.GetResponseError().Error())
 		return ret.ErrCode, ret.GetResponseError()
 	}
-	app.Redis.ZIncrBy(contextRedis.Background(), redisTemplateKey, 1, toUser).Err() //同一模板每人每天最多接收1条消息
-	app.Redis.ZIncrBy(contextRedis.Background(), redisUserKey, 1, toUser).Err()     //每人每天最多收到2个不同类型模板消息
+	if ret.ErrCode == 0 {
+		app.Redis.ZIncrBy(contextRedis.Background(), redisTemplateKey, 1, toUser).Err() //同一模板每人每天最多接收1条消息
+		app.Redis.ZIncrBy(contextRedis.Background(), redisUserKey, 1, toUser).Err()     //每人每天最多收到2个不同类型模板消息
+	}
 	return ret.ErrCode, nil
 }
 
@@ -83,7 +85,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		break
 	}
 	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
-	if showCount >= 100 {
+	if showCount >= 1 {
 		return []string{}
 	}
 	if redisTemplateKey != "" {

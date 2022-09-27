@@ -88,18 +88,18 @@ func apiRouter(router *gin.Engine) {
 			qnrRouter.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
 			qnrRouter.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
 		}
-		//小程序订阅消息
-		messageRouter := mustAuthRouter.Group("/message")
-		{
-			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
-			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
-		}
 		questRouter := mustAuthRouter.Group("/question")
 		{
 			//答题相关路由
 			questRouter.GET("/subject", apiutil.Format(question.DefaultSubjectController.GetList))
 			questRouter.POST("/create", apiutil.Format(question.DefaultSubjectController.Create))
 			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
+		}
+		//小程序订阅消息
+		messageRouter := mustAuthRouter.Group("/message")
+		{
+			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
+			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
 		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
@@ -217,8 +217,8 @@ func apiRouter(router *gin.Engine) {
 		//上传文件相关路由
 		uploadRouter := mustAuthRouter.Group("/upload")
 		{
-			uploadRouter.Any("/point-collect", apiutil.Format(api.DefaultUploadController.UploadPointCollectImage))
 			uploadRouter.Any("/", apiutil.Format(api.DefaultUploadController.UploadImage))
+			uploadRouter.Any("/point-collect", apiutil.Format(api.DefaultUploadController.UploadPointCollectImage))
 			uploadRouter.Any("/multipart", apiutil.Format(api.DefaultUploadController.MultipartUploadImage))
 		}
 
