@@ -1,15 +1,16 @@
 
 func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) error {
-	{{if .withCache}}{{if .containsIndexCache}}data, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
+	{{if .withCache}}{{if .containsIndexCache}}data,exist, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
 	if err!=nil{
 		return err
 	}
 
 {{end}}	{{.keys}}
-    _, err {{if .containsIndexCache}}={{else}}:={{end}} m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("delete from %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table)
-		return conn.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}})
-	}, {{.keyValues}}){{else}}query := fmt.Sprintf("delete from %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table)
-		_,err:=m.conn.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}}){{end}}
+    err {{if .containsIndexCache}}={{else}}:={{end}} m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&CouponCard{}).Error
+    if err != nil {
+        return err
+    }
+	err = m.cache.DelCtx(ctx, {{.keyValues}})
 	return err
+    {{else}}return m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(CouponCard{}).Error{{end}}
 }

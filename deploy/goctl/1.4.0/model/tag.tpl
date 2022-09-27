@@ -1,1 +1,1 @@
-`db:"{{.field}}"`
+`gorm:"{{.field}}"`
