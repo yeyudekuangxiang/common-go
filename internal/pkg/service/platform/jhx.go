@@ -87,23 +87,23 @@ func (srv JhxService) TicketCreate(tradeno string, user entity.User) error {
 	if err != nil {
 		return err
 	}
-	//response := jhxCommonResponse{}
-	response := make(map[string]interface{}, 0)
+	response := jhxCommonResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
 		return err
 	}
-	//if response.Code != 0 {
-	//	return errors.New(response.Msg)
-	//}
-	//ticketCreateResponse := &jhxTicketCreateResponse{}
-	//err = util.MapTo(response.Data, &ticketCreateResponse)
-	//if err != nil {
-	//	return err
-	//}
+	if response.Code != 0 {
+		return errors.New(response.Msg)
+	}
+	ticketCreateResponse := &jhxTicketCreateResponse{}
+	err = util.MapTo(response.Data, &ticketCreateResponse)
+	if err != nil {
+		return err
+	}
 	// todo 入库
-	//ticketCreateResponse.QrCodeStr
+	//code := ticketCreateResponse.QrCodeStr
+	//
 	fmt.Printf("%v\n", response)
 	return nil
 }
