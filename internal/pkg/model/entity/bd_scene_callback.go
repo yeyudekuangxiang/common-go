@@ -9,6 +9,7 @@ type BdSceneCallback struct {
 	OpenId         string
 	BizId          string
 	SourceKey      string
+	Body           string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }

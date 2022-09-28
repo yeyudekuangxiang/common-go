@@ -218,18 +218,19 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 			SourceKey:      "star_charge",
 		})
 		if one.ID == 0 {
+			body, _ := ccRingService.CallBack()
 			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
 				PlatformKey:    sceneUser.PlatformKey,
 				PlatformUserId: sceneUser.PlatformUserId,
 				OpenId:         sceneUser.OpenId,
 				BizId:          form.OutTradeNo,
 				SourceKey:      "star_charge",
+				Body:           body,
 				CreatedAt:      time.Now(),
 			})
 			if err != nil {
 				return
 			}
-			ccRingService.CallBack()
 		}
 	}
 }
