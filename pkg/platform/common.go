@@ -6,10 +6,11 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"sort"
+	"strings"
 )
 
 // CheckSign 验证签名
-func CheckSign(params map[string]interface{}) error {
+func CheckSign(params map[string]interface{}, joiner string) error {
 	sign := params["sign"]
 	delete(params, "sign")
 	var slice []string
@@ -19,7 +20,10 @@ func CheckSign(params map[string]interface{}) error {
 	sort.Strings(slice)
 	var signStr string
 	for _, v := range slice {
-		signStr += v + "=" + util.InterfaceToString(params[v]) + ";"
+		signStr += v + "=" + util.InterfaceToString(params[v]) + joiner
+	}
+	if joiner != ";" {
+		strings.TrimRight(signStr, joiner)
 	}
 	//验证签名
 	signMd5 := encrypt.Md5(params["platformKey"].(string) + signStr)
