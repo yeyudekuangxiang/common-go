@@ -2,40 +2,81 @@ package platform
 
 import (
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/httputil"
 )
 
-var DefaultCCRingService = NewCCRingService()
-
-func NewCCRingService() *ccRing {
-	return &ccRing{}
+type ccRingService struct {
+	Authorization string `json:"authorization"`
+	Url           string `json:"interface"`
+	Domain        string `json:"domain"`
+	Option        *ccRingOption
 }
 
-type ccRing struct {
+type ccRingOption struct {
+	MemberId            string  `json:"memberId"`
+	OrderNum            string  `json:"orderNum"`
+	DegreeOfCharge      float64 `json:"degreeOfCharge,omitempty"`
+	ProductCategoryName string  `json:"productCategoryName,omitempty"`
+	Name                string  `json:"name,omitempty"`
+	Qua                 string  `json:"qua,omitempty"`
+}
+
+type CcRingOptions func(option *ccRingOption)
+
+func NewCCRingService(token, domain, url string, opts ...CcRingOptions) *ccRingService {
+	options := &ccRingOption{}
+	for i := range opts {
+		opts[i](options)
+	}
+	return &ccRingService{
+		Authorization: token,
+		Domain:        domain,
+		Url:           url,
+		Option:        options,
+	}
+}
+
+func WithCCRingMemberId(memberId string) CcRingOptions {
+	return func(option *ccRingOption) {
+		option.MemberId = memberId
+	}
+}
+func WithCCRingDegreeOfCharge(degree float64) CcRingOptions {
+	return func(option *ccRingOption) {
+		option.DegreeOfCharge = degree
+	}
+}
+
+func WithCCRingOrderNum(orderNum string) CcRingOptions {
+	return func(option *ccRingOption) {
+		option.OrderNum = orderNum
+	}
+}
+
+func WithCCRingProductCategoryName(categoryName string) CcRingOptions {
+	return func(option *ccRingOption) {
+		option.ProductCategoryName = categoryName
+	}
+}
+func WithCCRingName(name string) CcRingOptions {
+	return func(option *ccRingOption) {
+		option.Name = name
+	}
+}
+func WithCCRingQua(qua string) CcRingOptions {
+	return func(option *ccRingOption) {
+		option.Qua = qua
+	}
 }
 
 //回调ccring
-func (c ccRing) CallBack(userInfo *entity.User, degree float64) {
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
-	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
-		scene := repository.DefaultBdSceneRepository.FindByCh("ccring")
-		if scene.ID == 0 {
-			app.Logger.Errorf("回调光环错误:%s", "未设置scene")
-			return
-		}
-		url := scene.Domain + "/api/cc-ring/external/ev-charge"
-		authToken := httputil.HttpWithHeader("Authorization", "dsaflsdkfjxcmvoxiu123moicuvhoi123")
-		queryParams := ccRingReqParams{
-			MemberId:       sceneUser.PlatformUserId,
-			DegreeOfCharge: degree,
-		}
-		_, err := httputil.PostJson(url, queryParams, authToken)
-		if err != nil {
-			app.Logger.Errorf("回调光环错误:%s", err.Error())
-			return
-		}
+func (srv ccRingService) CallBack() {
+	//回调
+	authToken := httputil.HttpWithHeader("Authorization", srv.Authorization)
+	_, err := httputil.PostJson(srv.Domain+srv.Url, srv.Option, authToken)
+	if err != nil {
+		app.Logger.Errorf("回调光环错误: post error %s", err.Error())
 		return
 	}
+	return
 }

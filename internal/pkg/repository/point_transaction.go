@@ -56,19 +56,19 @@ func (repo PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.
 	pt := entity.PointTransaction{}
 	db := repo.ctx.DB.Model(pt)
 	if by.TransactionId != "" {
-		db.Where("transaction_id", by.TransactionId)
+		db.Where("transaction_id = ?", by.TransactionId)
 	}
 	if by.Type != "" {
-		db.Where("type", by.Type)
+		db.Where("type = ?", by.Type)
 	}
 	if by.OpenId != "" {
-		db.Where("openid", by.OpenId)
+		db.Where("openid = ?", by.OpenId)
 	}
 	if by.Note != "" {
-		db.Where("note", by.Note)
+		db.Where("note = ?", by.Note)
 	}
 	if by.AdditionInfo != "" {
-		db.Where("additional_info", by.AdditionInfo)
+		db.Where("additional_info = ?", by.AdditionInfo)
 	}
 	err := db.First(&pt).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
