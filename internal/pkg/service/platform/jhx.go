@@ -126,9 +126,8 @@ func (srv JhxService) TicketNotify(sign string, params map[string]string) error 
 		return err
 	}
 	//查询库 根据tradeno获取券码
+	//app.RpcService.CouponRpcSrv.
 
-	//app.RpcService.CouponRpcSrv.GetCouponPageList()
-	
 	//如果 status 相等 不处理 返回 nil
 
 	//如果 status 不想等 根据 tadeno 更新status,used_time 返回nil
@@ -204,8 +203,10 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 	if sceneUser.ID == 0 {
 		return nil, 0, errors.New("未找到绑定关系")
 	}
+	var items []entity.BdScenePrePoint
+	var point int64
 	//获取pre_point数据
-	item, _, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
+	items, _, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
 		StartTime:      time.Now().AddDate(0, 0, -7).Format("2006-01-02 15:04:05"),
@@ -213,11 +214,12 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 		Status:         1,
 	})
 	if err != nil {
-		return nil, 0, err
+		return items, 0, err
 	}
 	//获取现有积分
-	point := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: sceneUser.OpenId})
-	return item, point.Balance, nil
+	pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: sceneUser.OpenId})
+	point = pointInfo.Balance
+	return items, point, nil
 }
 
 //消费气泡数据
@@ -264,7 +266,17 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 }
 
 //jhx 卡券领取记录
-func (srv JhxService) CouponList() {
+func (srv JhxService) CouponList(sign string, params map[string]string) {
+
+}
+
+//
+func (srv JhxService) MyOrder(sign string, params map[string]string) {
+
+}
+
+//
+func (srv JhxService) MyCertificate(sign string, params map[string]string) {
 
 }
 

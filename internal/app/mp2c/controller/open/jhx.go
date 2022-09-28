@@ -147,3 +147,49 @@ func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
 		"point": point,
 	}, nil
 }
+
+//我的兑换
+func (ctr JhxController) MyOrder(ctx *gin.Context) (gin.H, error) {
+	form := PreCollectRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := params["sign"]
+	delete(params, "sign")
+	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService.MyOrder(sign, params)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list": nil,
+	}, nil
+}
+
+//我的证书
+func (ctr JhxController) MyCertificate(ctx *gin.Context) (gin.H, error) {
+	form := PreCollectRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := params["sign"]
+	delete(params, "sign")
+	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService.MyCertificate(sign, params)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list": nil,
+	}, nil
+}
