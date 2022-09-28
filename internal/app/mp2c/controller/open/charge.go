@@ -90,12 +90,14 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
-	} else {
-		if totalPoint > scene.PointLimit {
-			fmt.Println("charge 充电量限制修正 ", form, thisPoint, lastPoint)
-			thisPoint = scene.PointLimit - lastPoint
-			totalPoint = scene.PointLimit
-		}
+		return nil, nil
+		//return nil, errors.New("充电获取积分已达到上限")
+	}
+
+	if totalPoint > scene.PointLimit {
+		fmt.Println("charge 充电量限制修正 ", form, thisPoint, lastPoint)
+		thisPoint = scene.PointLimit - lastPoint
+		totalPoint = scene.PointLimit
 	}
 
 	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
@@ -132,7 +134,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			fmt.Println("charge 加碳失败", form)
 		}
 	}
-	//绿喵回调第三方
 
 	//发券
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
