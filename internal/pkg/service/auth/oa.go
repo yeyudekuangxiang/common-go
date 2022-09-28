@@ -5,10 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chanxuehong/wechat/mp/jssdk"
-	mpoauth2 "github.com/chanxuehong/wechat/mp/oauth2"
-	"github.com/chanxuehong/wechat/oauth2"
-	"github.com/go-redis/redis/v8"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -21,6 +17,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/chanxuehong/wechat/mp/jssdk"
+	mpoauth2 "github.com/chanxuehong/wechat/mp/oauth2"
+	"github.com/chanxuehong/wechat/oauth2"
+	"github.com/go-redis/redis/v8"
 )
 
 const (

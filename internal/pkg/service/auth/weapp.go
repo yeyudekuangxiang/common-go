@@ -3,9 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/medivhzhan/weapp/v3"
-	"github.com/panjf2000/ants/v2"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -16,6 +13,10 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"
+
+	"github.com/medivhzhan/weapp/v3"
+	"github.com/panjf2000/ants/v2"
+	"github.com/pkg/errors"
 )
 
 var userDealPool, _ = ants.NewPool(100)

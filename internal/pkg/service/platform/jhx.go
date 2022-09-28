@@ -271,42 +271,42 @@ func (srv JhxService) CouponList(sign string, params map[string]string) {
 }
 
 //
-func (srv JhxService) MyAccountInfo(sign string, params map[string]string) (*service.UserAccountInfo, error) {
-	err := srv.checkSign(sign, params)
-	if err != nil {
-		return &service.UserAccountInfo{}, err
-	}
-	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return &service.UserAccountInfo{}, errors.New("未找到绑定关系")
-	}
-	user, err := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
-	if err != nil {
-		return &service.UserAccountInfo{}, err
-	}
-	accountInfo, err := service.DefaultUserService.AccountInfo(user.ID)
-	if err != nil {
-		return &service.UserAccountInfo{}, err
-	}
-	return accountInfo, nil
-}
+//func (srv JhxService) MyAccountInfo(sign string, params map[string]string) (*service.UserAccountInfo, error) {
+//	err := srv.checkSign(sign, params)
+//	if err != nil {
+//		return &service.UserAccountInfo{}, err
+//	}
+//	//根据 platform_member_id 获取 openid
+//	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
+//	if sceneUser.ID == 0 {
+//		return &service.UserAccountInfo{}, errors.New("未找到绑定关系")
+//	}
+//	userInfo, err := user.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
+//	if err != nil {
+//		return &service.UserAccountInfo{}, err
+//	}
+//	accountInfo, err := user.DefaultUserService.AccountInfo(userInfo.ID)
+//	if err != nil {
+//		return &service.UserAccountInfo{}, err
+//	}
+//	return accountInfo, nil
+//}
 
 //
-func (srv JhxService) MyOrder(sign string, params map[string]string) error {
-	err := srv.checkSign(sign, params)
-	if err != nil {
-		return err
-	}
-	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return errors.New("未找到绑定关系")
-	}
-	user, _ := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
-	fmt.Printf("user:%v", user)
-	return nil
-}
+//func (srv JhxService) MyOrder(sign string, params map[string]string) error {
+//	err := srv.checkSign(sign, params)
+//	if err != nil {
+//		return err
+//	}
+//	//根据 platform_member_id 获取 openid
+//	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
+//	if sceneUser.ID == 0 {
+//		return errors.New("未找到绑定关系")
+//	}
+//	userInfo, _ := user.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
+//	fmt.Printf("user:%v", userInfo)
+//	return nil
+//}
 
 //
 func (srv JhxService) MyCertificate(sign string, params map[string]string) {
