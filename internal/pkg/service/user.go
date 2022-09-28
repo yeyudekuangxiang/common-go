@@ -138,7 +138,22 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	}
 	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
 	user.ChannelId = ch.Cid
-	return &user, repository.DefaultUserRepository.Save(&user)
+	ret := repository.DefaultUserRepository.Save(&user)
+
+	//上报到诸葛
+	zhuGeAttr := make(map[string]interface{}, 0)
+	zhuGeAttr["来源"] = param.Source
+	zhuGeAttr["渠道"] = ch.Name
+	if ret == nil {
+		zhuGeAttr["是否成功"] = "成功"
+
+	} else {
+		zhuGeAttr["是否成功"] = "失败"
+		zhuGeAttr["失败原因"] = ret.Error()
+	}
+
+	track.DefaultZhuGeService().Track(config.ZhuGeEventName.NewUserAdd, param.OpenId, zhuGeAttr)
+	return &user, ret
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {
 	if unionid == "" || id == 0 {
