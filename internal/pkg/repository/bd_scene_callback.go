@@ -24,6 +24,9 @@ func (repo BdSceneCallbackRepository) FindOne(by GetSceneCallback) entity.BdScen
 	if by.PlatformUserId != "" {
 		query.Where("platform_user_id = ?", by.PlatformUserId)
 	}
+	if by.BizId != "" {
+		query.Where("biz_id = ?", by.BizId)
+	}
 	err := query.First(&item).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
