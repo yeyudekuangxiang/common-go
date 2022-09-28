@@ -32,17 +32,5 @@ type PreCollectRequest struct {
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	Amount      string `json:"amount,omitempty" form:"amount"`
 	PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
+	Sign        string `json:"sign" form:"sign"`
 }
-
-//type GetPreCollectRequest struct {
-//	MemberId    string `json:"memberId" from:"memberId"`
-//	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
-//	//Amount      string `json:"amount,omitempty" form:"amount"`
-//	//PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
-//}
-//
-//type ConsumeCollectRequest struct {
-//	MemberId    string `json:"memberId" from:"memberId"`
-//	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
-//	PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
-//}

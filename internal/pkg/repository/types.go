@@ -300,4 +300,6 @@ type GetScenePrePoint struct {
 	OpenId         string `json:"openId"`
 	StartTime      string `json:"startTime"`
 	EndTime        string `json:"endTime"`
+	Id             int64  `json:"id"`
+	Status         int    `json:"status"`
 }

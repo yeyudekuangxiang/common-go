@@ -10,6 +10,7 @@ type BdScenePrePoint struct {
 	PlatformUserId string    `json:"platformUserId,omitempty"` //外站用户id
 	Point          string    `json:"phone,omitempty"`          //外站用户手机
 	OpenId         string    `json:"openId,omitempty"`         //本站用户openId
+	Status         int       `json:"status"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }
