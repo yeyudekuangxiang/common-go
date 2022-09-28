@@ -14,8 +14,8 @@ type ZyhRepository struct {
 	ctx *context.MioContext
 }
 
-func (repo ZyhRepository) Save(carbon *entity.Zyh) error {
-	return repo.ctx.DB.Save(carbon).Error
+func (repo ZyhRepository) Save(zyh *entity.Zyh) error {
+	return repo.ctx.DB.Save(zyh).Error
 }
 
 func (repo ZyhRepository) FindBy(by FindZyhById) entity.Zyh {

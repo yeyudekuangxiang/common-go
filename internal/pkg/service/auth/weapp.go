@@ -85,7 +85,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		}
 
 		if thirdId != "" && cid == 1057 {
-			activityService.NewZyhService(context.NewMioContext()).GetInfoBy(srv_types.GetZyhGetInfoByDTO{
+			activityService.NewZyhService(context.NewMioContext()).Create(srv_types.GetZyhGetInfoByDTO{
 				Openid: whoAmiResp.Data.Openid,
 				VolId:  thirdId,
 			})

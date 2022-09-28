@@ -27,8 +27,17 @@ func (srv ZyhService) GetInfoBy(dto srv_types.GetZyhGetInfoByDTO) (entity.Zyh, e
 		Openid: dto.Openid,
 		VolId:  dto.VolId,
 	})
-	if info.Id == 0 {
-		return entity.Zyh{}, errors.New("无用户信息")
-	}
 	return info, nil
+}
+
+func (srv ZyhService) Create(dto srv_types.GetZyhGetInfoByDTO) error {
+	info, _ := srv.GetInfoBy(dto)
+	if info.Id == 0 {
+		//入库
+		return srv.zyhRepo.Save(&entity.Zyh{
+			Openid: dto.Openid,
+			VolId:  dto.VolId,
+		})
+	}
+	return errors.New("志愿汇用户已存在")
 }
