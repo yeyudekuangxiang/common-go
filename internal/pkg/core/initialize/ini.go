@@ -18,6 +18,7 @@ func InitIni(source interface{}) {
 		log.Panic(err)
 	}
 	log.Println("初始化配置文件成功")
+	log.Printf("%+v\n", config.Config)
 	afterInitIni()
 }
 
