@@ -31,7 +31,7 @@ type OaService struct {
 	Platform entity.UserSource
 }
 
-func (srv OaService) LoginByCode(code string, cid int64) (string, error) {
+func (srv OaService) LoginByCode(code string, cid int64) (string, string, error) {
 	setting := config.FindOaSetting(srv.Platform)
 
 	oauth2Client := oauth2.Client{
@@ -39,12 +39,12 @@ func (srv OaService) LoginByCode(code string, cid int64) (string, error) {
 	}
 	token, err := oauth2Client.ExchangeToken(code)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	userinfo, err := mpoauth2.GetUserInfo(token.AccessToken, token.OpenId, "", nil)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	sexStr := ""
@@ -64,9 +64,10 @@ func (srv OaService) LoginByCode(code string, cid int64) (string, error) {
 		ChannelId: cid,
 	})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return service.DefaultUserService.CreateUserToken(user.ID)
+	tokenValue, errToken := service.DefaultUserService.CreateUserToken(user.ID)
+	return tokenValue, userinfo.OpenId, errToken
 }
 func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, u string) bool {
 	parse, err := url.Parse(u)
