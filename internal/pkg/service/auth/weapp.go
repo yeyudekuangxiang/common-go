@@ -25,7 +25,7 @@ type WeappService struct {
 	client *weapp.Client
 }
 
-func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64) (*entity.User, string, bool, error) {
+func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64, thirdId string) (*entity.User, string, bool, error) {
 	//调用java那边登陆接口
 	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
@@ -81,6 +81,10 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		})
 		if err != nil {
 			return nil, "", false, err
+		}
+
+		if thirdId != "" && cid == 1057 {
+
 		}
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)

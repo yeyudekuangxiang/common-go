@@ -26,4 +26,5 @@ type WeappAuthForm struct {
 	PartnershipWith string `json:"partnershipWith" form:"partnershipWith" alias:"partnershipWith"`
 	InvitedBy       string `json:"invitedBy" form:"invitedBy" alias:"invitedBy"`
 	Cid             int64  `json:"cid" form:"cid" alias:"cid"`
+	ThirdId         string `json:"thirdId" form:"thirdId" alias:"thirdId"`
 }
