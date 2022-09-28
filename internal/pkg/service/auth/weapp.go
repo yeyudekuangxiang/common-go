@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	activityService "mio/internal/pkg/service/activity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -84,7 +85,10 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		}
 
 		if thirdId != "" && cid == 1057 {
-
+			activityService.NewZyhService(context.NewMioContext()).GetInfoBy(srv_types.GetZyhGetInfoByDTO{
+				Openid: whoAmiResp.Data.Openid,
+				VolId:  thirdId,
+			})
 		}
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)

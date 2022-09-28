@@ -53,7 +53,7 @@ type FindSchoolBy struct {
 	CityId     int64   `json:"cityId"`
 }
 
-type FindZyhBy struct {
+type FindZyhById struct {
 	Openid string `json:"openid"`
 	VolId  string `json:"volId"`
 }

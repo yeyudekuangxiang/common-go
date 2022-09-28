@@ -18,7 +18,7 @@ func (repo ZyhRepository) Save(carbon *entity.Zyh) error {
 	return repo.ctx.DB.Save(carbon).Error
 }
 
-func (repo ZyhRepository) FindBy(by FindZyhBy) entity.Zyh {
+func (repo ZyhRepository) FindBy(by FindZyhById) entity.Zyh {
 	zyh := entity.Zyh{}
 	db := repo.ctx.DB.Model(zyh)
 	if by.Openid != "" {

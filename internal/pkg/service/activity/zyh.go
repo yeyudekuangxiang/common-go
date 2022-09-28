@@ -1,8 +1,11 @@
 package activity
 
 import (
+	"errors"
 	"mio/internal/pkg/core/context"
+	entity "mio/internal/pkg/model/entity/activity"
 	repoActivity "mio/internal/pkg/repository/activity"
+	"mio/internal/pkg/service/srv_types"
 )
 
 var DefaultAnswerService = ZyhService{ctx: context.NewMioContext()}
@@ -19,13 +22,13 @@ type ZyhService struct {
 	zyhRepo repoActivity.ZyhRepository
 }
 
-/*
-func (srv ZyhService) GetInfoBy(dto srv_types.DeleteQuestionAnswerDTO) error {
-	a := srv.zyhRepo.FindBy(repoActivity.FindZyhBy{
-		Openid: "111",
-		VolId:  "1111",
+func (srv ZyhService) GetInfoBy(dto srv_types.GetZyhGetInfoByDTO) (entity.Zyh, error) {
+	info := srv.zyhRepo.FindBy(repoActivity.FindZyhById{
+		Openid: dto.Openid,
+		VolId:  dto.VolId,
 	})
-	println(a)
-    return nil
-	//return a
-}*/
+	if info.Id == 0 {
+		return entity.Zyh{}, errors.New("无用户信息")
+	}
+	return info, nil
+}
