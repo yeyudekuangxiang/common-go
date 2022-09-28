@@ -39,7 +39,7 @@ build-manual:
   cache:
     key: mp2c-go-vendor-cache
     paths:
-      - vendor
+      - ./vendor
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
@@ -49,7 +49,6 @@ build-manual:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
   script:
     - ls
-    - ls vendor
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
