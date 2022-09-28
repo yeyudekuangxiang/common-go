@@ -14,7 +14,11 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      {{ if eq .Release.Namespace "prod" }}
+      serviceAccountName: find-endpoints-prod
+      {{ else }}
       serviceAccountName: find-endpoints
+      {{ end }}
       containers:
         - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           env:
