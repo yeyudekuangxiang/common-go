@@ -7,6 +7,7 @@ type BdSceneCallback struct {
 	PlatformKey    string
 	PlatformUserId string
 	OpenId         string
+	BizId          string
 	SourceKey      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

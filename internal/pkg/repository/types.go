@@ -299,6 +299,7 @@ type GetSceneCallback struct {
 	PlatformKey    string
 	PlatformUserId string
 	OpenId         string
+	BizId          string
 	SourceKey      string
 	StartTime      string
 	EndTime        string

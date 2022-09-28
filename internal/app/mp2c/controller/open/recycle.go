@@ -19,6 +19,7 @@ import (
 	"mio/pkg/platform"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var DefaultRecycleController = RecycleController{}
@@ -270,6 +271,7 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 			PlatformKey:    sceneUser.PlatformKey,
 			PlatformUserId: sceneUser.PlatformUserId,
 			OpenId:         sceneUser.OpenId,
+			BizId:          form.OrderNo,
 			SourceKey:      "oola",
 		})
 		if one.ID == 0 {
@@ -278,7 +280,9 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 				PlatformKey:    sceneUser.PlatformKey,
 				PlatformUserId: sceneUser.PlatformUserId,
 				OpenId:         sceneUser.OpenId,
+				BizId:          form.OrderNo,
 				SourceKey:      "oola",
+				CreatedAt:      time.Now(),
 			})
 			if err != nil {
 				return

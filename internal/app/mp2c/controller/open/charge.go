@@ -214,6 +214,7 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 			PlatformKey:    sceneUser.PlatformKey,
 			PlatformUserId: sceneUser.PlatformUserId,
 			OpenId:         sceneUser.OpenId,
+			BizId:          form.OutTradeNo,
 			SourceKey:      "star_charge",
 		})
 		if one.ID == 0 {
@@ -221,7 +222,9 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 				PlatformKey:    sceneUser.PlatformKey,
 				PlatformUserId: sceneUser.PlatformUserId,
 				OpenId:         sceneUser.OpenId,
+				BizId:          form.OutTradeNo,
 				SourceKey:      "star_charge",
+				CreatedAt:      time.Now(),
 			})
 			if err != nil {
 				return
