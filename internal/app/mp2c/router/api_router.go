@@ -223,6 +223,8 @@ func apiRouter(router *gin.Engine) {
 
 		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
 		mustAuthRouter.POST("/order/submit-from-event", apiutil.Format(api.DefaultOrderController.SubmitOrderForEvent))
+		mustAuthRouter.POST("/order/submit-from-event-gd", apiutil.Format(api.DefaultOrderController.SubmitOrderForEventGD))
+
 		mustAuthRouter.GET("/order/list", apiutil.FormatInterface(api.DefaultOrderController.GetUserOrderList))
 
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))

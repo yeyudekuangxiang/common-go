@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	eevent "mio/internal/pkg/model/entity/event"
 	repository2 "mio/internal/pkg/repository"
+	repositoryActivity "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/platform"
@@ -28,14 +29,17 @@ import (
 	"time"
 )
 
-var DefaultOrderService = NewOrderService(repository2.DefaultOrderRepository)
+var DefaultOrderService = NewOrderService(repository2.DefaultOrderRepository, repository2.DefaultOrderRepository, repository2.DefaultUserRepository, repositoryActivity.DefaultGDDonationBookRepository)
 
-func NewOrderService(repo repository2.OrderRepository) OrderService {
-	return OrderService{repo: repo}
+func NewOrderService(repo repository2.OrderRepository, repository repository2.OrderRepository, userRepository repository2.UserRepository, repositoryActivity repositoryActivity.GDDonationBookRepository) OrderService {
+	return OrderService{repo: repo, repoOrder: repository, repoUser: userRepository, repoGDBook: repositoryActivity}
 }
 
 type OrderService struct {
-	repo repository2.OrderRepository
+	repo       repository2.OrderRepository
+	repoOrder  repository2.OrderRepository
+	repoUser   repository2.UserRepository
+	repoGDBook repositoryActivity.GDDonationBookRepository
 }
 
 // CalculateAndCheck 计算商品价格并且检查库存
@@ -461,6 +465,59 @@ func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventP
 		UploadCode:    code,
 	}, nil
 }
+
+func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEventGDParam) (*srv_types.SubmitOrderForEventResult, error) {
+	if !util2.DefaultLock.Lock("SubmitOrderForEventGD"+param.OpenId, time.Second*10) {
+		return nil, errno.ErrLimit
+	}
+	defer util2.DefaultLock.UnLock("SubmitOrderForEventGD" + param.OpenId)
+	return &srv_types.SubmitOrderForEventResult{
+		CertificateNo: "CN511327209092207152-3",
+		UploadCode:    "68584147-617c-448a-aa12-7f4be0680978",
+	}, nil
+	wechatServiceOpenId := param.WechatServiceOpenId
+	info := srv.repoUser.GetUserBy(repository2.GetUserBy{OpenId: wechatServiceOpenId})
+	wechatServiceUid := info.ID
+	if wechatServiceUid == 0 {
+		return nil, errors.New("不满足领取条件")
+	}
+	wechatServiceUser := srv.repoGDBook.GetUserBy(repositoryActivity.FindRecordBy{UserId: wechatServiceUid})
+	if wechatServiceUser.UserId == 0 {
+		return nil, errors.New("您不满足领取条件哦")
+	}
+
+	openid := param.OpenId
+	//判断是否领取过证书
+	var ItemIdSlice = []string{"cbddf0af60f402f717b0987b79709209", "b00064a760f400a42850b68e1f783c22"}
+	orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{
+		Openid:      openid,
+		ItemIdSlice: ItemIdSlice})
+	if orderTotal >= 1 {
+		return nil, errors.New("您已经领取过证书了")
+	}
+	order, errorOrder := srv.SubmitOrderForEvent(srv_types.SubmitOrderForEventParam{UserId: param.UserId, EventId: param.EventId})
+	if errorOrder != nil {
+		return nil, errorOrder
+	}
+
+	//发放积分
+	point := 500
+	pointService := NewPointService(context.NewMioContext())
+	_, errInc := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       openid,
+		Type:         entity.POINT_PARTNERSHIP,
+		ChangePoint:  int64(point),
+		BizId:        util2.UUID(),
+		AdditionInfo: order.UploadCode + "#" + order.UploadCode + "#" + strconv.Itoa(point),
+		Note:         order.UploadCode + "#" + order.UploadCode,
+	})
+	if errInc != nil {
+		fmt.Println("广东教育学会，发证书 加积分失败，失败原因", errInc.Error())
+		return nil, errors.New(errInc.Error())
+	}
+	return order, nil
+}
+
 func (srv OrderService) afterSubmitEventOrder(userId int64, evId string, limit eevent.EventLimit, badge *entity.Badge) {
 	app.Logger.Info("提交兑换订单后", evId, config.Constants.StarCouponEventId)
 	if config.Constants.StarCouponEventId == evId {
