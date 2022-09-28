@@ -24,7 +24,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 }
 
-func newDB(c config.DbConf) (*gorm.DB,err) {
+func newDB(c config.DbConf) (*gorm.DB,error) {
     return db.NewDB(db.Config{
 		Type:         c.Type,
 		Host:         c.Host,
