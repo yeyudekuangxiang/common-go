@@ -10,9 +10,13 @@ import (
 )
 
 func InitRpc() {
+	var endpoints []string
+	if config.Config.CouponRpc.Endpoints != "" {
+		endpoints = strings.Split(config.Config.CouponRpc.Endpoints, ",")
+	}
 	app.RpcService = &app.RpcClient{
 		CouponRpcSrv: couponclient.NewCoupon(zrpc.MustNewClient(zrpc.RpcClientConf{
-			Endpoints: strings.Split(config.Config.CouponRpc.Endpoints, ","),
+			Endpoints: endpoints,
 			Target:    config.Config.CouponRpc.Target,
 			NonBlock:  config.Config.CouponRpc.NonBlock,
 			Timeout:   config.Config.CouponRpc.Timeout,

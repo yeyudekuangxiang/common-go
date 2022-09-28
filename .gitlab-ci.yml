@@ -13,7 +13,7 @@ build:
   cache:
     key: mp2c-go-vendor-cache
     paths:
-      - vendor
+      - ./vendor
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
@@ -22,6 +22,7 @@ build:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
   script:
+    - ls
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
@@ -38,7 +39,7 @@ build-manual:
   cache:
     key: mp2c-go-vendor-cache
     paths:
-      - vendor
+      - ./vendor
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
@@ -47,6 +48,7 @@ build-manual:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
   script:
+    - ls
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
