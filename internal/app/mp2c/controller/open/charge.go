@@ -75,7 +75,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		fmt.Println("用户风险等级过高 ", form)
 		return nil, errors.New("账户风险等级过高")
 	}
-
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
@@ -83,6 +82,9 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	lastPoint, _ := strconv.Atoi(cmd.Val())
 	thisPoint0, _ := strconv.ParseFloat(form.TotalPower, 64)
+
+	//回调光环
+	go ctr.turnPlatform(userInfo, form)
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
 	totalPoint := lastPoint + thisPoint
@@ -131,8 +133,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 	//绿喵回调第三方
-	ccRingService := platform.NewCCRingService()
-	go ccRingService.CallBack(userInfo, thisPoint0)
+
 	//发券
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
@@ -190,5 +191,45 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 			return
 		}
 		return
+	}
+}
+
+//回调的回调
+func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeForm) {
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUser(user.OpenId, "ccring")
+	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
+		ccringScene := service.DefaultBdSceneService.FindByCh("ccring")
+		if ccringScene.ID == 0 {
+			app.Logger.Info("ccring 渠道查询失败")
+			return
+		}
+		point, _ := strconv.ParseFloat(form.TotalPower, 64)
+		ccRingService := platform.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/ev-charge",
+			platform.WithCCRingOrderNum(form.OutTradeNo),
+			platform.WithCCRingMemberId(sceneUser.PlatformUserId),
+			platform.WithCCRingDegreeOfCharge(point),
+		)
+		//记录
+		one := repository.DefaultBdSceneCallbackRepository.FindOne(repository.GetSceneCallback{
+			PlatformKey:    sceneUser.PlatformKey,
+			PlatformUserId: sceneUser.PlatformUserId,
+			OpenId:         sceneUser.OpenId,
+			BizId:          form.OutTradeNo,
+			SourceKey:      "star_charge",
+		})
+		if one.ID == 0 {
+			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
+				PlatformKey:    sceneUser.PlatformKey,
+				PlatformUserId: sceneUser.PlatformUserId,
+				OpenId:         sceneUser.OpenId,
+				BizId:          form.OutTradeNo,
+				SourceKey:      "star_charge",
+				CreatedAt:      time.Now(),
+			})
+			if err != nil {
+				return
+			}
+			ccRingService.CallBack()
+		}
 	}
 }

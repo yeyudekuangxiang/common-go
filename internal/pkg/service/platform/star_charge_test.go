@@ -2,6 +2,7 @@ package platform
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -18,4 +19,6 @@ func TestTime(t *testing.T) {
 	fmt.Printf("%s\n", startTime)
 	fmt.Printf("%s\n", endTime)
 	fmt.Printf("%s\n", time.Now())
+	fmt.Printf(strconv.FormatFloat(3.1415926, 'f', 2, 64))
+
 }

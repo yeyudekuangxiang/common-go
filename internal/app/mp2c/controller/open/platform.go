@@ -47,7 +47,9 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 		sceneUser.OpenId = user.OpenId
 		sceneUser.UnionId = user.UnionId
 		err := service.DefaultBdSceneUserService.Create(sceneUser)
-		app.Logger.Errorf("create db_scene_user error:%s", err.Error())
+		if err != nil {
+			app.Logger.Errorf("create db_scene_user error:%s", err.Error())
+		}
 		return nil, nil
 	}
 	return nil, nil

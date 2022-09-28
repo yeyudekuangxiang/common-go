@@ -63,19 +63,17 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
 	if userInfo.ID == 0 {
-		fmt.Println("charge 未找到用户 ", form)
+		fmt.Println("oola 未找到用户 ", form)
 		return nil, errno.ErrUserNotFound
 	}
 
-	//避开重放
-	if !util.DefaultLock.Lock(form.Type+form.OrderNo, 24*3600*30*time.Second) {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
+	//检查重复订单
+	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
+		return nil, err
 	}
-	//if err = RecycleService.CheckOrder(userInfo.OpenId, form.OrderNo); err != nil {
-	//	return nil, err
-	//}
+
+	//回调光环
+	go ctr.turnPlatform(userInfo, form)
 
 	//匹配大类型
 	typeName := RecycleService.GetType(form.ProductCategoryName)
@@ -107,8 +105,8 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Type:         typeName,
 		ChangePoint:  point,
 		BizId:        util.UUID(),
-		AdditionInfo: form.OrderNo + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
-		Note:         form.OrderNo,
+		AdditionInfo: form.OrderNo + "#" + strconv.FormatFloat(currCo2, 'f', 2, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
+		Note:         scene.Ch + "#" + form.OrderNo,
 	})
 	if err != nil {
 		fmt.Println("oola 旧物回收 加积分失败 ", form)
@@ -126,6 +124,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Ip:      "",
 	})
 	println(carbon)
+
 	return gin.H{}, nil
 }
 
@@ -199,7 +198,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	typeText := RecycleService.GetText(typeName)
 
 	//幂等 检查重复订单
-	if err = RecycleService.CheckOrder(userInfo.OpenId, form.Data.OrderSn); err != nil {
+	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.Data.OrderSn); err != nil {
 		return nil, err
 	}
 
@@ -228,7 +227,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		ChangePoint:  point,
 		BizId:        util.UUID(),
 		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.Data.Phone,
-		Note:         form.Data.OrderSn,
+		Note:         scene.Ch + "#" + form.Data.OrderSn,
 	})
 
 	carbonString := fmt.Sprintf("%f", currCo2)
@@ -251,7 +250,45 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 }
 
 //回调的回调
-func (ctr RecycleController) turnPlatform(params map[string]interface{}) map[string]interface{} {
-
-	return nil
+func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePushForm) {
+	//绿喵回调ccring
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUser(user.OpenId, "ccring")
+	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
+		ccringScene := service.DefaultBdSceneService.FindByCh("ccring")
+		if ccringScene.ID == 0 {
+			app.Logger.Info("ccring 渠道查询失败")
+			return
+		}
+		ccRingService := platformService.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/recycle",
+			platformService.WithCCRingOrderNum(form.OrderNo),
+			platformService.WithCCRingMemberId(sceneUser.PlatformUserId),
+			platformService.WithCCRingProductCategoryName(form.ProductCategoryName),
+			platformService.WithCCRingName(form.Name),
+			platformService.WithCCRingQua(form.Qua),
+		)
+		//记录
+		one := repository.DefaultBdSceneCallbackRepository.FindOne(repository.GetSceneCallback{
+			PlatformKey:    sceneUser.PlatformKey,
+			PlatformUserId: sceneUser.PlatformUserId,
+			OpenId:         sceneUser.OpenId,
+			BizId:          form.OrderNo,
+			SourceKey:      "oola",
+		})
+		if one.ID == 0 {
+			ccRingService.CallBack()
+			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
+				PlatformKey:    sceneUser.PlatformKey,
+				PlatformUserId: sceneUser.PlatformUserId,
+				OpenId:         sceneUser.OpenId,
+				BizId:          form.OrderNo,
+				SourceKey:      "oola",
+				CreatedAt:      time.Now(),
+			})
+			if err != nil {
+				return
+			}
+			ccRingService.CallBack()
+		}
+	}
+	return
 }
