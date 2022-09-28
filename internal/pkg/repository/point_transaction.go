@@ -76,6 +76,29 @@ func (repo PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.
 	}
 	return pt
 }
+
+func (repo PointTransactionRepository) FindByValue(by FindPointTransactionByValue) entity.PointTransaction {
+	pt := entity.PointTransaction{}
+	db := repo.ctx.DB.Model(pt)
+	if by.Type != "" {
+		db.Where("type = ?", by.Type)
+	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
+	if by.ChangeType == "dec" {
+		db.Where("value < ?", 0)
+	}
+	if by.ChangeType == "inc" {
+		db.Where("value > ?", 0)
+	}
+	err := db.First(&pt).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return pt
+}
+
 func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.PointTransaction, int64) {
 	list := make([]entity.PointTransaction, 0)
 

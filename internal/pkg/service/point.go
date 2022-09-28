@@ -17,13 +17,14 @@ import (
 )
 
 func NewPointService(ctx *context.MioContext) PointService {
-	return PointService{ctx: ctx, repo: repository.NewPointRepository(ctx), repoInvite: repository.NewInviteRepository(ctx)}
+	return PointService{ctx: ctx, repo: repository.NewPointRepository(ctx), repoInvite: repository.NewInviteRepository(ctx), repoPointTransaction: repository.NewPointTransactionRepository(ctx)}
 }
 
 type PointService struct {
-	ctx        *context.MioContext
-	repo       *repository.PointRepository
-	repoInvite *repository.InviteRepository
+	ctx                  *context.MioContext
+	repo                 *repository.PointRepository
+	repoInvite           *repository.InviteRepository
+	repoPointTransaction *repository.PointTransactionRepository
 }
 
 // FindByUserId 获取用户积分
@@ -279,4 +280,37 @@ func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage
 		IsFail:      util.Ternary(failMessage == "", false, true).Bool(),
 		FailMessage: failMessage,
 	})
+
+	if dto.ChangePoint > 0 {
+		ret := srv.repoPointTransaction.FindByValue(repository.FindPointTransactionByValue{
+			OpenId:     dto.OpenId,
+			ChangeType: "inc",
+		})
+		//第一次新增积分，上报
+		if ret.ID == 0 {
+			zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
+			zhuGeAttr["openid"] = dto.OpenId
+			zhuGeAttr["积分类型"] = dto.Type
+			zhuGeAttr["变动方式"] = "inc"
+			zhuGeAttr["变动数量"] = uint(dto.ChangePoint)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.FirstIncPoint, dto.OpenId, zhuGeAttr)
+		}
+	}
+
+	if dto.ChangePoint < 0 {
+		retDec := srv.repoPointTransaction.FindByValue(repository.FindPointTransactionByValue{
+			OpenId:     dto.OpenId,
+			ChangeType: "dec",
+		})
+		//第一次减积分，上报
+		if retDec.ID == 0 {
+			zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
+			zhuGeAttr["openid"] = dto.OpenId
+			zhuGeAttr["积分类型"] = dto.Type
+			zhuGeAttr["变动方式"] = "dec"
+			zhuGeAttr["变动数量"] = uint(dto.ChangePoint)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.FirstDecPoint, dto.OpenId, zhuGeAttr)
+		}
+	}
+
 }

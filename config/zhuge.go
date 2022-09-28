@@ -9,6 +9,9 @@ type zhuGeEventName struct {
 	UserIdentify           string
 	UserInvitedBy          string
 	MessageMiniSubscribe   string
+	FirstIncPoint          string
+	FirstDecPoint          string
+	NewUserAdd             string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -19,4 +22,7 @@ var ZhuGeEventName = zhuGeEventName{
 	UserIdentify:           "用户渠道",
 	UserInvitedBy:          "用户邀请关系上报",
 	MessageMiniSubscribe:   "小程序订阅消息",
+	FirstIncPoint:          "首次赚积分",
+	FirstDecPoint:          "首次消耗积分",
+	NewUserAdd:             "新用户",
 }

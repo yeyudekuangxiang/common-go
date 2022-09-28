@@ -187,6 +187,11 @@ type FindPointTransactionBy struct {
 	Note          string
 	AdditionInfo  string
 }
+type FindPointTransactionByValue struct {
+	OpenId     string
+	Type       string
+	ChangeType string
+}
 type FindStepHistoryBy struct {
 	OpenId        string
 	Day           model.Time
