@@ -6,11 +6,11 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
 	}
 
 {{end}}	{{.keys}}
-    err {{if .containsIndexCache}}={{else}}:={{end}} m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&CouponCard{}).Error
+    err {{if .containsIndexCache}}={{else}}:={{end}} m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&{{.upperStartCamelObject}}{}).Error
     if err != nil {
         return err
     }
 	err = m.cache.DelCtx(ctx, {{.keyValues}})
 	return err
-    {{else}}return m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(CouponCard{}).Error{{end}}
+    {{else}}return m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&{{.upperStartCamelObject}}{}).Error{{end}}
 }

@@ -8,11 +8,12 @@ info (
 )
 
 type request {
-	// TODO: add members here and delete this comment
+	UserId int64 `form:"userId" json:"userId" binding:"required" alias:"userId"`
 }
 
 type response {
-	// TODO: add members here and delete this comment
+	UserId int64 `json:"userId"`
+	Nickname string `json:"nickname"`
 }
 
 service {{.serviceName}} {

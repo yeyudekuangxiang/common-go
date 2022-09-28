@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"{{.projectPath}}/common/interceptor/rpcserver"
+    "{{.projectPath}}/common/errno"
 
 	{{.imports}}
 
@@ -21,6 +22,9 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	fmt.Printf("配置文件 %+v\n",c)
+	errno.Debug = c.Debug
+
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
