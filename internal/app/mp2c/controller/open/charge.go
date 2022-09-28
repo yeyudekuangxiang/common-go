@@ -201,6 +201,7 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 		ccringScene := service.DefaultBdSceneService.FindByCh("ccring")
 		if ccringScene.ID == 0 {
 			app.Logger.Info("ccring 渠道查询失败")
+			return
 		}
 		point, _ := strconv.ParseFloat(form.TotalPower, 64)
 		ccRingService := platform.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/ev-charge",
@@ -216,7 +217,6 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 			SourceKey:      "star_charge",
 		})
 		if one.ID == 0 {
-			ccRingService.CallBack()
 			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
 				PlatformKey:    sceneUser.PlatformKey,
 				PlatformUserId: sceneUser.PlatformUserId,
@@ -226,6 +226,7 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 			if err != nil {
 				return
 			}
+			ccRingService.CallBack()
 		}
 	}
 }

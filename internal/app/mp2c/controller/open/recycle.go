@@ -256,6 +256,7 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 		ccringScene := service.DefaultBdSceneService.FindByCh("ccring")
 		if ccringScene.ID == 0 {
 			app.Logger.Info("ccring 渠道查询失败")
+			return
 		}
 		ccRingService := platformService.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/recycle",
 			platformService.WithCCRingOrderNum(form.OrderNo),
