@@ -17,5 +17,5 @@ func TestTime(t *testing.T) {
 	//now, _ := time.Parse("2006-01-02", time.Now())
 	fmt.Printf("%s\n", startTime)
 	fmt.Printf("%s\n", endTime)
-	fmt.Printf("%s\n", time.Now())
+	fmt.Printf("%s\n", time.Now().UTC().Format("2006-01-02 15:04:05"))
 }

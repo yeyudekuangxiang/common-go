@@ -28,7 +28,7 @@ type jhxTicketStatusRequest struct {
 }
 
 type PreCollectRequest struct {
-	MemberId    string `json:"memberId" from:"memberId"`
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	Amount      string `json:"amount,omitempty" form:"amount"`
 	PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`

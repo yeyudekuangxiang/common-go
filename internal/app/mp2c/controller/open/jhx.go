@@ -114,7 +114,7 @@ func (ctr JhxController) GetPreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	sign := params["sign"]
 	delete(params, "sign")
 	jhxService := platform.NewJhxService(context.NewMioContext())
-	err = jhxService.PreCollectPoint(sign, params, scene.Ch)
+	err = jhxService.GetPreCollectPointList(sign, params, scene.Ch)
 	if err != nil {
 		return nil, err
 	}

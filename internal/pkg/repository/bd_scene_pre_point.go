@@ -56,7 +56,7 @@ func (repo BdScenePrePointRepository) FindAllByPlatformKey(platformKey string) [
 	return items
 }
 
-func (repo BdScenePrePointRepository) FindBy(by entity.BdScenePrePoint) []entity.BdScenePrePoint {
+func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) []entity.BdScenePrePoint {
 	var items []entity.BdScenePrePoint
 	query := repo.DB.Where("platform_key = ?", by.PlatformKey)
 	if by.OpenId != "" {
@@ -64,6 +64,15 @@ func (repo BdScenePrePointRepository) FindBy(by entity.BdScenePrePoint) []entity
 	}
 	if by.PlatformUserId != "" {
 		query.Where("platform_user_id = ?", by.PlatformUserId)
+	}
+	if by.OpenId != "" {
+		query.Where("open_id = ?", by.OpenId)
+	}
+	if by.StartTime != "" {
+		query.Where("to_char(created_at, 'YYYY-MM-DD HH:MI:SS') > ?", by.StartTime)
+	}
+	if by.EndTime != "" {
+		query.Where("to_char(created_at, 'YYYY-MM-DD HH:MI:SS') < ?", by.EndTime)
 	}
 	err := query.Find(&items).Error
 	if err != nil && err != gorm.ErrRecordNotFound {

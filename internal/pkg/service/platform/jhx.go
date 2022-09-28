@@ -199,7 +199,12 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 		return errors.New("未找到绑定关系")
 	}
 	//获取pre_point数据
-
+	repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
+		PlatformKey:    sceneUser.PlatformKey,
+		PlatformUserId: sceneUser.PlatformUserId,
+		StartTime:      time.Now().AddDate(0, 0, -7).Format("2006-01-02 15:04:05"),
+		EndTime:        time.Now().Format("2006-01-02 15:04:05"),
+	})
 	return nil
 }
 
