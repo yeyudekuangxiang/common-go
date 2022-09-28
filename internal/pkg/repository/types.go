@@ -293,3 +293,13 @@ type GetRedeemCodeBy struct {
 	CodeId   string
 	CouponId string
 }
+
+type GetSceneCallback struct {
+	ID             int
+	PlatformKey    string
+	PlatformUserId string
+	OpenId         string
+	SourceKey      string
+	StartTime      string
+	EndTime        string
+}

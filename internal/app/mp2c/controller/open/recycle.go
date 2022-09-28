@@ -258,12 +258,32 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 			app.Logger.Info("ccring 渠道查询失败")
 		}
 		ccRingService := platformService.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/recycle",
+			platformService.WithCCRingOrderNum(form.OrderNo),
 			platformService.WithCCRingMemberId(sceneUser.PlatformUserId),
 			platformService.WithCCRingProductCategoryName(form.ProductCategoryName),
 			platformService.WithCCRingName(form.Name),
 			platformService.WithCCRingQua(form.Qua),
 		)
-		ccRingService.CallBack()
+		//记录
+		one := repository.DefaultBdSceneCallbackRepository.FindOne(repository.GetSceneCallback{
+			PlatformKey:    sceneUser.PlatformKey,
+			PlatformUserId: sceneUser.PlatformUserId,
+			OpenId:         sceneUser.OpenId,
+			SourceKey:      "oola",
+		})
+		if one.ID == 0 {
+			ccRingService.CallBack()
+			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
+				PlatformKey:    sceneUser.PlatformKey,
+				PlatformUserId: sceneUser.PlatformUserId,
+				OpenId:         sceneUser.OpenId,
+				SourceKey:      "oola",
+			})
+			if err != nil {
+				return
+			}
+			ccRingService.CallBack()
+		}
 	}
 	return
 }

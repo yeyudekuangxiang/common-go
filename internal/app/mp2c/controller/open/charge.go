@@ -84,7 +84,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	thisPoint0, _ := strconv.ParseFloat(form.TotalPower, 64)
 
 	//回调光环
-	go ctr.turnPlatform(userInfo, thisPoint0)
+	go ctr.turnPlatform(userInfo, form)
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
 	totalPoint := lastPoint + thisPoint
@@ -195,17 +195,37 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 }
 
 //回调的回调
-func (ctr ChargeController) turnPlatform(user *entity.User, point float64) {
+func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeForm) {
 	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUser(user.OpenId, "ccring")
 	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
 		ccringScene := service.DefaultBdSceneService.FindByCh("ccring")
 		if ccringScene.ID == 0 {
 			app.Logger.Info("ccring 渠道查询失败")
 		}
+		point, _ := strconv.ParseFloat(form.TotalPower, 64)
 		ccRingService := platform.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/ev-charge",
+			platform.WithCCRingOrderNum(form.OutTradeNo),
 			platform.WithCCRingMemberId(sceneUser.PlatformUserId),
 			platform.WithCCRingDegreeOfCharge(point),
 		)
-		ccRingService.CallBack()
+		//记录
+		one := repository.DefaultBdSceneCallbackRepository.FindOne(repository.GetSceneCallback{
+			PlatformKey:    sceneUser.PlatformKey,
+			PlatformUserId: sceneUser.PlatformUserId,
+			OpenId:         sceneUser.OpenId,
+			SourceKey:      "star_charge",
+		})
+		if one.ID == 0 {
+			ccRingService.CallBack()
+			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
+				PlatformKey:    sceneUser.PlatformKey,
+				PlatformUserId: sceneUser.PlatformUserId,
+				OpenId:         sceneUser.OpenId,
+				SourceKey:      "star_charge",
+			})
+			if err != nil {
+				return
+			}
+		}
 	}
 }
