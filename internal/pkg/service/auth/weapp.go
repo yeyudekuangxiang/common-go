@@ -27,6 +27,13 @@ type WeappService struct {
 }
 
 func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64, thirdId string) (*entity.User, string, bool, error) {
+	activityService.NewZyhService(context.NewMioContext()).Create(srv_types.GetZyhGetInfoByDTO{
+		Openid: "1111",
+		VolId:  "3333",
+	})
+
+	return nil, "", false, nil
+
 	//调用java那边登陆接口
 	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
