@@ -9,7 +9,6 @@ type Config struct {
 	zrpc.RpcServerConf
 	Database DbConf
 	Cache    cache.CacheConf
-	Redis RedisConf
 	Debug bool
 }
 

@@ -1,6 +1,14 @@
 package svc
 
 import {{.imports}}
+import (
+	"{{.projectPath}}/common/db"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
+	"os"
+	"time"
+)
 
 type ServiceContext struct {
 	Config config.Config
@@ -16,8 +24,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 }
 
-func newDB(c config.DbConf)(*gorm.DB,err)
-{
+func newDB(c config.DbConf) (*gorm.DB,err) {
     return db.NewDB(db.Config{
 		Type:         c.Type,
 		Host:         c.Host,
