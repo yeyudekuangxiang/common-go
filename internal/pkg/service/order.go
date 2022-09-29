@@ -471,10 +471,6 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 		return nil, errno.ErrLimit
 	}
 	defer util2.DefaultLock.UnLock("SubmitOrderForEventGD" + param.OpenId)
-	return &srv_types.SubmitOrderForEventResult{
-		CertificateNo: "CN511327209092207152-3",
-		UploadCode:    "68584147-617c-448a-aa12-7f4be0680978",
-	}, nil
 	wechatServiceOpenId := param.WechatServiceOpenId
 	info := srv.repoUser.GetUserBy(repository2.GetUserBy{OpenId: wechatServiceOpenId})
 	wechatServiceUid := info.ID
