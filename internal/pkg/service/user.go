@@ -14,7 +14,6 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -110,18 +109,18 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
 }
 
-func (u UserService) SendUserRegisterCoupon(user entity.User) {
-	orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
-	startTime, _ := time.Parse("2006-01-02", "2022-09-29")
-	endTime, _ := time.Parse("2006-01-02", "2022-10-31")
-	for i := 0; i < 2; i++ {
-		err := jhx.NewJhxService(mioctx.NewMioContext()).TicketCreate(orderNo+strconv.Itoa(i), 123, startTime, endTime, user)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
+//func (u UserService) SendUserRegisterCoupon(user entity.User) {
+//	orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
+//	startTime, _ := time.Parse("2006-01-02", "2022-09-29")
+//	endTime, _ := time.Parse("2006-01-02", "2022-10-31")
+//	for i := 0; i < 2; i++ {
+//		err := jhx.NewJhxService(mioctx.NewMioContext()).TicketCreate(orderNo+strconv.Itoa(i), 123, startTime, endTime, user)
+//		if err != nil {
+//			return
+//		}
+//	}
+//	return
+//}
 
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user := u.r.GetUserBy(repository.GetUserBy{
@@ -359,7 +358,6 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}
 
 	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
-	go u.SendUserRegisterCoupon(userInfo)
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {

@@ -6,11 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"mio/internal/app/mp2c/controller/api/api_types"
+	"mio/internal/pkg/core/app"
+	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -136,6 +140,24 @@ func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
+	//绑定后
+	err := service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
+	if err == nil && user.ChannelId == 1059 {
+		go func() {
+			jhxService := jhx.NewJhxService(mioctx.NewMioContext())
+			orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
+			startTime, _ := time.Parse("2006-01-02", "2022-09-29")
+			endTime, _ := time.Parse("2006-01-02", "2022-10-31")
+			for i := 0; i < 2; i++ {
+				err := jhxService.TicketCreate(orderNo+strconv.Itoa(i), 123, startTime, endTime, user)
+				if err != nil {
+					app.Logger.Errorf("金华行发券失败:%s", err.Error())
+					return
+				}
+			}
+			return
+		}()
+	}
 	return nil, service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
 }
 func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {

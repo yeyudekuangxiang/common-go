@@ -67,9 +67,9 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 		app.Logger.Info("渠道查询失败", form)
 		return nil, errors.New("渠道查询失败")
 	}
-
+	delete(dst, "sign")
 	//check sign
-	if err := platformUtil.CheckSign(dst, ";"); err != nil {
+	if err := platformUtil.CheckSign(form.Sign, dst, form.PlatformKey, ";"); err != nil {
 		app.Logger.Errorf("校验sign失败: %s", err.Error())
 		return nil, err
 	}

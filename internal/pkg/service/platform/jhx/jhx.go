@@ -107,7 +107,6 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, starTime, endTi
 	if err != nil {
 		return err
 	}
-	// todo 入库
 	coupon, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
 		CouponCardTypeId:     typeId,
 		CouponCardQrcodeText: ticketCreateResponse.QrCodeStr,
@@ -142,7 +141,7 @@ func (srv JhxService) TicketNotify(sign string, params map[string]string) error 
 	if coupon.Exist && coupon.CouponInfo.UsedStatus == status {
 		return nil
 	}
-	//如果 status 不想等 根据 tradeno 更新status,used_time 返回nil
+	//如果 status 不等 根据 tradeno 更新status,used_time 返回nil
 	_, err = app.RpcService.CouponRpcSrv.UpdateCouponUsedStatus(srv.ctx, &couponclient.UpdateCouponUsedStatusReq{
 		CouponCardId: coupon.CouponInfo.CouponCardId,
 		UsedStatus:   status,
@@ -157,7 +156,14 @@ func (srv JhxService) TicketNotify(sign string, params map[string]string) error 
 func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error) {
 	params := srv.getCommonParams()
 	params["tradeno"] = tradeno
-	url := srv.option.Domain + "/busticket/ticket_create"
+	sign := srv.getSign(params)
+	params["sign"] = strings.ToUpper(sign)
+	url := srv.option.Domain + "/busticket/ticket_status"
+	marshal, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("%v\n%s\n", marshal, marshal)
 	body, err := httputil.PostJson(url, params)
 	fmt.Printf("%s\n", body)
 	if err != nil {

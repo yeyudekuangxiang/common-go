@@ -17,9 +17,9 @@ type jhxCommonRequest struct {
 }
 
 type jhxTicketNotifyRequest struct {
-	TicketNo string `json:"ticket_no" form:"ticket_no" binding:"required"`
+	Tradeno  string `json:"tradeno" form:"tradeno" binding:"required"`
 	Status   string `json:"status" form:"status" binding:"required"`
-	UsedTime string `json:"used_time" form:"used_time"`
+	UsedTime string `json:"used_time" form:"used_time" binding:"required"`
 	Sign     string `json:"sign"`
 }
 
