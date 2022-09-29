@@ -1,21 +1,26 @@
 # 绿喵微服务
 
-## 微服务框架使用[go-zero](https://github.com/zeromicro/go-zero)
+## 微服务框架使用 [go-zero](https://github.com/zeromicro/go-zero)
 ## 项目架构参考 [go-zero-looklook](https://github.com/Mikaelemmmm/go-zero-looklook)
+## api参数绑定和验证 api参数绑定使用的是gin的参数绑定模块 [gin](https://gin-gonic.com/zh-cn/docs/examples/binding-and-validation/) 。参数验证使用的是 [go-playground/validator](https://github.com/go-playground/validator)
 
 ## 开发准备
-### 1. 克隆运行环境
+### 1. 安装goctl工具
+`go install github.com/yeyudekuangxiang/goctl@v1.4.0`
+### 2. protoc & protoc-gen-go安装
+`goctl env check -i -f --verbose`
+### 3. 克隆运行环境
 `git clone -b runtime git@gitlab.miotech.com:miotech-application/backend/mp2c-micro.git mp2c-micro-runtime`
 
-### 2. 打开命令行，并将目录切换到mp2c-micro-runtime的文件夹下
+### 4. 打开命令行，并将目录切换到mp2c-micro-runtime的文件夹下
 `cd mp2c-micro-runtime`
 
-### 3. 运行 ```make init``` 使用自定义的goctl模版文件
+### 5. 运行 ```make init``` 使用自定义的goctl模版文件
 
-### 4. 运行```docker-compose -f docker-compose-env.yml up -d``` 命令安装运行环境(非必需)
+### 6. 运行```docker-compose -f docker-compose-env.yml up -d``` 命令安装运行环境(非必需)
 运行此命令将会在docker中安装 jaeger、prometheus、grafana、elasticsearch、kibana、go-stash、filebeat、zookeeper、kafka、asynqmon、mysql、redis
 
-### 5. 运行```docker-compose up -d```(非必需)
+### 7. 运行```docker-compose up -d```(非必需)
 运行此命令将会安装nginx用于网关、并且将所有的微服务应用在 lyumikael/gomodd 容器中运行
 
 ## 项目开发
@@ -53,6 +58,8 @@
 在```app/应用名/cmd/api/internal/logic``` 下完成业务逻辑  
 在```app/应用名/cmd/api/internal/svc``` 初始化第三方rpc服务等操作
 
+## 项目运行
+在项目根目录下执行 `make run` 按提示输入想要运行的应用类型( rpc | api )和名称
 ## 项目部署
 部署之前如有配置文件的变更或者新增 联系阿金编辑  
 在develop分支上打tag develop-应用名-应用类型(api|rpc)-v1.0.0 会自动将此服务部署到测试环境  
