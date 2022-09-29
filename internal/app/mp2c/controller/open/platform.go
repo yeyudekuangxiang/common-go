@@ -75,7 +75,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	}
 
 	//check sign
-	if err := platformUtil.CheckSign(dst); err != nil {
+	if err := platformUtil.CheckSign(dst, ";"); err != nil {
 		app.Logger.Errorf("校验sign失败: %s", err.Error())
 		return nil, err
 	}

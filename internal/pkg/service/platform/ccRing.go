@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"fmt"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util/httputil"
 )
@@ -70,13 +71,14 @@ func WithCCRingQua(qua string) CcRingOptions {
 }
 
 //回调ccring
-func (srv ccRingService) CallBack() {
+func (srv ccRingService) CallBack() (string, error) {
 	//回调
 	authToken := httputil.HttpWithHeader("Authorization", srv.Authorization)
-	_, err := httputil.PostJson(srv.Domain+srv.Url, srv.Option, authToken)
+	body, err := httputil.PostJson(srv.Domain+srv.Url, srv.Option, authToken)
 	if err != nil {
 		app.Logger.Errorf("回调光环错误: post error %s", err.Error())
-		return
+		return fmt.Sprintf("%s", body), err
 	}
-	return
+	return fmt.Sprintf("%s", body), nil
+
 }

@@ -275,19 +275,19 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 			SourceKey:      "oola",
 		})
 		if one.ID == 0 {
-			ccRingService.CallBack()
+			body, _ := ccRingService.CallBack()
 			err := repository.DefaultBdSceneCallbackRepository.Save(entity.BdSceneCallback{
 				PlatformKey:    sceneUser.PlatformKey,
 				PlatformUserId: sceneUser.PlatformUserId,
 				OpenId:         sceneUser.OpenId,
 				BizId:          form.OrderNo,
 				SourceKey:      "oola",
+				Body:           body,
 				CreatedAt:      time.Now(),
 			})
 			if err != nil {
 				return
 			}
-			ccRingService.CallBack()
 		}
 	}
 	return
