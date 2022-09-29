@@ -4,6 +4,9 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
 	if err!=nil{
 		return err
 	}
+	if !exist{
+	    return nil
+    }
 
 {{end}}	{{.keys}}
     err {{if .containsIndexCache}}={{else}}:={{end}} m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&{{.upperStartCamelObject}}{}).Error

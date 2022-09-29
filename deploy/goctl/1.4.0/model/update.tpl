@@ -4,13 +4,16 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
 	if err!=nil{
 		return err
 	}
+	if !exist{
+	    return errors.New("记录不存在")
+	}
 
 {{end}}	{{.keys}}
     {{if .containsIndexCache}}err{{else}}err:{{end}}= m.db.WithContext(ctx).Save(data).Error
     if err != nil {
         return err
     }
-    return m.cache.DelCtx(ctx, publicCouponCardCouponCardIdKey)
+    return m.cache.DelCtx(ctx, {{.keyValues}})
     {{else}}
     return m.db.WithContext(ctx).Save(data).Error
     {{end}}
