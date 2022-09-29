@@ -1,4 +1,4 @@
-package platform
+package recycle
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
@@ -126,7 +127,7 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	return nil
 }
 
-func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secret string) error {
+func (srv RecycleService) CheckFmySign(params platform.FmySignParams, appId string, secret string) error {
 	sign := params.Sign
 	params.Sign = ""
 	rand1 := string([]rune(sign)[0:4])

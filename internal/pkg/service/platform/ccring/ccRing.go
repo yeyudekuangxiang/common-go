@@ -1,4 +1,4 @@
-package platform
+package ccring
 
 import (
 	"mio/internal/pkg/core/app"

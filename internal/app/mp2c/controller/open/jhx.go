@@ -5,7 +5,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
@@ -20,7 +20,7 @@ type JhxController struct {
 
 func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService := jhx.NewJhxService(context.NewMioContext())
 	orderNo := "jhx" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	err := jhxService.TicketCreate(orderNo, user)
 	if err != nil {
@@ -34,7 +34,7 @@ func (ctr JhxController) TicketStatus(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService := jhx.NewJhxService(context.NewMioContext())
 	result, err := jhxService.TicketStatus(form.Tradeno)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := params["sign"]
 	delete(params, "sign")
-	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 
 //生产积分气泡
 func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
-	form := PreCollectRequest{}
+	form := jhxPreCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := params["sign"]
 	delete(params, "sign")
-	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.PreCollectPoint(sign, params)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (ctr JhxController) PreCollectPoint(ctx *gin.Context) (gin.H, error) {
 
 //获取积分气泡list
 func (ctr JhxController) GetPreCollectPoint(ctx *gin.Context) (gin.H, error) {
-	form := PreCollectRequest{}
+	form := jhxGetPreCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (ctr JhxController) GetPreCollectPoint(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := params["sign"]
 	delete(params, "sign")
-	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService := jhx.NewJhxService(context.NewMioContext())
 	item, point, err := jhxService.GetPreCollectPointList(sign, params)
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (ctr JhxController) GetPreCollectPoint(ctx *gin.Context) (gin.H, error) {
 
 //消费积分气泡
 func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
-	form := PreCollectRequest{}
+	form := jhxCollectRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := params["sign"]
 	delete(params, "sign")
-	jhxService := platform.NewJhxService(context.NewMioContext())
+	jhxService := jhx.NewJhxService(context.NewMioContext())
 	point, err := jhxService.CollectPoint(sign, params)
 	if err != nil {
 		return nil, err
@@ -148,9 +148,8 @@ func (ctr JhxController) CollectPoint(ctx *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//我的兑换
-func (ctr JhxController) MyOrder(ctx *gin.Context) (gin.H, error) {
-	form := PreCollectRequest{}
+func (ctr JhxController) MyAccountInfo(ctx *gin.Context) (gin.H, error) {
+	form := jhxMyAccountRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -161,8 +160,37 @@ func (ctr JhxController) MyOrder(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := params["sign"]
 	delete(params, "sign")
-	jhxService := platform.NewJhxService(context.NewMioContext())
-	jhxService.MyOrder(sign, params)
+	jhxService := jhx.NewJhxService(context.NewMioContext())
+	accountInfo, err := jhxService.MyAccountInfo(sign, params)
+	if err != nil {
+		return nil, err
+	}
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list": accountInfo,
+	}, nil
+}
+
+//我的兑换
+func (ctr JhxController) MyOrder(ctx *gin.Context) (gin.H, error) {
+	form := jhxMyOrderRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := params["sign"]
+	delete(params, "sign")
+	jhxService := jhx.NewJhxService(context.NewMioContext())
+	err = jhxService.MyOrder(sign, params)
+	if err != nil {
+		return nil, err
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +201,7 @@ func (ctr JhxController) MyOrder(ctx *gin.Context) (gin.H, error) {
 
 //我的证书
 func (ctr JhxController) MyCertificate(ctx *gin.Context) (gin.H, error) {
-	form := PreCollectRequest{}
+	form := jhxMyCrRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -184,12 +212,12 @@ func (ctr JhxController) MyCertificate(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := params["sign"]
 	delete(params, "sign")
-	jhxService := platform.NewJhxService(context.NewMioContext())
-	jhxService.MyCertificate(sign, params)
+	jhxService := jhx.NewJhxService(context.NewMioContext())
+	certificate, err := jhxService.MyCertificate(sign, params)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
-		"list": nil,
+		"list": certificate,
 	}, nil
 }

@@ -12,6 +12,8 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	platformService "mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/ccring"
+	"mio/internal/pkg/service/platform/recycle"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -51,7 +53,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 
 	//new RecycleService
 	ctx := context.NewMioContext()
-	RecycleService := platformService.NewRecycleService(ctx)
+	RecycleService := recycle.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
 	//校验sign
@@ -125,11 +127,11 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//绿喵回调ccring
 	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
 	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
-		ccRingService := platformService.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", "/api/cc-ring/external/recycle",
-			platformService.WithCCRingMemberId(sceneUser.PlatformUserId),
-			platformService.WithCCRingProductCategoryName(form.ProductCategoryName),
-			platformService.WithCCRingName(form.Name),
-			platformService.WithCCRingQua(form.Qua),
+		ccRingService := ccring.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", "/api/cc-ring/external/recycle",
+			ccring.WithCCRingMemberId(sceneUser.PlatformUserId),
+			ccring.WithCCRingProductCategoryName(form.ProductCategoryName),
+			ccring.WithCCRingName(form.Name),
+			ccring.WithCCRingQua(form.Qua),
 		)
 		go ccRingService.CallBack()
 	}
@@ -181,7 +183,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	//new RecycleService
 	ctx := context.NewMioContext()
-	RecycleService := platformService.NewRecycleService(ctx)
+	RecycleService := recycle.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
 	//校验sign

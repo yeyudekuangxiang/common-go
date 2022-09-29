@@ -12,7 +12,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/ccring"
+	"mio/internal/pkg/service/platform/star_charge"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -153,9 +154,9 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	//绿喵回调第三方
 	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByOpenId(userInfo.OpenId)
 	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
-		ccRingService := platform.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", "/api/cc-ring/external/ev-charge",
-			platform.WithCCRingMemberId(sceneUser.PlatformUserId),
-			platform.WithCCRingDegreeOfCharge(thisPoint0),
+		ccRingService := ccring.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", "/api/cc-ring/external/ev-charge",
+			ccring.WithCCRingMemberId(sceneUser.PlatformUserId),
+			ccring.WithCCRingDegreeOfCharge(thisPoint0),
 		)
 		go ccRingService.CallBack()
 	}
@@ -195,7 +196,7 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 		startTime, _ := time.ParseInLocation("2006-01-02", "2022-09-24", time.Local)
 		endTime, _ := time.ParseInLocation("2006-01-02", "2022-10-01", time.Local)
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := platform.NewStarChargeService(ctx)
+			starChargeService := star_charge.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
 				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())
