@@ -77,7 +77,7 @@ func (repo BdScenePrePointRepository) FindAllByPlatformKey(platformKey string) (
 
 func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) ([]entity.BdScenePrePoint, int64, error) {
 	var items []entity.BdScenePrePoint
-	query := repo.DB.Where("platform_key = ?", by.PlatformKey)
+	query := repo.DB.Model(&entity.BdScenePrePoint{}).Where("platform_key = ?", by.PlatformKey)
 	if by.OpenId != "" {
 		query.Where("open_id = ?", by.OpenId)
 	}

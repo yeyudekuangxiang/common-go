@@ -233,8 +233,8 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 	items, _, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
-		StartTime:      time.Now().AddDate(0, 0, -7).Format("2006-01-02 15:04:05"),
-		EndTime:        time.Now().Format("2006-01-02 15:04:05"),
+		StartTime:      time.Now().AddDate(0, 0, -7).UTC().Format("2006-01-02 15:04:05"),
+		EndTime:        time.Now().UTC().Format("2006-01-02 15:04:05"),
 		Status:         1,
 	})
 	if err != nil {
