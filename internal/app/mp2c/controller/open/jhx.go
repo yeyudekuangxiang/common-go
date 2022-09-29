@@ -19,11 +19,15 @@ type JhxController struct {
 }
 
 func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
+	form := jhxTicketCreateRequest{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
 	user := apiutil.GetAuthUser(ctx)
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	orderNo := "jhx" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	startTime, _ := time.Parse("2006-01-02", "2022-09-29")
-	endTime, _ := time.Parse("2006-01-02", "2022-10-31")
+	startTime, _ := time.Parse("2006-01-02", form.StartTime)
+	endTime, _ := time.Parse("2006-01-02", form.EndTime)
 	err := jhxService.TicketCreate(orderNo, 123, startTime, endTime, user)
 	if err != nil {
 		return nil, err

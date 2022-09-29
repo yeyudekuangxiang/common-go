@@ -5,6 +5,7 @@ import (
 	"github.com/shopspring/decimal"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service"
 	"strings"
 )
 
@@ -127,11 +128,31 @@ func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{},
 	return res, nil
 }
 
+//金华行
+func (c *defaultClientHandle) jhxPageData() (map[string]interface{}, error) {
+	openIds := []string{c.clientHandle.OpenId}
+	types := []entity.PointTransactionType{entity.POINT_JHX}
+	_, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]interface{}, 0)
+	//返回数据
+	res["count"] = count
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId)
+	return res, nil
+}
+
 func (c *defaultClientHandle) getTodayData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
 	return repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: openIds,
 		Types:   types,
 	})
+}
+
+func (c *defaultClientHandle) getCarbonDayData(openId string) float64 {
+	user, _ := service.DefaultUserService.GetUserByOpenId(openId)
+	return service.NewCarbonTransactionService(c.ctx).GetTodayCarbon(user.ID)
 }
 
 func (c *defaultClientHandle) getMonthData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {

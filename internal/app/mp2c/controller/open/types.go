@@ -27,6 +27,13 @@ type jhxTicketStatusRequest struct {
 	Tradeno string `json:"tradeno" form:"tradeno" binding:"required"`
 }
 
+type jhxTicketCreateRequest struct {
+	Tradeno   string `json:"tradeno" form:"tradeno" binding:"required"`
+	TypeId    int64  `json:"typeId" form:"typeId" binding:"required"`
+	StartTime string `json:"startTime" form:"startTime"`
+	EndTime   string `json:"endTime" form:"endTime"`
+}
+
 type jhxPreCollectRequest struct {
 	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
