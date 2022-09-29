@@ -10,26 +10,9 @@ import (
 )
 
 // CheckSign 验证签名
-func CheckSign(params map[string]interface{}, joiner string) error {
-	if joiner == "" {
-		joiner = ";"
-	}
-	sign := params["sign"]
-	delete(params, "sign")
-	var slice []string
-	for k := range params {
-		slice = append(slice, k)
-	}
-	sort.Strings(slice)
-	var signStr string
-	for _, v := range slice {
-		signStr += v + "=" + util.InterfaceToString(params[v]) + ";"
-	}
-	if joiner != ";" {
-		strings.TrimRight(signStr, joiner)
-	}
+func CheckSign(sign string, params map[string]interface{}, key string, joiner string) error {
+	signMd5 := GetSign(params, key, joiner)
 	//验证签名
-	signMd5 := encrypt.Md5(params["platformKey"].(string) + signStr)
 	if signMd5 != sign {
 		app.Logger.Errorf("验签失败 oriSign: %s ; encodeSign: %s", sign, signMd5)
 		return errors.New("验签失败")
@@ -38,11 +21,7 @@ func CheckSign(params map[string]interface{}, joiner string) error {
 }
 
 // GetSign 签名
-func GetSign(params map[string]interface{}, joiner string) string {
-	var platformKey string
-	if key, ok := params["platformKey"]; ok {
-		platformKey = key.(string)
-	}
+func GetSign(params map[string]interface{}, key string, joiner string) string {
 	if joiner == "" {
 		joiner = ";"
 	}
@@ -59,5 +38,5 @@ func GetSign(params map[string]interface{}, joiner string) string {
 		signStr = strings.TrimRight(signStr, joiner)
 	}
 	//验证签名
-	return encrypt.Md5(platformKey + signStr)
+	return encrypt.Md5(key + signStr)
 }

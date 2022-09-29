@@ -54,3 +54,29 @@ func (CouponController) RedeemCode(c *gin.Context) (interface{}, error) {
 
 	return result, nil
 }
+
+func (CouponController) CouponList(c *gin.Context) error {
+	//if err := srv.checkSign(sign, params); err != nil {
+	//	return err
+	//}
+	////根据 platform_member_id 获取 openid
+	//sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
+	//if sceneUser.ID == 0 {
+	//	return errors.New("未找到绑定关系")
+	//}
+	//list, err := app.RpcService.CouponRpcSrv.GetCouponPageList(srv.ctx, &couponclient.GetCouponPageListReq{
+	//	UserId:           0,
+	//	Page:             ,
+	//	Size:             0,
+	//	UsedStatus:       0,
+	//	IsExpired:        0,
+	//	OrderBy:          0,
+	//	CouponCardTypeId: 0,
+	//	Status:           0,
+	//	SearchCode:       "",
+	//})
+	//if err != nil {
+	//	return err
+	//}
+	return nil
+}

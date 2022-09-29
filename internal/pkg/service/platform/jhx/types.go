@@ -7,6 +7,19 @@ type jhxCommonResponse struct {
 	Data map[string]interface{} `json:"data"`
 }
 
+type jhxCommonRequest struct {
+	Version string `json:"version"`
+	Appid   string `json:"appid"`
+	Nonce   int    `json:"nonce"`
+}
+
+type jhxTicketNotifyRequest struct {
+	jhxCommonRequest
+	TicketNo string `json:"ticket_no" form:"ticket_no"`
+	Status   string `json:"status" form:"status"`
+	UsedTime string `json:"used_time" form:"used_time"`
+}
+
 type jhxTicketCreateResponse struct {
 	QrCodeStr string `json:"qrcodestr" form:"qrcodestr"`
 }

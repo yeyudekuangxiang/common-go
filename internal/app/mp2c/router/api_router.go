@@ -239,8 +239,12 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/badge/upload/setting", apiutil.FormatInterface(badge.DefaultBadgeController.UploadOldBadgeImage))
 
 		//兑换券相关
-		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
-		mustAuthRouter.POST("/coupon/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
+		couponRouter := mustAuthRouter.Group("/coupon")
+		{
+			couponRouter.GET("/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+			couponRouter.POST("/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
+		}
+
 		//获取第三方数据
 		platformRouter := mustAuthRouter.Group("/platform")
 		{

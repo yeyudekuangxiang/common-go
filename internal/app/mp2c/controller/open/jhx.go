@@ -22,7 +22,9 @@ func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	orderNo := "jhx" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	err := jhxService.TicketCreate(orderNo, user)
+	startTime, _ := time.Parse("2006-01-02", "2022-09-29")
+	endTime, _ := time.Parse("2006-01-02", "2022-10-31")
+	err := jhxService.TicketCreate(orderNo, 123, startTime, endTime, user)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +58,7 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	sign := params["sign"]
+	sign := form.Sign
 	delete(params, "sign")
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
@@ -170,54 +172,5 @@ func (ctr JhxController) MyAccountInfo(ctx *gin.Context) (gin.H, error) {
 	}
 	return gin.H{
 		"list": accountInfo,
-	}, nil
-}
-
-//我的兑换
-func (ctr JhxController) MyOrder(ctx *gin.Context) (gin.H, error) {
-	form := jhxMyOrderRequest{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
-		return nil, err
-	}
-	params := make(map[string]string, 0)
-	err := util.MapTo(&form, &params)
-	if err != nil {
-		return nil, err
-	}
-	sign := params["sign"]
-	delete(params, "sign")
-	jhxService := jhx.NewJhxService(context.NewMioContext())
-	err = jhxService.MyOrder(sign, params)
-	if err != nil {
-		return nil, err
-	}
-	if err != nil {
-		return nil, err
-	}
-	return gin.H{
-		"list": nil,
-	}, nil
-}
-
-//我的证书
-func (ctr JhxController) MyCertificate(ctx *gin.Context) (gin.H, error) {
-	form := jhxMyCrRequest{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
-		return nil, err
-	}
-	params := make(map[string]string, 0)
-	err := util.MapTo(&form, &params)
-	if err != nil {
-		return nil, err
-	}
-	sign := params["sign"]
-	delete(params, "sign")
-	jhxService := jhx.NewJhxService(context.NewMioContext())
-	certificate, err := jhxService.MyCertificate(sign, params)
-	if err != nil {
-		return nil, err
-	}
-	return gin.H{
-		"list": certificate,
 	}, nil
 }

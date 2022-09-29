@@ -81,7 +81,7 @@ func WithJhxNonce(nonce string) JhxOptions {
 	}
 }
 
-func (srv JhxService) TicketCreate(tradeno string, user entity.User) error {
+func (srv JhxService) TicketCreate(tradeno string, typeId int64, starTime, endTime time.Time, user entity.User) error {
 	params := srv.getCommonParams()
 	params["tradeno"] = tradeno
 	params["mobile"] = user.PhoneNumber
@@ -109,9 +109,12 @@ func (srv JhxService) TicketCreate(tradeno string, user entity.User) error {
 	}
 	// todo 入库
 	coupon, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
-		CouponCardTypeId:     123,
+		CouponCardTypeId:     typeId,
 		CouponCardQrcodeText: ticketCreateResponse.QrCodeStr,
 		UserId:               user.ID,
+		BizId:                tradeno,
+		StartTime:            starTime.UnixMilli(),
+		EndTime:              endTime.UnixMilli(),
 	})
 	fmt.Printf("coupon: %v\n", coupon)
 	if err != nil {
@@ -126,13 +129,28 @@ func (srv JhxService) TicketNotify(sign string, params map[string]string) error 
 		return err
 	}
 	//查询库 根据tradeno获取券码
-	//app.RpcService.CouponRpcSrv.
-
+	coupon, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
+		CouponCardTypeId: 123,
+		BizId:            params["tradeno"],
+	})
+	if err != nil {
+		return err
+	}
 	//如果 status 相等 不处理 返回 nil
-
-	//如果 status 不想等 根据 tadeno 更新status,used_time 返回nil
-
-	//如果有err 返回err
+	parseInt, _ := strconv.ParseInt(params["status"], 10, 32)
+	status := int32(parseInt)
+	if coupon.Exist && coupon.CouponInfo.UsedStatus == status {
+		return nil
+	}
+	//如果 status 不想等 根据 tradeno 更新status,used_time 返回nil
+	_, err = app.RpcService.CouponRpcSrv.UpdateCouponUsedStatus(srv.ctx, &couponclient.UpdateCouponUsedStatusReq{
+		CouponCardId: coupon.CouponInfo.CouponCardId,
+		UsedStatus:   status,
+		UsedTime:     time.Now().UnixMilli(),
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -265,11 +283,6 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	return point, nil
 }
 
-//jhx 卡券领取记录
-func (srv JhxService) CouponList(sign string, params map[string]string) {
-
-}
-
 func (srv JhxService) MyAccountInfo(sign string, params map[string]string) (*service.UserAccountInfo, error) {
 	err := srv.checkSign(sign, params)
 	if err != nil {
@@ -289,41 +302,6 @@ func (srv JhxService) MyAccountInfo(sign string, params map[string]string) (*ser
 		return &service.UserAccountInfo{}, err
 	}
 	return accountInfo, nil
-}
-
-func (srv JhxService) MyOrder(sign string, params map[string]string) error {
-	err := srv.checkSign(sign, params)
-	if err != nil {
-		return err
-	}
-	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return errors.New("未找到绑定关系")
-	}
-	userInfo, _ := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
-	fmt.Printf("user:%v", userInfo)
-	return nil
-}
-
-//
-func (srv JhxService) MyCertificate(sign string, params map[string]string) ([]entity.Badge, error) {
-
-	err := srv.checkSign(sign, params)
-	if err != nil {
-		return nil, err
-	}
-	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return nil, errors.New("未找到绑定关系")
-	}
-	userInfo, _ := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
-	list, err := service.DefaultBadgeService.GetBadgePageList(userInfo.OpenId)
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
 }
 
 func (srv JhxService) checkSign(sign string, params map[string]string) error {

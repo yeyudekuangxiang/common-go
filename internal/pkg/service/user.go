@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -107,6 +108,19 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
 	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
+}
+
+func (u UserService) SendUserRegisterCoupon(user entity.User) {
+	orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
+	startTime, _ := time.Parse("2006-01-02", "2022-09-29")
+	endTime, _ := time.Parse("2006-01-02", "2022-10-31")
+	for i := 0; i < 2; i++ {
+		err := jhx.NewJhxService(mioctx.NewMioContext()).TicketCreate(orderNo+strconv.Itoa(i), 123, startTime, endTime, user)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
@@ -343,8 +357,9 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			app.Logger.Errorf("发放邀请积分失败:%s, 用户openId:%s", err.Error(), userInfo.OpenId)
 		}
 	}
-	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
 
+	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
+	go u.SendUserRegisterCoupon(userInfo)
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
