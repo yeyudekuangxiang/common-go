@@ -279,10 +279,21 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if err != nil {
 		return 0, errno.ErrRecordNotFound
 	}
-	//调用point_trans.incPoint
-
+	//检查上限
+	timeStr := time.Now().Format("2006-01-02")
+	key := timeStr + scene.Ch + "PrePoint" + params["memberId"]
+	lastPoint, _ := strconv.ParseInt(app.Redis.Get(srv.ctx, key).Val(), 10, 64)
 	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
-	point, err := service.NewPointService(srv.ctx).IncUserPoint(srv_types.IncUserPointDTO{
+	totalPoint := lastPoint + incPoint
+	if lastPoint >= int64(scene.PrePointLimit) {
+		return 0, errors.New("今日获取积分已达到上限")
+	}
+	if totalPoint > int64(scene.PrePointLimit) {
+		incPoint = int64(scene.PrePointLimit) - lastPoint
+		totalPoint = int64(scene.PrePointLimit)
+	}
+	app.Redis.Set(srv.ctx, key, totalPoint, 24*time.Hour)
+	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
 		Type:        entity.POINT_JHX,
 		BizId:       util.UUID(),

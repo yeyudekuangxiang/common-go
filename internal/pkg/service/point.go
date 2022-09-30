@@ -167,6 +167,32 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			}
 		}
 
+		//发送到志愿汇
+		//if point.Balance > 0 {
+		//	sendType := "0"
+		//	switch dto.Type {
+		//	case entity.POINT_QUIZ:
+		//		sendType = "1"
+		//		break
+		//	case entity.POINT_STEP:
+		//		sendType = "2"
+		//		break
+		//	}
+		//	serviceZyh := platformSrv.ZyhService{}
+		//	messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
+		//	err := serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+		//		Openid:         dto.OpenId,
+		//		PointType:      dto.Type,
+		//		Value:          dto.ChangePoint,
+		//		ResultCode:     messageCode,
+		//		AdditionalInfo: messageErr.Error(),
+		//		TransactionId:  dto.BizId,
+		//	})
+		//	if err != nil {
+		//		return err
+		//	}
+		//}
+
 		//发完积分，更新邀请表发积分状态
 		if dto.InviteId != 0 && dto.Type == entity.POINT_INVITE {
 			//更新状态
