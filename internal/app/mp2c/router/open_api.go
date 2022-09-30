@@ -38,8 +38,12 @@ func openRouter(router *gin.Engine) {
 			duibaRouter.GET("/h5", api.DefaultDuiBaController.DuiBaNoLoginH5)
 		}
 
+		//订单同步接口 （星星充电、快电）
+		openRouter.POST("sendpoint", apiutil.Format(open.DefaultZyhController.SendPoint))
+
 		oaRouter := openRouter.Group("/oa")
 		{
+
 			//微信公众号网页授权登陆
 			oaRouter.GET("/auth", func(context *gin.Context) {
 				authApi.DefaultOaController.AutoLogin(context)

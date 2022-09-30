@@ -6,13 +6,16 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/repository"
 	messageSrv "mio/internal/pkg/service/message"
+	platformSrv "mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -165,6 +168,29 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			if messageErr != nil {
 
 			}
+		}
+
+		//发送到志愿汇
+		if point.Balance > 0 {
+			sendType := "0"
+			switch dto.Type {
+			case entity.POINT_QUIZ:
+				sendType = "1"
+				break
+			case entity.POINT_STEP:
+				sendType = "2"
+				break
+			}
+			serviceZyh := platformSrv.ZyhService{}
+			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
+			serviceZyh.SendPointLog(activity.ZyhLog{
+				Openid:         dto.OpenId,
+				PointType:      dto.Type,
+				Value:          dto.ChangePoint,
+				ResultCode:     messageCode,
+				AdditionalInfo: messageErr.Error(),
+				TransactionId:  dto.BizId,
+			})
 		}
 
 		//发完积分，更新邀请表发积分状态
