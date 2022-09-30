@@ -240,39 +240,13 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("重复提交订单")
 	}
 
-	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
-	//	fmt.Println("charge 重复提交订单", form)
-	//	app.Logger.Info("charge 重复提交订单", form)
-	//	return nil, errors.New("重复提交订单")
-	//}
-
-	//查询今日积分总量
-	timeStr := time.Now().Format("2006-01-02")
-	key := "prePoint" + timeStr + scene.Ch + form.Mobile
-	cmd := app.Redis.Get(ctx, key)
-
-	lastPoint, _ := strconv.Atoi(cmd.Val())
-	thisAmount, _ := strconv.ParseFloat(form.Amount, 64)
-
-	thisPoint := int(thisAmount * float64(scene.Override))
-	totalPoint := lastPoint + thisPoint
-	if lastPoint >= scene.PrePointLimit {
-		fmt.Println("今日积分已达到上限 ", form)
-		return nil, nil
-	}
-	if totalPoint > scene.PrePointLimit {
-		fmt.Println("积分获取数量修正 ", form)
-		thisPoint = scene.PrePointLimit - lastPoint
-		totalPoint = scene.PrePointLimit
-	}
-
-	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
-
 	//预加积分
+	fromString, _ := decimal.NewFromString(params["amount"])
+	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
-		Point:          strconv.Itoa(thisPoint),
+		Point:          point,
 		OpenId:         sceneUser.OpenId,
 		Status:         1,
 		CreatedAt:      time.Now(),

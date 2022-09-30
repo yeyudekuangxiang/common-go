@@ -264,6 +264,10 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if sceneUser.ID == 0 {
 		return 0, errors.New("未找到绑定关系")
 	}
+	scene := repository.DefaultBdSceneRepository.FindByCh(params["platformKey"])
+	if scene.Key == "" || scene.Key == "e" {
+		return 0, errors.New("渠道查询失败")
+	}
 	//获取pre_point数据 one limit
 	id, _ := strconv.ParseInt(params["prePointId"], 10, 64)
 	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
@@ -276,6 +280,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 		return 0, errno.ErrRecordNotFound
 	}
 	//调用point_trans.incPoint
+
 	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
 	point, err := service.NewPointService(srv.ctx).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
