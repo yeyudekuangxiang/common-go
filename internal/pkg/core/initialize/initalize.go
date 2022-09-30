@@ -13,7 +13,7 @@ func Initialize(configPath string) {
 	InitWeapp()
 	InitOss()
 	InitWxoa()
-	InitRpc()
+	//InitRpc()
 	initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
 }
