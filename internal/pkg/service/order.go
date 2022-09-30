@@ -484,7 +484,7 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 
 	openid := param.OpenId
 	//判断是否领取过证书
-	var ItemIdSlice = []string{"cbddf0af60f402f717b0987b79709209", "b00064a760f400a42850b68e1f783c22"}
+	var ItemIdSlice = []string{"903acf9cc687e85dc9de0bb0f054ad2f"}
 	orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{
 		Openid:      openid,
 		ItemIdSlice: ItemIdSlice})
