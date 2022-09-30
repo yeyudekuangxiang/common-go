@@ -132,5 +132,5 @@ func (repo BdScenePrePointRepository) Create(data *entity.BdScenePrePoint) error
 }
 
 func (repo BdScenePrePointRepository) Save(data *entity.BdScenePrePoint) error {
-	return repo.DB.Model(&entity.BdScenePrePoint{}).Save(data).Error
+	return repo.DB.Save(data).Error
 }
