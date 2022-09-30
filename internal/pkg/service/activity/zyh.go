@@ -12,14 +12,16 @@ var DefaultAnswerService = ZyhService{ctx: context.NewMioContext()}
 
 func NewZyhService(ctx *context.MioContext) *ZyhService {
 	return &ZyhService{
-		ctx:     ctx,
-		zyhRepo: repoActivity.NewZyhRepository(ctx),
+		ctx:        ctx,
+		zyhRepo:    repoActivity.NewZyhRepository(ctx),
+		zyhLogRepo: repoActivity.NewZyhLogRepository(ctx),
 	}
 }
 
 type ZyhService struct {
-	ctx     *context.MioContext
-	zyhRepo repoActivity.ZyhRepository
+	ctx        *context.MioContext
+	zyhRepo    repoActivity.ZyhRepository
+	zyhLogRepo repoActivity.ZyhLogRepository
 }
 
 func (srv ZyhService) GetInfoBy(dto srv_types.GetZyhGetInfoByDTO) (entity.Zyh, error) {

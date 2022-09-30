@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/context"
 	entity "mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/repository/activity"
+	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
 )
@@ -15,7 +16,7 @@ import (
 func NewZyhService(ctx *context.MioContext) *ZyhService {
 	return &ZyhService{
 		ctx:              ctx,
-		Domain:           "http://47.99.112.147:8080",
+		Domain:           config.Config.ActivityZyh.Domain,
 		ZyhRepository:    activity.NewZyhRepository(ctx),
 		ZyhLogRepository: activity.NewZyhLogRepository(ctx),
 	}
@@ -62,7 +63,13 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 	return response.ErrCode, nil
 }
 
-func (srv ZyhService) SendPointLog(log entity.ZyhLog) error {
-	ret := srv.ZyhLogRepository.Save(&log)
-	return ret
+func (srv ZyhService) CreateLog(dto srv_types.GetZyhLogAddDTO) error {
+	return srv.ZyhLogRepository.Save(&entity.ZyhLog{
+		Openid:         dto.Openid,
+		PointType:      dto.PointType,
+		Value:          dto.Value,
+		ResultCode:     dto.ResultCode,
+		AdditionalInfo: dto.AdditionalInfo,
+		TransactionId:  dto.TransactionId,
+	})
 }

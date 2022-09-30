@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -25,7 +25,7 @@ func (ctr ZyhController) SendPoint(ctx *gin.Context) (gin.H, error) {
 
 	messageCode, messageErr := zyhService.SendPoint(pointType, openid, point)
 
-	zyhService.SendPointLog(activity.ZyhLog{
+	zyhService.CreateLog(srv_types.GetZyhLogAddDTO{
 		Openid:         openid,
 		PointType:      entity.POINT_ARTICLE,
 		Value:          1,

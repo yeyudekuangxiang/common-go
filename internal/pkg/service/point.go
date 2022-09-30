@@ -6,7 +6,6 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/repository"
 	messageSrv "mio/internal/pkg/service/message"
 	platformSrv "mio/internal/pkg/service/platform"
@@ -183,7 +182,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			}
 			serviceZyh := platformSrv.ZyhService{}
 			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
-			serviceZyh.SendPointLog(activity.ZyhLog{
+			serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
 				Openid:         dto.OpenId,
 				PointType:      dto.Type,
 				Value:          dto.ChangePoint,

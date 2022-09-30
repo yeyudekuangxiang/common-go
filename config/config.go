@@ -118,6 +118,7 @@ type rpcSetting struct {
 type activityZyh struct {
 	AccessKeyId     string
 	AccessKeySecret string
+	Domain          string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {
