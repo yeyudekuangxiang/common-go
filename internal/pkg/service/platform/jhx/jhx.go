@@ -17,6 +17,7 @@ import (
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
+	"mio/pkg/platform"
 	"sort"
 	"strconv"
 	"strings"
@@ -123,23 +124,30 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, starTime, endTi
 }
 
 //消费通知
-func (srv JhxService) TicketNotify(sign string, params map[string]string) error {
-	if err := srv.checkSign(sign, params); err != nil {
+func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) error {
+	scene := service.DefaultBdSceneService.FindByCh("jinhuaxing")
+	if scene.Key == "" || scene.Key == "e" {
+		return errors.New("渠道查询失败")
+	}
+	if err := platform.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		return err
 	}
 	//查询库 根据tradeno获取券码
 	coupon, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
 		CouponCardTypeId: 123,
-		BizId:            params["tradeno"],
+		BizId:            params["tradeno"].(string),
 	})
 	if err != nil {
 		return err
 	}
 	//如果 status 相等 不处理 返回 nil
-	parseInt, _ := strconv.ParseInt(params["status"], 10, 32)
-	status := int32(parseInt)
-	if coupon.Exist && coupon.CouponInfo.UsedStatus == status {
-		return nil
+	j, _ := strconv.ParseInt(params["status"].(string), 10, 32)
+	status := int32(j)
+	if !coupon.Exist {
+		return errors.New("券码不存在")
+	}
+	if coupon.CouponInfo.UsedStatus == status {
+		return errors.New("该券码已失效")
 	}
 	//如果 status 不等 根据 tradeno 更新status,used_time 返回nil
 	_, err = app.RpcService.CouponRpcSrv.UpdateCouponUsedStatus(srv.ctx, &couponclient.UpdateCouponUsedStatusReq{

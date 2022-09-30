@@ -117,6 +117,10 @@ func (repo BdScenePrePointRepository) FindOne(by GetScenePrePoint) (entity.BdSce
 	if by.PlatformKey != "" {
 		query.Where("platform_key = ?", by.PlatformKey)
 	}
+	if by.Status != 0 {
+		query.Where("status = ?", by.Status)
+	}
+
 	err := query.First(&item).Error
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {

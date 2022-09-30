@@ -42,6 +42,16 @@ type GetChargeForm struct {
 	TotalPower string `json:"totalPower,omitempty" form:"totalPower" alias:"统计总量"`
 	Sign       string `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
+
+type PreCollectRequest struct {
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	Amount      string `json:"amount" form:"amount" binding:"required"`
+	Tradeno     string `json:"tradeno" form:"tradeno"`
+	Mobile      string `json:"mobile" form:"mobile"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
+}
+
 type ChangeChargeExceptionForm struct {
 	Ch string `json:"ch" form:"ch" binding:"required" alias:"渠道参数"`
 }

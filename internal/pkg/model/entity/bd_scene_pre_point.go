@@ -11,6 +11,8 @@ type BdScenePrePoint struct {
 	Point          string    `json:"point,omitempty"`
 	OpenId         string    `json:"openId,omitempty"` //本站用户openId
 	Status         int       `json:"status"`
+	Mobile         string    `json:"mobile"`
+	Tradeno        string    `json:"tradeno"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }

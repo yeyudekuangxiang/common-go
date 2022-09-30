@@ -166,6 +166,125 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
+func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
+	form := api.PreCollectRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		app.Logger.Errorf("参数错误: %s", form)
+		return nil, err
+	}
+	ctx := context.NewMioContext()
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errors.New("渠道查询失败")
+	}
+	//白名单验证
+	ip := c.ClientIP()
+	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
+		app.Logger.Info("校验白名单失败", ip)
+		return nil, errors.New("非白名单ip:" + ip)
+	}
+
+	//校验sign
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := form.Sign
+	delete(params, "sign")
+	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
+		app.Logger.Info("校验sign失败", form)
+		return nil, errors.New("sign:" + form.Sign + " 验证失败")
+	}
+
+	//查询用户
+	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
+	if sceneUser.ID == 0 {
+		return nil, errors.New("未找到绑定关系")
+	}
+
+	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
+		OpenId: sceneUser.OpenId,
+		Source: entity.UserSourceMio,
+	})
+
+	//用户验证
+	if userInfo.ID <= 0 {
+		fmt.Println("charge 未找到用户 ", form)
+		return nil, errors.New("未找到用户")
+	}
+
+	//风险登记验证
+	if userInfo.Risk >= 2 {
+		fmt.Println("用户风险等级过高 ", form)
+		return nil, errors.New("账户风险等级过高")
+	}
+
+	//查重
+	transService := service.NewPointTransactionService(ctx)
+	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
+
+	by, err := transService.FindBy(repository.FindPointTransactionBy{
+		OpenId: userInfo.OpenId,
+		Type:   string(typeString),
+		Note:   form.PlatformKey + "#" + form.Tradeno,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if by.ID != 0 {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
+	}
+
+	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
+	//	fmt.Println("charge 重复提交订单", form)
+	//	app.Logger.Info("charge 重复提交订单", form)
+	//	return nil, errors.New("重复提交订单")
+	//}
+
+	//查询今日积分总量
+	timeStr := time.Now().Format("2006-01-02")
+	key := "prePoint" + timeStr + scene.Ch + form.Mobile
+	cmd := app.Redis.Get(ctx, key)
+
+	lastPoint, _ := strconv.Atoi(cmd.Val())
+	thisAmount, _ := strconv.ParseFloat(form.Amount, 64)
+
+	thisPoint := int(thisAmount * float64(scene.Override))
+	totalPoint := lastPoint + thisPoint
+	if lastPoint >= scene.PrePointLimit {
+		fmt.Println("今日积分已达到上限 ", form)
+		return nil, nil
+	}
+	if totalPoint > scene.PrePointLimit {
+		fmt.Println("积分获取数量修正 ", form)
+		thisPoint = scene.PrePointLimit - lastPoint
+		totalPoint = scene.PrePointLimit
+	}
+
+	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
+
+	//预加积分
+	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
+		PlatformKey:    sceneUser.PlatformKey,
+		PlatformUserId: sceneUser.PlatformUserId,
+		Point:          strconv.Itoa(thisPoint),
+		OpenId:         sceneUser.OpenId,
+		Status:         1,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{}, nil
+}
+
 func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
 	form := api.ChangeChargeExceptionForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
