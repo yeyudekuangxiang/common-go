@@ -484,7 +484,7 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 
 	openid := param.OpenId
 	//判断是否领取过证书
-	var ItemIdSlice = []string{"a3d0f0c361fb4076bb6f3ec9e45cb5a7"}
+	var ItemIdSlice = []string{"2b9bec35e677d7c9b9955738704512b0"}
 	orderTotal := srv.repoOrder.GetOrderTotalByItemId(repotypes.GetOrderTotalByItemIdDO{
 		Openid:      openid,
 		ItemIdSlice: ItemIdSlice})
@@ -508,7 +508,7 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 		Note:         order.UploadCode + "#" + order.UploadCode,
 	})
 	if errInc != nil {
-		fmt.Println("广东教育学会，发证书 加积分失败，失败原因", errInc.Error())
+		app.Logger.Error("广东教育学会，发证书 加积分失败，失败原因", errInc.Error())
 		return nil, errors.New(errInc.Error())
 	}
 	return order, nil
