@@ -2,10 +2,13 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/validator"
 )
 
 var DefaultCommentController = &CommentController{}
@@ -120,13 +123,13 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
-	//if form.Message != "" {
-	//	//检查内容
-	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
-	//		app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-	//		return gin.H{"comment": nil, "point": 0}, errors.New("内容审核未通过，发布失败。")
-	//	}
-	//}
+	if form.Message != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
+			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
+			return gin.H{"comment": nil, "point": 0}, errors.New("内容审核未通过，发布失败。")
+		}
+	}
 	comment, point, err := service.DefaultCommentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
@@ -145,6 +148,13 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	form := CommentEditForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
+	}
+	if form.Message != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
+			app.Logger.Error(fmt.Errorf("update Comment error:%s", err.Error()))
+			return gin.H{"comment": nil, "point": 0}, errors.New("内容审核未通过，发布失败。")
+		}
 	}
 	err := service.DefaultCommentService.UpdateComment(user.ID, form.CommentId, form.Message)
 	if err != nil {
