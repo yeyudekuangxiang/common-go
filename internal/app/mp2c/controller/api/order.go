@@ -55,6 +55,8 @@ func (OrderController) SubmitOrderForEventGD(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(ctx)
+	form.EventId = ""
+
 	info, err := service.DefaultOrderService.SubmitOrderForEventGD(srv_types.SubmitOrderForEventGDParam{
 		UserId:              user.ID,
 		EventId:             form.EventId,
