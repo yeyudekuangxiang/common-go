@@ -121,6 +121,7 @@ deploy-feature:
   only:
     - /^feature-.+$/
   before_script:
+    - env
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
