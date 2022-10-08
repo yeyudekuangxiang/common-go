@@ -77,7 +77,7 @@ func (repo PointTransactionRepository) FindBy(by FindPointTransactionBy) entity.
 	return pt
 }
 
-func (repo PointTransactionRepository) FindByValue(by FindPointTransactionByValue) entity.PointTransaction {
+func (repo PointTransactionRepository) FindTotal(by FindPointTransactionByValue) (total int64) {
 	pt := entity.PointTransaction{}
 	db := repo.ctx.DB.Model(pt)
 	if by.Type != "" {
@@ -92,11 +92,11 @@ func (repo PointTransactionRepository) FindByValue(by FindPointTransactionByValu
 	if by.ChangeType == "inc" {
 		db.Where("value > ?", 0)
 	}
-	err := db.First(&pt).Error
+	err := db.Count(&total).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
-	return pt
+	return
 }
 
 func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageListBy) ([]entity.PointTransaction, int64) {
