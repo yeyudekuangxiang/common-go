@@ -162,28 +162,28 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	case carbon > 0 && carbon <= 2000000:
 		{
 			userGroup = "极致低碳人群"
-			userGroupTips = "健康地球，感谢有你"
+			userGroupTips = "你在低碳环保这条路上一骑绝尘！"
 			level = 0
 			break
 		}
 	case carbon > 2000000 && carbon <= 6000000:
 		{
 			userGroup = "低碳环保人群"
-			userGroupTips = "希望您继续保持~~"
+			userGroupTips = "优秀的低碳选手，要继续保持哦！"
 			level = 1
 			break
 		}
 	case carbon > 6000000 && carbon <= 12000000:
 		{
 			userGroup = "地球消耗者"
-			userGroupTips = "情况有点危险，要开始行动啦～"
+			userGroupTips = "环保不难，从小事做起节能减排！"
 			level = 2
 			break
 		}
 	case carbon > 12000000 && carbon <= 24000000:
 		{
 			userGroup = "地球破坏者"
-			userGroupTips = "警告！必须马上减排"
+			userGroupTips = "别躺平～美丽地球，没你真不行！"
 			level = 3
 			break
 		}
