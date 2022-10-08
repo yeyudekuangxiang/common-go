@@ -73,3 +73,23 @@ func (srv ZyhService) CreateLog(dto srv_types.GetZyhLogAddDTO) error {
 		TransactionId:  dto.TransactionId,
 	})
 }
+
+func (srv ZyhService) GetInfoBy(dto srv_types.GetZyhGetInfoByDTO) (entity.Zyh, error) {
+	info := srv.ZyhRepository.FindBy(activity.FindZyhById{
+		Openid: dto.Openid,
+		VolId:  dto.VolId,
+	})
+	return info, nil
+}
+
+func (srv ZyhService) Create(dto srv_types.GetZyhGetInfoByDTO) error {
+	info, _ := srv.GetInfoBy(dto)
+	if info.Id == 0 {
+		//入库
+		return srv.ZyhRepository.Save(&entity.Zyh{
+			Openid: dto.Openid,
+			VolId:  dto.VolId,
+		})
+	}
+	return errors.New("志愿汇用户已存在")
+}

@@ -11,7 +11,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	activityService "mio/internal/pkg/service/activity"
+	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -85,7 +85,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		}
 
 		if thirdId != "" && cid == 1057 {
-			activityService.NewZyhService(context.NewMioContext()).Create(srv_types.GetZyhGetInfoByDTO{
+			platform.NewZyhService(context.NewMioContext()).Create(srv_types.GetZyhGetInfoByDTO{
 				Openid: whoAmiResp.Data.Openid,
 				VolId:  thirdId,
 			})

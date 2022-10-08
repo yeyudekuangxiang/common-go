@@ -141,7 +141,6 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		}
 
 		//积分变动提醒
-
 		types := map[entity.PointTransactionType]string{
 			entity.POINT_JHX:                    "金华行",
 			entity.POINT_FAST_ELECTRICITY:       "快电",
@@ -180,8 +179,9 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 				sendType = "2"
 				break
 			}
-			serviceZyh := platformSrv.ZyhService{}
+			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
 			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
+			//发送结果记录到日志
 			serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
 				Openid:         dto.OpenId,
 				PointType:      dto.Type,
