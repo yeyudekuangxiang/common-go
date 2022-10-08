@@ -282,12 +282,12 @@ func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage
 	})
 
 	if dto.ChangePoint > 0 {
-		ret := srv.repoPointTransaction.FindByValue(repository.FindPointTransactionByValue{
+		total := srv.repoPointTransaction.FindTotal(repository.FindPointTransactionByValue{
 			OpenId:     dto.OpenId,
 			ChangeType: "inc",
 		})
 		//第一次新增积分，上报
-		if ret.ID == 0 {
+		if total == 1 {
 			zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
 			zhuGeAttr["openid"] = dto.OpenId
 			zhuGeAttr["积分类型"] = dto.Type
@@ -298,12 +298,12 @@ func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage
 	}
 
 	if dto.ChangePoint < 0 {
-		retDec := srv.repoPointTransaction.FindByValue(repository.FindPointTransactionByValue{
+		total := srv.repoPointTransaction.FindTotal(repository.FindPointTransactionByValue{
 			OpenId:     dto.OpenId,
 			ChangeType: "dec",
 		})
 		//第一次减积分，上报
-		if retDec.ID == 0 {
+		if total == 1 {
 			zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
 			zhuGeAttr["openid"] = dto.OpenId
 			zhuGeAttr["积分类型"] = dto.Type
