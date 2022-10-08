@@ -268,6 +268,9 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if scene.Key == "" || scene.Key == "e" {
 		return 0, errors.New("渠道查询失败")
 	}
+	//用户数据
+	//user, _ := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
+
 	//获取pre_point数据 one limit
 	id, _ := strconv.ParseInt(params["prePointId"], 10, 64)
 	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
@@ -293,6 +296,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 		totalPoint = int64(scene.PrePointLimit)
 	}
 	app.Redis.Set(srv.ctx, key, totalPoint, 24*time.Hour)
+	//积分
 	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
 		Type:        entity.POINT_JHX,

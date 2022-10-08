@@ -243,6 +243,7 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 	//预加积分
 	fromString, _ := decimal.NewFromString(params["amount"])
 	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
+	carbon, _ := fromString.Mul(decimal.NewFromInt(1960)).Round(2).Float64()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
@@ -255,7 +256,14 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	//减碳量
+	_, _ = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		OpenId: userInfo.OpenId,
+		UserId: userInfo.ID,
+		Type:   entity.CARBON_JHX,
+		Value:  carbon,
+		Ip:     ip,
+	})
 	return gin.H{}, nil
 }
 
