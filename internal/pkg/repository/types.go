@@ -295,11 +295,11 @@ type GetRedeemCodeBy struct {
 }
 
 type GetScenePrePoint struct {
-	PlatformKey    string `json:"platformKey"`
-	PlatformUserId string `json:"platformUserId"`
-	OpenId         string `json:"openId"`
-	StartTime      string `json:"startTime"`
-	EndTime        string `json:"endTime"`
-	Id             int64  `json:"id"`
-	Status         int    `json:"status"`
+	PlatformKey    string    `json:"platformKey"`
+	PlatformUserId string    `json:"platformUserId"`
+	OpenId         string    `json:"openId"`
+	StartTime      time.Time `json:"startTime"`
+	EndTime        time.Time `json:"endTime"`
+	Id             int64     `json:"id"`
+	Status         int       `json:"status"`
 }

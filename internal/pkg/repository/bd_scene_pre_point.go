@@ -87,14 +87,17 @@ func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) ([]entity.BdSc
 	if by.OpenId != "" {
 		query.Where("open_id = ?", by.OpenId)
 	}
-	if by.StartTime != "" {
-		query.Where("to_char(created_at, 'YYYY-MM-DD HH:MI:SS') > ?", by.StartTime)
+	if !by.StartTime.IsZero() {
+		query.Where("created_at > ?", by.StartTime)
 	}
-	if by.EndTime != "" {
-		query.Where("to_char(created_at, 'YYYY-MM-DD HH:MI:SS') < ?", by.EndTime)
+	if !by.EndTime.IsZero() {
+		query.Where("created_at < ?", by.EndTime)
+	}
+	if by.Status != 0 {
+		query.Where("status = ?", by.Status)
 	}
 	var total int64
-	err := query.Count(&total).Find(&items).Error
+	err := query.Count(&total).Order("created_at asc").Find(&items).Error
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
