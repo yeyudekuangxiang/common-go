@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/wxoa"
 	"os"
 	"path"
@@ -528,13 +529,13 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 //CreateTopic 创建文章
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
 	topicModel := entity.Topic{}
-	//if content != "" {
-	//	//检查内容
-	//	if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-	//		app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-	//		return topicModel, errors.New("内容审核未通过，发布失败。")
-	//	}
-	//}
+	if content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
+			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			return topicModel, errors.New("内容审核未通过，发布失败。")
+		}
+	}
 
 	//处理images
 	imageStr := strings.Join(images, ",")
@@ -611,12 +612,12 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 
 	}
 
-	//if content != "" {
-	//	//检查内容
-	//	if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-	//		return entity.Topic{}, err
-	//	}
-	//}
+	if content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
+			return entity.Topic{}, err
+		}
+	}
 
 	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
 		return entity.Topic{}, err
