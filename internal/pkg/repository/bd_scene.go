@@ -29,6 +29,8 @@ func (repo BdSceneRepository) SceneToType(ch string) entity.PointTransactionType
 		return entity.POINT_JHX
 	case "fastElectricity":
 		return entity.POINT_FAST_ELECTRICITY
+	case "yitongxing":
+		return entity.POINT_YTX
 	}
 	return entity.POINT_ECAR
 }
@@ -37,6 +39,11 @@ func (repo BdSceneRepository) SceneToCarbonType(ch string) entity.CarbonTransact
 	switch ch {
 	case "lvmiao":
 		return entity.CARBON_ECAR
+	case "jinhuaxing":
+		return entity.CARBON_JHX
+	case "yitongxing":
+		return entity.CARBON_YTX
 	}
+
 	return ""
 }

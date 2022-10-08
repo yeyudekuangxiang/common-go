@@ -257,13 +257,19 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//减碳量
-	_, _ = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
-		OpenId: userInfo.OpenId,
-		UserId: userInfo.ID,
-		Type:   entity.CARBON_JHX,
-		Value:  carbon,
-		Ip:     ip,
-	})
+	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	if typeCarbonStr != "" {
+		_, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId: userInfo.OpenId,
+			UserId: userInfo.ID,
+			Type:   entity.CARBON_JHX,
+			Value:  carbon,
+			Ip:     ip,
+		})
+		if err != nil {
+			app.Logger.Errorf("预加积分 err:%s", err.Error())
+		}
+	}
 	return gin.H{}, nil
 }
 
