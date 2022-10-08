@@ -20,20 +20,8 @@ func mp2cCron() {
 	})
 
 	//签到提醒
-	AddFunc("0 0/30 8-9 * ?", func() {
-		log.Println("每天执行一次")
-		service := messageSrv.MessageService{}
-		service.SendMessageToSignUser()
-	})
-
-	AddFunc("0 0/30 11-14 * ?", func() {
-		log.Println("每天执行一次")
-		service := messageSrv.MessageService{}
-		service.SendMessageToSignUser()
-	})
-
-	AddFunc("0 0/30 17-20 * ?", func() {
-		log.Println("每天执行一次")
+	AddFunc("0/30 8,9,10,11,12,13,14,15,16,17,18,19,20 * * ?", func() {
+		log.Println("8,9,10,11,12,13,14,15,16,17,18,19,20 每30分钟执行一次")
 		service := messageSrv.MessageService{}
 		service.SendMessageToSignUser()
 	})
