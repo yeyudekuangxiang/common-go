@@ -2,8 +2,10 @@ package service
 
 import (
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/platform/jhx"
 )
 
 var DefaultBdSceneUserService = BdSceneUserService{}
@@ -49,6 +51,14 @@ func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, membe
 	if err != nil {
 		app.Logger.Errorf("create db_scene_user error:%s", err.Error())
 		return nil, err
+	}
+	//绑定回调
+	if scene.Ch == "jinhuaxing" {
+		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
+		if err != nil {
+			app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
+			return nil, err
+		}
 	}
 	return sceneUser, nil
 }
