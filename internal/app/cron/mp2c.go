@@ -4,7 +4,6 @@ import (
 	"log"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
-	messageSrv "mio/internal/pkg/service/message"
 )
 
 func mp2cCron() {
@@ -20,9 +19,9 @@ func mp2cCron() {
 	})
 
 	//签到提醒
-	AddFunc("0/30 8,9,10,11,12,13,14,15,16,17,18,19,20 * * ?", func() {
+	/*AddFunc("0/30 8,9,10,11,12,13,14,15,16,17,18,19,20 * * ?", func() {
 		log.Println("8,9,10,11,12,13,14,15,16,17,18,19,20 每30分钟执行一次")
 		service := messageSrv.MessageService{}
 		service.SendMessageToSignUser()
-	})
+	})*/
 }
