@@ -9,10 +9,12 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/wxoa"
 	"os"
@@ -533,6 +535,10 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
 			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "发帖"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
 			return topicModel, errors.New("内容审核未通过，发布失败。")
 		}
 	}
@@ -583,6 +589,17 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	if topicModel.UserId != userId {
 		return entity.Topic{}, errors.New("无权限修改")
 	}
+	if content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
+			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "更新帖子"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
+			return entity.Topic{}, errors.New("内容审核未通过，发布失败。")
+		}
+	}
 	//处理images
 	imageStr := strings.Join(images, ",")
 
@@ -610,13 +627,6 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 			return entity.Topic{}, err
 		}
 
-	}
-
-	if content != "" {
-		//检查内容
-		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			return entity.Topic{}, err
-		}
 	}
 
 	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {

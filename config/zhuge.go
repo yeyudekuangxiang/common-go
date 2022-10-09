@@ -12,6 +12,7 @@ type zhuGeEventName struct {
 	FirstIncPoint          string
 	FirstDecPoint          string
 	NewUserAdd             string
+	MsgSecCheck            string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -25,4 +26,5 @@ var ZhuGeEventName = zhuGeEventName{
 	FirstIncPoint:          "首次赚积分",
 	FirstDecPoint:          "首次消耗积分",
 	NewUserAdd:             "新用户",
+	MsgSecCheck:            "文本内容审核",
 }
