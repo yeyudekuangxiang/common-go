@@ -146,7 +146,7 @@ func (srv MessageService) SendMessageToSignUser() {
 			//其他错误情况，不做任何处理,会在下次定时器运行时，重新提醒
 		}
 	}
-	app.Logger.Info("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
+	app.Logger.Infof("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
 }
 
 func (srv MessageService) SendMessageToSignUserTest() (gin.H, error) {
@@ -189,6 +189,6 @@ func (srv MessageService) SendMessageToSignUserTest() (gin.H, error) {
 			//其他错误情况，不做任何处理,会在下次定时器运行时，重新提醒
 		}
 	}
-	app.Logger.Info("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
+	app.Logger.Infof("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
 	return gin.H{}, nil
 }
