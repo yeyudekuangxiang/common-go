@@ -21,7 +21,8 @@ type jhxTicketNotifyRequest struct {
 }
 
 type jhxTicketCreateResponse struct {
-	QrCodeStr string `json:"qrcodestr" form:"qrcodestr"`
+	QrCodeStr  string `json:"qrcodestr" form:"qrcodestr"`
+	ExpireTime string `json:"expireTime" from:"expireTime"`
 }
 
 type jhxTicketStatusResponse struct {

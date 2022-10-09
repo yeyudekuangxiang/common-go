@@ -82,7 +82,7 @@ func WithJhxNonce(nonce string) JhxOptions {
 	}
 }
 
-func (srv JhxService) TicketCreate(tradeno string, typeId int64, starTime, endTime time.Time, user entity.User) error {
+func (srv JhxService) TicketCreate(tradeno string, typeId int64, user entity.User) error {
 	params := srv.getCommonParams()
 	params["tradeno"] = tradeno
 	params["mobile"] = user.PhoneNumber
@@ -108,13 +108,19 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, starTime, endTi
 	if err != nil {
 		return err
 	}
+	var expireTime time.Time
+	if ticketCreateResponse.ExpireTime == "" {
+		expireTime = time.Now().AddDate(1, 0, 0)
+	} else {
+		expireTime, _ = time.Parse("2006-01-02", ticketCreateResponse.ExpireTime)
+	}
 	coupon, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
 		CouponCardTypeId:     typeId,
 		CouponCardQrcodeText: ticketCreateResponse.QrCodeStr,
 		UserId:               user.ID,
 		BizId:                tradeno,
-		StartTime:            starTime.UnixMilli(),
-		EndTime:              endTime.UnixMilli(),
+		StartTime:            time.Now().UnixMilli(),
+		EndTime:              expireTime.UnixMilli(),
 	})
 	fmt.Printf("coupon: %v\n", coupon)
 	if err != nil {

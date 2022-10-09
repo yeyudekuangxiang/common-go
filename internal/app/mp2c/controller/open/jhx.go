@@ -26,9 +26,7 @@ func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	orderNo := "jhx" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	startTime, _ := time.Parse("2006-01-02", form.StartTime)
-	endTime, _ := time.Parse("2006-01-02", form.EndTime)
-	err := jhxService.TicketCreate(orderNo, 123, startTime, endTime, user)
+	err := jhxService.TicketCreate(orderNo, 123, user)
 	if err != nil {
 		return nil, err
 	}

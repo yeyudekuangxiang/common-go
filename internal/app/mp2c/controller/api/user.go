@@ -146,10 +146,8 @@ func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 		go func() {
 			jhxService := jhx.NewJhxService(mioctx.NewMioContext())
 			orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
-			startTime, _ := time.Parse("2006-01-02", "2022-09-29")
-			endTime, _ := time.Parse("2006-01-02", "2022-10-31")
 			for i := 0; i < 2; i++ {
-				err := jhxService.TicketCreate(orderNo+strconv.Itoa(i), 123, startTime, endTime, user)
+				err := jhxService.TicketCreate(orderNo+strconv.Itoa(i), 123, user)
 				if err != nil {
 					app.Logger.Errorf("金华行发券失败:%s", err.Error())
 					return
