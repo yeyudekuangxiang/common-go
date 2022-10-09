@@ -90,7 +90,7 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, starTime, endTi
 	params["sign"] = strings.ToUpper(sign)
 	url := srv.option.Domain + "/busticket/ticket_create"
 	body, err := httputil.PostJson(url, params)
-	fmt.Printf("response body: %s\n", body)
+	fmt.Printf("ticket_create response body: %s\n", body)
 	if err != nil {
 		return err
 	}
@@ -192,6 +192,30 @@ func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, er
 	}
 	//返回状态
 	return ticketStatusResponse, nil
+}
+
+func (srv JhxService) BindSuccess(mobile string, status string) error {
+	params := srv.getCommonParams()
+	params["status"] = status
+	params["mobile"] = mobile
+	sign := srv.getSign(params)
+	params["sign"] = strings.ToUpper(sign)
+	url := srv.option.Domain + "/busticket/bind_success"
+	body, err := httputil.PostJson(url, params)
+	fmt.Printf("bind_success response body: %s\n", body)
+	if err != nil {
+		return err
+	}
+	response := jhxCommonResponse{}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		fmt.Printf("bind_success Unmarshal body: %s\n", err.Error())
+		return err
+	}
+	if response.Code != 0 {
+		return errors.New(response.Msg)
+	}
+	return nil
 }
 
 //创建气泡数据
