@@ -9,6 +9,7 @@ import (
 type IMiniSubTemplate interface {
 	ToData() map[string]subscribemessage.SendValue
 	TemplateId() string
+	SendMixCount() float64
 	IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU()
 }
 
@@ -38,6 +39,10 @@ func (m MiniChangePointTemplate) ToData() map[string]subscribemessage.SendValue 
 
 func (m MiniChangePointTemplate) TemplateId() string {
 	return config.MessageTemplateIds.ChangePoint
+}
+
+func (m MiniChangePointTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.ChangePoint
 }
 
 func (m MiniChangePointTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
@@ -75,6 +80,10 @@ func (m MiniOrderDeliverTemplate) TemplateId() string {
 	return config.MessageTemplateIds.OrderDeliver
 }
 
+func (m MiniOrderDeliverTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.OrderDeliver
+}
+
 func (m MiniOrderDeliverTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
@@ -99,6 +108,10 @@ func (m MiniSignRemindTemplate) ToData() map[string]subscribemessage.SendValue {
 
 func (m MiniSignRemindTemplate) TemplateId() string {
 	return config.MessageTemplateIds.SignRemind
+}
+
+func (m MiniSignRemindTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.SignRemind
 }
 
 func (m MiniSignRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
@@ -133,6 +146,10 @@ func (m MiniTopicPassTemplate) TemplateId() string {
 	return config.MessageTemplateIds.TopicPass
 }
 
+func (m MiniTopicPassTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.TopicPass
+}
+
 func (m MiniTopicPassTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
@@ -163,6 +180,10 @@ func (m MiniTopicCarefullyChosenTemplate) ToData() map[string]subscribemessage.S
 
 func (m MiniTopicCarefullyChosenTemplate) TemplateId() string {
 	return config.MessageTemplateIds.TopicCarefullyChosen
+}
+
+func (m MiniTopicCarefullyChosenTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.TopicCarefullyChosen
 }
 
 func (m MiniTopicCarefullyChosenTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {

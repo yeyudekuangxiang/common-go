@@ -60,8 +60,9 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 //todo 给测试用
 
 func (MessageController) SendSign(c *gin.Context) (gin.H, error) {
+	return gin.H{}, nil
 	service := messageSrv.MessageService{}
-	return service.SendMessageToSignUserTest()
+	service.SendMessageToSignUser()
 	return gin.H{
 		"code": 0,
 		"err":  nil,

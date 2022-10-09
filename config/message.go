@@ -20,6 +20,26 @@ var MessageTemplateIds = MessageTemplateId{
 	TopicCarefullyChosen: "G8_5XpSOsL0E0AmL0UfNZ3pwWRjU-PYdk40ptT_viFI", //帖子被精选通知
 }
 
+//小程序订阅消息模版
+
+type MessageSendMixCount struct {
+	ChangePoint          float64
+	OrderDeliver         float64
+	SignRemind           float64
+	TopicPass            float64
+	TopicCarefullyChosen float64
+}
+
+//每个模版最多发送条数
+
+var MessageSendMixCounts = MessageSendMixCount{
+	ChangePoint:          1, //积分到账提醒
+	OrderDeliver:         1, //订单发货提醒
+	SignRemind:           1, //签到提醒
+	TopicPass:            1, //帖子审核通过提醒
+	TopicCarefullyChosen: 1, //帖子被精选通知
+}
+
 //模版路径
 
 var MessageJumpUrls = MessageTemplateId{
