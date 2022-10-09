@@ -8,14 +8,13 @@ type platformForm struct {
 	Sign        string `json:"sign,omitempty" form:"sign"`
 }
 
-//金华行 核销参数
-type jhxCommonRequest struct {
-	Version string `json:"version"`
-	Appid   string `json:"appid"`
-	Nonce   int    `json:"nonce"`
-	Sign    string `json:"sign"`
+type bindPlatform struct {
+	PlatformKey string `json:"platformKey" form:"platformKey"`
+	MemberId    string `json:"memberId,omitempty" form:"memberId"`
+	IsNewUser   string `json:"isNewUser" form:"isNewUser"`
 }
 
+//金华行 核销参数
 type jhxTicketNotifyRequest struct {
 	Tradeno  string `json:"tradeno" form:"tradeno" binding:"required"`
 	Status   string `json:"status" form:"status" binding:"required"`

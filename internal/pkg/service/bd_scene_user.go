@@ -4,6 +4,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 )
 
 var DefaultBdSceneUserService = BdSceneUserService{}
@@ -38,7 +39,7 @@ func (srv BdSceneUserService) Create(data *entity.BdSceneUser) error {
 func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, memberId string) (*entity.BdSceneUser, error) {
 	sceneUser := srv.FindPlatformUser(user.OpenId, scene.Ch)
 	if sceneUser.ID != 0 {
-		return sceneUser, nil
+		return sceneUser, errno.ErrChannelExisting
 	}
 	sceneUser.PlatformKey = scene.Ch
 	sceneUser.PlatformUserId = memberId

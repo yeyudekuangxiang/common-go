@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	platformUtil "mio/pkg/platform"
 	"strings"
 )
@@ -23,7 +24,7 @@ type PlatformController struct {
 
 func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, error) {
 	//接收参数 platformKey, phone
-	form := platformForm{}
+	form := bindPlatform{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
@@ -41,11 +42,11 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 
 	//绑定
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
-	if err != nil {
+	if err != nil && err != errno.ErrChannelExisting {
 		return nil, err
 	}
 	//绑定回调
-	if scene.Ch == "jinhuaxing" {
+	if scene.Ch == "jinhuaxing" && err != errno.ErrChannelExisting {
 		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
 		if err != nil {
 			app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
