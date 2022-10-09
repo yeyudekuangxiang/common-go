@@ -477,7 +477,7 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 	if wechatServiceUid == 0 {
 		return nil, errors.New("不满足领取条件")
 	}
-	wechatServiceUser := srv.repoGDBook.GetUserBy(repositoryActivity.FindRecordBy{UserId: wechatServiceUid})
+	wechatServiceUser := srv.repoGDBook.GetDonationBookByUid(repositoryActivity.FindRecordBy{UserId: wechatServiceUid})
 	if wechatServiceUser.UserId == 0 {
 		return nil, errors.New("您不满足领取条件哦")
 	}
