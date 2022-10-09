@@ -62,6 +62,25 @@ func (repo GDDonationBookRepository) GetUserBy(by FindRecordBy) activity.GDDonat
 	return record
 }
 
+func (repo GDDonationBookRepository) GetDonationBookByUid(by FindRecordBy) activity.GDDonationBookRecord {
+	var record activity.GDDonationBookRecord
+	if by.UserId == 0 {
+		return record
+	}
+	db := app.DB.Model(activity.GDDonationBookRecord{})
+	if by.UserId > 0 {
+		db.Where("user_id = ?", by.UserId)
+	}
+	db.Where("is_success", 1)
+	db.Where("answer_status", 2)
+	if err := db.First(&record).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return record
+}
+
 // GetInvitedBy 获取用户活动及个人信息
 func (repo GDDonationBookRepository) GetInvitedBy(by FindRecordBy) []activity.GDDonationBookRecord {
 	record := make([]activity.GDDonationBookRecord, 0)
