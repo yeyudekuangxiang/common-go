@@ -21,6 +21,9 @@ import (
 
 func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
+
+	router.GET("/sendSign", apiutil.Format(message.DefaultMessageController.SendSign))
+
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())

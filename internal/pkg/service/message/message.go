@@ -4,6 +4,7 @@ import (
 	contextRedis "context"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
 	"mio/config"
@@ -146,4 +147,48 @@ func (srv MessageService) SendMessageToSignUser() {
 		}
 	}
 	app.Logger.Info("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
+}
+
+func (srv MessageService) SendMessageToSignUserTest() (gin.H, error) {
+	messageSignUserKey := config.RedisKey.MessageSignUser
+	time := time.Now().Unix()
+	op := &redis.ZRangeBy{
+		Max:    strconv.FormatInt(time, 10),
+		Min:    "0",
+		Offset: 0,    //类似sql的limit, 表示开始偏移量
+		Count:  5000, //默认一次跑5000条数据，因为是每10分钟跑一次，根据现在的日活，5000是可以的，后续可以增加或者进行分页处理
+	}
+	list, err := app.Redis.ZRevRangeByScore(contextRedis.Background(), messageSignUserKey, op).Result()
+
+	return gin.H{
+		"code": list,
+		"err":  err,
+	}, nil
+
+	message := MiniSignRemindTemplate{
+		ActivityName: "每日签到",
+		Tip:          "低碳打卡有惊喜，快来解锁今日福利吧",
+	}
+	successCount := 0
+	failCount := 0
+	refuseCount := 0
+	for _, openid := range list {
+		code, messageErr := srv.SendMiniSubMessage(openid, config.MessageJumpUrls.SignRemind, message)
+		if messageErr == nil && code == 0 {
+			//发送成功，提醒时间延长24小时
+			srv.ExtensionSignTime(openid)
+			successCount++
+			continue
+		} else if code == 43101 {
+			//用户拒绝提醒，删除用户提醒
+			srv.DelExtensionSignTime(openid) //删除提醒
+			refuseCount++
+			continue
+		} else {
+			failCount++
+			//其他错误情况，不做任何处理,会在下次定时器运行时，重新提醒
+		}
+	}
+	app.Logger.Info("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
+	return gin.H{}, nil
 }
