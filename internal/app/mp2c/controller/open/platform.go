@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -42,6 +43,14 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil {
 		return nil, err
+	}
+	//绑定回调
+	if scene.Ch == "jinhuaxing" {
+		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
+		if err != nil {
+			app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
+			return nil, err
+		}
 	}
 	//返回
 	return gin.H{
