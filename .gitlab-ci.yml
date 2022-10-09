@@ -6,6 +6,8 @@ stages:
 build:
   image: golang:1.17
   stage: build
+  tags:
+    - build
   only:
     - develop
     - master
@@ -32,6 +34,8 @@ build-manual:
   image: golang:1.17
   stage: build
   allow_failure: false
+  tags:
+    - build
   when: manual
   only:
     - /^hotfix-.+$/
@@ -55,6 +59,8 @@ build-manual:
       - ./cmd/mp2c/mp2c
 package:
   stage: package
+  tags:
+    - docker
   only:
     - develop
     - master
@@ -67,6 +73,8 @@ package:
 package-manual:
   stage: package
   when: on_success
+  tags:
+    - docker
   only:
     - /^hotfix-.+$/
     - /^feature-.+$/
