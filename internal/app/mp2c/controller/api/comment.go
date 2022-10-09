@@ -2,15 +2,10 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"mio/config"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util/apiutil"
-	"mio/internal/pkg/util/validator"
 )
 
 var DefaultCommentController = &CommentController{}
@@ -145,17 +140,17 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
-	if form.Message != "" {
-		//检查内容
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
-			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发布评论"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-			return gin.H{"comment": nil, "point": 0}, errors.New("内容审核未通过，发布失败。")
-		}
-	}
+	//if form.Message != "" {
+	//	//检查内容
+	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
+	//		app.Logger.Error(fmt.Errorf("update Comment error:%s", err.Error()))
+	//		zhuGeAttr := make(map[string]interface{}, 0)
+	//		zhuGeAttr["场景"] = "更新评论"
+	//		zhuGeAttr["失败原因"] = err.Error()
+	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+	//		return gin.H{"comment": nil, "point": 0}, errors.New("内容审核未通过，发布失败。")
+	//	}
+	//}
 	err := service.DefaultCommentService.UpdateComment(user.ID, form.CommentId, form.Message)
 	if err != nil {
 		return gin.H{}, err
