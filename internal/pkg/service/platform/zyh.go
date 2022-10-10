@@ -29,6 +29,8 @@ type ZyhService struct {
 	ZyhLogRepository activity.ZyhLogRepository
 }
 
+//志愿汇发金币
+
 func (srv ZyhService) SendPoint(pointType string, openid string, point string) (code string, error error) {
 	info := srv.ZyhRepository.FindBy(activity.FindZyhById{
 		Openid: openid,
