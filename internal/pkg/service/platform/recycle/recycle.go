@@ -9,7 +9,6 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
@@ -48,47 +47,47 @@ var pointRecycleByRules = map[string]entity.PointTransactionType{
 
 // 回收 台 单位对应积分 比如 电视机 1台 获得 69积分
 var recyclePointByNum = map[string]int64{
-	"手机":    113,
-	"平板电脑":  409,
-	"手提电脑":  1031,
+	"手机":       113,
+	"平板电脑":   409,
+	"手提电脑":   1031,
 	"一体机电脑": 1911,
-	"冰箱":    384,
-	"洗衣机":   690,
-	"空调":    205,
-	"电视机":   69,
-	"衣帽鞋包":  21, //1000g : 21 积分
-	"书籍课本":  6,  //1000g : 6 积分
-	"旧物回收":  21,
+	"冰箱":       384,
+	"洗衣机":     690,
+	"空调":       205,
+	"电视机":     69,
+	"衣帽鞋包":   21, //1000g : 21 积分
+	"书籍课本":   6,  //1000g : 6 积分
+	"旧物回收":   21,
 }
 
 // 回收 台/重量 单位对应减碳量 比如 电视机 1台 获得 15000g 减碳量
 var recycleCo2ByNum = map[string]float64{
-	"手机":    25000,
-	"平板电脑":  89000,
-	"手提电脑":  224000,
+	"手机":       25000,
+	"平板电脑":   89000,
+	"手提电脑":   224000,
 	"一体机电脑": 415000,
-	"冰箱":    83000,
-	"洗衣机":   150000,
-	"空调":    45000,
-	"电视机":   15000,
-	"衣帽鞋包":  4500, //1000g : 4500g
-	"书籍课本":  1400, //1000g : 1400g
-	"旧物回收":  4500,
+	"冰箱":       83000,
+	"洗衣机":     150000,
+	"空调":       45000,
+	"电视机":     15000,
+	"衣帽鞋包":   4500, //1000g : 4500g
+	"书籍课本":   1400, //1000g : 1400g
+	"旧物回收":   4500,
 }
 
 //每个类型对应次数
 var recycleLimit = map[string]int{
-	"衣帽鞋包":  1,
-	"书籍课本":  1,
-	"手机":    1,
-	"平板电脑":  1,
-	"手提电脑":  1,
+	"衣帽鞋包":   1,
+	"书籍课本":   1,
+	"手机":       1,
+	"平板电脑":   1,
+	"手提电脑":   1,
 	"一体机电脑": 1,
-	"冰箱":    1,
-	"洗衣机":   1,
-	"空调":    1,
-	"电视机":   1,
-	"旧物回收":  1,
+	"冰箱":       1,
+	"洗衣机":     1,
+	"空调":       1,
+	"电视机":     1,
+	"旧物回收":   1,
 }
 
 // CheckLimit 检查该类型今日获取次数
@@ -127,7 +126,7 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 	return nil
 }
 
-func (srv RecycleService) CheckFmySign(params platform.FmySignParams, appId string, secret string) error {
+func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secret string) error {
 	sign := params.Sign
 	params.Sign = ""
 	rand1 := string([]rune(sign)[0:4])

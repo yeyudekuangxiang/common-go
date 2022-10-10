@@ -11,7 +11,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	platformService "mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/platform/ccring"
 	"mio/internal/pkg/service/platform/recycle"
 	"mio/internal/pkg/service/srv_types"
@@ -175,7 +174,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("渠道查询失败")
 	}
 
-	dst := platformService.FmySignParams{}
+	dst := recycle.FmySignParams{}
 	err := util.MapTo(&form, &dst)
 	if err != nil {
 		return nil, err
