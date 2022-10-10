@@ -38,11 +38,10 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 	if info.Id == 0 {
 		return "30000", errors.New("不存在该志愿者")
 	}
-	volunteerId := info.Openid
 	params := make(map[string]string, 0)
 	params["AccessKeyId"] = config.Config.ActivityZyh.AccessKeyId
 	params["type"] = pointType
-	params["volunteerId"] = volunteerId
+	params["volunteerId"] = info.VolId
 	params["point"] = point
 	sign := util2.GetSign(params)
 	params["Signature"] = sign //strings.ToUpper()
