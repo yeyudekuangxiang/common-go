@@ -1,4 +1,4 @@
-Name: coupon.rpc
+Name: {{.serviceName}}.rpc
 Debug: false
 ListenOn: 127.0.0.1:2006
 Database:
