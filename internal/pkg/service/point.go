@@ -168,7 +168,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			}
 		}
 
-		//发送到志愿汇
+		//同步到志愿汇
 		if point.Balance > 0 {
 			sendType := "0"
 			switch dto.Type {
