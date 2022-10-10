@@ -1,4 +1,4 @@
-package platform
+package common
 
 import (
 	mioContext "mio/internal/pkg/core/context"

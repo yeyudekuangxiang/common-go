@@ -261,7 +261,15 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 		return nil, 0, err
 	}
 	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
+	condition := repository.GetSceneUserOne{PlatformKey: params["platformKey"]}
+	if memberId, ok := params["memberId"]; ok {
+		condition.PlatformUserId = memberId
+	}
+	if openId, ok := params["openId"]; ok {
+		condition.OpenId = openId
+	}
+
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(condition)
 	if sceneUser.ID == 0 {
 		return nil, 0, errors.New("未找到绑定关系")
 	}
@@ -271,6 +279,7 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 	items, _, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
+		OpenId:         sceneUser.OpenId,
 		StartTime:      time.Now().AddDate(0, 0, -7),
 		EndTime:        time.Now(),
 		Status:         1,
@@ -289,17 +298,25 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if err := srv.checkSign(sign, params); err != nil {
 		return 0, err
 	}
-	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return 0, errors.New("未找到绑定关系")
-	}
+
 	scene := repository.DefaultBdSceneRepository.FindByCh(params["platformKey"])
 	if scene.Key == "" || scene.Key == "e" {
 		return 0, errors.New("渠道查询失败")
 	}
-	//用户数据
-	//user, _ := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
+
+	sceneUserCondition := repository.GetSceneUserOne{PlatformKey: params["platformKey"]}
+	if memberId, ok := params["memberId"]; ok {
+		sceneUserCondition.PlatformUserId = memberId
+	}
+
+	if openId, ok := params["openId"]; ok {
+		sceneUserCondition.OpenId = openId
+	}
+
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(sceneUserCondition)
+	if sceneUser.ID == 0 {
+		return 0, errors.New("未找到绑定关系")
+	}
 
 	//获取pre_point数据 one limit
 	id, _ := strconv.ParseInt(params["prePointId"], 10, 64)

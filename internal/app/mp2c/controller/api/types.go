@@ -47,8 +47,8 @@ type PreCollectRequest struct {
 	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	Amount      string `json:"amount" form:"amount" binding:"required"`
-	Tradeno     string `json:"tradeno" form:"tradeno"`
-	Mobile      string `json:"mobile" form:"mobile"`
+	Tradeno     string `json:"tradeno" form:"tradeno"  binding:"required"`
+	Mobile      string `json:"mobile" form:"mobile" binding:"required"`
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 

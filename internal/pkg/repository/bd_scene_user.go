@@ -59,3 +59,38 @@ func (repo BdSceneUserRepository) FindPlatformUserByOpenId(openId string) entity
 func (repo BdSceneUserRepository) Create(data *entity.BdSceneUser) error {
 	return repo.DB.Model(&entity.BdSceneUser{}).Create(data).Error
 }
+
+func (repo BdSceneUserRepository) FindOne(params GetSceneUserOne) *entity.BdSceneUser {
+	one := entity.BdSceneUser{}
+	query := repo.DB.Model(&one)
+
+	if params.Id != 0 {
+		query.Where("id = ?", params.Id)
+	}
+
+	if params.PlatformKey != "" {
+		query.Where("platform_key = ?", params.PlatformKey)
+	}
+
+	if params.PlatformUserId != "" {
+		query.Where("platform_user_id = ?", params.PlatformUserId)
+	}
+
+	if params.OpenId != "" {
+		query.Where("open_id = ?", params.OpenId)
+	}
+
+	if params.Phone != "" {
+		query.Where("phone = ?", params.Phone)
+	}
+
+	if params.UnionId != "" {
+		query.Where("union_id = ?", params.UnionId)
+	}
+
+	err := query.First(&one).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return &one
+}

@@ -42,19 +42,18 @@ type jhxPreCollectRequest struct {
 }
 
 type jhxGetPreCollectRequest struct {
-	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	MemberId    string `json:"memberId" from:"memberId"`
+	OpenId      string `json:"openId" form:"openId"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
-	//Amount      string `json:"amount,omitempty" form:"amount"`
-	//PrePointId string `json:"prePointId,omitempty" form:"prePointId"`
-	Sign string `json:"sign" form:"sign" binding:"required"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 
 type jhxCollectRequest struct {
-	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	MemberId    string `json:"memberId" from:"memberId"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
-	//Amount      string `json:"amount,omitempty" form:"amount"`
-	PrePointId string `json:"prePointId" form:"prePointId"`
-	Sign       string `json:"sign" form:"sign" binding:"required"`
+	OpenId      string `json:"openId" form:"openId"`
+	PrePointId  string `json:"prePointId" form:"prePointId"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 type jhxMyOrderRequest struct {
 	MemberId    string `json:"memberId" from:"memberId" binding:"required"`

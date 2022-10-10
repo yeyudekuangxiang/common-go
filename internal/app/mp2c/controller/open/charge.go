@@ -13,10 +13,12 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/ccring"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/star_charge"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -199,13 +201,8 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//查询用户
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return nil, errors.New("未找到绑定关系")
-	}
-
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
-		OpenId: sceneUser.OpenId,
+		Mobile: form.Mobile,
 		Source: entity.UserSourceMio,
 	})
 
@@ -221,6 +218,27 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("账户风险等级过高")
 	}
 
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+		Phone:          form.Mobile,
+	})
+	//第三方推送订单时检测是否绑定，未绑定用户执行绑定
+	if sceneUser.ID == 0 {
+		//调用绑定
+		sceneUser, err = service.DefaultBdSceneUserService.Bind(*userInfo, *scene, form.MemberId)
+		if err != nil && err != errno.ErrChannelExisting {
+			return nil, err
+		}
+		//绑定回调
+		if scene.Ch == "jinhuaxing" && err != errno.ErrChannelExisting {
+			err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
+			if err != nil {
+				app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
+				return nil, err
+			}
+		}
+	}
 	//查重
 	transService := service.NewPointTransactionService(ctx)
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
@@ -245,11 +263,13 @@ func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
 	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
 	amount, _ := fromString.Float64()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
-		PlatformKey:    sceneUser.PlatformKey,
-		PlatformUserId: sceneUser.PlatformUserId,
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
 		Point:          point,
-		OpenId:         sceneUser.OpenId,
+		OpenId:         userInfo.OpenId,
 		Status:         1,
+		Mobile:         form.Mobile,
+		Tradeno:        form.Tradeno,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
