@@ -181,15 +181,17 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			}
 			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
 			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
-			//发送结果记录到日志
-			serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
-				Openid:         dto.OpenId,
-				PointType:      dto.Type,
-				Value:          dto.ChangePoint,
-				ResultCode:     messageCode,
-				AdditionalInfo: messageErr.Error(),
-				TransactionId:  dto.BizId,
-			})
+			if messageCode != "30000" {
+				//发送结果记录到日志
+				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+					Openid:         dto.OpenId,
+					PointType:      dto.Type,
+					Value:          dto.ChangePoint,
+					ResultCode:     messageCode,
+					AdditionalInfo: messageErr.Error(),
+					TransactionId:  dto.BizId,
+				})
+			}
 		}
 
 		//发完积分，更新邀请表发积分状态
