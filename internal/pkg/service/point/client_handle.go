@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -255,6 +256,19 @@ func (c *defaultClientHandle) incPoint(num int64) (int64, error) {
 	}
 	//更新积分
 	point, err := c.savePoint(&usrPoint)
+	failMessage := ""
+	if err != nil {
+		failMessage = err.Error()
+	}
+
+	track.DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
+		OpenId:      c.clientHandle.OpenId,
+		PointType:   c.clientHandle.Type,
+		ChangeType:  util.Ternary(c.clientHandle.point > 0, "inc", "dec").String(),
+		Value:       uint(c.clientHandle.point),
+		IsFail:      util.Ternary(err == nil, false, true).Bool(),
+		FailMessage: failMessage,
+	})
 	if err != nil {
 		return 0, err
 	}
