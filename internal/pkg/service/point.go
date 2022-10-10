@@ -184,12 +184,16 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
 			if messageCode != "30000" {
 				//发送结果记录到日志
+				msgErr := ""
+				if messageErr != nil {
+					msgErr = messageErr.Error()
+				}
 				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
 					Openid:         dto.OpenId,
 					PointType:      dto.Type,
 					Value:          dto.ChangePoint,
 					ResultCode:     messageCode,
-					AdditionalInfo: messageErr.Error(),
+					AdditionalInfo: msgErr,
 					TransactionId:  dto.BizId,
 				})
 			}
