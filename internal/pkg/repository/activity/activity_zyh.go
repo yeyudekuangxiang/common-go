@@ -25,7 +25,7 @@ func (repo ZyhRepository) FindBy(by FindZyhById) entity.Zyh {
 		db.Where("openid = ?", by.Openid)
 	}
 	if by.VolId != "" {
-		db.Where("vol_id = ?", by.VolId)
+		db.Or("vol_id = ?", by.VolId)
 	}
 	if err := db.First(&zyh).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
