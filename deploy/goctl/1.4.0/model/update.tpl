@@ -15,6 +15,6 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
     }
     return m.cache.DelCtx(ctx, {{.keyValues}})
     {{else}}
-    return m.db.WithContext(ctx).Save(data).Error
+    return m.db.WithContext(ctx).Save({{if .containsIndexCache}}newData{{else}}data{{end}}).Error
     {{end}}
 }

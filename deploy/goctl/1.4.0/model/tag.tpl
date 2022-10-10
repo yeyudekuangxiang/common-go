@@ -1,1 +1,1 @@
-`gorm:"column:{{.field}}"`
+`gorm:"{{if .isPk}}primaryKey;{{end}}{{if .isAutoIncrement}}autoIncrement;{{end}}column:{{.field}}"`

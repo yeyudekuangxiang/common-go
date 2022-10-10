@@ -11,3 +11,8 @@ func (m *default{{.upperStartCamelObject}}Model) Insert(ctx context.Context, dat
 	return m.db.WithContext(ctx).Create(data).Error
     {{end}}
 }
+
+func (m *default{{.upperStartCamelObject}}Model) InsertBatch(ctx context.Context, data *[]{{.upperStartCamelObject}}, batchSize int) error {
+	err := m.db.WithContext(ctx).CreateInBatches(data, batchSize).Error
+    return err
+}

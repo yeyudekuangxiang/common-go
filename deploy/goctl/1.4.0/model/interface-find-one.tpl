@@ -1,1 +1,1 @@
-FindOne(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) (*{{.upperStartCamelObject}}, bool, error)
+FindOne(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}}, opts ...option) (*{{.upperStartCamelObject}}, bool, error)

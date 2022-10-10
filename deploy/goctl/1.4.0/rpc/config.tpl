@@ -11,7 +11,11 @@ type Config struct {
 	Cache    cache.CacheConf
 	Debug bool
 }
-
+type RedisConf struct {
+	Host     string
+	Password string `json:",optional"`
+	DB       int    `json:",optional"`
+}
 type DbConf struct {
 	Type         string
 	Host         string
