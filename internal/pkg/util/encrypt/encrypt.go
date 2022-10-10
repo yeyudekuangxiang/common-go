@@ -129,9 +129,10 @@ func GetSign(params map[string]string) string {
 }
 
 /*
-//  keyStr 密钥
-//  value  消息内容
+ keyStr 密钥
+ value  消息内容
 */
+
 func HMACSHA1(keyStr, value string) string {
 	key := []byte(keyStr)
 	mac := hmac.New(sha1.New, key)
