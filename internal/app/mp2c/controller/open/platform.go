@@ -2,7 +2,10 @@ package open
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
+	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -15,6 +18,7 @@ import (
 	"mio/pkg/errno"
 	platformUtil "mio/pkg/platform"
 	"strings"
+	"time"
 )
 
 var DefaultPlatformController = PlatformController{}
@@ -114,4 +118,104 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	return nil, nil
+}
+
+func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
+	form := api.PrePointRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		app.Logger.Errorf("参数错误: %s", form)
+		return nil, err
+	}
+	ctx := context.NewMioContext()
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errors.New("渠道查询失败")
+	}
+	//白名单验证
+	ip := c.ClientIP()
+	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
+		app.Logger.Info("校验白名单失败", ip)
+		return nil, errors.New("非白名单ip:" + ip)
+	}
+
+	//校验sign
+	params := make(map[string]string, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+	sign := form.Sign
+	delete(params, "sign")
+	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
+		app.Logger.Info("校验sign失败", form)
+		return nil, errors.New("sign:" + form.Sign + " 验证失败")
+	}
+
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+	})
+
+	//查重
+	transService := service.NewPointTransactionService(ctx)
+	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
+
+	by, err := transService.FindBy(repository.FindPointTransactionBy{
+		Type: string(typeString),
+		Note: form.PlatformKey + "#" + form.Tradeno,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if by.ID != 0 {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
+	}
+
+	//预加积分
+	fromString, _ := decimal.NewFromString(params["amount"])
+	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
+	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+		Point:          point,
+		OpenId:         sceneUser.OpenId,
+		Status:         1,
+		Mobile:         sceneUser.Phone,
+		Tradeno:        form.Tradeno,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	////减碳量
+	//fromString, _ := decimal.NewFromString(params["amount"])
+	//amount, _ := fromString.Float64()
+	//typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	//if typeCarbonStr != "" {
+	//	_, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+	//		OpenId: sceneUser.OpenId,
+	//		UserId: userInfo.ID,
+	//		Type:   typeCarbonStr,
+	//		Value:  amount,
+	//		Ip:     ip,
+	//	})
+	//	if err != nil {
+	//		app.Logger.Errorf("预加积分 err:%s", err.Error())
+	//	}
+	//}
+	return gin.H{}, nil
+}
+
+func (receiver PlatformController) GetPrePointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
+	return nil, 0, nil
+}
+
+func (receiver PlatformController) CollectPoint(sign string, params map[string]string) (int64, error) {
+	return 0, nil
 }

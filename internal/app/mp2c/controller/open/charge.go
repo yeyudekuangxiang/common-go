@@ -13,12 +13,10 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/ccring"
-	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/star_charge"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -165,131 +163,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//发券
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
-	return gin.H{}, nil
-}
-
-func (ctr ChargeController) PreCollectPoint(c *gin.Context) (gin.H, error) {
-	form := api.PreCollectRequest{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		app.Logger.Errorf("参数错误: %s", form)
-		return nil, err
-	}
-	ctx := context.NewMioContext()
-	//查询 渠道信息
-	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
-	if scene.Key == "" || scene.Key == "e" {
-		return nil, errors.New("渠道查询失败")
-	}
-	//白名单验证
-	ip := c.ClientIP()
-	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
-		app.Logger.Info("校验白名单失败", ip)
-		return nil, errors.New("非白名单ip:" + ip)
-	}
-
-	//校验sign
-	params := make(map[string]string, 0)
-	err := util.MapTo(&form, &params)
-	if err != nil {
-		return nil, err
-	}
-	sign := form.Sign
-	delete(params, "sign")
-	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
-		app.Logger.Info("校验sign失败", form)
-		return nil, errors.New("sign:" + form.Sign + " 验证失败")
-	}
-
-	//查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
-		Mobile: form.Mobile,
-		Source: entity.UserSourceMio,
-	})
-
-	//用户验证
-	if userInfo.ID <= 0 {
-		fmt.Println("charge 未找到用户 ", form)
-		return nil, errors.New("未找到用户")
-	}
-
-	//风险登记验证
-	if userInfo.Risk >= 2 {
-		fmt.Println("用户风险等级过高 ", form)
-		return nil, errors.New("账户风险等级过高")
-	}
-
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-		Phone:          form.Mobile,
-	})
-	//第三方推送订单时检测是否绑定，未绑定用户执行绑定
-	if sceneUser.ID == 0 {
-		//调用绑定
-		sceneUser, err = service.DefaultBdSceneUserService.Bind(*userInfo, *scene, form.MemberId)
-		if err != nil && err != errno.ErrChannelExisting {
-			return nil, err
-		}
-		//绑定回调
-		if scene.Ch == "jinhuaxing" && err != errno.ErrChannelExisting {
-			err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
-			if err != nil {
-				app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
-				return nil, err
-			}
-		}
-	}
-	//查重
-	transService := service.NewPointTransactionService(ctx)
-	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
-
-	by, err := transService.FindBy(repository.FindPointTransactionBy{
-		OpenId: userInfo.OpenId,
-		Type:   string(typeString),
-		Note:   form.PlatformKey + "#" + form.Tradeno,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if by.ID != 0 {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
-	}
-
-	//预加积分
-	fromString, _ := decimal.NewFromString(params["amount"])
-	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
-	amount, _ := fromString.Float64()
-	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-		Point:          point,
-		OpenId:         userInfo.OpenId,
-		Status:         1,
-		Mobile:         form.Mobile,
-		Tradeno:        form.Tradeno,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	})
-	if err != nil {
-		return nil, err
-	}
-	//减碳量
-	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
-	if typeCarbonStr != "" {
-		_, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
-			OpenId: userInfo.OpenId,
-			UserId: userInfo.ID,
-			Type:   typeCarbonStr,
-			Value:  amount,
-			Ip:     ip,
-		})
-		if err != nil {
-			app.Logger.Errorf("预加积分 err:%s", err.Error())
-		}
-	}
 	return gin.H{}, nil
 }
 

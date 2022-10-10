@@ -230,9 +230,10 @@ func (srv JhxService) PreCollectPoint(sign string, params map[string]string) err
 		return err
 	}
 	//根据 platform_member_id 获取 openid
+	var openId string
 	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return errors.New("未找到绑定关系")
+	if sceneUser.ID != 0 {
+		openId = sceneUser.OpenId
 	}
 	//创建数据
 	fromString, err := decimal.NewFromString(params["amount"])
@@ -241,10 +242,10 @@ func (srv JhxService) PreCollectPoint(sign string, params map[string]string) err
 	}
 	point := fromString.Mul(decimal.NewFromInt(10)).Round(2).String()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
-		PlatformKey:    sceneUser.PlatformKey,
-		PlatformUserId: sceneUser.PlatformUserId,
+		PlatformKey:    params["platformKey"],
+		PlatformUserId: params["memberId"],
 		Point:          point,
-		OpenId:         sceneUser.OpenId,
+		OpenId:         openId,
 		Status:         1,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
@@ -260,36 +261,43 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 	if err := srv.checkSign(sign, params); err != nil {
 		return nil, 0, err
 	}
-	//根据 platform_member_id 获取 openid
-	condition := repository.GetSceneUserOne{PlatformKey: params["platformKey"]}
-	if memberId, ok := params["memberId"]; ok {
-		condition.PlatformUserId = memberId
-	}
-	if openId, ok := params["openId"]; ok {
-		condition.OpenId = openId
-	}
 
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(condition)
-	if sceneUser.ID == 0 {
-		return nil, 0, errors.New("未找到绑定关系")
-	}
 	var items []entity.BdScenePrePoint
 	var point int64
+
 	//获取pre_point数据
-	items, _, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
-		PlatformKey:    sceneUser.PlatformKey,
-		PlatformUserId: sceneUser.PlatformUserId,
-		OpenId:         sceneUser.OpenId,
-		StartTime:      time.Now().AddDate(0, 0, -7),
-		EndTime:        time.Now(),
-		Status:         1,
-	})
+	scenePointCondition := repository.GetScenePrePoint{
+		PlatformKey: params["platformKey"],
+		StartTime:   time.Now().AddDate(0, 0, -7),
+		EndTime:     time.Now(),
+		Status:      1,
+	}
+	//根据 platform_member_id 获取 openid
+	sceneUserCondition := repository.GetSceneUserOne{
+		PlatformKey: params["platformKey"],
+	}
+
+	if memberId, ok := params["memberId"]; ok {
+		scenePointCondition.PlatformUserId = memberId
+		sceneUserCondition.PlatformUserId = memberId
+	}
+
+	if openId, ok := params["openId"]; ok {
+		scenePointCondition.OpenId = openId
+		sceneUserCondition.OpenId = openId
+	}
+
+	items, _, err := repository.DefaultBdScenePrePointRepository.FindBy(scenePointCondition)
 	if err != nil {
 		return items, 0, err
 	}
-	//获取现有积分
-	pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: sceneUser.OpenId})
-	point = pointInfo.Balance
+
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(sceneUserCondition)
+	if sceneUser.ID != 0 {
+		pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: sceneUser.OpenId})
+		point = pointInfo.Balance
+	}
+
 	return items, point, nil
 }
 
@@ -329,6 +337,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if err != nil {
 		return 0, errno.ErrRecordNotFound
 	}
+
 	//检查上限
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + "PrePoint" + params["memberId"]
@@ -338,10 +347,12 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if lastPoint >= int64(scene.PrePointLimit) {
 		return 0, errors.New("今日获取积分已达到上限")
 	}
+
 	if totalPoint > int64(scene.PrePointLimit) {
 		incPoint = int64(scene.PrePointLimit) - lastPoint
 		totalPoint = int64(scene.PrePointLimit)
 	}
+
 	app.Redis.Set(srv.ctx, key, totalPoint, 24*time.Hour)
 	//积分
 	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
@@ -354,6 +365,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if err != nil {
 		return 0, err
 	}
+
 	//更新pre_point对应数据
 	one.Status = 2
 	one.UpdatedAt = time.Now()
@@ -361,28 +373,8 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	if err != nil {
 		return 0, err
 	}
-	return point, nil
-}
 
-func (srv JhxService) MyAccountInfo(sign string, params map[string]string) (*service.UserAccountInfo, error) {
-	err := srv.checkSign(sign, params)
-	if err != nil {
-		return &service.UserAccountInfo{}, err
-	}
-	//根据 platform_member_id 获取 openid
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID == 0 {
-		return &service.UserAccountInfo{}, errors.New("未找到绑定关系")
-	}
-	userInfo, err := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
-	if err != nil {
-		return &service.UserAccountInfo{}, err
-	}
-	accountInfo, err := service.DefaultUserService.AccountInfo(userInfo.ID)
-	if err != nil {
-		return &service.UserAccountInfo{}, err
-	}
-	return accountInfo, nil
+	return point, nil
 }
 
 func (srv JhxService) checkSign(sign string, params map[string]string) error {

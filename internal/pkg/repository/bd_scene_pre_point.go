@@ -84,9 +84,6 @@ func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) ([]entity.BdSc
 	if by.PlatformUserId != "" {
 		query.Where("platform_user_id = ?", by.PlatformUserId)
 	}
-	if by.OpenId != "" {
-		query.Where("open_id = ?", by.OpenId)
-	}
 	if !by.StartTime.IsZero() {
 		query.Where("created_at > ?", by.StartTime)
 	}
