@@ -8,11 +8,13 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	messageSrv "mio/internal/pkg/service/message"
+	platformSrv "mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -140,7 +142,6 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		}
 
 		//积分变动提醒
-
 		types := map[entity.PointTransactionType]string{
 			entity.POINT_JHX:                    "金华行",
 			entity.POINT_FAST_ELECTRICITY:       "快电",
@@ -165,6 +166,32 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
 			if messageErr != nil {
 
+			}
+		}
+
+		//同步到志愿汇
+		if point.Balance > 0 {
+			sendType := "0"
+			switch dto.Type {
+			case entity.POINT_QUIZ:
+				sendType = "1"
+				break
+			case entity.POINT_STEP:
+				sendType = "2"
+				break
+			}
+			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
+			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
+			if messageCode != "30000" {
+				//发送结果记录到日志
+				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+					Openid:         dto.OpenId,
+					PointType:      dto.Type,
+					Value:          dto.ChangePoint,
+					ResultCode:     messageCode,
+					AdditionalInfo: messageErr.Error(),
+					TransactionId:  dto.BizId,
+				})
 			}
 		}
 

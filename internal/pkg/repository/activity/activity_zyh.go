@@ -1,0 +1,36 @@
+package activity
+
+import (
+	"gorm.io/gorm"
+	"mio/internal/pkg/core/context"
+	entity "mio/internal/pkg/model/entity/activity"
+)
+
+func NewZyhRepository(ctx *context.MioContext) ZyhRepository {
+	return ZyhRepository{ctx: ctx}
+}
+
+type ZyhRepository struct {
+	ctx *context.MioContext
+}
+
+func (repo ZyhRepository) Save(zyh *entity.Zyh) error {
+	return repo.ctx.DB.Save(zyh).Error
+}
+
+func (repo ZyhRepository) FindBy(by FindZyhById) entity.Zyh {
+	zyh := entity.Zyh{}
+	db := repo.ctx.DB.Model(zyh)
+	if by.Openid != "" {
+		db.Where("openid = ?", by.Openid)
+	}
+	if by.VolId != "" {
+		db.Or("vol_id = ?", by.VolId)
+	}
+	if err := db.First(&zyh).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return zyh
+}
