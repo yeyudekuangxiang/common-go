@@ -124,7 +124,7 @@ func (p PointTransactionType) RealText() string {
 const (
 	POINT_STEP                    PointTransactionType = "STEP"              //步行
 	POINT_COFFEE_CUP              PointTransactionType = "COFFEE_CUP"        //自带咖啡杯
-	POINT_PURCHASE                PointTransactionType = "PURCHASE"          //兑换
+	POINT_PURCHASE                PointTransactionType = "PURCHASE"          //兑换  所有走订单逻辑的都叫兑换：证书&券码兑换商品
 	POINT_INVITE                  PointTransactionType = "INVITE"            //邀请好友
 	POINT_CHECK_IN                PointTransactionType = "CHECK_IN"          //每日签到
 	POINT_BIKE_RIDE               PointTransactionType = "BIKE_RIDE"         //骑行
