@@ -164,7 +164,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 
 	by, err := transService.FindBy(repository.FindPointTransactionBy{
 		Type: string(typeString),
-		Note: form.PlatformKey + "#" + form.Tradeno,
+		Note: form.PlatformKey + "#" + form.TradeNo,
 	})
 
 	if err != nil {
@@ -187,7 +187,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		OpenId:         sceneUser.OpenId,
 		Status:         1,
 		Mobile:         sceneUser.Phone,
-		Tradeno:        form.Tradeno,
+		Tradeno:        form.TradeNo,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
