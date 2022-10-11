@@ -339,18 +339,23 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	}
 
 	//检查上限
+	var isHalf bool
+	var halfPoint int64
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(srv.ctx, key).Val(), 10, 64)
 	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
 	totalPoint := lastPoint + incPoint
-	if lastPoint >= int64(scene.PrePointLimit) {
+	if lastPoint >= int64(scene.PrePointLimit) || totalPoint > int64(scene.PrePointLimit) {
 		return 0, errors.New("今日获取积分已达到上限")
 	}
 
 	if totalPoint > int64(scene.PrePointLimit) {
+		p := incPoint
 		incPoint = int64(scene.PrePointLimit) - lastPoint
 		totalPoint = int64(scene.PrePointLimit)
+		isHalf = true
+		halfPoint = p - incPoint
 	}
 
 	app.Redis.Set(srv.ctx, key, totalPoint, 24*time.Hour)
@@ -370,6 +375,11 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	//更新pre_point对应数据
 	one.Status = 2
 	one.UpdatedAt = time.Now()
+	if isHalf {
+		one.Status = 1
+		one.Point = strconv.FormatInt(halfPoint, 10)
+	}
+
 	err = repository.DefaultBdScenePrePointRepository.Save(&one)
 	if err != nil {
 		return 0, err
