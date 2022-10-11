@@ -346,7 +346,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(srv.ctx, key).Val(), 10, 64)
 	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
 	totalPoint := lastPoint + incPoint
-	if lastPoint >= int64(scene.PrePointLimit) || totalPoint > int64(scene.PrePointLimit) {
+	if lastPoint >= int64(scene.PrePointLimit) {
 		return 0, errors.New("今日获取积分已达到上限")
 	}
 
