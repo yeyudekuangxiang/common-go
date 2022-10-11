@@ -35,7 +35,7 @@ func New{{.upperStartCamelObject}}Model(db *gorm.DB,{{if .withCache}} c cache.Ca
 	}
 }
 
-func (c custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param, opts ...option) (*{{.upperStartCamelObject}},bool,error) {
+func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param, opts ...option) (*{{.upperStartCamelObject}},bool,error) {
 	db := c.db.WithContext(ctx)
 	db = initOptions(db, opts)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
@@ -54,7 +54,7 @@ func (c custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}}
 	return nil, false, err
 }
 
-func (c custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param) ([]{{.upperStartCamelObject}}, int64, error) {
+func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param) ([]{{.upperStartCamelObject}}, int64, error) {
 
 	db := c.db.WithContext(ctx)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
@@ -73,7 +73,7 @@ func (c custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param P
 	}
 	return list, count, nil
 }
-func (c custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param) ([]{{.upperStartCamelObject}}, error) {
+func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param) ([]{{.upperStartCamelObject}}, error) {
 
 	db := c.db.WithContext(ctx)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)

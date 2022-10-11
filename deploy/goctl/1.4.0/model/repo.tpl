@@ -12,5 +12,5 @@ func New{{.appName}}Repository(db *gorm.DB, c cache.CacheConf) *{{.appName}}Repo
 }
 
 type {{.appName}}Repository struct {
-	*default{{.appName}}Repository
+	*Default{{.appName}}Repository
 }
