@@ -12,6 +12,10 @@ var DefaultBdSceneUserService = BdSceneUserService{}
 type BdSceneUserService struct {
 }
 
+func (srv BdSceneUserService) FindOne(params repository.GetSceneUserOne) *entity.BdSceneUser {
+	return repository.DefaultBdSceneUserRepository.FindOne(params)
+}
+
 func (srv BdSceneUserService) FindByCh(platformKey string) *entity.BdSceneUser {
 	item := repository.DefaultBdSceneUserRepository.FindByCh(platformKey)
 	return &item
@@ -37,7 +41,11 @@ func (srv BdSceneUserService) Create(data *entity.BdSceneUser) error {
 }
 
 func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, memberId string) (*entity.BdSceneUser, error) {
-	sceneUser := srv.FindPlatformUser(user.OpenId, scene.Ch)
+	sceneUser := srv.FindOne(repository.GetSceneUserOne{
+		PlatformKey:    scene.Ch,
+		PlatformUserId: memberId,
+		OpenId:         user.OpenId,
+	})
 	if sceneUser.ID != 0 {
 		return sceneUser, errno.ErrChannelExisting
 	}

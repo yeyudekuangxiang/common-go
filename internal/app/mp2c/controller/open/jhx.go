@@ -193,7 +193,7 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 		sceneUser.Phone = userInfo.PhoneNumber
 		sceneUser.OpenId = userInfo.OpenId
 		sceneUser.UnionId = userInfo.UnionId
-		err := service.DefaultBdSceneUserService.Create(sceneUser)
+		err = service.DefaultBdSceneUserService.Create(sceneUser)
 		if err != nil {
 			app.Logger.Errorf("bind db_scene_user error:%s", err.Error())
 		}
