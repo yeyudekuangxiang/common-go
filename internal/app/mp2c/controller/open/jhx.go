@@ -165,9 +165,20 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 
 	//查询用户
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
-		OpenId: form.Mobile,
+		Mobile: form.Mobile,
 		Source: entity.UserSourceMio,
 	})
+
+	//用户验证
+	if userInfo.ID <= 0 {
+		return nil, errors.New("未找到用户")
+	}
+
+	//风险登记验证
+	if userInfo.Risk >= 2 {
+		fmt.Println("用户风险等级过高 ", form)
+		return nil, errors.New("账户风险等级过高")
+	}
 
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
 		PlatformKey:    form.PlatformKey,
@@ -193,17 +204,6 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 				app.Logger.Errorf("callback jinhuaxing bind_success error:%s", err.Error())
 			}
 		}
-	}
-
-	//用户验证
-	if userInfo.ID <= 0 {
-		return nil, errors.New("未找到用户")
-	}
-
-	//风险登记验证
-	if userInfo.Risk >= 2 {
-		fmt.Println("用户风险等级过高 ", form)
-		return nil, errors.New("账户风险等级过高")
 	}
 
 	//查重
