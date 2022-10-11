@@ -40,12 +40,14 @@ type unidianTypeId struct {
 	Test       string
 	FiveYuan   string
 	TwentyYuan string
+	TenYuan    string
 }
 
 var UnidianTypeId = unidianTypeId{
 	Test:       "10013", // 测试
 	FiveYuan:   "10689", // 5元话费
 	TwentyYuan: "10725", // 20元话费
+	TenYuan:    "10724", // 10元话费
 }
 
 type SubmitOrderParam struct {
