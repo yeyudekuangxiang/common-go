@@ -45,7 +45,7 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 	params["point"] = point
 	sign := util2.GetSign(params)
 	params["Signature"] = sign //strings.ToUpper()
-	url := srv.Domain + "/VMSAPI/api/publicSchool/lm/pushPointsInfo.do"
+	url := srv.Domain
 	body, err := httputil.PostMapFrom(url, params)
 	fmt.Printf("%s\n", body)
 	if err != nil {

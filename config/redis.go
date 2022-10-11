@@ -6,6 +6,7 @@ type redisKey struct {
 	YZM                      string
 	UniDian                  string
 	FriendsHelp              string
+	SendPhoneByQnr           string
 	Limit1S                  string
 	InitTopicFlowLimit       string
 	Lock                     string
@@ -35,6 +36,7 @@ var RedisKey = redisKey{
 	YZM:                      "yzm:",                            // 拼接用户id
 	UniDian:                  "unidian:",                        // 拼接手机号
 	FriendsHelp:              "friends_help:",                   // 拼接手机号
+	SendPhoneByQnr:           "SendPhoneByQnr",                       //拼接手机号
 	Limit1S:                  "Limit1S:",                        // 拼接行数名称
 	InitTopicFlowLimit:       "mp2c:initTopicFlowlimit:%d",      //拼接用户id
 	Lock:                     "mp2c:lock:",                      //redis分布式锁  拼接key

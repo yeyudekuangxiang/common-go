@@ -10,11 +10,9 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	activity2 "mio/internal/pkg/model/entity/activity"
 	"mio/internal/pkg/model/entity/pugc"
 	questionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/service"
-	service2 "mio/internal/pkg/service/activity"
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -148,7 +146,7 @@ func (PugcController) SendPoint(c *gin.Context) (gin.H, error) {
 
 //发送20元优惠券的时候用  http://127.0.0.1:port/pugc/phoneTen
 func (PugcController) SendTwentyYuanByExcel(c *gin.Context) (gin.H, error) {
-	f, err := excelize.OpenFile("/Users/apple/Desktop/10元.xlsx")
+	f, err := excelize.OpenFile("/Users/apple/Desktop/金融问卷10元话费奖励名单1010.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return nil, nil
@@ -160,20 +158,12 @@ func (PugcController) SendTwentyYuanByExcel(c *gin.Context) (gin.H, error) {
 		return nil, nil
 	}
 	//后续进行实际话费充值操作                                      //需要手机号码
-	for _, row := range rows {
-		fmt.Println(row[0])
-		//入库记录
-		_, err = service2.DefaultBocShareBonusRecordService.CreateRecord(service2.CreateBocShareBonusRecordParam{
-			UserId: 100,
-			Value:  500,
-			Type:   activity2.BocShareBonusMio,
-			Info:   row[0], //因为入库的是本地，做参考用
-		})
-		fmt.Println(err)
-		if err != nil {
-			return nil, nil
+	for i, row := range rows {
+		if i == 0 {
+			continue
 		}
-		err = service.DefaultUnidianService.SendPrize(service.UnidianTypeId.TwentyYuan, row[0], config.RedisKey.FriendsHelp) //充话费
+		println(row[0])
+		err = service.DefaultUnidianService.SendPrize(service.UnidianTypeId.TenYuan, row[0], config.RedisKey.SendPhoneByQnr) //充话费
 		println(err)
 	}
 	fmt.Println("发完了")

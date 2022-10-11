@@ -5,15 +5,19 @@ import (
 	"io/ioutil"
 	"mio/internal/pkg/util/encrypt"
 	"net/http"
+	"time"
 )
 
 func CouponOfUnidian(typeId string, mobile string, outTradeNo string) {
 
+	timeStamp := time.Now().Format("20060102150405")
+
 	channelId := "115"
-	timeStamp := "2"
+	//timeStamp := strconv.FormatInt(time.Now().Unix(), 10)
 	key := "B5C0B2C3C1CD4942"
 	sign := encrypt.Md5(typeId + "#" + channelId + "#" + mobile + "#" + timeStamp + "#" + outTradeNo + "#" + key)
-	url := "https://qyif.unidian.com/QuanYi/Common/Coupon.aspx?TypeId=" + typeId + "&ChannelId=" + channelId + "&Mobile=" + mobile + "&TimeStamp=" + timeStamp + "&OutTradeNo=" + outTradeNo + "&Sign=" + sign + "&UserIdType=0"
+	//sign := util.Md5(typeId + "#" + channelId + "#" + mobile + "#" + timeStamp + "#" + outTradeNo + "#" + key)
+	url := "http://qyif.unidian.com/QuanYi/Common/Coupon.aspx?TypeId=" + typeId + "&ChannelId=" + channelId + "&Mobile=" + mobile + "&TimeStamp=" + timeStamp + "&OutTradeNo=" + outTradeNo + "&Sign=" + sign + "&UserIdType=0"
 	method := "GET"
 
 	fmt.Println(url)
