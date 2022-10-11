@@ -120,6 +120,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+// PrePoint 预加积分
 func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	form := api.PrePointRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -193,6 +194,17 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	return gin.H{}, nil
+}
+
+// GetPrePointList 获取预加积分列表
+func (receiver PlatformController) GetPrePointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
+	return nil, 0, nil
+}
+
+// CollectPoint 收集预加积分
+func (receiver PlatformController) CollectPoint(sign string, params map[string]string) (int64, error) {
+
 	////减碳量
 	//fromString, _ := decimal.NewFromString(params["amount"])
 	//amount, _ := fromString.Float64()
@@ -209,13 +221,5 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	//		app.Logger.Errorf("预加积分 err:%s", err.Error())
 	//	}
 	//}
-	return gin.H{}, nil
-}
-
-func (receiver PlatformController) GetPrePointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
-	return nil, 0, nil
-}
-
-func (receiver PlatformController) CollectPoint(sign string, params map[string]string) (int64, error) {
 	return 0, nil
 }
