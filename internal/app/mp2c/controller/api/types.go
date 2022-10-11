@@ -42,6 +42,25 @@ type GetChargeForm struct {
 	TotalPower string `json:"totalPower,omitempty" form:"totalPower" alias:"统计总量"`
 	Sign       string `json:"sign" form:"sign" binding:"required" alias:"签名"`
 }
+
+type PreCollectRequest struct {
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	Amount      string `json:"amount" form:"amount" binding:"required"`
+	Tradeno     string `json:"tradeno" form:"tradeno"  binding:"required"`
+	Mobile      string `json:"mobile" form:"mobile"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
+}
+
+type PrePointRequest struct {
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	Amount      string `json:"amount" form:"amount" binding:"required"`
+	TradeNo     string `json:"tradeNo" form:"tradeNo"  binding:"required"`
+	Mobile      string `json:"mobile" form:"mobile"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
+}
+
 type ChangeChargeExceptionForm struct {
 	Ch string `json:"ch" form:"ch" binding:"required" alias:"渠道参数"`
 }
@@ -179,4 +198,8 @@ type CommentEditForm struct {
 
 type ChangeCommentLikeForm struct {
 	CommentId int64 `json:"commentId" form:"commentId" binding:"required" alias:"评论id"`
+}
+
+type JinHuaXingForm struct {
+	Mobile string `json:"mobile" form:"mobile" binding:"required"`
 }

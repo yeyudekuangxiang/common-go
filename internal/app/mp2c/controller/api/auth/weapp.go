@@ -1,13 +1,14 @@
 package auth
 
 import (
-	"github.com/gin-gonic/gin"
 	"mio/config"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/auth"
 	"mio/internal/pkg/util/apiutil"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 var DefaultWeappController = WeappController{}

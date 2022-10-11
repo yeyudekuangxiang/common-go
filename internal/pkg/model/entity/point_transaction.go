@@ -154,6 +154,7 @@ const (
 	POINT_JHX                     PointTransactionType = "JHX"               //金华行
 	POINT_POWER_REPLACE           PointTransactionType = "POWER_REPLACE"     //电车换电
 	POINT_DUIBA_INTEGRAL_RECHARGE PointTransactionType = "INTEGRAL_RECHARGE" //兑吧虚拟商品充值积分
+	POINT_YTX                     PointTransactionType = "YTX"               //亿通行
 
 	POINT_RECYCLING_CLOTHING     PointTransactionType = "RECYCLING_CLOTHING"     //旧物回收 oola衣物鞋帽
 	POINT_RECYCLING_DIGITAL      PointTransactionType = "RECYCLING_COMPUTER"     //旧物回收 oola数码

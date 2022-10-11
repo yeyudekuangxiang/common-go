@@ -12,7 +12,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/ccring"
+	"mio/internal/pkg/service/platform/star_charge"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -52,19 +53,13 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	//避开重放
-	if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
-	}
-
 	//通过手机号查询用户
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
 		Mobile: form.Mobile,
 		Source: entity.UserSourceMio,
 	})
 
+	//用户验证
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
 		return nil, errors.New("未找到用户")
@@ -75,6 +70,32 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		fmt.Println("用户风险等级过高 ", form)
 		return nil, errors.New("账户风险等级过高")
 	}
+
+	//查重
+	transService := service.NewPointTransactionService(ctx)
+	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
+
+	by, err := transService.FindBy(repository.FindPointTransactionBy{
+		OpenId: userInfo.OpenId,
+		Type:   string(typeString),
+		Note:   form.Ch + "#" + form.OutTradeNo,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if by.ID != 0 {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
+	}
+
+	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
+	//	fmt.Println("charge 重复提交订单", form)
+	//	app.Logger.Info("charge 重复提交订单", form)
+	//	return nil, errors.New("重复提交订单")
+	//}
+
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
@@ -103,9 +124,8 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
 
 	//加积分
-	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 	pointService := service.NewPointService(ctx)
-	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         typeString,
 		ChangePoint:  int64(thisPoint),
@@ -170,7 +190,7 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 		startTime, _ := time.ParseInLocation("2006-01-02", "2022-09-24", time.Local)
 		endTime, _ := time.ParseInLocation("2006-01-02", "2022-10-01", time.Local)
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := platform.NewStarChargeService(ctx)
+			starChargeService := star_charge.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
 				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())
@@ -205,10 +225,10 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 			return
 		}
 		point, _ := strconv.ParseFloat(form.TotalPower, 64)
-		ccRingService := platform.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/ev-charge",
-			platform.WithCCRingOrderNum(form.OutTradeNo),
-			platform.WithCCRingMemberId(sceneUser.PlatformUserId),
-			platform.WithCCRingDegreeOfCharge(point),
+		ccRingService := ccring.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/ev-charge",
+			ccring.WithCCRingOrderNum(form.OutTradeNo),
+			ccring.WithCCRingMemberId(sceneUser.PlatformUserId),
+			ccring.WithCCRingDegreeOfCharge(point),
 		)
 		//记录
 		one := repository.DefaultBdSceneCallbackRepository.FindOne(repository.GetSceneCallback{

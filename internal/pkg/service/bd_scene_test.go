@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mio/pkg/duiba/util"
 	"testing"
+	"time"
 )
 
 func TestCheckSign(t *testing.T) {
@@ -18,4 +19,10 @@ func TestCheckSign(t *testing.T) {
 	} else {
 		fmt.Println("false")
 	}
+}
+
+func TestTime(t *testing.T) {
+	time1 := time.Now().Local().IsZero()
+
+	fmt.Println(time1)
 }

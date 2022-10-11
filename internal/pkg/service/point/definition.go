@@ -45,4 +45,5 @@ var pageDataMap = map[string]*commandDescription{
 	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData}, //快电
 	"FMY_RECYCLE":      {FnPageData: (*defaultClientHandle).fmyRecyclePageData},
 	"REDUCE_PLASTIC":   {FnPageData: (*defaultClientHandle).reducePlasticPageData},
+	"JHX":              {FnPageData: (*defaultClientHandle).jhxPageData},
 }

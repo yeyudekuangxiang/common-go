@@ -299,6 +299,27 @@ type GetRedeemCodeBy struct {
 	CouponId string
 }
 
+type GetScenePrePoint struct {
+	PlatformKey    string    `json:"platformKey"`
+	PlatformUserId string    `json:"platformUserId"`
+	OpenId         string    `json:"openId"`
+	StartTime      time.Time `json:"startTime"`
+	EndTime        time.Time `json:"endTime"`
+	Id             int64     `json:"id"`
+	Status         int       `json:"status"`
+}
+
+type GetSceneUserOne struct {
+	Id             int64     `json:"id"`
+	PlatformKey    string    `json:"platformKey"`
+	PlatformUserId string    `json:"platformUserId"`
+	OpenId         string    `json:"openId"`
+	Phone          string    `json:"phone"`
+	UnionId        string    `json:"unionId"`
+	StartTime      time.Time `json:"startTime"`
+	EndTime        time.Time `json:"endTime"`
+}
+
 type GetSceneCallback struct {
 	ID             int
 	PlatformKey    string

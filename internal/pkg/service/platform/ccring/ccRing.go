@@ -1,4 +1,4 @@
-package platform
+package ccring
 
 import (
 	"fmt"

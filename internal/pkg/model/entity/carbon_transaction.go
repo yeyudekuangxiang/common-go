@@ -124,6 +124,7 @@ const (
 	CARBON_FMY_RECYCLING_CLOTHING CarbonTransactionType = "RECYCLING_FMY_CLOTHING" //旧物回收 fmy衣物鞋帽
 	CARBON_JHX                    CarbonTransactionType = "JHX"                    //金华行
 	CARBON_RECYCLING              CarbonTransactionType = "RECYCLING"              //旧物回收总的
+	CARBON_YTX                    CarbonTransactionType = "YTX"                    //亿通行
 )
 
 type CarbonTransaction struct {

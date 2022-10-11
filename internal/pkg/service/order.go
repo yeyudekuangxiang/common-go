@@ -17,7 +17,7 @@ import (
 	repositoryActivity "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/event"
-	"mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/star_charge"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
@@ -538,7 +538,7 @@ func (srv OrderService) sendEventStarCoupon(userId int64, evId string) {
 		return
 	}
 
-	starChargeService := platform.NewStarChargeService(context.NewMioContext())
+	starChargeService := star_charge.NewStarChargeService(context.NewMioContext())
 	token, err := starChargeService.GetAccessToken()
 	if err != nil {
 		app.Logger.Error("兑换证书发星星券失败,获取星星token失败", err, userId, evId)
