@@ -5,7 +5,7 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
 		return err
 	}
 	if !exist{
-	    return errors.New("记录不存在")
+	    return nil
 	}
 
 {{end}}	{{.keys}}

@@ -1,7 +1,6 @@
 package {{.pkg}}
 
 import (
-	"context"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"gorm.io/gorm"
 )

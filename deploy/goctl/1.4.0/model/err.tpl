@@ -8,7 +8,6 @@ import (
 )
 
 var (
-    ErrNotFound = sqlx.ErrNotFound
     singleFlights = syncx.NewSingleFlight()
     stats = cache.NewStat("sqlc")
 )
