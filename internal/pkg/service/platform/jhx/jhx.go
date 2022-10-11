@@ -340,7 +340,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 
 	//检查上限
 	timeStr := time.Now().Format("2006-01-02")
-	key := timeStr + scene.Ch + "PrePoint" + params["memberId"]
+	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(srv.ctx, key).Val(), 10, 64)
 	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
 	totalPoint := lastPoint + incPoint
@@ -361,6 +361,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 		BizId:       util.UUID(),
 		ChangePoint: incPoint,
 		AdminId:     0,
+		Note:        params["platformKey"] + "#" + one.Tradeno,
 	})
 	if err != nil {
 		return 0, err
