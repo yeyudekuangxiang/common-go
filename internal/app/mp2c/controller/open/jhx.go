@@ -181,9 +181,9 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-		//OpenId:         userInfo.OpenId,
+		PlatformKey: form.PlatformKey,
+		//PlatformUserId: form.MemberId,
+		OpenId: userInfo.OpenId,
 	})
 
 	//第三方推送订单时检测是否绑定，未绑定用户执行绑定
