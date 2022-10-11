@@ -21,6 +21,7 @@ var Config = app{
 	AMQP:        amqpSetting{},
 	CouponRpc:   rpcSetting{},
 	ActivityZyh: activityZyh{},
+	BaiDuImageSearch: baiDuImageSearchSetting{},
 }
 
 type app struct {
@@ -40,6 +41,7 @@ type app struct {
 	Zhuge       zhugeConfig     `ini:"zhuge"`
 	CouponRpc   rpcSetting      `ini:"couponRpc"`
 	ActivityZyh activityZyh     `ini:"activityZyh"`
+	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
 }
 type appSetting struct {
 	TokenKey string
@@ -97,6 +99,10 @@ type amqpSetting struct {
 	Url string
 }
 type baiDuSetting struct {
+	AppKey    string
+	AppSecret string
+}
+type baiDuImageSearchSetting struct {
 	AppKey    string
 	AppSecret string
 }

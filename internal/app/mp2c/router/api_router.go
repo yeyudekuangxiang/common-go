@@ -21,7 +21,6 @@ import (
 
 func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
-
 	router.GET("/sendSign", apiutil.Format(message.DefaultMessageController.SendSign))
 
 	//非必须登陆的路由
@@ -238,13 +237,18 @@ func apiRouter(router *gin.Engine) {
 		mustAuthRouter.GET("/badge/upload/setting", apiutil.FormatInterface(badge.DefaultBadgeController.UploadOldBadgeImage))
 
 		//兑换券相关
-		mustAuthRouter.GET("/coupon/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
-		mustAuthRouter.POST("/coupon/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
+		couponRouter := mustAuthRouter.Group("/coupon")
+		{
+			couponRouter.GET("/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
+			couponRouter.POST("/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
+		}
+
 		//获取第三方数据
 		platformRouter := mustAuthRouter.Group("/platform")
 		{
-			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))           //获取oolaKey
-			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultRecycleController.GetOolaKey)) //金华行-发码
+			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))         //获取oolaKey
+			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultJhxController.TicketCreate)) //金华行-发码
+			platformRouter.GET("/jhx/ticket-status", apiutil.Format(open.DefaultJhxController.TicketStatus))  //金华行-查询券码状态
 		}
 
 		//碳成就相关路由

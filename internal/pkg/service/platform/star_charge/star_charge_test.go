@@ -1,4 +1,4 @@
-package platform
+package star_charge
 
 import (
 	"fmt"
@@ -21,4 +21,5 @@ func TestTime(t *testing.T) {
 	fmt.Printf("%s\n", time.Now())
 	fmt.Printf(strconv.FormatFloat(3.1415926, 'f', 2, 64))
 
+	fmt.Printf("%s\n", time.Now().UTC().Format("2006-01-02 15:04:05"))
 }

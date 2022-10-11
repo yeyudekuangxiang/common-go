@@ -11,7 +11,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	platformService "mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/ccring"
+	"mio/internal/pkg/service/platform/recycle"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -52,7 +53,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 
 	//new RecycleService
 	ctx := context.NewMioContext()
-	RecycleService := platformService.NewRecycleService(ctx)
+	RecycleService := recycle.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
 	//校验sign
@@ -63,13 +64,15 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
 	if userInfo.ID == 0 {
-		fmt.Println("oola 未找到用户 ", form)
+		fmt.Printf("%s 未找到用户 %v",scene.Ch, form)
 		return nil, errno.ErrUserNotFound
 	}
 
-	//检查重复订单
-	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
-		return nil, err
+	//查重
+	if err = RecycleService.CheckOrder(userInfo.OpenId, "oola"+"#"+form.OrderNo); err != nil {
+		fmt.Println("charge 重复提交订单", form)
+		app.Logger.Info("charge 重复提交订单", form)
+		return nil, errors.New("重复提交订单")
 	}
 
 	//回调光环
@@ -165,7 +168,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errors.New("渠道查询失败")
 	}
 
-	dst := platformService.FmySignParams{}
+	dst := recycle.FmySignParams{}
 	err := util.MapTo(&form, &dst)
 	if err != nil {
 		return nil, err
@@ -173,7 +176,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	//new RecycleService
 	ctx := context.NewMioContext()
-	RecycleService := platformService.NewRecycleService(ctx)
+	RecycleService := recycle.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
 	//校验sign
@@ -259,12 +262,12 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 			app.Logger.Info("ccring 渠道查询失败")
 			return
 		}
-		ccRingService := platformService.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/recycle",
-			platformService.WithCCRingOrderNum(form.OrderNo),
-			platformService.WithCCRingMemberId(sceneUser.PlatformUserId),
-			platformService.WithCCRingProductCategoryName(form.ProductCategoryName),
-			platformService.WithCCRingName(form.Name),
-			platformService.WithCCRingQua(form.Qua),
+		ccRingService := ccring.NewCCRingService("dsaflsdkfjxcmvoxiu123moicuvhoi123", ccringScene.Domain, "/api/cc-ring/external/recycle",
+			ccring.WithCCRingOrderNum(form.OrderNo),
+			ccring.WithCCRingMemberId(sceneUser.PlatformUserId),
+			ccring.WithCCRingProductCategoryName(form.ProductCategoryName),
+			ccring.WithCCRingName(form.Name),
+			ccring.WithCCRingQua(form.Qua),
 		)
 		//记录
 		one := repository.DefaultBdSceneCallbackRepository.FindOne(repository.GetSceneCallback{

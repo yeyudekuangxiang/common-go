@@ -36,3 +36,16 @@ func TestSlice(t *testing.T) {
 	s2 := s[len(s)-4:]
 	fmt.Println(s2)
 }
+
+func TestMap1(t *testing.T) {
+	m := make(map[int]int, 10)
+	for i := 1; i <= 10; i++ {
+		m[i] = i
+	}
+
+	for k, v := range m {
+		go func(k, v int) {
+			fmt.Println("k ->", k, "v ->", v)
+		}(k, v)
+	}
+}

@@ -1,4 +1,4 @@
-package platform
+package star_charge
 
 import (
 	"encoding/json"
@@ -167,7 +167,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	return nil
 }
 
-// CheckLimit 充电检测
+// CheckChargeLimit 充电检测
 func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime string) error {
 	todayBuilder := repository.DefaultCouponHistoryRepository.RowBuilder()
 	todayBuilder.Where("open_id = ?", openId).
