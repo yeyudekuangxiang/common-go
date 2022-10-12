@@ -56,15 +56,26 @@ func CheckMsgWithOpenId(openid, content string) error {
 }
 
 func checkMsg(params *security.MsgSecCheckRequest) error {
-	check, err := app.Weapp.NewSecurity().MsgSecCheck(params)
+	var check *security.MsgSecCheckResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		check, err = app.Weapp.NewSecurity().MsgSecCheck(params)
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(check.ErrCode)
+	}, 1)
+
 	if err != nil {
 		return err
 	}
+
 	if check.ErrCode != 0 {
 		return fmt.Errorf("check error: %s", check.ErrMSG)
 	}
+
 	if check.Result.Suggest != "pass" && check.Result.Label != 100 {
 		return fmt.Errorf("check error: %s", "内容不合规，请重新输入")
 	}
+	
 	return nil
 }
