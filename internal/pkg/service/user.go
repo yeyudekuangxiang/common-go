@@ -96,6 +96,7 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 
 //SendUserIdentifyToZhuGe 用户属性上报到诸葛
 func (u UserService) SendUserIdentifyToZhuGe(openid string) {
+	return
 	if openid == "" {
 		return
 	}
