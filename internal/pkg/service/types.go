@@ -34,8 +34,6 @@ type CreateUserParam struct {
 	Source      entity.UserSource `json:"source" binding:"oneof=mio mobile"`
 	UnionId     string            `json:"unionId"`
 	ChannelId   int64             `json:"int64"`
-	Ip          string            `json:"ip"`
-	CityCode    string            `json:"city_code"`
 }
 
 type unidianTypeId struct {
