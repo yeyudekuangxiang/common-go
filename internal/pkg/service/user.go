@@ -326,18 +326,23 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
 	userInfo.Ip = cip
 
-	// todo topic数据批量修改
 	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber, Source: entity.UserSourceMio})
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
-	if ok && specialUser.ID == 0 {
-		return errors.New("该号码已被绑定")
+	//检查重复绑定 特殊用户有已绑定的账号
+	if ok && userByMobile.OpenId != userInfo.OpenId && specialUser.ID == 0 {
+		return errors.New("该号码已绑定")
 	}
-
-	if ok && !u.checkOpenId(userByMobile.OpenId) && specialUser.ID != 0 && specialUser.Status == 0 {
+	//更新特殊用户的数据
+	if ok && specialUser.ID != 0 && !u.checkOpenId(userByMobile.OpenId) && specialUser.Status == 0 {
 		//更新topic userid
-		err = DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
+		err := DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
 		if err != nil {
-			app.Logger.Info("用户数据更新失败", err.Error())
+			app.Logger.Info("special用户topic数据更新失败", err.Error())
+		}
+		userByMobile.PhoneNumber = ""
+		err = u.r.Save(userByMobile)
+		if err != nil {
+			app.Logger.Info("special用户原账号更新失败", err.Error())
 		}
 		specialUser.Status = 1
 		err = DefaultUserSpecialService.Save(&specialUser)
