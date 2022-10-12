@@ -137,7 +137,15 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 		if err != nil {
 			return err
 		}
+	} else {
+		topicModel.TopicTag = ""
+		topicModel.TopicTagId = ""
+		err := app.DB.Model(&topicModel).Association("Tags").Clear()
+		if err != nil {
+			return err
+		}
 	}
+
 	if err := app.DB.Model(&topicModel).Updates(topicModel).Error; err != nil {
 		return err
 	}
