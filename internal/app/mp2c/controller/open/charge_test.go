@@ -7,7 +7,6 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/util/encrypt"
-	"mio/pkg/wxapp"
 	"testing"
 	"time"
 )
@@ -64,6 +63,6 @@ func TestMakeSign(t *testing.T) {
 
 func TestAccessToken(t *testing.T) {
 	initialize.Initialize("/Users/yunfeng/Documents/workspace/mp2c-go/config.ini")
-	token, _ := wxapp.NewClient(app.Weapp).AccessToken()
+	token, _ := app.Weapp.AccessToken()
 	fmt.Println(token)
 }

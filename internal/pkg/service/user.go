@@ -288,9 +288,17 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		return errors.New("未查到用户信息")
 	}
 
-	phoneResult, err := app.Weapp.NewPhonenumber().GetPhoneNumber(&phonenumber.GetPhoneNumberRequest{
-		Code: code,
-	})
+	var phoneResult *phonenumber.GetPhoneNumberResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		phoneResult, err = app.Weapp.NewPhonenumber().GetPhoneNumber(&phonenumber.GetPhoneNumberRequest{
+			Code: code,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(phoneResult.ErrCode)
+	}, 1)
+
 	if err != nil {
 		return err
 	}
@@ -311,7 +319,15 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			ClientIp: cip,
 			MobileNo: userInfo.PhoneNumber,
 		}
-		rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
+		var rest *wxapp.UserRiskRankResponse
+		err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+			rest, err = app.Weapp.GetUserRiskRank(userRiskRankParam)
+			if err != nil {
+				return false, err
+			}
+			return app.Weapp.IsExpireAccessToken(rest.ErrCode)
+		}, 1)
+
 		if err != nil {
 			app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
 		}
@@ -330,6 +346,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
 	//检查重复绑定 特殊用户有已绑定的账号
 	if ok && userByMobile.OpenId != userInfo.OpenId && specialUser.ID == 0 {
+		app.Logger.Errorf("bind user: %s; old user: %s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, specialUser.ID)
 		return errors.New("该号码已绑定")
 	}
 	//更新特殊用户的数据
@@ -397,6 +414,7 @@ func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 	}
 
 	decryptResult, err := app.Weapp.DecryptMobile(session.SessionKey, param.EncryptedData, param.IV)
+
 	if err != nil {
 		return err
 	}
@@ -585,7 +603,15 @@ func (u UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
 
 // CheckUserRisk 检测用户风险等级
 func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRiskRankResponse, error) {
-	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(param)
+	var rest *wxapp.UserRiskRankResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		rest, err = app.Weapp.GetUserRiskRank(param)
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(rest.ErrCode)
+	}, 1)
+
 	if err != nil {
 		return nil, err
 	}

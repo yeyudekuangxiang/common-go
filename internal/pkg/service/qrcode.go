@@ -69,12 +69,19 @@ func (srv QRCodeService) GetUnlimitedQRCode(qrScene entity.QrCodeScene, page, sc
 	}
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
-		Scene:     scene,
-		Page:      page,
-		Width:     width,
-		IsHyaline: true,
-	})
+	var resp *wxapp.QRCodeResponse
+	err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
+			Scene:     scene,
+			Page:      page,
+			Width:     width,
+			IsHyaline: true,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+	}, 1)
 
 	if err != nil {
 		//app.Logger.Errorf("生成分享码失败 %v %v %+v\n", topicId, userId, err)
@@ -110,12 +117,19 @@ func (srv QRCodeService) GetUnlimitedQRCode(qrScene entity.QrCodeScene, page, sc
 // width 小程序码宽度
 func (srv QRCodeService) GetUnlimitedQRCodeRaw(page, scene string, width int) ([]byte, error) {
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
-		Scene:     scene,
-		Page:      page,
-		Width:     width,
-		IsHyaline: true,
-	})
+	var resp *wxapp.QRCodeResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
+			Scene:     scene,
+			Page:      page,
+			Width:     width,
+			IsHyaline: true,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+	}, 1)
 
 	if err != nil {
 		//app.Logger.Errorf("生成分享码失败 %v %v %+v\n", topicId, userId, err)
@@ -147,11 +161,18 @@ func (srv QRCodeService) GetLimitedQRCode(qrScene entity.QrCodeScene, path strin
 	}
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetWxaCodeResponse(&weapp.QRCode{
-		Path:      path,
-		Width:     width,
-		IsHyaline: true,
-	})
+	var resp *wxapp.QRCodeResponse
+	err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.GetWxaCodeResponse(&weapp.QRCode{
+			Path:      path,
+			Width:     width,
+			IsHyaline: true,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+	}, 1)
 
 	if err != nil {
 		//app.Logger.Errorf("生成分享码失败 %v %v %+v\n", topicId, userId, err)
@@ -186,11 +207,19 @@ func (srv QRCodeService) GetLimitedQRCode(qrScene entity.QrCodeScene, path strin
 func (srv QRCodeService) GetLimitedQRCodeRaw(path string, width int) ([]byte, error) {
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetWxaCodeResponse(&weapp.QRCode{
-		Path:      path,
-		Width:     width,
-		IsHyaline: true,
-	})
+	var resp *wxapp.QRCodeResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.GetWxaCodeResponse(&weapp.QRCode{
+			Path:      path,
+			Width:     width,
+			IsHyaline: true,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+
+	}, 1)
 
 	if err != nil {
 		//app.Logger.Errorf("生成分享码失败 %v %v %+v\n", topicId, userId, err)
@@ -222,10 +251,17 @@ func (srv QRCodeService) GetWxQrcode(qrScene entity.QrCodeScene, path string, wi
 	}
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
-		Path:  path,
-		Width: width,
-	})
+	var resp *wxapp.QRCodeResponse
+	err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
+			Path:  path,
+			Width: width,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+	}, 1)
 
 	if err != nil {
 		//app.Logger.Errorf("生成分享码失败 %v %v %+v\n", topicId, userId, err)
@@ -260,10 +296,17 @@ func (srv QRCodeService) GetWxQrcode(qrScene entity.QrCodeScene, path string, wi
 func (srv QRCodeService) GetWxQrcodeRaw(path string, width int) ([]byte, error) {
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
-		Path:  path,
-		Width: width,
-	})
+	var resp *wxapp.QRCodeResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
+			Path:  path,
+			Width: width,
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+	}, 1)
 
 	if err != nil {
 		//app.Logger.Errorf("生成分享码失败 %v %v %+v\n", topicId, userId, err)
