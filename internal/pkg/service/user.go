@@ -346,6 +346,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
 	//检查重复绑定 特殊用户有已绑定的账号
 	if ok && userByMobile.OpenId != userInfo.OpenId && specialUser.ID == 0 {
+		app.Logger.Errorf("bind user: %s; old user: %s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, specialUser.ID)
 		return errors.New("该号码已绑定")
 	}
 	//更新特殊用户的数据
