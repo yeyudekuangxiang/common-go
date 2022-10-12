@@ -317,13 +317,16 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		userInfo.Risk = rest.RiskRank
 	}
 
-	//获取用户地址  todo 加入队列
-	city, err := baidu.IpToCity(cip)
-	if err != nil {
-		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+	//授权ip地址没获取到，在绑定的时候，再有一次入库的机会
+	if userInfo.Ip == "" {
+		//获取用户地址
+		city, err := baidu.IpToCity(cip)
+		if err != nil {
+			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+		}
+		userInfo.CityCode = city.Content.AddressDetail.Adcode
+		userInfo.Ip = cip
 	}
-	userInfo.CityCode = city.Content.AddressDetail.Adcode
-	userInfo.Ip = cip
 
 	// todo topic数据批量修改
 	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber, Source: entity.UserSourceMio})
