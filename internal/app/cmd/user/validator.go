@@ -45,7 +45,7 @@ to quickly create a Cobra application.`,
 
 		for i, user := range list {
 			fmt.Println(i)
-			rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(wxapp.UserRiskRankParam{
+			rest, err := app.Weapp.GetUserRiskRank(wxapp.UserRiskRankParam{
 				AppId:    config.Config.Weapp.AppId,
 				OpenId:   user.OpenId,
 				Scene:    0,

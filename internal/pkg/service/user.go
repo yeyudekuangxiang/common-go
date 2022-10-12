@@ -311,7 +311,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 			ClientIp: cip,
 			MobileNo: userInfo.PhoneNumber,
 		}
-		rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(userRiskRankParam)
+		rest, err := app.Weapp.GetUserRiskRank(userRiskRankParam)
 		if err != nil {
 			app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
 		}
@@ -585,7 +585,7 @@ func (u UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
 
 // CheckUserRisk 检测用户风险等级
 func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRiskRankResponse, error) {
-	rest, err := wxapp.NewClient(app.Weapp).GetUserRiskRank(param)
+	rest, err := app.Weapp.GetUserRiskRank(param)
 	if err != nil {
 		return nil, err
 	}

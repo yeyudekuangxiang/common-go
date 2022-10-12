@@ -33,7 +33,7 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.5.0
 	github.com/zeromicro/go-zero v1.3.4
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.2
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.5
 	go.uber.org/zap v1.21.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -175,4 +175,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.2 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.2
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.5 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.5

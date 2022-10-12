@@ -12,7 +12,6 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
-	"mio/pkg/wxapp"
 	"strings"
 	"time"
 )
@@ -69,7 +68,7 @@ func (srv QRCodeService) GetUnlimitedQRCode(qrScene entity.QrCodeScene, page, sc
 	}
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
+	resp, err := app.Weapp.GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
 		Scene:     scene,
 		Page:      page,
 		Width:     width,
@@ -110,7 +109,7 @@ func (srv QRCodeService) GetUnlimitedQRCode(qrScene entity.QrCodeScene, page, sc
 // width 小程序码宽度
 func (srv QRCodeService) GetUnlimitedQRCodeRaw(page, scene string, width int) ([]byte, error) {
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
+	resp, err := app.Weapp.GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
 		Scene:     scene,
 		Page:      page,
 		Width:     width,
@@ -147,7 +146,7 @@ func (srv QRCodeService) GetLimitedQRCode(qrScene entity.QrCodeScene, path strin
 	}
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetWxaCodeResponse(&weapp.QRCode{
+	resp, err := app.Weapp.GetWxaCodeResponse(&weapp.QRCode{
 		Path:      path,
 		Width:     width,
 		IsHyaline: true,
@@ -186,7 +185,7 @@ func (srv QRCodeService) GetLimitedQRCode(qrScene entity.QrCodeScene, path strin
 func (srv QRCodeService) GetLimitedQRCodeRaw(path string, width int) ([]byte, error) {
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).GetWxaCodeResponse(&weapp.QRCode{
+	resp, err := app.Weapp.GetWxaCodeResponse(&weapp.QRCode{
 		Path:      path,
 		Width:     width,
 		IsHyaline: true,
@@ -222,7 +221,7 @@ func (srv QRCodeService) GetWxQrcode(qrScene entity.QrCodeScene, path string, wi
 	}
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
+	resp, err := app.Weapp.CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
 		Path:  path,
 		Width: width,
 	})
@@ -260,7 +259,7 @@ func (srv QRCodeService) GetWxQrcode(qrScene entity.QrCodeScene, path string, wi
 func (srv QRCodeService) GetWxQrcodeRaw(path string, width int) ([]byte, error) {
 
 	//创建新的
-	resp, err := wxapp.NewClient(app.Weapp).CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
+	resp, err := app.Weapp.CreateWxaQrcodeResponse(&weapp.QRCodeCreator{
 		Path:  path,
 		Width: width,
 	})

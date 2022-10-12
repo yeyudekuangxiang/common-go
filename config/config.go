@@ -5,43 +5,45 @@ import (
 )
 
 var Config = app{
-	App:         appSetting{},
-	Http:        httpSetting{},
-	Database:    databaseSetting{},
-	Log:         logSetting{},
-	Weapp:       wxSetting{},
-	MioSubOA:    wxSetting{},
-	MioSrvOA:    wxSetting{},
-	Redis:       redisSetting{},
-	DuiBa:       duiBaSetting{},
-	OSS:         ossSetting{},
-	BaiDu:       baiDuSetting{},
-	Java:        javaConfig{},
-	Zhuge:       zhugeConfig{},
-	AMQP:        amqpSetting{},
-	CouponRpc:   rpcSetting{},
-	ActivityZyh: activityZyh{},
+	App:              appSetting{},
+	Http:             httpSetting{},
+	Database:         databaseSetting{},
+	Log:              logSetting{},
+	Weapp:            wxSetting{},
+	MioSubOA:         wxSetting{},
+	MioSrvOA:         wxSetting{},
+	Redis:            redisSetting{},
+	DuiBa:            duiBaSetting{},
+	OSS:              ossSetting{},
+	BaiDu:            baiDuSetting{},
+	Java:             javaConfig{},
+	Zhuge:            zhugeConfig{},
+	AMQP:             amqpSetting{},
+	CouponRpc:        rpcSetting{},
+	ActivityZyh:      activityZyh{},
 	BaiDuImageSearch: baiDuImageSearchSetting{},
+	TokenCenterRpc:   rpcSetting{},
 }
 
 type app struct {
-	App         appSetting      `ini:"app"`
-	Http        httpSetting     `ini:"http"`
-	Database    databaseSetting `ini:"database"`
-	Log         logSetting      `ini:"log"`
-	Weapp       wxSetting       `ini:"weapp"`
-	MioSubOA    wxSetting       `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA    wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis       redisSetting    `ini:"redis"`
-	DuiBa       duiBaSetting    `ini:"duiba"`
-	OSS         ossSetting      `ini:"oss"`
-	AMQP        amqpSetting     `ini:"amqp"`
-	BaiDu       baiDuSetting    `ini:"baidu"`
-	Java        javaConfig      `ini:"java"`
-	Zhuge       zhugeConfig     `ini:"zhuge"`
-	CouponRpc   rpcSetting      `ini:"couponRpc"`
-	ActivityZyh activityZyh     `ini:"activityZyh"`
+	App              appSetting              `ini:"app"`
+	Http             httpSetting             `ini:"http"`
+	Database         databaseSetting         `ini:"database"`
+	Log              logSetting              `ini:"log"`
+	Weapp            wxSetting               `ini:"weapp"`
+	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
+	MioSrvOA         wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
+	Redis            redisSetting            `ini:"redis"`
+	DuiBa            duiBaSetting            `ini:"duiba"`
+	OSS              ossSetting              `ini:"oss"`
+	AMQP             amqpSetting             `ini:"amqp"`
+	BaiDu            baiDuSetting            `ini:"baidu"`
+	Java             javaConfig              `ini:"java"`
+	Zhuge            zhugeConfig             `ini:"zhuge"`
+	CouponRpc        rpcSetting              `ini:"couponRpc"`
+	ActivityZyh      activityZyh             `ini:"activityZyh"`
 	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
+	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
 }
 type appSetting struct {
 	TokenKey string
