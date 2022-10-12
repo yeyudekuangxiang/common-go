@@ -23,14 +23,10 @@ func TestAutoTry(t *testing.T) {
 			Page:  "pages/community/details/index",
 			Width: 100,
 		})
+
 		//系统错误
 		if err != nil {
 			return false, err
-		}
-
-		//调用成功
-		if qrResp.ErrCode == 0 {
-			return false, nil
 		}
 
 		//自动判断是否重试

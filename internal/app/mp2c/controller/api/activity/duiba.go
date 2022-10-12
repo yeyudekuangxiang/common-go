@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/medivhzhan/weapp/v3"
+	"github.com/medivhzhan/weapp/v3/request"
 	"io/ioutil"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
+	"net/http"
 	"strconv"
 )
 
@@ -85,16 +87,25 @@ func (ctr ZeroController) GetActivityMiniQR(ctx *gin.Context) error {
 		return err
 	}
 
-	res, err1, err2 := app.Weapp.GetQRCode(&weapp.QRCode{
-		Path: fmt.Sprintf("/pages/duiba_v2/duiba/index?activityId=%s", activity.ActivityId),
-	})
-	if err2 != nil {
-		return err2
+	var res *http.Response
+	var comErr *request.CommonError
+	err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		res, comErr, err = app.Weapp.GetQRCode(&weapp.QRCode{
+			Path: fmt.Sprintf("/pages/duiba_v2/duiba/index?activityId=%s", activity.ActivityId),
+		})
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(comErr.ErrCode)
+	}, 1)
+
+	if err != nil {
+		return err
+	}
+	if comErr.ErrCode != 0 {
+		return errors.New(strconv.Itoa(comErr.ErrCode) + comErr.ErrMSG)
 	}
 
-	if err1.ErrCode != 0 {
-		return errors.New(strconv.Itoa(err1.ErrCode) + err1.ErrMSG)
-	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

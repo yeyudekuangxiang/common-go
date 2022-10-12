@@ -118,6 +118,9 @@ func (c *Client) GetUserRiskRank(param UserRiskRankParam, recursiveCount ...int)
 }
 
 func (c *Client) IsExpireAccessToken(code int) (bool, error) {
+	if code == 0 {
+		return false, nil
+	}
 	return c.tokenCenter.IsExpired(strconv.Itoa(code))
 }
 
