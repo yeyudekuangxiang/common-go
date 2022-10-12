@@ -264,6 +264,7 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 
 	var items []entity.BdScenePrePoint
 	var point int64
+	var openId string
 
 	//获取pre_point数据
 	scenePointCondition := repository.GetScenePrePoint{
@@ -282,7 +283,8 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 		sceneUserCondition.PlatformUserId = memberId
 	}
 
-	if openId, ok := params["openId"]; ok {
+	if opId, ok := params["openId"]; ok {
+		openId = opId
 		scenePointCondition.OpenId = openId
 		sceneUserCondition.OpenId = openId
 	}
@@ -296,8 +298,10 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 	if sceneUser.ID != 0 {
 		pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: sceneUser.OpenId})
 		point = pointInfo.Balance
+	} else if openId != "" {
+		pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: openId})
+		point = pointInfo.Balance
 	}
-
 	return items, point, nil
 }
 
