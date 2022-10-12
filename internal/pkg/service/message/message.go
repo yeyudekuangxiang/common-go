@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/medivhzhan/weapp/v3/request"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -44,13 +45,22 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 		return -2, errors.New("每人每天最多收到2个不同类型模板消息")
 	}*/
 
-	ret, err := app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
-		ToUser:           toUser,
-		TemplateID:       template.TemplateId(),
-		Page:             page,
-		MiniprogramState: subscribemessage.MiniprogramStateFormal,
-		Data:             template.ToData(),
-	})
+	var ret *request.CommonError
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
+			ToUser:           toUser,
+			TemplateID:       template.TemplateId(),
+			Page:             page,
+			MiniprogramState: subscribemessage.MiniprogramStateFormal,
+			Data:             template.ToData(),
+		})
+
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(ret.ErrCode)
+	}, 1)
+
 	if err != nil {
 		app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), toUser, err.Error())
 		zhuGeAttr["错误码"] = -3

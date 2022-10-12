@@ -698,6 +698,7 @@ github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d/go.mod h1
 github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a/go.mod h1:syvi0/a8iFYH4r/RixwvyeAJjdLS9QV7WQ/tjFTllLA=
 github.com/smartystreets/goconvey v1.6.4 h1:fv0U8FUIMPNf1L9lnHLvLhgicrIVChEkdzIKYqbNC9s=
 github.com/smartystreets/goconvey v1.6.4/go.mod h1:syvi0/a8iFYH4r/RixwvyeAJjdLS9QV7WQ/tjFTllLA=
+github.com/sony/sonyflake v1.1.0/go.mod h1:LORtCywH/cq10ZbyfhKrHYgAUGH7mOBa76enV9txy/Y=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/spaolacci/murmur3 v1.1.0 h1:7c1g84S4BPRrfL5Xrdp6fOJ206sU9y293DDHaoy0bLI=
 github.com/spaolacci/murmur3 v1.1.0/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
@@ -796,10 +797,6 @@ github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9/go.mod h1:E1AXubJB
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
 github.com/zeromicro/go-zero v1.3.4 h1:XeNdwcrOmnvHj891AmeCA9RrRj1PeN49//KKCK4WAXk=
 github.com/zeromicro/go-zero v1.3.4/go.mod h1:nEU/ITZSmxRxvr/JmSoJ48MNV62UpY6bqJz9Voba7Yw=
-gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.2 h1:bdoaIw7hQO4fUWndKaLHXc3Paa5S1F83TjDPb1ZqQ7A=
-gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.2/go.mod h1:6BXl9fAVQJsH+hDStYlAoXMtnrja0mpVTKO7BDc7Yus=
-gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.4 h1:0Ya7qUKbLAAVvq15vyUPECzaxCRbYzwEVome+rAbPBw=
-gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.4/go.mod h1:6BXl9fAVQJsH+hDStYlAoXMtnrja0mpVTKO7BDc7Yus=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.5 h1:ry8ejdmqIZUrNXtTp5yeCWDN8Gcln5Cz5csZSplwla0=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.5/go.mod h1:fqIeOnNQ3JuVrc9Dra1SsWvH33PlUo4N0/lfmsC+ATY=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
