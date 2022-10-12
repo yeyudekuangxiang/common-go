@@ -170,7 +170,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		}
 
 		//同步到志愿汇
-		if point.Balance > 0 {
+		if dto.ChangePoint > 0 {
 			sendType := "0"
 			switch dto.Type {
 			case entity.POINT_QUIZ:
