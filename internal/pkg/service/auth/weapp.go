@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
+	"mio/pkg/baidu"
 	"time"
 
 	"github.com/medivhzhan/weapp/v3"
@@ -27,7 +28,7 @@ type WeappService struct {
 	client *weapp.Client
 }
 
-func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64, thirdId string) (*entity.User, string, bool, error) {
+func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64, thirdId string, ip string) (*entity.User, string, bool, error) {
 	//调用java那边登陆接口
 	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
@@ -72,6 +73,11 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	isNewUser := false
 	if user.ID == 0 {
 		isNewUser = true
+		//获取用户地址
+		city, err := baidu.IpToCity(ip)
+		if err != nil {
+			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+		}
 		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
 			AvatarUrl:   "https://resources.miotech.com/static/mp2c/images/user/default.png",
@@ -80,6 +86,8 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 			Source:      entity.UserSourceMio,
 			UnionId:     session.WxUnionId,
 			ChannelId:   cid,
+			Ip:          ip,
+			CityCode:    city.Content.AddressDetail.Adcode,
 		})
 		if err != nil {
 			return nil, "", false, err
