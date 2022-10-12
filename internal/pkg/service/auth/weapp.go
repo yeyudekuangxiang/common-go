@@ -84,16 +84,25 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			return nil, "", false, err
 		}
-
-		if thirdId != "" && cid == 1057 {
-			platform.NewZyhService(context.NewMioContext()).Create(srv_types.GetZyhGetInfoByDTO{
-				Openid: whoAmiResp.Data.Openid,
-				VolId:  thirdId,
-			})
-		}
 	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
 	}
+	scoreMap := make(map[int64]string)
+	scoreMap[1060] = "志愿汇低碳好礼"
+	scoreMap[1057] = "志愿汇"
+	scoreMap[1050] = "志愿汇App落地页"
+	scoreMap[1047] = "志愿汇骑行券"
+	scoreMap[1046] = "志愿汇积分"
+	scoreMap[1045] = "志愿汇落地页"
+	// 如果key存在ok为true,v为对应的值；不存在ok为false,v为值类型的零值
+	_, ok := scoreMap[cid]
+	if ok && thirdId != "" {
+		platform.NewZyhService(context.NewMioContext()).Create(srv_types.GetZyhGetInfoByDTO{
+			Openid: whoAmiResp.Data.Openid,
+			VolId:  thirdId,
+		})
+	}
+
 	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
