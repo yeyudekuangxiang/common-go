@@ -52,7 +52,7 @@ to quickly create a Cobra application.`,
 				ClientIp: "192.168.0.1",
 			})
 			if rest.ErrCode != 0 && rest.ErrCode != 61010 {
-				app.Logger.Errorf("%+v", rest)
+				app.Logger.Errorf("Validator Cmd error: %+v", rest)
 			}
 			log.Println(rest, err)
 		}

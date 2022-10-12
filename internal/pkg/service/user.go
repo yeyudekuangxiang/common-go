@@ -300,6 +300,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}, 1)
 
 	if err != nil {
+		app.Logger.Errorf("BindPhoneByCode error:%s", err.Error())
 		return err
 	}
 	if phoneResult.ErrCode != 0 {
