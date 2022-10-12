@@ -1,19 +1,15 @@
 package service
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/validator"
 	"strconv"
 	"time"
 )
@@ -187,17 +183,17 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	if err != nil {
 		return entity.CommentIndex{}, 0, err
 	}
-	if message != "" {
-		//检查内容
-		if err := validator.CheckMsgWithOpenId(openId, message); err != nil {
-			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发布评论"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
-			return entity.CommentIndex{}, 0, errors.New("内容审核未通过，发布失败。")
-		}
-	}
+	//if message != "" {
+	//	//检查内容
+	//	if err := validator.CheckMsgWithOpenId(openId, message); err != nil {
+	//		app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
+	//		zhuGeAttr := make(map[string]interface{}, 0)
+	//		zhuGeAttr["场景"] = "发布评论"
+	//		zhuGeAttr["失败原因"] = err.Error()
+	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
+	//		return entity.CommentIndex{}, 0, errors.New("内容审核未通过，发布失败。")
+	//	}
+	//}
 	comment := entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
