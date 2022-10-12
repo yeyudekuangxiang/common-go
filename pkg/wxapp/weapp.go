@@ -13,15 +13,27 @@ import (
 	"time"
 )
 
+type noCache struct {
+}
+
+func (noCache) Set(key string, val interface{}, timeout time.Duration) {
+}
+
+func (noCache) Get(key string) (interface{}, bool) {
+	return nil, false
+}
+
 func NewClient(appId, appSecret string, tokenCenter AccessTokenCenter) *Client {
 	return &Client{Client: weapp.NewClient(appId, appSecret, weapp.WithAccessTokenSetter(func() (token string, expireIn uint) {
 		token, expireAt, err := tokenCenter.AccessToken()
+
 		if err != nil {
 			log.Println("获取token失败", appId, appSecret, err)
 			return "", 0
 		}
+
 		return token, uint(expireAt.Sub(time.Now()).Seconds())
-	})), tokenCenter: tokenCenter}
+	}), weapp.WithCache(noCache{})), tokenCenter: tokenCenter}
 }
 
 type Client struct {
