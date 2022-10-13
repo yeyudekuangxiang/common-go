@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
+	"github.com/medivhzhan/weapp/v3/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -23,8 +24,8 @@ func (noCache) Get(key string) (interface{}, bool) {
 	return nil, false
 }
 
-func NewClient(appId, appSecret string, tokenCenter AccessTokenCenter) *Client {
-	return &Client{Client: weapp.NewClient(appId, appSecret, weapp.WithAccessTokenSetter(func() (token string, expireIn uint) {
+func NewClient(appId, appSecret string, tokenCenter AccessTokenCenter, level logger.Level) *Client {
+	wpClient := weapp.NewClient(appId, appSecret, weapp.WithAccessTokenSetter(func() (token string, expireIn uint) {
 		token, expireAt, err := tokenCenter.AccessToken()
 
 		if err != nil {
@@ -33,7 +34,10 @@ func NewClient(appId, appSecret string, tokenCenter AccessTokenCenter) *Client {
 		}
 
 		return token, uint(expireAt.Sub(time.Now()).Seconds())
-	}), weapp.WithCache(noCache{})), tokenCenter: tokenCenter}
+	}), weapp.WithCache(noCache{}))
+	wpClient.SetLogLevel(level)
+
+	return &Client{Client: wpClient, tokenCenter: tokenCenter}
 }
 
 type Client struct {

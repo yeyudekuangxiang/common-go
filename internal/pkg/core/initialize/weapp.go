@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"context"
+	"github.com/medivhzhan/weapp/v3/logger"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
 	"log"
 	"mio/config"
@@ -10,10 +11,18 @@ import (
 	"time"
 )
 
+//debug info warn error
+var logLevelMap = map[string]logger.Level{
+	"debug": logger.Info,
+	"info":  logger.Info,
+	"warn":  logger.Warn,
+	"error": logger.Error,
+}
+
 func InitWeapp() {
 	log.Println("初始化weapp组件...")
 	weappSetting := config.Config.Weapp
-	client := wxapp.NewClient(weappSetting.AppId, weappSetting.Secret, NewTokenCenter())
+	client := wxapp.NewClient(weappSetting.AppId, weappSetting.Secret, NewTokenCenter(), logLevelMap[config.Config.Log.Level])
 	*app.Weapp = *client
 	log.Println("初始化weapp组件成功")
 }

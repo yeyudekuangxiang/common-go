@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
+	"github.com/medivhzhan/weapp/v3/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/zeromicro/go-zero/zrpc"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
@@ -15,7 +16,7 @@ func TestAutoTry(t *testing.T) {
 
 	var qrResp *QRCodeResponse
 
-	client := NewClient("wx3279a0b1782e2d93", "4028279bec13ece9155c7eae348de171", NewTokenCenter())
+	client := NewClient("wx3279a0b1782e2d93", "4028279bec13ece9155c7eae348de171", NewTokenCenter(), logger.Info)
 
 	err := client.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 		qrResp, err = client.GetUnlimitedQRCodeResponse(&weapp.UnlimitedQRCode{
