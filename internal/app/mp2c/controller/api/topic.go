@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller"
@@ -10,6 +9,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 )
 
 var DefaultTopicController = TopicController{}
@@ -179,7 +179,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	if user.Auth != 1 {
-		return nil, errors.New("无权限")
+		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 	form := CreateTopicForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -200,7 +200,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	//user
 	user := apiutil.GetAuthUser(c)
 	if user.Auth != 1 {
-		return nil, errors.New("无权限")
+		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 
 	form := UpdateTopicForm{}
@@ -226,7 +226,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	//user
 	user := apiutil.GetAuthUser(c)
 	if user.Auth != 1 {
-		return nil, errors.New("无权限")
+		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 	//更新帖子
 	err := service.DefaultTopicService.DelTopic(user.ID, form.ID)

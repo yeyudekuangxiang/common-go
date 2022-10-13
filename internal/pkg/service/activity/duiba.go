@@ -2,9 +2,9 @@ package activity
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"

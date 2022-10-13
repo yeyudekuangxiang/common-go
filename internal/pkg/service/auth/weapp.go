@@ -101,7 +101,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			return nil, "", false, err
 		}
-	} else if user.GUID == "" && session.WxUnionId != "" { //更新用户unionid
+	} else if user.UnionId == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
 	}
 

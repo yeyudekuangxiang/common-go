@@ -1,7 +1,7 @@
 package event
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"strconv"

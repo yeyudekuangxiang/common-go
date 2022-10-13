@@ -1,8 +1,8 @@
 package business
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"

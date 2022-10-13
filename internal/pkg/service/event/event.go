@@ -2,8 +2,8 @@ package event
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"

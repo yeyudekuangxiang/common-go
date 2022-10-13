@@ -1,8 +1,8 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"

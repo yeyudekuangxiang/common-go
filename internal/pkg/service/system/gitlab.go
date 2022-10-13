@@ -2,8 +2,8 @@ package system
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"

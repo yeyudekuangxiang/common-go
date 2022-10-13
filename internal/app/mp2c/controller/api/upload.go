@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
@@ -27,18 +26,18 @@ func (UploadController) UploadPointCollectImage(ctx *gin.Context) (gin.H, error)
 	fileHeader, err := ctx.FormFile("file")
 	if err != nil {
 		if err == http.ErrMissingFile {
-			return nil, errors.New("请选择文件")
+			return nil, errno.ErrCommon.WithMessage("请选择文件")
 		}
 		return nil, err
 	}
 
 	if fileHeader.Size > 5*1024*1024 {
-		return nil, errors.New("文件大小不能超过5M")
+		return nil, errno.ErrCommon.WithMessage("文件大小不能超过5M")
 	}
 
 	fileExt := path.Ext(fileHeader.Filename)
 	if fileExt != ".png" && fileExt != ".jpg" && fileExt != ".jpeg" {
-		return nil, errors.New("仅支持png、jpg格式的图片")
+		return nil, errno.ErrCommon.WithMessage("仅支持png、jpg格式的图片")
 	}
 
 	file, err := fileHeader.Open()
@@ -57,7 +56,7 @@ func (UploadController) MultipartUploadImage(ctx *gin.Context) (gin.H, error) {
 	fileHeader, err := ctx.FormFile("file")
 	if err != nil {
 		if err == http.ErrMissingFile {
-			return nil, errors.New("请选择文件")
+			return nil, errno.ErrCommon.WithMessage("请选择文件")
 		}
 		return nil, err
 	}
@@ -125,7 +124,7 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 	fileHeader, err := ctx.FormFile("file")
 	if err != nil {
 		if err == http.ErrMissingFile {
-			return nil, errors.New("请选择文件")
+			return nil, errno.ErrCommon.WithMessage("请选择文件")
 		}
 		return nil, err
 	}
@@ -133,16 +132,16 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 		Scene: strings.ToLower(form.ImageScene),
 	})
 	if err != nil || uploadScene.ID == 0 {
-		return nil, errors.New("上传场景错误")
+		return nil, errno.ErrCommon.WithMessage("上传场景错误")
 	}
 
 	if fileHeader.Size > 5*1024*1024 {
-		return nil, errors.New("文件大小不能超过5M")
+		return nil, errno.ErrCommon.WithMessage("文件大小不能超过5M")
 	}
 
 	fileExt := path.Ext(fileHeader.Filename)
 	if fileExt != ".png" && fileExt != ".jpg" && fileExt != ".jpeg" {
-		return nil, errors.New("仅支持png、jpg格式的图片")
+		return nil, errno.ErrCommon.WithMessage("仅支持png、jpg格式的图片")
 	}
 
 	file, err := fileHeader.Open()

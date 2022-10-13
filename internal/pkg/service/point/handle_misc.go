@@ -1,13 +1,13 @@
 package point
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 )
 
 //检查图片
@@ -33,7 +33,7 @@ func (c *defaultClientHandle) scanImage(imgUrl string) ([]string, error) {
 func (c *defaultClientHandle) validateRule(content []string, rules CollectRules) ([]string, error) {
 	ruleArray := util.Intersect(content, rules[c.clientHandle.Type])
 	if len(ruleArray) == 0 {
-		return nil, errors.New("不是有效的图片")
+		return nil, errno.ErrCommon.WithMessage("不是有效的图片")
 	}
 	return content, nil
 }
@@ -44,7 +44,7 @@ func (c *defaultClientHandle) identifyImg(identify []string) (map[string]string,
 	enRules := identifyEnRules[c.clientHandle.Type]
 	m, valid := util.IntersectContains(identify, rule)
 	if !valid {
-		return nil, errors.New("无效图片")
+		return nil, errno.ErrCommon.WithMessage("无效图片")
 	}
 	enM := map[string]string{}
 	for k, v := range m {

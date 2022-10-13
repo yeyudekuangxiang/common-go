@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -36,7 +36,7 @@ func (srv PointService) FindByUserId(userId int64) (*entity.Point, error) {
 		return nil, err
 	}
 	if user.OpenId == "" {
-		return &entity.Point{}, errno.ErrUserNotFound
+		return &entity.Point{}, errno.ErrUserNotFound.WithCaller()
 	}
 	return srv.FindByOpenId(user.OpenId)
 }
@@ -44,7 +44,7 @@ func (srv PointService) FindByUserId(userId int64) (*entity.Point, error) {
 // FindByOpenId 获取用户积分
 func (srv PointService) FindByOpenId(openId string) (*entity.Point, error) {
 	if openId == "" {
-		return &entity.Point{}, errno.ErrUserNotFound
+		return &entity.Point{}, errno.ErrUserNotFound.WithCaller()
 	}
 	point := srv.repo.FindBy(repository.FindPointBy{
 		OpenId: openId,
@@ -284,7 +284,7 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 		return err
 	}
 	if user.ID == 0 {
-		return errno.ErrUserNotFound
+		return errno.ErrUserNotFound.WithCaller()
 	}
 	value := param.Value
 	if param.Type == entity.POINT_SYSTEM_REDUCE {

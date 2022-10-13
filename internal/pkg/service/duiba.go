@@ -2,8 +2,8 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -99,7 +99,7 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*ExchangeCallb
 		return nil, err
 	}
 	if userInfo.ID == 0 {
-		return nil, errors.New("用户信息不存在")
+		return nil, errno.ErrCommon.WithMessage("用户信息不存在")
 	}
 	data, err := json.Marshal(form)
 	if err != nil {
@@ -146,7 +146,7 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		return err
 	}
 	if userInfo.ID == 0 {
-		return errors.New("用户信息不存在")
+		return errno.ErrCommon.WithMessage("用户信息不存在")
 	}
 
 	pointTranService := NewPointTransactionService(context.NewMioContext())
@@ -183,7 +183,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		return err
 	}
 	if user.ID == 0 {
-		return errno.ErrUserNotFound
+		return errno.ErrUserNotFound.WithCaller()
 	}
 
 	orderId := form.DevelopBizId
@@ -312,7 +312,7 @@ var virtualGoodMap = map[string]int{
 func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId string, credit int64, err error) {
 	lockKey := fmt.Sprintf("VirtualGoodCallback%s", encrypt.Md5(form.OrderNum+form.Params))
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return "", 0, errors.New("操作频繁,请稍后再试")
+		return "", 0, errno.ErrCommon.WithMessage("操作频繁,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 

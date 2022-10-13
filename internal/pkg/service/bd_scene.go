@@ -1,8 +1,8 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/common/tool/encrypt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"

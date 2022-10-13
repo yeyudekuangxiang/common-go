@@ -135,17 +135,6 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	}
 	return list
 }
-func (u UserRepository) GetGuid(unionId string) string {
-	if unionId == "" {
-		return ""
-	}
-	user := entity.User{}
-	err := app.DB.Where("unionid = ? and guid <> ''", unionId).First(&user).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		panic(err)
-	}
-	return user.GUID
-}
 
 func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, int64) {
 	list := make([]entity.User, 0)

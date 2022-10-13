@@ -1,7 +1,7 @@
 package business
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"

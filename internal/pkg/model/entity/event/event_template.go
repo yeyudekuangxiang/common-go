@@ -2,7 +2,7 @@ package event
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/util"
 	"reflect"
 	"strings"

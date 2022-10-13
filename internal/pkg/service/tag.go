@@ -1,8 +1,8 @@
 package service
 
 import (
-	"errors"
 	"github.com/mlogclub/simple"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 )

@@ -2,8 +2,8 @@ package platform
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/context"
 	entity "mio/internal/pkg/model/entity/activity"

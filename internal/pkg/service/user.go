@@ -79,12 +79,12 @@ func (u UserService) GetUserByToken(token string) (*entity.User, error) {
 }
 func (u UserService) CreateUserToken(id int64) (string, error) {
 	if id == 0 {
-		return "", errno.ErrUserNotFound
+		return "", errno.ErrUserNotFound.WithCaller()
 	}
 
 	user := u.r.GetUserById(id)
 	if user.ID == 0 {
-		return "", errno.ErrUserNotFound
+		return "", errno.ErrUserNotFound.WithCaller()
 	}
 
 	return util2.CreateToken(auth.User{
@@ -132,24 +132,12 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 		return &user, nil
 	}
 
-	guid := ""
-	if param.UnionId != "" {
-		guid = u.r.GetGuid(param.UnionId)
-		if guid == "" {
-			guid = util2.UUID()
-		}
-	}
-
 	user = entity.User{}
 	if err := util2.MapTo(param, &user); err != nil {
 		return nil, err
 	}
-	user.GUID = guid
 	user.Time = model.NewTime()
 
-	if param.UnionId != "" {
-		app.DB.Where("unionid = ? and guid =''", param.UnionId).Update("guid", guid)
-	}
 	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
 	user.ChannelId = ch.Cid
 	ret := repository.DefaultUserRepository.Save(&user)
@@ -173,23 +161,11 @@ func (u UserService) UpdateUserUnionId(id int64, unionid string) {
 	if unionid == "" || id == 0 {
 		return
 	}
-
 	user := u.r.GetUserById(id)
 	if user.ID == 0 {
 		return
 	}
-
-	guid := u.r.GetGuid(unionid)
-	if guid == "" {
-		guid = util2.UUID()
-	}
-
-	user.UnionId = unionid
-	user.GUID = guid
-	err := u.r.Save(&user)
-	if err != nil {
-		app.Logger.Error("更新unionid失败", id, unionid, err)
-	}
+	app.DB.Model(entity.User{}).Where("id = ?", id).UpdateColumn("unionid = ?", unionid)
 }
 
 // GetUserBy 请使用 GetUser 代替此方法
@@ -411,7 +387,7 @@ func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 		return err
 	}
 	if session.ID == 0 {
-		return errno.ErrAuth
+		return errno.ErrAuth.WithCaller()
 	}
 
 	decryptResult, err := app.Weapp.DecryptMobile(session.SessionKey, param.EncryptedData, param.IV)

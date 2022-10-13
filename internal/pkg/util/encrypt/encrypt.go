@@ -10,7 +10,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/util"
 	"net/url"

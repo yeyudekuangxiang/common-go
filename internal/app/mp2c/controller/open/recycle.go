@@ -1,9 +1,9 @@
 package open
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -35,14 +35,14 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	if form.Type != "1" {
-		return nil, errors.New("非回收订单")
+		return nil, errno.ErrCommon.WithMessage("非回收订单")
 	}
 
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh("oola")
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	dst := make(map[string]interface{}, 0)
@@ -64,8 +64,8 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
 	if userInfo.ID == 0 {
-		fmt.Printf("%s 未找到用户 %v",scene.Ch, form)
-		return nil, errno.ErrUserNotFound
+		fmt.Printf("%s 未找到用户 %v", scene.Ch, form)
+		return nil, errno.ErrUserNotFound.WithCaller()
 	}
 
 	//查重
@@ -193,7 +193,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	if userInfo.ID == 0 {
 		fmt.Println("charge 未找到用户 ", form)
-		return nil, errno.ErrUserNotFound
+		return nil, errno.ErrUserNotFound.WithCaller()
 	}
 
 	//默认只有衣物
