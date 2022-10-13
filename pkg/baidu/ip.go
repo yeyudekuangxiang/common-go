@@ -36,7 +36,7 @@ func IpToCity(ip string) (*CityResult, error) {
 	if ip == "" {
 		return nil, errors.New("ip地址为空")
 	}
-	url := "https://api.map.baidu.com/location/ip?ak=32f38c9491f2da9eb61106aaab1e9739&ip=" + ip
+	url := "https://api.map.baidu.com/location/ip?ak=bHCEP8afEnhnFFbx1z6NwXpeChsPx8Aj&ip=" + ip
 	method := "GET"
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
