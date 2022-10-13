@@ -79,7 +79,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 	lockKey := "changeUserPoint" + dto.OpenId
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
 		go srv.trackPoint(dto, "操作频繁")
-		return 0, errors.New("操作频繁")
+		return 0, errno.ErrCommon.WithMessage("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -107,7 +107,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 
 		//判读积分余额是否充足
 		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
-			return errors.New("积分不足")
+			return errno.ErrCommon.WithMessage("积分不足")
 		}
 
 		if point.Id == 0 {
@@ -253,7 +253,7 @@ func (srv PointService) ChangeUserPointByOffline(dto srv_types.ChangeUserPointDT
 		}
 		//判读积分余额是否充足
 		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
-			return errors.New("积分不足")
+			return errno.ErrCommon.WithMessage("积分不足")
 		}
 		if point.Id == 0 {
 			//创建积分账户

@@ -355,7 +355,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productItemId string) error {
 	point := virtualGoodMap[productItemId]
 	if point == 0 {
-		return errors.New("虚拟商品不存在")
+		return errno.ErrCommon.WithMessage("虚拟商品不存在")
 	}
 	pointService := NewPointService(context.NewMioContext())
 	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{

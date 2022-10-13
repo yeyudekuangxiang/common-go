@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/pkg/errors"
 	"log"
 	"math/rand"
 	"mio/config"
@@ -55,17 +54,17 @@ func (srv OrderService) CalculateAndCheck(items []repository2.CheckStockItem) (*
 		ItemIds: itemIds,
 	})
 	if len(productItems) != len(itemIds) {
-		return nil, errors.New("存在失效商品,请去掉失效商品后重试")
+		return nil, errno.ErrCommon.WithMessage("存在失效商品,请去掉失效商品后重试")
 	}
 
 	result := &CalculateProductResult{ItemList: make([]submitOrderItem, 0)}
 	for _, productItem := range productItems {
 		wantCount := itemMap[productItem.ProductItemId].Count
 		if !productItem.Active {
-			return nil, errors.New("商品`" + productItem.Title + "`已下架")
+			return nil, errno.ErrCommon.WithMessage("商品`" + productItem.Title + "`已下架")
 		}
 		if productItem.RemainingCount < wantCount {
-			return nil, errors.New("商品`" + productItem.Title + "`库存不足")
+			return nil, errno.ErrCommon.WithMessage("商品`" + productItem.Title + "`库存不足")
 		}
 		result.TotalCost += productItem.Cost
 		result.ItemList = append(result.ItemList, submitOrderItem{
@@ -126,7 +125,7 @@ func (srv OrderService) SubmitOrder(param SubmitOrderParam) (*entity.Order, erro
 func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, error) {
 	//防止并发
 	if !util2.DefaultLock.Lock("submitOrder_"+strconv.FormatInt(param.Order.UserId, 5), time.Second*5) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 
 	orderSuccess := false
@@ -138,7 +137,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 		return nil, err
 	}
 	if user.ID == 0 || user.OpenId == "" {
-		return nil, errors.New("未查找到用户信息,请联系管理员")
+		return nil, errno.ErrCommon.WithMessage("未查找到用户信息,请联系管理员")
 	}
 
 	pointService := NewPointService(context.NewMioContext())
@@ -148,7 +147,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 		return nil, err
 	}
 	if point.Balance < int64(param.Order.TotalCost) {
-		return nil, errors.New("积分不足,无法兑换")
+		return nil, errno.ErrCommon.WithMessage("积分不足,无法兑换")
 	}
 
 	//检查并且锁定库存
@@ -224,7 +223,7 @@ func (srv OrderService) create(orderId string, param submitOrderParam) (*entity.
 		return nil, nil, err
 	}
 	if user.ID == 0 || user.OpenId == "" {
-		return nil, nil, errors.New("未查找到用户信息,请联系管理员")
+		return nil, nil, errno.ErrCommon.WithMessage("未查找到用户信息,请联系管理员")
 	}
 
 	order := &entity.Order{
@@ -415,7 +414,7 @@ func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventP
 		return nil, errno.ErrRecordNotFound.WithCaller()
 	}
 	if ev.ProductItemId == "" {
-		return nil, errors.New("项目未启用,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("项目未启用,请稍后再试")
 	}
 	if !ev.StartTime.IsZero() && ev.StartTime.After(time.Now()) {
 		return nil, errno.ErrCommon.WithMessage("项目未开始")
@@ -475,11 +474,11 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 	info := srv.repoUser.GetUserBy(repository2.GetUserBy{OpenId: wechatServiceOpenId})
 	wechatServiceUid := info.ID
 	if wechatServiceUid == 0 {
-		return nil, errors.New("不满足领取条件")
+		return nil, errno.ErrCommon.WithMessage("不满足领取条件")
 	}
 	wechatServiceUser := srv.repoGDBook.GetDonationBookByUid(repositoryActivity.FindRecordBy{UserId: wechatServiceUid})
 	if wechatServiceUser.UserId == 0 {
-		return nil, errors.New("您不满足领取条件哦")
+		return nil, errno.ErrCommon.WithMessage("您不满足领取条件哦")
 	}
 
 	openid := param.OpenId
@@ -489,7 +488,7 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 		Openid:      openid,
 		ItemIdSlice: ItemIdSlice})
 	if orderTotal >= 1 {
-		return nil, errors.New("您已经领取过证书了")
+		return nil, errno.ErrCommon.WithMessage("您已经领取过证书了")
 	}
 	order, errorOrder := srv.SubmitOrderForEvent(srv_types.SubmitOrderForEventParam{UserId: param.UserId, EventId: param.EventId})
 	if errorOrder != nil {
@@ -509,7 +508,7 @@ func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEven
 	})
 	if errInc != nil {
 		app.Logger.Error("广东教育学会，发证书 加积分失败，失败原因", errInc.Error())
-		return nil, errors.New(errInc.Error())
+		return nil, errno.ErrCommon.WithMessage(errInc.Error())
 	}
 	return order, nil
 }

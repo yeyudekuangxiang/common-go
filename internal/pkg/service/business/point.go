@@ -2,7 +2,6 @@ package business
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
@@ -101,7 +100,7 @@ func (srv PointService) SendPointEvCar(param SendPointEvCarParam) (int, error) {
 	pointRate, err := DefaultPointRateSettingService.ParsePointExchangeRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
-		return 0, errors.New("系统异常,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 
 	addPoint := pointRate.Calc(param.CarbonCredits)
@@ -138,7 +137,7 @@ func (srv PointService) SendPointOnlineMeeting(param SendPointOnlineMeetingParam
 	pointRate, err := DefaultPointRateSettingService.ParseOnlineMeetingRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
-		return 0, errors.New("系统异常,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 
 	addPoint := pointRate.OneCity.Calc(param.OneCityCredit)
@@ -176,7 +175,7 @@ func (srv PointService) SendPointSaveWaterElectricity(param SendPointSaveWaterEl
 	pointRate, err := DefaultPointRateSettingService.ParseSaveWaterElectricityRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
-		return 0, errors.New("系统异常,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 	addPoint := pointRate.Water.Calc(param.WaterCredit)
 	addPoint += pointRate.Electricity.Calc(param.ElectricityCredit)
@@ -213,7 +212,7 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 	pointRate, err := DefaultPointRateSettingService.ParsePublicTransportRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
-		return 0, errors.New("系统异常,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 
 	addPoint := pointRate.Bus.Calc(param.BusCredit)
@@ -254,7 +253,7 @@ func (srv PointService) SendPointOEP(param SendPointOEPParam) (int, error) {
 	pointRate, err := DefaultPointRateSettingService.ParsePointOEPRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
-		return 0, errors.New("系统异常,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 
 	addPoint := pointRate.Calc(param.CarbonCredit)
@@ -288,7 +287,7 @@ func (srv PointService) SendPointGreenBusinessTrip(param SendPointGreenBusinessT
 	pointRate, err := DefaultPointRateSettingService.ParseGreenBusinessTripExchangeRate(sceneSetting.PointRateSetting)
 	if err != nil {
 		app.Logger.Error("转换碳积分汇率异常", sceneSetting.PointRateSetting, err)
-		return 0, errors.New("系统异常,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 	var addPoint int
 	switch param.TripType {

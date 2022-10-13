@@ -3,7 +3,6 @@ package activity
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	activity3 "mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/repository/activity"
@@ -153,10 +152,10 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) GetCityList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	cityList := activity.DefaultGDdbService.GetCityList()
 	return gin.H{
@@ -168,10 +167,10 @@ func (ctr AnswerController) GetCityList(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) GetGradeList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	gradeList := activity.DefaultGDdbService.GetGradeList()
 	return gin.H{
@@ -182,10 +181,10 @@ func (ctr AnswerController) GetGradeList(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) CreateSchool(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	form := &GDDbCreateSchoolForm{}
 	if err := apiutil.BindForm(ctx, form); err != nil {
@@ -204,10 +203,10 @@ func (ctr AnswerController) CreateSchool(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) GetSchoolList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	form := &GDDbSelectSchoolForm{}
 	if err := apiutil.BindForm(ctx, form); err != nil {
@@ -223,10 +222,10 @@ func (ctr AnswerController) GetSchoolList(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) GetAchievement(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	res := activity.DefaultGDdbService.GetAchievement(user.ID)
 	return gin.H{
@@ -244,10 +243,10 @@ func (ctr AnswerController) GetIntegral(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) CloseLateTips(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	if err := activity.DefaultGDdbService.CloseLateTips(user.ID); err != nil {
 		return nil, err

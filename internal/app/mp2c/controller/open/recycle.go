@@ -59,7 +59,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//校验sign
 	if err := RecycleService.CheckSign(dst, scene.Key); err != nil {
 		app.Logger.Info("校验sign失败", form)
-		return nil, errors.New("sign:" + form.Sign + " 验证失败")
+		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
