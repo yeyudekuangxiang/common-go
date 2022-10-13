@@ -1,15 +1,16 @@
 package activity
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	activity3 "mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -60,7 +61,7 @@ func (ctr AnswerController) HomePage(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) GetUserSchool(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	school, err := activity.DefaultGDdbService.GetUserSchool(user.ID)
 	if err != nil {
@@ -74,10 +75,10 @@ func (ctr AnswerController) GetUserSchool(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	t, _ := strconv.Atoi(ctx.PostForm("type"))
 	file, err := ctx.FormFile("file")
@@ -85,7 +86,7 @@ func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	if file.Size > 5*1024*1024 {
-		return nil, errors.New("上传失败，请调整文件大小！")
+		return nil, errno.ErrCommon.WithMessage("上传失败，请调整文件大小！")
 	}
 	open, err := file.Open()
 	if err != nil {
@@ -110,10 +111,10 @@ func (ctr AnswerController) StartQuestion(ctx *gin.Context) (gin.H, error) {
 	// 更新答题状态
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	return nil, nil
 }
@@ -122,10 +123,10 @@ func (ctr AnswerController) StartQuestion(ctx *gin.Context) (gin.H, error) {
 func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.ID == 0 {
-		return nil, errors.New("未登录，无法访问。")
+		return nil, errno.ErrCommon.WithMessage("未登录，无法访问。")
 	}
 	if !activity.DefaultGDdbService.IsNewUser(user) {
-		return nil, errors.New("本次活动仅限绿喵新用户参加哦～")
+		return nil, errno.ErrCommon.WithMessage("本次活动仅限绿喵新用户参加哦～")
 	}
 	form := &GDDbActivitySchoolForm{}
 	if err := apiutil.BindForm(ctx, form); err != nil {
@@ -138,7 +139,7 @@ func (ctr AnswerController) EndQuestion(ctx *gin.Context) (gin.H, error) {
 	app.Logger.Info("答题完成，保存学校信息end")
 
 	if err != nil {
-		return nil, errors.New("学校信息保存失败")
+		return nil, errno.ErrCommon.WithMessage("学校信息保存失败")
 	}
 	// 检测成团状态
 	err = activity.DefaultGDdbService.CheckActivityStatus(user.ID, form.SchoolId)

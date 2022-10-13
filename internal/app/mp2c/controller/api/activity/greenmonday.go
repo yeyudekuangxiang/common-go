@@ -1,11 +1,11 @@
 package activity
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 )
 
 var DefaultGMController = GMController{}
@@ -37,7 +37,7 @@ func (ctr GMController) ReportInvitationRecord(ctx *gin.Context) (gin.H, error) 
 	err := activity.DefaultGMService.AddInvitationRecord(form.UserId, user.ID)
 	if err != nil {
 		app.Logger.Error(err)
-		return nil, errors.New("建立邀请关系失败,请联系管理员")
+		return nil, errno.ErrCommon.WithMessage("建立邀请关系失败,请联系管理员")
 	}
 	return nil, nil
 }

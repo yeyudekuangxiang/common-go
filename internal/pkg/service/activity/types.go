@@ -1,7 +1,7 @@
 package activity
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/activity"

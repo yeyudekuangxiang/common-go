@@ -2,8 +2,8 @@ package jhx
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"

@@ -2,8 +2,8 @@ package service
 
 import (
 	contextRedis "context"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"

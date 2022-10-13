@@ -110,7 +110,7 @@ func AuthAdmin() gin.HandlerFunc {
 		admin, exists, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || !exists {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
 			return
 		}
 
@@ -130,7 +130,7 @@ func AuthBusinessUser() gin.HandlerFunc {
 		user, err := business.DefaultUserService.GetBusinessUserByToken(token)
 		if err != nil || user == nil {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
 			return
 		}
 
@@ -148,7 +148,7 @@ func mustAuth() gin.HandlerFunc {
 		user, err := service2.DefaultUserService.GetUserByToken(token)
 		if err != nil || user.ID == 0 {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)
@@ -164,7 +164,7 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByToken(token)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth token err", token, err)
-				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation, nil))
+				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
 				return
 			}
 		}
@@ -173,13 +173,13 @@ func MustAuth2() gin.HandlerFunc {
 			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
 			if err != nil || user.ID == 0 {
 				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
+				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithErrMessage(openId), nil))
 				return
 			}
 		}
 
 		if user == nil {
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithCaller(), nil))
 			return
 		}
 		ctx.Set("AuthUser", *user)

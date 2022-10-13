@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"

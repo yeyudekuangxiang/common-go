@@ -1,8 +1,8 @@
 package point
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"

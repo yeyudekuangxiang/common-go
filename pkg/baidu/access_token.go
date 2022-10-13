@@ -2,9 +2,9 @@ package baidu
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	"time"

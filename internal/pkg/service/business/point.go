@@ -1,8 +1,8 @@
 package business
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
@@ -89,7 +89,7 @@ func (srv PointService) SendPointEvCar(param SendPointEvCarParam) (int, error) {
 		return 0, err
 	}
 	if userInfo.ID == 0 {
-		return 0, errno.ErrUserNotFound
+		return 0, errno.ErrUserNotFound.WithCaller()
 	}
 
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeEvCar)
@@ -126,7 +126,7 @@ func (srv PointService) SendPointOnlineMeeting(param SendPointOnlineMeetingParam
 		return 0, err
 	}
 	if userInfo.ID == 0 {
-		return 0, errno.ErrUserNotFound
+		return 0, errno.ErrUserNotFound.WithCaller()
 	}
 
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeOnlineMeeting)
@@ -164,7 +164,7 @@ func (srv PointService) SendPointSaveWaterElectricity(param SendPointSaveWaterEl
 		return 0, err
 	}
 	if userInfo.ID == 0 {
-		return 0, errno.ErrUserNotFound
+		return 0, errno.ErrUserNotFound.WithCaller()
 	}
 
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeSaveWaterElectricity)
@@ -201,7 +201,7 @@ func (srv PointService) SendPointPublicTransport(param SendPointPublicTransportP
 		return 0, err
 	}
 	if userInfo.ID == 0 {
-		return 0, errno.ErrUserNotFound
+		return 0, errno.ErrUserNotFound.WithCaller()
 	}
 
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypePublicTransport)
@@ -242,7 +242,7 @@ func (srv PointService) SendPointOEP(param SendPointOEPParam) (int, error) {
 		return 0, err
 	}
 	if userInfo.ID == 0 {
-		return 0, errno.ErrUserNotFound
+		return 0, errno.ErrUserNotFound.WithCaller()
 	}
 
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeOEP)
@@ -276,7 +276,7 @@ func (srv PointService) SendPointGreenBusinessTrip(param SendPointGreenBusinessT
 		return 0, err
 	}
 	if userInfo.ID == 0 {
-		return 0, errno.ErrUserNotFound
+		return 0, errno.ErrUserNotFound.WithCaller()
 	}
 
 	sceneSetting, err := DefaultCompanyCarbonSceneService.FindCompanySceneSetting(userInfo.BCompanyId, ebusiness.CarbonTypeGreenBusinessTrip)

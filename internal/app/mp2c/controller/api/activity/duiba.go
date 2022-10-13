@@ -1,7 +1,6 @@
 package activity
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/medivhzhan/weapp/v3"
@@ -12,6 +11,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"net/http"
 	"strconv"
 )
@@ -78,7 +78,7 @@ func (ctr ZeroController) GetActivityMiniQR(ctx *gin.Context) error {
 		return err
 	}
 	if form.Password != "greencatniubi123..." {
-		return errors.New("密码错误")
+		return errno.ErrCommon.WithMessage("密码错误")
 	}
 
 	duiBaService := service.NewDuiBaActivityService(context.NewMioContext())
@@ -103,7 +103,7 @@ func (ctr ZeroController) GetActivityMiniQR(ctx *gin.Context) error {
 		return err
 	}
 	if comErr.ErrCode != 0 {
-		return errors.New(strconv.Itoa(comErr.ErrCode) + comErr.ErrMSG)
+		return errno.ErrCommon.WithMessage(strconv.Itoa(comErr.ErrCode) + comErr.ErrMSG)
 	}
 
 	defer res.Body.Close()

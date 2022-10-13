@@ -1,7 +1,7 @@
 package business
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/model/entity/business"
 	brepo "mio/internal/pkg/repository/business"
 )

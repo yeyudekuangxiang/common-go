@@ -468,7 +468,7 @@ func (srv OrderService) SubmitOrderForEvent(param srv_types.SubmitOrderForEventP
 
 func (srv OrderService) SubmitOrderForEventGD(param srv_types.SubmitOrderForEventGDParam) (*srv_types.SubmitOrderForEventResult, error) {
 	if !util2.DefaultLock.Lock("SubmitOrderForEventGD"+param.OpenId, time.Second*10) {
-		return nil, errno.ErrLimit
+		return nil, errno.ErrLimit.WithCaller()
 	}
 	defer util2.DefaultLock.UnLock("SubmitOrderForEventGD" + param.OpenId)
 	wechatServiceOpenId := param.WechatServiceOpenId
@@ -587,7 +587,7 @@ func (srv OrderService) checkEventLimit(userId int64, evId string, limit eevent.
 	d, c, err := limit.Parse()
 	if err != nil {
 		app.Logger.Error(limit, err)
-		return errno.ErrInternalServer
+		return errno.ErrInternalServer.WithCaller()
 	}
 	if d == 0 {
 		return nil

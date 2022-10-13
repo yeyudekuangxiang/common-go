@@ -11,7 +11,7 @@ import (
 	"time"
 )
 import (
-	"errors"
+	"github.com/pkg/errors"
 )
 
 var (

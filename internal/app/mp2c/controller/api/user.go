@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
@@ -106,7 +105,7 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 			"userId": userId,
 		}, err
 	} else {
-		err := errors.New("验证码错误,请重新输入")
+		err := errno.ErrCommon.WithMessage("验证码错误,请重新输入")
 		return gin.H{}, err
 	}
 }
@@ -120,7 +119,7 @@ func (UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
 	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
 		return nil, service.DefaultUserService.BindMobileByYZM(userInfo.ID, form.Mobile)
 	}
-	return nil, errors.New("验证码错误,请重新输入")
+	return nil, errno.ErrCommon.WithMessage("验证码错误,请重新输入")
 }
 
 func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {

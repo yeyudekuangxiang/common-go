@@ -58,11 +58,15 @@ func (e err) Status(status int) err {
 // WithErr 带上err信息
 func (e err) WithErr(err error) err {
 	e.err = err
+	_, f, l, _ := runtime.Caller(1)
+	e.callers = f + ":" + strconv.Itoa(l)
 	return e
 }
 
 // WithMessage 替换默认的提示
 func (e err) WithMessage(message string) err {
+	_, f, l, _ := runtime.Caller(1)
+	e.callers = f + ":" + strconv.Itoa(l)
 	e.message = message
 	return e
 }
@@ -70,6 +74,8 @@ func (e err) WithMessage(message string) err {
 // WithErrMessage 带上err message
 func (e err) WithErrMessage(err string) err {
 	e.err = errors.New(err)
+	_, f, l, _ := runtime.Caller(1)
+	e.callers = f + ":" + strconv.Itoa(l)
 	return e
 }
 
@@ -108,17 +114,20 @@ func DecodeErr(e error) (httpStatus int, code int, message string) {
 	if e == nil {
 		return status(OK.status), OK.Code(), OK.Message()
 	}
-
 	if decodeErr, ok := e.(err); ok {
+		logerr(e, decodeErr.callers)
 		if config.Config.App.Debug && decodeErr.err != nil {
-			logerr(decodeErr.err, decodeErr.callers)
 			return status(decodeErr.status), decodeErr.Code(), decodeErr.err.Error()
 		}
 		return status(decodeErr.status), decodeErr.Code(), decodeErr.Message()
 	}
+	if _, ok := e.(fmt.Formatter); ok {
+		logerr(e, fmt.Sprintf("%+v", e))
+	} else {
+		logerr(e, "")
+	}
 
 	if config.Config.App.Debug {
-		logerr(e, "")
 		return status(ErrInternalServer.status), ErrInternalServer.Code(), e.Error()
 	}
 	return status(ErrInternalServer.status), ErrInternalServer.Code(), ErrInternalServer.Error()

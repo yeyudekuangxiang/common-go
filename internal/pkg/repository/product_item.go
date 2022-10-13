@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"

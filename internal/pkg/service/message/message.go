@@ -2,11 +2,11 @@ package message
 
 import (
 	contextRedis "context"
-	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/request"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/track"

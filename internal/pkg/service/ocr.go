@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"

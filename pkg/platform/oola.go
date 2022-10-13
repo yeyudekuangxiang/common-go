@@ -2,8 +2,8 @@ package platform
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/go-redis/redis/v8"
+	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"

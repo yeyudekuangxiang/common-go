@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"

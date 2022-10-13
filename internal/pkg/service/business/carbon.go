@@ -1,8 +1,8 @@
 package business
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/config"
 	"mio/internal/pkg/core/app"
