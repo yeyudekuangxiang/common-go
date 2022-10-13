@@ -154,7 +154,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			entity.POINT_SYSTEM_ADD:             "系统补发",
 		}
 		_, ok := types[dto.Type]
-		if ok && (point.Balance > 0) {
+		if ok && (dto.ChangePoint > 0) {
 			//发小程序订阅消息
 			message := messageSrv.MiniChangePointTemplate{
 				Point:    dto.ChangePoint,
@@ -170,32 +170,53 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		}
 
 		//同步到志愿汇
-		if dto.ChangePoint > 0 {
-			sendType := "0"
-			switch dto.Type {
-			case entity.POINT_QUIZ:
-				sendType = "1"
-				break
-			case entity.POINT_STEP:
-				sendType = "2"
-				break
+		if dto.ChangePoint >= 0 {
+			//积分变动提醒
+			typeZyh := map[entity.PointTransactionType]string{
+				entity.POINT_STEP:                    "步行",
+				entity.POINT_COFFEE_CUP:              "自带咖啡杯",
+				entity.POINT_BIKE_RIDE:               "骑行",
+				entity.POINT_ECAR:                    "答题活动",
+				entity.POINT_QUIZ:                    "答题活动",
+				entity.POINT_JHX:                     "金华行",
+				entity.POINT_POWER_REPLACE:           "电车换电",
+				entity.POINT_DUIBA_INTEGRAL_RECHARGE: "兑吧虚拟商品充值积分",
+				entity.POINT_RECYCLING_CLOTHING:      "旧物回收 oola衣物鞋帽",
+				entity.POINT_RECYCLING_DIGITAL:       "旧物回收 oola数码",
+				entity.POINT_RECYCLING_APPLIANCE:     "旧物回收 oola家电",
+				entity.POINT_RECYCLING_BOOK:          "旧物回收 oola书籍",
+				entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
+				entity.POINT_FAST_ELECTRICITY:        "快电",
+				entity.POINT_REDUCE_PLASTIC:          "环保减塑",
 			}
-			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
-			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
-			if messageCode != "30000" {
-				//发送结果记录到日志
-				msgErr := ""
-				if messageErr != nil {
-					msgErr = messageErr.Error()
+			_, zyhOk := typeZyh[dto.Type]
+			if zyhOk {
+				sendType := "0"
+				switch dto.Type {
+				case entity.POINT_QUIZ:
+					sendType = "1"
+					break
+				case entity.POINT_STEP:
+					sendType = "2"
+					break
 				}
-				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
-					Openid:         dto.OpenId,
-					PointType:      dto.Type,
-					Value:          dto.ChangePoint,
-					ResultCode:     messageCode,
-					AdditionalInfo: msgErr,
-					TransactionId:  dto.BizId,
-				})
+				serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
+				messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
+				if messageCode != "30000" {
+					//发送结果记录到日志
+					msgErr := ""
+					if messageErr != nil {
+						msgErr = messageErr.Error()
+					}
+					serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+						Openid:         dto.OpenId,
+						PointType:      dto.Type,
+						Value:          dto.ChangePoint,
+						ResultCode:     messageCode,
+						AdditionalInfo: msgErr,
+						TransactionId:  dto.BizId,
+					})
+				}
 			}
 		}
 
