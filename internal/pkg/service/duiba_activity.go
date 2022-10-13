@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -13,6 +12,7 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -45,7 +45,7 @@ func (srv DuiBaActivityService) Create(dto srv_types.CreateDuiBaActivityDTO) err
 		return err
 	}
 	if banner.ID != 0 {
-		return errors.New("activityId已存在")
+		return errno.ErrCommon.WithMessage("activityId已存在")
 	}
 	bannerDo := entity.DuiBaActivity{
 		Status:    entity.DuiBaActivityStatusYes,
@@ -65,7 +65,7 @@ func (srv DuiBaActivityService) Update(dto srv_types.UpdateDuiBaActivityDTO) err
 		return err
 	}
 	if info.ID == 0 {
-		return errors.New("activityId不存在")
+		return errno.ErrCommon.WithMessage("activityId不存在")
 	}
 	//是否存在
 	one, errInfo := srv.repo.GetExistOne(repotypes.GetDuiBaActivityExistDO{ActivityId: dto.ActivityId, NotId: dto.Id})
@@ -73,7 +73,7 @@ func (srv DuiBaActivityService) Update(dto srv_types.UpdateDuiBaActivityDTO) err
 		return errInfo
 	}
 	if one.ID != 0 {
-		return errors.New("activityId已存在")
+		return errno.ErrCommon.WithMessage("activityId已存在")
 	}
 	do := entity.DuiBaActivity{
 		Status:    entity.DuiBaActivityStatusYes,
@@ -106,7 +106,7 @@ func (srv DuiBaActivityService) Delete(dto srv_types.DeleteDuiBaActivityDTO) err
 		return err
 	}
 	if info.ID == 0 {
-		return errors.New("activityId不存在")
+		return errno.ErrCommon.WithMessage("activityId不存在")
 	}
 	do := repotypes.DeleteDuiBaActivityDO{
 		UpdatedAt: time.Now(),
@@ -124,7 +124,7 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 		return nil, err
 	}
 	if info.ID == 0 {
-		return nil, errors.New("activityId不存在")
+		return nil, errno.ErrCommon.WithMessage("activityId不存在")
 	}
 	//生成兑吧页面路径
 	ActivityAppPath := srv.GetActivityAppPath(info.ActivityId, info.Cid, info.IsShare, info.IsPhone)

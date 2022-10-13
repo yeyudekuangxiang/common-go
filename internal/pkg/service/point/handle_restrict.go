@@ -2,11 +2,11 @@ package point
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func (c *defaultClientHandle) checkTimes(times int64) error {
 		return err
 	}
 	if count >= times {
-		return errors.New("超过当日次数")
+		return errno.ErrCommon.WithMessage("超过当日次数")
 	}
 	return nil
 }
@@ -53,7 +53,7 @@ func (c *defaultClientHandle) checkTimes2() error {
 		return nil
 	}
 	if result.CurrentCount >= result.MaxCount {
-		return errors.New("超过当日次数")
+		return errno.ErrCommon.WithMessage("超过当日次数")
 	}
 	return nil
 }
@@ -71,7 +71,7 @@ func (c *defaultClientHandle) checkMaxPoint(maxPoint int64, currPoint int64) err
 		point += item["value"].(int64)
 	}
 	if maxPoint-point <= 0 {
-		return errors.New("今日积分获取已达到上限")
+		return errno.ErrCommon.WithMessage("今日积分获取已达到上限")
 	}
 	if currPoint+point >= maxPoint {
 		c.clientHandle.point = maxPoint
@@ -84,7 +84,7 @@ func (c *defaultClientHandle) checkMaxPoint(maxPoint int64, currPoint int64) err
 // 检查积分是否足够
 func (c *defaultClientHandle) checkUsrPoints(num int64) error {
 	if c.additional.changeType == "dec" && num-c.clientHandle.point <= 0 {
-		return errors.New("积分不足")
+		return errno.ErrCommon.WithMessage("积分不足")
 	}
 
 	return nil
@@ -93,14 +93,14 @@ func (c *defaultClientHandle) checkUsrPoints(num int64) error {
 // 幂等
 func (c *defaultClientHandle) checkIdempotency() error {
 	if !util.DefaultLock.Lock(fmt.Sprintf("%s", "collect"+"_"+c.clientHandle.OpenId), time.Second*5) {
-		return errors.New("操作频率过快,请稍后再试")
+		return errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	return nil
 }
 
 func (c *defaultClientHandle) checkOrderId(orderId string) error {
 	if orderId == "" {
-		return errors.New("参数错误:订单号为空")
+		return errno.ErrCommon.WithMessage("参数错误:订单号为空")
 	}
 	result, err := c.plugin.transaction.FindOrder(orderId)
 	if err != nil {
@@ -109,5 +109,5 @@ func (c *defaultClientHandle) checkOrderId(orderId string) error {
 	if result.ID == 0 {
 		return nil
 	}
-	return errors.New("订单号已经存在")
+	return errno.ErrCommon.WithMessage("订单号已经存在")
 }

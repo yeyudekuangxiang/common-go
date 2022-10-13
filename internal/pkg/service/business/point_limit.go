@@ -2,7 +2,6 @@ package business
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
@@ -36,7 +35,7 @@ func (srv PointLimitService) checkLimit(userId int64, t ebusiness.PointType) (in
 		return 0, 0, false, err
 	}
 	if carbonScene.ID == 0 {
-		return 0, 0, false, errors.New("未查询到此低碳场景")
+		return 0, 0, false, errno.ErrCommon.WithMessage("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
 		CompanyId: userInfo.BCompanyId,
@@ -45,7 +44,7 @@ func (srv PointLimitService) checkLimit(userId int64, t ebusiness.PointType) (in
 		return 0, 0, false, err
 	}
 	if companyCarbonScene.ID == 0 {
-		return 0, 0, false, errors.New("未查询到此低碳场景")
+		return 0, 0, false, errno.ErrCommon.WithMessage("未查询到此低碳场景")
 	}
 
 	limitLog, err := DefaultPointLimitLogService.FindLimitLog(FindPointLimitLogParam{
@@ -98,7 +97,7 @@ func (srv PointLimitService) CheckLimitAndUpdate(userId int64, value int, t ebus
 		return nil, 0, err
 	}
 	if !ok {
-		return nil, 0, errors.New("已经达到当日最大限制")
+		return nil, 0, errno.ErrCommon.WithMessage("已经达到当日最大限制")
 	}
 
 	if value >= leftPoint {

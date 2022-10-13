@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -100,7 +99,7 @@ func (srv OaService) AutoLoginCallback(code string, state string) (string, error
 		app.Logger.Error(err)
 	}
 	if dataStr == "" {
-		return "", errors.New("数据异常")
+		return "", errno.ErrCommon.WithMessage("数据异常")
 	}
 	data := map[string]string{}
 	err = json.Unmarshal([]byte(dataStr), &data)
@@ -132,7 +131,7 @@ func (srv OaService) AutoLoginCallback(code string, state string) (string, error
 }
 func (srv OaService) AutoLogin(redirectUri string, state string) (string, error) {
 	if !srv.CheckAuthWhiteList(srv.Platform, redirectUri) {
-		return "", errors.New("跳转地址未在白名单内")
+		return "", errno.ErrCommon.WithMessage("跳转地址未在白名单内")
 	}
 
 	setting := config.FindOaSetting(srv.Platform)

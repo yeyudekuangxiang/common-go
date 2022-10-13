@@ -2,11 +2,11 @@ package service
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/common/tool/encrypt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	util2 "mio/internal/pkg/util/encrypt"
+	"mio/pkg/errno"
 	"sort"
 	"strings"
 )
@@ -61,7 +61,7 @@ func (srv BdSceneService) CheckWhiteList(ip, ch string) error {
 				return nil
 			}
 		}
-		return errors.New("非白名单ip")
+		return errno.ErrCommon.WithMessage("非白名单ip")
 	}
 	return nil
 }

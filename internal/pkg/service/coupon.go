@@ -73,7 +73,7 @@ func (r CouponService) RetrieveUnassignedCoupon(couponTypeId string) (*coupon.Co
 
 		if cp.ID == 0 {
 			app.Logger.Error("兑换券存量不足", couponTypeId)
-			//return errors.New("兑换券存量不足")
+			//return errno.ErrCommon.WithMessage("兑换券存量不足")
 			return nil
 		}
 		cp.UpdateTime = model.NewTime()
@@ -108,15 +108,15 @@ func (r CouponService) RedeemCouponWithTransaction(param RedeemCouponWithTransac
 		CouponId: param.CouponId,
 	})
 	if coupon.ID == 0 {
-		return nil, errors.New("券码不存在")
+		return nil, errno.ErrCommon.WithMessage("券码不存在")
 	}
 
 	if !r.IsActiveCoupon(coupon.StartTime.Time, coupon.EndTime.Time) {
-		return nil, errors.New("不在券码有效期内")
+		return nil, errno.ErrCommon.WithMessage("不在券码有效期内")
 	}
 
 	if coupon.Redeemed {
-		return nil, errors.New("券码已被兑换")
+		return nil, errno.ErrCommon.WithMessage("券码已被兑换")
 	}
 
 	coupon.Openid = param.OpenId
@@ -130,7 +130,7 @@ func (r CouponService) RedeemCouponWithTransaction(param RedeemCouponWithTransac
 		return nil, err
 	}
 	if contentType.ID == 0 {
-		return nil, errors.New("未找到券码类型")
+		return nil, errno.ErrCommon.WithMessage("未找到券码类型")
 	}
 
 	orderId := ""
@@ -146,7 +146,7 @@ func (r CouponService) RedeemCouponWithTransaction(param RedeemCouponWithTransac
 		}
 		orderId = order.OrderId
 	} else {
-		return nil, errors.New("改兑换码为第三方伙伴的券码哦～请去对应的地方兑换")
+		return nil, errno.ErrCommon.WithMessage("改兑换码为第三方伙伴的券码哦～请去对应的地方兑换")
 	}
 
 	err = r.r.Save(&coupon)

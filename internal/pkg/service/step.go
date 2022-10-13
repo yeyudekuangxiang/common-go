@@ -3,7 +3,6 @@ package service
 import (
 	contextRedis "context"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -15,6 +14,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -143,7 +143,7 @@ func (srv StepService) formatWeeklyHistoryStepList(list []entity.StepHistory) []
 // RedeemPointFromPendingSteps 领取步行积分
 func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId), time.Second*5) {
-		return 0, errors.New("操作频繁,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("操作频繁,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId))
 
@@ -190,7 +190,7 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 // RedeemCarbonFromPendingSteps 领取步行碳量
 func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip string) (float64, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemCarbonFromPendingSteps%s", openId), time.Second*5) {
-		return 0, errors.New("操作频繁,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("操作频繁,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("RedeemCarbonFromPendingSteps%s", openId))
 
@@ -208,7 +208,7 @@ func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip
 	addStepFloat, _ := addStep.Float64()
 	errRedis := app.Redis.ZIncrBy(contextRedis.Background(), redisKey, addStepFloat, UserIdString).Err()
 	if errRedis != nil {
-		return 0, errors.New("步数更新失败")
+		return 0, errno.ErrCommon.WithMessage("步数更新失败")
 	}
 	//发碳
 	//int64转float64

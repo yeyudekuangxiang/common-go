@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
@@ -81,13 +80,13 @@ func (srv OCRService) OCRForGm(openid string, risk int, src string) error {
 		}
 	}
 	if orderNo == "" || fee == "" {
-		return errors.New("无法识别此账单,请重新上传,谢谢")
+		return errno.ErrCommon.WithMessage("无法识别此账单,请重新上传,谢谢")
 	}
 	fmt.Println("素食打卡账单:" + orderNo + ":" + fee)
 	cmd := app.Redis.SetNX(context.Background(), config.RedisKey.Lock+orderNo, "a", 36500*time.Second)
 	if !cmd.Val() {
 		fmt.Println(config.RedisKey.Lock + orderNo + "重复扫描素食打卡")
-		return errors.New("重复扫描素食打卡账单")
+		return errno.ErrCommon.WithMessage("重复扫描素食打卡账单")
 	}
 
 	pointTranService := NewPointService(mioctx.NewMioContext())
@@ -112,7 +111,7 @@ func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 		return nil, err
 	}
 	if !rest.IsSuccess() {
-		return nil, errors.New(rest.ErrorMsg)
+		return nil, errno.ErrCommon.WithMessage(rest.ErrorMsg)
 	}
 
 	results := make([]string, 0)

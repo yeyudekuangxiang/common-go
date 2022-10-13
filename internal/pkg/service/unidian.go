@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util/unidian"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func (u UnidianService) SendPrize(typeId string, mobile string, activityType str
 	cmd := app.Redis.SetNX(context.Background(), activityType+mobile, "a", 3650*time.Second)
 	if !cmd.Val() {
 		fmt.Println(activityType + mobile + "重复充值")
-		return errors.New("正在充值,请稍等")
+		return errno.ErrCommon.WithMessage("正在充值,请稍等")
 	}
 	unidian.CouponOfUnidian(typeId, mobile, activityType+mobile)
 	return nil

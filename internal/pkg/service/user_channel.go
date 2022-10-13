@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 )
 
 var DefaultUserChannelService = NewUserChannelService(repository.DefaultUserChannelRepository)
@@ -21,12 +21,12 @@ func (srv UserChannelService) Create(param *entity.UserChannel) error {
 	channel, err := srv.getByCid(param.Cid)
 	if err == nil {
 		if channel.Cid != 0 {
-			return errors.New("渠道已存在，不能重复创建")
+			return errno.ErrCommon.WithMessage("渠道已存在，不能重复创建")
 		}
 	}
 	ch := srv.r.FindByCode(repository.FindUserChannelBy{Cid: param.Cid, Code: param.Code})
 	if ch.Code != "" {
-		return errors.New("code已存在，换一个吧")
+		return errno.ErrCommon.WithMessage("code已存在，换一个吧")
 	}
 	return srv.r.Create(param)
 }
@@ -39,11 +39,11 @@ func (srv UserChannelService) Save(param *entity.UserChannel) error {
 func (srv UserChannelService) UpdateUserChannel(params *entity.UserChannel) error {
 	channel := srv.r.FindByCid(repository.FindUserChannelBy{Cid: params.Cid})
 	if channel.Cid == 0 {
-		return errors.New("渠道不存在，不能修改")
+		return errno.ErrCommon.WithMessage("渠道不存在，不能修改")
 	}
 	ch := srv.r.FindByCode(repository.FindUserChannelBy{Cid: params.Cid, Code: params.Code})
 	if ch.Code != "" {
-		return errors.New("code已存在")
+		return errno.ErrCommon.WithMessage("code已存在")
 	}
 	channel.Code = params.Code
 	channel.Name = params.Name
@@ -79,7 +79,7 @@ func (srv UserChannelService) getByCid(cid int64) (channel *entity.UserChannel, 
 		Cid: cid,
 	})
 	if ch.Cid == 0 {
-		return nil, errors.New("渠道不存在")
+		return nil, errno.ErrCommon.WithMessage("渠道不存在")
 	}
 	return ch, nil
 }
@@ -90,7 +90,7 @@ func (srv UserChannelService) GetChannelInfoByCid(cid int64) (channel *entity.Us
 		Cid: cid,
 	})
 	if ch.Cid == 0 {
-		return nil, errors.New("渠道不存在")
+		return nil, errno.ErrCommon.WithMessage("渠道不存在")
 	}
 	return ch, nil
 }

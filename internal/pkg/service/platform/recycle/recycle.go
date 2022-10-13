@@ -3,7 +3,6 @@ package recycle
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -147,7 +146,7 @@ func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secre
 func (srv RecycleService) GetMaxPointByMonth(typeName entity.PointTransactionType) (int64, error) {
 	point := srv.getMaxPointByMonth(typeName)
 	if point == 0 {
-		return 0, errors.New("")
+		return 0, errno.ErrCommon.WithMessage("")
 	}
 	return point, nil
 }
@@ -176,7 +175,7 @@ func (srv RecycleService) GetPoint(typeName, qua string) (int64, error) {
 	num, _ := strconv.ParseFloat(qua, 64)
 	point := srv.getPoint(typeName, num)
 	if point == 0 {
-		return 0, errors.New("未匹配到" + typeName + "积分规则")
+		return 0, errno.ErrCommon.WithMessage("未匹配到" + typeName + "积分规则")
 	}
 	return point, nil
 }
@@ -185,7 +184,7 @@ func (srv RecycleService) GetCo2(typeName, qua string) (float64, error) {
 	num, _ := strconv.ParseFloat(qua, 64)
 	co2 := srv.getCo2(typeName, num)
 	if co2 == 0 {
-		return 0, errors.New("未匹配到" + typeName + "减碳量规则")
+		return 0, errno.ErrCommon.WithMessage("未匹配到" + typeName + "减碳量规则")
 	}
 	return co2, nil
 }
@@ -195,7 +194,7 @@ func (srv RecycleService) checkLimit(openId string, typeName string) error {
 	timeStr := time.Now().Format("20060102")
 	limit, _ := app.Redis.Get(srv.ctx, openId+typeName+timeStr).Int()
 	if limit >= num {
-		return errors.New(typeName + "回收积分已达到本日次数上限")
+		return errno.ErrCommon.WithMessage(typeName + "回收积分已达到本日次数上限")
 	}
 	app.Redis.Set(srv.ctx, openId+typeName+timeStr, num, time.Hour*24)
 	return nil
@@ -241,7 +240,7 @@ func (srv RecycleService) checkOrder(openId, orderNo string) error {
 		Note:   orderNo,
 	})
 	if one.ID != 0 {
-		return errors.New("重复订单")
+		return errno.ErrCommon.WithMessage("重复订单")
 	}
 	return nil
 }

@@ -53,7 +53,7 @@ func (srv BadgeService) GenerateCode(certificateId string) (string, error) {
 		return "", err
 	}
 	if cert.ID == 0 {
-		return "", errors.New("证书不存在")
+		return "", errno.ErrCommon.WithMessage("证书不存在")
 	}
 	switch cert.Type {
 	case entity.CertTypeRandom:
@@ -172,10 +172,10 @@ func (srv BadgeService) GetUploadOldBadgeSetting(badgeId int64) (*srv_types.Uplo
 		return nil, err
 	}
 	if badge.ID == 0 || badge.ProductItemId == "" {
-		return nil, errors.New("获取证书信息失败,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("获取证书信息失败,请稍后再试")
 	}
 	if badge.ImageUrl != "" {
-		return nil, errors.New("证书已存在")
+		return nil, errno.ErrCommon.WithMessage("证书已存在")
 	}
 
 	ev, err := event.DefaultEventService.FindEvent(event.FindEventParam{
@@ -186,7 +186,7 @@ func (srv BadgeService) GetUploadOldBadgeSetting(badgeId int64) (*srv_types.Uplo
 	}
 
 	if ev.ID == 0 {
-		return nil, errors.New("获取证书信息失败,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("获取证书信息失败,请稍后再试")
 	}
 
 	setting, err := event.DefaultEventTemplateService.ParseSetting(ev.EventTemplateType, ev.TemplateSetting)

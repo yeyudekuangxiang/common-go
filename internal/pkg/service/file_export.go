@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 )
 
 var DefaultFileExportService = FileExportService{repo: repository.DefaultFileExportRepository}
@@ -28,7 +28,7 @@ func (srv FileExportService) Add(param AddFileExportParam) (*entity.FileExport, 
 func (srv FileExportService) Update(id int64, param UpdateFileExportParam) (*entity.FileExport, error) {
 	fileExport := srv.repo.FindById(id)
 	if fileExport.ID == 0 {
-		return nil, errors.New("导出任务不存在")
+		return nil, errno.ErrCommon.WithMessage("导出任务不存在")
 	}
 	fileExport.Url = param.Url
 	fileExport.Status = param.Status

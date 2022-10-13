@@ -6,11 +6,11 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/request"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -36,7 +36,7 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 	if templateSendCount >= template.SendMixCount() {
 		zhuGeAttr["错误码"] = -1
 		zhuGeAttr["错误信息"] = "同一模板每人每天最多接收1条消息"
-		return -1, errors.New("同一模板每人每天最多接收1条消息")
+		return -1, errno.ErrCommon.WithMessage("同一模板每人每天最多接收1条消息")
 	}
 
 	/*if userSendCount >= 2 {

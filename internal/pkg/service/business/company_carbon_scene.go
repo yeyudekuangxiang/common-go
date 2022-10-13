@@ -1,9 +1,9 @@
 package business
 
 import (
-	"github.com/pkg/errors"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
+	"mio/pkg/errno"
 )
 
 var DefaultCompanyCarbonSceneService = CompanyCarbonSceneService{repo: rbusiness.DefaultCompanyCarbonSceneRepository}
@@ -27,7 +27,7 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 		return nil, err
 	}
 	if carbonScene.ID == 0 {
-		return nil, errors.New("未查询到此低碳场景")
+		return nil, errno.ErrCommon.WithMessage("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
 		CompanyId:     companyId,
@@ -37,7 +37,7 @@ func (srv CompanyCarbonSceneService) FindCompanySceneSetting(companyId int, carb
 		return nil, err
 	}
 	if companyCarbonScene.ID == 0 {
-		return nil, errors.New("未查询到此低碳场景")
+		return nil, errno.ErrCommon.WithMessage("未查询到此低碳场景")
 	}
 
 	return &CompanySceneSetting{

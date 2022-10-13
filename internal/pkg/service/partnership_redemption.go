@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -55,7 +55,7 @@ func (srv PartnershipRedemptionService) ProcessPromotionInformation(openId strin
 				return nil, err
 			}
 			if unSendCoupon.ID == 0 {
-				return nil, errors.New("兑换券存量不足")
+				return nil, errno.ErrCommon.WithMessage("兑换券存量不足")
 			}
 
 			app.Logger.Info("获取一张未发放的优惠券", openId, unSendCoupon.CouponTypeId, entity.OrderTypeRedeem)
