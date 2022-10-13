@@ -1,7 +1,6 @@
 package open
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
@@ -127,12 +126,14 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
 	}
+
 	ctx := context.NewMioContext()
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
 		return nil, errors.New("渠道查询失败")
 	}
+
 	//白名单验证
 	ip := c.ClientIP()
 	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
@@ -146,35 +147,31 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	sign := form.Sign
 	delete(params, "sign")
+
 	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errors.New("sign:" + form.Sign + " 验证失败")
 	}
 
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-	})
-
 	//查重
-	transService := service.NewPointTransactionService(ctx)
+	PointTransService := service.NewPointTransactionService(ctx)
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
-	by, err := transService.FindBy(repository.FindPointTransactionBy{
+	by, err := PointTransService.FindBy(repository.FindPointTransactionBy{
 		Type: string(typeString),
 		Note: form.PlatformKey + "#" + form.TradeNo,
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
 
 	if by.ID != 0 {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
+		app.Logger.Errorf("重复提交订单: %v", form)
+		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
 	//预加积分
@@ -184,26 +181,27 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
 		Point:          point,
-		OpenId:         sceneUser.OpenId,
 		Status:         1,
-		Mobile:         sceneUser.Phone,
 		Tradeno:        form.TradeNo,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
+
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
+
 	return gin.H{}, nil
 }
 
 // GetPrePointList 获取预加积分列表
-func (receiver PlatformController) GetPrePointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
-	return nil, 0, nil
+func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error) {
+
+	return nil, nil
 }
 
 // CollectPoint 收集预加积分
-func (receiver PlatformController) CollectPoint(sign string, params map[string]string) (int64, error) {
+func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 
 	////减碳量
 	//fromString, _ := decimal.NewFromString(params["amount"])
@@ -221,5 +219,5 @@ func (receiver PlatformController) CollectPoint(sign string, params map[string]s
 	//		app.Logger.Errorf("预加积分 err:%s", err.Error())
 	//	}
 	//}
-	return 0, nil
+	return nil, nil
 }
