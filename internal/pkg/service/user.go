@@ -279,7 +279,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 
 	if err != nil {
 		app.Logger.Errorf("BindPhoneByCode error:%s", err.Error())
-		return err
+		return errno.ErrCommon
 	}
 	if phoneResult.ErrCode != 0 {
 		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
@@ -325,7 +325,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
 	//检查重复绑定 特殊用户有已绑定的账号
 	if ok && userByMobile.OpenId != userInfo.OpenId && specialUser.ID == 0 {
-		app.Logger.Errorf("bind user: %s; old user: %s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, specialUser.ID)
+		app.Logger.Errorf("bind user: %s; old user: %s, bind mobile:%s, binding mobile:%s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, userByMobile.PhoneNumber, userInfo.PhoneNumber, specialUser.ID)
 		return errno.ErrCommon.WithMessage("该号码已绑定")
 	}
 	//更新特殊用户的数据

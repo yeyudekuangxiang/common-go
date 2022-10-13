@@ -28,14 +28,15 @@ var (
 
 	ErrRecordNotFound  = err{code: 20100, message: "数据异常"}   // ErrRecordNotFound 数据库错误
 	ErrChannelNotFound = err{code: 20101, message: "渠道数据异常"} // ErrChannelNotFound 渠道数据异常
-	ErrChannelExisting = err{code: 20102, message: "数据已存在"}  // ErrChannelExisting 数据已存在
+	ErrExisting        = err{code: 20102, message: "数据已存在"}  // ErrExisting 数据已存在
 
 	ErrAuth       = err{code: 20201, message: "未登陆"}  // ErrAuth 未登录
 	ErrValidation = err{code: 20202, message: "验证失败"} // ErrValidation 验证失败
 
-	ErrUserNotFound  = err{code: 20301, message: "未查询到用户信息"} // ErrUserNotFound 未查询到用户信息
-	ErrNotBindMobile = err{code: 20303, message: "未授权手机号码"}  // ErrNotBindMobile 未绑定手机号
-	ErrBindMobile    = err{code: 20304, message: "绑定手机号码失败"} // ErrBindMobile 绑定手机号时异常
+	ErrUserNotFound       = err{code: 20301, message: "未查询到用户信息"} // ErrUserNotFound 未查询到用户信息
+	ErrNotBindMobile      = err{code: 20303, message: "未授权手机号码"}  // ErrNotBindMobile 未绑定手机号
+	ErrBindMobile         = err{code: 20304, message: "绑定手机号码失败"} // ErrBindMobile 绑定手机号时异常
+	ErrBindRecordNotFound = err{code: 20305, message: "未找到绑定关系"}
 
 	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
 )

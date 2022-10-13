@@ -12,7 +12,7 @@ type BdScenePrePointRepository struct {
 	DB *gorm.DB
 }
 
-func (repo BdScenePrePointRepository) FindByPlatformUser(memberId string, platformKey string) ([]entity.BdScenePrePoint, int64, error) {
+func (repo BdScenePrePointRepository) FindByPlatformUser(platformKey, memberId string) ([]entity.BdScenePrePoint, int64, error) {
 	var item []entity.BdScenePrePoint
 	var total int64
 	err := repo.DB.
