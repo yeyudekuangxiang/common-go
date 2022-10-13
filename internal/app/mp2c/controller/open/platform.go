@@ -37,11 +37,11 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	if user.ID == 0 {
-		return nil, errors.New("用户未登陆")
+		return nil, errno.ErrCommon.WithMessage("用户未登陆")
 	}
 
 	//绑定
@@ -80,7 +80,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 	delete(dst, "sign")
 	//check sign

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3/phonenumber"
-	"github.com/pkg/errors"
 	"math/rand"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -175,7 +174,7 @@ func (u UserService) GetUserBy(by repository.GetUserBy) (*entity.User, error) {
 }
 func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.User, error) {
 	if mobile == "" {
-		return nil, errors.New("手机号不能为空")
+		return nil, errno.ErrCommon.WithMessage("手机号不能为空")
 	}
 	user := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{
 		Mobile: mobile,
@@ -198,18 +197,18 @@ func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.Use
 // BindMobileByYZM 绑定手机号
 func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
 	if mobile == "" {
-		return errors.New("手机号不能为空")
+		return errno.ErrCommon.WithMessage("手机号不能为空")
 	}
 	userBy := repository.DefaultUserRepository.GetUserBy(repository.GetUserBy{Mobile: mobile})
 	if userBy.ID != 0 {
-		return errors.New("该号码已被绑定，请更换号码重新绑定")
+		return errno.ErrCommon.WithMessage("该号码已被绑定，请更换号码重新绑定")
 	}
 	user := repository.DefaultUserRepository.GetUserById(userId)
 	if user.ID == 0 {
-		return errors.New("未查到用户信息")
+		return errno.ErrCommon.WithMessage("未查到用户信息")
 	}
 	if user.PhoneNumber != "" {
-		return errors.New("您已绑定号码，请勿重复操作")
+		return errno.ErrCommon.WithMessage("您已绑定号码，请勿重复操作")
 	}
 	user.PhoneNumber = mobile
 	return repository.DefaultUserRepository.Save(&user)
@@ -261,7 +260,7 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
-		return errors.New("未查到用户信息")
+		return errno.ErrCommon.WithMessage("未查到用户信息")
 	}
 
 	var phoneResult *phonenumber.GetPhoneNumberResponse
@@ -324,7 +323,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	//检查重复绑定 特殊用户有已绑定的账号
 	if ok && userByMobile.OpenId != userInfo.OpenId && specialUser.ID == 0 {
 		app.Logger.Errorf("bind user: %s; old user: %s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, specialUser.ID)
-		return errors.New("该号码已绑定")
+		return errno.ErrCommon.WithMessage("该号码已绑定")
 	}
 	//更新特殊用户的数据
 	if ok && specialUser.ID != 0 && !u.checkOpenId(userByMobile.OpenId) && specialUser.Status == 0 {
@@ -353,7 +352,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	ret := u.r.Save(&userInfo)
 
 	if invitedBy != "" && userInfo.Risk > 2 {
-		return errors.New("很遗憾您暂无法参与活动")
+		return errno.ErrCommon.WithMessage("很遗憾您暂无法参与活动")
 	}
 	//有邀请，并且没有发放奖励，不是黑产用户，给用户发放奖励
 	inviteInfo := u.rInvite.GetInviteNoReward(userInfo.OpenId)
@@ -378,7 +377,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 	userInfo := u.r.GetUserById(param.UserId)
 	if userInfo.ID == 0 {
-		return errors.New("未查到用户信息")
+		return errno.ErrCommon.WithMessage("未查到用户信息")
 	}
 
 	session, err := DefaultSessionService.FindSessionByOpenId(userInfo.OpenId)

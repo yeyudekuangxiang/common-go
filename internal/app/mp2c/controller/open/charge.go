@@ -3,7 +3,6 @@ package open
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -17,6 +16,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -36,20 +36,20 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 	//白名单验证
 	ip := c.ClientIP()
 	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.Ch); err != nil {
 		app.Logger.Info("校验白名单失败", ip)
-		return nil, errors.New("非白名单ip:" + ip)
+		return nil, errno.ErrCommon.WithMessage("非白名单ip:" + ip)
 	}
 
 	//校验sign
 	if scene.Ch != "lvmiao" {
 		if !service.DefaultBdSceneService.CheckSign(form.Mobile, form.OutTradeNo, form.TotalPower, form.Sign, scene) {
 			app.Logger.Info("校验sign失败", form)
-			return nil, errors.New("sign:" + form.Sign + " 验证失败")
+			return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 		}
 	}
 
@@ -62,13 +62,13 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	//用户验证
 	if userInfo.ID <= 0 {
 		fmt.Println("charge 未找到用户 ", form)
-		return nil, errors.New("未找到用户")
+		return nil, errno.ErrCommon.WithMessage("未找到用户")
 	}
 
 	//风险登记验证
 	if userInfo.Risk >= 2 {
 		fmt.Println("用户风险等级过高 ", form)
-		return nil, errors.New("账户风险等级过高")
+		return nil, errno.ErrCommon.WithMessage("账户风险等级过高")
 	}
 
 	//查重
@@ -87,7 +87,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if by.ID != 0 {
 		fmt.Println("charge 重复提交订单", form)
 		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
+		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
 	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {

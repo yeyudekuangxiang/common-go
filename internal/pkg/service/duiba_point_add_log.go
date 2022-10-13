@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 )
 
 var DefaultDuiBaPointAddLogService = DuiBaPointAddLogService{repo: repository.DefaultDuiBaPointAddLogRepository}
@@ -30,7 +30,7 @@ func (srv DuiBaPointAddLogService) CreateLog(add CreateDuiBaPointAddLog) (*entit
 func (srv DuiBaPointAddLogService) UpdateLogTransaction(logId int64, transactionId string) error {
 	log := srv.repo.FindByID(logId)
 	if log.ID == 0 {
-		return errors.New("log 不存在")
+		return errno.ErrCommon.WithMessage("log 不存在")
 	}
 	log.TransactionId = transactionId
 	return srv.repo.Save(&log)

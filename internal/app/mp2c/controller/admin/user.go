@@ -3,13 +3,13 @@ package admin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/wxamp"
+	"mio/pkg/errno"
 	"strings"
 )
 
@@ -175,7 +175,7 @@ func (ctr UserController) UpdateRisk(c *gin.Context) (gin.H, error) {
 	var UserIdSlice, PhoneSlice, OpenIdSlice []string
 
 	if len(idsSlice) == 0 {
-		return nil, errors.New("请输出要提交的id")
+		return nil, errno.ErrCommon.WithMessage("请输出要提交的id")
 	}
 	switch form.Type {
 	case 1:

@@ -2,11 +2,11 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/star_charge"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 )
 
 var DefaultStarChargeController = NewStarChargeController()
@@ -29,10 +29,10 @@ func (s StarChargeController) SendCoupon(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	if user.ID == 0 {
-		return nil, errors.New("用户不存在")
+		return nil, errno.ErrCommon.WithMessage("用户不存在")
 	}
 	if user.PhoneNumber == "" {
-		return nil, errors.New("用户未绑定手机号")
+		return nil, errno.ErrCommon.WithMessage("用户未绑定手机号")
 	}
 	starChargeService := star_charge.NewStarChargeService(context.NewMioContext())
 	token, err := starChargeService.GetAccessToken()
