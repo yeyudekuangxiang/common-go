@@ -18,6 +18,7 @@ type UserRepository struct {
 func (u UserRepository) Save(user *entity.User) error {
 	return app.DB.Save(user).Error
 }
+
 func (u UserRepository) GetUserById(id int64) entity.User {
 	var user entity.User
 	if err := app.DB.First(&user, id).Error; err != nil {

@@ -146,18 +146,20 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	}
 	user.GUID = guid
 	user.Time = model.NewTime()
+	user.Auth = 1
+	user.Position = "ordinary"
+	user.Status = 1
 
 	if param.UnionId != "" {
 		app.DB.Where("unionid = ? and guid =''", param.UnionId).Update("guid", guid)
 	}
-	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
-	user.ChannelId = ch.Cid
+
 	ret := repository.DefaultUserRepository.Save(&user)
 
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
-	zhuGeAttr["渠道"] = ch.Name
+	zhuGeAttr["渠道"] = user.ChannelId
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
 
