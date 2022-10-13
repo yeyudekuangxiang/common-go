@@ -313,13 +313,15 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		userInfo.Risk = rest.RiskRank
 	}
 
-	//获取用户地址  todo 加入队列
-	city, err := baidu.IpToCity(cip)
-	if err != nil {
-		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+	if userInfo.Ip == "" || userInfo.CityCode == "" {
+		//获取用户地址  todo 加入队列
+		city, err := baidu.IpToCity(cip)
+		if err != nil {
+			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+		}
+		userInfo.CityCode = city.Content.AddressDetail.Adcode
+		userInfo.Ip = cip
 	}
-	userInfo.CityCode = city.Content.AddressDetail.Adcode
-	userInfo.Ip = cip
 
 	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber, Source: entity.UserSourceMio})
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
