@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"os"
 	"path"
@@ -243,7 +244,7 @@ func (srv TopicService) FindById(topicId int64) entity.Topic {
 func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	topic := srv.repo.FindById(topicId)
 	if topic.Id == 0 {
-		return errors.New("未查询到此内容")
+		return errno.ErrCommon.WithMessage("未查询到此内容")
 	}
 	err := srv.repo.UpdateColumn(topicId, "sort", sort)
 	if err != nil {
@@ -262,7 +263,7 @@ func (srv TopicService) ImportUser(filename string) error {
 	defer file.Close()
 
 	if file.SheetCount == 0 {
-		return errors.New("没有数据")
+		return errno.ErrCommon.WithMessage("没有数据")
 	}
 
 	rows, err := file.GetRows(file.GetSheetList()[0])
@@ -372,7 +373,7 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 	defer file.Close()
 
 	if file.SheetCount == 0 {
-		return errors.New("没有数据")
+		return errno.ErrCommon.WithMessage("没有数据")
 	}
 
 	rows, err := file.GetRows(file.GetSheetList()[0])
@@ -421,10 +422,10 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 		}
 
 		if len(users) == 0 {
-			return errors.New("未查询到用户`" + nickname + "`,请先导入用户")
+			return errno.ErrCommon.WithMessage("未查询到用户`" + nickname + "`,请先导入用户")
 		}
 		if len(users) > 1 {
-			return errors.New("检测到有多个昵称为`" + nickname + "`的用户,请手动处理后再导入")
+			return errno.ErrCommon.WithMessage("检测到有多个昵称为`" + nickname + "`的用户,请手动处理后再导入")
 		}
 
 		topicTag := ""
@@ -434,7 +435,7 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 			err = app.DB.Where("name = ?", tag1Text).First(&tag1).Error
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
-					return errors.New("未查询到话题`" + tag1Text + "`,请先导入话题")
+					return errno.ErrCommon.WithMessage("未查询到话题`" + tag1Text + "`,请先导入话题")
 				}
 				return errors.WithStack(err)
 			}
@@ -446,7 +447,7 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 			err = app.DB.Where("name = ?", tag2Text).First(&tag2).Error
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
-					return errors.New("为查询到话题`" + tag2Text + "`,请先导入话题")
+					return errno.ErrCommon.WithMessage("为查询到话题`" + tag2Text + "`,请先导入话题")
 				}
 				return errors.WithStack(err)
 			}
@@ -581,10 +582,10 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	//查询记录是否存在
 	topicModel := srv.repo.FindById(topicId)
 	if topicModel.Id == 0 {
-		return entity.Topic{}, errors.New("该帖子不存在")
+		return entity.Topic{}, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
-		return entity.Topic{}, errors.New("无权限修改")
+		return entity.Topic{}, errno.ErrCommon.WithMessage("无权限修改")
 	}
 	//if content != "" {
 	//	//检查内容
@@ -644,7 +645,7 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 	//查询数据是否存在
 	topic := srv.repo.FindById(topicId)
 	if topic.Id == 0 {
-		return entity.Topic{}, errors.New("数据不存在")
+		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
 	}
 	//更新查看次数 todo
 	err := srv.repo.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
@@ -658,10 +659,10 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 func (srv TopicService) DelTopic(userId, topicId int64) error {
 	topicModel := srv.repo.FindById(topicId)
 	if topicModel.Id == 0 {
-		return errors.New("该帖子不存在")
+		return errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
-		return errors.New("无权限删除")
+		return errno.ErrCommon.WithMessage("无权限删除")
 	}
 	if err := app.DB.Delete(&topicModel).Error; err != nil {
 		return err

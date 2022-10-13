@@ -2,9 +2,9 @@ package service
 
 import (
 	"github.com/mlogclub/simple"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 )
 
 var DefaultTagService = NewTagService(repository.DefaultTagRepository)
@@ -31,7 +31,7 @@ func (u TagService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.
 func (u TagService) GetOne(id int64) (entity.Tag, error) {
 	tag := u.r.GetById(id)
 	if tag.Id == 0 {
-		return entity.Tag{}, errors.New("未找到该标签")
+		return entity.Tag{}, errno.ErrCommon.WithMessage("未找到该标签")
 	}
 	return tag, nil
 }

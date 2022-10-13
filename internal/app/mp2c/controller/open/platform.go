@@ -3,7 +3,6 @@ package open
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/pkg/core/app"
@@ -92,7 +91,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	//check user
 	user, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{Mobile: form.Mobile, Source: entity.UserSourceMio})
 	if user.ID == 0 {
-		return nil, errors.New("用户不存在")
+		return nil, errno.ErrCommon.WithMessage("用户不存在")
 	}
 
 	method := scene.Ch
@@ -100,7 +99,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 		method = strings.ToLower(method) + "_" + strings.ToLower(form.Method)
 	}
 	if _, ok := entity.PlatformMethodMap[method]; !ok {
-		return nil, errors.New("未找到匹配方法")
+		return nil, errno.ErrCommon.WithMessage("未找到匹配方法")
 	}
 	t := entity.PlatformMethodMap[method]
 
@@ -131,13 +130,13 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 	//白名单验证
 	ip := c.ClientIP()
 	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
 		app.Logger.Info("校验白名单失败", ip)
-		return nil, errors.New("非白名单ip:" + ip)
+		return nil, errno.ErrCommon.WithMessage("非白名单ip:" + ip)
 	}
 
 	//校验sign
@@ -150,7 +149,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	delete(params, "sign")
 	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
 		app.Logger.Info("校验sign失败", form)
-		return nil, errors.New("sign:" + form.Sign + " 验证失败")
+		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
@@ -174,7 +173,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if by.ID != 0 {
 		fmt.Println("charge 重复提交订单", form)
 		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
+		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
 	//预加积分

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -9,6 +8,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"strconv"
 	"strings"
@@ -112,7 +112,7 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 	//查询记录是否存在
 	topicModel := srv.topic.FindById(topicId)
 	if topicModel.Id == 0 {
-		return errors.New("该帖子不存在")
+		return errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 	//处理images
 	imageStr := strings.Join(images, ",")
@@ -158,7 +158,7 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 	var topic entity.Topic
 	app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User").Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
-		return entity.Topic{}, errors.New("数据不存在")
+		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
 	}
 	return topic, nil
 }
@@ -169,7 +169,7 @@ func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) error {
 	var topic entity.Topic
 	app.DB.Model(&entity.Topic{}).Preload("Tags").Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
-		return errors.New("数据不存在")
+		return errno.ErrCommon.WithMessage("数据不存在")
 	}
 	err := app.DB.Model(&topic).Updates(entity.Topic{Status: 4, DelReason: reason}).Error
 	if err != nil {
@@ -184,7 +184,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) er
 	var topic entity.Topic
 	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
-		return errors.New("数据不存在")
+		return errno.ErrCommon.WithMessage("数据不存在")
 	}
 
 	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
@@ -235,7 +235,7 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) error {
 	var topic entity.Topic
 	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
-		return errors.New("数据不存在")
+		return errno.ErrCommon.WithMessage("数据不存在")
 	}
 	if err := app.DB.Model(&topic).Update("is_top", isTop).Error; err != nil {
 		return err
@@ -249,7 +249,7 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
 	var topic entity.Topic
 	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
-		return errors.New("数据不存在")
+		return errno.ErrCommon.WithMessage("数据不存在")
 	}
 	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
 		return err

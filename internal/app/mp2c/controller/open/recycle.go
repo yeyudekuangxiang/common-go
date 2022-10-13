@@ -3,7 +3,6 @@ package open
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -72,7 +71,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	if err = RecycleService.CheckOrder(userInfo.OpenId, "oola"+"#"+form.OrderNo); err != nil {
 		fmt.Println("charge 重复提交订单", form)
 		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errors.New("重复提交订单")
+		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
 	//回调光环
@@ -81,7 +80,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//匹配大类型
 	typeName := RecycleService.GetType(form.ProductCategoryName)
 	if typeName == "" {
-		return nil, errors.New("未识别回收分类")
+		return nil, errno.ErrCommon.WithMessage("未识别回收分类")
 	}
 
 	//查询今日该类型获取积分次数
@@ -135,7 +134,7 @@ func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh("oola")
 	if scene.Key == "" || scene.Key == "e" {
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 	userInfo := apiutil.GetAuthUser(c)
 	oolaPkg := platform.NewOola(context.NewMioContext(), scene.AppId, userInfo.OpenId, scene.Domain, app.Redis)
@@ -159,13 +158,13 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	if strings.ToUpper(form.Data.Status) != "COMPLETE" {
-		return nil, errors.New("订单未完成")
+		return nil, errno.ErrCommon.WithMessage("订单未完成")
 	}
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh("fmy")
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errors.New("渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	dst := recycle.FmySignParams{}
@@ -182,7 +181,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	//校验sign
 	if err := RecycleService.CheckFmySign(dst, scene.AppId, scene.Key); err != nil {
 		app.Logger.Info("校验sign失败", form)
-		return nil, errors.New("sign:" + form.Sign + " 验证失败")
+		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
 	//通过phone_number查询用户

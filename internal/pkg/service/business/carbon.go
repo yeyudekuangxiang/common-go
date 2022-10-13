@@ -2,7 +2,6 @@ package business
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -26,7 +25,7 @@ func NewCarbonService(ctx *context.MioContext) *CarbonService {
 func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity float64) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditEvCar%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -36,7 +35,7 @@ func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity float64) (*
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到此场景当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到此场景当日最大限制")
 	}
 
 	transactionId := util.UUID()
@@ -72,7 +71,7 @@ func (srv CarbonService) CarbonCreditEvCar(userId int64, electricity float64) (*
 func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, oneCityDuration, manyCityDuration time.Duration) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditOnlineMeeting%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -82,7 +81,7 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, oneCityDuration
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到此场景当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到此场景当日最大限制")
 	}
 
 	sendCarbonResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditOnlineMeeting(SendCarbonCreditOnlineMeetingParam{
@@ -117,7 +116,7 @@ func (srv CarbonService) CarbonCreditOnlineMeeting(userId int64, oneCityDuration
 func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, electricity int64) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditSaveWaterElectricity%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -127,7 +126,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到此场景当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到此场景当日最大限制")
 	}
 
 	sendResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditSaveWaterElectricity(SendCarbonCreditSaveWaterElectricityParam{
@@ -161,7 +160,7 @@ func (srv CarbonService) CarbonCreditSaveWaterElectricity(userId int64, water, e
 func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus, metro, step, bike float64) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditSavePublicTransport%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -171,7 +170,7 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus, metro, s
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到此场景当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到此场景当日最大限制")
 	}
 
 	sendResult, err := NewCarbonCreditsService(srv.ctx).SendCarbonCreditSavePublicTransport(SendCarbonCreditSavePublicTransportParam{
@@ -214,7 +213,7 @@ func (srv CarbonService) CarbonCreditPublicTransport(userId int64, bus, metro, s
 func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonResult, error) {
 	lockKey := fmt.Sprintf("CarbonCreditOEP%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -224,7 +223,7 @@ func (srv CarbonService) CarbonCreditOEP(userId int64, voucher string) (*CarbonR
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到此场景当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到此场景当日最大限制")
 	}
 
 	transactionId := util.UUID()
@@ -261,7 +260,7 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType eb
 
 	lockKey := fmt.Sprintf("CarbonCreditGreenBusinessTrip%d", userId)
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return nil, errors.New("操作频率过快,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -271,7 +270,7 @@ func (srv CarbonService) CarbonCreditGreenBusinessTrip(userId int64, tripType eb
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到此场景当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到此场景当日最大限制")
 	}
 
 	//计算城市距离

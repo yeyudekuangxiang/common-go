@@ -2,7 +2,6 @@ package quiz
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -47,7 +46,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 
 	todayAnsweredNum := DefaultQuizSingleRecordService.GetTodayAnswerNum(openid)
 	if todayAnsweredNum >= OneDayAnswerNum {
-		return nil, errors.New("答题数量超出限制")
+		return nil, errno.ErrCommon.WithMessage("答题数量超出限制")
 	}
 
 	question := entity.QuizQuestion{}
@@ -58,7 +57,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 	}
 
 	if question.ID == 0 {
-		return nil, errors.New("题目不存在")
+		return nil, errno.ErrCommon.WithMessage("题目不存在")
 	}
 
 	isRight := question.AnswerStatement == answer

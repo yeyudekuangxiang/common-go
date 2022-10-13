@@ -2,12 +2,12 @@ package service
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -68,7 +68,7 @@ func (srv CheckinService) getCheckDayPoint(dayNumber int) int {
 }
 func (srv CheckinService) Checkin(openId string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("Checkin%s", openId), time.Second*5) {
-		return 0, errors.New("操作太频繁,请稍后再试")
+		return 0, errno.ErrCommon.WithMessage("操作太频繁,请稍后再试")
 	}
 
 	history, err := DefaultCheckinHistoryService.FindLastCheckinHistory(openId)

@@ -79,7 +79,7 @@ func (srv CarbonService) DecUserCarbon(dto srv_types.DecUserPointDTO) (float64, 
 func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (float64, error) {
 	lockKey := "changeUserCarbon" + dto.OpenId
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return 0, errors.New("操作频繁")
+		return 0, errno.ErrCommon.WithMessage("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 	//检测积分发放次数限制
@@ -103,7 +103,7 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 
 		//判读积分余额是否充足
 		if dto.ChangePoint < 0 && carbon.Carbon+dto.ChangePoint < 0 {
-			return errors.New("碳量不足")
+			return errno.ErrCommon.WithMessage("碳量不足")
 		}
 
 		if carbon.Id == 0 {

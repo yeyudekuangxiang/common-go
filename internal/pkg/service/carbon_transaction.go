@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -18,6 +17,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/baidu"
+	"mio/pkg/errno"
 	"sort"
 	"strconv"
 	"strings"
@@ -125,7 +125,7 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	//查询场景配置
 	scene := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: dto.Type})
 	if scene.ID == 0 {
-		return 0, errors.New("不存在该场景")
+		return 0, errno.ErrCommon.WithMessage("不存在该场景")
 	}
 	//判断是否有限制
 	/*errCheck := NewCarbonTransactionCountLimitService(srv.ctx).CheckLimitAndUpdate(dto.Type, dto.OpenId, scene.MaxCount)

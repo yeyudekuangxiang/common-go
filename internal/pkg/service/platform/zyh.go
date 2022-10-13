@@ -3,7 +3,6 @@ package platform
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/context"
 	entity "mio/internal/pkg/model/entity/activity"
@@ -11,6 +10,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
+	"mio/pkg/errno"
 )
 
 func NewZyhService(ctx *context.MioContext) *ZyhService {
@@ -36,7 +36,7 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 		Openid: openid,
 	})
 	if info.Id == 0 {
-		return "30000", errors.New("不存在该志愿者")
+		return "30000", errno.ErrCommon.WithMessage("不存在该志愿者")
 	}
 	params := make(map[string]string, 0)
 	params["AccessKeyId"] = config.Config.ActivityZyh.AccessKeyId
@@ -57,7 +57,7 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 		return "30002", err
 	}
 	if response.ErrCode != "0000" {
-		return response.ErrCode, errors.New(response.Message)
+		return response.ErrCode, errno.ErrCommon.WithMessage(response.Message)
 	}
 	//入库
 	fmt.Printf("%v\n", response)
@@ -92,5 +92,5 @@ func (srv ZyhService) Create(dto srv_types.GetZyhGetInfoByDTO) error {
 			VolId:  dto.VolId,
 		})
 	}
-	return errors.New("志愿汇用户已存在")
+	return errno.ErrCommon.WithMessage("志愿汇用户已存在")
 }

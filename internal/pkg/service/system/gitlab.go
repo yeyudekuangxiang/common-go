@@ -3,12 +3,12 @@ package system
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
 	"mio/internal/pkg/queue/types/wxworkqueue"
 	"mio/internal/pkg/util/httputil"
+	"mio/pkg/errno"
 	glbtyp "mio/pkg/gitlab/types"
 	"mio/pkg/wxwork"
 	"regexp"
@@ -95,7 +95,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 		return nil
 	} else {
 		app.Logger.Error(mres.MergeStatus)
-		return errors.New(mres.MergeStatus)
+		return errno.ErrCommon.WithMessage(mres.MergeStatus)
 	}
 }
 func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, error) {

@@ -1,12 +1,12 @@
 package business
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func (srv CarbonRankService) ChangeLikeStatus(param ChangeLikeStatusParam) (*bus
 		TimePoint:  start,
 	})
 	if rank.ID == 0 {
-		return nil, errors.New("排行信息不存在")
+		return nil, errno.ErrCommon.WithMessage("排行信息不存在")
 	}
 
 	like, err := DefaultCarbonRankLikeLogService.ChangeLikeStatus(CarbonRankLikeLogParam{

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 )
 
 var DefaultCommentAdminService = NewCommentAdminService(repository.DefaultCommentRepository)
@@ -53,7 +53,7 @@ func (d defaultCommentAdminService) DelCommentSoft(commentId int64, reason strin
 	query, err := d.commentModel.FindOneQuery(builder)
 	if err != nil {
 		if err == entity.ErrNotFount {
-			return errors.New("该评论不存在")
+			return errno.ErrCommon.WithMessage("该评论不存在")
 		}
 		return err
 	}

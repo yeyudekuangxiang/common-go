@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/pkg/errors"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
@@ -47,7 +46,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 		return "", err
 	}
 	if userInfo.ID == 0 {
-		return "", errors.New("未查询到用户信息")
+		return "", errno.ErrCommon.WithMessage("未查询到用户信息")
 	}
 
 	//此方法只能使用一次
