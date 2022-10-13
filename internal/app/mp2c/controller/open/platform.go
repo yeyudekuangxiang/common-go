@@ -53,8 +53,7 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
 		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
 		if err != nil {
-			app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
-			return nil, err
+			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
 		}
 	}
 	//返回
@@ -99,11 +98,12 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	if form.Method != "" {
 		method = strings.ToLower(method) + "_" + strings.ToLower(form.Method)
 	}
+
 	if _, ok := entity.PlatformMethodMap[method]; !ok {
 		return nil, errno.ErrCommon.WithMessage("未找到匹配方法")
 	}
-	t := entity.PlatformMethodMap[method]
 
+	t := entity.PlatformMethodMap[method]
 	value := entity.PointCollectValueMap[t]
 
 	_, err = service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
@@ -114,9 +114,11 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 		AdminId:     0,
 		Note:        t.Text(),
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return nil, nil
 }
 
@@ -272,10 +274,9 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 	}, nil
 }
 
-// CollectPoint 收集预加积分
-func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
-
-	form := api.PrePointRequest{}
+// CollectPrePoint  收集预加积分
+func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error) {
+	form := api.CollectPrePoint{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
@@ -295,7 +296,7 @@ func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
@@ -304,9 +305,9 @@ func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 	sign := form.Sign
 	delete(params, "sign")
 
-	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		app.Logger.Info("校验sign失败", form)
-		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
+		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
@@ -319,8 +320,13 @@ func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrBindRecordNotFound
 	}
 
+	userInfo, err := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
+	if err != nil {
+		return nil, errno.ErrUserNotFound
+	}
+
 	//获取pre_point数据 one limit
-	id, _ := strconv.ParseInt(params["prePointId"], 10, 64)
+	id, _ := strconv.ParseInt(form.PrePointId, 10, 64)
 	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
@@ -360,6 +366,7 @@ func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
+
 	//积分
 	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
@@ -367,7 +374,7 @@ func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 		BizId:       util.UUID(),
 		ChangePoint: incPoint,
 		AdminId:     0,
-		Note:        params["platformKey"] + "#" + one.Tradeno,
+		Note:        form.PlatformKey + "#" + one.Tradeno,
 	})
 
 	if err != nil {
@@ -388,16 +395,16 @@ func (receiver PlatformController) CollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//减碳量
-	fromString, _ := decimal.NewFromString(params["amount"])
-	amount, _ := fromString.Float64()
+	fromString, _ := decimal.NewFromString(one.Point)
+	amount, _ := fromString.Div(decimal.NewFromInt(int64(scene.Override))).Float64()
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" {
 		_, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 			OpenId: sceneUser.OpenId,
-			//UserId: userInfo.ID,
-			Type:  typeCarbonStr,
-			Value: amount,
-			Ip:    ip,
+			UserId: userInfo.ID,
+			Type:   typeCarbonStr,
+			Value:  amount,
+			Ip:     ip,
 		})
 		if err != nil {
 			app.Logger.Errorf("预加积分 err:%s", err.Error())
