@@ -133,7 +133,7 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, user entity.Use
 func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) error {
 	scene := service.DefaultBdSceneService.FindByCh("jinhuaxing")
 	if scene.Key == "" || scene.Key == "e" {
-		return errors.New("渠道查询失败")
+		return errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 	if err := platform.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		return err
@@ -150,10 +150,10 @@ func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) e
 	j, _ := strconv.ParseInt(params["status"].(string), 10, 32)
 	status := int32(j)
 	if !coupon.Exist {
-		return errors.New("券码不存在")
+		return errno.ErrCommon.WithMessage("券码不存在")
 	}
 	if coupon.CouponInfo.UsedStatus == status {
-		return errors.New("该券码已失效")
+		return errno.ErrCommon.WithMessage("该券码已失效")
 	}
 	//如果 status 不等 根据 tradeno 更新status,used_time 返回nil
 	_, err = app.RpcService.CouponRpcSrv.UpdateCouponUsedStatus(srv.ctx, &couponclient.UpdateCouponUsedStatusReq{
@@ -189,7 +189,7 @@ func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, er
 		return &jhxTicketStatusResponse{}, err
 	}
 	if response.Code != 0 {
-		return &jhxTicketStatusResponse{}, errors.New(response.Msg)
+		return &jhxTicketStatusResponse{}, errno.ErrCommon.WithMessage(response.Msg)
 	}
 	ticketStatusResponse := &jhxTicketStatusResponse{}
 	err = util.MapTo(response.Data, ticketStatusResponse)
@@ -219,7 +219,7 @@ func (srv JhxService) BindSuccess(mobile string, status string) error {
 		return err
 	}
 	if response.Code != 0 {
-		return errors.New(response.Msg)
+		return errno.ErrCommon.WithMessage(response.Msg)
 	}
 	return nil
 }
@@ -313,7 +313,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 
 	scene := repository.DefaultBdSceneRepository.FindByCh(params["platformKey"])
 	if scene.Key == "" || scene.Key == "e" {
-		return 0, errors.New("渠道查询失败")
+		return 0, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	sceneUserCondition := repository.GetSceneUserOne{PlatformKey: params["platformKey"]}
@@ -327,7 +327,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(sceneUserCondition)
 	if sceneUser.ID == 0 {
-		return 0, errors.New("未找到绑定关系")
+		return 0, errno.ErrCommon.WithMessage("未找到绑定关系")
 	}
 
 	//获取pre_point数据 one limit
@@ -351,7 +351,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
 	totalPoint := lastPoint + incPoint
 	if lastPoint >= int64(scene.PrePointLimit) {
-		return 0, errors.New("今日获取积分已达到上限")
+		return 0, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
 	}
 
 	if totalPoint > int64(scene.PrePointLimit) {
@@ -395,7 +395,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 func (srv JhxService) checkSign(sign string, params map[string]string) error {
 	md5Sign := srv.getSign(params)
 	if sign != md5Sign {
-		return errors.New("验签失败")
+		return errno.ErrCommon.WithMessage("验签失败")
 	}
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
+	"mio/pkg/errno"
 	"time"
 
 	"github.com/medivhzhan/weapp/v3"
@@ -60,7 +61,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	}
 
 	if whoAmiResp.Code != "success" {
-		return nil, "", false, errors.New(whoAmiResp.Message)
+		return nil, "", false, errno.ErrCommon.WithMessage(whoAmiResp.Message)
 	}
 
 	user, err := service.DefaultUserService.GetUserByOpenId(whoAmiResp.Data.Openid)

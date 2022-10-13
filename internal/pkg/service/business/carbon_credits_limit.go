@@ -2,7 +2,6 @@ package business
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
@@ -32,7 +31,7 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 		return 0, err
 	}
 	if carbonScene.ID == 0 {
-		return 0, errors.New("未查询到此低碳场景")
+		return 0, errno.ErrCommon.WithMessage("未查询到此低碳场景")
 	}
 	companyCarbonScene, err := DefaultCompanyCarbonSceneService.FindCompanyScene(FindCompanyCarbonSceneParam{
 		CompanyId:     userInfo.BCompanyId,
@@ -42,7 +41,7 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 		return 0, err
 	}
 	if companyCarbonScene.ID == 0 {
-		return 0, errors.New("未查询到此低碳场景")
+		return 0, errno.ErrCommon.WithMessage("未查询到此低碳场景")
 	}
 
 	limitLog, err := DefaultCarbonCreditsLimitLogService.FindLimitLog(FindCarbonCreditsLimitLogParam{
@@ -84,7 +83,7 @@ func (srv CarbonCreditsLimitService) CheckLimitAndUpdate(userId int64, value dec
 		return nil, err
 	}
 	if count <= 0 {
-		return nil, errors.New("已经达到当日最大限制")
+		return nil, errno.ErrCommon.WithMessage("已经达到当日最大限制")
 	}
 
 	log, err := DefaultCarbonCreditsLimitLogService.UpdateOrCreateLimitLog(UpdateOrCreateCarbonCreditsLimitLogParam{

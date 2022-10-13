@@ -3,13 +3,13 @@ package star_charge
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -95,7 +95,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 		return "", err
 	}
 	if signResponse.Ret != 0 {
-		return "", errors.New("请求错误")
+		return "", errno.ErrCommon.WithMessage("请求错误")
 	}
 	//result.data解密
 	accessResult := starChargeAccessResult{}
@@ -142,14 +142,14 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		return err
 	}
 	if provideResponse.Ret != 0 {
-		return errors.New(provideResponse.Msg)
+		return errno.ErrCommon.WithMessage(provideResponse.Msg)
 	}
 	// result.data解密
 	provideResult := starChargeProvideResult{}
 	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
 	if provideResult.SuccStat != 0 {
-		return errors.New(provideResult.FailReasonMsg)
+		return errno.ErrCommon.WithMessage(provideResult.FailReasonMsg)
 	}
 	//保存记录
 	history := entity.CouponHistory{
@@ -178,7 +178,7 @@ func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime 
 		return err
 	}
 	if count >= 1 {
-		return errors.New("每日每位用户限制领取 1 次")
+		return errno.ErrCommon.WithMessage("每日每位用户限制领取 1 次")
 	}
 	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
 	builder.Where("open_id = ?", openId).
@@ -190,7 +190,7 @@ func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime 
 		return err
 	}
 	if count >= 2 {
-		return errors.New("活动期间每位用户限制领取 2 次")
+		return errno.ErrCommon.WithMessage("活动期间每位用户限制领取 2 次")
 	}
 	return nil
 

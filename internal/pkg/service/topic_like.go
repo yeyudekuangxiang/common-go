@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -9,6 +8,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -28,7 +28,7 @@ type TopicLikeService struct {
 func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, int64, error) {
 	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
 	if topic.Id == 0 {
-		return nil, 0, errors.New("帖子不存在")
+		return nil, 0, errno.ErrCommon.WithMessage("帖子不存在")
 	}
 	title := topic.Title
 	if len([]rune(title)) > 8 {
@@ -78,7 +78,7 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 func (t TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {
 	list := t.repo.GetListBy(repository.GetTopicLikeListBy{UserId: userId})
 	if len(list) == 0 {
-		return nil, errors.New("未找到点赞数据")
+		return nil, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}
 	return list, nil
 }
@@ -86,7 +86,7 @@ func (t TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, e
 func (t TopicLikeService) GetOneByTopic(topicId int64, userId int64) (entity.TopicLike, error) {
 	like := t.repo.FindBy(repository.FindTopicLikeBy{TopicId: int(topicId), UserId: int(userId)})
 	if like.Id == 0 {
-		return entity.TopicLike{}, errors.New("未找到点赞数据")
+		return entity.TopicLike{}, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}
 	return like, nil
 }

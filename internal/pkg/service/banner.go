@@ -1,13 +1,13 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"strings"
 )
 
@@ -32,7 +32,7 @@ func (srv BannerService) Create(dto srv_types.CreateBannerDTO) error {
 		return err
 	}
 	if banner.ID != 0 {
-		return errors.New("banner名称或图片已存在")
+		return errno.ErrCommon.WithMessage("banner名称或图片已存在")
 	}
 	if dto.Type == entity.BannerTypeH5 {
 		dto.Redirect = "pages/load_bearing/webview/index?url=" + dto.Redirect
@@ -49,7 +49,7 @@ func (srv BannerService) Create(dto srv_types.CreateBannerDTO) error {
 func (srv BannerService) Update(dto srv_types.UpdateBannerDTO) error {
 	bannerOne := srv.repo.GetById(dto.Id)
 	if bannerOne.ID == 0 {
-		return errors.New("banner记录不存在")
+		return errno.ErrCommon.WithMessage("banner记录不存在")
 	}
 	//判断名称和图片是否存在
 	banner, err := srv.repo.GetExistOne(repotypes.GetBannerExistDO{Name: dto.Name, NotId: dto.Id})
@@ -57,7 +57,7 @@ func (srv BannerService) Update(dto srv_types.UpdateBannerDTO) error {
 		return err
 	}
 	if banner.ID != 0 {
-		return errors.New("banner名称已存在")
+		return errno.ErrCommon.WithMessage("banner名称已存在")
 	}
 
 	if dto.Type == entity.BannerTypeH5 {

@@ -1,12 +1,12 @@
 package quiz
 
 import (
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 )
 
 var DefaultQuizDailyResultService = QuizDailyResultService{}
@@ -33,11 +33,11 @@ func (srv QuizDailyResultService) CompleteTodayQuiz(openid string) (*entity.Quiz
 		return nil, err
 	}
 	if todayResult.ID != 0 {
-		return nil, errors.New("请勿重复提交答题")
+		return nil, errno.ErrCommon.WithMessage("请勿重复提交答题")
 	}
 	todaySummary := DefaultQuizSingleRecordService.GetTodaySummary(openid)
 	if todaySummary.AnsweredNum < OneDayAnswerNum {
-		return nil, errors.New("答题未完成")
+		return nil, errno.ErrCommon.WithMessage("答题未完成")
 	}
 
 	t := model.NewTime()

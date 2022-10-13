@@ -2,12 +2,12 @@ package service
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"strings"
 )
 
@@ -156,7 +156,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 		return 0, err
 	}
 	if !ok {
-		return 0, errors.New("达到当日该类别最大积分限制")
+		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
 	}
 
 	valid, result, err := srv.validateBikeRideImage(imageUrl)
@@ -164,7 +164,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 		return 0, err
 	}
 	if !valid {
-		return 0, errors.New("不是有效的单车图片")
+		return 0, errno.ErrCommon.WithMessage("不是有效的单车图片")
 	}
 
 	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
@@ -202,7 +202,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 		return 0, err
 	}
 	if !ok {
-		return 0, errors.New("达到当日该类别最大积分限制")
+		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
 	}
 
 	valid, result, err := srv.validateCoffeeCupImage(imageUrl)
@@ -210,7 +210,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 		return 0, err
 	}
 	if !valid {
-		return 0, errors.New("不是有效的自带杯图片")
+		return 0, errno.ErrCommon.WithMessage("不是有效的自带杯图片")
 	}
 
 	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
@@ -248,7 +248,7 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 		return 0, err
 	}
 	if !ok {
-		return 0, errors.New("达到当日该类别最大积分限制")
+		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
 	}
 
 	valid, result, err := srv.validatePowerReplaceImage(imageUrl)
@@ -256,7 +256,7 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 		return 0, err
 	}
 	if !valid {
-		return 0, errors.New("不是有效的图片")
+		return 0, errno.ErrCommon.WithMessage("不是有效的图片")
 	}
 
 	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
@@ -295,7 +295,7 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 		return 0, err
 	}
 	if !ok {
-		return 0, errors.New("达到当日该类别最大积分限制")
+		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
 	}
 
 	valid, result, err := srv.validateReducePlasticImage(imageUrl)
@@ -303,7 +303,7 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 		return 0, err
 	}
 	if !valid {
-		return 0, errors.New("不是有效的图片")
+		return 0, errno.ErrCommon.WithMessage("不是有效的图片")
 	}
 
 	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{

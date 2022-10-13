@@ -2,7 +2,6 @@ package question
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
@@ -13,6 +12,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 )
 
 var DefaultSubjectService = SubjectService{ctx: context.NewMioContext()}
@@ -119,7 +119,7 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	//查询用户是否入库，入库并回答过问题
 	info := srv.repoUser.FindBy(repotypes.GetQuestionUserGetById{OpenId: dto.OpenId})
 	if info.UserId == 0 {
-		return srv_types.AddUserCarbonInfoDTO{}, errors.New("未提交年度排放问卷")
+		return srv_types.AddUserCarbonInfoDTO{}, errno.ErrCommon.WithMessage("未提交年度排放问卷")
 	}
 	userId := info.UserId
 	//总碳量

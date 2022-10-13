@@ -51,7 +51,7 @@ func TestMinCut(t *testing.T) {
 	}
 	dfs(0)
 	l := len(ans)
-	for i, _ := range ans {
+	for i := range ans {
 		atoi, _ := strconv.Atoi(i)
 		ret = append(ret, atoi)
 	}

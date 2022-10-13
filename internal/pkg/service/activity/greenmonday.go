@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -31,10 +32,10 @@ func (srv GMService) Order(userId int64, addressId string) (*entity2.Order, erro
 		return nil, err
 	}
 	if record.PrizeStatus == 1 {
-		return nil, errors.New("未完成挑战,请完成挑战后再领取")
+		return nil, errno.ErrCommon.WithMessage("未完成挑战,请完成挑战后再领取")
 	}
 	if record.PrizeStatus == 3 {
-		return nil, errors.New("已领取过奖励,无法继续领取	")
+		return nil, errno.ErrCommon.WithMessage("已领取过奖励,无法继续领取	")
 	}
 	if record.PrizeStatus == 2 {
 		record.PrizeStatus = 3
@@ -65,7 +66,7 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (*activity.GMRe
 		return nil, err
 	}
 	if record.AvailableQuesNum <= 0 {
-		return nil, errors.New("答题次数用光啦,快去邀请好友获取答题机会吧")
+		return nil, errno.ErrCommon.WithMessage("答题次数用光啦,快去邀请好友获取答题机会吧")
 	}
 	record.UsedQuesNum++
 	if param.IsRight {
@@ -80,7 +81,7 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (*activity.GMRe
 	err = activity2.DefaultGMRecordRepository.Save(record)
 	if err != nil {
 		app.Logger.Error("GM答题失败", param, err)
-		return nil, errors.New("答题失败,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("答题失败,请稍后再试")
 	}
 	isRight := 1
 	if !param.IsRight {
@@ -99,7 +100,7 @@ func (srv GMService) AnswerQuestion(param AnswerGMQuestionParam) (*activity.GMRe
 	err = activity2.DefaultGMQuestionLogRepository.Save(&quesLog)
 	if err != nil {
 		app.Logger.Error("GM答题失败", param, err)
-		return nil, errors.New("答题失败,请稍后再试")
+		return nil, errno.ErrCommon.WithMessage("答题失败,请稍后再试")
 	}
 
 	//发放答题积分
@@ -119,18 +120,18 @@ func (srv GMService) SendAnswerQuestionBonus(userId int64, logId int) error {
 		return err
 	}
 	if user.ID == 0 {
-		return errors.New("未查询到用户信息,请联系管理员")
+		return errno.ErrCommon.WithMessage("未查询到用户信息,请联系管理员")
 	}
 
 	log := activity2.DefaultGMQuestionLogRepository.FindById(logId)
 	if log.ID == 0 {
-		return errors.New("未查到答题记录")
+		return errno.ErrCommon.WithMessage("未查到答题记录")
 	}
 	if log.IsRight == 2 {
-		return errors.New("答题错误,无法发放积分")
+		return errno.ErrCommon.WithMessage("答题错误,无法发放积分")
 	}
 	if log.IsSendPoint == 2 {
-		return errors.New("积分已发放")
+		return errno.ErrCommon.WithMessage("积分已发放")
 	}
 	log.IsSendPoint = 2
 	err = activity2.DefaultGMQuestionLogRepository.Save(&log)
@@ -155,7 +156,7 @@ func (srv GMService) AddInvitationRecord(userId, InviteeUserId int64) error {
 		return err
 	}
 	if InviteeUser.ID == 0 {
-		return errors.New("未查询到用户信息")
+		return errno.ErrCommon.WithMessage("未查询到用户信息")
 	}
 	isNewUser := srv.IsNewUser(InviteeUser.Time.Time)
 

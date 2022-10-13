@@ -3,7 +3,6 @@ package activity
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -16,6 +15,7 @@ import (
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -38,11 +38,11 @@ func (b BocService) GetApplyRecordPageList(param GetRecordPageListParam) (list [
 		return
 	}
 	if user.ID == 0 {
-		err = errors.New("用户不存在")
+		err = errno.ErrCommon.WithMessage("用户不存在")
 		return
 	}
 	if user.PhoneNumber == "" {
-		err = errors.New("未绑定手机号,请先绑定手机号")
+		err = errno.ErrCommon.WithMessage("未绑定手机号,请先绑定手机号")
 		return
 	}
 
@@ -313,18 +313,18 @@ func (b BocService) SendApplyBonus(userId int64) error {
 	cmd := app.Redis.GetEx(context.Background(), config.RedisKey.Limit1S+strconv.Itoa(int(userId)), 1*time.Second)
 	fmt.Println(cmd)
 	if cmd.Val() != "" {
-		return errors.New("正在审核中,请稍等")
+		return errno.ErrCommon.WithMessage("正在审核中,请稍等")
 	}
 	//更改奖励发放状态
 	record := activity.DefaultBocRecordRepository.FindBy(activity.FindRecordBy{
 		UserId: userId,
 	})
 	if record.Id == 0 {
-		return errors.New("未查询到活动参与记录")
+		return errno.ErrCommon.WithMessage("未查询到活动参与记录")
 	}
 
 	if record.ApplyBonusStatus == 3 {
-		return errors.New("奖励已经发放过了")
+		return errno.ErrCommon.WithMessage("奖励已经发放过了")
 	}
 
 	record.ApplyStatus = 3
@@ -343,7 +343,7 @@ func (b BocService) SendApplyBonus(userId int64) error {
 	}
 
 	if user.ID == 0 {
-		return errors.New("请先绑定手机号后再进行操作")
+		return errno.ErrCommon.WithMessage("请先绑定手机号后再进行操作")
 	}
 
 	_, err = DefaultBocShareBonusRecordService.CreateRecord(CreateBocShareBonusRecordParam{
@@ -372,19 +372,19 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 		UserId: userId,
 	})
 	if record.Id == 0 {
-		return errors.New("未查询到活动参与记录")
+		return errno.ErrCommon.WithMessage("未查询到活动参与记录")
 	}
 	if record.ApplyStatus != 3 {
-		return errors.New("卡片暂未审核通过")
+		return errno.ErrCommon.WithMessage("卡片暂未审核通过")
 	}
 	if record.BindWechatStatus != 2 {
-		return errors.New("卡片暂未绑定微信")
+		return errno.ErrCommon.WithMessage("卡片暂未绑定微信")
 	}
 	if record.BindWechatBonusStatus == 1 {
-		return errors.New("请先去小程序中提交申请,申请通过后将会发放奖励")
+		return errno.ErrCommon.WithMessage("请先去小程序中提交申请,申请通过后将会发放奖励")
 	}
 	if record.BindWechatBonusStatus == 3 {
-		return errors.New("奖励已经发放过了")
+		return errno.ErrCommon.WithMessage("奖励已经发放过了")
 	}
 
 	record.BindWechatBonusStatus = 3
@@ -402,7 +402,7 @@ func (b BocService) SendBindWechatBonus(userId int64) error {
 	}
 
 	if user.ID == 0 {
-		return errors.New("请先绑定手机号后再进行操作")
+		return errno.ErrCommon.WithMessage("请先绑定手机号后再进行操作")
 	}
 	_, err = DefaultBocShareBonusRecordService.CreateRecord(CreateBocShareBonusRecordParam{
 		UserId: user.ID,
@@ -427,23 +427,23 @@ func (b BocService) ApplySendApplyBonus(userId int64) error {
 		return err
 	}
 	if mobileUser.ID == 0 {
-		return errors.New("请检查是否已经绑定手机号号码")
+		return errno.ErrCommon.WithMessage("请检查是否已经绑定手机号号码")
 	}
 	record := activity.DefaultBocRecordRepository.FindBy(activity.FindRecordBy{
 		UserId: mobileUser.ID,
 	})
 	if record.ApplyStatus != 3 {
-		return errors.New("银行卡暂未申请成功,请稍后再试")
+		return errno.ErrCommon.WithMessage("银行卡暂未申请成功,请稍后再试")
 	}
 	if record.ApplyBonusStatus != 1 {
-		return errors.New("奖励已申请")
+		return errno.ErrCommon.WithMessage("奖励已申请")
 	}
 	record.ApplyBonusStatus = 2
 	record.ApplyBonusTime = model.NewTime()
 	err = activity.DefaultBocRecordRepository.Save(&record)
 	if err != nil {
 		app.Logger.Error(userId, err)
-		return errors.New("申请失败,请稍后再试")
+		return errno.ErrCommon.WithMessage("申请失败,请稍后再试")
 	}
 
 	//话费的无需审核直接充值
@@ -457,16 +457,16 @@ func (b BocService) ApplySendBindWechatBonus(userId int64) error {
 		return err
 	}
 	if mobileUser.ID == 0 {
-		return errors.New("请检查是否已经绑定手机号号码")
+		return errno.ErrCommon.WithMessage("请检查是否已经绑定手机号号码")
 	}
 	record := activity.DefaultBocRecordRepository.FindBy(activity.FindRecordBy{
 		UserId: mobileUser.ID,
 	})
 	if record.BindWechatStatus != 2 {
-		return errors.New("银行卡暂未绑定微信,请稍后再试")
+		return errno.ErrCommon.WithMessage("银行卡暂未绑定微信,请稍后再试")
 	}
 	if record.BindWechatBonusStatus != 1 {
-		return errors.New("奖励已申请")
+		return errno.ErrCommon.WithMessage("奖励已申请")
 	}
 	record.BindWechatBonusStatus = 2
 	return activity.DefaultBocRecordRepository.Save(&record)
@@ -488,22 +488,22 @@ func (b BocService) ApplySendBocBonus(userId int64) error {
 	})
 	if err != nil {
 		app.Logger.Error(userId, err)
-		return errors.New("申请失败,请稍后再试")
+		return errno.ErrCommon.WithMessage("申请失败,请稍后再试")
 	}
 
 	if len(list) == 0 {
-		return errors.New("没有未领取的奖励")
+		return errno.ErrCommon.WithMessage("没有未领取的奖励")
 	}
 
 	sum, err := DefaultBocShareBonusRecordService.SendBocSum(userId)
 
 	if err != nil {
 		app.Logger.Error(userId, err)
-		return errors.New("系统异常,请稍后再试")
+		return errno.ErrCommon.WithMessage("系统异常,请稍后再试")
 	}
 	if sum >= 5000 {
 		app.Logger.Error(userId, sum, "奖励最高可领50元")
-		return errors.New("奖励最高可领50元")
+		return errno.ErrCommon.WithMessage("奖励最高可领50元")
 	}
 
 	err = app.DB.Transaction(func(tx *gorm.DB) error {
@@ -539,7 +539,7 @@ func (b BocService) ApplySendBocBonus(userId int64) error {
 	})
 	if err != nil {
 		app.Logger.Error(userId, err)
-		return errors.New("申请失败,请稍后再试")
+		return errno.ErrCommon.WithMessage("申请失败,请稍后再试")
 	}
 	return nil
 }

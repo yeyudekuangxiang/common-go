@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/pkg/errno"
 	"time"
 )
 
@@ -55,7 +55,7 @@ func (srv PointTransactionCountLimitService) CheckLimitAndUpdate(t entity.PointT
 	}
 
 	if limit.CurrentCount >= limitN {
-		return errors.New("获取积分次数达到" + msg + "上限")
+		return errno.ErrCommon.WithMessage("获取积分次数达到" + msg + "上限")
 	}
 
 	limit.CurrentCount++
@@ -117,7 +117,7 @@ func (srv PointTransactionCountLimitService) CheckMaxPoint(transactionType entit
 		todayValue += item["value"].(int64)
 	}
 	if maxPoint-todayValue <= 0 {
-		return 0, errors.New("今日积分已达上限")
+		return 0, errno.ErrCommon.WithMessage("今日积分已达上限")
 	}
 	if maxPoint-todayValue > 0 && maxPoint-todayValue < currPoint {
 		return maxPoint - todayValue, nil
@@ -136,7 +136,7 @@ func (srv PointTransactionCountLimitService) CheckMaxPointByMonth(transactionTyp
 		todayValue += item["value"].(int64)
 	}
 	if maxPoint-todayValue <= 0 {
-		return 0, errors.New("此回收分类已达到本月获取积分上限")
+		return 0, errno.ErrCommon.WithMessage("此回收分类已达到本月获取积分上限")
 	}
 	if maxPoint-todayValue > 0 && maxPoint-todayValue < currPoint {
 		return maxPoint - todayValue, nil

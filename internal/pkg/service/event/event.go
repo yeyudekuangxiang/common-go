@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/util/timeutils"
+	"mio/pkg/errno"
 	"strconv"
 	"strings"
 	"time"
@@ -55,7 +56,7 @@ func (srv EventService) GetEventFullInfo(eventId string) (*EventFullInfo, error)
 	}
 
 	if ev.ID == 0 {
-		return nil, errors.New("项目不存在")
+		return nil, errno.ErrCommon.WithMessage("项目不存在")
 	}
 
 	participationList, _, err := DefaultEventParticipationService.GetParticipationPageList(GetParticipationPageListParam{
@@ -131,7 +132,7 @@ func (srv EventService) AddEventParticipationCount(eventId string, count int) er
 		return err
 	}
 	if ev.ID == 0 {
-		return errors.New("未查询到项目信息")
+		return errno.ErrCommon.WithMessage("未查询到项目信息")
 	}
 	ev.ParticipationCount += count
 	return srv.repo.Save(&ev)

@@ -1,7 +1,6 @@
 package activity
 
 import (
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -10,6 +9,7 @@ import (
 	"mio/internal/pkg/repository"
 	repoactivity "mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/service"
+	"mio/pkg/errno"
 	"runtime"
 	"time"
 )
@@ -242,19 +242,19 @@ func (srv GDdbService) CheckActivityStatus(userId, schoolId int64) error {
 			//更新用户状态
 			userInfo.InviteType = 0
 			_ = srv.repo.Save(&userInfo)
-			return errors.New("慢了一步，好友已和他人完成共同捐赠")
+			return errno.ErrCommon.WithMessage("慢了一步，好友已和他人完成共同捐赠")
 		}
 		//正常答题 更新状态
 		ids := []int64{userInfo.UserId, userInfo.InviteId}
 		if err := app.DB.Model(entity.GDDonationBookRecord{}).
 			Where("user_id in ?", ids).
 			Updates(entity.GDDonationBookRecord{IsSuccess: 1}).Error; err != nil {
-			return errors.New("更新答题状态失败")
+			return errno.ErrCommon.WithMessage("更新答题状态失败")
 		}
 		//被邀请者答题完成，更新学校排行榜
 		err := srv.IncrRank(userInfo.InviteId)
 		if err != nil {
-			return errors.New("更新捐书人数失败")
+			return errno.ErrCommon.WithMessage("更新捐书人数失败")
 		}
 	}
 	return nil
@@ -314,7 +314,7 @@ func (srv GDdbService) UpdateAnswerStatus(userId int64, status int) error {
 func (srv GDdbService) IncrRank(userId int64) error {
 	var err error
 	if userId == 0 {
-		return errors.New("参数错误：userId不能为空")
+		return errno.ErrCommon.WithMessage("参数错误：userId不能为空")
 	}
 	activityUser := repoactivity.DefaultGDDonationBookRepository.FindBy(repoactivity.FindRecordBy{UserId: userId})
 	app.Logger.Infof("广东教育-活动用户信息：activityUser:%v", activityUser)
@@ -323,13 +323,13 @@ func (srv GDdbService) IncrRank(userId int64) error {
 		USchool := repoactivity.DefaultGDDbUserSchoolRepository.FindBy(repoactivity.FindRecordBy{UserId: activityUser.UserId})
 		if USchool.ID == 0 {
 			app.Logger.Infof("广东教育-未获取到用户绑定的学校信息：USchool:%v", USchool)
-			return errors.New("未绑定学校，请重试")
+			return errno.ErrCommon.WithMessage("未绑定学校，请重试")
 		}
 		//获取学校信息
 		schoolInfo := repoactivity.DefaultGDDbSchoolRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: USchool.SchoolId})
 		if schoolInfo.ID == 0 {
 			app.Logger.Infof("广东教育-未获取到学校信息：schoolInfo:%v", schoolInfo)
-			return errors.New("获取学校信息失败，请重试")
+			return errno.ErrCommon.WithMessage("获取学校信息失败，请重试")
 		}
 		rankInfo := repoactivity.DefaultGDDbSchoolRankRepository.FindBy(repoactivity.FindSchoolBy{SchoolId: USchool.SchoolId})
 		app.Logger.Infof("广东教育-获取排行榜信息：%v", rankInfo)
@@ -392,7 +392,7 @@ func (srv GDdbService) CreateSchool(schoolName string, cityId int64, gradeType i
 		SchoolName: schoolName,
 	})
 	if schoolRes.ID != 0 {
-		return 0, errors.New("学校已存在")
+		return 0, errno.ErrCommon.WithMessage("学校已存在")
 	}
 	school := &entity.GDDbSchool{
 		CityId:     cityId,
