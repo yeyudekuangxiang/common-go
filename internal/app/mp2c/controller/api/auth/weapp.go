@@ -28,7 +28,7 @@ func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
 	}
 	zhuGeAttr := make(map[string]interface{}, 0)
 	partnershipWith := entity.PartnershipType(strings.ToUpper(form.PartnershipWith))
-	user, cookie, isNewUser, err := auth.DefaultWeappService.LoginByCode(form.Code, form.InvitedBy, partnershipWith, form.Cid, form.ThirdId)
+	user, cookie, isNewUser, err := auth.DefaultWeappService.LoginByCode(form.Code, form.InvitedBy, partnershipWith, form.Cid, form.ThirdId, ctx.ClientIP())
 	if err != nil {
 		zhuGeAttr["失败原因"] = err.Error()
 		auth.DefaultWeappService.ToZhuGe("无openid", zhuGeAttr, config.ZhuGeEventName.UserLoginErr)
