@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -16,6 +17,7 @@ import (
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	platformUtil "mio/pkg/platform"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -197,28 +199,149 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 }
 
 // GetPrePointList 获取预加积分列表
-func (receiver PlatformController) GetPrePointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
-	return nil, 0, nil
+func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error) {
+	return nil, nil
 }
 
-// CollectPoint 收集预加积分
-func (receiver PlatformController) CollectPoint(sign string, params map[string]string) (int64, error) {
+func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error) {
+	form := api.CollectPrePoint{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		app.Logger.Errorf("参数错误: %s", form)
+		return nil, err
+	}
 
-	////减碳量
-	//fromString, _ := decimal.NewFromString(params["amount"])
-	//amount, _ := fromString.Float64()
-	//typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
-	//if typeCarbonStr != "" {
-	//	_, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
-	//		OpenId: sceneUser.OpenId,
-	//		UserId: userInfo.ID,
-	//		Type:   typeCarbonStr,
-	//		Value:  amount,
-	//		Ip:     ip,
-	//	})
-	//	if err != nil {
-	//		app.Logger.Errorf("预加积分 err:%s", err.Error())
-	//	}
-	//}
-	return 0, nil
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
+	}
+
+	//白名单验证
+	ip := c.ClientIP()
+	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
+		app.Logger.Info("校验白名单失败", ip)
+		return nil, errno.ErrCommon.WithMessage("非白名单ip:" + ip)
+	}
+
+	//校验sign
+	params := make(map[string]interface{}, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+
+	sign := form.Sign
+	delete(params, "sign")
+
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
+		app.Logger.Info("校验sign失败", form)
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+	})
+
+	if sceneUser.OpenId == "" {
+		app.Logger.Infof("未找到绑定关系 platformKey:%s; memberId: %s", form.PlatformKey, form.MemberId)
+		return nil, errno.ErrBindRecordNotFound
+	}
+
+	userInfo, err := service.DefaultUserService.GetUserByOpenId(sceneUser.OpenId)
+	if err != nil {
+		return nil, errno.ErrUserNotFound
+	}
+
+	//获取pre_point数据 one limit
+	id, _ := strconv.ParseInt(form.PrePointId, 10, 64)
+	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
+		PlatformKey:    sceneUser.PlatformKey,
+		PlatformUserId: sceneUser.PlatformUserId,
+		OpenId:         sceneUser.OpenId,
+		Id:             id,
+		Status:         1,
+	})
+
+	if err != nil {
+		return nil, errno.ErrRecordNotFound
+	}
+
+	//检查上限
+	ctx := context.NewMioContext()
+
+	var isHalf bool
+	var halfPoint int64
+
+	timeStr := time.Now().Format("2006-01-02")
+	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
+
+	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
+	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
+
+	totalPoint := lastPoint + incPoint
+
+	if lastPoint >= int64(scene.PrePointLimit) {
+		return nil, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
+	}
+
+	if totalPoint > int64(scene.PrePointLimit) {
+		p := incPoint
+		incPoint = int64(scene.PrePointLimit) - lastPoint
+		totalPoint = int64(scene.PrePointLimit)
+		isHalf = true
+		halfPoint = p - incPoint
+	}
+
+	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
+
+	//积分
+	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:      sceneUser.OpenId,
+		Type:        entity.POINT_JHX,
+		BizId:       util.UUID(),
+		ChangePoint: incPoint,
+		AdminId:     0,
+		Note:        form.PlatformKey + "#" + one.Tradeno,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	//更新pre_point对应数据
+	one.Status = 2
+	one.UpdatedAt = time.Now()
+	if isHalf {
+		one.Status = 1
+		one.Point = strconv.FormatInt(halfPoint, 10)
+	}
+
+	err = repository.DefaultBdScenePrePointRepository.Save(&one)
+	if err != nil {
+		return nil, err
+	}
+
+	//减碳量
+	fromString, _ := decimal.NewFromString(one.Point)
+	amount, _ := fromString.Div(decimal.NewFromInt(int64(scene.Override))).Float64()
+	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	if typeCarbonStr != "" {
+		_, err = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId: sceneUser.OpenId,
+			UserId: userInfo.ID,
+			Type:   typeCarbonStr,
+			Value:  amount,
+			Ip:     ip,
+		})
+		if err != nil {
+			app.Logger.Errorf("预加积分 err:%s", err.Error())
+		}
+
+	}
+
+	return gin.H{
+		"point":     point,
+		"thisPoint": strconv.FormatInt(halfPoint, 10),
+	}, nil
 }
