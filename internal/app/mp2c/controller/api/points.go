@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"time"
@@ -38,13 +39,44 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 		OrderBy:   entity.OrderByList{entity.OrderByPointTranCTDESC},
 	})
 
+	//查询openid是否是志愿汇id
+	zyhService := platform.NewZyhService(context.NewMioContext())
+	isVolunteer, _ := zyhService.CheckIsVolunteer(user.OpenId)
 	recordInfoList := make([]api_types.PointRecordInfo, 0)
 	for _, pt := range list {
+		zyhTip := ""
 		recordInfo := api_types.PointRecordInfo{}
 		if err := util.MapTo(pt, &recordInfo); err != nil {
 			return nil, err
 		}
-		recordInfo.TypeText = recordInfo.Type.Text()
+		if isVolunteer {
+			//2022-10-13 12:05:58 之前不提醒
+			if recordInfo.CreateTime.Unix() > 1665633958 {
+				//查看type是否推送到志愿汇
+				typeZyh := map[entity.PointTransactionType]string{
+					entity.POINT_STEP:                    "步行",
+					entity.POINT_COFFEE_CUP:              "自带咖啡杯",
+					entity.POINT_BIKE_RIDE:               "骑行",
+					entity.POINT_ECAR:                    "答题活动",
+					entity.POINT_QUIZ:                    "答题活动",
+					entity.POINT_JHX:                     "金华行",
+					entity.POINT_POWER_REPLACE:           "电车换电",
+					entity.POINT_DUIBA_INTEGRAL_RECHARGE: "兑吧虚拟商品充值积分",
+					entity.POINT_RECYCLING_CLOTHING:      "旧物回收 oola衣物鞋帽",
+					entity.POINT_RECYCLING_DIGITAL:       "旧物回收 oola数码",
+					entity.POINT_RECYCLING_APPLIANCE:     "旧物回收 oola家电",
+					entity.POINT_RECYCLING_BOOK:          "旧物回收 oola书籍",
+					entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
+					entity.POINT_FAST_ELECTRICITY:        "快电",
+					entity.POINT_REDUCE_PLASTIC:          "环保减塑",
+				}
+				_, zyhOk := typeZyh[recordInfo.Type]
+				if !zyhOk {
+					zyhTip = "(不获得志愿汇能源)"
+				}
+			}
+		}
+		recordInfo.TypeText = recordInfo.Type.Text() + zyhTip
 		recordInfo.TimeStr = recordInfo.CreateTime.Format("01-02 15:04:05")
 		recordInfoList = append(recordInfoList, recordInfo)
 	}

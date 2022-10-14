@@ -29,6 +29,16 @@ type ZyhService struct {
 	ZyhLogRepository activity.ZyhLogRepository
 }
 
+func (srv ZyhService) CheckIsVolunteer(openid string) (bool, error) {
+	info := srv.ZyhRepository.FindBy(activity.FindZyhById{
+		Openid: openid,
+	})
+	if info.Id == 0 {
+		return false, errno.ErrCommon.WithMessage("不存在该志愿者")
+	}
+	return true, nil
+}
+
 //志愿汇发金币
 
 func (srv ZyhService) SendPoint(pointType string, openid string, point string) (code string, error error) {
