@@ -72,7 +72,7 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 				}
 				_, zyhOk := typeZyh[recordInfo.Type]
 				if !zyhOk {
-					zyhTip = "(不获得志愿汇能源)"
+					zyhTip = "(该场景不转化志愿汇能源)"
 				}
 			}
 		}
