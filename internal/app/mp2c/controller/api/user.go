@@ -155,6 +155,9 @@ func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 			return
 		}()
 	}
+	if err != nil {
+		fmt.Printf("BindMobileByCodeCtr Error:%s", err.Error())
+	}
 	return nil, err
 }
 func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
