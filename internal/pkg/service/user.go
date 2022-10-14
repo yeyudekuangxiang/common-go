@@ -323,10 +323,10 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	city, err := baidu.IpToCity(cip)
 	if err != nil {
 		app.Logger.Errorf("BindPhoneByCode ip地址查询失败 %s", err.Error())
+	} else {
+		userInfo.CityCode = city.Content.AddressDetail.Adcode
+		userInfo.Ip = cip
 	}
-
-	userInfo.CityCode = city.Content.AddressDetail.Adcode
-	userInfo.Ip = cip
 
 	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber, Source: entity.UserSourceMio})
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
