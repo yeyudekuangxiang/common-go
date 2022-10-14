@@ -262,7 +262,9 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 }
 func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
+
 	if userInfo.ID == 0 {
+		app.Logger.Errorf("BindPhoneByCode Error:%s userId:%d", "未查到用户信息", userId)
 		return errno.ErrCommon.WithMessage("未查到用户信息")
 	}
 
