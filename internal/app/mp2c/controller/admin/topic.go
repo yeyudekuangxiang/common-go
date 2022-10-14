@@ -38,7 +38,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		float, _ := strconv.ParseInt(tagIds[0], 10, 64)
 		cond.TagId = float
 	} else if len(tagIds) > 1 {
-		cond.TagIds = strings.Join(tagIds, ",")
+		cond.TagIds = tagIds
 	}
 
 	//get topic by params
