@@ -74,6 +74,33 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 	return response.ErrCode, nil
 }
 
+func (srv ZyhService) SendPointJb(pointType string, volId string, point string) (code string, error error) {
+	params := make(map[string]string, 0)
+	params["AccessKeyId"] = config.Config.ActivityZyh.AccessKeyId
+	params["type"] = pointType
+	params["volunteerId"] = volId
+	params["point"] = point
+	sign := util2.GetSign(params)
+	params["Signature"] = sign //strings.ToUpper()
+	url := srv.Domain
+	body, err := httputil.PostMapFrom(url, params)
+	fmt.Printf("%s\n", body)
+	if err != nil {
+		return "30001", err
+	}
+	response := zyhCommonResponse{}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "30002", err
+	}
+	if response.ErrCode != "0000" {
+		return response.ErrCode, errno.ErrCommon.WithMessage(response.Message)
+	}
+	//入库
+	fmt.Printf("%v\n", response)
+	return response.ErrCode, nil
+}
+
 func (srv ZyhService) CreateLog(dto srv_types.GetZyhLogAddDTO) error {
 	return srv.ZyhLogRepository.Save(&entity.ZyhLog{
 		Openid:         dto.Openid,

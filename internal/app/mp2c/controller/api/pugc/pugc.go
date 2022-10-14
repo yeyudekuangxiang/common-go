@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/model/entity/pugc"
 	questionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform"
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -25,6 +26,67 @@ import (
 var DefaultPugcController = PugcController{}
 
 type PugcController struct {
+}
+
+//周年庆双倍积分奖励明细
+
+func (PugcController) SendZyhPoint(c *gin.Context) (gin.H, error) {
+	f, err := excelize.OpenFile("/Users/apple/Desktop/积分1000志愿汇重推v1.xlsx")
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+	// Get all the rows in the Sheet2.
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+	zyhService := platform.NewZyhService(context.NewMioContext())
+
+	//后续进行实际话费充值操作                                      //需要手机号码
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		vid := row[0]
+		transactionId := row[3]
+		pointTypeString := row[4]
+		pointType := entity.PointTransactionType(pointTypeString)
+		pointStr := row[5]
+		point, _ := strconv.ParseInt(pointStr, 10, 64)
+
+		sendType := "0"
+		switch pointType {
+		case entity.POINT_QUIZ:
+			sendType = "1"
+			break
+		case entity.POINT_STEP:
+			sendType = "2"
+			break
+		}
+
+		messageCode, messageErr := zyhService.SendPointJb(sendType, vid, pointStr)
+		//发送结果记录到日志
+		msgErr := ""
+		if messageErr != nil {
+			msgErr = messageErr.Error()
+		}
+		zyhService.CreateLog(srv_types.GetZyhLogAddDTO{
+			Openid:         vid,
+			PointType:      pointType,
+			Value:          point,
+			ResultCode:     messageCode,
+			AdditionalInfo: msgErr,
+			TransactionId:  transactionId,
+		})
+
+		if messageErr != nil {
+			return nil, messageErr
+		}
+	}
+	fmt.Println("发完了")
+	return nil, nil
 }
 
 func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
