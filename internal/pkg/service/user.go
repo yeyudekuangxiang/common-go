@@ -262,7 +262,9 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 }
 func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
+
 	if userInfo.ID == 0 {
+		app.Logger.Errorf("BindPhoneByCode Error:%s userId:%d", "未查到用户信息", userId)
 		return errno.ErrCommon.WithMessage("未查到用户信息")
 	}
 
@@ -281,9 +283,12 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		app.Logger.Errorf("BindPhoneByCode error:%s", err.Error())
 		return errno.ErrCommon
 	}
+
 	if phoneResult.ErrCode != 0 {
+		app.Logger.Errorf("BindPhoneByCode Response error:%s", phoneResult.ErrMSG)
 		return errno.ErrBindMobile.WithErrMessage(fmt.Sprintf("%d %s", phoneResult.ErrCode, phoneResult.ErrMSG))
 	}
+
 	userInfo.PhoneNumber = phoneResult.Data.PhoneNumber
 
 	isBlack := app.Redis.SIsMember(context.Background(), config.RedisKey.BlackList, phoneResult.Data.PhoneNumber)
@@ -310,6 +315,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		if err != nil {
 			app.Logger.Info("BindPhoneByCode 风险等级查询查询出错", err.Error())
 		}
+
 		userInfo.Risk = rest.RiskRank
 	}
 
@@ -318,16 +324,19 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	if err != nil {
 		app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
 	}
+
 	userInfo.CityCode = city.Content.AddressDetail.Adcode
 	userInfo.Ip = cip
 
 	userByMobile, ok, _ := u.r.GetUser(repository.GetUserBy{Mobile: userInfo.PhoneNumber, Source: entity.UserSourceMio})
 	specialUser := DefaultUserSpecialService.GetSpecialUserByPhone(userInfo.PhoneNumber)
+
 	//检查重复绑定 特殊用户有已绑定的账号
 	if ok && userByMobile.OpenId != userInfo.OpenId && specialUser.ID == 0 {
-		app.Logger.Errorf("bind user: %s; old user: %s, bind mobile:%s, binding mobile:%s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, userByMobile.PhoneNumber, userInfo.PhoneNumber, specialUser.ID)
+		app.Logger.Errorf("BindPhoneByCode err: bind user: %s; old user: %s, bind mobile:%s, binding mobile:%s, isSpecial:%d", userInfo.OpenId, userByMobile.OpenId, userByMobile.PhoneNumber, userInfo.PhoneNumber, specialUser.ID)
 		return errno.ErrCommon.WithMessage("该号码已绑定")
 	}
+
 	//更新特殊用户的数据
 	if ok && specialUser.ID != 0 && !u.checkOpenId(userByMobile.OpenId) && specialUser.Status == 0 {
 		//更新topic userid
@@ -354,9 +363,12 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	//更新保存用户信息
 	ret := u.r.Save(&userInfo)
 
+	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
+
 	if invitedBy != "" && userInfo.Risk > 2 {
-		return errno.ErrCommon.WithMessage("很遗憾您暂无法参与活动")
+		return ret
 	}
+
 	//有邀请，并且没有发放奖励，不是黑产用户，给用户发放奖励
 	inviteInfo := u.rInvite.GetInviteNoReward(userInfo.OpenId)
 	if inviteInfo.ID != 0 && userInfo.Risk <= 2 {
@@ -372,9 +384,9 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		if err != nil {
 			app.Logger.Errorf("发放邀请积分失败:%s, 用户openId:%s", err.Error(), userInfo.OpenId)
 		}
+
 	}
 
-	go u.SendUserIdentifyToZhuGe(userInfo.OpenId) //个人信息打点到诸葛
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {

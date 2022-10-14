@@ -90,10 +90,10 @@ func openRouter(router *gin.Engine) {
 				openBusticketRouter.POST("/get_collect", apiutil.Format(open.DefaultJhxController.JhxGetPreCollectPoint)) //获取积分气泡
 				openBusticketRouter.POST("/collect", apiutil.Format(open.DefaultJhxController.JhxCollectPoint))           //收集积分气泡
 			}
-			openPlatformRouter.POST("/pre_collect", apiutil.Format(open.DefaultJhxController.JhxPreCollectPoint))      //金华行单独调用 预加积分
-			openPlatformRouter.POST("/pre_point", apiutil.Format(open.DefaultPlatformController.PrePoint))             //第三方平台 预加积分
-			openPlatformRouter.POST("/get_pre_point", apiutil.Format(open.DefaultPlatformController.GetPrePointList))  //第三方平台 预加积分
-			openPlatformRouter.POST("/collect_pre_point", apiutil.Format(open.DefaultPlatformController.CollectPoint)) //第三方平台 预加积分
+			openPlatformRouter.POST("/pre_collect", apiutil.Format(open.DefaultJhxController.JhxPreCollectPoint))         //金华行单独调用 预加积分
+			openPlatformRouter.POST("/pre_point", apiutil.Format(open.DefaultPlatformController.PrePoint))                //第三方平台 预加积分
+			openPlatformRouter.POST("/get_pre_point", apiutil.Format(open.DefaultPlatformController.GetPrePointList))     //第三方平台 预加积分
+			openPlatformRouter.POST("/collect_pre_point", apiutil.Format(open.DefaultPlatformController.CollectPrePoint)) //第三方平台 预加积分
 
 		}
 	}
