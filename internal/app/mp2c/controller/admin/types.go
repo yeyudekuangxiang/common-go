@@ -89,7 +89,7 @@ type CommentDeleteRequest struct {
 type TopicListRequest struct {
 	ID        int64  `json:"id" form:"id" alias:"帖子id" binding:"gte=0"`
 	Title     string `json:"title" form:"title" alias:"帖子标题"`
-	TagId     int64  `json:"tagId" form:"tagId" alias:"标签id" binding:"gte=0"`
+	TagId     string `json:"tagId" form:"tagId" alias:"标签id" binding:"gte=0"`
 	UserId    int64  `json:"userId" form:"userId" alias:"用户id" binding:"gte=0"`
 	UserName  string `json:"userName" form:"userName" alias:"用户名"`
 	Status    int    `json:"status" form:"status" alias:"审核状态" binding:"min=0,max=4"`

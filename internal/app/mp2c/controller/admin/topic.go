@@ -5,6 +5,8 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"strconv"
+	"strings"
 )
 
 var DefaultTopicController = TopicController{}
@@ -18,19 +20,29 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	//get topic by params
-	list, total, err := service.DefaultTopicAdminService.GetTopicList(repository.TopicListRequest{
+	cond := repository.TopicListRequest{
 		ID:        form.ID,
 		Title:     form.Title,
 		UserId:    form.UserId,
 		UserName:  form.UserName,
-		TagId:     form.TagId,
 		Status:    form.Status,
 		IsTop:     form.IsTop,
 		IsEssence: form.IsEssence,
 		Offset:    form.Offset(),
 		Limit:     form.Limit(),
-	})
+	}
+
+	tagIds := strings.Split(form.TagId, ",")
+
+	if len(tagIds) == 1 {
+		float, _ := strconv.ParseInt(tagIds[0], 10, 64)
+		cond.TagId = float
+	} else if len(tagIds) > 1 {
+		cond.TagIds = strings.Join(tagIds, ",")
+	}
+
+	//get topic by params
+	list, total, err := service.DefaultTopicAdminService.GetTopicList(cond)
 
 	if err != nil {
 		return nil, err

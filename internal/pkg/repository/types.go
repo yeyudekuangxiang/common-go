@@ -59,6 +59,7 @@ type TopicListRequest struct {
 	UserId    int64  `json:"userId"`
 	UserName  string `json:"userName"`
 	TagId     int64  `json:"tagId"`
+	TagIds    string `json:"tagIds"`
 	Status    int    `json:"status"`    //0全部 1待审核 2审核失败 3已发布 4已下架
 	IsTop     int    `json:"isTop"`     //是否置顶
 	IsEssence int    `json:"isEssence"` //是否
