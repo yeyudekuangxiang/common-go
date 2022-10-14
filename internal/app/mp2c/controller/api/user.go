@@ -13,7 +13,6 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"strconv"
 	"time"
 )
 
@@ -144,9 +143,9 @@ func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	if err == nil && user.ChannelId == 1059 {
 		go func() {
 			jhxService := jhx.NewJhxService(mioctx.NewMioContext())
-			orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
+
 			for i := 0; i < 2; i++ {
-				err := jhxService.TicketCreate(orderNo+strconv.Itoa(i), 123, user)
+				_, err = jhxService.TicketCreate(1000, user)
 				if err != nil {
 					app.Logger.Errorf("金华行发券失败:%s", err.Error())
 					return

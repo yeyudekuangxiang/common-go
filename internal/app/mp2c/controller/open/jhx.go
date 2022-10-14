@@ -15,7 +15,6 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"strconv"
 	"time"
 )
 
@@ -31,12 +30,13 @@ func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 	jhxService := jhx.NewJhxService(context.NewMioContext())
-	orderNo := "jhx" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	err := jhxService.TicketCreate(orderNo, 123, user)
+	tradeNo, err := jhxService.TicketCreate(1000, user)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"orderId": tradeNo,
+	}, nil
 }
 
 func (ctr JhxController) TicketStatus(ctx *gin.Context) (gin.H, error) {

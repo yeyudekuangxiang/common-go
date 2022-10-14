@@ -82,9 +82,9 @@ func WithJhxNonce(nonce string) JhxOptions {
 	}
 }
 
-func (srv JhxService) TicketCreate(tradeno string, typeId int64, user entity.User) error {
+func (srv JhxService) TicketCreate(typeId int64, user entity.User) (string, error) {
 	params := srv.getCommonParams()
-	params["tradeno"] = tradeno
+	params["tradeno"] = "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
 	params["mobile"] = user.PhoneNumber
 	sign := srv.getSign(params)
 	params["sign"] = strings.ToUpper(sign)
@@ -92,41 +92,43 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, user entity.Use
 	body, err := httputil.PostJson(url, params)
 	fmt.Printf("ticket_create response body: %s\n", body)
 	if err != nil {
-		return err
+		return "", err
 	}
 	response := jhxCommonResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
-		return err
+		return "", err
 	}
 	if response.Code != 0 {
-		return errors.New(response.Msg)
+		return "", errors.New(response.Msg)
 	}
 	ticketCreateResponse := &jhxTicketCreateResponse{}
 	err = util.MapTo(response.Data, &ticketCreateResponse)
 	if err != nil {
-		return err
+		return "", err
 	}
+
 	var expireTime time.Time
 	if ticketCreateResponse.ExpireTime == "" {
 		expireTime = time.Now().AddDate(1, 0, 0)
 	} else {
 		expireTime, _ = time.Parse("2006-01-02", ticketCreateResponse.ExpireTime)
 	}
-	coupon, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+
+	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
 		CouponCardTypeId:     typeId,
 		CouponCardQrcodeText: ticketCreateResponse.QrCodeStr,
 		UserId:               user.ID,
-		BizId:                tradeno,
+		BizId:                params["tradeno"],
 		StartTime:            time.Now().UnixMilli(),
 		EndTime:              expireTime.UnixMilli(),
 	})
-	fmt.Printf("coupon: %v\n", coupon)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	return params["tradeno"], nil
 }
 
 //消费通知
@@ -140,7 +142,7 @@ func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) e
 	}
 	//查询库 根据tradeno获取券码
 	coupon, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
-		CouponCardTypeId: 123,
+		CouponCardTypeId: 1000,
 		BizId:            params["tradeno"].(string),
 	})
 	if err != nil {
