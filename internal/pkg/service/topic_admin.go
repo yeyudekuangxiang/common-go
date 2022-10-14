@@ -57,7 +57,7 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 		query.Where("topic.is_essence = ?", param.IsEssence)
 	}
 
-	if param.TagId != 0 || len(param.TagIds) > 0 {
+	if param.TagId != 0 {
 		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
 	} else if len(param.TagIds) > 0 {
 		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id in (?)", param.TagIds)
