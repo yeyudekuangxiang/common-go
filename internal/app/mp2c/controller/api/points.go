@@ -51,7 +51,7 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 		}
 		if isVolunteer {
 			//2022-10-13 12:05:58 之前不提醒
-			if recordInfo.CreateTime.Unix() > 1665633958 {
+			if recordInfo.CreateTime.Unix() > 1665633958 && recordInfo.Value > 0 {
 				//查看type是否推送到志愿汇
 				typeZyh := map[entity.PointTransactionType]string{
 					entity.POINT_STEP:                    "步行",
