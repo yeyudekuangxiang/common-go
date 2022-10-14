@@ -61,10 +61,16 @@ type PrePointRequest struct {
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 
-type CollectPrePoint struct {
+type CollectPrePointRequest struct {
 	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	PrePointId  string `json:"prePointId" form:"prePointId" binding:"required"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
+}
+
+type PrePointListRequest struct {
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 

@@ -212,7 +212,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 
 // GetPrePointList 获取预加积分列表
 func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error) {
-	form := api.PrePointRequest{}
+	form := api.PrePointListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
@@ -232,7 +232,7 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 	}
 
 	//校验sign
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
@@ -241,26 +241,14 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 	sign := form.Sign
 	delete(params, "sign")
 
-	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
-		app.Logger.Info("校验sign失败", form)
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
-	}
-
-	var openId string
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-	})
-
-	if sceneUser.ID != 0 {
-		openId = sceneUser.OpenId
 	}
 
 	res, total, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
 		Status:         1,
-		OpenId:         openId,
 		StartTime:      time.Now().AddDate(0, 0, -7),
 	})
 
@@ -276,7 +264,7 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 
 // CollectPrePoint  收集预加积分
 func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error) {
-	form := api.CollectPrePoint{}
+	form := api.CollectPrePointRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
@@ -310,10 +298,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-	})
+	sceneUser := service.DefaultBdSceneUserService.FindPlatformUserByPlatformUserId(form.MemberId, form.PlatformKey)
 
 	if sceneUser.OpenId == "" {
 		app.Logger.Infof("未找到绑定关系 platformKey:%s; memberId: %s", form.PlatformKey, form.MemberId)
