@@ -75,6 +75,9 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 					zyhTip = "(该场景不转化志愿汇能源)"
 				}
 			}
+			if recordInfo.Type == entity.POINT_QUIZ && recordInfo.Value == 2500 {
+				zyhTip = "(该场景不转化志愿汇能源)"
+			}
 		}
 		recordInfo.TypeText = recordInfo.Type.Text() + zyhTip
 		recordInfo.TimeStr = recordInfo.CreateTime.Format("01-02 15:04:05")

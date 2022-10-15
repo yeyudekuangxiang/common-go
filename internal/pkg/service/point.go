@@ -190,6 +190,9 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 				entity.POINT_REDUCE_PLASTIC:          "环保减塑",
 			}
 			_, zyhOk := typeZyh[dto.Type]
+			if dto.Type == entity.POINT_QUIZ && dto.ChangePoint == 2500 {
+				zyhOk = false
+			}
 			if zyhOk {
 				sendType := "0"
 				switch dto.Type {

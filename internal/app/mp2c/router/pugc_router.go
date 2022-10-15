@@ -12,6 +12,7 @@ func pugcRouter(router *gin.Engine) {
 	pugcRouter.Use(middleware.Throttle())
 	//pugcRouter.Use(mustAuth())
 	{
+		pugcRouter.GET("/sendZyhPoint", apiutil.Format(pugc.DefaultPugcController.SendZyhPoint))
 		pugcRouter.GET("/carbonInit", apiutil.Format(pugc.DefaultPugcController.CarbonInit))
 		pugcRouter.POST("/ex", apiutil.Format(pugc.DefaultPugcController.ExportExcel))
 		pugcRouter.GET("/sendPoint", apiutil.Format(pugc.DefaultPugcController.SendPoint))
