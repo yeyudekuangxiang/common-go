@@ -614,9 +614,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.Nickname = nikeName
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
-
-	topicModel.Status = 1
-
+	
 	//tag
 	if len(tagIds) > 0 {
 		tagModel := make([]entity.Tag, 0)
