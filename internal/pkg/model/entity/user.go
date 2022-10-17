@@ -58,7 +58,7 @@ type User struct {
 	UnionId      string       `gorm:"column:unionid" json:"unionId"`
 	Time         model.Time   `gorm:"time" json:"time"`
 	GUID         string       `gorm:"guid" json:"guid"`
-	Partners     Partner      `gorm:"partners" json:"partners"` //合作商 0:非乐活家 1:乐活家
+	Partners     Partner      `gorm:"partners" json:"partners"` //乐活家 1是 2否
 	Position     UserPosition `json:"position"`                 //身份 blue:蓝v yellow:黄v ordinary:普通用户
 	PositionIcon string       `json:"positionIcon"`
 	Risk         int          `json:"risk"`

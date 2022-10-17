@@ -21,15 +21,17 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	cond := repository.TopicListRequest{
-		ID:        form.ID,
-		Title:     form.Title,
-		UserId:    form.UserId,
-		UserName:  form.UserName,
-		Status:    form.Status,
-		IsTop:     form.IsTop,
-		IsEssence: form.IsEssence,
-		Offset:    form.Offset(),
-		Limit:     form.Limit(),
+		ID:         form.ID,
+		Title:      form.Title,
+		UserId:     form.UserId,
+		UserName:   form.UserName,
+		Status:     form.Status,
+		IsTop:      form.IsTop,
+		IsEssence:  form.IsEssence,
+		IsPartners: form.IsPartners,
+		Position:   form.Position,
+		Offset:     form.Offset(),
+		Limit:      form.Limit(),
 	}
 
 	tagIds := strings.Split(form.TagId, ",")
@@ -38,7 +40,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		float, _ := strconv.ParseInt(tagIds[0], 10, 64)
 		cond.TagId = float
 	} else if len(tagIds) > 1 {
-		cond.TagIds = strings.Join(tagIds, ",")
+		cond.TagIds = tagIds
 	}
 
 	//get topic by params
