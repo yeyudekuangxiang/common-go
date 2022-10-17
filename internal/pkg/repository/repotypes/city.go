@@ -6,3 +6,7 @@ type GetCityListDO struct {
 	Name          string
 	PidCode       string
 }
+
+type GetCityByCode struct {
+	CityCode string
+}

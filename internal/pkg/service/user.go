@@ -8,11 +8,13 @@ import (
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
+	contextMix "mio/internal/pkg/core/context"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -28,19 +30,22 @@ import (
 
 var DefaultUserService = NewUserService(
 	repository.DefaultUserRepository,
-	repository.InviteRepository{})
+	repository.InviteRepository{},
+	repository.NewCityRepository(contextMix.NewMioContext()))
 
 func NewUserService(r repository.UserRepository,
-	rInvite repository.InviteRepository) UserService {
+	rInvite repository.InviteRepository, rCity repository.CityRepository) UserService {
 	return UserService{
 		r:       r,
 		rInvite: rInvite,
+		rCity:   rCity,
 	}
 }
 
 type UserService struct {
 	r       repository.UserRepository
 	rInvite repository.InviteRepository
+	rCity   repository.CityRepository
 }
 
 // GetUser 查询用户信息
@@ -144,10 +149,16 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user.ChannelId = ch.Cid
 	ret := repository.DefaultUserRepository.Save(&user)
 
+	retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
 	zhuGeAttr["渠道"] = user.ChannelId
+	zhuGeAttr["城市code"] = user.CityCode
+	if cityErr != nil {
+		zhuGeAttr["城市名"] = retCity.Name
+	}
+
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
 

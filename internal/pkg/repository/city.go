@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"gorm.io/gorm"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository/repotypes"
@@ -40,4 +41,18 @@ func (repo CityRepository) GetList(by repotypes.GetCityListDO) ([]entity.City, e
 		panic(err)
 	}
 	return list, nil
+}
+
+func (repo CityRepository) GetByCityCode(by repotypes.GetCityByCode) (entity.City, error) {
+	info := entity.City{}
+	db := repo.ctx.DB.Model(info)
+	if by.CityCode != "" {
+		db.Where("city_code", by.CityCode)
+	}
+	if err := db.First(&info).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+	}
+	return info, nil
 }

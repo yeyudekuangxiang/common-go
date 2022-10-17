@@ -7,3 +7,7 @@ type CreateCityDto struct {
 	Name     string
 	PidCode  string
 }
+
+type GetByCityCode struct {
+	CityCode string
+}
