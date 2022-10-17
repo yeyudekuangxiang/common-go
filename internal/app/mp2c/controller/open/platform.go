@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
+	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -49,6 +50,7 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	if err != nil && err != errno.ErrExisting {
 		return nil, err
 	}
+
 	//绑定回调
 	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
 		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
@@ -56,6 +58,14 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
 		}
 	}
+	if scene.Ch == "yitongxing" && err != errno.ErrExisting {
+		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.AppId), ytx.WithDomain(scene.Domain))
+		err = ytxSrv.Synchro(sceneUser.PlatformUserId, sceneUser.OpenId)
+		if err != nil {
+			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
+		}
+	}
+
 	//返回
 	return gin.H{
 		"memberId":     sceneUser.PlatformUserId,

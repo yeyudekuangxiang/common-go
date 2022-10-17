@@ -32,9 +32,9 @@ type jhxOption struct {
 	Nonce     string
 }
 
-type JhxOptions func(options *jhxOption)
+type Options func(options *jhxOption)
 
-func NewJhxService(ctx *context.MioContext, jhxOptions ...JhxOptions) *JhxService {
+func NewJhxService(ctx *context.MioContext, jhxOptions ...Options) *Service {
 	options := &jhxOption{
 		Domain:    "http://m.jinhuaxing.com.cn/api",
 		AppId:     "2498728d209d",
@@ -47,42 +47,42 @@ func NewJhxService(ctx *context.MioContext, jhxOptions ...JhxOptions) *JhxServic
 		jhxOptions[i](options)
 	}
 
-	return &JhxService{
+	return &Service{
 		ctx:    ctx,
 		option: options,
 	}
 }
 
-type JhxService struct {
+type Service struct {
 	ctx    *context.MioContext
 	option *jhxOption
 }
 
-func WithJhxDomain(domain string) JhxOptions {
+func WithJhxDomain(domain string) Options {
 	return func(option *jhxOption) {
 		option.Domain = domain
 	}
 }
 
-func WithJhxAppId(appId string) JhxOptions {
+func WithJhxAppId(appId string) Options {
 	return func(option *jhxOption) {
 		option.AppId = appId
 	}
 }
 
-func WithJhxTimestamp(timestamp string) JhxOptions {
+func WithJhxTimestamp(timestamp string) Options {
 	return func(option *jhxOption) {
 		option.Timestamp = timestamp
 	}
 }
 
-func WithJhxNonce(nonce string) JhxOptions {
+func WithJhxNonce(nonce string) Options {
 	return func(option *jhxOption) {
 		option.Nonce = nonce
 	}
 }
 
-func (srv JhxService) TicketCreate(tradeno string, typeId int64, user entity.User) error {
+func (srv Service) TicketCreate(tradeno string, typeId int64, user entity.User) error {
 	params := srv.getCommonParams()
 	params["tradeno"] = tradeno
 	params["mobile"] = user.PhoneNumber
@@ -130,7 +130,7 @@ func (srv JhxService) TicketCreate(tradeno string, typeId int64, user entity.Use
 }
 
 //消费通知
-func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) error {
+func (srv Service) TicketNotify(sign string, params map[string]interface{}) error {
 	scene := service.DefaultBdSceneService.FindByCh("jinhuaxing")
 	if scene.Key == "" || scene.Key == "e" {
 		return errno.ErrCommon.WithMessage("渠道查询失败")
@@ -167,7 +167,7 @@ func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) e
 	return nil
 }
 
-func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error) {
+func (srv Service) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error) {
 	params := srv.getCommonParams()
 	params["tradeno"] = tradeno
 	sign := srv.getSign(params)
@@ -200,7 +200,7 @@ func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, er
 	return ticketStatusResponse, nil
 }
 
-func (srv JhxService) BindSuccess(mobile string, status string) error {
+func (srv Service) BindSuccess(mobile string, status string) error {
 	params := srv.getCommonParams()
 	params["status"] = status
 	params["mobile"] = mobile
@@ -225,7 +225,7 @@ func (srv JhxService) BindSuccess(mobile string, status string) error {
 }
 
 //创建气泡数据
-func (srv JhxService) PreCollectPoint(sign string, params map[string]string) error {
+func (srv Service) PreCollectPoint(sign string, params map[string]string) error {
 	if err := srv.checkSign(sign, params); err != nil {
 		return err
 	}
@@ -257,7 +257,7 @@ func (srv JhxService) PreCollectPoint(sign string, params map[string]string) err
 }
 
 //获取气泡数据
-func (srv JhxService) GetPreCollectPointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
+func (srv Service) GetPreCollectPointList(sign string, params map[string]string) ([]entity.BdScenePrePoint, int64, error) {
 	if err := srv.checkSign(sign, params); err != nil {
 		return nil, 0, err
 	}
@@ -306,7 +306,7 @@ func (srv JhxService) GetPreCollectPointList(sign string, params map[string]stri
 }
 
 //消费气泡数据
-func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64, error) {
+func (srv Service) CollectPoint(sign string, params map[string]string) (int64, error) {
 	if err := srv.checkSign(sign, params); err != nil {
 		return 0, err
 	}
@@ -392,7 +392,7 @@ func (srv JhxService) CollectPoint(sign string, params map[string]string) (int64
 	return point, nil
 }
 
-func (srv JhxService) checkSign(sign string, params map[string]string) error {
+func (srv Service) checkSign(sign string, params map[string]string) error {
 	md5Sign := srv.getSign(params)
 	if sign != md5Sign {
 		return errno.ErrCommon.WithMessage("验签失败")
@@ -401,7 +401,7 @@ func (srv JhxService) checkSign(sign string, params map[string]string) error {
 }
 
 // GetSign 签名
-func (srv JhxService) getSign(params map[string]string) string {
+func (srv Service) getSign(params map[string]string) string {
 	var slice []string
 	for k := range params {
 		slice = append(slice, k)
@@ -415,7 +415,7 @@ func (srv JhxService) getSign(params map[string]string) string {
 	return encrypt.Md5(signStr)
 }
 
-func (srv JhxService) getCommonParams() map[string]string {
+func (srv Service) getCommonParams() map[string]string {
 	params := make(map[string]string, 0)
 	params["version"] = srv.option.Version
 	params["appid"] = srv.option.AppId

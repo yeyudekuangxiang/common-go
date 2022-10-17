@@ -9,8 +9,8 @@ type platformForm struct {
 }
 
 type bindPlatform struct {
-	PlatformKey string `json:"platformKey" form:"platformKey"`
-	MemberId    string `json:"memberId,omitempty" form:"memberId"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	MemberId    string `json:"memberId" form:"memberId" binding:"required"`
 	IsNewUser   string `json:"isNewUser" form:"isNewUser"`
 }
 
