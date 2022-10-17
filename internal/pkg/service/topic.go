@@ -114,10 +114,17 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	}
 
 	query.Where("topic.status = ?", entity.TopicStatusPublished)
-	err := query.Count(&total).
-		Group("topic.id").
-		Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc").
-		Limit(param.Limit).
+	query = query.Count(&total).
+		Group("topic.id")
+	if param.Order == "time" {
+		query.Order("topic.updated_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
+	} else if param.Order == "recommend" {
+		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
+	} else {
+		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
+	}
+
+	err := query.Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
 	if err != nil {

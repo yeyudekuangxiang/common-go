@@ -9,8 +9,9 @@ type GetWeappQrCodeFrom struct {
 	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 type GetTopicPageListForm struct {
-	ID         int64 `json:"id" form:"id" binding:"gte=0" alias:"文章id"`
-	TopicTagId int64 `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
+	ID         int64  `json:"id" form:"id" binding:"gte=0" alias:"文章id"`
+	TopicTagId int64  `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
+	Order      string `json:"order" form:"order" alias:"排序"`
 	controller.PageFrom
 }
 type ChangeTopicLikeForm struct {
