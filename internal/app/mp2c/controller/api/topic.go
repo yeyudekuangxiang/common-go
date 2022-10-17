@@ -133,6 +133,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
+		Order:      form.Order,
 	})
 	if err != nil {
 		return nil, err
