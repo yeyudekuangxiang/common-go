@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/repotypes"
 	"time"
 )
 
@@ -19,7 +20,7 @@ type CityService struct {
 
 //  添加发放碳量记录并且更新用户剩余碳量
 
-func (srv CityService) Create(dto api_types.CreateCityDto) (*entity.CarbonTransaction, error) {
+func (srv CityService) Create(dto api_types.CreateCityDto) (*entity.City, error) {
 	//入库
 	cityDo := entity.City{
 		CityCode:  dto.CityCode,
@@ -32,4 +33,14 @@ func (srv CityService) Create(dto api_types.CreateCityDto) (*entity.CarbonTransa
 		return nil, err
 	}
 	return nil, nil
+}
+
+func (srv CityService) GetByCityCode(dto api_types.GetByCityCode) (entity.City, error) {
+	ret, err := srv.repo.GetByCityCode(repotypes.GetCityByCode{
+		CityCode: dto.CityCode,
+	})
+	if err != nil {
+		return entity.City{}, err
+	}
+	return ret, nil
 }
