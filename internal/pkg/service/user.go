@@ -153,7 +153,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
-	zhuGeAttr["渠道"] = user.ChannelId
+	zhuGeAttr["渠道"] = ch.Name
 	zhuGeAttr["城市code"] = user.CityCode
 	if cityErr != nil {
 		zhuGeAttr["城市名"] = retCity.Name
