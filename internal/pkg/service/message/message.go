@@ -121,6 +121,10 @@ func (srv MessageService) DelExtensionSignTime(openid string) {
 
 //SendMessageToSignUser 给用户发送签到提醒
 func (srv MessageService) SendMessageToSignUser() {
+	if !util.DefaultLock.Lock("SendMessageToSignUser", time.Minute*5) {
+		return
+	}
+	defer util.DefaultLock.UnLock("SendMessageToSignUser")
 	messageSignUserKey := config.RedisKey.MessageSignUser
 	time := time.Now().Unix()
 	op := &redis.ZRangeBy{
