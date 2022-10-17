@@ -117,7 +117,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	query = query.Count(&total).
 		Group("topic.id")
 	if param.Order == "time" {
-		query.Order("topic.updated_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
+		query.Order("topic.created_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
 	} else if param.Order == "recommend" {
 		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
 	} else {
