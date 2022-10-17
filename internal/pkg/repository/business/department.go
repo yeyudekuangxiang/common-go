@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultDepartmentRepository = DepartmentRepository{DB: app.DB}
+var DefaultDepartmentRepository = DepartmentRepository{DB: app.BusinessDB}
 
 type DepartmentRepository struct {
 	DB *gorm.DB
@@ -17,12 +17,12 @@ type IDepartmentRepository interface {
 }
 
 func (u DepartmentRepository) Save(Department *business.Department) error {
-	return app.DB.Save(Department).Error
+	return u.DB.Save(Department).Error
 }
 
 func (u DepartmentRepository) GetDepartmentBy(by GetDepartmentBy) business.Department {
 	Department := business.Department{}
-	db := app.DB.Model(Department)
+	db := u.DB.Model(Department)
 
 	if by.ID > 0 {
 		db.Where("id = ?", by.ID)
@@ -38,7 +38,7 @@ func (u DepartmentRepository) GetDepartmentBy(by GetDepartmentBy) business.Depar
 
 func (u DepartmentRepository) GetDepartmentListBy(by GetDepartmentListBy) []business.Department {
 	list := make([]business.Department, 0)
-	db := app.DB.Model(business.Department{})
+	db := u.DB.Model(business.Department{})
 	if len(by.Ids) > 0 {
 		db.Where("id in (?)", by.Ids)
 	}

@@ -15,7 +15,26 @@ Throttle = 5-S
 
 [database]
 # 数据库类型 mysql postgres
-Type=mysql
+Type=postgres
+Host=127.0.0.1
+Port=3306
+UserName=root
+Password=root
+Database=mio
+TablePrefix=
+#最大连接数 <=0表示不限制连接数
+MaxOpenConns=10
+#最大空闲数 <=0表示不保留空闲连接
+MaxIdleConns=5
+#连接可重用时间 <=0表示永远可用(单位秒)
+MaxLifetime=50
+#控制台日志等级 silent error warn info
+LogLevel=info
+
+#企业版数据库连接
+[databaseBusines]
+# 数据库类型 mysql postgres
+Type=postgres
 Host=127.0.0.1
 Port=3306
 UserName=root
@@ -74,8 +93,8 @@ AppKey=
 AppSecret=
 
 [java]
-JavaLoginUrl=http://mp2c-service:9999/api/mp2c/auth/login
-JavaWhoAmi=http://mp2c-service:9999/api/mp2c/user/whoami
+JavaLoginUrl=https://dev.mp2c.miotech.com/api/mp2c/auth/login
+JavaWhoAmi=https://dev.mp2c.miotech.com/api/mp2c/user/whoami
 
 [zhuge]
 AppKey=
@@ -86,4 +105,8 @@ Url=amqp://guest:guest@localhost:5672
 
 [couponRpc]
 Endpoints=127.0.0.1:2006
+NonBlock=true
+
+[tokenCenterRpc]
+Endpoints=127.0.0.1:2009
 NonBlock=true

@@ -32,9 +32,9 @@ func (srv QuizSingleRecordService) CreateSingleRecord(param CreateSingleRecordPa
 	}
 	return &record, app.DB.Create(&record).Error
 }
-func (srv QuizSingleRecordService) IsAnswered(openId string, questionId string) error {
+func (srv QuizSingleRecordService) IsAnswered(openId string, questionId string, day timeutils.Date) error {
 	record := entity.QuizSingleRecord{}
-	err := app.DB.Where("openid = ? and question_id = ? and answer_time >= ? and answer_time < ?", openId, questionId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Take(&record).Error
+	err := app.DB.Where("openid = ? and question_id = ? and answer_time >= ? and answer_time < ?", openId, questionId, day.FullString(), day.AddDay(1).FullString()).Take(&record).Error
 
 	if err == nil {
 		return errno.ErrLimit.WithMessage("重复提交")
@@ -57,13 +57,13 @@ func (srv QuizSingleRecordService) GetTodayAnswerNum(openId string) int64 {
 	}
 	return count
 }
-func (srv QuizSingleRecordService) GetTodaySummary(openId string) DaySummary {
+func (srv QuizSingleRecordService) GetTodaySummary(openId string, day timeutils.Date) DaySummary {
 	summary := DaySummary{}
-	err := app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ?", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Count(&summary.AnsweredNum).Error
+	err := app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ?", openId, day.FullString(), day.AddDay(1).FullString()).Count(&summary.AnsweredNum).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
-	err = app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ? and correct = true", openId, timeutils.NowDate().FullString(), timeutils.NowDate().AddDay(1).FullString()).Count(&summary.CorrectNum).Error
+	err = app.DB.Model(entity.QuizSingleRecord{}).Where("openid = ? and answer_time >= ? and answer_time < ? and correct = true", openId, day.FullString(), day.AddDay(1).FullString()).Count(&summary.CorrectNum).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}

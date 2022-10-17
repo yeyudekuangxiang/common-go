@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultPointLogRepository = NewPointLogRepository(app.DB)
+var DefaultPointLogRepository = NewPointLogRepository(app.BusinessDB)
 
 func NewPointLogRepository(db *gorm.DB) PointLogRepository {
 	return PointLogRepository{
