@@ -121,7 +121,7 @@ func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*en
 	} else if param.Order == "recommend" {
 		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
 	} else {
-		query.Order("topic.see_count desc, topic.like_count desc,  topic.id desc")
+		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
 	}
 
 	err := query.Limit(param.Limit).
