@@ -199,12 +199,10 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//预加积分
-	fromString, _ := decimal.NewFromString(params["amount"])
-	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
-		Point:          point,
+		Point:          form.Point,
 		Status:         1,
 		Tradeno:        form.TradeNo,
 		CreatedAt:      time.Now(),

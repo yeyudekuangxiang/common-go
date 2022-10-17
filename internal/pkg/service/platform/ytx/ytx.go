@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
+	platformUtil "mio/pkg/platform"
 	"sort"
 	"strings"
 	"time"
@@ -62,8 +63,13 @@ func (srv *Service) Synchro(memberId string, openId string) error {
 		PlatformUserId: openId,
 		Ts:             time.Now().UnixMilli(),
 	}
-
-	synchroRequest.Signature = srv.getSign(synchroRequest)
+	params := make(map[string]interface{}, 0)
+	err := util.MapTo(&synchroRequest, &params)
+	if err != nil {
+		return err
+	}
+	params["secret"] = srv.option.Secret
+	synchroRequest.Signature = platformUtil.GetSign(params, "", "&")
 	url := srv.option.Domain + "/markting_activity/network/lvmiao/synchro"
 	body, err := httputil.PostJson(url, synchroRequest)
 	fmt.Printf("ytx synchro response body: %s\n", body)
