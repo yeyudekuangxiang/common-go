@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/duiba"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
@@ -65,7 +66,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 		}
 	}
 
-	return service.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
+	return duiba.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
 		UserId:  userId,
 		OpenId:  userInfo.OpenId,
 		Path:    path,
@@ -311,7 +312,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	}*/
 
 	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()
-	return service.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
+	return duiba.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
 		UserId:  userId,
 		OpenId:  userInfo.OpenId,
 		Path:    path,

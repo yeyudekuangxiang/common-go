@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
+	duiba2 "mio/internal/pkg/service/duiba"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/duiba"
 	duibaApi "mio/pkg/duiba/api/model"
@@ -23,7 +24,7 @@ func (DuiBaController) AutoLogin(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(ctx)
-	u, err := service.DefaultDuiBaService.AutoLogin(service.AutoLoginParam{
+	u, err := duiba2.DefaultDuiBaService.AutoLogin(service.AutoLoginParam{
 		UserId: user.ID,
 		Path:   form.Path,
 	})
@@ -45,7 +46,7 @@ func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
 		}
 	}
 
-	err := service.DefaultDuiBaService.CheckSign(form)
+	err := duiba2.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		app.Logger.Error("ExchangeCallback 参数验证失败", form, err)
 		return gin.H{
@@ -55,7 +56,7 @@ func (DuiBaController) ExchangeCallback(ctx *gin.Context) gin.H {
 		}
 	}
 
-	result, err := service.DefaultDuiBaService.ExchangeCallback(form)
+	result, err := duiba2.DefaultDuiBaService.ExchangeCallback(form)
 	if err != nil {
 		return gin.H{
 			"status":       "fail",
@@ -76,12 +77,12 @@ func (DuiBaController) ExchangeResultNoticeCallback(ctx *gin.Context) string {
 		app.Logger.Error("ExchangeResultNoticeCallback 参数获取失败", ctx, err)
 		return err.Error()
 	}
-	err := service.DefaultDuiBaService.CheckSign(form)
+	err := duiba2.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		app.Logger.Error("ExchangeResultNoticeCallback 参数验证失败", form, err)
 		return err.Error()
 	}
-	err = service.DefaultDuiBaService.ExchangeResultNoticeCallback(form)
+	err = duiba2.DefaultDuiBaService.ExchangeResultNoticeCallback(form)
 	if err != nil {
 		app.Logger.Error("ExchangeResultNoticeCallback 退还积分失败", form, err)
 		return err.Error()
@@ -98,7 +99,7 @@ func (DuiBaController) VirtualGoodCallback(ctx *gin.Context) gin.H {
 			"supplierBizId": "",
 		}
 	}
-	err := service.DefaultDuiBaService.CheckSign(form)
+	err := duiba2.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		app.Logger.Error("VirtualGoodCallback 参数验证失败", form, err)
 		return gin.H{
@@ -107,7 +108,7 @@ func (DuiBaController) VirtualGoodCallback(ctx *gin.Context) gin.H {
 			"supplierBizId": "",
 		}
 	}
-	orderId, credit, err := service.DefaultDuiBaService.VirtualGoodCallback(form)
+	orderId, credit, err := duiba2.DefaultDuiBaService.VirtualGoodCallback(form)
 	if err != nil {
 		app.Logger.Error("VirtualGoodCallback 兑换虚拟商品失败", form, err)
 		return gin.H{
@@ -129,13 +130,13 @@ func (DuiBaController) OrderCallback(ctx *gin.Context) string {
 		app.Logger.Error("OrderCallback 参数获取失败", ctx, err)
 		return err.Error()
 	}
-	err := service.DefaultDuiBaService.CheckSign(form)
+	err := duiba2.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		app.Logger.Error("OrderCallback 参数验证失败", form, err)
 		return err.Error()
 	}
 
-	err = service.DefaultDuiBaService.OrderCallback(form)
+	err = duiba2.DefaultDuiBaService.OrderCallback(form)
 	if err != nil {
 		app.Logger.Error("OrderCallback 同步订单失败", form, err)
 		return err.Error()
@@ -157,7 +158,7 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 
 	pointService := service.NewPointService(context.NewMioContext())
 	userPoint, _ := pointService.FindByOpenId(form.Uid)
-	err := service.DefaultDuiBaService.CheckSign(form)
+	err := duiba2.DefaultDuiBaService.CheckSign(form)
 	if err != nil {
 		return gin.H{
 			"status":       "fail",
@@ -166,7 +167,7 @@ func (DuiBaController) PointAddLogCallback(ctx *gin.Context) gin.H {
 		}
 	}
 
-	tranId, err := service.DefaultDuiBaService.PointAddCallback(form)
+	tranId, err := duiba2.DefaultDuiBaService.PointAddCallback(form)
 
 	userPoint, _ = pointService.FindByOpenId(form.Uid)
 	if err != nil {
