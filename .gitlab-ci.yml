@@ -4,7 +4,7 @@ stages:
   - deploy
   - auto_merge
 build:
-  image: golang:1.17
+  image: yeyudekuangxiang/golang:1.17-alpine3.16
   stage: build
   tags:
     - build
@@ -21,7 +21,6 @@ build:
     paths:
       - .cache
   before_script:
-    - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
     - echo $SSH_PRIVATE_KEY
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
@@ -37,7 +36,7 @@ build:
       - ./cmd/mp2c/mp2c
 
 build-manual:
-  image: golang:1.17
+  image: yeyudekuangxiang/golang:1.17-alpine3.16
   stage: build
   allow_failure: false
   tags:
@@ -55,7 +54,6 @@ build-manual:
     paths:
       - .cache
   before_script:
-    - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
     - echo $SSH_PRIVATE_KEY
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
