@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/shopspring/decimal"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"
 	"mio/internal/pkg/core/app"
@@ -82,6 +81,7 @@ func WithJhxNonce(nonce string) JhxOptions {
 	}
 }
 
+//发放券码
 func (srv JhxService) TicketCreate(typeId int64, user entity.User) (string, error) {
 	params := srv.getCommonParams()
 	params["tradeno"] = "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
@@ -169,6 +169,7 @@ func (srv JhxService) TicketNotify(sign string, params map[string]interface{}) e
 	return nil
 }
 
+//券码状态
 func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error) {
 	params := srv.getCommonParams()
 	params["tradeno"] = tradeno
@@ -202,6 +203,7 @@ func (srv JhxService) TicketStatus(tradeno string) (*jhxTicketStatusResponse, er
 	return ticketStatusResponse, nil
 }
 
+//绑定回调
 func (srv JhxService) BindSuccess(mobile string, status string) error {
 	params := srv.getCommonParams()
 	params["status"] = status
@@ -222,38 +224,6 @@ func (srv JhxService) BindSuccess(mobile string, status string) error {
 	}
 	if response.Code != 0 {
 		return errno.ErrCommon.WithMessage(response.Msg)
-	}
-	return nil
-}
-
-//创建气泡数据
-func (srv JhxService) PreCollectPoint(sign string, params map[string]string) error {
-	if err := srv.checkSign(sign, params); err != nil {
-		return err
-	}
-	//根据 platform_member_id 获取 openid
-	var openId string
-	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUserByPlatformUserId(params["memberId"], params["platformKey"])
-	if sceneUser.ID != 0 {
-		openId = sceneUser.OpenId
-	}
-	//创建数据
-	fromString, err := decimal.NewFromString(params["amount"])
-	if err != nil {
-		return err
-	}
-	point := fromString.Mul(decimal.NewFromInt(10)).Round(2).String()
-	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
-		PlatformKey:    params["platformKey"],
-		PlatformUserId: params["memberId"],
-		Point:          point,
-		OpenId:         openId,
-		Status:         1,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	})
-	if err != nil {
-		return err
 	}
 	return nil
 }
