@@ -13,9 +13,13 @@ build:
     - master
     - tags
   cache:
-    key: mp2c-go-vendor-cache
+    key:
+      files:
+        - go.mod
+        - go.sum
+      prefix: mp2c-go-cache
     paths:
-      - ./vendor
+      - .cache
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
@@ -23,8 +27,10 @@ build:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
+    - mkdir -p .cache
+    - go env -w GOPATH="$CI_PROJECT_DIR/.cache"
+    - go env
   script:
-    - ls
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
@@ -41,9 +47,13 @@ build-manual:
     - /^hotfix-.+$/
     - /^feature-.+$/
   cache:
-    key: mp2c-go-vendor-cache
+    key:
+      files:
+        - go.mod
+        - go.sum
+      prefix: mp2c-go-cache
     paths:
-      - ./vendor
+      - .cache
   before_script:
     - 'which ssh-agent || ( apk add --no-cache --update openssh-client openssh-keygen )'
     - eval $(ssh-agent -s)
@@ -51,8 +61,10 @@ build-manual:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
+    - mkdir -p .cache
+    - go env -w GOPATH="$CI_PROJECT_DIR/.cache"
+    - go env
   script:
-    - ls
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
