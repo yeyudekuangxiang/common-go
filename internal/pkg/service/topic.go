@@ -152,7 +152,7 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 	query.Where("topic.user_id = ?", param.UserId)
 	err := query.Count(&total).
 		Group("topic.id").
-		Order("is_top desc, is_essence desc,like_count desc,updated_at desc").
+		Order("id desc").
 		Limit(param.Limit).
 		Offset(param.Offset).
 		Find(&topList).Error
@@ -614,7 +614,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.Nickname = nikeName
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
-	
+
 	//tag
 	if len(tagIds) > 0 {
 		tagModel := make([]entity.Tag, 0)
