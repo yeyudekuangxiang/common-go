@@ -403,6 +403,7 @@ func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string
 		if err != nil {
 			return err
 		}
+		return nil
 	}
 	app.Logger.Error("未知的虚拟商品类型", orderNum, openid, productItemId)
 	return errno.ErrCommon.WithMessage("未知的虚拟商品类型")
