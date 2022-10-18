@@ -5,6 +5,7 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/duiba"
 )
 
 func InitIni(source interface{}) {
@@ -23,6 +24,6 @@ func InitIni(source interface{}) {
 }
 
 func afterInitIni() {
-	service.InitDefaultDuibaService()
+	duiba.InitDefaultDuibaService()
 	service.InitDefaultOssService()
 }
