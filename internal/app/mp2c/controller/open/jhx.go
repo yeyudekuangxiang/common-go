@@ -16,6 +16,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	platformUtil "mio/pkg/platform"
 	"time"
 )
 
@@ -24,6 +25,7 @@ var DefaultJhxController = JhxController{}
 type JhxController struct {
 }
 
+//发放券码
 func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	form := jhxTicketCreateRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
@@ -40,6 +42,7 @@ func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//查询券码状态
 func (ctr JhxController) TicketStatus(ctx *gin.Context) (gin.H, error) {
 	form := jhxTicketStatusRequest{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
@@ -131,6 +134,7 @@ func (ctr JhxController) JhxCollectPoint(ctx *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//金华行单独调用 预加积分
 func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	form := api.PreCollectRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -151,14 +155,15 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
 	sign := form.Sign
 	delete(params, "sign")
-	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
+
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errors.New("sign:" + form.Sign + " 验证失败")
 	}
@@ -226,7 +231,7 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//预加积分
-	fromString, _ := decimal.NewFromString(params["amount"])
+	fromString, _ := decimal.NewFromString(form.Amount)
 	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
 	amount, _ := fromString.Float64()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
