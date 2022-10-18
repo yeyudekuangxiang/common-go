@@ -28,9 +28,9 @@ build:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
     - mkdir -p .cache
-    - go env -w GOPATH="$CI_PROJECT_DIR/.cache"
-    - go env
+    - export GOPATH="$CI_PROJECT_DIR/.cache"
   script:
+    - go env
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
@@ -62,9 +62,9 @@ build-manual:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\\n\\tStrictHostKeyChecking no\\n\\n" > ~/.ssh/config'
     - mkdir -p .cache
-    - go env -w GOPATH="$CI_PROJECT_DIR/.cache"
-    - go env
+    - export GOPATH="$CI_PROJECT_DIR/.cache"
   script:
+    - go env
     - sh ./scripts/build.sh mp2c
   artifacts:
     paths:
