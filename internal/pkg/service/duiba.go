@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	sduiba "mio/internal/pkg/service/duiba"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -316,6 +317,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
+	//幂等
 	log, err := sduiba.DefaultVirtualGoodLogService.FindVirtualGoodLog(sduiba.FindVirtualGoodLogParam{
 		OrderNum: form.OrderNum,
 		Params:   form.Params,
@@ -323,14 +325,12 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 	if err != nil {
 		return "", 0, err
 	}
-
 	pointService := NewPointService(context.NewMioContext())
-	userPoint, err := pointService.FindByOpenId(form.Uid)
-	if err != nil {
-		return "", 0, err
-	}
-
 	if log.ID != 0 {
+		userPoint, err := pointService.FindByOpenId(form.Uid)
+		if err != nil {
+			return "", 0, err
+		}
 		return log.SupplierBizId, userPoint.Balance, nil
 	}
 
@@ -339,31 +339,72 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 		return "", 0, err
 	}
 
-	err = srv.SendVirtualGoodPoint(form.OrderNum, form.Uid, form.Params)
-	if err != nil {
-		app.Logger.Error("发放兑吧虚拟商品积分失败", err)
-		return "", 0, err
+	switch form.Params {
+	case virtualCouponJhx2Yuan:
+		err := srv.SendVirtualCoupon(form.OrderNum, form.Uid, form.Params)
+		if err != nil {
+			app.Logger.Error("发放兑吧虚拟商品优惠券失败", err)
+			return "", 0, err
+		}
+		userPoint, err := pointService.FindByOpenId(form.Uid)
+		if err != nil {
+			return "", 0, err
+		}
+		return log.SupplierBizId, userPoint.Balance, nil
 	}
 
-	userPoint, err = pointService.FindByOpenId(form.Uid)
-	if err != nil {
-		return "", 0, err
+	if _, ok := virtualGoodMap[form.Params]; ok {
+		point, errSendPoint := srv.SendVirtualGoodPoint(form.OrderNum, form.Uid, form.Params)
+		if errSendPoint != nil {
+			app.Logger.Error("发放兑吧虚拟商品积分失败", errSendPoint)
+			return "", 0, errSendPoint
+		} else {
+			return log.SupplierBizId, point, nil
+		}
 	}
 
-	return log.SupplierBizId, int64(userPoint.Balance), nil
+	return "", 0, errno.ErrCommon.WithMessage("虚拟商品不存在")
 }
-func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productItemId string) error {
+func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productItemId string) (int64, error) {
 	point := virtualGoodMap[productItemId]
 	if point == 0 {
-		return errno.ErrCommon.WithMessage("虚拟商品不存在")
+		return 0, errno.ErrCommon.WithMessage("虚拟商品不存在")
 	}
 	pointService := NewPointService(context.NewMioContext())
-	_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+	newPoint, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openid,
 		Type:         entity.POINT_DUIBA_INTEGRAL_RECHARGE,
 		ChangePoint:  int64(point),
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprintf("兑吧虚拟商品兑换 orderNum:%s productItemId:%s", orderNum, productItemId),
 	})
-	return err
+	if err != nil {
+		return 0, err
+	}
+	return newPoint, nil
+}
+
+const (
+	virtualCouponJhx2Yuan = "3323df0ce743a3e55a38c62dbc92eac4"
+)
+
+func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string) error {
+	switch productItemId {
+	case virtualCouponJhx2Yuan:
+		jhxService := jhx.NewJhxService(context.NewMioContext())
+		user, err := DefaultUserService.GetUserByOpenId(openid)
+		if err != nil {
+			return err
+		}
+		if user.ID == 0 {
+			return errno.ErrUserNotFound.WithCaller()
+		}
+		tradeNo, err := jhxService.TicketCreate(1000, *user)
+		println(tradeNo)
+		if err != nil {
+			return err
+		}
+	}
+	app.Logger.Error("未知的虚拟商品类型", orderNum, openid, productItemId)
+	return errno.ErrCommon.WithMessage("未知的虚拟商品类型")
 }
