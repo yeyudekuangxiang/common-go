@@ -38,6 +38,7 @@ func openRouter(router *gin.Engine) {
 			duibaRouter.GET("/h5", api.DefaultDuiBaController.DuiBaNoLoginH5)
 		}
 
+		openRouter.GET("zyh", apiutil.Format(open.DefaultZyhController.Zyh))
 		//订单同步接口 （星星充电、快电）
 		openRouter.POST("sendpoint", apiutil.Format(open.DefaultZyhController.SendPoint))
 

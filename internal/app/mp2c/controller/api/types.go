@@ -211,3 +211,8 @@ type ChangeCommentLikeForm struct {
 type JinHuaXingForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required"`
 }
+
+type GetZyhForm struct {
+	Mobile string `json:"mobile" form:"mobile" binding:"" alias:"手机号码"`
+	VolId  string `json:"volId" form:"volId" binding:"" alias:"志愿者id"`
+}

@@ -2,6 +2,7 @@ package open
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/platform"
@@ -39,4 +40,27 @@ func (ctr ZyhController) SendPoint(ctx *gin.Context) (gin.H, error) {
 	}
 	//入库
 	return nil, nil
+}
+
+//给客户用，查数据用
+
+func (ctr ZyhController) Zyh(ctx *gin.Context) (gin.H, error) {
+	form := api.GetZyhForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	if form.Mobile != "" {
+		zyhService := platform.NewZyhService(context.NewMioContext())
+		return zyhService.GetZyhInfoByMobile(srv_types.GetZyhOpenDTO{
+			Mobile: form.Mobile,
+		})
+	}
+
+	if form.VolId != "" {
+		zyhService := platform.NewZyhService(context.NewMioContext())
+		return zyhService.GetZyhInfoByVolId(srv_types.GetZyhOpenDTO{
+			VolId: form.VolId,
+		})
+	}
+	return gin.H{}, nil
 }
