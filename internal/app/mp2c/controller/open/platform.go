@@ -263,9 +263,23 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+	var point int64
+	sceneUserCondition := repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+	}
+	sceneUser := service.DefaultBdSceneUserService.FindOne(sceneUserCondition)
+	if sceneUser.ID != 0 {
+		pointInfo, err := service.NewPointService(context.NewMioContext()).FindByOpenId(sceneUser.OpenId)
+		if err != nil {
+			return nil, err
+		}
+		point = pointInfo.Balance
+	}
 
 	return gin.H{
 		"list":  res,
+		"point": point,
 		"total": total,
 	}, nil
 }
