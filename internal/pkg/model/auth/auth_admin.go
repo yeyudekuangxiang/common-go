@@ -5,7 +5,7 @@ import (
 )
 
 type Admin struct {
-	ID int
+	MioAdminID int `json:"mioAdminId"`
 }
 
 func (au Admin) Valid() error {

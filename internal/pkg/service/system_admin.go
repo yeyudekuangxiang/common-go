@@ -36,7 +36,7 @@ func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, 
 	if err != nil {
 		return nil, false, err
 	}
-	admin := a.r.GetAdminById(authAdmin.ID)
+	admin := a.r.GetAdminById(authAdmin.MioAdminID)
 	if admin.ID == 0 {
 		return nil, false, nil
 	}
@@ -66,6 +66,6 @@ func (a SystemAdminService) Login(account, password string) (string, error) {
 	}
 
 	return util.CreateToken(auth.Admin{
-		ID: admin.ID,
+		MioAdminID: admin.ID,
 	})
 }
