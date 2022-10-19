@@ -247,10 +247,10 @@ func apiRouter(router *gin.Engine) {
 		//获取第三方数据
 		platformRouter := mustAuthRouter.Group("/platform")
 		{
-			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))            //获取oolaKey
-			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultJhxController.TicketCreate))    //金华行-发码
-			platformRouter.GET("/jhx/ticket-status", apiutil.Format(open.DefaultJhxController.TicketStatus))     //金华行-查询券码状态
-			platformRouter.POST("/ytx/all-receive", apiutil.Format(platform.DefaultCommonController.AllReceive)) //亿通行 一件领取
+			platformRouter.GET("/oola-key", apiutil.Format(open.DefaultRecycleController.GetOolaKey))         //获取oolaKey
+			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultJhxController.TicketCreate)) //金华行-发码
+			platformRouter.GET("/jhx/ticket-status", apiutil.Format(open.DefaultJhxController.TicketStatus))  //金华行-查询券码状态
+			platformRouter.POST("/all-receive", apiutil.Format(platform.DefaultCommonController.AllReceive))  //亿通行 一件领取
 		}
 
 		//碳成就相关路由
