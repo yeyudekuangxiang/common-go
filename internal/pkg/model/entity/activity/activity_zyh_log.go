@@ -1,6 +1,9 @@
 package activity
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/pkg/model"
+	"mio/internal/pkg/model/entity"
+)
 
 type ZyhLog struct {
 	Id             int64                       `json:"id"`
@@ -10,6 +13,7 @@ type ZyhLog struct {
 	ResultCode     string                      `json:"result_code"`
 	AdditionalInfo string                      `json:"additional_info"`
 	TransactionId  string                      `json:"transaction_id"`
+	CreatedAt      model.Time                  `json:"createAt"`
 }
 
 func (ZyhLog) TableName() string {
