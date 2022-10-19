@@ -30,3 +30,25 @@ type jhxTicketStatusResponse struct {
 	Status   string `json:"status" form:"status"`
 	UsedTime string `json:"used_time" form:"used_time"`
 }
+
+// request
+type Collect struct {
+	MemberId    string `json:"memberId" from:"memberId"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	OpenId      string `json:"openId" form:"openId"`
+	PrePointId  string `json:"prePointId" form:"prePointId"`
+}
+
+type GetPreCollect struct {
+	MemberId    string `json:"memberId" from:"memberId"`
+	OpenId      string `json:"openId" form:"openId"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+}
+
+// callback
+type TicketNotify struct {
+	Tradeno  string `json:"tradeno" form:"tradeno" binding:"required"`
+	Status   string `json:"status" form:"status" binding:"required"`
+	UsedTime string `json:"used_time" form:"used_time" binding:"required"`
+	Sign     string `json:"sign" form:"sign" binding:"required"`
+}

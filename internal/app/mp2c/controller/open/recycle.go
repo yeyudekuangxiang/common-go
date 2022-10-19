@@ -141,7 +141,7 @@ func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
 	oolaPkg.WithHeadImgUrl(userInfo.AvatarUrl)
 	oolaPkg.WithUserName(userInfo.Nickname)
 	oolaPkg.WithPhone(userInfo.PhoneNumber)
-	channelCode, LoginKey, err := oolaPkg.GetToken()
+	channelCode, LoginKey, err := oolaPkg.GetToken(scene.Key)
 	if err != nil {
 		return nil, err
 	}

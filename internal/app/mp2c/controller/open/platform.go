@@ -53,14 +53,21 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 
 	//绑定回调
 	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
-		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
+		params := make(map[string]interface{}, 0)
+		params["mobile"] = sceneUser.Phone
+		params["status"] = "1"
+		jhxSvr := jhx.NewJhxService(context.NewMioContext())
+		err = jhxSvr.BindSuccess(params)
 		if err != nil {
 			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
 		}
 	}
 	if scene.Ch == "yitongxing" && err != errno.ErrExisting {
-		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.AppId), ytx.WithDomain(scene.Domain))
-		err = ytxSrv.Synchro(sceneUser.PlatformUserId, sceneUser.OpenId)
+		params := make(map[string]interface{}, 0)
+		params["memberId"] = sceneUser.PlatformUserId
+		params["openId"] = sceneUser.OpenId
+		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Key), ytx.WithDomain(scene.Domain))
+		err = ytxSrv.BindSuccess(params)
 		if err != nil {
 			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
 		}

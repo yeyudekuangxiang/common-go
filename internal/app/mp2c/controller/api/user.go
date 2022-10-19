@@ -10,10 +10,10 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
+	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"strconv"
 	"time"
 )
 
@@ -22,7 +22,7 @@ var DefaultUserController = UserController{}
 type UserController struct {
 }
 
-func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
+func (ctr UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 	user, err := service.DefaultUserService.GetUserById(1)
 	f, err := excelize.OpenFile("/Users/leo/Downloads/test1.xlsx")
 	if err != nil {
@@ -58,7 +58,7 @@ func (UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 }
 
 //GetUserInfo 用户信息
-func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
+func (ctr UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	userInfo := apiutil.GetAuthUser(c)
 	user := api_types.UserInfoVO{}
 	util.MapTo(userInfo, &user)
@@ -73,7 +73,7 @@ func (UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (UserController) GetYZM(c *gin.Context) (gin.H, error) {
+func (ctr UserController) GetYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (UserController) GetYZM(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
+func (ctr UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	}
 }
 
-func (UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
+func (ctr UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
 	return nil, errno.ErrCommon.WithMessage("验证码错误,请重新输入")
 }
 
-func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
+func (ctr UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	mobileUser, err := service.DefaultUserService.FindUserBySource(entity.UserSourceMobile, user.ID)
 	if err != nil {
@@ -133,7 +133,7 @@ func (UserController) GetMobileUserInfo(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
+func (ctr UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	form := BindMobileByCodeForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -141,23 +141,12 @@ func (UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	//绑定后
 	err := service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
-	if err == nil && user.ChannelId == 1059 {
-		go func() {
-			jhxService := jhx.NewJhxService(mioctx.NewMioContext())
-			orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
-			for i := 0; i < 2; i++ {
-				err := jhxService.TicketCreate(orderNo+strconv.Itoa(i), 123, user)
-				if err != nil {
-					app.Logger.Errorf("金华行发券失败:%s", err.Error())
-					return
-				}
-			}
-			return
-		}()
+	if err == nil {
+		ctr.sendCoupon(user)
 	}
 	return nil, err
 }
-func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
+func (ctr UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	summary, err := service.DefaultUserService.UserSummary(user.ID)
 	if err != nil {
@@ -167,7 +156,7 @@ func (UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 		"summary": summary,
 	}, nil
 }
-func (UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
+func (ctr UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	accountInfo, err := service.DefaultUserService.AccountInfo(user.ID)
 	if err != nil {
@@ -178,7 +167,7 @@ func (UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
+func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	form := UpdateUserInfoForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -208,4 +197,34 @@ func (UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		PhoneNumber: form.PhoneNumber,
 	})
 	return nil, err
+}
+
+func (ctr UserController) sendCoupon(user entity.User) {
+	if user.ChannelId == 1059 {
+		jhxService := jhx.NewJhxService(mioctx.NewMioContext())
+		go func() {
+			for i := 0; i < 2; i++ {
+				_, err := jhxService.SendCoupon(1000, user)
+				if err != nil {
+					app.Logger.Errorf("金华行发券失败:%s", err.Error())
+					return
+				}
+			}
+			return
+		}()
+	}
+
+	if user.ChannelId == 1066 {
+		var options []ytx.Options
+		options = append(options, ytx.WithPoolCode("RP202110251300002"))
+		options = append(options, ytx.WithSecret("a123456"))
+		Service := ytx.NewYtxService(mioctx.NewMioContext(), options...)
+		go func() {
+			_, err := Service.SendCoupon(user, 5.00)
+			if err != nil {
+				app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
+				return
+			}
+		}()
+	}
 }

@@ -3,9 +3,7 @@ package platform
 import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 )
 
@@ -27,12 +25,8 @@ func NewFmy(context *context.MioContext, client *redis.Client, appId, appSecret,
 	}
 }
 
-func (f Fmy) GetSign(ch string, data []byte) (sign string, err error) {
+func (f Fmy) GetSign(data []byte) (sign string, err error) {
 	//查询 渠道信息
-	scene := service.DefaultBdSceneService.FindByCh(ch)
-	if scene.Key == "" || scene.Key == "e" {
-		return "", errors.New("渠道查询失败")
-	}
 	rand1, rand2 := util.Rand4Number(), util.Rand4Number()
 	fmt.Println(rand1, rand2)
 	verifyData := rand1 + f.platformKey + string(data) + f.appSecret + rand2

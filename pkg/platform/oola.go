@@ -5,7 +5,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
@@ -67,12 +66,7 @@ func (o *Oola) WithUserName(userName string) {
 	}
 }
 
-func (o *Oola) getSign(ch string, params url.Values) (sign string, err error) {
-	//查询 渠道信息
-	scene := service.DefaultBdSceneService.FindByCh(ch)
-	if scene.Key == "" || scene.Key == "e" {
-		return "", errors.New("渠道查询失败")
-	}
+func (o *Oola) getSign(key string, params url.Values) (sign string, err error) {
 	var signStr string
 	var slice []string
 	for k := range params {
@@ -80,23 +74,21 @@ func (o *Oola) getSign(ch string, params url.Values) (sign string, err error) {
 	}
 	sort.Strings(slice)
 	for _, v := range slice {
-		//fmt.Printf("%v\n", params[v])
-		//fmt.Printf("%v\n", params[v][0])
 		signStr += v + "=" + util.InterfaceToString(params[v][0]) + ";"
 	}
-	return encrypt.Md5(scene.Key + signStr), nil
+	return encrypt.Md5(key + signStr), nil
 }
 
-func (o *Oola) GetToken() (string, string, error) {
+func (o *Oola) GetToken(key string) (string, string, error) {
 	autoLoginKey, _ := o.redis.GetDel(o.ctx, "oola_login_key:"+o.clientId).Result()
 	channelCode, _ := o.redis.GetDel(o.ctx, "oola_channel_code:"+o.clientId).Result()
 	if autoLoginKey == "" || channelCode == "" {
-		return o.register()
+		return o.register(key)
 	}
 	return channelCode, autoLoginKey, nil
 }
 
-func (o *Oola) register() (string, string, error) {
+func (o *Oola) register(key string) (string, string, error) {
 	params := make(url.Values)
 	params.Set("appId", o.appId)
 	params.Set("clientId", o.clientId)
@@ -110,7 +102,7 @@ func (o *Oola) register() (string, string, error) {
 		params.Set("headImgUrl", o.headImgUrl)
 	}
 
-	sign, err := o.getSign("oola", params)
+	sign, err := o.getSign(key, params)
 	if err != nil {
 		return "", "", err
 	}
@@ -128,7 +120,7 @@ func (o *Oola) register() (string, string, error) {
 	}
 	if res.Code != "200" {
 		if res.Code == "1006" {
-			return o.getUserAutoLoginKey()
+			return o.getUserAutoLoginKey(key)
 		}
 		return "", "", errors.New(res.Msg)
 	}
@@ -138,11 +130,11 @@ func (o *Oola) register() (string, string, error) {
 	return res.Info.ChannelCode, res.Info.AutologinKey, nil
 }
 
-func (o *Oola) getUserAutoLoginKey() (string, string, error) {
+func (o *Oola) getUserAutoLoginKey(key string) (string, string, error) {
 	params := make(url.Values)
 	params.Set("appId", o.appId)
 	params.Set("clientId", o.clientId)
-	sign, err := o.getSign("oola", params)
+	sign, err := o.getSign(key, params)
 	if err != nil {
 		return "", "", err
 	}

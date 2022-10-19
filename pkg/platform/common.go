@@ -2,7 +2,6 @@ package platform
 
 import (
 	"github.com/pkg/errors"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"sort"
@@ -14,7 +13,6 @@ func CheckSign(sign string, params map[string]interface{}, key string, joiner st
 	signMd5 := GetSign(params, key, joiner)
 	//验证签名
 	if signMd5 != sign {
-		app.Logger.Errorf("验签失败 oriSign: %s ; dstSign: %s", sign, signMd5)
 		return errors.New("验签失败")
 	}
 	return nil

@@ -73,7 +73,7 @@ func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*s
 	policyConfig.AddMaxAge(param.MaxAge)
 	policyConfig.AddContentType(param.MimeTypes)
 
-	//calucate signature
+	//calucate platform
 	configData, err := json.Marshal(policyConfig)
 	if err != nil {
 		return nil, errno.ErrInternalServer.With(err)

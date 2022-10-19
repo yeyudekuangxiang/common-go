@@ -15,7 +15,6 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"strconv"
 	"time"
 )
 
@@ -31,12 +30,13 @@ func (ctr JhxController) TicketCreate(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 	jhxService := jhx.NewJhxService(context.NewMioContext())
-	orderNo := "jhx" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	err := jhxService.TicketCreate(orderNo, 123, user)
+	tradeNo, err := jhxService.SendCoupon(1000, user)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return gin.H{
+		"orderNo": tradeNo,
+	}, nil
 }
 
 func (ctr JhxController) TicketStatus(ctx *gin.Context) (gin.H, error) {
@@ -67,7 +67,6 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	sign := form.Sign
-	delete(params, "sign")
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
 	if err != nil {
@@ -89,13 +88,14 @@ func (ctr JhxController) JhxGetPreCollectPoint(ctx *gin.Context) (gin.H, error) 
 		return nil, errno.ErrChannelNotFound
 	}
 
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
-	sign := params["sign"]
+	sign := params["sign"].(string)
 	delete(params, "sign")
+
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	item, point, err := jhxService.GetPreCollectPointList(sign, params)
 	if err != nil {
@@ -113,13 +113,12 @@ func (ctr JhxController) JhxCollectPoint(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
-	sign := params["sign"]
-	delete(params, "sign")
+	sign := form.Sign
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	point, err := jhxService.CollectPoint(sign, params)
 	if err != nil {
@@ -198,7 +197,10 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 		}
 		//绑定回调
 		if form.PlatformKey == "jinhuaxing" {
-			err := jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
+			bindParams := make(map[string]interface{}, 0)
+			bindParams["mobile"] = sceneUser.Phone
+			bindParams["status"] = "1"
+			err := jhx.NewJhxService(context.NewMioContext()).BindSuccess(bindParams)
 			if err != nil {
 				app.Logger.Errorf("callback jinhuaxing bind_success error:%s", err.Error())
 			}

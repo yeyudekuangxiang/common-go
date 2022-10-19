@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	sduiba "mio/internal/pkg/service/duiba"
+	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -366,4 +367,30 @@ func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productIte
 		AdditionInfo: fmt.Sprintf("兑吧虚拟商品兑换 orderNum:%s productItemId:%s", orderNum, productItemId),
 	})
 	return err
+}
+
+const (
+	virtualCouponJhx2Yuan = "3323df0ce743a3e55a38c62dbc92eac4"
+)
+
+func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string) error {
+	switch productItemId {
+	case virtualCouponJhx2Yuan:
+		jhxService := jhx.NewJhxService(context.NewMioContext())
+		user, err := DefaultUserService.GetUserByOpenId(openid)
+		if err != nil {
+			return err
+		}
+		if user.ID == 0 {
+			return errno.ErrUserNotFound.WithCaller()
+		}
+		tradeNo, err := jhxService.SendCoupon(1000, *user)
+		println(tradeNo)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	app.Logger.Error("未知的虚拟商品类型", orderNum, openid, productItemId)
+	return errno.ErrCommon.WithMessage("未知的虚拟商品类型")
 }
