@@ -4,7 +4,7 @@ type OaSignResult struct {
 	AppId     string `json:"appId"`
 	Timestamp string `json:"timestamp"`
 	NonceStr  string `json:"nonceStr"`
-	Signature string `json:"platform"`
+	Signature string `json:"signature"`
 }
 
 type FindOaAuthWhiteBy struct {

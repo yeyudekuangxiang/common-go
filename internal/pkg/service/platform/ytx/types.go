@@ -1,11 +1,11 @@
 package ytx
 
 type SynchroRequest struct {
-	OpenId         string `json:"openId"`             //亿通行openId
-	RegDate        string `json:"regDate"`            //注册时间，格式yyyyMMddHHmmss
-	PlatformUserId string `json:"platformUserId"`     //绿喵用户ID
-	Ts             int64  `json:"ts"`                 //时间戳，毫秒
-	Signature      string `json:"platform,omitempty"` //签名，计算获得
+	OpenId         string `json:"openId"`              //亿通行openId
+	RegDate        string `json:"regDate"`             //注册时间，格式yyyyMMddHHmmss
+	PlatformUserId string `json:"platformUserId"`      //绿喵用户ID
+	Ts             int64  `json:"ts"`                  //时间戳，毫秒
+	Signature      string `json:"signature,omitempty"` //签名，计算获得
 }
 
 type synchroResponse struct {

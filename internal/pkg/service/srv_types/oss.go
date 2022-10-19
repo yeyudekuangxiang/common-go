@@ -74,7 +74,7 @@ type OssPolicyToken struct {
 	AccessKeyId string `json:"AccessKeyId"`
 	Host        string `json:"host"`
 	Expire      int64  `json:"expire"`
-	Signature   string `json:"platform"`
+	Signature   string `json:"signature"`
 	Policy      string `json:"policy"`
 	Directory   string `json:"dir"`
 	Callback    string `json:"callback"`
