@@ -155,7 +155,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
@@ -164,7 +164,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	sign := form.Sign
 	delete(params, "sign")
 
-	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}

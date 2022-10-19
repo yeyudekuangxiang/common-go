@@ -57,7 +57,7 @@ type PrePointRequest struct {
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	Point       string `json:"point" form:"point" binding:"required"`
 	TradeNo     string `json:"tradeNo" form:"tradeNo"  binding:"required"`
-	Mobile      string `json:"mobile" form:"mobile"`
+	Mobile      string `json:"mobile,omitempty" form:"mobile"`
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 

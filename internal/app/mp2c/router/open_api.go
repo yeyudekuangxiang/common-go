@@ -92,9 +92,8 @@ func openRouter(router *gin.Engine) {
 			}
 			openPlatformRouter.POST("/pre_collect", apiutil.Format(open.DefaultJhxController.JhxPreCollectPoint))         //金华行单独调用 预加积分
 			openPlatformRouter.POST("/pre_point", apiutil.Format(open.DefaultPlatformController.PrePoint))                //第三方平台 预加积分
-			openPlatformRouter.POST("/get_pre_point", apiutil.Format(open.DefaultPlatformController.GetPrePointList))     //第三方平台 预加积分
-			openPlatformRouter.POST("/collect_pre_point", apiutil.Format(open.DefaultPlatformController.CollectPrePoint)) //第三方平台 预加积分
-
+			openPlatformRouter.POST("/get_pre_point", apiutil.Format(open.DefaultPlatformController.GetPrePointList))     //第三方平台 获取积分
+			openPlatformRouter.POST("/collect_pre_point", apiutil.Format(open.DefaultPlatformController.CollectPrePoint)) //第三方平台 消费积分
 		}
 	}
 }
