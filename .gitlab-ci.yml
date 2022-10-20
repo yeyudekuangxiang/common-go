@@ -7,7 +7,7 @@ build:
   image: yeyudekuangxiang/golang:1.17-alpine3.16
   stage: build
   tags:
-    - build
+    - docker
   only:
     - develop
     - master
@@ -40,7 +40,7 @@ build-manual:
   stage: build
   allow_failure: false
   tags:
-    - build
+    - docker
   when: manual
   only:
     - /^hotfix-.+$/
