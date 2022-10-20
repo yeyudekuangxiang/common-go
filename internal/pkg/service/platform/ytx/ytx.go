@@ -118,7 +118,7 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 
 func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error) {
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey: "jinhuaxing",
+		PlatformKey: "yitongxing",
 		OpenId:      user.OpenId,
 	})
 	if sceneUser.PlatformUserId == "" {

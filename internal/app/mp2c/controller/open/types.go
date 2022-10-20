@@ -78,3 +78,11 @@ type jhxMyCrRequest struct {
 	//PrePointId  string `json:"prePointId,omitempty" form:"prePointId"`
 	Sign string `json:"sign" form:"sign"`
 }
+
+type allReceiveRequest struct {
+	PlatformKey string `json:"platformKey" form:"platformKey" alias:"platformKey" binding:"required"`
+}
+
+type prePointListRequest struct {
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+}
