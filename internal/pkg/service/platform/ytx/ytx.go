@@ -151,12 +151,6 @@ func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error)
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
 		return "", err
 	}
-
-	if response.SubCode != "0000" {
-		return "", errors.New(response.SubMessage)
-	}
-	//记录
-
 	respData, _ := json.Marshal(response.SubData)
 
 	err = activity.NewYtxLogRepository(context.NewMioContext()).Save(&entityActivity.YtxLog{
@@ -168,10 +162,15 @@ func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error)
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
+	
 	if err != nil {
 		app.Logger.Errorf("亿通行发放红包记录保存失败:%s", err.Error())
 	}
 
+	if response.SubCode != "0000" {
+		return "", errors.New(response.SubMessage)
+	}
+	//记录
 	return response.SubData.OrderNo, nil
 }
 

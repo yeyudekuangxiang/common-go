@@ -61,7 +61,7 @@ func (ctr UserController) GetNewUser(c *gin.Context) (gin.H, error) {
 func (ctr UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	userInfo := apiutil.GetAuthUser(c)
 	user := api_types.UserInfoVO{}
-	util.MapTo(userInfo, &user)
+	_ = util.MapTo(userInfo, &user)
 	if userInfo.ChannelId != 0 {
 		channel, err := service.DefaultUserChannelService.GetChannelInfoByCid(userInfo.ChannelId)
 		if err == nil {
@@ -146,6 +146,7 @@ func (ctr UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	}
 	return nil, err
 }
+
 func (ctr UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	summary, err := service.DefaultUserService.UserSummary(user.ID)
@@ -156,6 +157,7 @@ func (ctr UserController) GetUserSummary(c *gin.Context) (gin.H, error) {
 		"summary": summary,
 	}, nil
 }
+
 func (ctr UserController) GetUserAccountInfo(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	accountInfo, err := service.DefaultUserService.AccountInfo(user.ID)
@@ -198,6 +200,20 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	})
 	return nil, err
 }
+
+// 个人主页
+func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
+	// 头像 昵称 笔记数量 ip属地 简介
+	//form := UpdateUserInfoForm{}
+	//if err := apiutil.BindForm(c, &form); err != nil {
+	//	return nil, err
+	//}
+	//user := apiutil.GetAuthUser(c)
+
+	return nil, nil
+}
+
+// 简介编辑
 
 func (ctr UserController) sendCoupon(user entity.User) {
 	if user.ChannelId == 1059 {

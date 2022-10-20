@@ -222,3 +222,17 @@ type GetZyhForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"" alias:"手机号码"`
 	VolId  string `json:"volId" form:"volId" binding:"" alias:"志愿者id"`
 }
+
+type HomePageRequest struct {
+	UserId int64 `json:"userId"`
+}
+
+type HomePageResponse struct {
+	UserId       int64  `json:"userId"`
+	OpenId       string `json:"openId"`
+	AvatarUrl    string `json:"avatarUrl"`
+	NickName     string `json:"nickName"`
+	ArticleNum   int64  `json:"articleNum"`
+	IPLocation   string `json:"IPLocation"`
+	Introduction string `json:"introduction"`
+}
