@@ -14,5 +14,5 @@ type YtxLog struct {
 }
 
 func (YtxLog) TableName() string {
-	return "activity_zyh_log"
+	return "activity_ytx_log"
 }

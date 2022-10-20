@@ -14,6 +14,6 @@ func Initialize(configPath string) {
 	InitOss()
 	InitWxoa()
 	InitRpc()
-	initQueueProducer()
+	//initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
 }
