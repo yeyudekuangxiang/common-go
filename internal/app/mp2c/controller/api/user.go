@@ -204,10 +204,10 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 // 个人主页
 func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	// 头像 昵称 笔记数量 ip属地 简介
-	//form := UpdateUserInfoForm{}
-	//if err := apiutil.BindForm(c, &form); err != nil {
-	//	return nil, err
-	//}
+	form := UpdateUserInfoForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
 	//user := apiutil.GetAuthUser(c)
 
 	return nil, nil
@@ -231,9 +231,12 @@ func (ctr UserController) sendCoupon(user entity.User) {
 	}
 
 	if user.ChannelId == 1066 {
+		bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
 		var options []ytx.Options
 		options = append(options, ytx.WithPoolCode("RP202110251300002"))
 		options = append(options, ytx.WithSecret("a123456"))
+		options = append(options, ytx.WithAppId(bdscene.AppId))
+		options = append(options, ytx.WithDomain(bdscene.Domain))
 		Service := ytx.NewYtxService(mioctx.NewMioContext(), options...)
 		go func() {
 			_, err := Service.SendCoupon(user, 5.00)

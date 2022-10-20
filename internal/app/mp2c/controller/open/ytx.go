@@ -54,7 +54,8 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		PlatformKey: form.PlatformKey,
 		OpenId:      user.OpenId,
 	})
-	if sceneUser.ID != 0 {
+
+	if sceneUser.ID == 0 {
 		return nil, errno.ErrBindRecordNotFound
 	}
 
