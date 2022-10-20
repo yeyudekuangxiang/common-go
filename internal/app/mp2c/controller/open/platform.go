@@ -1,7 +1,6 @@
 package open
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api"
@@ -12,6 +11,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
+	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
@@ -47,17 +47,32 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 
 	//绑定
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
-	if err != nil && err != errno.ErrChannelExisting {
+	if err != nil && err != errno.ErrExisting {
 		return nil, err
 	}
+
 	//绑定回调
-	if scene.Ch == "jinhuaxing" && err != errno.ErrChannelExisting {
-		err = jhx.NewJhxService(context.NewMioContext()).BindSuccess(sceneUser.Phone, "1")
+	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
+		params := make(map[string]interface{}, 0)
+		params["mobile"] = sceneUser.Phone
+		params["status"] = "1"
+		jhxSvr := jhx.NewJhxService(context.NewMioContext())
+		err = jhxSvr.BindSuccess(params)
 		if err != nil {
-			app.Logger.Errorf("callback %s error:%s", scene.Ch, err.Error())
-			return nil, err
+			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
 		}
 	}
+	if scene.Ch == "yitongxing" && err != errno.ErrExisting {
+		params := make(map[string]interface{}, 0)
+		params["memberId"] = sceneUser.PlatformUserId
+		params["openId"] = sceneUser.OpenId
+		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Key), ytx.WithDomain(scene.Domain))
+		err = ytxSrv.BindSuccess(params)
+		if err != nil {
+			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
+		}
+	}
+
 	//返回
 	return gin.H{
 		"memberId":     sceneUser.PlatformUserId,
@@ -100,11 +115,12 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 	if form.Method != "" {
 		method = strings.ToLower(method) + "_" + strings.ToLower(form.Method)
 	}
+
 	if _, ok := entity.PlatformMethodMap[method]; !ok {
 		return nil, errno.ErrCommon.WithMessage("未找到匹配方法")
 	}
-	t := entity.PlatformMethodMap[method]
 
+	t := entity.PlatformMethodMap[method]
 	value := entity.PointCollectValueMap[t]
 
 	_, err = service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
@@ -115,9 +131,11 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 		AdminId:     0,
 		Note:        t.Text(),
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return nil, nil
 }
 
@@ -128,12 +146,14 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
 	}
+
 	ctx := context.NewMioContext()
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
 		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
+
 	//白名单验证
 	ip := c.ClientIP()
 	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
@@ -142,69 +162,138 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	params := make(map[string]string, 0)
+	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
+
 	sign := form.Sign
 	delete(params, "sign")
-	if !service.DefaultBdSceneService.CheckPreSign(scene.Key, sign, params) {
+
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-	})
-
 	//查重
-	transService := service.NewPointTransactionService(ctx)
+	PointTransService := service.NewPointTransactionService(ctx)
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
-	by, err := transService.FindBy(repository.FindPointTransactionBy{
+	by, err := PointTransService.FindBy(repository.FindPointTransactionBy{
 		Type: string(typeString),
 		Note: form.PlatformKey + "#" + form.TradeNo,
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
 
 	if by.ID != 0 {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
+		app.Logger.Errorf("重复提交订单: %v", form)
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
+	var openId, mobile string
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+	})
+
+	if sceneUser.ID != 0 {
+		openId = sceneUser.OpenId
+		mobile = sceneUser.Phone
+	}
+
 	//预加积分
-	fromString, _ := decimal.NewFromString(params["amount"])
-	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
-		Point:          point,
-		OpenId:         sceneUser.OpenId,
+		Point:          form.Point,
 		Status:         1,
-		Mobile:         sceneUser.Phone,
 		Tradeno:        form.TradeNo,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
+		OpenId:         openId,
+		Mobile:         mobile,
 	})
+
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
+
 	return gin.H{}, nil
 }
 
 // GetPrePointList 获取预加积分列表
 func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error) {
-	return nil, nil
+	form := api.PrePointListRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		app.Logger.Errorf("参数错误: %s", form)
+		return nil, err
+	}
+
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
+	}
+
+	//白名单验证
+	ip := c.ClientIP()
+	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.PlatformKey); err != nil {
+		app.Logger.Info("校验白名单失败", ip)
+		return nil, errno.ErrCommon.WithMessage("非白名单ip:" + ip)
+	}
+
+	//校验sign
+	params := make(map[string]interface{}, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, err
+	}
+
+	sign := form.Sign
+	delete(params, "sign")
+
+	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
+		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
+	}
+
+	res, total, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+		Status:         1,
+		StartTime:      time.Now().AddDate(0, 0, -7),
+	})
+
+	if err != nil {
+		return nil, errno.ErrCommon.WithErr(err)
+	}
+	var point int64
+	sceneUserCondition := repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+	}
+	sceneUser := service.DefaultBdSceneUserService.FindOne(sceneUserCondition)
+	if sceneUser.ID != 0 {
+		pointInfo, err := service.NewPointService(context.NewMioContext()).FindByOpenId(sceneUser.OpenId)
+		if err != nil {
+			return nil, err
+		}
+		point = pointInfo.Balance
+	}
+
+	return gin.H{
+		"list":  res,
+		"point": point,
+		"total": total,
+	}, nil
 }
 
+// CollectPrePoint  收集预加积分
 func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error) {
-	form := api.CollectPrePoint{}
+	form := api.CollectPrePointRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
@@ -238,10 +327,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
-		PlatformKey:    form.PlatformKey,
-		PlatformUserId: form.MemberId,
-	})
+	sceneUser := service.DefaultBdSceneUserService.FindPlatformUserByPlatformUserId(form.MemberId, form.PlatformKey)
 
 	if sceneUser.OpenId == "" {
 		app.Logger.Infof("未找到绑定关系 platformKey:%s; memberId: %s", form.PlatformKey, form.MemberId)
@@ -337,7 +423,6 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		if err != nil {
 			app.Logger.Errorf("预加积分 err:%s", err.Error())
 		}
-
 	}
 
 	return gin.H{

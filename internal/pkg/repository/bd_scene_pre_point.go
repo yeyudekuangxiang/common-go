@@ -12,7 +12,7 @@ type BdScenePrePointRepository struct {
 	DB *gorm.DB
 }
 
-func (repo BdScenePrePointRepository) FindByPlatformUser(memberId string, platformKey string) ([]entity.BdScenePrePoint, int64, error) {
+func (repo BdScenePrePointRepository) FindByPlatformUser(platformKey, memberId string) ([]entity.BdScenePrePoint, int64, error) {
 	var item []entity.BdScenePrePoint
 	var total int64
 	err := repo.DB.
@@ -137,4 +137,36 @@ func (repo BdScenePrePointRepository) Create(data *entity.BdScenePrePoint) error
 
 func (repo BdScenePrePointRepository) Save(data *entity.BdScenePrePoint) error {
 	return repo.DB.Save(data).Error
+}
+
+func (repo BdScenePrePointRepository) Updates(cond GetScenePrePoint, up UpScenePrePoint) error {
+	query := repo.DB
+	if cond.Id != 0 {
+		query.Where("id = ?", cond.Id)
+	}
+
+	if cond.OpenId != "" {
+		query.Where("open_id = ?", cond.OpenId)
+	}
+
+	if cond.PlatformUserId != "" {
+		query.Where("platform_user_id = ?", cond.PlatformUserId)
+	}
+
+	if cond.PlatformKey != "" {
+		query.Where("platform_key = ?", cond.PlatformKey)
+	}
+
+	if cond.Status != 0 {
+		query.Where("status = ?", cond.Status)
+	}
+	err := query.Updates(up).Error
+
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return err
+	}
+	return nil
 }

@@ -398,7 +398,7 @@ func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string
 		if user.ID == 0 {
 			return errno.ErrUserNotFound.WithCaller()
 		}
-		tradeNo, err := jhxService.TicketCreate(1000, *user)
+		tradeNo, err := jhxService.SendCoupon(1000, *user)
 		println(tradeNo)
 		if err != nil {
 			return err
