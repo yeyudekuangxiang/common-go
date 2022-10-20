@@ -47,7 +47,7 @@ to quickly create a Cobra application.`,
 			})
 		case "admin":
 			token, err = util.CreateToken(auth.Admin{
-				ID: int(id),
+				MioAdminID: int(id),
 			})
 		case "business":
 			token, err = util.CreateToken(auth.BusinessUser{

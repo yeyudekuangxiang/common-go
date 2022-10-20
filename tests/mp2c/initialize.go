@@ -89,7 +89,7 @@ func createUserToken() string {
 }
 func createAdminToken() string {
 	token, err := util.CreateToken(auth.Admin{
-		ID: 1,
+		MioAdminID: 1,
 	})
 	if err != nil {
 		log.Fatal("create token err:", err)
