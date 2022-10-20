@@ -155,6 +155,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	zhuGeAttr["来源"] = param.Source
 	zhuGeAttr["渠道"] = ch.Name
 	zhuGeAttr["城市code"] = user.CityCode
+	zhuGeAttr["openid"] = user.OpenId
 	if cityErr == nil {
 		zhuGeAttr["城市名"] = retCity.Name
 	}
