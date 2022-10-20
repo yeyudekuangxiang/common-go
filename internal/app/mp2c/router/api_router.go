@@ -250,7 +250,7 @@ func apiRouter(router *gin.Engine) {
 			platformRouter.POST("/jhx/ticket-create", apiutil.Format(open.DefaultJhxController.TicketCreate)) //金华行-发码
 			platformRouter.GET("/jhx/ticket-status", apiutil.Format(open.DefaultJhxController.TicketStatus))  //金华行-查询券码状态
 			platformRouter.POST("/all-receive", apiutil.Format(open.DefaultYtxController.AllReceive))         //一键领取
-			platformRouter.POST("/pre-point-list", apiutil.Format(open.DefaultYtxController.PrePointList))    //预加积分列表
+			platformRouter.POST("/pre-point", apiutil.Format(open.DefaultYtxController.PrePointList))         //预加积分列表
 		}
 
 		//碳成就相关路由
