@@ -68,6 +68,7 @@ build-manual:
     paths:
       - ./cmd/mp2c/mp2c
 package:
+  image: docker:latest
   stage: package
   tags:
     - docker
@@ -81,6 +82,7 @@ package:
     - sh ./scripts/package.sh mp2c
 
 package-manual:
+  image: docker:latest
   stage: package
   when: on_success
   tags:
