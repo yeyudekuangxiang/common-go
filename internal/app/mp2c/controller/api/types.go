@@ -224,7 +224,7 @@ type GetZyhForm struct {
 }
 
 type HomePageRequest struct {
-	UserId int64 `json:"userId"`
+	UserId int64 `json:"userId" form:"userId"`
 }
 
 type HomePageResponse struct {
@@ -235,4 +235,8 @@ type HomePageResponse struct {
 	ArticleNum   int64  `json:"articleNum"`
 	IPLocation   string `json:"IPLocation"`
 	Introduction string `json:"introduction"`
+}
+
+type UpdateIntroductionRequest struct {
+	Introduction string `json:"introduction" form:"introduction" binding:"required"`
 }

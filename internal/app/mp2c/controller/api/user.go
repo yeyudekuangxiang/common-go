@@ -8,12 +8,14 @@ import (
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"strings"
 	"time"
 )
 
@@ -204,16 +206,84 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 // 个人主页
 func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	// 头像 昵称 笔记数量 ip属地 简介
-	form := UpdateUserInfoForm{}
+	form := HomePageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
+		return gin.H{}, err
 	}
-	//user := apiutil.GetAuthUser(c)
 
-	return nil, nil
+	result := HomePageResponse{}
+
+	user := apiutil.GetAuthUser(c)
+
+	if form.UserId != 0 {
+		u, err := service.DefaultUserService.GetUserById(form.UserId)
+		if err != nil {
+			return gin.H{}, err
+		}
+		if u.ID == 0 {
+			return gin.H{}, nil
+		}
+
+		//归属地
+		location, err := service.NewCityService(mioctx.NewMioContext()).GetByCityCode(api_types.GetByCityCode{CityCode: u.CityCode})
+		if err != nil {
+			return nil, err
+		}
+
+		//文章数量
+		count, err := service.DefaultTopicService.CountTopic(repository.GetTopicCountBy{
+			UserId: u.ID,
+		})
+		if err != nil {
+			return gin.H{}, err
+		}
+		_ = util.MapTo(&user, &result)
+		result.ArticleNum = count
+		result.IPLocation = location.Name
+	} else if user.ID != 0 {
+		//归属地
+		location, err := service.NewCityService(mioctx.NewMioContext()).GetByCityCode(api_types.GetByCityCode{CityCode: user.CityCode})
+		if err != nil {
+			return nil, err
+		}
+
+		//文章数量
+		count, err := service.DefaultTopicService.CountTopic(repository.GetTopicCountBy{
+			UserId: user.ID,
+		})
+		if err != nil {
+			return nil, err
+		}
+		_ = util.MapTo(&user, &result)
+		result.ArticleNum = count
+		result.IPLocation = location.Name
+	}
+
+	return gin.H{
+		"data": result,
+	}, nil
 }
 
-// 简介编辑
+// 更新简介
+func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
+	form := UpdateIntroductionRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return gin.H{}, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	if len(strings.Trim(form.Introduction, " ")) == 0 {
+		return nil, errno.ErrCommon.WithMessage("内容不可以为空")
+	}
+
+	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+		UserId:       user.ID,
+		Introduction: form.Introduction,
+	})
+
+	return nil, err
+}
 
 func (ctr UserController) sendCoupon(user entity.User) {
 	if user.ChannelId == 1059 {

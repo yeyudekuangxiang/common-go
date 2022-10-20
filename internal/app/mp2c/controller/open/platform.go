@@ -48,7 +48,7 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	//绑定
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil && err != errno.ErrExisting {
-		return nil, err
+		return nil, errno.ErrInternalServer.WithErr(err)
 	}
 
 	//绑定回调

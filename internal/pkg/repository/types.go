@@ -345,3 +345,17 @@ type GetSceneCallback struct {
 	StartTime      string
 	EndTime        string
 }
+
+type UpdateUserInfoParam struct {
+	UserId       int64
+	Nickname     string
+	Avatar       string
+	Gender       *entity.UserGender
+	Birthday     *time.Time
+	PhoneNumber  *string
+	Position     string
+	Status       int
+	Partners     int
+	Auth         int
+	Introduction string
+}

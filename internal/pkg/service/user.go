@@ -589,6 +589,9 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if param.Avatar != "" {
 		user.AvatarUrl = param.Avatar
 	}
+	if param.Introduction != "" {
+		user.Introduction = param.Introduction
+	}
 	return u.r.Save(&user)
 }
 func (u UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
