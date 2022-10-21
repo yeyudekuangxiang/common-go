@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"mio/internal/app/mp2c/controller"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -267,12 +266,23 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
-	form := controller.PageFrom{}
+	form := HomePageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
 	user := apiutil.GetAuthUser(c)
+	if form.UserId != 0 {
+		u, b, err := service.DefaultUserService.GetUserByID(form.UserId)
+		if err != nil {
+			return nil, errno.ErrCommon
+		}
+		if !b {
+			return nil, errno.ErrUserNotFound
+		}
+		user = *u
+	}
+
 	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
 		Limit:  form.Limit(),

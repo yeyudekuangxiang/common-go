@@ -8,7 +8,6 @@ import (
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
@@ -210,54 +209,32 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
-
-	result := HomePageResponse{}
-
+	var result entity.ShortUser
 	user := apiutil.GetAuthUser(c)
 
 	if form.UserId != 0 {
-		u, err := service.DefaultUserService.GetUserById(form.UserId)
+		u, b, err := service.DefaultUserService.GetUserByID(form.UserId)
 		if err != nil {
 			return gin.H{}, err
 		}
-		if u.ID == 0 {
+
+		if !b {
 			return gin.H{}, nil
 		}
-
-		//归属地
-		location, err := service.NewCityService(mioctx.NewMioContext()).GetByCityCode(api_types.GetByCityCode{CityCode: u.CityCode})
-		if err != nil {
-			return nil, err
-		}
-
-		//文章数量
-		count, err := service.DefaultTopicService.CountTopic(repository.GetTopicCountBy{
-			UserId: u.ID,
-		})
-		if err != nil {
-			return gin.H{}, err
-		}
-		_ = util.MapTo(&user, &result)
-		result.ArticleNum = count
-		result.IPLocation = location.Name
-	} else if user.ID != 0 {
-		//归属地
-		location, err := service.NewCityService(mioctx.NewMioContext()).GetByCityCode(api_types.GetByCityCode{CityCode: user.CityCode})
-		if err != nil {
-			return nil, err
-		}
-
-		//文章数量
-		count, err := service.DefaultTopicService.CountTopic(repository.GetTopicCountBy{
-			UserId: user.ID,
-		})
-		if err != nil {
-			return nil, err
-		}
-		_ = util.MapTo(&user, &result)
-		result.ArticleNum = count
-		result.IPLocation = location.Name
+		user = *u
 	}
+
+	//归属地
+	location, err := service.NewCityService(mioctx.NewMioContext()).GetByCityCode(api_types.GetByCityCode{CityCode: user.CityCode})
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	result = user.ShortUser()
+	result.IpLocation = location.Name
 
 	return gin.H{
 		"data": result,

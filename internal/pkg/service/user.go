@@ -143,6 +143,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user.Time = model.NewTime()
 	user.Auth = 1
 	user.Position = "ordinary"
+	user.Partners = 2
 	user.Status = 1
 
 	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
