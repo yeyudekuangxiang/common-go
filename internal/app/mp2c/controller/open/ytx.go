@@ -59,7 +59,7 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		return nil, errno.ErrBindRecordNotFound
 	}
 
-	prePoint, _, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
+	prePoint, total, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
 		OpenId:         sceneUser.OpenId,
@@ -68,6 +68,11 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+
+	if total == 0 {
+		return nil, errno.ErrRecordNotFound
+	}
+
 	//检查上限
 	var halfPoint, incPoint, totalPoint, halfId int64
 	var ids []int64
