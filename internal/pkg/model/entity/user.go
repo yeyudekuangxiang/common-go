@@ -73,6 +73,7 @@ type User struct {
 func (u User) ShortUser() ShortUser {
 	return ShortUser{
 		ID:           u.ID,
+		OpenId:       u.OpenId,
 		AvatarUrl:    u.AvatarUrl,
 		Gender:       u.Gender,
 		Nickname:     u.Nickname,
@@ -80,18 +81,24 @@ func (u User) ShortUser() ShortUser {
 		Position:     u.Position,
 		PositionIcon: u.PositionIcon,
 		Auth:         u.Auth,
+		Introduction: u.Introduction,
+		CreatedAt:    u.Time.String(),
 	}
 }
 
 type ShortUser struct {
 	ID           int64        `gorm:"primary_key;column:id" json:"id"`
+	OpenId       string       `gorm:"column:openid" json:"open_id"`
 	AvatarUrl    string       `gorm:"column:avatar_url" json:"avatarUrl"`
 	Gender       UserGender   `gorm:"column:gender" json:"gender"`
 	Nickname     string       `gorm:"column:nick_name" json:"nickname"`
 	Partners     Partner      `gorm:"partners" json:"partners"`
 	Position     UserPosition `json:"position"`
 	PositionIcon string       `json:"positionIcon"`
+	Introduction string       `json:"introduction"`
 	Auth         int          `json:"auth"` //发帖权限 0无权限 1有权限
+	IpLocation   string       `json:"ipLocation"`
+	CreatedAt    string       `json:"createdAt"`
 }
 
 func (ShortUser) TableName() string {
