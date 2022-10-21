@@ -145,6 +145,10 @@ func (repo BdScenePrePointRepository) Updates(cond GetScenePrePoint, up map[stri
 		query.Where("id = ?", cond.Id)
 	}
 
+	if len(cond.Ids) > 0 {
+		query.Where("id in (?)", cond.Ids)
+	}
+
 	if cond.OpenId != "" {
 		query.Where("open_id = ?", cond.OpenId)
 	}

@@ -74,36 +74,35 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	}
 
 	//检查上限
-	var halfPoint, incPoint, totalPoint, halfId int64
+	var halfPoint, incPoint, totalPoint, halfId, thanPoint int64
 	var ids []int64
 
-	key := time.Now().Format("2006-01-02") + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
+	key := time.Now().Format("2006-01-02") + ":prePoint:" + scene.Ch + sceneUser.OpenId
 
-	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
+	totalPoint, _ = strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
 
-	if lastPoint >= int64(scene.PrePointLimit) {
+	if totalPoint >= int64(scene.PrePointLimit) {
 		return nil, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
 	}
 
 	for _, v := range prePoint {
 		onePoint, _ := strconv.ParseInt(v.Point, 10, 64)
-
-		totalPoint = lastPoint + onePoint
+		totalPoint += onePoint
 
 		if totalPoint > int64(scene.PrePointLimit) {
-			incHalfPoint := int64(scene.PrePointLimit) - lastPoint
-			incPoint += incHalfPoint
-			totalPoint = int64(scene.PrePointLimit)
+			thanPoint = totalPoint - int64(scene.PrePointLimit)
 
-			halfPoint = onePoint - incHalfPoint
+			halfPoint = onePoint - thanPoint
 			halfId = v.ID
-			continue
+
+			totalPoint = int64(scene.PrePointLimit)
+			break
 		}
 		incPoint += onePoint
 		ids = append(ids, v.ID)
 	}
 
-	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
+	incPoint = incPoint + halfPoint
 
 	if incPoint == 0 {
 		return nil, nil
@@ -122,6 +121,8 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
 
+	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
+
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(form.PlatformKey)
 
 	if typeCarbonStr != "" {
@@ -138,18 +139,20 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 
 	upStatus := make(map[string]interface{}, 0)
 	upStatus["status"] = 2
-	err = repository.DefaultBdScenePrePointRepository.Updates(repository.GetScenePrePoint{
-		Ids:    ids,
-		Status: 1,
-	}, upStatus)
+	if len(ids) > 0 {
+		err = repository.DefaultBdScenePrePointRepository.Updates(repository.GetScenePrePoint{
+			Ids:    ids,
+			Status: 1,
+		}, upStatus)
+		if err != nil {
+			return nil, errno.ErrCommon.WithErr(err)
+		}
 
-	if err != nil {
-		return nil, errno.ErrCommon.WithErr(err)
 	}
 
 	if halfId != 0 {
 		upHalfPoint := make(map[string]interface{}, 0)
-		upStatus["point"] = halfPoint
+		upHalfPoint["point"] = thanPoint
 		err = repository.DefaultBdScenePrePointRepository.Updates(repository.GetScenePrePoint{
 			Id:     halfId,
 			Status: 1,
