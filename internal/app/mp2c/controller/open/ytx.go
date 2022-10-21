@@ -67,12 +67,37 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+	//检查上限
+	var halfPoint, incPoint, totalPoint, halfId int64
+	var ids []int64
 
-	var incPoint int64
-	for _, v := range prePoint {
-		point, _ := strconv.ParseInt(v.Point, 10, 64)
-		incPoint += point
+	key := time.Now().Format("2006-01-02") + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
+
+	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
+
+	if lastPoint >= int64(scene.PrePointLimit) {
+		return nil, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
 	}
+
+	for _, v := range prePoint {
+		onePoint, _ := strconv.ParseInt(v.Point, 10, 64)
+
+		totalPoint = lastPoint + onePoint
+
+		if totalPoint > int64(scene.PrePointLimit) {
+			incHalfPoint := int64(scene.PrePointLimit) - lastPoint
+			incPoint += incHalfPoint
+			totalPoint = int64(scene.PrePointLimit)
+
+			halfPoint = onePoint - incHalfPoint
+			halfId = v.ID
+			continue
+		}
+		incPoint += onePoint
+		ids = append(ids, v.ID)
+	}
+
+	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
 
 	if incPoint == 0 {
 		return nil, nil
@@ -105,17 +130,28 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		}
 	}
 
-	up := make(map[string]interface{}, 0)
-	up["status"] = 2
+	upStatus := make(map[string]interface{}, 0)
+	upStatus["status"] = 2
 	err = repository.DefaultBdScenePrePointRepository.Updates(repository.GetScenePrePoint{
-		PlatformKey:    sceneUser.PlatformKey,
-		PlatformUserId: sceneUser.PlatformUserId,
-		OpenId:         sceneUser.OpenId,
-		Status:         1,
-	}, up)
+		Ids:    ids,
+		Status: 1,
+	}, upStatus)
 
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
+	}
+
+	if halfId != 0 {
+		upHalfPoint := make(map[string]interface{}, 0)
+		upStatus["point"] = halfPoint
+		err = repository.DefaultBdScenePrePointRepository.Updates(repository.GetScenePrePoint{
+			Id:     halfId,
+			Status: 1,
+		}, upHalfPoint)
+
+		if err != nil {
+			return nil, errno.ErrCommon.WithErr(err)
+		}
 	}
 
 	return nil, nil
