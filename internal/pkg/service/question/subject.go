@@ -151,7 +151,7 @@ func (srv SubjectService) GetUserQuestion(dto srv_types.GetQuestionUserDTO) (srv
 	completion := "0"
 	carbonTodayDes := decimal.NewFromFloat(carbonToday)
 	if !carbonDay.IsZero() {
-		completion = carbonTodayDes.Div(carbonDay).Round(2).String()
+		completion = carbonTodayDes.Div(carbonDay).Mul(decimal.NewFromInt(100)).Round(2).String()
 	}
 
 	//属于用户群里
