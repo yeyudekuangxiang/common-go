@@ -220,7 +220,7 @@ func (ctr UserController) sendCoupon(user entity.User) {
 		options = append(options, ytx.WithSecret("a123456"))
 		Service := ytx.NewYtxService(mioctx.NewMioContext(), options...)
 		go func() {
-			_, err := Service.SendCoupon(user, 5.00)
+			_, err := Service.SendCoupon(1001, 5.00, user)
 			if err != nil {
 				app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
 				return
