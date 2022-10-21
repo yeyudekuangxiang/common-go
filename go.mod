@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/Baidu-AIP/golang-sdk v1.1.1
+	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
