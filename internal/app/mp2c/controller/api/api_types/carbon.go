@@ -81,13 +81,14 @@ type GetCarbonTransactionCreateForm struct {
 // DTO
 
 type CreateCarbonTransactionDto struct {
-	OpenId  string `binding:"required"`
-	UserId  int64
-	Type    entity.CarbonTransactionType
-	Value   float64
-	Info    string
-	AdminId int
-	Ip      string
+	OpenId   string `binding:"required"`
+	UserId   int64
+	Type     entity.CarbonTransactionType
+	Value    float64
+	Info     string
+	AdminId  int
+	Ip       string
+	AddValue float64
 }
 
 type GetCarbonTransactionBankDto struct {

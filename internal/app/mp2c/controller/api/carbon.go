@@ -95,12 +95,12 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	}
 
 	info, err := c.service.Create(api_types.CreateCarbonTransactionDto{
-		OpenId:  form.Uid,
-		Type:    carbonType,
-		Value:   carbonValue,
-		Info:    fmt.Sprintf("{sign=%s,serialNumber=%s}", form.SerialNumber, form.SerialNumber),
-		AdminId: 0,
-		Ip:      "", //ctx.ClientIP()*/
+		OpenId:   form.Uid,
+		Type:     carbonType,
+		AddValue: carbonValue,
+		Info:     fmt.Sprintf("{sign=%s,serialNumber=%s}", form.SerialNumber, form.SerialNumber),
+		AdminId:  0,
+		Ip:       "", //ctx.ClientIP()*/
 	})
 	if err != nil {
 		return gin.H{
