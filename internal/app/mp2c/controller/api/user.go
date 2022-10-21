@@ -309,7 +309,7 @@ func (ctr UserController) sendCoupon(user entity.User) {
 		options = append(options, ytx.WithDomain(bdscene.Domain))
 		ytxService := ytx.NewYtxService(mioctx.NewMioContext(), options...)
 		go func() {
-			_, err := ytxService.SendCoupon(user, 5.00)
+			_, err := ytxService.SendCoupon(1001, 5.00, user)
 			if err != nil {
 				app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
 				return

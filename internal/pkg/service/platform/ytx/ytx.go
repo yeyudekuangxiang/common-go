@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -116,7 +117,7 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 	return nil
 }
 
-func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error) {
+func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (string, error) {
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
 		PlatformKey: "yitongxing",
 		OpenId:      user.OpenId,
@@ -151,8 +152,8 @@ func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error)
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
 		return "", err
 	}
-	respData, _ := json.Marshal(response.SubData)
 
+	respData, _ := json.Marshal(response.SubData)
 	err = activity.NewYtxLogRepository(context.NewMioContext()).Save(&entityActivity.YtxLog{
 		OrderNo:        response.SubData.OrderNo,
 		OpenId:         sceneUser.OpenId,
@@ -162,7 +163,7 @@ func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error)
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
-	
+
 	if err != nil {
 		app.Logger.Errorf("亿通行发放红包记录保存失败:%s", err.Error())
 	}
@@ -170,7 +171,20 @@ func (srv *Service) SendCoupon(user entity.User, amount float64) (string, error)
 	if response.SubCode != "0000" {
 		return "", errors.New(response.SubMessage)
 	}
+
 	//记录
+
+	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+		CouponCardTypeId: typeId,
+		UserId:           user.ID,
+		BizId:            response.SubData.OrderNo,
+		CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+	})
+
+	if err != nil {
+		return "", err
+	}
+
 	return response.SubData.OrderNo, nil
 }
 
