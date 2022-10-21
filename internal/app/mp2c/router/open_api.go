@@ -73,6 +73,18 @@ func openRouter(router *gin.Engine) {
 		openRouter.POST("/recycle/oola", apiutil.Format(open.DefaultRecycleController.OolaOrderSync))
 		openRouter.POST("/recycle/fmy", apiutil.Format(open.DefaultRecycleController.FmyOrderSync))
 
+		carbonRouth := openRouter.Group("/carbon")
+		{
+			carbonRouth.POST("/mio-business/change/callback", func(context *gin.Context) {
+				res, err := api.DefaultCarbonController.Create(context)
+				if err != nil {
+					context.String(500, err.Error())
+					return
+				}
+				context.JSON(200, res)
+			})
+		}
+
 		//外部平台调绿喵 需要登陆
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
 		{
