@@ -70,25 +70,25 @@ type GetCarbonTransactionBankForm struct {
 }
 
 type GetCarbonTransactionCreateForm struct {
-	OpenId  string                       `json:"openId" form:"openId"  binding:"required"`
-	UserId  int64                        `form:"userId"`
-	Type    entity.CarbonTransactionType `form:"type" json:"type"`
-	Value   float64                      `form:"value" json:"value"`
-	Info    string                       `form:"info" json:"info"`
-	AdminId int                          `form:"adminId" json:"adminId"`
-	Ip      string                       `form:"ip" json:"ip"`
+	SerialNumber string `json:"serialNumber" form:"serialNumber"  binding:"required" alias:"流水号"`
+	CarbonType   string `json:"carbonType" form:"carbonType" binding:"required" alias:"类型"`
+	CarbonValue  string `json:"carbonValue" form:"carbonValue" binding:"required" alias:"碳量"`
+	Uid          string `json:"uid" form:"uid" binding:"required" alias:"uid"`
+	Time         string `json:"time" form:"time" binding:"datetime=2006-01-02 15:04:05" alias:"时间"`
+	Sign         string `json:"sign" form:"sign" binding:"required" alias:"sign"`
 }
 
 // DTO
 
 type CreateCarbonTransactionDto struct {
-	OpenId  string `binding:"required"`
-	UserId  int64
-	Type    entity.CarbonTransactionType
-	Value   float64
-	Info    string
-	AdminId int
-	Ip      string
+	OpenId   string `binding:"required"`
+	UserId   int64
+	Type     entity.CarbonTransactionType
+	Value    float64
+	Info     string
+	AdminId  int
+	Ip       string
+	AddValue float64
 }
 
 type GetCarbonTransactionBankDto struct {

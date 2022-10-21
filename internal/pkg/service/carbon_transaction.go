@@ -139,11 +139,17 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 			dto.UserId = infoV2.ID
 		}
 	}
-	//获取碳量
-	carbon := srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
-	if carbon == 0 {
-		return 0, nil
+	carbon := 0.0
+	if dto.AddValue != 0 {
+		carbon = dto.AddValue
+	} else {
+		//获取碳量
+		carbon = srv.repoScene.GetValue(scene, dto.Value) //增加的碳量
+		if carbon == 0 {
+			return 0, nil
+		}
 	}
+
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
 		Type:         dto.Type,

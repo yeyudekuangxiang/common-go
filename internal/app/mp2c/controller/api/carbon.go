@@ -10,6 +10,9 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/encrypt"
+	"sort"
+	"strconv"
 	"time"
 )
 
@@ -22,33 +25,97 @@ var DefaultCarbonController = CarbonController{
 
 func (c CarbonController) PointToCarbon(ctx *gin.Context) (gin.H, error) {
 	c.service.PointToCarbon()
-
 	return gin.H{}, nil
 }
 
+func GetSignToJava(params map[string]string) string {
+	//排序
+	var slice []string
+	for k := range params {
+		slice = append(slice, k)
+	}
+	sort.Strings(slice)
+	var signStr string
+	for _, v := range slice {
+		signStr += v + "=" + params[v]
+	}
+	return encrypt.Md5(signStr)
+}
+
 //Create 测试用
-func (c CarbonController) Create(ctx *gin.Context) (gin.H, error) {
-	return nil, nil
+//{ "status":"ok", "errorMessage":" ", 'bizId':"20140730192133033", "carbonValue":22.22 }
+func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	form := api_types.GetCarbonTransactionCreateForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
-		return nil, err
+		return gin.H{
+			"status":       "error",
+			"errorMessage": err.Error(),
+			"carbonValue":  "",
+			"bizId":        "",
+		}, nil
 	}
-	//判断名称和图片是否存在
+	var carbonType entity.CarbonTransactionType
+	switch form.CarbonType {
+	case "Cycling":
+		carbonType = entity.CARBON_BIKE_RIDE
+	}
+	if carbonType == "" {
+		return gin.H{
+			"status":       "error",
+			"errorMessage": "类型有误",
+			"carbonValue":  "",
+			"bizId":        "",
+		}, nil
+	}
+	params := make(map[string]string)
+	params["serialNumber"] = form.SerialNumber
+	params["carbonType"] = form.CarbonType
+	params["carbonValue"] = form.CarbonValue
+	params["uid"] = form.Uid
+	params["time"] = form.Time
+	params["privateKey"] = "mio2022"
+	sign := GetSignToJava(params)
+	if sign != form.Sign {
+		return gin.H{
+			"status":       "error",
+			"errorMessage": "验证有误",
+			"carbonValue":  "",
+			"bizId":        "",
+		}, nil
+	}
+
+	carbonValue, carbonErr := strconv.ParseFloat(form.CarbonValue, 64)
+	if carbonErr != nil {
+		return gin.H{
+			"status":       "error",
+			"errorMessage": carbonErr.Error(),
+			"carbonValue":  "",
+			"bizId":        "",
+		}, nil
+	}
+
 	info, err := c.service.Create(api_types.CreateCarbonTransactionDto{
-		OpenId:  form.OpenId,
-		UserId:  form.UserId,
-		Type:    form.Type,
-		Value:   form.Value,
-		Info:    fmt.Sprintf("{imageUrl=%s}", "1"),
-		AdminId: form.AdminId,
-		Ip:      form.Ip, //ctx.ClientIP()
+		OpenId:   form.Uid,
+		Type:     carbonType,
+		AddValue: carbonValue,
+		Info:     fmt.Sprintf("{sign=%s,serialNumber=%s}", form.SerialNumber, form.SerialNumber),
+		AdminId:  0,
+		Ip:       "", //ctx.ClientIP()*/
 	})
 	if err != nil {
-		return nil, err
+		return gin.H{
+			"status":       "error",
+			"errorMessage": err.Error(),
+			"carbonValue":  "",
+			"bizId":        "",
+		}, nil
 	}
 	return gin.H{
-		"carbon": info,
-	}, err
+		"status":       "ok",
+		"errorMessage": "",
+		"bizId":        "",
+		"carbonValue":  info,
+	}, nil
 }
 
 func (c CarbonController) Bank(ctx *gin.Context) (gin.H, error) {
