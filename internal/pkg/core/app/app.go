@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-redis/redis/v8"
 	"github.com/wagslane/go-rabbitmq"
@@ -25,6 +26,8 @@ var (
 	Redis = new(redis.Client)
 	// OssClient 阿里云oss
 	OssClient = new(oss.Client)
+	// STSClient 阿里云sts
+	STSClient = new(sts.Client)
 
 	QueueProduct = new(rabbitmq.Publisher)
 

@@ -4,6 +4,8 @@ go 1.17
 
 require (
 	github.com/Baidu-AIP/golang-sdk v1.1.1
+	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18
+	github.com/aliyun/aliyun-oss-go-sdk v2.2.2+incompatible
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
@@ -53,7 +55,6 @@ require (
 	github.com/CloudyKit/jet/v5 v5.0.2 // indirect
 	github.com/PuerkitoBio/goquery v1.5.1 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18 // indirect
 	github.com/andybalholm/brotli v1.0.1-0.20200619015827-c3da72aa01ed // indirect
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect

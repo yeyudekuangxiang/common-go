@@ -113,3 +113,84 @@ func (srv UploadService) MultipartUploadOcrImage(openid string, reader io.Reader
 	}
 	return ocrPath, nil
 }
+
+//CreateStsToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
+func (srv UploadService) CreateStsToken(operatorId int64, operatorType int8, scene string) (*srv_types.OssStsInfo, error) {
+	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
+		Scene: scene,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if uploadScene.ID == 0 {
+		return nil, errno.ErrRecordNotFound.With(err)
+	}
+	if uploadScene.MustLogin && operatorId == 0 {
+		return nil, errno.ErrValidation.WithCaller()
+	}
+
+	if operatorId != 0 {
+		lockKey := fmt.Sprintf("UploadToken%d%d", operatorType, operatorId)
+		if !util.DefaultLock.LockNum(lockKey, uploadScene.MaxCount, time.Hour*24) {
+			return nil, errno.ErrLimit.WithCaller()
+		}
+	}
+
+	log, err := DefaultUploadLogService.Create(srv_types.CreateUploadLogParam{
+		OssPath:      uploadScene.OssDir,
+		OperatorId:   operatorId,
+		OperatorType: operatorType,
+		SceneId:      uploadScene.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("路径", path.Join("acs:oss:*:*:miotech-resource", uploadScene.OssDir, "*"))
+	cert, err := DefaultOssService.GetSTSToken(srv_types.AssumeRoleParam{
+		Scheme:          "https",
+		Method:          "POST",
+		RoleArn:         "acs:ram::1742387841614768:role/corplinkosscrurole-miotech-resource",
+		RoleSessionName: "OssMultipartUpload",
+		DurationSeconds: time.Minute * 15,
+		Policy: srv_types.StsPolicy{
+			Version: "1",
+			Statement: []srv_types.Statement{
+				{
+					Effect: "Allow",
+					Action: []string{
+						"oss:PutObject",
+						"oss:InitiateMultipartUpload",
+						"oss:UploadPart",
+						"oss:UploadPartCopy",
+						"oss:CompleteMultipartUpload",
+						"oss:AbortMultipartUpload",
+						"oss:ListParts",
+						"oss:ListMultipartUploads",
+					},
+					Resource: []string{
+						path.Join("acs:oss:*:*:miotech-resource", uploadScene.OssDir, "*"),
+					},
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &srv_types.OssStsInfo{
+		Credentials: *cert,
+		Region:      "oss-cn-hongkong",
+		/*CallbackBodyUrl:  util.LinkJoin(config.Config.App.Domain, "/api/mp2c/upload/callback?logId="+log.LogId),
+		CallbackBody:     "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}",
+		CallbackBodyType: "application/x-www-form-urlencoded",*/
+		Bucket:    "miotech-resource",
+		MimeTypes: uploadScene.MimeTypes,
+		MaxSize:   uploadScene.MaxSize,
+		UploadId:  log.LogId,
+		Path:      path.Join(uploadScene.OssDir, "/"),
+		MaxAge:    uploadScene.MaxAge,
+	}, nil
+}

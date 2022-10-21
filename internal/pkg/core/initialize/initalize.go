@@ -12,6 +12,7 @@ func Initialize(configPath string) {
 	InitValidator()
 	InitWeapp()
 	InitOss()
+	InitSts()
 	InitWxoa()
 	InitRpc()
 	//initQueueProducer()

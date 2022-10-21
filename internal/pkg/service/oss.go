@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"hash"
 	"io"
@@ -15,6 +17,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -185,4 +188,25 @@ func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFile
 	}
 	fmt.Println("cmur:", cmur)
 	return cmur.Location, nil
+}
+
+func (srv OssService) GetSTSToken(param srv_types.AssumeRoleParam) (*sts.Credentials, error) {
+	req := sts.CreateAssumeRoleRequest()
+	req.Scheme = param.Scheme
+	req.Method = param.Method
+	req.RoleArn = param.RoleArn
+	req.RoleSessionName = param.RoleSessionName
+	req.DurationSeconds = requests.NewInteger(int(param.DurationSeconds.Seconds()))
+	req.Policy = param.Policy.String()
+	resp, err := app.STSClient.AssumeRole(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if !resp.IsSuccess() {
+		return nil, errno.ErrInternalServer.WithErrMessage(strconv.Itoa(resp.GetHttpStatus()))
+	}
+
+	return &resp.Credentials, nil
+
 }

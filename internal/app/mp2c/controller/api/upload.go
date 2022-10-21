@@ -155,3 +155,19 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 		"imgUrl": imgUrl,
 	}, err
 }
+func (UploadController) GetUploadSTSTokenInfo(ctx *gin.Context) (gin.H, error) {
+
+	form := api_types.GetUploadTokenInfoForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(ctx)
+
+	info, err := service.DefaultUploadService.CreateStsToken(user.ID, 1, form.Scene)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"info": info,
+	}, err
+}

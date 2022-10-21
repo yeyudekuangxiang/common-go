@@ -34,6 +34,8 @@ var gitlabRefMap = map[string]string{
 	"^feature-.+$":              "## 开发版本 [{ref}]",
 	"^hotfix-.+$":               "## 热修复版本 [{ref}]",
 	"v[0-9]+\\.[0-9]+\\.[0-9]+": "# 正式版本 [{ref}]",
+	"^develop-[a-zA-Z]+-(api|rpc)-v[0-9]+\\.[0-9]+\\.[0-9]+$":    "# 开发版本 [{ref}]",
+	"^production-[a-zA-Z]+-(api|rpc)-v[0-9]+\\.[0-9]+\\.[0-9]+$": "# 正式版本 [{ref}]",
 }
 
 // MergeBranch 合并
