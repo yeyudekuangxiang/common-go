@@ -66,7 +66,7 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		Status:         1,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
 
 	var incPoint int64
@@ -74,6 +74,11 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		point, _ := strconv.ParseInt(v.Point, 10, 64)
 		incPoint += point
 	}
+
+	if incPoint == 0 {
+		return nil, nil
+	}
+
 	c := context.NewMioContext()
 	_, err = service.NewPointService(c).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       sceneUser.OpenId,
@@ -82,8 +87,9 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		ChangePoint:  incPoint,
 		AdditionInfo: "一键领取亿通行积分",
 	})
+
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
 
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(form.PlatformKey)
@@ -96,20 +102,21 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 			Value:  float64(incPoint / int64(scene.Override)),
 		})
 		if err != nil {
-			return nil, err
+			return nil, errno.ErrCommon.WithErr(err)
 		}
 	}
 
+	up := make(map[string]interface{}, 0)
+	up["status"] = 2
 	err = repository.DefaultBdScenePrePointRepository.Updates(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
 		OpenId:         sceneUser.OpenId,
 		Status:         1,
-	}, repository.UpScenePrePoint{
-		Status: 2,
-	})
+	}, up)
+
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithErr(err)
 	}
 
 	return nil, nil

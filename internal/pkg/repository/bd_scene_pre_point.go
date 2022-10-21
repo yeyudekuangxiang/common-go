@@ -139,8 +139,8 @@ func (repo BdScenePrePointRepository) Save(data *entity.BdScenePrePoint) error {
 	return repo.DB.Save(data).Error
 }
 
-func (repo BdScenePrePointRepository) Updates(cond GetScenePrePoint, up UpScenePrePoint) error {
-	query := repo.DB
+func (repo BdScenePrePointRepository) Updates(cond GetScenePrePoint, up map[string]interface{}) error {
+	query := repo.DB.Model(&entity.BdScenePrePoint{})
 	if cond.Id != 0 {
 		query.Where("id = ?", cond.Id)
 	}
@@ -160,6 +160,7 @@ func (repo BdScenePrePointRepository) Updates(cond GetScenePrePoint, up UpSceneP
 	if cond.Status != 0 {
 		query.Where("status = ?", cond.Status)
 	}
+
 	err := query.Updates(up).Error
 
 	if err != nil {

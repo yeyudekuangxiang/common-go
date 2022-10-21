@@ -29,6 +29,9 @@ var (
 	ErrRecordNotFound  = err{code: 20100, message: "数据异常"}   // ErrRecordNotFound 数据库错误
 	ErrChannelNotFound = err{code: 20101, message: "渠道数据异常"} // ErrChannelNotFound 渠道数据异常
 	ErrExisting        = err{code: 20102, message: "数据已存在"}  // ErrExisting 数据已存在
+	ErrCreate          = err{code: 20102, message: "保存失败"}   // ErrExisting 数据已存在
+	ErrUpdate          = err{code: 20102, message: "更新失败"}   // ErrExisting 数据已存在
+	ErrDelete          = err{code: 20102, message: "删除失败"}   // ErrExisting 数据已存在
 
 	ErrAuth       = err{code: 20201, message: "未登陆"}  // ErrAuth 未登录
 	ErrValidation = err{code: 20202, message: "验证失败"} // ErrValidation 验证失败

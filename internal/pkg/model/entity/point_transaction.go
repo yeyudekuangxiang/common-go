@@ -54,7 +54,7 @@ func (p PointTransactionType) Text() string {
 		return "系统扣减"
 	case POINT_SYSTEM_ADD:
 		return "系统补发"
-	case POINT_JHX:
+	case POINT_JHX, POINT_YTX:
 		return "公交出行"
 	case POINT_PLATFORM:
 		return "活动奖励" //平台活动

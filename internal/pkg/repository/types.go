@@ -315,13 +315,7 @@ type GetScenePrePoint struct {
 }
 
 type UpScenePrePoint struct {
-	PlatformKey    string    `json:"platformKey,omitempty"`
-	PlatformUserId string    `json:"platformUserId,omitempty"`
-	OpenId         string    `json:"openId,omitempty"`
-	StartTime      time.Time `json:"startTime"`
-	EndTime        time.Time `json:"endTime"`
-	Id             int64     `json:"id,omitempty"`
-	Status         int       `json:"status,omitempty"`
+	Status uint `json:"status,omitempty"`
 }
 
 type GetSceneUserOne struct {
