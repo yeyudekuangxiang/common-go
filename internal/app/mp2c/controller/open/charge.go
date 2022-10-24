@@ -32,6 +32,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		app.Logger.Errorf("charge/push 参数错误: %s", form)
 		return nil, err
 	}
+
 	ctx := context.NewMioContext()
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
@@ -132,9 +133,11 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		BizId:        util.UUID(),
 		AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
 	})
+	
 	if err != nil {
 		fmt.Println("charge 加积分失败 ", form)
 	}
+
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" {

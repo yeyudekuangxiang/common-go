@@ -9,10 +9,14 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"mio/config"
 	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/track"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"os"
@@ -22,16 +26,16 @@ import (
 	"time"
 )
 
-var DefaultTopicService = NewTopicService()
+var DefaultTopicService = NewTopicService(mioContext.NewMioContext())
 
-func NewTopicService() TopicService {
+func NewTopicService(ctx *mioContext.MioContext) TopicService {
 	return TopicService{
-		repo: repository.DefaultTopicRepository,
+		topicModel: repository.NewTopicRepository(ctx),
 	}
 }
 
 type TopicService struct {
-	repo        repository.ITopicRepository
+	topicModel  repository.TopicModel
 	TokenServer *wxoa.AccessTokenServer
 }
 
@@ -73,7 +77,7 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 
 // GetTopicDetailPageList 通过topic表直接查询获取内容列表
 func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
-	list, total := srv.repo.GetTopicPageList(param)
+	list, total := srv.topicModel.GetTopicPageList(param)
 
 	//更新曝光和查看次数
 	//u.UpdateTopicFlowListShowCount(list, param.UserId)
@@ -165,7 +169,7 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
 func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
 
-	topicList, total := srv.repo.GetFlowPageList(repository.GetTopicFlowPageListBy{
+	topicList, total := srv.topicModel.GetFlowPageList(repository.GetTopicFlowPageListBy{
 		Offset:     param.Offset,
 		Limit:      param.Limit,
 		UserId:     param.UserId,
@@ -197,14 +201,14 @@ func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPa
 // UpdateTopicSeeCount 更新内容的查看次数加1
 func (srv TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
 	err := initUserFlowPool.Submit(func() {
-		topic := srv.repo.FindById(topicId)
+		topic := srv.topicModel.FindById(topicId)
 		if topic.Id == 0 {
 			return
 		}
 
 		seeCount := topic.SeeCount + 1
 
-		if err := srv.repo.UpdateColumn(topic.Id, "see_count", seeCount); err != nil {
+		if err := srv.topicModel.UpdateColumn(topic.Id, "see_count", seeCount); err != nil {
 			app.Logger.Error("更新topic查看次数失败", topicId, userId)
 			return
 		}
@@ -244,16 +248,16 @@ func (srv TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []e
 
 // FindById 根据id查询 entity.Topic
 func (srv TopicService) FindById(topicId int64) entity.Topic {
-	return srv.repo.FindById(topicId)
+	return srv.topicModel.FindById(topicId)
 }
 
 // UpdateTopicSort 更新内容的排序权重
 func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
-	topic := srv.repo.FindById(topicId)
+	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return errno.ErrCommon.WithMessage("未查询到此内容")
 	}
-	err := srv.repo.UpdateColumn(topicId, "sort", sort)
+	err := srv.topicModel.UpdateColumn(topicId, "sort", sort)
 	if err != nil {
 		return err
 	}
@@ -577,34 +581,34 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
 	}
-	if err := srv.repo.Save(&topicModel); err != nil {
+	if err := srv.topicModel.Save(&topicModel); err != nil {
 		return topicModel, err
 	}
-	return srv.repo.FindById(topicModel.Id), nil
+	return srv.topicModel.FindById(topicModel.Id), nil
 }
 
 // UpdateTopic 更新帖子
 func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
 
 	//查询记录是否存在
-	topicModel := srv.repo.FindById(topicId)
+	topicModel := srv.topicModel.FindById(topicId)
 	if topicModel.Id == 0 {
 		return entity.Topic{}, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
 		return entity.Topic{}, errno.ErrCommon.WithMessage("无权限修改")
 	}
-	//if content != "" {
-	//	//检查内容
-	//	if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-	//		app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
-	//		zhuGeAttr := make(map[string]interface{}, 0)
-	//		zhuGeAttr["场景"] = "更新帖子"
-	//		zhuGeAttr["失败原因"] = err.Error()
-	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-	//		return entity.Topic{}, errors.New("内容审核未通过，发布失败。")
-	//	}
-	//}
+	if content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
+			app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "更新帖子"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
+			return entity.Topic{}, errors.New("内容审核未通过，发布失败。")
+		}
+	}
 	//处理images
 	imageStr := strings.Join(images, ",")
 
@@ -648,12 +652,12 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 // DetailTopic 获取topic详情
 func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 	//查询数据是否存在
-	topic := srv.repo.FindById(topicId)
+	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
 	}
 	//更新查看次数 todo
-	err := srv.repo.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
+	err := srv.topicModel.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
 	if err != nil {
 		return entity.Topic{}, err
 	}
@@ -662,7 +666,7 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 
 // DelTopic 软删除
 func (srv TopicService) DelTopic(userId, topicId int64) error {
-	topicModel := srv.repo.FindById(topicId)
+	topicModel := srv.topicModel.FindById(topicId)
 	if topicModel.Id == 0 {
 		return errno.ErrCommon.WithMessage("该帖子不存在")
 	}

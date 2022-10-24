@@ -34,6 +34,7 @@ type GetTopicLikeListBy struct {
 
 type GetTopicPageListBy struct {
 	ID          int64              `json:"id"`
+	Ids         []int64            `json:"ids"`
 	TopicTagId  int64              `json:"topicTagId"`
 	Offset      int                `json:"offset"`
 	Status      int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架

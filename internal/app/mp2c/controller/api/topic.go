@@ -327,13 +327,3 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		"pageSize": form.PageSize,
 	}, err
 }
-
-func (ctr *TopicController) MyCollection(c *gin.Context) (gin.H, error) {
-	form := MyCollectionRequest{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-	//user := apiutil.GetAuthUser(c)
-
-	return nil, nil
-}

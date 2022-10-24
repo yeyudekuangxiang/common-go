@@ -233,7 +233,12 @@ type HomePageRequest struct {
 }
 
 type MyCollectionRequest struct {
-	ObjType int `json:"objType"`
+	controller.PageFrom
+}
+
+type CollectionRequest struct {
+	ObjId   int64 `json:"objId" form:"objId" binding:"required"`
+	ObjType int   `json:"objType" form:"objType" binding:"required"`
 }
 
 type UpdateIntroductionRequest struct {

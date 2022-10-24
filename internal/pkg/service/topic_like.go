@@ -17,16 +17,18 @@ var DefaultTopicLikeService = NewDefaultTopicLikeService()
 
 func NewDefaultTopicLikeService() TopicLikeService {
 	return TopicLikeService{
-		repo: repository.DefaultTopicLikeRepository,
+		repo:       repository.DefaultTopicLikeRepository,
+		topicModel: repository.NewTopicRepository(context.NewMioContext()),
 	}
 }
 
 type TopicLikeService struct {
-	repo repository.TopicLikeRepository
+	repo       repository.TopicLikeRepository
+	topicModel repository.TopicModel
 }
 
 func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, int64, error) {
-	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
+	topic := t.topicModel.FindById(int64(topicId))
 	if topic.Id == 0 {
 		return nil, 0, errno.ErrCommon.WithMessage("帖子不存在")
 	}
@@ -52,9 +54,9 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 		isFirst = false
 	}
 	if like.Status == 1 {
-		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
+		_ = t.topicModel.AddTopicLikeCount(int64(topicId), 1)
 	} else {
-		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
+		_ = t.topicModel.AddTopicLikeCount(int64(topicId), -1)
 	}
 	var point int64
 	if like.Status == 1 && isFirst == true {

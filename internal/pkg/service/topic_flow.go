@@ -7,17 +7,22 @@ import (
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	context2 "mio/internal/pkg/core/context"
 	entity2 "mio/internal/pkg/model/entity"
-	repository2 "mio/internal/pkg/repository"
+	"mio/internal/pkg/repository"
 	"time"
 )
 
 var initUserFlowPool, _ = ants.NewPool(50)
 
-var DefaultTopicFlowService = TopicFlowService{repo: repository2.DefaultTopicFlowRepository}
+var DefaultTopicFlowService = TopicFlowService{
+	repo:       repository.DefaultTopicFlowRepository,
+	topicModel: repository.NewTopicRepository(context2.NewMioContext()),
+}
 
 type TopicFlowService struct {
-	repo repository2.TopicFlowRepository
+	repo       repository.TopicFlowRepository
+	topicModel repository.TopicModel
 }
 
 // CalculateSort 计算内容流排序 创建时间和更新时间未计算在内
@@ -63,7 +68,7 @@ func (t TopicFlowService) InitUserFlow(userId int64) {
 	app.DB.FindInBatches(&topicList, 500, func(tx *gorm.DB, batch int) error {
 		flowList := make([]entity2.TopicFlow, 0)
 		for _, topic := range topicList {
-			flow := t.repo.FindBy(repository2.FindTopicFlowBy{
+			flow := t.repo.FindBy(repository.FindTopicFlowBy{
 				TopicId: topic.Id,
 				UserId:  userId,
 			})
@@ -113,11 +118,12 @@ func (t TopicFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
 	}
-	topic := repository2.DefaultTopicRepository.FindById(topicId)
+
+	topic := t.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return
 	}
-	flow := t.repo.FindBy(repository2.FindTopicFlowBy{
+	flow := t.repo.FindBy(repository.FindTopicFlowBy{
 		TopicId: topicId,
 		UserId:  userId,
 	})
@@ -137,11 +143,11 @@ func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 	if userId == 0 || topicId == 0 {
 		return
 	}
-	topic := repository2.DefaultTopicRepository.FindById(topicId)
+	topic := t.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return
 	}
-	flow := t.repo.FindBy(repository2.FindTopicFlowBy{
+	flow := t.repo.FindBy(repository.FindTopicFlowBy{
 		TopicId: topicId,
 		UserId:  userId,
 	})
@@ -158,7 +164,7 @@ func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 
 // AfterUpdateTopic 新增topic 、更新topic权重、更新topic查看次数 后调用此方法 重新计算内容流排序
 func (t TopicFlowService) AfterUpdateTopic(topicId int64) {
-	topic := repository2.DefaultTopicRepository.FindById(topicId)
+	topic := t.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return
 	}
