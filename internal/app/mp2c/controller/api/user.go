@@ -209,7 +209,6 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
-	var result entity.ShortUser
 	user := apiutil.GetAuthUser(c)
 
 	if form.UserId != 0 {
@@ -233,12 +232,12 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	result = user.ShortUser()
-	result.IpLocation = location.Name
 
-	return gin.H{
-		"data": result,
-	}, nil
+	shortUser := user.ShortUser()
+	result := make(map[string]interface{}, 0)
+	_ = util.MapTo(&shortUser, &result)
+	result["ipLocation"] = location.Name
+	return result, nil
 }
 
 // 更新简介

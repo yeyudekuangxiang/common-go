@@ -223,9 +223,17 @@ type GetZyhForm struct {
 	VolId  string `json:"volId" form:"volId" binding:"" alias:"志愿者id"`
 }
 
+type MyTopicRequest struct {
+	HomePageRequest
+	controller.PageFrom
+}
+
 type HomePageRequest struct {
 	UserId int64 `json:"userId" form:"userId"`
-	controller.PageFrom
+}
+
+type MyCollectionRequest struct {
+	ObjType int `json:"objType"`
 }
 
 type UpdateIntroductionRequest struct {
