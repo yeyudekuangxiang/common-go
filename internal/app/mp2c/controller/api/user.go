@@ -232,14 +232,12 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	shortUser := user.ShortUser()
 	result := make(map[string]interface{}, 0)
-	_ = util.MapTo(&shortUser, result)
+	_ = util.MapTo(&shortUser, &result)
 	result["ipLocation"] = location.Name
-
-	return gin.H{
-		"data": result,
-	}, nil
+	return result, nil
 }
 
 // 更新简介
