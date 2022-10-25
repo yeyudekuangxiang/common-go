@@ -62,6 +62,7 @@ func (d defaultCollectionService) Collection(objId int64, objType int, openId st
 	//update
 	if result.Status == 2 {
 		result.Status = 1
+
 		return d.collectionModel.Update(result)
 	}
 	return nil

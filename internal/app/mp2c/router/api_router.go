@@ -110,9 +110,9 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic))                  //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                //我的奖励
 
-			userRouter.GET("/topic-collection", apiutil.Format(api.DefaultCollectionController.TopicCollection))   //我的收藏(文章)
-			userRouter.GET("/collection", apiutil.Format(api.DefaultCollectionController.Collection))              //收藏(文章)
-			userRouter.GET("/cancel-collection", apiutil.Format(api.DefaultCollectionController.CancelCollection)) //取消收藏
+			userRouter.GET("/topic-collection", apiutil.Format(api.DefaultCollectionController.TopicCollection))    //我的收藏(文章)
+			userRouter.POST("/collection", apiutil.Format(api.DefaultCollectionController.Collection))              //收藏(文章)
+			userRouter.POST("/cancel-collection", apiutil.Format(api.DefaultCollectionController.CancelCollection)) //取消收藏
 
 			//社区2.0 用户相关
 			userRouter.GET("/home-page", apiutil.Format(api.DefaultUserController.HomePage))                      //主页

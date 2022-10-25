@@ -23,7 +23,9 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(c)
+
 	collectionService := service.NewCollectionService(context.NewMioContext(context.WithContext(c.Request.Context())))
+
 	collections, total, err := collectionService.TopicCollections(user.OpenId, form.Limit(), form.Offset())
 	if err != nil {
 		return nil, err

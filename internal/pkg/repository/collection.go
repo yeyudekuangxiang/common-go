@@ -91,7 +91,7 @@ func (m defaultCollectionModel) FindAllByOpenId(objType int, openId string, limi
 	if limit != 0 {
 		query.Limit(limit)
 	}
-	
+
 	if offset != 0 {
 		query.Offset(offset)
 	}
