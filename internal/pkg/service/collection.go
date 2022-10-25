@@ -28,6 +28,10 @@ func (d defaultCollectionService) TopicCollections(openId string, limit, offset 
 	//cond type; get ids
 	ids := d.getCollections(0, openId, 0, 0)
 	//查找文章
+	if len(ids) <= 0 {
+		return []*entity.Topic{}, 0, nil
+	}
+
 	list, total, err := d.topicModel.GetTopicList(repository.GetTopicPageListBy{
 		Ids:    ids,
 		Status: 3,

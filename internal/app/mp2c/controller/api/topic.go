@@ -296,6 +296,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	resList := make([]*entity.TopicItemRes, 0)
+
 	//点赞数据
 	likeMap := make(map[int]int, 0)
 	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
