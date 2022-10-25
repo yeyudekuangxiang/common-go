@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultPointLimitLogRepository = PointLimitLogRepository{DB: app.DB}
+var DefaultPointLimitLogRepository = PointLimitLogRepository{DB: app.BusinessDB}
 
 type PointLimitLogRepository struct {
 	DB *gorm.DB

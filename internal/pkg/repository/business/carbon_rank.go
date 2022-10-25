@@ -8,7 +8,7 @@ import (
 	"mio/pkg/errno"
 )
 
-var DefaultCarbonRankRepository = CarbonRankRepository{DB: app.DB}
+var DefaultCarbonRankRepository = CarbonRankRepository{DB: app.BusinessDB}
 
 type CarbonRankRepository struct {
 	DB *gorm.DB

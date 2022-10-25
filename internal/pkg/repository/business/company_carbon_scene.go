@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultCompanyCarbonSceneRepository = CompanyCarbonSceneRepository{DB: app.DB}
+var DefaultCompanyCarbonSceneRepository = CompanyCarbonSceneRepository{DB: app.BusinessDB}
 
 type CompanyCarbonSceneRepository struct {
 	DB *gorm.DB
@@ -34,7 +34,7 @@ func (repo CompanyCarbonSceneRepository) FindCompanyScene(by FindCompanyCarbonSc
 
 func (repo CompanyCarbonSceneRepository) GetCompanyCarbonSceneListBy(by GetCompanyCarbonSceneListBy) []business.CompanyCarbonScene {
 	list := make([]business.CompanyCarbonScene, 0)
-	db := app.DB.Model(business.CompanyCarbonScene{})
+	db := repo.DB.Model(business.CompanyCarbonScene{})
 	if by.Status > 0 {
 		db.Where("status = ?", by.Status)
 	}
