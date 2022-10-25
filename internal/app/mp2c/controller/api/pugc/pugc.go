@@ -89,6 +89,34 @@ func (PugcController) SendZyhPoint(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+//周年庆双倍积分奖励明细
+
+func (PugcController) SendZyhPointV2(c *gin.Context) (gin.H, error) {
+	zyhService := platform.NewZyhService(context.NewMioContext())
+	pointType := entity.PointTransactionType("POWER_REPLACE")
+	pointStr := "300"
+	point, _ := strconv.ParseInt(pointStr, 10, 64)
+	sendType := "0"
+	vid := "16658853458151f6eb1775c424543bb6e86eb3d858f0b"
+
+	messageCode, messageErr := zyhService.SendPointJb(sendType, vid, pointStr)
+	//发送结果记录到日志
+	msgErr := ""
+	if messageErr != nil {
+		msgErr = messageErr.Error()
+	}
+	zyhService.CreateLog(srv_types.GetZyhLogAddDTO{
+		Openid:         "oy_BA5Aof4m6hUTC81ykB0WbasO4",
+		PointType:      pointType,
+		Value:          point,
+		ResultCode:     messageCode,
+		AdditionalInfo: msgErr,
+		TransactionId:  "b51024f5-1913-4c62-9de3-57dc00e1ec8d",
+	})
+	fmt.Println("发完了")
+	return nil, nil
+}
+
 func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 	f, err := excelize.OpenFile("/Users/leo/Downloads/test1.xlsx")
 	if err != nil {
