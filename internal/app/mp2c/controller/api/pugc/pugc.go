@@ -92,6 +92,7 @@ func (PugcController) SendZyhPoint(c *gin.Context) (gin.H, error) {
 //周年庆双倍积分奖励明细
 
 func (PugcController) SendZyhPointV2(c *gin.Context) (gin.H, error) {
+	return gin.H{}, nil
 	zyhService := platform.NewZyhService(context.NewMioContext())
 	pointType := entity.PointTransactionType("POWER_REPLACE")
 	pointStr := "300"
