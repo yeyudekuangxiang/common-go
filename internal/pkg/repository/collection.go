@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"gorm.io/gorm"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -16,6 +17,7 @@ type (
 		FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error)
 		FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error)
 		FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error)
+		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 	}
 
 	defaultCollectionModel struct {
@@ -23,9 +25,13 @@ type (
 	}
 )
 
-func (m defaultCollectionModel) FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error) {
+func (d defaultCollectionModel) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+	return d.ctx.DB.Transaction(fc, opts...)
+}
+
+func (d defaultCollectionModel) FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error) {
 	var resp entity.Collection
-	err := m.ctx.DB.Model(&entity.Collection{}).
+	err := d.ctx.DB.Model(&entity.Collection{}).
 		Where("obj_id = ?", objId).
 		Where("obj_type = ?", objType).
 		Where("open_id= ?", openId).
@@ -40,9 +46,9 @@ func (m defaultCollectionModel) FindOneByOjb(objId int64, objType int, openId st
 	}
 }
 
-func (m defaultCollectionModel) FindOne(id int64) (*entity.Collection, error) {
+func (d defaultCollectionModel) FindOne(id int64) (*entity.Collection, error) {
 	var resp entity.Collection
-	err := m.ctx.DB.Model(&entity.Collection{}).
+	err := d.ctx.DB.Model(&entity.Collection{}).
 		First(&resp, id).Error
 	switch err {
 	case nil:
@@ -54,8 +60,8 @@ func (m defaultCollectionModel) FindOne(id int64) (*entity.Collection, error) {
 	}
 }
 
-func (m defaultCollectionModel) Insert(data *entity.Collection) (*entity.Collection, error) {
-	err := m.ctx.DB.WithContext(m.ctx.Context).Create(data).Error
+func (d defaultCollectionModel) Insert(data *entity.Collection) (*entity.Collection, error) {
+	err := d.ctx.DB.WithContext(d.ctx.Context).Create(data).Error
 	switch err {
 	case nil:
 		return data, nil
@@ -64,26 +70,26 @@ func (m defaultCollectionModel) Insert(data *entity.Collection) (*entity.Collect
 	}
 }
 
-func (m defaultCollectionModel) Delete(id int64) error {
-	result, err := m.FindOne(id)
+func (d defaultCollectionModel) Delete(id int64) error {
+	result, err := d.FindOne(id)
 	if err != nil {
 		return err
 	}
-	return m.ctx.DB.WithContext(m.ctx.Context).Delete(result).Error
+	return d.ctx.DB.WithContext(d.ctx.Context).Delete(result).Error
 }
 
-func (m defaultCollectionModel) Update(data *entity.Collection) error {
+func (d defaultCollectionModel) Update(data *entity.Collection) error {
 	if data.Id == 0 {
 		return gorm.ErrPrimaryKeyRequired
 	}
-	return m.ctx.DB.Save(data).Error
+	return d.ctx.DB.Save(data).Error
 }
 
-func (m defaultCollectionModel) FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error) {
+func (d defaultCollectionModel) FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error) {
 	var result []*entity.Collection
 	var total int64
 
-	query := m.ctx.DB.WithContext(m.ctx.Context).Model(&entity.Collection{}).
+	query := d.ctx.DB.WithContext(d.ctx.Context).Model(&entity.Collection{}).
 		Where("open_id = ?", openId).
 		Where("status = ?", 1).
 		Where("obj_type = ?", objType)
@@ -103,10 +109,10 @@ func (m defaultCollectionModel) FindAllByOpenId(objType int, openId string, limi
 	return result, total, nil
 }
 
-func (m defaultCollectionModel) FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error) {
+func (d defaultCollectionModel) FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error) {
 	var result []*entity.Collection
 	var total int64
-	query := m.ctx.DB.WithContext(m.ctx.Context)
+	query := d.ctx.DB.WithContext(d.ctx.Context)
 	if !startTime.IsZero() {
 		query.Where("created_at > ?", startTime)
 	}

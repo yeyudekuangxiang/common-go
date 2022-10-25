@@ -44,10 +44,10 @@ func (ctr CollectionController) Collection(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
-	collectionService := service.NewCollectionService(context.NewMioContext(context.WithContext(c.Request.Context())))
-	err := collectionService.Collection(form.ObjId, form.ObjType, user.OpenId)
+	collectionService := service.NewCollectionService(ctx)
+	err := collectionService.CollectionV2(form.ObjId, form.ObjType, user.OpenId)
 	return nil, err
 }
 

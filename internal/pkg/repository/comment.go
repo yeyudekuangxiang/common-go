@@ -44,7 +44,7 @@ func NewCommentRepository(db *gorm.DB) CommentModel {
 }
 
 func (m *defaultCommentRepository) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
-	return m.ctx.DB.Model(&entity.CommentIndex{}).Transaction(fc, opts...)
+	return m.ctx.DB.Transaction(fc, opts...)
 }
 
 func (m *defaultCommentRepository) RowBuilder() *gorm.DB {

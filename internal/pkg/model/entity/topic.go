@@ -78,6 +78,7 @@ type TopicItemRes struct {
 	IsEssence     int            `json:"isEssence"` //是否精华
 	DelReason     string         `json:"delReason"` //审核不通过 or 删除 的理由
 	IsLike        int            `json:"isLike"`
+	IsCollection  int            `json:"isCollection"`
 }
 
 func (t Topic) TopicItemRes() *TopicItemRes {
@@ -105,5 +106,6 @@ func (t Topic) TopicItemRes() *TopicItemRes {
 		IsEssence:     t.IsEssence,
 		DelReason:     t.DelReason,
 		IsLike:        0,
+		IsCollection:  0,
 	}
 }

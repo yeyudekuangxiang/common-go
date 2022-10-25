@@ -16,13 +16,20 @@ type (
 		TopicCollections(openId string, limit, offset int) ([]*entity.Topic, int64, error) //我的收藏
 		Collection(objId int64, objType int, openId string) error                          //收藏
 		CancelCollection(objId int64, objType int, openId string) error                    //取消收藏
+		Collections(openId string, objType, limit, offset int) []int64                     //收藏数据
+		CollectionV2(objId int64, objType int, openId string) error                        //收藏
 	}
 
 	defaultCollectionService struct {
+		ctx             *mioContext.MioContext
 		collectionModel repository.CollectionModel
 		topicModel      repository.TopicModel
 	}
 )
+
+func (d defaultCollectionService) Collections(openId string, objType, limit, offset int) []int64 {
+	return d.getCollections(objType, openId, limit, offset)
+}
 
 func (d defaultCollectionService) TopicCollections(openId string, limit, offset int) ([]*entity.Topic, int64, error) {
 	//cond type; get ids
@@ -59,29 +66,110 @@ func (d defaultCollectionService) Collection(objId int64, objType int, openId st
 				CreatedAt: time.Now(),
 			}
 			_, err = d.collectionModel.Insert(data)
-			return err
+			if err != nil {
+				return err
+			}
+			err = d.incrTopicCollections(objId)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 		return err
 	}
 	//update
 	if result.Status == 2 {
 		result.Status = 1
+		err = d.collectionModel.Update(result)
+		if err != nil {
+			return err
+		}
 
-		return d.collectionModel.Update(result)
+		err = d.incrTopicCollections(objId)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (d defaultCollectionService) CancelCollection(objId int64, objType int, openId string) error {
-	result, err := d.collectionModel.FindOneByOjb(objId, objType, openId)
+func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId string) error {
+	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
+		collectionModel := repository.NewCollectionRepository(ctx)
+		topicModel := repository.NewTopicRepository(ctx)
+		result, err := collectionModel.FindOneByOjb(objId, objType, openId)
+		if err != nil {
+			if err == entity.ErrNotFount {
+				//insert
+				data := &entity.Collection{
+					ObjId:     objId,
+					ObjType:   objType,
+					Status:    1,
+					OpenId:    openId,
+					CreatedAt: time.Now(),
+				}
+				_, err = collectionModel.Insert(data)
+				if err != nil {
+					return err
+				}
+				err = topicModel.ChangeTopicCollectionCount(objId, "collection_count", 1)
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+			return err
+		}
+		if result.Status == 2 {
+			result.Status = 1
+			err = collectionModel.Update(result)
+			if err != nil {
+				return err
+			}
+
+			err = topicModel.UpdateColumn(objId, "collection_count", 1)
+			if err != nil {
+				return err
+			}
+
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}
-	if result.Status == 2 {
+
+	return nil
+}
+
+func (d defaultCollectionService) CancelCollection(objId int64, objType int, openId string) error {
+	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
+		collectionModel := repository.NewCollectionRepository(ctx)
+		topicModel := repository.NewTopicRepository(ctx)
+
+		result, err := collectionModel.FindOneByOjb(objId, objType, openId)
+		if err != nil {
+			return err
+		}
+		if result.Status == 2 {
+			return nil
+		}
+		result.Status = 2
+		err = collectionModel.Update(result)
+		if err != nil {
+			return err
+		}
+		err = topicModel.ChangeTopicCollectionCount(objId, "collection_count", -1)
+		if err != nil {
+			return err
+		}
 		return nil
+	})
+
+	if err != nil {
+		return err
 	}
-	result.Status = 2
-	return d.collectionModel.Update(result)
+	return nil
 }
 
 func (d defaultCollectionService) getCollections(objType int, openId string, limit, offset int) []int64 {
@@ -97,8 +185,17 @@ func (d defaultCollectionService) getCollections(objType int, openId string, lim
 	return objIds
 }
 
+func (d defaultCollectionService) incrTopicCollections(objId int64) error {
+	return d.topicModel.ChangeTopicCollectionCount(objId, "collection_count", 1)
+}
+
+func (d defaultCollectionService) decrTopicCollections(objId int64) error {
+	return d.topicModel.ChangeTopicCollectionCount(objId, "collection_count", -1)
+}
+
 func NewCollectionService(ctx *mioContext.MioContext) CollectionService {
 	return &defaultCollectionService{
+		ctx:             ctx,
 		collectionModel: repository.NewCollectionRepository(ctx),
 		topicModel:      repository.NewTopicRepository(ctx),
 	}

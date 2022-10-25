@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
 	mioContext "mio/internal/pkg/core/context"
@@ -17,6 +18,8 @@ type (
 		UpdateColumn(id int64, key string, value interface{}) error
 		GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
+		ChangeTopicCollectionCount(id int64, column string, incr int) error
+		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 	}
 
 	defaultTopicRepository struct {
@@ -24,10 +27,18 @@ type (
 	}
 )
 
-func (u defaultTopicRepository) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicRepository) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+	return d.ctx.DB.Transaction(fc, opts...)
+}
+
+func (d defaultTopicRepository) ChangeTopicCollectionCount(id int64, column string, incr int) error {
+	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(column, gorm.Expr(column+"+?", incr)).Error
+}
+
+func (d defaultTopicRepository) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
-	query := u.ctx.DB.Model(&entity.Topic{}).
+	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
@@ -56,10 +67,10 @@ func (u defaultTopicRepository) GetMyTopic(by GetTopicPageListBy) ([]*entity.Top
 	return topList, total, nil
 }
 
-func (u defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
-	query := u.ctx.DB.Model(&entity.Topic{}).
+	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
@@ -112,10 +123,10 @@ func (u defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.T
 	return topList, total, nil
 }
 
-func (u defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64) {
+func (d defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
 
-	query := u.ctx.DB.Model(&entity.Topic{})
+	query := d.ctx.DB.Model(&entity.Topic{})
 	if by.ID > 0 {
 		query.Where("topic.id = ?", by.ID)
 	}
@@ -137,21 +148,21 @@ func (u defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []
 	return
 }
 
-func (u defaultTopicRepository) FindById(topicId int64) entity.Topic {
+func (d defaultTopicRepository) FindById(topicId int64) entity.Topic {
 	var topic entity.Topic
-	err := u.ctx.DB.Model(&entity.Topic{}).Preload("User").Preload("Tags").Where("id = ?", topicId).First(&topic).Error
+	err := d.ctx.DB.Model(&entity.Topic{}).Preload("User").Preload("Tags").Where("id = ?", topicId).First(&topic).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
 	return topic
 }
 
-func (u defaultTopicRepository) Save(topic *entity.Topic) error {
-	return u.ctx.DB.Save(topic).Error
+func (d defaultTopicRepository) Save(topic *entity.Topic) error {
+	return d.ctx.DB.Save(topic).Error
 }
 
-func (u defaultTopicRepository) AddTopicLikeCount(topicId int64, num int) error {
-	db := u.ctx.DB.Model(entity.Topic{}).
+func (d defaultTopicRepository) AddTopicLikeCount(topicId int64, num int) error {
+	db := d.ctx.DB.Model(entity.Topic{}).
 		Where("id = ?", topicId)
 	//避免点赞数为负数
 	if num < 0 {
@@ -160,9 +171,9 @@ func (u defaultTopicRepository) AddTopicLikeCount(topicId int64, num int) error 
 	return db.Update("like_count", gorm.Expr("like_count + ?", num)).Error
 }
 
-func (u defaultTopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
+func (d defaultTopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
-	db := u.ctx.DB.Table(fmt.Sprintf("%s as flow", entity.TopicFlow{}.TableName())).
+	db := d.ctx.DB.Table(fmt.Sprintf("%s as flow", entity.TopicFlow{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as topic on flow.topic_id = topic.id", entity.Topic{}.TableName())).
 		Where("flow.user_id = ?", by.UserId)
 
@@ -191,8 +202,8 @@ func (u defaultTopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list
 	return
 }
 
-func (u defaultTopicRepository) UpdateColumn(id int64, key string, value interface{}) error {
-	return u.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).UpdateColumn(key, value).Error
+func (d defaultTopicRepository) UpdateColumn(id int64, key string, value interface{}) error {
+	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(key, value).Error
 }
 
 func NewTopicRepository(ctx *mioContext.MioContext) TopicModel {

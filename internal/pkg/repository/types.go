@@ -22,14 +22,15 @@ type UpdateUserRisk struct {
 }
 
 type FindTopicLikeBy struct {
-	TopicId int
-	UserId  int
+	TopicId int64
+	UserId  int64
 }
 type GetTopicLikeListBy struct {
 	TopicIds []int64
 	UserIds  []int64
 	UserId   int64
 	TopicId  int64
+	Status   int
 }
 
 type GetTopicPageListBy struct {

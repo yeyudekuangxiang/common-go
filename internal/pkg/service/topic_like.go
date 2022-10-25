@@ -24,8 +24,8 @@ type TopicLikeService struct {
 	topicModel     repository.TopicModel
 }
 
-func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, int64, error) {
-	topic := srv.topicModel.FindById(int64(topicId))
+func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (*entity.TopicLike, int64, error) {
+	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return nil, 0, errno.ErrCommon.WithMessage("帖子不存在")
 	}
@@ -74,7 +74,10 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string)
 }
 
 func (srv TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {
-	list := srv.topicLikeModel.GetListBy(repository.GetTopicLikeListBy{UserId: userId})
+	list := srv.topicLikeModel.GetListBy(repository.GetTopicLikeListBy{
+		UserId: userId,
+		Status: 1,
+	})
 	if len(list) == 0 {
 		return nil, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}
@@ -82,7 +85,7 @@ func (srv TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike,
 }
 
 func (srv TopicLikeService) GetOneByTopic(topicId int64, userId int64) (entity.TopicLike, error) {
-	like := srv.topicLikeModel.FindBy(repository.FindTopicLikeBy{TopicId: int(topicId), UserId: int(userId)})
+	like := srv.topicLikeModel.FindBy(repository.FindTopicLikeBy{TopicId: topicId, UserId: userId})
 	if like.Id == 0 {
 		return entity.TopicLike{}, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}
