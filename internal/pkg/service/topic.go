@@ -30,13 +30,15 @@ var DefaultTopicService = NewTopicService(mioContext.NewMioContext())
 
 func NewTopicService(ctx *mioContext.MioContext) TopicService {
 	return TopicService{
-		topicModel: repository.NewTopicRepository(ctx),
+		topicModel:     repository.NewTopicRepository(ctx),
+		topicLikeModel: repository.NewTopicLikeRepository(ctx),
 	}
 }
 
 type TopicService struct {
-	topicModel  repository.TopicModel
-	TokenServer *wxoa.AccessTokenServer
+	topicModel     repository.TopicModel
+	topicLikeModel repository.TopicLikeModel
+	TokenServer    *wxoa.AccessTokenServer
 }
 
 //将 entity.Topic 列表填充为 TopicDetail 列表
@@ -48,7 +50,7 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	}
 	topicLikeMap := make(map[int64]bool)
 	if userId > 0 {
-		likeList := repository.TopicLikeRepository{DB: app.DB}.GetListBy(repository.GetTopicLikeListBy{
+		likeList := srv.topicLikeModel.GetListBy(repository.GetTopicLikeListBy{
 			TopicIds: topicIds,
 			UserId:   userId,
 		})
@@ -95,75 +97,19 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
 func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	topList := make([]*entity.Topic, 0)
-	var total int64
-	query := app.DB.Model(&entity.Topic{}).
-		Preload("User").
-		Preload("Tags").
-		Preload("Comment", func(db *gorm.DB) *gorm.DB {
-			return db.Where("comment_index.to_comment_id = ?", 0).
-				Order("like_count desc").Limit(10)
-		}).
-		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
-			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
-				Order("comment_index.like_count desc")
-		}).
-		Preload("Comment.RootChild.Member").
-		Preload("Comment.Member")
-	if param.TopicTagId != 0 {
-		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TopicTagId)
-	}
-	if param.UserId != 0 {
-		query.Where("topic.user_id = ?", param.UserId)
-	}
-
-	query.Where("topic.status = ?", entity.TopicStatusPublished)
-	query = query.Count(&total).
-		Group("topic.id")
-	if param.Order == "time" {
-		query.Order("topic.created_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
-	} else if param.Order == "recommend" {
-		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
-	} else {
-		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
-	}
-
-	err := query.Limit(param.Limit).
-		Offset(param.Offset).
-		Find(&topList).Error
+	list, i, err := srv.topicModel.GetTopicList(param)
 	if err != nil {
 		return nil, 0, err
 	}
-	return topList, total, nil
+	return list, i, nil
 }
 
 func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	topList := make([]*entity.Topic, 0)
-	var total int64
-	query := app.DB.Model(&entity.Topic{}).
-		Preload("User").
-		Preload("Tags").
-		Preload("Comment", func(db *gorm.DB) *gorm.DB {
-			return db.Where("comment_index.to_comment_id = ?", 0).
-				Order("like_count desc").Limit(10)
-		}).
-		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
-			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
-				Order("comment_index.like_count desc")
-		}).
-		Preload("Comment.RootChild.Member").
-		Preload("Comment.Member")
-	query.Where("topic.user_id = ?", param.UserId)
-	err := query.Count(&total).
-		Group("topic.id").
-		Order("id desc").
-		Limit(param.Limit).
-		Offset(param.Offset).
-		Find(&topList).Error
+	topic, i, err := srv.topicModel.GetMyTopic(param)
 	if err != nil {
 		return nil, 0, err
 	}
-	return topList, total, nil
+	return topic, i, nil
 }
 
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -110,8 +111,8 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(c)
-
-	like, point, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID), user.OpenId)
+	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	like, point, err := topicLikeService.ChangeLikeStatus(form.TopicId, int(user.ID), user.OpenId)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,8 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	resList := make([]*entity.TopicItemRes, 0)
 	//点赞数据
 	likeMap := make(map[int]int, 0)
-	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
 			likeMap[item.TopicId] = int(item.Status)
@@ -256,7 +258,8 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 		topicRes.CommentCount = CommentCount[0].Total
 	}
 	//获取点赞数据
-	like, err := service.DefaultTopicLikeService.GetOneByTopic(topic.Id, user.ID)
+	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	like, err := topicLikeService.GetOneByTopic(topic.Id, user.ID)
 	if err == nil {
 		topicRes.IsLike = int(like.Status)
 	}
@@ -288,13 +291,15 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})
+
 	if err != nil {
 		return nil, err
 	}
 	resList := make([]*entity.TopicItemRes, 0)
 	//点赞数据
 	likeMap := make(map[int]int, 0)
-	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
 			likeMap[item.TopicId] = int(item.Status)
@@ -306,12 +311,14 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
+
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
 		topic2comment[item.TopicId] = item.Total
 	}
+
 	for _, item := range list {
 		res := item.TopicItemRes()
 		res.CommentCount = topic2comment[res.Id]

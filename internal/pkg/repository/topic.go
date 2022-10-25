@@ -40,16 +40,19 @@ func (u defaultTopicRepository) GetMyTopic(by GetTopicPageListBy) ([]*entity.Top
 		}).
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
-	query.Where("topic.user_id = ?", by.UserId)
-	err := query.Count(&total).
+
+	err := query.Where("topic.user_id = ?", by.UserId).
+		Count(&total).
 		Group("topic.id").
 		Order("id desc").
 		Limit(by.Limit).
 		Offset(by.Offset).
 		Find(&topList).Error
+
 	if err != nil {
 		return nil, 0, err
 	}
+
 	return topList, total, nil
 }
 
@@ -135,8 +138,8 @@ func (u defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []
 }
 
 func (u defaultTopicRepository) FindById(topicId int64) entity.Topic {
-	topic := entity.Topic{}
-	err := u.ctx.DB.Model(entity.Topic{}).Preload("User").Preload("Tags").Where("id = ?", topicId).First(&topic).Error
+	var topic entity.Topic
+	err := u.ctx.DB.Model(&entity.Topic{}).Preload("User").Preload("Tags").Where("id = ?", topicId).First(&topic).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
