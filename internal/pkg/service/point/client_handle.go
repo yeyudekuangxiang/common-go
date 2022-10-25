@@ -7,10 +7,12 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	platformSrv "mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -277,6 +279,35 @@ func (c *defaultClientHandle) incPoint(num int64) (int64, error) {
 	_, err = c.saveTransAction()
 	if err != nil {
 		return 0, err
+	}
+
+	//同步到志愿汇
+	if c.clientHandle.point >= 0 {
+		//积分变动提醒
+		typeZyh := map[entity.PointTransactionType]string{
+			entity.POINT_POWER_REPLACE: "电车换电",
+		}
+		_, zyhOk := typeZyh[c.clientHandle.Type]
+		if zyhOk {
+			sendType := "0"
+			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
+			messageCode, messageErr := serviceZyh.SendPoint(sendType, c.clientHandle.OpenId, strconv.FormatInt(c.clientHandle.point, 10))
+			if messageCode != "30000" {
+				//发送结果记录到日志
+				msgErr := ""
+				if messageErr != nil {
+					msgErr = messageErr.Error()
+				}
+				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+					Openid:         c.clientHandle.OpenId,
+					PointType:      c.clientHandle.Type,
+					Value:          c.clientHandle.point,
+					ResultCode:     messageCode,
+					AdditionalInfo: msgErr,
+					TransactionId:  c.clientHandle.bizId,
+				})
+			}
+		}
 	}
 	return point, nil
 }
