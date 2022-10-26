@@ -363,7 +363,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
 
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
-	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
+	incPoint := one.Point
 
 	totalPoint := lastPoint + incPoint
 
@@ -400,7 +400,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	one.UpdatedAt = time.Now()
 	if isHalf {
 		one.Status = 1
-		one.Point = strconv.FormatInt(halfPoint, 10)
+		one.Point = halfPoint
 	}
 
 	err = repository.DefaultBdScenePrePointRepository.Save(&one)
@@ -409,7 +409,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	}
 
 	//减碳量
-	fromString, _ := decimal.NewFromString(one.Point)
+	fromString := decimal.NewFromInt(int64(one.Point))
 	amount, _ := fromString.Div(decimal.NewFromInt(int64(scene.Override))).Float64()
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" {
