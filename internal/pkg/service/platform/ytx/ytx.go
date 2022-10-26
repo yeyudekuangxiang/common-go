@@ -89,11 +89,11 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 	}
 
 	requestParams := make(map[string]interface{}, 0)
-	err := util.MapTo(&synchroRequest, &params)
+	err := util.MapTo(&synchroRequest, &requestParams)
 	if err != nil {
 		return err
 	}
-	params["secret"] = srv.option.Secret
+	requestParams["secret"] = srv.option.Secret
 	synchroRequest.Signature = platformUtil.GetSign(requestParams, "", "&")
 
 	url := srv.option.Domain + "/markting_activity/network/lvmiao/synchro"

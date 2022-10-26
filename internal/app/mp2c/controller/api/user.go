@@ -279,8 +279,8 @@ func (ctr UserController) sendCoupon(user entity.User) {
 	if user.ChannelId == 1066 {
 		bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
 		var options []ytx.Options
-		options = append(options, ytx.WithPoolCode("RP202110251300002"))
-		options = append(options, ytx.WithSecret("a123456"))
+		options = append(options, ytx.WithPoolCode(bdscene.AppId2))
+		options = append(options, ytx.WithSecret(bdscene.Secret))
 		options = append(options, ytx.WithAppId(bdscene.AppId))
 		options = append(options, ytx.WithDomain(bdscene.Domain))
 		ytxService := ytx.NewYtxService(mioctx.NewMioContext(), options...)
