@@ -261,7 +261,7 @@ func (srv Service) PreCollectPoint(sign string, params map[string]interface{}) e
 		return err
 	}
 
-	point := fromString.Mul(decimal.NewFromInt(10)).Round(2).String()
+	point := fromString.Mul(decimal.NewFromInt(10)).Round(2).IntPart()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
 		PlatformKey:    params["platformKey"].(string),
 		PlatformUserId: params["memberId"].(string),
@@ -374,7 +374,7 @@ func (srv Service) CollectPoint(sign string, params map[string]interface{}) (int
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(srv.ctx, key).Val(), 10, 64)
-	incPoint, _ := strconv.ParseInt(one.Point, 10, 64)
+	incPoint := one.Point
 	totalPoint := lastPoint + incPoint
 	if lastPoint >= int64(scene.PrePointLimit) {
 		return 0, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
@@ -407,7 +407,7 @@ func (srv Service) CollectPoint(sign string, params map[string]interface{}) (int
 	one.UpdatedAt = time.Now()
 	if isHalf {
 		one.Status = 1
-		one.Point = strconv.FormatInt(halfPoint, 10)
+		one.Point = halfPoint
 	}
 
 	err = repository.DefaultBdScenePrePointRepository.Save(&one)

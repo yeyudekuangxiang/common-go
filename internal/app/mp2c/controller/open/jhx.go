@@ -233,8 +233,9 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 
 	//预加积分
 	fromString, _ := decimal.NewFromString(form.Amount)
-	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).String()
 	amount, _ := fromString.Float64()
+
+	point := fromString.Mul(decimal.NewFromInt(int64(scene.Override))).Round(0).IntPart()
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,

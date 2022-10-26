@@ -86,7 +86,7 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	}
 
 	for _, v := range prePoint {
-		onePoint, _ := strconv.ParseInt(v.Point, 10, 64)
+		onePoint := v.Point
 		totalPoint += onePoint
 
 		if totalPoint > int64(scene.PrePointLimit) {
