@@ -8,6 +8,7 @@ func Initialize(configPath string) {
 	InitIni(configPath)
 	InitConsoleLog()
 	InitDB()
+	InitBusinessDB()
 	InitRedis()
 	InitValidator()
 	InitWeapp()

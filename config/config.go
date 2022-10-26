@@ -23,12 +23,14 @@ var Config = app{
 	ActivityZyh:      activityZyh{},
 	BaiDuImageSearch: baiDuImageSearchSetting{},
 	TokenCenterRpc:   rpcSetting{},
+	DatabaseBusiness: databaseSetting{},
 }
 
 type app struct {
 	App              appSetting              `ini:"app"`
 	Http             httpSetting             `ini:"http"`
 	Database         databaseSetting         `ini:"database"`
+	DatabaseBusiness databaseSetting         `ini:"databaseBusiness"`
 	Log              logSetting              `ini:"log"`
 	Weapp            wxSetting               `ini:"weapp"`
 	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置

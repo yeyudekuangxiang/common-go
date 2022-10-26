@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultCarbonCreditsLimitLogRepository = CarbonCreditsLimitLogRepository{DB: app.DB}
+var DefaultCarbonCreditsLimitLogRepository = CarbonCreditsLimitLogRepository{DB: app.BusinessDB}
 
 type CarbonCreditsLimitLogRepository struct {
 	DB *gorm.DB

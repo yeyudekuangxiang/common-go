@@ -41,6 +41,20 @@ func NewMioContext(options ...Option) *MioContext {
 	return mioContext
 }
 
+func NewBusinessContext(options ...Option) *MioContext {
+	mioContext := &MioContext{}
+	for _, option := range options {
+		option(mioContext)
+	}
+	if mioContext.Context == nil {
+		mioContext.Context = context.Background()
+	}
+	if mioContext.DB == nil {
+		mioContext.DB = app.BusinessDB
+	}
+	return mioContext
+}
+
 // BeginTran begins a transaction
 func (ctx *MioContext) BeginTran(options ...*sql.TxOptions) *MioContext {
 	db := ctx.DB.Begin(options...)

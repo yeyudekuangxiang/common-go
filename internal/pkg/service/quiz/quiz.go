@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"time"
 )
@@ -28,7 +29,7 @@ func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestion, err
 
 // Availability 是否可以答题 true可以 false不可以
 func (srv QuizService) Availability(openid string) (bool, error) {
-	isAnsweredToday, err := DefaultQuizDailyResultService.IsAnsweredToday(openid)
+	isAnsweredToday, err := DefaultQuizDailyResultService.IsAnsweredToday(openid, timeutils.NowDate())
 	if err != nil {
 		return false, err
 	}
@@ -40,7 +41,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 	}
 	defer util.DefaultLock.UnLock("QuizAnswerQuestion" + openid)
 
-	if err := DefaultQuizSingleRecordService.IsAnswered(openid, questionId); err != nil {
+	if err := DefaultQuizSingleRecordService.IsAnswered(openid, questionId, timeutils.NowDate()); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +82,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
-	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId)
+	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timeutils.Now())
 	if err != nil {
 		return 0, err
 	}
@@ -111,7 +112,7 @@ func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, erro
 	return point, err
 }
 func (srv QuizService) DailyResult(openId string) (*srv_types.QuizDailyResult, error) {
-	result, err := DefaultQuizDailyResultService.FindTodayResult(openId)
+	result, err := DefaultQuizDailyResultService.FindTodayResult(openId, timeutils.NowDate())
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity/business"
 )
 
-var DefaultUserRepository = UserRepository{DB: app.DB}
+var DefaultUserRepository = UserRepository{DB: app.BusinessDB}
 
 type UserRepository struct {
 	DB *gorm.DB
@@ -17,12 +17,12 @@ type IUserRepository interface {
 }
 
 func (u UserRepository) Save(user *business.User) error {
-	return app.DB.Save(user).Error
+	return u.DB.Save(user).Error
 }
 
 func (u UserRepository) GetUserBy(by GetUserBy) business.User {
 	user := business.User{}
-	db := app.DB.Model(user)
+	db := u.DB.Model(user)
 
 	if by.Uid != "" {
 		db.Where("uid = ?", by.Uid)
@@ -44,7 +44,7 @@ func (u UserRepository) GetUserBy(by GetUserBy) business.User {
 
 func (u UserRepository) GetUserListBy(by GetUserListBy) []business.User {
 	list := make([]business.User, 0)
-	db := app.DB.Model(business.User{})
+	db := u.DB.Model(business.User{})
 	if len(by.Ids) > 0 {
 		db.Where("id in (?)", by.Ids)
 	}
