@@ -12,7 +12,6 @@ import (
 
 func TestGoFunc(t *testing.T) {
 	flagConf := flag.String("c", "/Users/yunfeng/Documents/workspace/mp2c-go/config.ini", "-c")
-
 	initialize.Initialize(*flagConf)
 
 	user := entity.User{
@@ -26,10 +25,9 @@ func TestGoFunc(t *testing.T) {
 	options = append(options, WithDomain(bdscene.Domain))
 	ytxService := NewYtxService(mioctx.NewMioContext(), options...)
 
-	_, err := ytxService.SendCoupon(user, 5.00)
+	_, err := ytxService.SendCoupon(1001, 5.00, user)
 	if err != nil {
 		app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
 		return
 	}
-
 }

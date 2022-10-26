@@ -66,7 +66,7 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 		params := make(map[string]interface{}, 0)
 		params["memberId"] = sceneUser.PlatformUserId
 		params["openId"] = sceneUser.OpenId
-		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Key), ytx.WithDomain(scene.Domain))
+		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Secret2), ytx.WithDomain(scene.Domain2))
 		err = ytxSrv.BindSuccess(params)
 		if err != nil {
 			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
