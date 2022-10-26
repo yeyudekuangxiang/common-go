@@ -163,11 +163,17 @@ func (srv BadgeService) UpdateBadgeIsNew(openid string, id int64, isNew bool) er
 	return srv.repo.Save(badge)
 }
 
-func (srv BadgeService) GetUploadOldBadgeSetting(badgeId int64) (*srv_types.UploadOldBadgeResult, error) {
+func (srv BadgeService) GetUploadOldBadgeSetting(userId int64, badgeId int64) (*srv_types.UploadBadgeResult, error) {
+	userInfo, err := DefaultUserService.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
 
 	badge, err := srv.repo.FindBadge(repotypes.FindBadgeBy{
-		ID: badgeId,
+		ID:     badgeId,
+		OpenId: userInfo.OpenId,
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -196,14 +202,18 @@ func (srv BadgeService) GetUploadOldBadgeSetting(badgeId int64) (*srv_types.Uplo
 	}
 
 	code := util.UUID()
-
 	app.Redis.Set(context.Background(), config.RedisKey.BadgeImageCode+code, badge.ID, time.Minute*5)
-	return &srv_types.UploadOldBadgeResult{
-		CreateTime:        badge.CreateTime,
+	return &srv_types.UploadBadgeResult{
 		EventTemplateType: ev.EventTemplateType,
 		TemplateSetting: map[string]interface{}{
 			string(ev.EventTemplateType): setting,
 		},
-		UploadCode: code,
+		BadgeInfo: srv_types.UploadBadgeInfo{
+			UploadCode:    code,
+			Username:      userInfo.Nickname,
+			Time:          badge.CreateTime.Format("2006-01-02 15:04:05"),
+			CertificateNo: badge.Code,
+		},
 	}, nil
+
 }

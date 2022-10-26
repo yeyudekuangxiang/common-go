@@ -44,6 +44,9 @@ func (repo BadgeRepository) FindBadge(by repotypes.FindBadgeBy) (*entity.Badge, 
 	if by.ID != 0 {
 		db.Where("id = ?", by.ID)
 	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
 	err := db.Take(&badge).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err

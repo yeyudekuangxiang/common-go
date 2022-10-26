@@ -46,7 +46,8 @@ func (BadgeController) UploadOldBadgeImage(ctx *gin.Context) (interface{}, error
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	info, err := service.DefaultBadgeService.GetUploadOldBadgeSetting(form.BadgeId)
+	user := apiutil.GetAuthUser(ctx)
+	info, err := service.DefaultBadgeService.GetUploadOldBadgeSetting(user.ID, form.BadgeId)
 	if err != nil {
 		return nil, err
 	}
