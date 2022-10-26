@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -110,8 +111,8 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(c)
-
-	like, point, err := service.TopicLikeService{}.ChangeLikeStatus(form.TopicId, int(user.ID), user.OpenId)
+	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	like, point, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +129,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	list, total, err := service.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
@@ -139,19 +141,28 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	resList := make([]*entity.TopicItemRes, 0)
 	//点赞数据
-	likeMap := make(map[int]int, 0)
-	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	likeMap := make(map[int64]struct{}, 0)
+	topicLikeService := service.NewTopicLikeService(ctx)
+	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
-			likeMap[item.TopicId] = int(item.Status)
+			likeMap[item.TopicId] = struct{}{}
 		}
 	}
+	//收藏数据
+	collectionMap := make(map[int64]struct{}, 0)
+	collectionService := service.NewCollectionService(ctx)
+	collectionIds := collectionService.Collections(user.OpenId, 0, 0, 0)
+	for _, collectionId := range collectionIds {
+		collectionMap[collectionId] = struct{}{}
+	}
 
-	//获取顶级评论数量
+	//评论数据
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
+
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
@@ -161,8 +172,11 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	for _, item := range list {
 		res := item.TopicItemRes()
 		res.CommentCount = topic2comment[res.Id]
-		if _, ok := likeMap[int(res.Id)]; ok {
-			res.IsLike = likeMap[int(res.Id)]
+		if _, ok := likeMap[res.Id]; ok {
+			res.IsLike = 1
+		}
+		if _, ok := collectionMap[res.Id]; ok {
+			res.IsCollection = 1
 		}
 		resList = append(resList, res)
 	}
@@ -256,7 +270,8 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 		topicRes.CommentCount = CommentCount[0].Total
 	}
 	//获取点赞数据
-	like, err := service.DefaultTopicLikeService.GetOneByTopic(topic.Id, user.ID)
+	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	like, err := topicLikeService.GetOneByTopic(topic.Id, user.ID)
 	if err == nil {
 		topicRes.IsLike = int(like.Status)
 	}
@@ -270,7 +285,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
 	if form.UserId != 0 {
 		u, b, err := service.DefaultUserService.GetUserByID(form.UserId)
@@ -288,52 +303,60 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	resList := make([]*entity.TopicItemRes, 0)
+
 	//点赞数据
-	likeMap := make(map[int]int, 0)
-	likeList, _ := service.DefaultTopicLikeService.GetLikeInfoByUser(user.ID)
+	likeMap := make(map[int64]struct{}, 0)
+	topicLikeService := service.NewTopicLikeService(ctx)
+	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
-			likeMap[item.TopicId] = int(item.Status)
+			likeMap[item.TopicId] = struct{}{}
 		}
 	}
 
-	//获取顶级评论数量
+	//评论数据
 	ids := make([]int64, 0) //topicId
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
+
+	//收藏数据
+	collectionMap := make(map[int64]struct{}, 0)
+	collectionService := service.NewCollectionService(ctx)
+	collectionIds := collectionService.Collections(user.OpenId, 0, 0, 0)
+	for _, collectionId := range collectionIds {
+		collectionMap[collectionId] = struct{}{}
+	}
+
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
 		topic2comment[item.TopicId] = item.Total
 	}
+	//组装数据---点赞数据 收藏数据
 	for _, item := range list {
 		res := item.TopicItemRes()
 		res.CommentCount = topic2comment[res.Id]
-		if _, ok := likeMap[int(res.Id)]; ok {
-			res.IsLike = likeMap[int(res.Id)]
+		if _, ok := likeMap[res.Id]; ok {
+			res.IsLike = 1
+		}
+		if _, ok := collectionMap[res.Id]; ok {
+			res.IsCollection = 1
 		}
 		resList = append(resList, res)
 	}
+
 	return gin.H{
 		"list":     resList,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,
 	}, err
-}
-
-func (ctr *TopicController) MyCollection(c *gin.Context) (gin.H, error) {
-	form := MyCollectionRequest{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-	//user := apiutil.GetAuthUser(c)
-
-	return nil, nil
 }
