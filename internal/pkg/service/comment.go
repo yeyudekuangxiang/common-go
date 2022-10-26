@@ -199,7 +199,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return entity.CommentIndex{}, 0, errors.New("内容审核未通过，发布失败。")
 		}
 	}
-	
+
 	comment := entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
