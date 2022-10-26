@@ -225,6 +225,7 @@ type GetZyhForm struct {
 
 type MyTopicRequest struct {
 	HomePageRequest
+	Status int `json:"status" form:"status"`
 	controller.PageFrom
 }
 

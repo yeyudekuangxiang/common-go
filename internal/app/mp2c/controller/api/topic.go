@@ -300,6 +300,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 
 	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
+		Status: form.Status,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})

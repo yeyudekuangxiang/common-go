@@ -51,7 +51,9 @@ func (d defaultTopicRepository) GetMyTopic(by GetTopicPageListBy) ([]*entity.Top
 		}).
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
-
+	if by.Status != 0 {
+		query.Where("topic.status = ?", by.Status)
+	}
 	err := query.Where("topic.user_id = ?", by.UserId).
 		Count(&total).
 		Group("topic.id").
