@@ -98,8 +98,11 @@ func (d defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.T
 	if by.UserId != 0 {
 		query.Where("topic.user_id = ?", by.UserId)
 	}
-
-	query.Where("topic.status = ?", entity.TopicStatusPublished)
+	if by.Status != 0 {
+		query.Where("topic.status = ?", by.Status)
+	} else {
+		query.Where("topic.status = ?", entity.TopicStatusPublished)
+	}
 	query = query.Count(&total).
 		Group("topic.id")
 	if by.Order == "time" {
@@ -138,6 +141,7 @@ func (d defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []
 	if by.Status > 0 {
 		query.Where("topic.status = ?", by.Status)
 	}
+
 	err := query.Count(&total).
 		Offset(by.Offset).
 		Limit(by.Limit).
