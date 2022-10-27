@@ -10,7 +10,7 @@ import (
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"go.uber.org/zap"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
-	"mio/internal/pkg/queue/types/wxworkqueue"
+	"mio/internal/pkg/queue/types/message/wxworkqueue"
 	"mio/internal/pkg/util/encrypt"
 	mzap "mio/pkg/zap"
 

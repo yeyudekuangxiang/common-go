@@ -24,14 +24,13 @@ func Run() {
 	Router()
 }
 
-// StartConsume
-// exchange 交换机名称
-// exchangeKind 交换类型 direct fanout topic headers
+// StartConsume  路由模式默认topic
 // queue 消费队列名称
+// exchange 交换机名称
 // routerKeys 路由key
 // durable 消息是否持久化 重要的消息开启持久化
 // handler 消费回调
-func StartConsume(exchange, queue string, routerKeys []string, durable bool, handler rabbitmq.Handler) {
+func StartConsume(queue, exchange string, routerKeys []string, durable bool, handler rabbitmq.Handler) {
 	options := make([]func(*rabbitmq.ConsumeOptions), 0)
 	options = append(options, rabbitmq.WithConsumeOptionsBindingExchangeName(exchange),
 		rabbitmq.WithConsumeOptionsBindingExchangeKind("topic"))
@@ -39,6 +38,7 @@ func StartConsume(exchange, queue string, routerKeys []string, durable bool, han
 		options = append(options, rabbitmq.WithConsumeOptionsBindingExchangeDurable,
 			rabbitmq.WithConsumeOptionsQueueDurable)
 	}
+
 	err := consumer.StartConsuming(
 		handler,
 		queue,

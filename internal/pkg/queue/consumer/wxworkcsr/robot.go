@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/wagslane/go-rabbitmq"
 	"log"
-	"mio/internal/pkg/queue/types/wxworkqueue"
+	"mio/internal/pkg/queue/types/message/wxworkqueue"
 	"mio/pkg/wxwork"
 )
 

@@ -6,7 +6,7 @@ import (
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
-	"mio/internal/pkg/queue/types/wxworkqueue"
+	"mio/internal/pkg/queue/types/message/wxworkqueue"
 	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
 	glbtyp "mio/pkg/gitlab/types"
