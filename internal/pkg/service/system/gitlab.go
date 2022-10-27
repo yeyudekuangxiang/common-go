@@ -6,7 +6,7 @@ import (
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
-	"mio/internal/pkg/queue/types/message/wxworkqueue"
+	"mio/internal/pkg/queue/types/message/wxworkmsg"
 	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
 	glbtyp "mio/pkg/gitlab/types"
@@ -156,7 +156,7 @@ func (srv GitlabService) formatName(ref string) string {
 }
 func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 
-	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{
+	return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{
 		Key:  config.Constants.WxWorkGitlabRobotKey,
 		Type: wxwork.MsgTypeMarkdown,
 		Message: wxwork.Markdown{
@@ -180,7 +180,7 @@ func (srv GitlabService) deploymentRunning(deployment glbtyp.Deployment) error {
 	})
 }
 func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
-	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
+	return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
 		Content: fmt.Sprintf(`%s 发布成功通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
@@ -200,7 +200,7 @@ func (srv GitlabService) deploymentSuccess(deployment glbtyp.Deployment) error {
 	}})
 }
 func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
-	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
+	return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
 		Content: fmt.Sprintf(`%s 发布失败通知
 **应用名称:**[%s](%s)
 **应用描述:**%s
@@ -220,7 +220,7 @@ func (srv GitlabService) deployFailed(deployment glbtyp.Deployment) error {
 	}})
 }
 func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
-	return wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
+	return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeMarkdown, Message: wxwork.Markdown{
 		Content: fmt.Sprintf(`%s 发布取消通知
 **应用名称:**[%s](%s)
 **应用描述:**%s

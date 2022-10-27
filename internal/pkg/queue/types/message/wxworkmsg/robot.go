@@ -1,4 +1,4 @@
-package wxworkqueue
+package wxworkmsg
 
 import "mio/pkg/wxwork"
 

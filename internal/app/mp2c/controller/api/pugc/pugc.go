@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/pugc"
 	questionEntity "mio/internal/pkg/model/entity/question"
+	"mio/internal/pkg/queue/types/message/zhugemsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform"
 	questionService "mio/internal/pkg/service/question"
@@ -26,6 +27,49 @@ import (
 var DefaultPugcController = PugcController{}
 
 type PugcController struct {
+}
+
+func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
+	//上报到诸葛
+	zhuGeAttr := make(map[string]interface{}, 0)
+	zhuGeAttr["来源"] = "1"
+	zhuGeAttr["渠道"] = "3"
+	zhuGeAttr["城市code"] = "5"
+	zhuGeAttr["openid"] = "4"
+
+	zhugeAttr, errV2 := json.Marshal(zhuGeAttr)
+
+	if errV2 != nil {
+		return gin.H{}, nil
+	}
+	msg := zhugemsg.ZhugeMessage{
+		EventKey: "111",
+		Openid:   "333",
+		Date:     string(zhugeAttr),
+	}
+
+	data, _ := json.Marshal(msg)
+
+	println(data)
+
+	msgV5 := zhugemsg.ZhugeMessage{}
+	errV5 := json.Unmarshal(data, &msgV5)
+	if errV5 != nil {
+		return gin.H{}, errV5
+	}
+
+	s := msgV5.Date
+
+	zhuGeAttrV2 := make(map[string]interface{})
+
+	errV6 := json.Unmarshal([]byte(s), &zhuGeAttrV2)
+
+	if errV6 != nil {
+		return gin.H{}, errV6
+	}
+
+	return gin.H{}, nil
+
 }
 
 //周年庆双倍积分奖励明细

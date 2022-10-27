@@ -10,7 +10,7 @@ import (
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 	"go.uber.org/zap"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
-	"mio/internal/pkg/queue/types/message/wxworkqueue"
+	"mio/internal/pkg/queue/types/message/wxworkmsg"
 	"mio/internal/pkg/util/encrypt"
 	mzap "mio/pkg/zap"
 
@@ -51,7 +51,7 @@ func recovery() gin.HandlerFunc {
 				return
 			}
 
-			sendErr := wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{
+			sendErr := wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{
 				Key:  config.Constants.WxWorkBugRobotKey,
 				Type: wxwork.MsgTypeMarkdown,
 				Message: wxwork.Markdown{
