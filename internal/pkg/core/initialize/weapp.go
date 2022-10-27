@@ -43,7 +43,8 @@ func (t TokenCenter) AccessToken() (token string, expireIn time.Time, err error)
 	if err != nil {
 		return "", time.Time{}, err
 	}
-	return tokenResp.AccessToken, time.UnixMilli(tokenResp.ExpireAt), nil
+
+	return "62_LyFbC3E1ZjFL-20YUBdE4vbMj_3TXPEijjDaOi5nfj-JTpkuw2YlsshIYb8NE-CU72bu4VAR0x4VT4XAe9u1h_B4ZxVtOLeWHLJemRHrf8pJW8RtkeigGw3gEU-z08CJcHCKiw7ypf4qLC-_RIOhAAAIZF", time.UnixMilli(tokenResp.ExpireAt), nil
 }
 
 func (t TokenCenter) RefreshToken(oldToken string) (token string, expireIn time.Time, err error) {

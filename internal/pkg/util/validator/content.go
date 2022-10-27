@@ -2,12 +2,27 @@ package validator
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"github.com/medivhzhan/weapp/v3/security"
 	"mio/internal/pkg/core/app"
+	"strings"
 )
 
+var labelMap = map[int]string{
+	10001: "广告",
+	20001: "时政",
+	20002: "色情",
+	20003: "辱骂",
+	20006: "违法犯罪",
+	20008: "欺诈",
+	20012: "低俗",
+	20013: "版权",
+	21000: "其他",
+}
+
 func CheckMsgWithOpenId(openid, content string) error {
+	content = strings.ReplaceAll(content, " ", "")
+	content = strings.ReplaceAll(content, "\n", "")
 	length := len(content)
 	if length > 2500 {
 		s := []rune(content)
@@ -70,11 +85,11 @@ func checkMsg(params *security.MsgSecCheckRequest) error {
 	}
 
 	if check.ErrCode != 0 {
-		return fmt.Errorf("check error: %s", check.ErrMSG)
+		return errors.New(check.ErrMSG)
 	}
 
 	if check.Result.Suggest != "pass" && check.Result.Label != 100 {
-		return fmt.Errorf("check error: %s", "内容不合规，请重新输入")
+		return errors.New("内容不合规: " + labelMap[check.Result.Label])
 	}
 
 	return nil

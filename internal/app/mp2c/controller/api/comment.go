@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/config"
@@ -154,7 +153,7 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["场景"] = "更新评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-			return gin.H{"comment": nil, "point": 0}, errors.New("内容审核未通过，发布失败。")
+			return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 	err := service.DefaultCommentService.UpdateComment(user.ID, form.CommentId, form.Message)
