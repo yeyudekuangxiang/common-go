@@ -356,3 +356,9 @@ type UpdateUserInfoParam struct {
 	Auth         int
 	Introduction string
 }
+
+type SendMessage struct {
+	SendId  int64  `json:"sendId"`
+	RecId   int64  `json:"recId"`
+	Message string `json:"message"`
+}

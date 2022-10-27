@@ -1,12 +1,13 @@
 package service
 
 import (
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/pkg/errno"
 )
 
-var DefaultCommentAdminService = NewCommentAdminService(repository.DefaultCommentRepository)
+var DefaultCommentAdminService = NewCommentAdminService(repository.NewCommentRepository(context.NewMioContext()))
 
 type (
 	CommentAdminService interface {

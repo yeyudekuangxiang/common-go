@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-var DefaultCommentService = NewCommentService(repository.DefaultCommentRepository)
+var DefaultCommentService = NewCommentService(repository.NewCommentRepository(context.NewMioContext()))
 
 type (
 	CommentService interface {

@@ -35,13 +35,13 @@ type Options func(options *ytxOption)
 //appid: cc5dec82209c45888620eabec3a29b50
 //poolCode: RP202110251300002
 
-func NewYtxService(ctx *context.MioContext, jhxOptions ...Options) *Service {
+func NewYtxService(ctx *context.MioContext, ytxOptions ...Options) *Service {
 	options := &ytxOption{
 		Domain: "https://apift.ruubypay.com",
 	}
 
-	for i := range jhxOptions {
-		jhxOptions[i](options)
+	for i := range ytxOptions {
+		ytxOptions[i](options)
 	}
 
 	return &Service{

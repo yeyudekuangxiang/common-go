@@ -3,12 +3,9 @@ package repository
 import (
 	"database/sql"
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
-
-var DefaultCommentRepository = NewCommentRepository(app.DB)
 
 type (
 	CommentModel interface {
@@ -37,9 +34,9 @@ type (
 	}
 )
 
-func NewCommentRepository(db *gorm.DB) CommentModel {
+func NewCommentRepository(ctx *mioContext.MioContext) CommentModel {
 	return &defaultCommentRepository{
-		ctx: mioContext.NewMioContext(),
+		ctx: ctx,
 	}
 }
 

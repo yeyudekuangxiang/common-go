@@ -6,7 +6,6 @@ type Message struct {
 	Id        int64     `json:"id"`
 	SendId    int64     `json:"sendId"`
 	RecId     int64     `json:"recId"`
-	MessageId int64     `json:"messageId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
