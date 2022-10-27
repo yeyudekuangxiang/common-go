@@ -73,7 +73,7 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 	}
 
 	return gin.H{
-		"list":     collections,
+		"list":     resList,
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,
