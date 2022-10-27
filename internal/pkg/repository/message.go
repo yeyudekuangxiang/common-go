@@ -38,7 +38,7 @@ func (d defaultMessageModel) Update(data *entity.Message) error {
 	panic("implement me")
 }
 
-func NewMessageRepository(ctx *mioContext.MioContext) MessageModel {
+func NewMessageModel(ctx *mioContext.MioContext) MessageModel {
 	return &defaultMessageModel{
 		ctx: ctx,
 	}

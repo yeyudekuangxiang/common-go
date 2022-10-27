@@ -1,6 +1,18 @@
 package repository
 
+import mioContext "mio/internal/pkg/core/context"
+
 type (
-	MessageContent interface {
+	MessageContentModel interface {
+	}
+
+	defaultMessageContentModel struct {
+		ctx *mioContext.MioContext
 	}
 )
+
+func NewMessageContentModel(ctx *mioContext.MioContext) MessageContentModel {
+	return &defaultMessageContentModel{
+		ctx: ctx,
+	}
+}
