@@ -70,6 +70,8 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	sign := form.Sign
+	delete(params, "sign")
+	
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
 	if err != nil {
@@ -96,7 +98,7 @@ func (ctr JhxController) JhxGetPreCollectPoint(ctx *gin.Context) (gin.H, error) 
 	if err != nil {
 		return nil, err
 	}
-	sign := params["sign"].(string)
+	sign := form.Sign
 	delete(params, "sign")
 
 	jhxService := jhx.NewJhxService(context.NewMioContext())
@@ -122,6 +124,8 @@ func (ctr JhxController) JhxCollectPoint(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	sign := form.Sign
+	delete(params, "sign")
+
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	point, err := jhxService.CollectPoint(sign, params)
 	if err != nil {
