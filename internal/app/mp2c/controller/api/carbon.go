@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	platformSrv "mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/encrypt"
@@ -55,9 +57,11 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 		}, nil
 	}
 	var carbonType entity.CarbonTransactionType
+	var pointType entity.PointTransactionType
 	switch form.CarbonType {
 	case "Cycling":
-		carbonType = entity.CARBON_BIKE_RIDE
+		carbonType = entity.CARBON_CYCLING
+		pointType = entity.POINT_CYCLING
 	}
 	if carbonType == "" {
 		return gin.H{
@@ -71,6 +75,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	params["serialNumber"] = form.SerialNumber
 	params["carbonType"] = form.CarbonType
 	params["carbonValue"] = form.CarbonValue
+	params["pointValue"] = form.PointValue
 	params["uid"] = form.Uid
 	params["time"] = form.Time
 	params["privateKey"] = "mio2022"
@@ -110,6 +115,39 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 			"bizId":        "",
 		}, nil
 	}
+
+	point, errPoint := strconv.ParseInt(form.PointValue, 10, 64)
+	if errPoint != nil {
+		return gin.H{
+			"status":       "error",
+			"errorMessage": errPoint.Error(),
+			"carbonValue":  "",
+			"bizId":        form.SerialNumber,
+		}, nil
+	}
+
+	//同步到志愿汇
+	if point >= 0 {
+		sendType := "0"
+		serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
+		messageCode, messageErr := serviceZyh.SendPoint(sendType, form.Uid, strconv.FormatInt(point, 10))
+		if messageCode != "30000" {
+			//发送结果记录到日志
+			msgErr := ""
+			if messageErr != nil {
+				msgErr = messageErr.Error()
+			}
+			serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+				Openid:         form.Uid,
+				PointType:      pointType,
+				Value:          point,
+				ResultCode:     messageCode,
+				AdditionalInfo: msgErr,
+				TransactionId:  form.SerialNumber,
+			})
+		}
+	}
+
 	return gin.H{
 		"status":       "ok",
 		"errorMessage": "",

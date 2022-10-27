@@ -76,6 +76,8 @@ func (p PointTransactionType) Text() string {
 		return "环保减塑"
 	case POINT_ZCYP_SIGNUP, POINT_ZCYP_APPLY:
 		return "零碳小先锋"
+	case POINT_CYCLING:
+		return "骑行"
 	}
 	return "未知积分"
 }
@@ -117,6 +119,8 @@ func (p PointTransactionType) RealText() string {
 		return "星星充电"
 	case POINT_FAST_ELECTRICITY:
 		return "快电"
+	case POINT_CYCLING:
+		return "骑行"
 	}
 	return p.Text()
 }
@@ -173,6 +177,8 @@ const (
 
 	POINT_ZCYP_SIGNUP PointTransactionType = "ZCYP_SIGNUP"
 	POINT_ZCYP_APPLY  PointTransactionType = "ZCYP_APPLY"
+
+	POINT_CYCLING PointTransactionType = "CYCLING"
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -217,6 +223,7 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_COMMENT,
 	POINT_LIKE,
 	POINT_REDUCE_PLASTIC,
+	POINT_CYCLING,
 }
 
 const (

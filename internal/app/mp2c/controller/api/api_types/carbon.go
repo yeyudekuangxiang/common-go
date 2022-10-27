@@ -73,6 +73,7 @@ type GetCarbonTransactionCreateForm struct {
 	SerialNumber string `json:"serialNumber" form:"serialNumber"  binding:"required" alias:"流水号"`
 	CarbonType   string `json:"carbonType" form:"carbonType" binding:"required" alias:"类型"`
 	CarbonValue  string `json:"carbonValue" form:"carbonValue" binding:"required" alias:"碳量"`
+	PointValue   string `json:"pointValue" form:"pointValue" binding:"" alias:"积分"`
 	Uid          string `json:"uid" form:"uid" binding:"required" alias:"uid"`
 	Time         string `json:"time" form:"time" binding:"datetime=2006-01-02 15:04:05" alias:"时间"`
 	Sign         string `json:"sign" form:"sign" binding:"required" alias:"sign"`
