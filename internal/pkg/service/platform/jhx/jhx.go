@@ -147,7 +147,6 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 
 //消费通知
 func (srv Service) TicketNotify(sign string, params map[string]interface{}) error {
-
 	if err := platformUtil.CheckSign(sign, params, "scene.Key", "&"); err != nil {
 		return err
 	}
@@ -283,12 +282,12 @@ func (srv Service) GetPreCollectPointList(sign string, params map[string]interfa
 	if err := platformUtil.CheckSign(sign, params, "", "&"); err != nil {
 		return nil, 0, err
 	}
+
 	getPreCollect := GetPreCollect{}
 	_ = util.MapTo(&params, &getPreCollect)
 
 	var items []entity.BdScenePrePoint
 	var point int64
-	var openId string
 
 	//获取pre_point数据
 	scenePointCondition := repository.GetScenePrePoint{
@@ -322,7 +321,7 @@ func (srv Service) GetPreCollectPointList(sign string, params map[string]interfa
 		pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: sceneUser.OpenId})
 		point = pointInfo.Balance
 	} else if getPreCollect.OpenId != "" {
-		pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: openId})
+		pointInfo := repository.NewPointRepository(srv.ctx).FindBy(repository.FindPointBy{OpenId: getPreCollect.OpenId})
 		point = pointInfo.Balance
 	}
 	return items, point, nil
