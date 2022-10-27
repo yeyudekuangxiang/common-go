@@ -1,7 +1,6 @@
 package service
 
 import (
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -13,20 +12,20 @@ import (
 	"time"
 )
 
-var DefaultTopicLikeService = NewDefaultTopicLikeService()
-
-func NewDefaultTopicLikeService() TopicLikeService {
+func NewTopicLikeService(ctx *context.MioContext) TopicLikeService {
 	return TopicLikeService{
-		repo: repository.DefaultTopicLikeRepository,
+		topicLikeModel: repository.NewTopicLikeRepository(ctx),
+		topicModel:     repository.NewTopicRepository(ctx),
 	}
 }
 
 type TopicLikeService struct {
-	repo repository.TopicLikeRepository
+	topicLikeModel repository.TopicLikeModel
+	topicModel     repository.TopicModel
 }
 
-func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (*entity.TopicLike, int64, error) {
-	topic := repository.DefaultTopicRepository.FindById(int64(topicId))
+func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (*entity.TopicLike, int64, error) {
+	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
 		return nil, 0, errno.ErrCommon.WithMessage("帖子不存在")
 	}
@@ -34,8 +33,7 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 	if len([]rune(title)) > 8 {
 		title = string([]rune(topic.Title)[0:8]) + "..."
 	}
-	r := repository.TopicLikeRepository{DB: app.DB}
-	like := r.FindBy(repository.FindTopicLikeBy{
+	like := srv.topicLikeModel.FindBy(repository.FindTopicLikeBy{
 		TopicId: topicId,
 		UserId:  userId,
 	})
@@ -52,9 +50,9 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 		isFirst = false
 	}
 	if like.Status == 1 {
-		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), 1)
+		_ = srv.topicModel.AddTopicLikeCount(int64(topicId), 1)
 	} else {
-		_ = repository.DefaultTopicRepository.AddTopicLikeCount(int64(topicId), -1)
+		_ = srv.topicModel.AddTopicLikeCount(int64(topicId), -1)
 	}
 	var point int64
 	if like.Status == 1 && isFirst == true {
@@ -72,19 +70,22 @@ func (t TopicLikeService) ChangeLikeStatus(topicId, userId int, openId string) (
 			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
 		}
 	}
-	return &like, point, r.Save(&like)
+	return &like, point, srv.topicLikeModel.Save(&like)
 }
 
-func (t TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {
-	list := t.repo.GetListBy(repository.GetTopicLikeListBy{UserId: userId})
+func (srv TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {
+	list := srv.topicLikeModel.GetListBy(repository.GetTopicLikeListBy{
+		UserId: userId,
+		Status: 1,
+	})
 	if len(list) == 0 {
 		return nil, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}
 	return list, nil
 }
 
-func (t TopicLikeService) GetOneByTopic(topicId int64, userId int64) (entity.TopicLike, error) {
-	like := t.repo.FindBy(repository.FindTopicLikeBy{TopicId: int(topicId), UserId: int(userId)})
+func (srv TopicLikeService) GetOneByTopic(topicId int64, userId int64) (entity.TopicLike, error) {
+	like := srv.topicLikeModel.FindBy(repository.FindTopicLikeBy{TopicId: topicId, UserId: userId})
 	if like.Id == 0 {
 		return entity.TopicLike{}, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}

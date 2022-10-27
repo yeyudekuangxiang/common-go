@@ -2,28 +2,34 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultTopicLikeRepository = NewTopicLikeRepository(app.DB)
+type (
+	TopicLikeModel interface {
+		Save(like *entity.TopicLike) error
+		FindBy(by FindTopicLikeBy) entity.TopicLike
+		GetListBy(by GetTopicLikeListBy) []entity.TopicLike
+	}
 
-func NewTopicLikeRepository(db *gorm.DB) TopicLikeRepository {
-	return TopicLikeRepository{
-		DB: db,
+	defaultTopicLikeModel struct {
+		ctx *context.MioContext
+	}
+)
+
+func NewTopicLikeRepository(ctx *context.MioContext) TopicLikeModel {
+	return defaultTopicLikeModel{
+		ctx: ctx,
 	}
 }
 
-type TopicLikeRepository struct {
-	DB *gorm.DB
+func (d defaultTopicLikeModel) Save(like *entity.TopicLike) error {
+	return d.ctx.DB.Save(like).Error
 }
-
-func (t TopicLikeRepository) Save(like *entity.TopicLike) error {
-	return t.DB.Save(like).Error
-}
-func (t TopicLikeRepository) FindBy(by FindTopicLikeBy) entity.TopicLike {
+func (d defaultTopicLikeModel) FindBy(by FindTopicLikeBy) entity.TopicLike {
 	like := entity.TopicLike{}
-	db := t.DB.Model(like)
+	db := d.ctx.DB.Model(like)
 	if by.TopicId > 0 {
 		db.Where("topic_id = ?", by.TopicId)
 	}
@@ -37,9 +43,9 @@ func (t TopicLikeRepository) FindBy(by FindTopicLikeBy) entity.TopicLike {
 	}
 	return like
 }
-func (t TopicLikeRepository) GetListBy(by GetTopicLikeListBy) []entity.TopicLike {
+func (d defaultTopicLikeModel) GetListBy(by GetTopicLikeListBy) []entity.TopicLike {
 	list := make([]entity.TopicLike, 0)
-	db := t.DB.Model(entity.TopicLike{})
+	db := d.ctx.DB.Model(entity.TopicLike{})
 	if len(by.TopicIds) > 0 {
 		db.Where("topic_id in (?)", by.TopicIds)
 	}
@@ -51,6 +57,9 @@ func (t TopicLikeRepository) GetListBy(by GetTopicLikeListBy) []entity.TopicLike
 	}
 	if by.UserId > 0 {
 		db.Where("user_id = ?", by.UserId)
+	}
+	if by.Status != 0 {
+		db.Where("status = ?", by.Status)
 	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)

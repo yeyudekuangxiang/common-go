@@ -14,17 +14,17 @@ import (
 	"strings"
 )
 
-var DefaultTopicAdminService = NewTopicAdminService()
+var DefaultTopicAdminService = NewTopicAdminService(context.NewMioContext())
 
-func NewTopicAdminService() TopicAdminService {
+func NewTopicAdminService(ctx *context.MioContext) TopicAdminService {
 	return TopicAdminService{
-		topic: repository.DefaultTopicRepository,
-		tag:   repository.DefaultTagRepository,
+		topicModel: repository.NewTopicRepository(ctx),
+		tag:        repository.DefaultTagRepository,
 	}
 }
 
 type TopicAdminService struct {
-	topic       repository.ITopicRepository
+	topicModel  repository.TopicModel
 	tag         repository.ITagRepository
 	TokenServer *wxoa.AccessTokenServer
 }
@@ -122,7 +122,7 @@ func (srv TopicAdminService) CreateTopic(userId int64, title, content string, ta
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 	}
 
-	if err := srv.topic.Save(topicModel); err != nil {
+	if err := srv.topicModel.Save(topicModel); err != nil {
 		return err
 	}
 	return nil
@@ -131,7 +131,7 @@ func (srv TopicAdminService) CreateTopic(userId int64, title, content string, ta
 // UpdateTopic 更新帖子
 func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, tagIds []int64, images []string) error {
 	//查询记录是否存在
-	topicModel := srv.topic.FindById(topicId)
+	topicModel := srv.topicModel.FindById(topicId)
 	if topicModel.Id == 0 {
 		return errno.ErrCommon.WithMessage("该帖子不存在")
 	}

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	"gorm.io/gorm"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"time"
@@ -12,8 +14,10 @@ type (
 		Insert(data *entity.Collection) (*entity.Collection, error)
 		Delete(id int64) error
 		Update(data *entity.Collection) error
-		FindAllByOpenId(openId string) ([]*entity.Collection, error)
-		FindAllByTime(startTime, endTime time.Time) ([]*entity.Collection, error)
+		FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error)
+		FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error)
+		FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error)
+		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 	}
 
 	defaultCollectionModel struct {
@@ -21,38 +25,115 @@ type (
 	}
 )
 
+func (d defaultCollectionModel) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+	return d.ctx.DB.Transaction(fc, opts...)
+}
+
+func (d defaultCollectionModel) FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error) {
+	var resp entity.Collection
+	err := d.ctx.DB.Model(&entity.Collection{}).
+		Where("obj_id = ?", objId).
+		Where("obj_type = ?", objType).
+		Where("open_id= ?", openId).
+		First(&resp).Error
+	switch err {
+	case nil:
+		return &resp, nil
+	case gorm.ErrRecordNotFound:
+		return nil, entity.ErrNotFount
+	default:
+		return nil, err
+	}
+}
+
 func (d defaultCollectionModel) FindOne(id int64) (*entity.Collection, error) {
-	//TODO implement me
-	panic("implement me")
+	var resp entity.Collection
+	err := d.ctx.DB.Model(&entity.Collection{}).
+		First(&resp, id).Error
+	switch err {
+	case nil:
+		return &resp, nil
+	case gorm.ErrRecordNotFound:
+		return nil, entity.ErrNotFount
+	default:
+		return nil, err
+	}
 }
 
 func (d defaultCollectionModel) Insert(data *entity.Collection) (*entity.Collection, error) {
-	//TODO implement me
-	panic("implement me")
+	err := d.ctx.DB.WithContext(d.ctx.Context).Create(data).Error
+	switch err {
+	case nil:
+		return data, nil
+	default:
+		return nil, err
+	}
 }
 
 func (d defaultCollectionModel) Delete(id int64) error {
-	//TODO implement me
-	panic("implement me")
+	result, err := d.FindOne(id)
+	if err != nil {
+		return err
+	}
+	return d.ctx.DB.WithContext(d.ctx.Context).Delete(result).Error
 }
 
 func (d defaultCollectionModel) Update(data *entity.Collection) error {
-	//TODO implement me
-	panic("implement me")
+	if data.Id == 0 {
+		return gorm.ErrPrimaryKeyRequired
+	}
+	return d.ctx.DB.Save(data).Error
 }
 
-func (d defaultCollectionModel) FindAllByOpenId(openId string) ([]*entity.Collection, error) {
-	//TODO implement me
-	panic("implement me")
+func (d defaultCollectionModel) FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error) {
+	var result []*entity.Collection
+	var total int64
+
+	query := d.ctx.DB.WithContext(d.ctx.Context).Model(&entity.Collection{}).
+		Where("open_id = ?", openId).
+		Where("status = ?", 1).
+		Where("obj_type = ?", objType)
+
+	if limit != 0 {
+		query.Limit(limit)
+	}
+
+	if offset != 0 {
+		query.Offset(offset)
+	}
+
+	err := query.Count(&total).Find(&result).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return result, total, nil
 }
 
-func (d defaultCollectionModel) FindAllByTime(startTime, endTime time.Time) ([]*entity.Collection, error) {
-	//TODO implement me
-	panic("implement me")
+func (d defaultCollectionModel) FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error) {
+	var result []*entity.Collection
+	var total int64
+	query := d.ctx.DB.WithContext(d.ctx.Context)
+	if !startTime.IsZero() {
+		query.Where("created_at > ?", startTime)
+	}
+
+	if !endTime.IsZero() {
+		query.Where("created_at < ?", endTime)
+	}
+
+	if err := query.Where("status = ?", 1).
+		Count(&total).
+		Limit(limit).
+		Offset(offset).
+		Find(&result).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return result, total, nil
 }
 
-func NewCollectionRepository() CollectionModel {
+func NewCollectionRepository(ctx *mioContext.MioContext) CollectionModel {
 	return &defaultCollectionModel{
-		ctx: mioContext.NewMioContext(),
+		ctx: ctx,
 	}
 }

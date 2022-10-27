@@ -5,9 +5,9 @@ import (
 )
 
 type TopicLike struct {
-	Id        int        `json:"id"`
-	TopicId   int        `json:"topicId"`
-	UserId    int        `json:"userId"`
+	Id        int64      `json:"id"`
+	TopicId   int64      `json:"topicId"`
+	UserId    int64      `json:"userId"`
 	Status    int8       `json:"status"`
 	CreatedAt model.Time `json:"createdAt"`
 	UpdatedAt model.Time `json:"updatedAt"`

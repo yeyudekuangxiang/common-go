@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
@@ -32,34 +33,34 @@ type (
 	}
 
 	defaultCommentRepository struct {
-		Model *gorm.DB
+		ctx *mioContext.MioContext
 	}
 )
 
 func NewCommentRepository(db *gorm.DB) CommentModel {
 	return &defaultCommentRepository{
-		Model: db,
+		ctx: mioContext.NewMioContext(),
 	}
 }
 
 func (m *defaultCommentRepository) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
-	return m.Model.Model(&entity.CommentIndex{}).Transaction(fc, opts...)
+	return m.ctx.DB.Transaction(fc, opts...)
 }
 
 func (m *defaultCommentRepository) RowBuilder() *gorm.DB {
-	return m.Model.Model(&entity.CommentIndex{})
+	return m.ctx.DB.WithContext(m.ctx.Context).Model(&entity.CommentIndex{})
 }
 
 func (m *defaultCommentRepository) CountBuilder(field string) *gorm.DB {
-	return m.Model.Model(&entity.CommentIndex{}).Select("COUNT(" + field + ")")
+	return m.ctx.DB.Model(&entity.CommentIndex{}).Select("COUNT(" + field + ")")
 }
 
 func (m *defaultCommentRepository) SumBuilder(field string) *gorm.DB {
-	return m.Model.Model(&entity.CommentIndex{}).Select("SUM(" + field + ")")
+	return m.ctx.DB.Model(&entity.CommentIndex{}).Select("SUM(" + field + ")")
 }
 
 func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.CommentIndex, error) {
-	err := m.Model.Create(data).Error
+	err := m.ctx.DB.Create(data).Error
 	switch err {
 	case nil:
 		return data, nil
@@ -70,7 +71,7 @@ func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.Co
 
 func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
-	err := m.Model.First(&resp, id).Error
+	err := m.ctx.DB.First(&resp, id).Error
 	switch err {
 	case nil:
 		return &resp, nil
@@ -187,25 +188,19 @@ func (m *defaultCommentRepository) FindPageListByIdASC(builder *gorm.DB, preMinI
 
 func (m *defaultCommentRepository) Delete(id, userId int64) error {
 	var result entity.CommentIndex
-	err := m.Model.Where("id = ? and member_id = ?", id, userId).First(&result).Error
+	err := m.ctx.DB.Where("id = ? and member_id = ?", id, userId).First(&result).Error
 	if err != nil {
 		return err
 	}
-	err = m.Model.Transaction(func(tx *gorm.DB) error {
-		if err = m.Model.Delete(result).Error; err != nil {
-			return err
-		}
-		if err = m.Update(&result); err != nil {
-			return err
-		}
-		return nil
-	})
-	return err
+	if err = m.ctx.DB.Delete(result).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
 	var result entity.CommentIndex
-	err := m.Model.Where("id = ? and member_id = ?", id, userId).First(&result).Error
+	err := m.ctx.DB.Where("id = ? and member_id = ?", id, userId).First(&result).Error
 	if err != nil {
 		return err
 	}
@@ -216,7 +211,7 @@ func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
 
 func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 	var result entity.CommentIndex
-	err := m.Model.Where("id = ? and member_id = ?", data.Id, data.MemberId).First(&result).Error
+	err := m.ctx.DB.Where("id = ? and member_id = ?", data.Id, data.MemberId).First(&result).Error
 	if err != nil {
 		return err
 	}
@@ -244,11 +239,11 @@ func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 	if data.HateCount != 0 {
 		result.HateCount = data.HateCount
 	}
-	return m.Model.Model(&result).Updates(&result).Error
+	return m.ctx.DB.Model(&result).Updates(&result).Error
 }
 
 func (m *defaultCommentRepository) AddTopicLikeCount(commentId int64, num int) error {
-	db := m.Model.Model(&entity.CommentIndex{}).Where("id = ?", commentId)
+	db := m.ctx.DB.Model(&entity.CommentIndex{}).Where("id = ?", commentId)
 	//避免点赞数为负数
 	if num < 0 {
 		db.Where("like_count >= ?", -num)
