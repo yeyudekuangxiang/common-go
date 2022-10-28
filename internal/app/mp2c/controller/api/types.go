@@ -53,25 +53,10 @@ type PreCollectRequest struct {
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 
-type PrePointRequest struct {
-	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
-	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
-	Point       int64  `json:"point" form:"point" binding:"required"`
-	TradeNo     string `json:"tradeNo" form:"tradeNo"  binding:"required"`
-	Mobile      string `json:"mobile,omitempty" form:"mobile"`
-	Sign        string `json:"sign" form:"sign" binding:"required"`
-}
-
 type CollectPrePointRequest struct {
 	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	PrePointId  string `json:"prePointId" form:"prePointId" binding:"required"`
-	Sign        string `json:"sign" form:"sign" binding:"required"`
-}
-
-type PrePointListRequest struct {
-	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
-	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 

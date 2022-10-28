@@ -1,8 +1,10 @@
 package open
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -13,8 +15,10 @@ import (
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	platformUtil "mio/pkg/platform"
 	"strconv"
@@ -27,13 +31,13 @@ var DefaultPlatformController = PlatformController{}
 type PlatformController struct {
 }
 
-func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, error) {
+func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, error) {
 	//接收参数 platformKey, phone
 	form := bindPlatform{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	user := apiutil.GetAuthUser(ctx)
+	user := apiutil.GetAuthUser(c)
 	//查询渠道号
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -80,9 +84,9 @@ func (receiver PlatformController) BindPlatformUser(ctx *gin.Context) (gin.H, er
 	}, nil
 }
 
-func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
+func (receiver PlatformController) SyncPoint(c *gin.Context) (gin.H, error) {
 	form := platformForm{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
@@ -141,7 +145,7 @@ func (receiver PlatformController) SyncPoint(ctx *gin.Context) (gin.H, error) {
 
 // PrePoint 预加积分
 func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
-	form := api.PrePointRequest{}
+	form := setPrePointRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
@@ -227,7 +231,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 
 // GetPrePointList 获取预加积分列表
 func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error) {
-	form := api.PrePointListRequest{}
+	form := prePointListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
@@ -429,4 +433,39 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		"point":     point,
 		"thisPoint": strconv.FormatInt(halfPoint, 10),
 	}, nil
+}
+
+func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
+	form := checkMsg{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+	if form.Content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "发帖"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+	return nil, nil
+}
+
+func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
+	form := checkMedia{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+	if form.MediaUrl != "" {
+		err := validator.CheckMediaWithOpenId(user.OpenId, form.MediaUrl)
+		if err != nil {
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+	return nil, nil
 }

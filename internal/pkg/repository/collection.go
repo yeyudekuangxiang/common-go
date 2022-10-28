@@ -95,11 +95,11 @@ func (d defaultCollectionModel) FindAllByOpenId(objType int, openId string, limi
 		Where("obj_type = ?", objType)
 
 	if limit != 0 {
-		query.Limit(limit)
+		query = query.Limit(limit)
 	}
 
 	if offset != 0 {
-		query.Offset(offset)
+		query = query.Offset(offset)
 	}
 
 	err := query.Count(&total).Find(&result).Error
@@ -114,11 +114,11 @@ func (d defaultCollectionModel) FindAllByTime(startTime, endTime time.Time, limi
 	var total int64
 	query := d.ctx.DB.WithContext(d.ctx.Context)
 	if !startTime.IsZero() {
-		query.Where("created_at > ?", startTime)
+		query = query.Where("created_at > ?", startTime)
 	}
 
 	if !endTime.IsZero() {
-		query.Where("created_at < ?", endTime)
+		query = query.Where("created_at < ?", endTime)
 	}
 
 	if err := query.Where("status = ?", 1).

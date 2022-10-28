@@ -94,3 +94,31 @@ func checkMsg(params *security.MsgSecCheckRequest) error {
 
 	return nil
 }
+
+func CheckMediaWithOpenId(openid, mediaUrl string) error {
+	req := &security.MediaCheckAsyncRequest{
+		MediaUrl:  mediaUrl,
+		MediaType: 2,
+		Version:   2,
+		Openid:    openid,
+		Scene:     3,
+	}
+	var resp *security.MediaCheckAsyncResponse
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+		resp, err = app.Weapp.NewSecurity().MediaCheckAsync(req)
+		if err != nil {
+			return false, err
+		}
+		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
+	}, 1)
+
+	if err != nil {
+		return err
+	}
+
+	if resp.ErrCode != 0 {
+		return errors.New(resp.ErrMSG)
+	}
+
+	return nil
+}

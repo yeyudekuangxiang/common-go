@@ -83,6 +83,29 @@ type allReceiveRequest struct {
 	PlatformKey string `json:"platformKey" form:"platformKey" alias:"platformKey" binding:"required"`
 }
 
-type prePointListRequest struct {
+type PrePointListRequest struct {
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+}
+
+type setPrePointRequest struct {
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	Point       int64  `json:"point" form:"point" binding:"required"`
+	TradeNo     string `json:"tradeNo" form:"tradeNo"  binding:"required"`
+	Mobile      string `json:"mobile,omitempty" form:"mobile"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
+}
+
+type prePointListRequest struct {
+	MemberId    string `json:"memberId" from:"memberId" binding:"required"`
+	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
+	Sign        string `json:"sign" form:"sign" binding:"required"`
+}
+
+type checkMsg struct {
+	Content string `json:"content" form:"content" binding:"required"`
+}
+
+type checkMedia struct {
+	MediaUrl string `json:"mediaUrl" form:"mediaUrl" binding:"mediaUrl"`
 }

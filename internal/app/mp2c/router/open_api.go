@@ -90,6 +90,9 @@ func openRouter(router *gin.Engine) {
 		{
 			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 			openAuthRouter.GET("/platform/bind", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
+			openAuthRouter.GET("/check/msg", apiutil.Format(open.DefaultPlatformController.CheckMgs))
+			openAuthRouter.GET("/check/media", apiutil.Format(open.DefaultPlatformController.CheckMedia))
+
 		}
 		//外部平台调绿喵 不需要登陆
 		openRouter.POST("/sync/point", apiutil.Format(open.DefaultPlatformController.SyncPoint))
