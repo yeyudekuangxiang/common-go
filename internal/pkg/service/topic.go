@@ -565,6 +565,9 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
 
+	if topicModel.Status != 3 {
+		topicModel.Status = 1
+	}
 	//tag
 	if len(tagIds) > 0 {
 		tagModel := make([]entity.Tag, 0)
@@ -619,6 +622,7 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 	if topicModel.UserId != userId {
 		return errno.ErrCommon.WithMessage("无权限删除")
 	}
+
 	if err := app.DB.Delete(&topicModel).Error; err != nil {
 		return errno.ErrInternalServer
 	}
