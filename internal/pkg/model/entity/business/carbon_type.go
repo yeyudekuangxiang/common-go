@@ -16,6 +16,8 @@ const (
 	CarbonTypeEvCar                CarbonType = "EvCar"                //电动车 电车充电
 	CarbonTypeOEP                  CarbonType = "Thrift"               //光盘打卡
 	CarbonTypeGreenBusinessTrip    CarbonType = "Travel"               //低碳差旅
+	CarbonTypeGreenBusinessCup     CarbonType = "Cup"                  //自带杯
+
 )
 
 // Text 展示给用户看的
@@ -33,6 +35,8 @@ func (t CarbonType) Text() string {
 		return "光盘打卡"
 	case CarbonTypeGreenBusinessTrip:
 		return "低碳差旅"
+	case CarbonTypeGreenBusinessCup:
+		return "自带杯"
 	}
 	return "未知类型"
 }
