@@ -43,6 +43,7 @@ func (t TokenCenter) AccessToken() (token string, expireIn time.Time, err error)
 	if err != nil {
 		return "", time.Time{}, err
 	}
+
 	return tokenResp.AccessToken, time.UnixMilli(tokenResp.ExpireAt), nil
 }
 

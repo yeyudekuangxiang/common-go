@@ -494,7 +494,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 			zhuGeAttr["场景"] = "发帖"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-			return topicModel, errors.New("内容审核未通过，发布失败。")
+			return topicModel, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 
@@ -528,7 +528,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.Tags = tagModel
 	}
 	if err := srv.topicModel.Save(&topicModel); err != nil {
-		return topicModel, err
+		return topicModel, errno.ErrCommon.WithMessage("帖子保存失败")
 	}
 	return srv.topicModel.FindById(topicModel.Id), nil
 }
@@ -552,7 +552,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 			zhuGeAttr["场景"] = "更新帖子"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-			return entity.Topic{}, errors.New("内容审核未通过，发布失败。")
+			return entity.Topic{}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 	//处理images
@@ -565,6 +565,9 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	topicModel.ImageList = imageStr
 	topicModel.Content = content
 
+	if topicModel.Status != 3 {
+		topicModel.Status = 1
+	}
 	//tag
 	if len(tagIds) > 0 {
 		tagModel := make([]entity.Tag, 0)
@@ -577,7 +580,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
-			return entity.Topic{}, err
+			return entity.Topic{}, errno.ErrCommon.WithMessage("Tag更新失败")
 		}
 
 	} else {
@@ -585,12 +588,12 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTagId = ""
 		err := app.DB.Model(&topicModel).Association("Tags").Clear()
 		if err != nil {
-			return entity.Topic{}, err
+			return entity.Topic{}, errno.ErrCommon.WithMessage("Tag更新失败")
 		}
 	}
 
 	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
-		return entity.Topic{}, err
+		return entity.Topic{}, errno.ErrCommon.WithMessage("帖子更新失败")
 	}
 	return topicModel, nil
 }
@@ -605,7 +608,7 @@ func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
 	//更新查看次数 todo
 	err := srv.topicModel.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
 	if err != nil {
-		return entity.Topic{}, err
+		return entity.Topic{}, errno.ErrInternalServer
 	}
 	return topic, nil
 }
@@ -619,8 +622,9 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 	if topicModel.UserId != userId {
 		return errno.ErrCommon.WithMessage("无权限删除")
 	}
+
 	if err := app.DB.Delete(&topicModel).Error; err != nil {
-		return err
+		return errno.ErrInternalServer
 	}
 	return nil
 }

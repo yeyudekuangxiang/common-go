@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
+	"mio/pkg/errno"
 	"strconv"
 	"time"
 )
@@ -190,13 +191,13 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 
 	if message != "" {
 		//检查内容
-		if err := validator.CheckMsgWithOpenId(openId, message); err != nil {
+		if err = validator.CheckMsgWithOpenId(openId, message); err != nil {
 			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "发布评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
-			return entity.CommentIndex{}, 0, errors.New("内容审核未通过，发布失败。")
+			return entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 

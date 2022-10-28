@@ -69,6 +69,7 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 					entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
 					entity.POINT_FAST_ELECTRICITY:        "快电",
 					entity.POINT_REDUCE_PLASTIC:          "环保减塑",
+					entity.POINT_CYCLING:                 "骑行",
 				}
 				_, zyhOk := typeZyh[recordInfo.Type]
 				if !zyhOk {

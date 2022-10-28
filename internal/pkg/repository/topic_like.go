@@ -58,6 +58,9 @@ func (d defaultTopicLikeModel) GetListBy(by GetTopicLikeListBy) []entity.TopicLi
 	if by.UserId > 0 {
 		db.Where("user_id = ?", by.UserId)
 	}
+	if by.Status != 0 {
+		db.Where("status = ?", by.Status)
+	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}
