@@ -13,6 +13,7 @@ const (
 	PointTypeEvCar                PointType = "EvCar"                //电动车 电车充电
 	PointTypeOEP                  PointType = "Thrift"               //光盘打卡
 	PointTypeGreenBusinessTrip    PointType = "Travel"               //低碳差旅
+	PointTypeGreenBusinessCup     PointType = "Cup"                  //自带杯
 )
 
 // Text 展示给用户看的
@@ -37,6 +38,8 @@ func (t PointType) RealText() string {
 		return "光盘打卡"
 	case PointTypeGreenBusinessTrip:
 		return "低碳差旅"
+	case PointTypeGreenBusinessCup:
+		return "自带杯"
 	}
 	return "未知类型"
 }
