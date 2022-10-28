@@ -444,9 +444,9 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 	if form.Content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			app.Logger.Error(fmt.Errorf("文本校验 error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发帖"
+			zhuGeAttr["场景"] = "文本校验"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
 			return nil, errno.ErrCommon.WithMessage(err.Error())
@@ -464,6 +464,11 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 	if form.MediaUrl != "" {
 		err := validator.CheckMediaWithOpenId(user.OpenId, form.MediaUrl)
 		if err != nil {
+			app.Logger.Error(fmt.Errorf("图片校验 error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "图片校验"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
