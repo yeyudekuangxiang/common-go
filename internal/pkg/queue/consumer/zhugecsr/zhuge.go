@@ -15,17 +15,12 @@ func SendToZhuge(delivery rabbitmq.Delivery) rabbitmq.Action {
 		log.Println("转换埋点到诸葛失败", err, string(delivery.Body))
 		return rabbitmq.Ack
 	}
-	zhuGeAttrV2 := make(map[string]interface{})
-	errV6 := json.Unmarshal([]byte(msg.Date), &zhuGeAttrV2)
-	if errV6 != nil {
+	zhuGeAttr := make(map[string]interface{})
+	err = json.Unmarshal([]byte(msg.Date), &zhuGeAttr)
+	if err != nil {
 		return rabbitmq.Ack
 	}
 	//上报到诸葛
-	/*zhuGeAttr := make(map[string]interface{}, 0)
-	zhuGeAttr["来源"] = "1"
-	zhuGeAttr["渠道"] = "3"
-	zhuGeAttr["城市code"] = "5"
-	zhuGeAttr["openid"] = "4"*/
-	track.DefaultZhuGeService().Track(msg.EventKey, msg.Openid, zhuGeAttrV2)
+	track.DefaultZhuGeService().Track(msg.EventKey, msg.Openid, zhuGeAttr)
 	return rabbitmq.Ack
 }

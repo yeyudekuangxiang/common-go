@@ -1,3 +1,3 @@
 package routerkey
 
-const SmsSend = "sms:send"
+const SmsSend = "sms.send"
