@@ -14,8 +14,8 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
-      {{ if eq .Release.Namespace "prod" }}
-      serviceAccountName: find-endpoints-prod
+      {{ if eq .Release.Namespace "mio-prod" }}
+      serviceAccountName: find-endpoints
       {{ else }}
       serviceAccountName: find-endpoints
       {{ end }}
