@@ -12,16 +12,19 @@ import (
 type (
 	WebMessage interface {
 		SendMessage(sendId, recId int64, key string, recObjId int64) error
+		GetMessage(userId int64, status, limit, offset int) ([]entity.UserWebMessage, int64, error)
 	}
 
 	defaultWebMessage struct {
-		ctx      *mioContext.MioContext
-		message  repository.MessageModel
-		template repository.MessageTemplateModel
-		user     repository.UserRepository
-		topic    repository.TopicModel
-		comment  repository.CommentModel
-		options  *webMessageOption
+		ctx             *mioContext.MioContext
+		message         repository.MessageModel
+		messageCustomer repository.MessageCustomerModel
+		messageContent  repository.MessageContentModel
+		template        repository.MessageTemplateModel
+		user            repository.UserRepository
+		topic           repository.TopicModel
+		comment         repository.CommentModel
+		options         *webMessageOption
 	}
 
 	webMessageOption struct {
@@ -33,22 +36,27 @@ type (
 	Options func(option *webMessageOption)
 )
 
-func WithSendObjId(sendObjId int64) Options {
-	return func(option *webMessageOption) {
-		option.SendObjId = sendObjId
+func (d defaultWebMessage) GetMessage(userId int64, status, limit, offset int) ([]entity.UserWebMessage, int64, error) {
+	msgList, total, err := d.messageCustomer.FindAll(repository.FindMessageParams{
+		RecId:  userId,
+		Status: status,
+		Limit:  limit,
+		Offset: offset,
+	})
+	if err != nil {
+		return nil, 0, err
 	}
-}
 
-func WithRecObjId(recObjId int64) Options {
-	return func(option *webMessageOption) {
-		option.RecObjId = recObjId
+	var msgIds []int64
+	for _, item := range msgList {
+		msgIds = append(msgIds, item.MessageId)
 	}
-}
 
-func WithVal(val string) Options {
-	return func(option *webMessageOption) {
-		option.Val = val
-	}
+	//if err = d.messageCustomer.UpdateAll(repository.FindMessageParams{MessageIds: msgIds}); err != nil {
+	//	return nil, 0, err
+	//}
+
+	return msgList, total, nil
 }
 
 func (d defaultWebMessage) SendMessage(sendId, recId int64, key string, recObjId int64) error {
@@ -158,6 +166,24 @@ func (d defaultWebMessage) getTemplate(key string) string {
 	return one.TempContent
 }
 
+func WithSendObjId(sendObjId int64) Options {
+	return func(option *webMessageOption) {
+		option.SendObjId = sendObjId
+	}
+}
+
+func WithRecObjId(recObjId int64) Options {
+	return func(option *webMessageOption) {
+		option.RecObjId = recObjId
+	}
+}
+
+func WithVal(val string) Options {
+	return func(option *webMessageOption) {
+		option.Val = val
+	}
+}
+
 func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMessage {
 	option := &webMessageOption{}
 	for i := range options {
@@ -165,12 +191,14 @@ func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMes
 	}
 
 	return &defaultWebMessage{
-		ctx:      ctx,
-		message:  repository.NewMessageModel(ctx),
-		template: repository.NewMessageTemplateModel(ctx),
-		user:     repository.NewUserRepository(),
-		topic:    repository.NewTopicRepository(ctx),
-		comment:  repository.NewCommentRepository(ctx),
-		options:  option,
+		ctx:             ctx,
+		message:         repository.NewMessageModel(ctx),
+		messageCustomer: repository.NewMessageCustomerModel(ctx),
+		messageContent:  repository.NewMessageContentModel(ctx),
+		template:        repository.NewMessageTemplateModel(ctx),
+		user:            repository.NewUserRepository(),
+		topic:           repository.NewTopicRepository(ctx),
+		comment:         repository.NewCommentRepository(ctx),
+		options:         option,
 	}
 }

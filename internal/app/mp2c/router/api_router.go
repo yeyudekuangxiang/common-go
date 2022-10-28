@@ -98,6 +98,7 @@ func apiRouter(router *gin.Engine) {
 		{
 			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
 			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
+			messageRouter.GET("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
 		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
@@ -118,6 +119,7 @@ func apiRouter(router *gin.Engine) {
 			//社区2.0 用户相关
 			userRouter.GET("/home-page", apiutil.Format(api.DefaultUserController.HomePage))                      //主页
 			userRouter.POST("/update-introduction", apiutil.Format(api.DefaultUserController.UpdateIntroduction)) //更新简介
+			userRouter.POST("/message", apiutil.Format(api.DefaultUserController.UpdateIntroduction))             //更新简介
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")

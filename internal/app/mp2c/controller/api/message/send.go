@@ -4,18 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
+	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
 )
 
-var DefaultMessageController = MessageController{}
+var DefaultMessageController = MsgController{}
 
-type MessageController struct {
+type MsgController struct {
 }
 
 //todo 给测试用
 
-func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
+func (ctr MsgController) SendMessage(c *gin.Context) (gin.H, error) {
 
 	return gin.H{}, nil
 	b := messageSrv.MiniSignRemindTemplate{
@@ -59,7 +60,7 @@ func (MessageController) SendMessage(c *gin.Context) (gin.H, error) {
 
 //todo 给测试用
 
-func (MessageController) SendSign(c *gin.Context) (gin.H, error) {
+func (ctr MsgController) SendSign(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 	service := messageSrv.MessageService{}
 	service.SendMessageToSignUser()
@@ -69,7 +70,7 @@ func (MessageController) SendSign(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (MessageController) GetTemplateId(c *gin.Context) (gin.H, error) {
+func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	form := api_types.MessageGetTemplateIdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -78,5 +79,27 @@ func (MessageController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	service := messageSrv.MessageService{}
 	return gin.H{
 		"templateIds": service.GetTemplateId(user.OpenId, form.Scene),
+	}, nil
+}
+
+func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
+	form := api_types.WebMessageRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	msgList, total, err := messageService.GetMessage(user.ID, form.Status, form.Limit(), form.Offset())
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"list":     msgList,
+		"total":    total,
+		"page":     form.Limit(),
+		"pageSize": form.Offset(),
 	}, nil
 }

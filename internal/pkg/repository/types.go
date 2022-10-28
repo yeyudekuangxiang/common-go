@@ -362,3 +362,15 @@ type SendMessage struct {
 	RecId   int64  `json:"recId"`
 	Message string `json:"message"`
 }
+
+type FindMessageParams struct {
+	MessageIds []int64   `json:"messageIds"`
+	MessageId  int64     `json:"messageId"`
+	SendId     int64     `json:"sendId"`
+	RecId      int64     `json:"recId"`
+	Status     int       `json:"status"`
+	StartTime  time.Time `json:"startTime"`
+	EndTime    time.Time `json:"endTime"`
+	Limit      int       `json:"limit"`
+	Offset     int       `json:"offset"`
+}
