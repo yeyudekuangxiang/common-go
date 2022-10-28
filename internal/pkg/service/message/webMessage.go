@@ -12,6 +12,7 @@ import (
 type (
 	WebMessage interface {
 		SendMessage(sendId, recId int64, key string, recObjId int64) error
+		GetMessageCount(userId int64, status int) (int64, error)
 		GetMessage(userId int64, status, limit, offset int) ([]entity.UserWebMessage, int64, error)
 	}
 
@@ -35,6 +36,17 @@ type (
 
 	Options func(option *webMessageOption)
 )
+
+func (d defaultWebMessage) GetMessageCount(userId int64, status int) (int64, error) {
+	total, err := d.messageCustomer.CountAll(repository.FindMessageParams{
+		RecId:  userId,
+		Status: status,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
+}
 
 func (d defaultWebMessage) GetMessage(userId int64, status, limit, offset int) ([]entity.UserWebMessage, int64, error) {
 	msgList, total, err := d.messageCustomer.FindAll(repository.FindMessageParams{

@@ -10,12 +10,43 @@ type (
 	MessageCustomerModel interface {
 		FindAll(params FindMessageParams) ([]entity.UserWebMessage, int64, error)
 		UpdateAll(params FindMessageParams) error
+		CountAll(params FindMessageParams) (int64, error)
 	}
 
 	defaultMessageCustomerModel struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultMessageCustomerModel) CountAll(params FindMessageParams) (int64, error) {
+	query := d.ctx.DB.Model(&entity.MessageCustomer{}).WithContext(d.ctx.Context)
+	var total int64
+	if len(params.MessageIds) > 0 {
+		query = query.Where("message_id in (?)", params.MessageIds)
+	}
+
+	if params.RecId != 0 {
+		query = query.Where("rec_id = ?", params.RecId)
+	}
+
+	if params.Status != 0 {
+		query = query.Where("status = ?", params.Status)
+	}
+
+	if !params.StartTime.IsZero() {
+		query = query.Where("created_at > ?", params.StartTime)
+	}
+
+	if !params.EndTime.IsZero() {
+		query = query.Where("created_at < ?", params.EndTime)
+	}
+
+	err := query.Count(&total).Error
+	if err == nil {
+		return total, nil
+	}
+	return 0, err
+}
 
 func (d defaultMessageCustomerModel) UpdateAll(params FindMessageParams) error {
 	query := d.ctx.DB.Model(&entity.MessageCustomer{}).WithContext(d.ctx.Context)

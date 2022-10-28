@@ -103,3 +103,22 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 		"pageSize": form.Offset(),
 	}, nil
 }
+
+func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
+	form := api_types.WebMessageRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	total, err := messageService.GetMessageCount(user.ID, form.Status)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"total": total,
+	}, nil
+}
