@@ -107,5 +107,5 @@ type checkMsg struct {
 }
 
 type checkMedia struct {
-	MediaUrl string `json:"mediaUrl" form:"mediaUrl" binding:"mediaUrl"`
+	MediaUrl string `json:"mediaUrl" form:"mediaUrl" binding:"required"`
 }
