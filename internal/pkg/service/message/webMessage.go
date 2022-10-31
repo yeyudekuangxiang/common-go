@@ -13,8 +13,8 @@ import (
 type (
 	WebMessage interface {
 		SendMessage(param sendWebMessage) error
-		GetMessageCount(userId int64, status, forType int) (int64, error)
-		GetMessage(userId int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error)
+		GetMessageCount(userID int64, status, forType int) (int64, error)
+		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error)
 	}
 
 	defaultWebMessage struct {
@@ -30,17 +30,17 @@ type (
 	}
 
 	webMessageOption struct {
-		SendObjId int64  `json:"sendObjId"` //发送者 object id
-		RecObjId  int64  `json:"recObjId"`  //接受者 object id
+		SendObjID int64  `json:"sendObjId"` // 发送者 object id
+		RecObjId  int64  `json:"recObjId"`  // 接受者 object id
 		Val       string `json:"val"`
 	}
 
 	Options func(option *webMessageOption)
 )
 
-func (d defaultWebMessage) GetMessageCount(userId int64, status, forType int) (int64, error) {
+func (d defaultWebMessage) GetMessageCount(userID int64, status, forType int) (int64, error) {
 	total, err := d.message.CountAll(repository.FindMessageParams{
-		RecId:  userId,
+		RecId:  userID,
 		Status: status,
 		Type:   forType,
 	})
@@ -52,9 +52,9 @@ func (d defaultWebMessage) GetMessageCount(userId int64, status, forType int) (i
 	return total, nil
 }
 
-func (d defaultWebMessage) GetMessage(userId int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error) {
+func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error) {
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
-		RecId:  userId,
+		RecId:  userID,
 		Status: status,
 		Type:   forType,
 		Limit:  limit,
@@ -131,11 +131,11 @@ func (d defaultWebMessage) SendMessage(param sendWebMessage) error {
 	return nil
 }
 
-func (d defaultWebMessage) replaceTempForTopic(content string, recObjId int64) string {
+func (d defaultWebMessage) replaceTempForTopic(content string, recObjID int64) string {
 	var topic entity.Topic
 	var title string
-	if d.options.SendObjId != 0 {
-		topic = d.topic.FindById(d.options.SendObjId)
+	if d.options.SendObjID != 0 {
+		topic = d.topic.FindById(d.options.SendObjID)
 		title = topic.Title
 		topicRune := []rune(topic.Title)
 		if len(topicRune) > 5 {
@@ -144,7 +144,7 @@ func (d defaultWebMessage) replaceTempForTopic(content string, recObjId int64) s
 		return strings.ReplaceAll(content, "reTopicTitle", title)
 	}
 
-	topic = d.topic.FindById(recObjId)
+	topic = d.topic.FindById(recObjID)
 	title = topic.Title
 	topicRune := []rune(topic.Title)
 	if len(topicRune) > 5 {
@@ -153,11 +153,11 @@ func (d defaultWebMessage) replaceTempForTopic(content string, recObjId int64) s
 	return strings.ReplaceAll(content, "topicTitle", title)
 }
 
-func (d defaultWebMessage) replaceTempForComment(content string, recObjId int64) string {
+func (d defaultWebMessage) replaceTempForComment(content string, recObjID int64) string {
 	var comment, recComment *entity.CommentIndex
 	var message, recMessage string
-	if d.options.SendObjId != 0 {
-		comment, _ = d.comment.FindOne(d.options.SendObjId)
+	if d.options.SendObjID != 0 {
+		comment, _ = d.comment.FindOne(d.options.SendObjID)
 		message = comment.Message
 		messageRune := []rune(message)
 		if len(messageRune) > 5 {
@@ -166,7 +166,7 @@ func (d defaultWebMessage) replaceTempForComment(content string, recObjId int64)
 		content = strings.ReplaceAll(content, "reComment", message)
 	}
 
-	recComment, _ = d.comment.FindOne(recObjId)
+	recComment, _ = d.comment.FindOne(recObjID)
 	recMessage = recComment.Message
 	messageRune := []rune(recMessage)
 	if len(messageRune) > 5 {
@@ -188,7 +188,7 @@ func (d defaultWebMessage) getTemplate(key string) string {
 
 func WithSendObjId(sendObjId int64) Options {
 	return func(option *webMessageOption) {
-		option.SendObjId = sendObjId
+		option.SendObjID = sendObjId
 	}
 }
 
