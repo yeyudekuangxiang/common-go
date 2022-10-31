@@ -16,7 +16,7 @@ type CollectRules map[entity.PointTransactionType][]string
 type RuleTranslate map[entity.PointTransactionType]map[string]string
 
 var rules = CollectRules{
-	"COFFEE_CUP":    []string{"自带杯"}, //, "单号", "订单"
+	"COFFEE_CUP":    []string{"自带杯", "单号", "订单"},
 	"BIKE_RIDE":     []string{"骑行", "单车", "骑车", "bike", "出行", "哈啰", "摩拜", "青桔"},
 	"POWER_REPLACE": []string{"订单编号", "已支付"},
 }
