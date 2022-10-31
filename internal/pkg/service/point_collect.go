@@ -68,10 +68,10 @@ func (srv PointCollectService) validateCoffeeCupImage(imageUrl string) (bool, []
 		return false, nil, err
 	}
 	result1 := srv.validatePointRule(results, coffeeCupRuleOne)
-	result2 := srv.validatePointRule(results, coffeeCupRuleTwo)
+	//result2 := srv.validatePointRule(results, coffeeCupRuleTwo)
 
-	if result1 != "" && result2 != "" {
-		return true, []string{result1, result2}, nil
+	if result1 != "" { //&& result2 != ""
+		return true, []string{result1}, nil //result2
 	}
 	return false, nil, nil
 }
