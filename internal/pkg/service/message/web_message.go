@@ -2,7 +2,6 @@ package message
 
 import (
 	"errors"
-	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -14,7 +13,7 @@ type (
 	WebMessage interface {
 		SendMessage(param sendWebMessage) error
 		GetMessageCount(userID int64, status, forType int) (int64, error)
-		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error)
+		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error)
 	}
 
 	defaultWebMessage struct {
@@ -52,7 +51,7 @@ func (d defaultWebMessage) GetMessageCount(userID int64, status, forType int) (i
 	return total, nil
 }
 
-func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error) {
+func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error) {
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
 		RecId:  userID,
 		Status: status,
@@ -64,15 +63,15 @@ func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offs
 		return nil, 0, err
 	}
 
-	var msgIds []int64
-	for _, item := range msgList {
-		msgIds = append(msgIds, item.MessageId)
-	}
-
-	err = d.message.HaveRead(repository.FindMessageParams{MessageIds: msgIds})
-	if err != nil {
-		app.Logger.Errorf("Message HaveRead Error:%s", err.Error())
-	}
+	//var msgIds []int64
+	//for _, item := range msgList {
+	//	msgIds = append(msgIds, item.MessageId)
+	//}
+	//
+	//err = d.message.HaveRead(repository.FindMessageParams{MessageIds: msgIds})
+	//if err != nil {
+	//	app.Logger.Errorf("Message HaveRead Error:%s", err.Error())
+	//}
 
 	return msgList, total, nil
 }

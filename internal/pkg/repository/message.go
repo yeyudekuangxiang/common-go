@@ -14,7 +14,7 @@ type (
 		Delete(id int64) error
 		Update(data *entity.Message) error
 		SendMessage(data SendMessage) error
-		GetMessage(params FindMessageParams) ([]entity.UserWebMessage, int64, error)
+		GetMessage(params FindMessageParams) ([]entity.UserWebMessageV2, int64, error)
 		CountAll(params FindMessageParams) (int64, error)
 		HaveRead(params FindMessageParams) error
 	}
@@ -24,12 +24,12 @@ type (
 	}
 )
 
-func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]entity.UserWebMessage, int64, error) {
-	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
-		Select("c.*,mc.message_content,message.type").
-		Joins("left join message_content mc on message.id = mc.message_id").
-		Joins("left join message_customer c on message.id = c.message_id")
-	var resp []entity.UserWebMessage
+func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]entity.UserWebMessageV2, int64, error) {
+	query := d.ctx.DB.Model(&entity.MessageContent{}).WithContext(d.ctx.Context).
+		Select("message_content.message_id,message_content.message_content,message_content.created_at,message_content.updated_at").
+		Joins("left join message m on message_content.message_id = m.id").
+		Joins("left join message_customer c on message_content.message_id = c.message_id")
+	var resp []entity.UserWebMessageV2
 	var total int64
 	if params.RecId != 0 {
 		query = query.Where("c.rec_id = ?", params.RecId)
@@ -40,7 +40,7 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]entity.User
 	}
 
 	if params.Type != 0 {
-		query = query.Where("message.type = ?", params.Type)
+		query = query.Where("m.type = ?", params.Type)
 	}
 
 	if !params.StartTime.IsZero() {
