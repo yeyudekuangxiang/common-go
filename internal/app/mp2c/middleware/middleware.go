@@ -242,3 +242,18 @@ func corsM() gin.HandlerFunc {
 	cfg.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid")
 	return cors.New(cfg)
 }
+
+//临时使用openid作为登陆验证
+func MqAuth2() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("token")
+		if token == "" {
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
+			return
+		}
+		if token != config.FindMqToken(ctx.FullPath()) {
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
+			return
+		}
+	}
+}

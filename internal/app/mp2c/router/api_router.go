@@ -10,6 +10,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/message"
+	rabbitmqApi "mio/internal/app/mp2c/controller/api/mq"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
@@ -272,4 +273,13 @@ func apiRouter(router *gin.Engine) {
 
 	}
 
+	mqAuthRouter := router.Group("/api/mp2c")
+	mqAuthRouter.Use(middleware.MqAuth2(), middleware.Throttle())
+	{
+		mqRouter := mqAuthRouter.Group("/mq")
+		{
+			mqRouter.POST("/send_sms", apiutil.Format(rabbitmqApi.DefaultMqController.SendSms))
+			mqRouter.POST("/send_zhuge", apiutil.Format(rabbitmqApi.DefaultMqController.SendZhuGe))
+		}
+	}
 }
