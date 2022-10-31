@@ -287,6 +287,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
+	status := form.Status
 	if form.UserId != 0 {
 		u, b, err := service.DefaultUserService.GetUserByID(form.UserId)
 		if err != nil {
@@ -296,11 +297,12 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 			return nil, errno.ErrUserNotFound
 		}
 		user = *u
+		status = 3
 	}
 
 	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
-		Status: form.Status,
+		Status: status,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})
@@ -336,12 +338,12 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	}
 
 	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
-	//组装数据---帖子的顶级评论数量
+	// 组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
 		topic2comment[item.TopicId] = item.Total
 	}
-	//组装数据---点赞数据 收藏数据
+	// 组装数据---点赞数据 收藏数据
 	for _, item := range list {
 		res := item.TopicItemRes()
 		res.CommentCount = topic2comment[res.Id]
