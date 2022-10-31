@@ -29,34 +29,34 @@ type (
 		AddTopicLikeCount(commentId int64, num int) error
 	}
 
-	defaultCommentRepository struct {
+	defaultCommentModel struct {
 		ctx *mioContext.MioContext
 	}
 )
 
-func NewCommentRepository(ctx *mioContext.MioContext) CommentModel {
-	return &defaultCommentRepository{
+func NewCommentModel(ctx *mioContext.MioContext) CommentModel {
+	return &defaultCommentModel{
 		ctx: ctx,
 	}
 }
 
-func (m *defaultCommentRepository) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+func (m *defaultCommentModel) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
 	return m.ctx.DB.Transaction(fc, opts...)
 }
 
-func (m *defaultCommentRepository) RowBuilder() *gorm.DB {
+func (m *defaultCommentModel) RowBuilder() *gorm.DB {
 	return m.ctx.DB.WithContext(m.ctx.Context).Model(&entity.CommentIndex{})
 }
 
-func (m *defaultCommentRepository) CountBuilder(field string) *gorm.DB {
+func (m *defaultCommentModel) CountBuilder(field string) *gorm.DB {
 	return m.ctx.DB.Model(&entity.CommentIndex{}).Select("COUNT(" + field + ")")
 }
 
-func (m *defaultCommentRepository) SumBuilder(field string) *gorm.DB {
+func (m *defaultCommentModel) SumBuilder(field string) *gorm.DB {
 	return m.ctx.DB.Model(&entity.CommentIndex{}).Select("SUM(" + field + ")")
 }
 
-func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.CommentIndex, error) {
+func (m *defaultCommentModel) Insert(data *entity.CommentIndex) (*entity.CommentIndex, error) {
 	err := m.ctx.DB.Create(data).Error
 	switch err {
 	case nil:
@@ -66,7 +66,7 @@ func (m *defaultCommentRepository) Insert(data *entity.CommentIndex) (*entity.Co
 	}
 }
 
-func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, error) {
+func (m *defaultCommentModel) FindOne(id int64) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
 	err := m.ctx.DB.First(&resp, id).Error
 	switch err {
@@ -79,7 +79,7 @@ func (m *defaultCommentRepository) FindOne(id int64) (*entity.CommentIndex, erro
 	}
 }
 
-func (m *defaultCommentRepository) FindOneQuery(builder *gorm.DB) (*entity.CommentIndex, error) {
+func (m *defaultCommentModel) FindOneQuery(builder *gorm.DB) (*entity.CommentIndex, error) {
 	var resp entity.CommentIndex
 	err := builder.First(&resp).Error
 	switch err {
@@ -92,7 +92,7 @@ func (m *defaultCommentRepository) FindOneQuery(builder *gorm.DB) (*entity.Comme
 	}
 }
 
-func (m *defaultCommentRepository) FindCount(builder *gorm.DB) (int64, error) {
+func (m *defaultCommentModel) FindCount(builder *gorm.DB) (int64, error) {
 	var resp int64
 	err := builder.Count(&resp).Error
 	switch err {
@@ -103,7 +103,7 @@ func (m *defaultCommentRepository) FindCount(builder *gorm.DB) (int64, error) {
 	}
 }
 
-func (m *defaultCommentRepository) FindSum(builder *gorm.DB) (float64, error) {
+func (m *defaultCommentModel) FindSum(builder *gorm.DB) (float64, error) {
 	var resp float64
 	err := builder.First(&resp).Error
 	switch err {
@@ -114,7 +114,7 @@ func (m *defaultCommentRepository) FindSum(builder *gorm.DB) (float64, error) {
 	}
 }
 
-func (m *defaultCommentRepository) FindAll(builder *gorm.DB, orderBy string) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentModel) FindAll(builder *gorm.DB, orderBy string) ([]*entity.CommentIndex, error) {
 	if orderBy == "" {
 		builder.Order("comment_index.id DESC")
 	} else {
@@ -132,7 +132,7 @@ func (m *defaultCommentRepository) FindAll(builder *gorm.DB, orderBy string) ([]
 	}
 }
 
-func (m *defaultCommentRepository) FindPageListByPage(builder *gorm.DB, offset, limit int64, orderBy string) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentModel) FindPageListByPage(builder *gorm.DB, offset, limit int64, orderBy string) ([]*entity.CommentIndex, error) {
 	if orderBy == "" {
 		builder.Order("id DESC")
 	} else {
@@ -151,7 +151,7 @@ func (m *defaultCommentRepository) FindPageListByPage(builder *gorm.DB, offset, 
 	}
 }
 
-func (m *defaultCommentRepository) FindPageListByIdDESC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentModel) FindPageListByIdDESC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error) {
 	if preMinId > 0 {
 		builder = builder.Where(" id < ? ", preMinId)
 	}
@@ -167,7 +167,7 @@ func (m *defaultCommentRepository) FindPageListByIdDESC(builder *gorm.DB, preMin
 	}
 }
 
-func (m *defaultCommentRepository) FindPageListByIdASC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error) {
+func (m *defaultCommentModel) FindPageListByIdASC(builder *gorm.DB, preMinId, limit int64) ([]*entity.CommentIndex, error) {
 	if preMinId > 0 {
 		builder = builder.Where(" id < ? ", preMinId)
 	}
@@ -183,7 +183,7 @@ func (m *defaultCommentRepository) FindPageListByIdASC(builder *gorm.DB, preMinI
 	}
 }
 
-func (m *defaultCommentRepository) Delete(id, userId int64) error {
+func (m *defaultCommentModel) Delete(id, userId int64) error {
 	var result entity.CommentIndex
 	err := m.ctx.DB.Where("id = ? and member_id = ?", id, userId).First(&result).Error
 	if err != nil {
@@ -195,7 +195,7 @@ func (m *defaultCommentRepository) Delete(id, userId int64) error {
 	return nil
 }
 
-func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
+func (m *defaultCommentModel) DeleteSoft(id, userId int64) error {
 	var result entity.CommentIndex
 	err := m.ctx.DB.Where("id = ? and member_id = ?", id, userId).First(&result).Error
 	if err != nil {
@@ -206,7 +206,7 @@ func (m *defaultCommentRepository) DeleteSoft(id, userId int64) error {
 	return m.Update(&result)
 }
 
-func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
+func (m *defaultCommentModel) Update(data *entity.CommentIndex) error {
 	var result entity.CommentIndex
 	err := m.ctx.DB.Where("id = ? and member_id = ?", data.Id, data.MemberId).First(&result).Error
 	if err != nil {
@@ -239,7 +239,7 @@ func (m *defaultCommentRepository) Update(data *entity.CommentIndex) error {
 	return m.ctx.DB.Model(&result).Updates(&result).Error
 }
 
-func (m *defaultCommentRepository) AddTopicLikeCount(commentId int64, num int) error {
+func (m *defaultCommentModel) AddTopicLikeCount(commentId int64, num int) error {
 	db := m.ctx.DB.Model(&entity.CommentIndex{}).Where("id = ?", commentId)
 	//避免点赞数为负数
 	if num < 0 {

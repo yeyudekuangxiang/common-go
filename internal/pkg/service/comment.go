@@ -19,8 +19,6 @@ import (
 	"time"
 )
 
-var DefaultCommentService = NewCommentService(repository.NewCommentRepository(context.NewMioContext()))
-
 type (
 	CommentService interface {
 		FindOne(commentId int64) (*entity.CommentIndex, error)
@@ -38,12 +36,15 @@ type (
 )
 
 type defaultCommentService struct {
-	commentModel repository.CommentModel
+	ctx              *context.MioContext
+	commentModel     repository.CommentModel
+	commentLikeModel repository.CommentLikeModel
 }
 
-func NewCommentService(model repository.CommentModel) CommentService {
+func NewCommentService(ctx *context.MioContext) CommentService {
 	return &defaultCommentService{
-		commentModel: model,
+		ctx:          ctx,
+		commentModel: repository.NewCommentModel(ctx),
 	}
 }
 
@@ -213,34 +214,41 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
 	}
+
 	_, err = srv.commentModel.Insert(&comment)
 	if err != nil {
 		return entity.CommentIndex{}, 0, err
 	}
+
 	//更新topic
 	app.DB.Model(&topic).Update("updated_at", model.Time{Time: time.Now()})
 	//更新count数据
+	recId := topic.UserId
 	if ToCommentId != 0 {
+		//回复的评论
+		ToComment, err := srv.commentModel.FindOne(ToCommentId)
+		if err != nil {
+			return entity.CommentIndex{}, 0, err
+		}
+		recId = ToComment.MemberId
 		err = srv.commentModel.Trans(func(tx *gorm.DB) error {
-			//回复的评论
-			ToCommentIdRow, err := srv.commentModel.FindOne(ToCommentId)
-			if err != nil {
-				return err
-			}
-			ToCommentIdRow.RootCount++ //更新父评论的根评论数量
-			ToCommentIdRow.Count++     //更新父评论的评论数量
-			err = tx.Model(ToCommentIdRow).Select("root_count", "count").Updates(ToCommentIdRow).Error
+			ToComment.RootCount++ //更新父评论的根评论数量
+			ToComment.Count++     //更新父评论的评论数量
+			err = tx.Model(ToComment).Select("root_count", "count").Updates(ToComment).Error
 			if err != nil {
 				return errors.WithMessage(err, "update ToCommentIdRow:")
 			}
+
 			//本条评论
 			ToCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("to_comment_id = ?", ToCommentId))
 			if err != nil {
 				return err
 			}
-			if ToCommentIdRow.RootCommentId != 0 {
-				ToCommentId = ToCommentIdRow.RootCommentId
+
+			if ToComment.RootCommentId != 0 {
+				ToCommentId = ToComment.RootCommentId
 			}
+
 			comment.RootCommentId = ToCommentId          //更新RootCommentId
 			comment.Floor = int32(ToCommentIdChildCount) //更新楼层
 			err = tx.Model(comment).Select("root_comment_id", "floor").Updates(comment).Error
@@ -249,49 +257,28 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			}
 
 			//顶级评论
-			if ToCommentIdRow.RootCommentId != 0 {
-				RootCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("root_comment_id = ?", ToCommentIdRow.RootCommentId))
+			if ToComment.RootCommentId != 0 {
+				RootCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("root_comment_id = ?", ToComment.RootCommentId))
 				if err != nil {
 					return err
 				}
+
 				//更新顶级评论下的评论数量
-				err = tx.Model(&entity.CommentIndex{}).Where("id = ?", ToCommentIdRow.RootCommentId).Update("count", RootCommentIdChildCount).Error
+				err = tx.Model(&entity.CommentIndex{}).Where("id = ?", ToComment.RootCommentId).Update("count", RootCommentIdChildCount).Error
 				if err != nil {
 					return errors.WithMessage(err, "update RootCommentIdRow:")
 				}
+
 			}
 			return nil
 		})
 		if err != nil {
 			return entity.CommentIndex{}, 0, err
 		}
-	}
-	//find comment
-	one, err := srv.commentModel.FindOne(comment.Id)
-	if err != nil {
-		return entity.CommentIndex{}, 0, err
-	}
-	//更新积分
-	messagerune := []rune(comment.Message)
-	if len(messagerune) > 8 {
-		message = string(messagerune[0:8])
+
 	}
 
-	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
-	pointService := NewPointService(context.NewMioContext())
-	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       openId,
-		Type:         entity.POINT_COMMENT,
-		BizId:        util.UUID(),
-		ChangePoint:  point,
-		AdminId:      0,
-		Note:         "评论" + message + "..." + "成功",
-		AdditionInfo: strconv.FormatInt(topic.Id, 10) + "#" + strconv.FormatInt(comment.Id, 10),
-	})
-	if err != nil {
-		point = 0
-	}
-	return *one, point, nil
+	return comment, recId, nil
 }
 
 func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, int64, error) {
@@ -300,11 +287,59 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 		return &entity.CommentLike{}, 0, err
 	}
 
-	like, point, err := DefaultCommentLikeService.Like(userId, commentId, comment.Message, openId)
-	if err != nil {
-		return &entity.CommentLike{}, 0, err
+	like := srv.commentLikeModel.FindBy(repository.FindCommentLikeBy{
+		CommentId: commentId,
+		UserId:    userId,
+	})
+	var isFirst bool
+	if like.Id == 0 {
+		like = entity.CommentLike{
+			CommentId: commentId,
+			UserId:    userId,
+			Status:    1,
+			CreatedAt: model.Time{Time: time.Now()},
+		}
+		isFirst = true
+	} else {
+		like.UpdatedAt = model.Time{Time: time.Now()}
+		like.Status = (like.Status + 1) % 2
+		isFirst = false
 	}
-	return like, point, nil
+
+	if like.Status == 1 {
+		_ = srv.AddTopicLikeCount(commentId, 1)
+	} else {
+		_ = srv.AddTopicLikeCount(commentId, -1)
+	}
+
+	message := comment.Message
+	if len([]rune(message)) > 8 {
+		message = string([]rune(message)[0:8]) + "..."
+	}
+	//发放积分
+	var point int64
+
+	if like.Status == 1 && isFirst {
+		pointService := NewPointService(context.NewMioContext())
+		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+			AdminId:      0,
+			Note:         "评论 \"" + message + "\" 点赞",
+			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
+		})
+		if err == nil {
+			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		}
+	}
+
+	if err = srv.commentLikeModel.Save(&like); err != nil {
+		return nil, 0, err
+	}
+
+	return &like, point, nil
 }
 
 func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {

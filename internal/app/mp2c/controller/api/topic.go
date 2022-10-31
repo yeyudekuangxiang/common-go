@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 )
@@ -111,11 +112,27 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(c)
-	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
-	like, point, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	topicLikeService := service.NewTopicLikeService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	like, point, recId, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
+
+	//发送消息
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   user.ID,
+		RecId:    recId,
+		Key:      "like_topic",
+		RecObjId: like.TopicId,
+		Type:     1,
+	})
+	if err != nil {
+		app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+	}
+
 	return gin.H{
 		"point":  point,
 		"status": like.Status,
