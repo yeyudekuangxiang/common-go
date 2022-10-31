@@ -199,7 +199,7 @@ stop-deploy-hotfix:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    -  helm uninstall $RELEASE_NAME  -n prod
+    -  helm uninstall $RELEASE_NAME  -n mio-prod
 
 stop-deploy-feature:
   image: yeyudekuangxiang/helm:3.8.1
@@ -219,4 +219,4 @@ stop-deploy-feature:
     - mkdir -p $HOME/.kube
     - echo -n $kube_config_sh | base64 -d > $HOME/.kube/config
   script:
-    -  helm uninstall $RELEASE_NAME -n dev
+    -  helm uninstall $RELEASE_NAME -n mio-dev

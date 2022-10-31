@@ -6,13 +6,13 @@ echo "remove start"
 container_name='mp2c-go'
 
 if [ ${CI_COMMIT_REF_NAME:0:8}  = "release-" ]; then
-  namespace='prod'
+  namespace='mio-prod'
   container_name=${container_name}${CI_COMMIT_REF_NAME}
 elif [ ${CI_COMMIT_REF_NAME:0:7} = "hotfix-" ]; then
-  namespace='prod'
+  namespace='mio-prod'
   container_name=${container_name}${CI_COMMIT_REF_NAME}
 elif [ ${CI_COMMIT_REF_NAME:0:8} = "feature-" ]; then
-  namespace='dev'
+  namespace='mio-dev'
   container_name=${container_name}${CI_COMMIT_REF_NAME}
 else
   echo "仅支持 release-(.+) hotfix-(.+) feature-(.+) 自动删除"
