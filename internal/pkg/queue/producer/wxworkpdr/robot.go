@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"github.com/wagslane/go-rabbitmq"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/queue/types/wxworkqueue"
-	"mio/pkg/wxwork"
+	"mio/internal/pkg/queue/types/message/wxworkmsg"
+	"mio/internal/pkg/queue/types/routerkey"
 )
 
-func SendRobotMessage(message wxworkqueue.RobotMessage) error {
-	return wxwork.SendRobotMessage(message.Key, message.Message)
+func SendRobotMessage(message wxworkmsg.RobotMessage) error {
+	//return wxwork.SendRobotMessage(message.Key, message.Message)
 	data, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
-	return app.QueueProduct.Publish(data, []string{"wxwork.robot"}, rabbitmq.WithPublishOptionsExchange("wxwork"))
+	return app.QueueProduct.Publish(data, []string{routerkey.WxWorkRobot}, rabbitmq.WithPublishOptionsExchange("wxwork"))
 }
