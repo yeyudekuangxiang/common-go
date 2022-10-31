@@ -2,6 +2,7 @@ package message
 
 import (
 	"errors"
+	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -11,9 +12,9 @@ import (
 
 type (
 	WebMessage interface {
-		SendMessage(sendId, recId int64, key string, recObjId int64) error
-		GetMessageCount(userId int64, status int) (int64, error)
-		GetMessage(userId int64, status, limit, offset int) ([]entity.UserWebMessage, int64, error)
+		SendMessage(param sendWebMessage) error
+		GetMessageCount(userId int64, status, forType int) (int64, error)
+		GetMessage(userId int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error)
 	}
 
 	defaultWebMessage struct {
@@ -37,21 +38,25 @@ type (
 	Options func(option *webMessageOption)
 )
 
-func (d defaultWebMessage) GetMessageCount(userId int64, status int) (int64, error) {
-	total, err := d.messageCustomer.CountAll(repository.FindMessageParams{
+func (d defaultWebMessage) GetMessageCount(userId int64, status, forType int) (int64, error) {
+	total, err := d.message.CountAll(repository.FindMessageParams{
 		RecId:  userId,
 		Status: status,
+		Type:   forType,
 	})
+
 	if err != nil {
 		return 0, err
 	}
+
 	return total, nil
 }
 
-func (d defaultWebMessage) GetMessage(userId int64, status, limit, offset int) ([]entity.UserWebMessage, int64, error) {
-	msgList, total, err := d.messageCustomer.FindAll(repository.FindMessageParams{
+func (d defaultWebMessage) GetMessage(userId int64, status, forType, limit, offset int) ([]entity.UserWebMessage, int64, error) {
+	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
 		RecId:  userId,
 		Status: status,
+		Type:   forType,
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -64,15 +69,16 @@ func (d defaultWebMessage) GetMessage(userId int64, status, limit, offset int) (
 		msgIds = append(msgIds, item.MessageId)
 	}
 
-	//if err = d.messageCustomer.UpdateAll(repository.FindMessageParams{MessageIds: msgIds}); err != nil {
-	//	return nil, 0, err
-	//}
+	err = d.message.HaveRead(repository.FindMessageParams{MessageIds: msgIds})
+	if err != nil {
+		app.Logger.Errorf("Message HaveRead Error:%s", err.Error())
+	}
 
 	return msgList, total, nil
 }
 
-func (d defaultWebMessage) SendMessage(sendId, recId int64, key string, recObjId int64) error {
-	sendUser, b, err := d.user.GetUserByID(sendId)
+func (d defaultWebMessage) SendMessage(param sendWebMessage) error {
+	sendUser, b, err := d.user.GetUserByID(param.SendId)
 	if err != nil {
 		return err
 	}
@@ -81,7 +87,7 @@ func (d defaultWebMessage) SendMessage(sendId, recId int64, key string, recObjId
 		return errno.ErrUserNotFound.WithMessage("发送消息用户不存在")
 	}
 
-	_, b, err = d.user.GetUserByID(recId)
+	_, b, err = d.user.GetUserByID(param.RecId)
 	if err != nil {
 		return err
 	}
@@ -90,30 +96,32 @@ func (d defaultWebMessage) SendMessage(sendId, recId int64, key string, recObjId
 		return errno.ErrUserNotFound.WithMessage("发送消息用户不存在")
 	}
 
-	content := d.getTemplate(key)
+	content := d.getTemplate(param.Key)
+
 	if content == "" {
 		return errors.New("模板不存在")
 	}
 
 	content = strings.ReplaceAll(content, "userName", sendUser.Nickname)
-	keys := strings.Split(key, "_")
+	keys := strings.Split(param.Key, "_")
 	if len(keys) >= 2 {
 		if keys[1] == "topic" {
-			content = d.replaceTempForTopic(content, recObjId)
+			content = d.replaceTempForTopic(content, param.RecObjId)
 		}
 
 		if keys[1] == "comment" {
-			content = d.replaceTempForComment(content, recObjId)
+			content = d.replaceTempForComment(content, param.RecId)
 		}
 
 	} else {
-		content = strings.ReplaceAll(content, key, d.options.Val)
+		content = strings.ReplaceAll(content, param.Key, d.options.Val)
 	}
 
 	//入库
 	err = d.message.SendMessage(repository.SendMessage{
-		SendId:  sendId,
-		RecId:   recId,
+		SendId:  param.SendId,
+		RecId:   param.RecId,
+		Type:    param.Type,
 		Message: content,
 	})
 	if err != nil {

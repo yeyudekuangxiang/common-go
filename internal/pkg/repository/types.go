@@ -360,7 +360,12 @@ type UpdateUserInfoParam struct {
 type SendMessage struct {
 	SendId  int64  `json:"sendId"`
 	RecId   int64  `json:"recId"`
+	Type    int    `json:"type"`
 	Message string `json:"message"`
+}
+
+type GetMessage struct {
+	Type int `json:"type"`
 }
 
 type FindMessageParams struct {
@@ -368,7 +373,8 @@ type FindMessageParams struct {
 	MessageId  int64     `json:"messageId"`
 	SendId     int64     `json:"sendId"`
 	RecId      int64     `json:"recId"`
-	Status     int       `json:"status"`
+	Type       int       `json:"type"`               // 1互动消息 2系统消息
+	Status     int       `json:"status" default:"1"` // 1未读 2已读
 	StartTime  time.Time `json:"startTime"`
 	EndTime    time.Time `json:"endTime"`
 	Limit      int       `json:"limit"`
