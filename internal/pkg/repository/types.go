@@ -380,3 +380,9 @@ type FindMessageParams struct {
 	Limit      int       `json:"limit"`
 	Offset     int       `json:"offset"`
 }
+
+type SetHaveReadMessageParams struct {
+	MsgId  int64   `json:"msgId"`
+	MsgIds []int64 `json:"msgIds"`
+	RecId  int64   `json:"recId"`
+}

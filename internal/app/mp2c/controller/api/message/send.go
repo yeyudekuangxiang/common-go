@@ -122,3 +122,24 @@ func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 		"total": total,
 	}, nil
 }
+
+func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
+	form := api_types.HaveReadWebMessageRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	err := messageService.SetHaveRead(messageSrv.SetHaveReadMessage{
+		MsgId:  form.MsgId,
+		RecId:  user.ID,
+		MsgIds: form.MsgIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}

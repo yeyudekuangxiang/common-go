@@ -11,9 +11,10 @@ import (
 
 type (
 	WebMessage interface {
-		SendMessage(param sendWebMessage) error
+		SendMessage(param SendWebMessage) error
 		GetMessageCount(userID int64, status, forType int) (int64, error)
 		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error)
+		SetHaveRead(param SetHaveReadMessage) error
 	}
 
 	defaultWebMessage struct {
@@ -36,6 +37,18 @@ type (
 
 	Options func(option *webMessageOption)
 )
+
+func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
+	err := d.messageCustomer.HaveReadMessage(repository.SetHaveReadMessageParams{
+		MsgId:  params.MsgId,
+		MsgIds: params.MsgIds,
+		RecId:  params.RecId,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func (d defaultWebMessage) GetMessageCount(userID int64, status, forType int) (int64, error) {
 	total, err := d.message.CountAll(repository.FindMessageParams{
@@ -76,7 +89,7 @@ func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offs
 	return msgList, total, nil
 }
 
-func (d defaultWebMessage) SendMessage(param sendWebMessage) error {
+func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	sendUser, b, err := d.user.GetUserByID(param.SendId)
 	if err != nil {
 		return err
