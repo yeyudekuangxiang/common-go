@@ -114,7 +114,7 @@ func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	messageService := messageSrv.NewWebMessageService(ctx)
-	total, err := messageService.GetMessageCount(user.ID, form.Status)
+	total, err := messageService.GetMessageCount(user.ID, form.Status, form.Type)
 	if err != nil {
 		return nil, err
 	}
