@@ -57,7 +57,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	//绑定回调
 	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
 		params := make(map[string]interface{}, 0)
-		params["mobile"] = sceneUser.Phone
+		params["mobile"] = user.PhoneNumber
 		params["status"] = "1"
 		jhxSvr := jhx.NewJhxService(context.NewMioContext())
 		err = jhxSvr.BindSuccess(params)
@@ -363,7 +363,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	var halfPoint int64
 
 	timeStr := time.Now().Format("2006-01-02")
-	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
+	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + userInfo.PhoneNumber
 
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
 	incPoint := one.Point
