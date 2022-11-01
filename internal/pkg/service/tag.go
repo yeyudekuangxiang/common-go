@@ -2,34 +2,43 @@ package service
 
 import (
 	"github.com/mlogclub/simple"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/pkg/errno"
 )
 
-var DefaultTagService = NewTagService(repository.DefaultTagRepository)
+type (
+	TagService interface {
+		List(cnq *simple.SqlCnd) (list []entity.Tag)
+		GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error)
+		GetOne(id int64) (entity.Tag, error)
+	}
 
-func NewTagService(r repository.ITagRepository) TagService {
-	return TagService{
-		r: r,
+	defaultTagService struct {
+		ctx      *mioContext.MioContext
+		tagModel repository.TagModel
+	}
+)
+
+func NewTagService(ctx *mioContext.MioContext) TagService {
+	return defaultTagService{
+		ctx:      ctx,
+		tagModel: repository.NewTagModel(ctx),
 	}
 }
 
-type TagService struct {
-	r repository.ITagRepository
+func (srv defaultTagService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
+	return srv.tagModel.List(cnq)
 }
 
-func (u TagService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
-	return u.r.List(cnq)
-}
-
-func (u TagService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error) {
-	list, total := u.r.GetTagPageList(param)
+func (srv defaultTagService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error) {
+	list, total := srv.tagModel.GetTagPageList(param)
 	return list, total, nil
 }
 
-func (u TagService) GetOne(id int64) (entity.Tag, error) {
-	tag := u.r.GetById(id)
+func (srv defaultTagService) GetOne(id int64) (entity.Tag, error) {
+	tag := srv.tagModel.GetById(id)
 	if tag.Id == 0 {
 		return entity.Tag{}, errno.ErrCommon.WithMessage("未找到该标签")
 	}

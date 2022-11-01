@@ -32,12 +32,14 @@ func NewTopicService(ctx *mioContext.MioContext) TopicService {
 	return TopicService{
 		topicModel:     repository.NewTopicModel(ctx),
 		topicLikeModel: repository.NewTopicLikeRepository(ctx),
+		tagModel:       repository.NewTagModel(ctx),
 	}
 }
 
 type TopicService struct {
 	topicModel     repository.TopicModel
 	topicLikeModel repository.TopicLikeModel
+	tagModel       repository.TagModel
 	TokenServer    *wxoa.AccessTokenServer
 }
 
@@ -536,7 +538,8 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 				Id: tagId,
 			})
 		}
-		tag := DefaultTagService.r.GetById(tagIds[0])
+
+		tag := srv.tagModel.GetById(tagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
@@ -604,7 +607,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 				Id: tagId,
 			})
 		}
-		tag := DefaultTagService.r.GetById(tagIds[0])
+		tag := srv.tagModel.GetById(tagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
