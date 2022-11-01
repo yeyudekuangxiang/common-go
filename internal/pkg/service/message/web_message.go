@@ -122,7 +122,7 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 		}
 
 		if keys[1] == "comment" {
-			content = d.replaceTempForComment(content, param.RecId)
+			content = d.replaceTempForComment(content, param.RecObjId)
 		}
 
 	} else {
@@ -229,8 +229,8 @@ func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMes
 		messageContent:  repository.NewMessageContentModel(ctx),
 		template:        repository.NewMessageTemplateModel(ctx),
 		user:            repository.NewUserRepository(),
-		topic:           repository.NewTopicRepository(ctx),
-		comment:         repository.NewCommentRepository(ctx),
+		topic:           repository.NewTopicModel(ctx),
+		comment:         repository.NewCommentModel(ctx),
 		options:         option,
 	}
 }

@@ -15,7 +15,7 @@ import (
 func NewTopicLikeService(ctx *context.MioContext) TopicLikeService {
 	return TopicLikeService{
 		topicLikeModel: repository.NewTopicLikeRepository(ctx),
-		topicModel:     repository.NewTopicRepository(ctx),
+		topicModel:     repository.NewTopicModel(ctx),
 	}
 }
 

@@ -189,7 +189,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	})
 
 	if err != nil {
-		app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+		app.Logger.Errorf("评论站内信发送失败:%s", err.Error())
 	}
 
 	return gin.H{
@@ -274,10 +274,23 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := service.NewCommentService(ctx)
+	messageService := message.NewWebMessageService(ctx)
 
-	like, point, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
+	like, point, recId, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
 	if err != nil {
 		return nil, err
+	}
+
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   user.ID,
+		RecId:    recId,
+		Key:      "like_comment",
+		RecObjId: form.CommentId,
+		Type:     1,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
 	}
 
 	return gin.H{

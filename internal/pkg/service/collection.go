@@ -96,7 +96,7 @@ func (d defaultCollectionService) Collection(objId int64, objType int, openId st
 func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId string) error {
 	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
 		collectionModel := repository.NewCollectionRepository(ctx)
-		topicModel := repository.NewTopicRepository(ctx)
+		topicModel := repository.NewTopicModel(ctx)
 		result, err := collectionModel.FindOneByOjb(objId, objType, openId)
 		if err != nil {
 			if err == entity.ErrNotFount {
@@ -145,7 +145,7 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 func (d defaultCollectionService) CancelCollection(objId int64, objType int, openId string) error {
 	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
 		collectionModel := repository.NewCollectionRepository(ctx)
-		topicModel := repository.NewTopicRepository(ctx)
+		topicModel := repository.NewTopicModel(ctx)
 
 		result, err := collectionModel.FindOneByOjb(objId, objType, openId)
 		if err != nil {
@@ -197,6 +197,6 @@ func NewCollectionService(ctx *mioContext.MioContext) CollectionService {
 	return &defaultCollectionService{
 		ctx:             ctx,
 		collectionModel: repository.NewCollectionRepository(ctx),
-		topicModel:      repository.NewTopicRepository(ctx),
+		topicModel:      repository.NewTopicModel(ctx),
 	}
 }

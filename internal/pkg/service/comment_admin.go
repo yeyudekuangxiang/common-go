@@ -7,16 +7,15 @@ import (
 	"mio/pkg/errno"
 )
 
-var DefaultCommentAdminService = NewCommentAdminService(repository.NewCommentRepository(context.NewMioContext()))
-
 type (
 	CommentAdminService interface {
-		DelCommentSoft(commentId int64, reason string) error
+		DelCommentSoft(commentId int64, reason string) (entity.CommentIndex, error)
 		CommentList(content string, userId int64, topicId int64, limit, offset int) ([]*entity.CommentIndex, int64, error)
 	}
 )
 
 type defaultCommentAdminService struct {
+	ctx          *context.MioContext
 	commentModel repository.CommentModel
 }
 
@@ -48,25 +47,26 @@ func (d defaultCommentAdminService) CommentList(content string, userId int64, ob
 	return all, count, nil
 }
 
-func (d defaultCommentAdminService) DelCommentSoft(commentId int64, reason string) error {
+func (d defaultCommentAdminService) DelCommentSoft(commentId int64, reason string) (entity.CommentIndex, error) {
 	builder := d.commentModel.RowBuilder()
 	builder.Where("id = ?", commentId).Where("state = ?", 0)
-	query, err := d.commentModel.FindOneQuery(builder)
+	comment, err := d.commentModel.FindOneQuery(builder)
 	if err != nil {
 		if err == entity.ErrNotFount {
-			return errno.ErrCommon.WithMessage("该评论不存在")
+			return entity.CommentIndex{}, errno.ErrCommon.WithMessage("该评论不存在")
 		}
-		return err
+		return entity.CommentIndex{}, err
 	}
-	err = d.commentModel.RowBuilder().Model(query).Updates(entity.CommentIndex{State: 1, DelReason: reason}).Error
+	err = d.commentModel.RowBuilder().Model(comment).Updates(entity.CommentIndex{State: 1, DelReason: reason}).Error
 	if err != nil {
-		return err
+		return entity.CommentIndex{}, err
 	}
-	return nil
+	return *comment, nil
 }
 
-func NewCommentAdminService(model repository.CommentModel) CommentAdminService {
+func NewCommentAdminService(ctx *context.MioContext) CommentAdminService {
 	return &defaultCommentAdminService{
-		commentModel: model,
+		ctx:          ctx,
+		commentModel: repository.NewCommentModel(ctx),
 	}
 }

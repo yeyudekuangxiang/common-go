@@ -5,7 +5,7 @@ type SendWebMessage struct {
 	RecId    int64  `json:"recId"`
 	Key      string `json:"key"`
 	RecObjId int64  `json:"recObjId"`
-	Type     int    `json:"type"`
+	Type     int    `json:"type" default:"1"`
 }
 
 type SetHaveReadMessage struct {

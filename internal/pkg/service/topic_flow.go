@@ -17,7 +17,7 @@ var initUserFlowPool, _ = ants.NewPool(50)
 
 var DefaultTopicFlowService = TopicFlowService{
 	repo:       repository.DefaultTopicFlowRepository,
-	topicModel: repository.NewTopicRepository(context2.NewMioContext()),
+	topicModel: repository.NewTopicModel(context2.NewMioContext()),
 }
 
 type TopicFlowService struct {
