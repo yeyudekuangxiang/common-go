@@ -12,7 +12,7 @@ import (
 type (
 	WebMessage interface {
 		SendMessage(params SendWebMessage) error
-		GetMessageCount(params GetWebMessageCount) (int64, error)
+		GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error)
 		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error)
 		SetHaveRead(params SetHaveReadMessage) error
 	}
@@ -50,19 +50,44 @@ func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
 	return nil
 }
 
-func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (int64, error) {
+func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error) {
+	res := GetWebMessageCountResp{}
+
 	total, err := d.message.CountAll(repository.FindMessageParams{
 		RecId:  params.RecId,
-		Types:  params.Types,
-		Type:   params.Type,
 		Status: 1,
 	})
 
 	if err != nil {
-		return 0, err
+		return res, errno.ErrCommon
 	}
 
-	return total, nil
+	res.Total = total
+
+	exchangeMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
+		RecId:  params.RecId,
+		Status: 1,
+		Type:   1,
+	})
+
+	if err != nil {
+		return res, errno.ErrCommon
+	}
+
+	res.ExchangeMsgTotal = exchangeMsgTotal
+
+	systemMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
+		RecId:  params.RecId,
+		Status: 1,
+		Types:  []int{2, 3},
+	})
+	if err != nil {
+		return res, errno.ErrCommon
+	}
+
+	res.SystemMsgTotal = systemMsgTotal
+
+	return res, nil
 }
 
 func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error) {

@@ -12,11 +12,6 @@ type WebMessageRequest struct {
 	Type   int `json:"type" form:"type" binding:"required"`
 }
 
-type WebMessageCountRequest struct {
-	Type  int   `json:"type" form:"type"`
-	Types []int `json:"types" form:"types"`
-}
-
 // 已读
 type HaveReadWebMessageRequest struct {
 	MsgId  int64   `json:"msgId" form:"msgId"`

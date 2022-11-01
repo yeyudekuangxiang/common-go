@@ -16,6 +16,10 @@ type SetHaveReadMessage struct {
 
 type GetWebMessageCount struct {
 	RecId int64 `json:"recId"`
-	Type  int   `json:"type"`
-	Types []int `json:"types"`
+}
+
+type GetWebMessageCountResp struct {
+	Total            int64 `json:"total"`
+	ExchangeMsgTotal int64 `json:"exchangeMsgTotal"`
+	SystemMsgTotal   int64 `json:"systemMsgTotal"`
 }
