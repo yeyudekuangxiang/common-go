@@ -74,13 +74,13 @@ func (d defaultMessageModel) CountAll(params FindMessageParams) (int64, error) {
 
 	var total int64
 	if len(params.MessageIds) > 0 {
-		query = query.Where("message.id in (?)", params.MessageIds)
+		query = query.Where("m.id in (?)", params.MessageIds)
 	}
 
 	if params.Type != 0 {
-		query = query.Where("message.type = ?", params.Type)
+		query = query.Where("m.type = ?", params.Type)
 	} else if len(params.Types) >= 1 {
-		query = query.Where("message.type in (?)", params.Types)
+		query = query.Where("m.type in (?)", params.Types)
 	}
 
 	if params.RecId != 0 {
@@ -92,11 +92,11 @@ func (d defaultMessageModel) CountAll(params FindMessageParams) (int64, error) {
 	}
 
 	if !params.StartTime.IsZero() {
-		query = query.Where("message.created_at > ?", params.StartTime)
+		query = query.Where("m.created_at > ?", params.StartTime)
 	}
 
 	if !params.EndTime.IsZero() {
-		query = query.Where("message.created_at < ?", params.EndTime)
+		query = query.Where("m.created_at < ?", params.EndTime)
 	}
 
 	err := query.Count(&total).Error
