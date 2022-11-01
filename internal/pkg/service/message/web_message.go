@@ -11,10 +11,10 @@ import (
 
 type (
 	WebMessage interface {
-		SendMessage(param SendWebMessage) error
-		GetMessageCount(userID int64, status, forType int) (int64, error)
+		SendMessage(params SendWebMessage) error
+		GetMessageCount(params GetWebMessageCount) (int64, error)
 		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error)
-		SetHaveRead(param SetHaveReadMessage) error
+		SetHaveRead(params SetHaveReadMessage) error
 	}
 
 	defaultWebMessage struct {
@@ -50,11 +50,12 @@ func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
 	return nil
 }
 
-func (d defaultWebMessage) GetMessageCount(userID int64, status, forType int) (int64, error) {
+func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (int64, error) {
 	total, err := d.message.CountAll(repository.FindMessageParams{
-		RecId:  userID,
-		Status: status,
-		Type:   forType,
+		RecId:  params.RecId,
+		Types:  params.Types,
+		Type:   params.Type,
+		Status: 1,
 	})
 
 	if err != nil {

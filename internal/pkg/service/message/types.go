@@ -13,3 +13,9 @@ type SetHaveReadMessage struct {
 	MsgIds []int64 `json:"msgIds" form:"msgIds"`
 	RecId  int64   `json:"recId" form:"recId"`
 }
+
+type GetWebMessageCount struct {
+	RecId int64 `json:"recId"`
+	Type  int   `json:"type"`
+	Types []int `json:"types"`
+}

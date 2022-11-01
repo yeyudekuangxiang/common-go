@@ -373,7 +373,8 @@ type FindMessageParams struct {
 	MessageId  int64     `json:"messageId"`
 	SendId     int64     `json:"sendId"`
 	RecId      int64     `json:"recId"`
-	Type       int       `json:"type"`               // 1互动消息 2系统消息
+	Type       int       `json:"type"` // 1互动消息 2酷喵圈社区 3二手交易
+	Types      []int     `json:"types"`
 	Status     int       `json:"status" default:"1"` // 1未读 2已读
 	StartTime  time.Time `json:"startTime"`
 	EndTime    time.Time `json:"endTime"`

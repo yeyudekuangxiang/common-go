@@ -105,7 +105,7 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
-	form := api_types.WebMessageRequest{}
+	form := api_types.WebMessageCountRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -114,10 +114,15 @@ func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	messageService := messageSrv.NewWebMessageService(ctx)
-	total, err := messageService.GetMessageCount(user.ID, form.Status, form.Type)
+	total, err := messageService.GetMessageCount(messageSrv.GetWebMessageCount{
+		RecId: user.ID,
+		Type:  form.Type,
+		Types: form.Types,
+	})
 	if err != nil {
 		return nil, err
 	}
+
 	return gin.H{
 		"total": total,
 	}, nil
