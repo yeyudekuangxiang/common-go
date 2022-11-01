@@ -178,7 +178,7 @@ type GetTopicFlowPageListBy struct {
 	UserId     int64
 	TopicId    int64
 	TopicTagId int64
-	Status     entity.TopicStatus `json:"status"` //直接传0值表示全部
+	Status     entity.TopicStatus `json:"status"` // 直接传'0'值表示全部
 }
 type GetProductItemListBy struct {
 	ItemIds []string

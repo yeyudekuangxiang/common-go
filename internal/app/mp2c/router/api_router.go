@@ -99,7 +99,7 @@ func apiRouter(router *gin.Engine) {
 			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
 			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
 			messageRouter.GET("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
-			messageRouter.GET("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
+			messageRouter.POST("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
 			messageRouter.POST("/web-message-haveread", apiutil.Format(message.DefaultMessageController.SetHaveReadWebMessage))
 		}
 		//用户相关路由
