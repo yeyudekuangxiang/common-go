@@ -27,8 +27,8 @@ func (rdt RankDateType) ParseLastTime() (time.Time, time.Time) {
 		start = t.AddWeek(-1).StartOfWeek().Time
 		end = t.AddWeek(-1).EndOfWeek().Time
 	case RankDateTypeMonth:
-		start = t.AddMonth(-1).StartOfMonth().Time
-		end = t.AddMonth(-1).EndOfMonth().Time
+		start = t.StartOfMonth().AddMonth(-1).Time
+		end = t.StartOfMonth().AddMonth(-1).EndOfMonth().Time
 	}
 	return start, end
 }
