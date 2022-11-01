@@ -9,7 +9,6 @@ import (
 )
 
 func SendSms(mobile string, sms string) error {
-
 	url := "https://smssh1.253.com/msg/v1/send/json"
 	method := "POST"
 	payload := strings.NewReader(`{

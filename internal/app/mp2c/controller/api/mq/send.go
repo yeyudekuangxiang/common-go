@@ -20,11 +20,12 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
-	//发送短信
 	err := message.SendSms(form.Phone, form.Msg)
 	if err != nil {
 		log.Println("短信发送失败", err, form.Phone, form.Msg)
+		return nil, err
 	}
+	//发送短信
 	return gin.H{}, nil
 }
 
