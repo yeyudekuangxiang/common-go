@@ -40,6 +40,7 @@ const (
 	BannerSceneEvent   BannerScene = "event"
 	BannerSceneTopic   BannerScene = "topic"
 	BannerSceneWelfare BannerScene = "welfare"
+	BannerSceneUser    BannerScene = "user"
 )
 
 const OrderByBannerSortAsc OrderBy = "order_by_banner_sort_asc"
@@ -54,6 +55,7 @@ var (
 		BannerSceneEvent:   "携手",
 		BannerSceneTopic:   "社区",
 		BannerSceneWelfare: "公益",
+		BannerSceneUser:    "用户",
 	}
 	BannerTypeMap = map[BannerType]string{
 		BannerTypeMini: "第三方小程序",
