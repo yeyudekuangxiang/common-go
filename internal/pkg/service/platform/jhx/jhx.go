@@ -166,19 +166,25 @@ func (srv Service) TicketNotify(sign string, params map[string]interface{}) erro
 	//如果 status 相等 不处理 返回 nil
 	j, _ := strconv.ParseInt(ticketNotify.Status, 10, 32)
 	status := int32(j)
+	var usedStatus int32
+	if status == 1 {
+		usedStatus = 2
+	} else if status == 2 {
+		usedStatus = 1
+	}
 
 	if !coupon.Exist {
 		return errno.ErrCommon.WithMessage("券码不存在")
 	}
 
-	if coupon.CouponInfo.UsedStatus == status {
+	if coupon.CouponInfo.UsedStatus == usedStatus {
 		return errno.ErrCommon.WithMessage("该券码已失效")
 	}
 
 	//如果 status 不等 根据 tradeno 更新status,used_time 返回nil
 	_, err = app.RpcService.CouponRpcSrv.UpdateCouponUsedStatus(srv.ctx, &couponclient.UpdateCouponUsedStatusReq{
 		CouponCardId: coupon.CouponInfo.CouponCardId,
-		UsedStatus:   status,
+		UsedStatus:   usedStatus,
 		UsedTime:     time.Now().UnixMilli(),
 	})
 	if err != nil {
