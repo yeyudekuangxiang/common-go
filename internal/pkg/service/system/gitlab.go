@@ -29,11 +29,11 @@ const private_token = "yoQqAi__rVuZj8kRwgfh"
 const base_url = "https://gitlab.miotech.com/api/v4"
 
 var gitlabRefMap = map[string]string{
-	"^master$":                  "## 预发布版本",
-	"^develop$":                 "## 测试版本",
-	"^feature-.+$":              "## 开发版本 [{ref}]",
-	"^hotfix-.+$":               "## 热修复版本 [{ref}]",
-	"v[0-9]+\\.[0-9]+\\.[0-9]+": "# 正式版本 [{ref}]",
+	"^master$":                   "## 预发布版本",
+	"^develop$":                  "## 测试版本",
+	"^feature-.+$":               "## 开发版本 [{ref}]",
+	"^hotfix-.+$":                "## 热修复版本 [{ref}]",
+	"^v[0-9]+\\.[0-9]+\\.[0-9]+": "# 正式版本 [{ref}]",
 	"^develop-[a-zA-Z]+-(api|rpc)-v[0-9]+\\.[0-9]+\\.[0-9]+$":    "# 开发版本 [{ref}]",
 	"^production-[a-zA-Z]+-(api|rpc)-v[0-9]+\\.[0-9]+\\.[0-9]+$": "# 正式版本 [{ref}]",
 }
