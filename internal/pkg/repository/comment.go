@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
@@ -27,12 +28,25 @@ type (
 		CountBuilder(field string) *gorm.DB
 		SumBuilder(field string) *gorm.DB
 		AddTopicLikeCount(commentId int64, num int) error
+		FindListByIds(ids []int64) []*entity.CommentIndex
 	}
 
 	defaultCommentModel struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (m *defaultCommentModel) FindListByIds(ids []int64) []*entity.CommentIndex {
+	commentList := make([]*entity.CommentIndex, len(ids))
+	err := app.DB.Model(&entity.CommentIndex{}).
+		Where("id in (?)", ids).
+		//Where("state = ?", 0).
+		Find(&commentList).Error
+	if err != nil {
+		return []*entity.CommentIndex{}
+	}
+	return commentList
+}
 
 func NewCommentModel(ctx *mioContext.MioContext) CommentModel {
 	return &defaultCommentModel{

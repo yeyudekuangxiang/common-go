@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
@@ -36,8 +37,9 @@ func (d defaultTopicRepository) GetTopicNotes(topicIds []int64) []*entity.Topic 
 		Where("topic.id in ?", topicIds).
 		Where("topic.status = ?", entity.TopicStatusPublished).
 		Group("topic.id").
-		Find(&topList)
+		Find(&topList).Error
 	if err != nil {
+		app.Logger.Error(err)
 		return []*entity.Topic{}
 	}
 	return topList

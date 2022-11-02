@@ -5,6 +5,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"strings"
 )
@@ -67,7 +68,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 	exchangeMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
-		Type:   1,
+		Types:  []int{1, 2, 3},
 	})
 
 	if err != nil {
@@ -79,7 +80,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 	systemMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
-		Types:  []int{2, 3},
+		Types:  []int{4, 5, 6, 7},
 	})
 	if err != nil {
 		return res, errno.ErrCommon
@@ -103,21 +104,19 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	if err != nil {
 		return nil, 0, err
 	}
-	var result []*GetWebMessageResp
-
 	l := len(msgList)
+
+	result := make([]*GetWebMessageResp, l)
+
 	uKeyMap := make(map[int64]struct{}, l+1)
 	topicMap := make(map[int64]struct{}, l+1)
 	commentMap := make(map[int64]struct{}, l+1)
 	orderMap := make(map[int64]struct{}, l+1)
 	goodsMap := make(map[int64]struct{}, l+1)
 	for i, item := range msgList {
-		result[i].Id = item.Id
-		result[i].MessageContent = item.MessageContent
-		result[i].Type = item.Type
-		result[i].TurnId = item.TurnId
-		result[i].TurnType = item.TurnType
-		result[i].CreatedAt = item.CreatedAt
+		one := &GetWebMessageResp{}
+		_ = util.MapTo(item, one)
+		result[i] = one
 		//uKeyMap
 		uKeyMap[item.SendId] = struct{}{}
 		//turnMap
@@ -148,32 +147,28 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	}
 
 	//Turn
-	var topicIds, commentIds, orderIds, goodsIds []int64
-	if len(topicMap) > 1 {
-		for id, _ := range topicMap {
-			topicIds = append(topicIds, id)
+	tMap := d.turnTopic(topicMap)     //文章
+	cMap := d.turnComment(commentMap) //评论
+	oMap := d.turnOrder(orderMap)     // 订单
+	gMap := d.turnGoods(goodsMap)     // 商品
+
+	for _, item := range result {
+		item.User = uMap[item.SendId]
+		//文章组合
+		if item.TurnType == 1 {
+			item.TurnNotes = tMap[item.TurnId]
 		}
-		tMap := make(map[int64]string, len(topicIds))
-		topicList := d.topic.GetTopicNotes(topicIds)
-		if len(topicList) > 1 {
-			for _, topicItem := range topicList {
-				tMap[topicItem.Id] = topicItem.
-			}
+		//评论组合
+		if item.TurnType == 2 {
+			item.TurnNotes = cMap[item.TurnId]
 		}
-	}
-	if len(commentMap) > 1 {
-		for _, id := range commentMap {
-			commentIds = append(commentIds, id)
+		//商品组合
+		if item.TurnType == 3 {
+			item.TurnNotes = oMap[item.TurnId]
 		}
-	}
-	if len(orderMap) > 1 {
-		for _, id := range orderMap {
-			orderIds = append(orderIds, id)
-		}
-	}
-	if len(goodsMap) > 1 {
-		for _, id := range goodsMap {
-			goodsIds = append(goodsIds, id)
+		//订单组合
+		if item.TurnType == 4 {
+			item.TurnNotes = gMap[item.TurnId]
 		}
 	}
 
@@ -289,8 +284,58 @@ func (d defaultWebMessage) getTemplate(key string) string {
 	return one.TempContent
 }
 
-func (d defaultWebMessage) unique(m map[]) string {
+func (d defaultWebMessage) turnTopic(topicMap map[int64]struct{}) map[int64]string {
+	if len(topicMap) >= 1 {
+		var topicIds []int64
+		for id, _ := range topicMap {
+			topicIds = append(topicIds, id)
+		}
+		topicList := d.topic.GetTopicNotes(topicIds)
+		if len(topicList) >= 1 {
+			tMap := make(map[int64]string, len(topicIds))
+			for _, topicItem := range topicList {
+				notes := ""
+				n := len(topicItem.Tags)
+				if n > 2 {
+					n = 2
+				}
+				for i := 0; i < n; i++ {
+					notes += topicItem.Tags[i].Name + "|"
+				}
+				notes += topicItem.Title
+				tMap[topicItem.Id] = notes
+			}
+			return tMap
+		}
+	}
 
+	return map[int64]string{}
+}
+
+func (d defaultWebMessage) turnComment(commentMap map[int64]struct{}) map[int64]string {
+	if len(commentMap) >= 1 {
+		var commentIds []int64
+		for id, _ := range commentMap {
+			commentIds = append(commentIds, id)
+		}
+		commentList := d.comment.FindListByIds(commentIds)
+		if len(commentList) >= 1 {
+			cMap := make(map[int64]string, len(commentIds))
+			for _, commentItem := range commentList {
+				cMap[commentItem.Id] = commentItem.Message
+			}
+			return cMap
+		}
+	}
+	return map[int64]string{}
+}
+
+func (d defaultWebMessage) turnOrder(commentMap map[int64]struct{}) map[int64]string {
+	return map[int64]string{}
+}
+
+func (d defaultWebMessage) turnGoods(commentMap map[int64]struct{}) map[int64]string {
+	return map[int64]string{}
 }
 
 func WithSendObjId(sendObjId int64) Options {
