@@ -25,36 +25,40 @@ type (
 )
 
 func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]entity.UserWebMessageV2, int64, error) {
-	query := d.ctx.DB.Model(&entity.MessageContent{}).WithContext(d.ctx.Context).
-		Select("message_content.message_id,message_content.message_content,message_content.created_at,message_content.updated_at").
-		Joins("left join message m on message_content.message_id = m.id").
-		Joins("left join message_customer c on message_content.message_id = c.message_id")
+	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
+		Select("mcontent.message_id,mcontent.message_content,message.created_at").
+		Joins("left join message_content mcontent on message.id = mcontent.message_id").
+		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
 	var resp []entity.UserWebMessageV2
 	var total int64
+
 	if params.RecId != 0 {
-		query = query.Where("c.rec_id = ?", params.RecId)
+		query = query.Where("mcustomer.rec_id = ?", params.RecId)
 	}
 
 	if params.Status != 0 {
-		query = query.Where("c.status = ?", params.Status)
+		query = query.Where("mcustomer.status = ?", params.Status)
 	}
 
 	if params.Type != 0 {
-		query = query.Where("m.type = ?", params.Type)
+		query = query.Where("message.type = ?", params.Type)
+	} else if len(params.Types) >= 1 {
+		query = query.Where("message.type in (?)", params.Types)
 	}
 
 	if !params.StartTime.IsZero() {
-		query = query.Where("c.created_at > ?", params.StartTime)
+		query = query.Where("mcustomer.created_at > ?", params.StartTime)
 	}
 
 	if !params.EndTime.IsZero() {
-		query = query.Where("c.created_at < ?", params.EndTime)
+		query = query.Where("mcustomer.created_at < ?", params.EndTime)
 	}
 
 	if params.Limit != 0 && params.Offset != 0 {
 		query = query.Limit(params.Limit).Offset(params.Offset)
 	}
-	err := query.Count(&total).Order("c.id asc").Find(&resp).Error
+
+	err := query.Count(&total).Order("mcustomer.id asc").Find(&resp).Error
 
 	if err == nil {
 		return resp, total, nil
@@ -68,35 +72,34 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]entity.User
 }
 
 func (d defaultMessageModel) CountAll(params FindMessageParams) (int64, error) {
-	query := d.ctx.DB.Model(&entity.MessageContent{}).WithContext(d.ctx.Context).
-		Joins("left join message m on message_content.message_id = m.id").
-		Joins("left join message_customer c on message_content.message_id = c.message_id")
+	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
+		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
 
 	var total int64
 	if len(params.MessageIds) > 0 {
-		query = query.Where("m.id in (?)", params.MessageIds)
+		query = query.Where("message.id in (?)", params.MessageIds)
 	}
 
 	if params.Type != 0 {
-		query = query.Where("m.type = ?", params.Type)
+		query = query.Where("message.type = ?", params.Type)
 	} else if len(params.Types) >= 1 {
-		query = query.Where("m.type in (?)", params.Types)
+		query = query.Where("message.type in (?)", params.Types)
 	}
 
 	if params.RecId != 0 {
-		query = query.Where("c.rec_id = ?", params.RecId)
+		query = query.Where("mcustomer.rec_id = ?", params.RecId)
 	}
 
 	if params.Status != 0 {
-		query = query.Where("c.status = ?", params.Status)
+		query = query.Where("mcustomer.status = ?", params.Status)
 	}
 
 	if !params.StartTime.IsZero() {
-		query = query.Where("m.created_at > ?", params.StartTime)
+		query = query.Where("message.created_at > ?", params.StartTime)
 	}
 
 	if !params.EndTime.IsZero() {
-		query = query.Where("m.created_at < ?", params.EndTime)
+		query = query.Where("message.created_at < ?", params.EndTime)
 	}
 
 	err := query.Count(&total).Error

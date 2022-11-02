@@ -92,7 +92,14 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	messageService := messageSrv.NewWebMessageService(ctx)
-	msgList, total, err := messageService.GetMessage(user.ID, form.Status, form.Type, form.Limit(), form.Offset())
+	msgList, total, err := messageService.GetMessage(messageSrv.GetWebMessage{
+		UserId: user.ID,
+		Status: form.Status,
+		Type:   form.Type,
+		Types:  form.Types,
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+	})
 	if err != nil {
 		return nil, err
 	}

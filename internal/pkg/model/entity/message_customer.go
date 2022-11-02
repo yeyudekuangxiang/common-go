@@ -30,5 +30,4 @@ type UserWebMessageV2 struct {
 	MessageId      int64     `json:"messageId"`
 	MessageContent string    `json:"messageContent"`
 	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
 }

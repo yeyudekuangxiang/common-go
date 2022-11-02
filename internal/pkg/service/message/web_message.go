@@ -13,7 +13,7 @@ type (
 	WebMessage interface {
 		SendMessage(params SendWebMessage) error
 		GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error)
-		GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error)
+		GetMessage(params GetWebMessage) ([]entity.UserWebMessageV2, int64, error)
 		SetHaveRead(params SetHaveReadMessage) error
 	}
 
@@ -90,13 +90,14 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 	return res, nil
 }
 
-func (d defaultWebMessage) GetMessage(userID int64, status, forType, limit, offset int) ([]entity.UserWebMessageV2, int64, error) {
+func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]entity.UserWebMessageV2, int64, error) {
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
-		RecId:  userID,
-		Status: status,
-		Type:   forType,
-		Limit:  limit,
-		Offset: offset,
+		RecId:  params.UserId,
+		Status: params.Status,
+		Type:   params.Type,
+		Types:  params.Types,
+		Limit:  params.Limit,
+		Offset: params.Offset,
 	})
 	if err != nil {
 		return nil, 0, err
