@@ -13,7 +13,7 @@ type (
 	WebMessage interface {
 		SendMessage(params SendWebMessage) error
 		GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error)
-		GetMessage(params GetWebMessage) ([]entity.UserWebMessageV2, int64, error)
+		GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error)
 		SetHaveRead(params SetHaveReadMessage) error
 	}
 
@@ -90,7 +90,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 	return res, nil
 }
 
-func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]entity.UserWebMessageV2, int64, error) {
+func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error) {
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
 		RecId:  params.UserId,
 		Status: params.Status,
@@ -99,21 +99,85 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]entity.UserWebMes
 		Limit:  params.Limit,
 		Offset: params.Offset,
 	})
+
 	if err != nil {
 		return nil, 0, err
 	}
+	var result []*GetWebMessageResp
 
-	//var msgIds []int64
-	//for _, item := range msgList {
-	//	msgIds = append(msgIds, item.MessageId)
-	//}
-	//
-	//err = d.message.HaveRead(repository.FindMessageParams{MessageIds: msgIds})
-	//if err != nil {
-	//	app.Logger.Errorf("Message HaveRead Error:%s", err.Error())
-	//}
+	l := len(msgList)
+	uKeyMap := make(map[int64]struct{}, l+1)
+	topicMap := make(map[int64]struct{}, l+1)
+	commentMap := make(map[int64]struct{}, l+1)
+	orderMap := make(map[int64]struct{}, l+1)
+	goodsMap := make(map[int64]struct{}, l+1)
+	for i, item := range msgList {
+		result[i].Id = item.Id
+		result[i].MessageContent = item.MessageContent
+		result[i].Type = item.Type
+		result[i].TurnId = item.TurnId
+		result[i].TurnType = item.TurnType
+		result[i].CreatedAt = item.CreatedAt
+		//uKeyMap
+		uKeyMap[item.SendId] = struct{}{}
+		//turnMap
+		if item.TurnType == 1 {
+			topicMap[item.TurnId] = struct{}{}
+		}
+		if item.TurnType == 2 {
+			commentMap[item.TurnId] = struct{}{}
+		}
+		if item.TurnType == 3 {
+			orderMap[item.TurnId] = struct{}{}
+		}
+		if item.TurnType == 4 {
+			goodsMap[item.TurnId] = struct{}{}
+		}
+	}
 
-	return msgList, total, nil
+	//User
+	var uIds []int64
+	for id, _ := range uKeyMap {
+		uIds = append(uIds, id)
+	}
+
+	uMap := make(map[int64]entity.ShortUser, len(uIds))
+	uList := d.user.GetShortUserListBy(repository.GetUserListBy{UserIds: uIds})
+	for _, uItem := range uList {
+		uMap[uItem.ID] = uItem
+	}
+
+	//Turn
+	var topicIds, commentIds, orderIds, goodsIds []int64
+	if len(topicMap) > 1 {
+		for id, _ := range topicMap {
+			topicIds = append(topicIds, id)
+		}
+		tMap := make(map[int64]string, len(topicIds))
+		topicList := d.topic.GetTopicNotes(topicIds)
+		if len(topicList) > 1 {
+			for _, topicItem := range topicList {
+				tMap[topicItem.Id] = topicItem.
+			}
+		}
+	}
+	if len(commentMap) > 1 {
+		for _, id := range commentMap {
+			commentIds = append(commentIds, id)
+		}
+	}
+	if len(orderMap) > 1 {
+		for _, id := range orderMap {
+			orderIds = append(orderIds, id)
+		}
+	}
+	if len(goodsMap) > 1 {
+		for _, id := range goodsMap {
+			goodsIds = append(goodsIds, id)
+		}
+	}
+
+	return result, total, nil
 }
 
 func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
@@ -223,6 +287,10 @@ func (d defaultWebMessage) getTemplate(key string) string {
 		return ""
 	}
 	return one.TempContent
+}
+
+func (d defaultWebMessage) unique(m map[]) string {
+
 }
 
 func WithSendObjId(sendObjId int64) Options {

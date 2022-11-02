@@ -188,7 +188,7 @@ func (srv Service) TicketNotify(sign string, params map[string]interface{}) erro
 	return nil
 }
 
-func (srv Service) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error) {
+func (srv Service) TicketStatus(tradeno string) (*JhxTicketStatusResponse, error) {
 	commonParams := srv.getCommonParams()
 	commonParams["tradeno"] = tradeno
 	commonParams["sign"] = strings.ToUpper(platformUtil.GetSign(commonParams, "", "&"))
@@ -198,20 +198,20 @@ func (srv Service) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error
 	body, err := httputil.PostJson(url, commonParams)
 	fmt.Printf("%s\n", body)
 	if err != nil {
-		return &jhxTicketStatusResponse{}, err
+		return &JhxTicketStatusResponse{}, err
 	}
 	response := jhxCommonResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return &jhxTicketStatusResponse{}, err
+		return &JhxTicketStatusResponse{}, err
 	}
 	if response.Code != 0 {
-		return &jhxTicketStatusResponse{}, errno.ErrCommon.WithMessage(response.Msg)
+		return &JhxTicketStatusResponse{}, errno.ErrCommon.WithMessage(response.Msg)
 	}
-	ticketStatusResponse := &jhxTicketStatusResponse{}
+	ticketStatusResponse := &JhxTicketStatusResponse{}
 	err = util.MapTo(response.Data, ticketStatusResponse)
 	if err != nil {
-		return &jhxTicketStatusResponse{}, err
+		return &JhxTicketStatusResponse{}, err
 	}
 	//返回状态
 	return ticketStatusResponse, nil

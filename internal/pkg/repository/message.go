@@ -14,7 +14,7 @@ type (
 		Delete(id int64) error
 		Update(data *entity.Message) error
 		SendMessage(data SendMessage) error
-		GetMessage(params FindMessageParams) ([]entity.UserWebMessageV2, int64, error)
+		GetMessage(params FindMessageParams) ([]*entity.UserWebMessage, int64, error)
 		CountAll(params FindMessageParams) (int64, error)
 		HaveRead(params FindMessageParams) error
 	}
@@ -24,12 +24,12 @@ type (
 	}
 )
 
-func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]entity.UserWebMessageV2, int64, error) {
+func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.UserWebMessage, int64, error) {
 	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
-		Select("mcontent.message_id,mcontent.message_content,message.created_at").
+		Select("message.*,mcontent.message_content").
 		Joins("left join message_content mcontent on message.id = mcontent.message_id").
 		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
-	var resp []entity.UserWebMessageV2
+	var resp []*entity.UserWebMessage
 	var total int64
 
 	if params.RecId != 0 {

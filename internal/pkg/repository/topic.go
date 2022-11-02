@@ -20,12 +20,28 @@ type (
 		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
+		GetTopicNotes(topicIds []int64) []*entity.Topic
 	}
 
 	defaultTopicRepository struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicRepository) GetTopicNotes(topicIds []int64) []*entity.Topic {
+	topList := make([]*entity.Topic, 0)
+	err := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Where("topic.id in ?", topicIds).
+		Where("topic.status = ?", entity.TopicStatusPublished).
+		Group("topic.id").
+		Find(&topList)
+	if err != nil {
+		return []*entity.Topic{}
+	}
+	return topList
+}
 
 func (d defaultTopicRepository) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
 	return d.ctx.DB.Transaction(fc, opts...)

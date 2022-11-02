@@ -1,5 +1,10 @@
 package message
 
+import (
+	"mio/internal/pkg/model/entity"
+	"time"
+)
+
 type SendWebMessage struct {
 	SendId   int64  `json:"sendId"`
 	RecId    int64  `json:"recId"`
@@ -21,6 +26,20 @@ type GetWebMessage struct {
 	Types  []int `json:"types"`
 	Limit  int   `json:"limit"`
 	Offset int   `json:"offset"`
+}
+
+type GetWebMessageResp struct {
+	//message
+	Id             int64     `json:"id"`
+	MessageContent string    `json:"messageContent"`
+	Type           int       `json:"type"` //1点赞 2评论 3回复 4发布 5精选 6违规 7合作社
+	CreatedAt      time.Time `json:"createdAt"`
+	//turn obj
+	TurnType  int    `json:"TurnType"` // 1文章 2评论 3订单 4商品
+	TurnId    int64  `json:"TurnId"`
+	TurnNotes string `json:"turnNotes"` // 简介
+	//user
+	User entity.ShortUser
 }
 
 type GetWebMessageCount struct {
