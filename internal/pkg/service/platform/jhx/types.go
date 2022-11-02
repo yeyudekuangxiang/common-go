@@ -25,7 +25,7 @@ type jhxTicketCreateResponse struct {
 	ExpireTime string `json:"expireTime" from:"expireTime"`
 }
 
-type jhxTicketStatusResponse struct {
+type JhxTicketStatusResponse struct {
 	TicketNo string `json:"ticket_no" form:"ticket_no"`
 	Status   string `json:"status" form:"status"`
 	UsedTime string `json:"used_time" form:"used_time"`
