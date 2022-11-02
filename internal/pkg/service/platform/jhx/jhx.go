@@ -92,7 +92,7 @@ func (srv Service) SendCoupon(typeId int64, user entity.User) (string, error) {
 func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) {
 	commonParams := srv.getCommonParams()
 	rand.Seed(time.Now().UnixNano())
-	tradeNo := "ytx" + strconv.FormatInt(time.Now().UnixMilli(), 10) + strconv.FormatInt(rand.Int63(), 10)
+	tradeNo := "jhx" + strconv.FormatInt(time.Now().UnixMilli(), 10) + strconv.FormatInt(rand.Int63(), 10)
 	commonParams["tradeno"] = tradeNo
 	commonParams["mobile"] = user.PhoneNumber
 
@@ -147,7 +147,7 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 
 //消费通知
 func (srv Service) TicketNotify(sign string, params map[string]interface{}) error {
-	if err := platformUtil.CheckSign(sign, params, "scene.Key", "&"); err != nil {
+	if err := platformUtil.CheckSign(sign, params, "d7b47f379109", "&"); err != nil {
 		return err
 	}
 
@@ -188,7 +188,7 @@ func (srv Service) TicketNotify(sign string, params map[string]interface{}) erro
 	return nil
 }
 
-func (srv Service) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error) {
+func (srv Service) TicketStatus(tradeno string) (*JhxTicketStatusResponse, error) {
 	commonParams := srv.getCommonParams()
 	commonParams["tradeno"] = tradeno
 	commonParams["sign"] = strings.ToUpper(platformUtil.GetSign(commonParams, "", "&"))
@@ -198,20 +198,20 @@ func (srv Service) TicketStatus(tradeno string) (*jhxTicketStatusResponse, error
 	body, err := httputil.PostJson(url, commonParams)
 	fmt.Printf("%s\n", body)
 	if err != nil {
-		return &jhxTicketStatusResponse{}, err
+		return &JhxTicketStatusResponse{}, err
 	}
 	response := jhxCommonResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return &jhxTicketStatusResponse{}, err
+		return &JhxTicketStatusResponse{}, err
 	}
 	if response.Code != 0 {
-		return &jhxTicketStatusResponse{}, errno.ErrCommon.WithMessage(response.Msg)
+		return &JhxTicketStatusResponse{}, errno.ErrCommon.WithMessage(response.Msg)
 	}
-	ticketStatusResponse := &jhxTicketStatusResponse{}
+	ticketStatusResponse := &JhxTicketStatusResponse{}
 	err = util.MapTo(response.Data, ticketStatusResponse)
 	if err != nil {
-		return &jhxTicketStatusResponse{}, err
+		return &JhxTicketStatusResponse{}, err
 	}
 	//返回状态
 	return ticketStatusResponse, nil
