@@ -43,8 +43,9 @@ type defaultCommentService struct {
 
 func NewCommentService(ctx *context.MioContext) CommentService {
 	return &defaultCommentService{
-		ctx:          ctx,
-		commentModel: repository.NewCommentModel(ctx),
+		ctx:              ctx,
+		commentModel:     repository.NewCommentModel(ctx),
+		commentLikeModel: repository.NewCommentLikeRepository(ctx),
 	}
 }
 

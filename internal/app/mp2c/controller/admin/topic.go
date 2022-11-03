@@ -148,6 +148,7 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	if err := adminTopicService.DeleteTopic(form.ID, form.Reason); err != nil {
 		return nil, err
 	}
+	//
 	return nil, nil
 }
 
@@ -179,8 +180,13 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	})
 
 	var point int64
+	var isSend bool
 	if topic.Status == 3 && form.Status == 4 {
+		isSend = true
 		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	} else if form.Status == 3 && by.ID == 0 {
+		isSend = true
+		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
 	}
 
 	title := topic.Title
@@ -188,8 +194,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		title = string([]rune(title)[0:8]) + "..."
 	}
 
-	if form.Status == 3 && by.ID == 0 {
-		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	if isSend {
 		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       user.OpenId,
 			Type:         entity.POINT_ARTICLE,
@@ -212,6 +217,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		key = "fail_topic"
 		t = 6
 	}
+
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   0,
 		RecId:    user.ID,
