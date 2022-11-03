@@ -106,8 +106,8 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"list":     msgList,
 		"total":    total,
-		"page":     form.Limit(),
-		"pageSize": form.Offset(),
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
 }
 

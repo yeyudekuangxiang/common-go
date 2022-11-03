@@ -32,8 +32,8 @@ func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"list":     list,
 		"total":    total,
-		"page":     form.Limit(),
-		"pageSize": form.Offset(),
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
 }
 
