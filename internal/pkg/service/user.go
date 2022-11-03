@@ -559,13 +559,18 @@ func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, 
 func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	//图片审核
 	user := u.r.GetUserById(param.UserId)
-	err := validator.CheckMediaWithOpenId(user.OpenId, param.Avatar)
-	if err != nil {
-		return errno.ErrCommon.WithMessage(err.Error())
-	}
+
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+
+	if param.Avatar != "" {
+		err := validator.CheckMediaWithOpenId(user.OpenId, param.Avatar)
+		if err != nil {
+			return errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+
 	if param.PhoneNumber != nil {
 		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
 			return errno.ErrCommon.WithMessage("该手机号已被其他账号绑定")
