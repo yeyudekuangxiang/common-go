@@ -5,12 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/message"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"strconv"
 )
 
 var DefaultCommentController = &CommentController{}
@@ -29,14 +34,18 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	req := entity.CommentIndex{
 		ObjId: form.ID,
 	}
-	list, total, err := service.DefaultCommentService.FindListAndChild(&req, form.Offset(), form.Limit())
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := service.NewCommentService(ctx)
+	commentLikeService := service.NewCommentLikeService(ctx)
+
+	list, total, err := commentService.FindListAndChild(&req, form.Offset(), form.Limit())
 	if err != nil {
 		return nil, err
 	}
 	//获取点赞记录
 	commentRes := make([]*entity.CommentRes, 0)
 	likeMap := make(map[int64]int, 0)
-	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
+	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)
 	if len(commentLike) > 0 {
 		for _, item := range commentLike {
 			likeMap[item.CommentId] = int(item.Status)
@@ -73,19 +82,24 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, form); err != nil {
 		return nil, err
 	}
+
 	user := apiutil.GetAuthUser(c)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentLikeService := service.NewCommentLikeService(ctx)
+	commentService := service.NewCommentService(ctx)
 
 	data := &entity.CommentIndex{
 		RootCommentId: form.ID,
 	}
-	list, total, err := service.DefaultCommentService.FindSubList(data, form.Offset(), form.Limit())
+
+	list, total, err := commentService.FindSubList(data, form.Offset(), form.Limit())
 	if err != nil {
 		return nil, err
 	}
 	//获取点赞记录
 	commentRes := make([]*entity.CommentRes, 0)
 	likeMap := make(map[int64]int, 0)
-	commentLike := service.DefaultCommentLikeService.GetLikeInfoByUser(user.ID)
+	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)
 	if len(commentLike) > 0 {
 		for _, item := range commentLike {
 			likeMap[item.CommentId] = int(item.Status)
@@ -117,19 +131,72 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
-	user := apiutil.GetAuthUser(c)
-	if user.Auth == 0 {
-		return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage("无权限")
-	}
 	form := CommentCreateForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
 
-	comment, point, err := service.DefaultCommentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
+	user := apiutil.GetAuthUser(c)
+	if user.Auth == 0 {
+		return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage("无权限")
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := service.NewCommentService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	comment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
+
+	//更新积分
+	msg := comment.Message
+	messagerune := []rune(comment.Message)
+	if len(messagerune) > 8 {
+		msg = string(messagerune[0:8])
+	}
+
+	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
+	pointService := service.NewPointService(ctx)
+	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       user.OpenId,
+		Type:         entity.POINT_COMMENT,
+		BizId:        util.UUID(),
+		ChangePoint:  point,
+		AdminId:      0,
+		Note:         "评论" + msg + "..." + "成功",
+		AdditionInfo: strconv.FormatInt(form.ObjId, 10) + "#" + strconv.FormatInt(comment.Id, 10),
+	})
+	if err != nil {
+		point = 0
+	}
+
+	//发送消息
+	msgKey := "reply_topic"
+	turnId := comment.ObjId
+	turnType := 1
+	t := 2
+	if form.Parent != 0 {
+		msgKey = "reply_comment"
+		turnId = comment.Id
+		turnType = 2
+		t = 3
+	}
+
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   user.ID,
+		RecId:    recId,
+		Key:      msgKey,
+		TurnType: turnType,
+		TurnId:   turnId,
+		Type:     t,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("评论站内信发送失败:%s", err.Error())
+	}
+
 	return gin.H{
 		"comment": comment,
 		"point":   point,
@@ -156,7 +223,11 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 			return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
-	err := service.DefaultCommentService.UpdateComment(user.ID, form.CommentId, form.Message)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := service.NewCommentService(ctx)
+
+	err := commentService.UpdateComment(user.ID, form.CommentId, form.Message)
 	if err != nil {
 		return gin.H{}, err
 	}
@@ -169,7 +240,11 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
-	err := service.DefaultCommentService.DelCommentSoft(user.ID, form.ID)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := service.NewCommentService(ctx)
+
+	err := commentService.DelCommentSoft(user.ID, form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +256,11 @@ func (ctr *CommentController) Detail(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, nil
 	}
-	one, err := service.DefaultCommentService.FindOne(form.ID)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := service.NewCommentService(ctx)
+
+	one, err := commentService.FindOne(form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -198,10 +277,28 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	like, point, err := service.DefaultCommentService.Like(user.ID, form.CommentId, user.OpenId)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := service.NewCommentService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	like, comment, point, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
+
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   user.ID,
+		RecId:    comment.MemberId,
+		Key:      "like_comment",
+		TurnType: 2,
+		TurnId:   comment.Id,
+		Type:     1,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+	}
+
 	return gin.H{
 		"status": like.Status,
 		"point":  point,

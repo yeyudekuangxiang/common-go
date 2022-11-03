@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
+	"strings"
 )
 
 var DefaultMessageController = MsgController{}
@@ -91,15 +92,64 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
 
+	types := strings.Split(form.Types, ",")
+
 	messageService := messageSrv.NewWebMessageService(ctx)
-	msgList, total, err := messageService.GetMessage(user.ID, form.Status, form.Limit(), form.Offset())
+	msgList, total, err := messageService.GetMessage(messageSrv.GetWebMessage{
+		UserId: user.ID,
+		Status: form.Status,
+		Types:  types,
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+	})
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
 		"list":     msgList,
 		"total":    total,
-		"page":     form.Limit(),
-		"pageSize": form.Offset(),
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
+}
+
+func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	resp, err := messageService.GetMessageCount(messageSrv.GetWebMessageCount{
+		RecId: user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"total":            resp.Total,
+		"exchangeMsgTotal": resp.ExchangeMsgTotal,
+		"systemMsgTotal":   resp.SystemMsgTotal,
+	}, nil
+}
+
+func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
+	form := api_types.HaveReadWebMessageRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	msgIds := strings.Split(form.MsgIds, ",")
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	err := messageService.SetHaveRead(messageSrv.SetHaveReadMessage{
+		RecId:  user.ID,
+		MsgIds: msgIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

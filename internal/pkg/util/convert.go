@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"log"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -57,4 +58,20 @@ func InterfaceToString(data interface{}) string {
 		key = strconv.FormatFloat(it, 'f', -1, 64)
 	}
 	return key
+}
+
+func Map2SliceE(i interface{}) ([]interface{}, []interface{}, error) {
+	kind := reflect.TypeOf(i).Kind()
+	if kind != reflect.Map {
+		return nil, nil, errors.New("the input is not a map")
+	}
+	m := reflect.ValueOf(i)
+	keys := m.MapKeys()
+	slK, slV := make([]interface{}, 0, len(keys)), make([]interface{}, 0, len(keys))
+	for _, k := range keys {
+		slK = append(slK, k.Interface())
+		v := m.MapIndex(k)
+		slV = append(slV, v.Interface())
+	}
+	return slK, slV, nil
 }

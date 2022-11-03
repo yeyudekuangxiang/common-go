@@ -8,5 +8,11 @@ type MessageGetTemplateIdForm struct {
 
 type WebMessageRequest struct {
 	controller.PageFrom
-	Status int
+	Status int    `json:"status" default:"1" form:"status" binding:"required"`
+	Types  string `json:"types" form:"types"`
+}
+
+// 已读
+type HaveReadWebMessageRequest struct {
+	MsgIds string `json:"msgIds" form:"msgIds"`
 }

@@ -1,9 +1,16 @@
 package admin
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/message"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"strconv"
 	"strings"
@@ -43,8 +50,11 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		cond.TagIds = tagIds
 	}
 
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+
 	//get topic by params
-	list, total, err := service.DefaultTopicAdminService.GetTopicList(cond)
+	list, total, err := adminTopicService.GetTopicList(cond)
 
 	if err != nil {
 		return nil, err
@@ -57,7 +67,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
-	rootCommentCount := service.DefaultTopicAdminService.GetCommentCount(ids)
+	rootCommentCount := adminTopicService.GetCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
@@ -79,7 +89,10 @@ func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	topic, err := service.DefaultTopicAdminService.DetailTopic(form.ID)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+
+	topic, err := adminTopicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -93,9 +106,11 @@ func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	//user
 	//创建帖子
-	err := service.DefaultTopicAdminService.CreateTopic(int64(1451), form.Title, form.Content, form.TagIds, form.Images)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+
+	err := adminTopicService.CreateTopic(int64(1451), form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +124,10 @@ func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//更新帖子
-	err := service.DefaultTopicAdminService.UpdateTopic(form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+
+	err := adminTopicService.UpdateTopic(form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +140,12 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
 	//更新帖子
-	if err := service.DefaultTopicAdminService.DeleteTopic(form.ID, form.Reason); err != nil {
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+
+	if err := adminTopicService.DeleteTopic(form.ID, form.Reason); err != nil {
 		return nil, err
 	}
 	return nil, nil
@@ -135,9 +157,72 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Review(form.ID, form.Status, form.Reason)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+
+	topic, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
 	if err != nil {
 		return nil, err
+	}
+
+	pointService := service.NewPointService(ctx)
+	pointTransService := service.NewPointTransactionService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	user, _ := service.DefaultUserService.GetUserById(topic.UserId)
+
+	by, err := pointTransService.FindBy(repository.FindPointTransactionBy{
+		OpenId:       user.OpenId,
+		Type:         string(entity.POINT_ARTICLE),
+		AdditionInfo: strconv.FormatInt(topic.Id, 10),
+	})
+
+	var point int64
+	if topic.Status == 3 && form.Status == 4 {
+		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+	}
+
+	title := topic.Title
+	if len([]rune(title)) > 8 {
+		title = string([]rune(title)[0:8]) + "..."
+	}
+
+	if form.Status == 3 && by.ID == 0 {
+		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_ARTICLE,
+			BizId:        util.UUID(),
+			ChangePoint:  point,
+			AdminId:      0,
+			Note:         fmt.Sprintf("审核笔记:%s；审核状态:%d", topic.Title, topic.Status),
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
+	}
+
+	//发消息
+	var key string
+	var t int
+	if form.Status == 3 {
+		key = "post_topic"
+		t = 4
+	}
+	if form.Status == 4 {
+		key = "fail_topic"
+		t = 6
+	}
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   0,
+		RecId:    user.ID,
+		Key:      key,
+		TurnId:   topic.Id,
+		TurnType: 1,
+		Type:     t,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
 	}
 	return nil, nil
 }
@@ -148,10 +233,30 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Top(form.ID, form.IsTop)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	topic, err := adminTopicService.Top(form.ID, form.IsTop)
 	if err != nil {
 		return nil, err
 	}
+
+	//发消息
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   0,
+		RecId:    topic.UserId,
+		Key:      "top_topic",
+		TurnType: 1,
+		TurnId:   topic.Id,
+		Type:     5,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【文章置顶】站内信发送失败:%s", err.Error())
+	}
+
 	return nil, nil
 }
 
@@ -161,9 +266,48 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Essence(form.ID, form.IsEssence)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := service.NewTopicAdminService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	topic, err := adminTopicService.Essence(form.ID, form.IsEssence)
 	if err != nil {
 		return nil, err
 	}
+
+	//发放积分
+	if form.IsEssence == 1 {
+		title := topic.Title
+		if len([]rune(title)) > 8 {
+			title = string([]rune(title)[0:8]) + "..."
+		}
+		user, _ := service.DefaultUserService.GetUserById(topic.UserId)
+		pointService := service.NewPointService(context.NewMioContext())
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_RECOMMEND,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
+			AdminId:      0,
+			Note:         "笔记 \"" + title + "...\" 被设为精华",
+			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+		})
+	}
+
+	//发消息
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   0,
+		RecId:    topic.UserId,
+		Key:      "essence_topic",
+		TurnType: 1,
+		TurnId:   topic.Id,
+		Type:     5,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【精华文章】站内信发送失败:%s", err.Error())
+	}
+
 	return nil, nil
 }

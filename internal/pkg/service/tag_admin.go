@@ -2,39 +2,51 @@ package service
 
 import (
 	"github.com/mlogclub/simple"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 )
 
-var DefaultTagAdminService = NewTagAdminService(repository.DefaultTagRepository)
+type (
+	TagAdminService interface {
+		List(cnq *simple.SqlCnd) (list []entity.Tag)
+		GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error)
+		Delete(id int64) error
+		Update(tag repository.UpdateTag) error
+		Detail(id int64) entity.Tag
+		Create(tag repository.CreateTag) error
+	}
 
-func NewTagAdminService(r repository.ITagRepository) TagAdminService {
-	return TagAdminService{
-		r: r,
+	defaultTagAdminService struct {
+		ctx      *mioContext.MioContext
+		tagModel repository.TagModel
+	}
+)
+
+func NewTagAdminService(ctx *mioContext.MioContext) TagAdminService {
+	return defaultTagAdminService{
+		ctx:      ctx,
+		tagModel: repository.NewTagModel(ctx),
 	}
 }
 
-type TagAdminService struct {
-	r repository.ITagRepository
+func (srv defaultTagAdminService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
+	return srv.tagModel.List(cnq)
 }
 
-func (u TagAdminService) List(cnq *simple.SqlCnd) (list []entity.Tag) {
-	return u.r.List(cnq)
-}
-
-func (u TagAdminService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error) {
-	list, total := u.r.GetTagPageList(param)
+func (srv defaultTagAdminService) GetTagPageList(param repository.GetTagPageListBy) ([]entity.Tag, int64, error) {
+	list, total := srv.tagModel.GetTagPageList(param)
 	return list, total, nil
 }
 
-func (u TagAdminService) Delete(id int64) error {
-	if err := u.r.Delete(id); err != nil {
+func (srv defaultTagAdminService) Delete(id int64) error {
+	if err := srv.tagModel.Delete(id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u TagAdminService) Update(tag repository.UpdateTag) error {
+func (srv defaultTagAdminService) Update(tag repository.UpdateTag) error {
 	tagModel := &entity.Tag{Id: tag.ID}
 	if tag.Image != "" {
 		tagModel.Img = tag.Image
@@ -45,24 +57,24 @@ func (u TagAdminService) Update(tag repository.UpdateTag) error {
 	if tag.Description != "" {
 		tagModel.Description = tag.Description
 	}
-	if err := u.r.Update(tagModel); err != nil {
+	if err := srv.tagModel.Update(tagModel); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u TagAdminService) Detail(id int64) entity.Tag {
-	return u.r.GetById(id)
+func (srv defaultTagAdminService) Detail(id int64) entity.Tag {
+	return srv.tagModel.GetById(id)
 }
 
-func (u TagAdminService) Create(tag repository.CreateTag) error {
+func (srv defaultTagAdminService) Create(tag repository.CreateTag) error {
 	tagModel := &entity.Tag{
 		Name:        tag.Name,
 		Description: tag.Description,
 		Img:         tag.Image,
 		//Icon:        "",
 	}
-	if err := u.r.Create(tagModel); err != nil {
+	if err := srv.tagModel.Create(tagModel); err != nil {
 		return err
 	}
 	return nil

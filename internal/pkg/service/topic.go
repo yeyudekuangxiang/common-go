@@ -30,14 +30,16 @@ var DefaultTopicService = NewTopicService(mioContext.NewMioContext())
 
 func NewTopicService(ctx *mioContext.MioContext) TopicService {
 	return TopicService{
-		topicModel:     repository.NewTopicRepository(ctx),
+		topicModel:     repository.NewTopicModel(ctx),
 		topicLikeModel: repository.NewTopicLikeRepository(ctx),
+		tagModel:       repository.NewTagModel(ctx),
 	}
 }
 
 type TopicService struct {
 	topicModel     repository.TopicModel
 	topicLikeModel repository.TopicLikeModel
+	tagModel       repository.TagModel
 	TokenServer    *wxoa.AccessTokenServer
 }
 
@@ -486,15 +488,29 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 //CreateTopic 创建文章
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
 	topicModel := entity.Topic{}
+
+	// 文本内容审核
 	if content != "" {
-		//检查内容
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
 			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发帖"
+			zhuGeAttr["场景"] = "发帖-文本内容审核"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
 			return topicModel, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+	// 图片内容审核
+	if len(images) > 1 {
+		for i, imgUrl := range images {
+			if err := validator.CheckMediaWithOpenId(openid, imgUrl); err != nil {
+				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+				zhuGeAttr := make(map[string]interface{}, 0)
+				zhuGeAttr["场景"] = "发帖-图片内容审核"
+				zhuGeAttr["失败原因"] = err.Error()
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
+				return topicModel, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+			}
 		}
 	}
 
@@ -522,7 +538,8 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 				Id: tagId,
 			})
 		}
-		tag := DefaultTagService.r.GetById(tagIds[0])
+
+		tag := srv.tagModel.GetById(tagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
@@ -555,6 +572,20 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 			return entity.Topic{}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
+
+	if len(images) > 1 {
+		for i, imgUrl := range images {
+			if err := validator.CheckMediaWithOpenId(openid, imgUrl); err != nil {
+				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+				zhuGeAttr := make(map[string]interface{}, 0)
+				zhuGeAttr["场景"] = "发帖-图片内容审核"
+				zhuGeAttr["失败原因"] = err.Error()
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
+				return topicModel, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+			}
+		}
+	}
+
 	//处理images
 	imageStr := strings.Join(images, ",")
 
@@ -576,7 +607,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 				Id: tagId,
 			})
 		}
-		tag := DefaultTagService.r.GetById(tagIds[0])
+		tag := srv.tagModel.GetById(tagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {

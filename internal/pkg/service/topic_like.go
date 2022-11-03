@@ -15,7 +15,7 @@ import (
 func NewTopicLikeService(ctx *context.MioContext) TopicLikeService {
 	return TopicLikeService{
 		topicLikeModel: repository.NewTopicLikeRepository(ctx),
-		topicModel:     repository.NewTopicRepository(ctx),
+		topicModel:     repository.NewTopicModel(ctx),
 	}
 }
 
@@ -24,10 +24,10 @@ type TopicLikeService struct {
 	topicModel     repository.TopicModel
 }
 
-func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (*entity.TopicLike, int64, error) {
+func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (entity.TopicLike, entity.Topic, int64, error) {
 	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
-		return nil, 0, errno.ErrCommon.WithMessage("帖子不存在")
+		return entity.TopicLike{}, entity.Topic{}, 0, errno.ErrCommon.WithMessage("帖子不存在")
 	}
 	title := topic.Title
 	if len([]rune(title)) > 8 {
@@ -50,9 +50,9 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		isFirst = false
 	}
 	if like.Status == 1 {
-		_ = srv.topicModel.AddTopicLikeCount(int64(topicId), 1)
+		_ = srv.topicModel.AddTopicLikeCount(topicId, 1)
 	} else {
-		_ = srv.topicModel.AddTopicLikeCount(int64(topicId), -1)
+		_ = srv.topicModel.AddTopicLikeCount(topicId, -1)
 	}
 	var point int64
 	if like.Status == 1 && isFirst == true {
@@ -70,7 +70,12 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
 		}
 	}
-	return &like, point, srv.topicLikeModel.Save(&like)
+	err := srv.topicLikeModel.Save(&like)
+	if err != nil {
+		return entity.TopicLike{}, entity.Topic{}, 0, err
+	}
+
+	return like, topic, point, nil
 }
 
 func (srv TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {

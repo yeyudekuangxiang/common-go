@@ -71,7 +71,7 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := form.Sign
 	delete(params, "sign")
-	
+
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
 	if err != nil {
@@ -207,7 +207,7 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 		//绑定回调
 		if form.PlatformKey == "jinhuaxing" {
 			bindParams := make(map[string]interface{}, 0)
-			bindParams["mobile"] = sceneUser.Phone
+			bindParams["mobile"] = userInfo.PhoneNumber
 			bindParams["status"] = "1"
 			err := jhx.NewJhxService(context.NewMioContext()).BindSuccess(bindParams)
 			if err != nil {

@@ -20,6 +20,7 @@ import (
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
@@ -556,7 +557,12 @@ func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, 
 	return u.r.GetUserListBy(by), nil
 }
 func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
+	//图片审核
 	user := u.r.GetUserById(param.UserId)
+	err := validator.CheckMediaWithOpenId(user.OpenId, param.Avatar)
+	if err != nil {
+		return errno.ErrCommon.WithMessage(err.Error())
+	}
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}

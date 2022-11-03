@@ -1,7 +1,6 @@
 package open
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/config"
@@ -58,7 +57,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	//绑定回调
 	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
 		params := make(map[string]interface{}, 0)
-		params["mobile"] = sceneUser.Phone
+		params["mobile"] = user.PhoneNumber
 		params["status"] = "1"
 		jhxSvr := jhx.NewJhxService(context.NewMioContext())
 		err = jhxSvr.BindSuccess(params)
@@ -364,7 +363,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	var halfPoint int64
 
 	timeStr := time.Now().Format("2006-01-02")
-	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
+	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + userInfo.PhoneNumber
 
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
 	incPoint := one.Point
@@ -444,7 +443,7 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 	if form.Content != "" {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-			app.Logger.Error(fmt.Errorf("文本校验 error:%s", err.Error()))
+			app.Logger.Errorf("文本校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "文本校验"
 			zhuGeAttr["失败原因"] = err.Error()
@@ -464,7 +463,7 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 	if form.MediaUrl != "" {
 		err := validator.CheckMediaWithOpenId(user.OpenId, form.MediaUrl)
 		if err != nil {
-			app.Logger.Error(fmt.Errorf("图片校验 error:%s", err.Error()))
+			app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "图片校验"
 			zhuGeAttr["失败原因"] = err.Error()

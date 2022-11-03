@@ -4,57 +4,60 @@ import (
 	"github.com/mlogclub/simple"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultTagRepository ITagRepository = NewTagRepository(app.DB)
+type (
+	TagModel interface {
+		List(cnd *simple.SqlCnd) (list []entity.Tag)
+		GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64)
+		GetById(id int64) entity.Tag
+		Delete(id int64) error
+		Update(tag *entity.Tag) error
+		Create(tag *entity.Tag) error
+	}
 
-type ITagRepository interface {
-	List(cnd *simple.SqlCnd) (list []entity.Tag)
-	GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64)
-	GetById(id int64) entity.Tag
-	Delete(id int64) error
-	Update(tag *entity.Tag) error
-	Create(tag *entity.Tag) error
+	defaultTagModel struct {
+		ctx *context.MioContext
+	}
+)
+
+func NewTagModel(ctx *context.MioContext) TagModel {
+	return defaultTagModel{
+		ctx: ctx,
+	}
 }
 
-func NewTagRepository(db *gorm.DB) TagRepository {
-	return TagRepository{DB: db}
+func (m defaultTagModel) Delete(id int64) error {
+	return m.ctx.DB.Delete(&entity.Tag{}, id).Error
 }
 
-type TagRepository struct {
-	DB *gorm.DB
+func (m defaultTagModel) Update(tag *entity.Tag) error {
+	return m.ctx.DB.Updates(tag).Error
 }
 
-func (u TagRepository) Delete(id int64) error {
-	return u.DB.Delete(&entity.Tag{}, id).Error
+func (m defaultTagModel) Create(tag *entity.Tag) error {
+	return m.ctx.DB.Save(tag).Error
 }
 
-func (u TagRepository) Update(tag *entity.Tag) error {
-	return u.DB.Updates(tag).Error
-}
-
-func (u TagRepository) Create(tag *entity.Tag) error {
-	return u.DB.Save(tag).Error
-}
-
-func (u TagRepository) GetById(id int64) entity.Tag {
+func (m defaultTagModel) GetById(id int64) entity.Tag {
 	tag := entity.Tag{}
-	err := app.DB.Model(entity.Tag{}).Where("id = ?", id).First(&tag).Error
+	err := m.ctx.DB.Model(entity.Tag{}).Where("id = ?", id).First(&tag).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
 	return tag
 }
 
-func (u TagRepository) List(cnd *simple.SqlCnd) (list []entity.Tag) {
+func (m defaultTagModel) List(cnd *simple.SqlCnd) (list []entity.Tag) {
 	cnd.Find(app.DB, &list)
 	return
 }
 
-func (u TagRepository) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64) {
+func (m defaultTagModel) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64) {
 	list = make([]entity.Tag, 0)
-	db := app.DB.Model(entity.Tag{})
+	db := m.ctx.DB.Model(entity.Tag{})
 	if by.ID != 0 {
 		db.Where("id = ?", by.ID)
 	}
