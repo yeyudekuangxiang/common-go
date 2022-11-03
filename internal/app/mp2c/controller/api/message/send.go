@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
+	"strings"
 )
 
 var DefaultMessageController = MsgController{}
@@ -91,12 +92,13 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
 
+	types := strings.Split(form.Types, ",")
+
 	messageService := messageSrv.NewWebMessageService(ctx)
 	msgList, total, err := messageService.GetMessage(messageSrv.GetWebMessage{
 		UserId: user.ID,
 		Status: form.Status,
-		Type:   form.Type,
-		Types:  form.Types,
+		Types:  types,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})
@@ -136,14 +138,15 @@ func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	msgIds := strings.Split(form.MsgIds, ",")
+
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
 
 	messageService := messageSrv.NewWebMessageService(ctx)
 	err := messageService.SetHaveRead(messageSrv.SetHaveReadMessage{
-		MsgId:  form.MsgId,
 		RecId:  user.ID,
-		MsgIds: form.MsgIds,
+		MsgIds: msgIds,
 	})
 	if err != nil {
 		return nil, err

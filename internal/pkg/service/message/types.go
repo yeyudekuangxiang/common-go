@@ -16,18 +16,17 @@ type SendWebMessage struct {
 }
 
 type SetHaveReadMessage struct {
-	MsgId  int64   `json:"msgId" form:"msgId"`
-	MsgIds []int64 `json:"msgIds" form:"msgIds"`
-	RecId  int64   `json:"recId" form:"recId"`
+	MsgIds []string `json:"msgIds" form:"msgIds"`
+	RecId  int64    `json:"recId" form:"recId"`
 }
 
 type GetWebMessage struct {
-	UserId int64 `json:"userId"`
-	Status int   `json:"status"`
-	Type   int   `json:"type"`
-	Types  []int `json:"types"`
-	Limit  int   `json:"limit"`
-	Offset int   `json:"offset"`
+	UserId int64    `json:"userId"`
+	Status int      `json:"status"`
+	Type   int      `json:"type"`
+	Types  []string `json:"types"`
+	Limit  int      `json:"limit"`
+	Offset int      `json:"offset"`
 }
 
 type GetWebMessageResp struct {

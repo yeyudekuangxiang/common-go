@@ -41,7 +41,6 @@ type (
 
 func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
 	err := d.messageCustomer.HaveReadMessage(repository.SetHaveReadMessageParams{
-		MsgId:  params.MsgId,
 		MsgIds: params.MsgIds,
 		RecId:  params.RecId,
 	})
@@ -68,7 +67,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 	exchangeMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
-		Types:  []int{1, 2, 3},
+		Types:  []string{"1", "2", "3"},
 	})
 
 	if err != nil {
@@ -80,7 +79,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 	systemMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
-		Types:  []int{4, 5, 6, 7},
+		Types:  []string{"4", "5", "6", "7", "8", "9", "10", "11", "12"},
 	})
 	if err != nil {
 		return res, errno.ErrCommon
@@ -95,7 +94,6 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
 		RecId:  params.UserId,
 		Status: params.Status,
-		Type:   params.Type,
 		Types:  params.Types,
 		Limit:  params.Limit,
 		Offset: params.Offset,

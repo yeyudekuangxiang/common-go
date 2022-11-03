@@ -8,13 +8,11 @@ type MessageGetTemplateIdForm struct {
 
 type WebMessageRequest struct {
 	controller.PageFrom
-	Status int   `json:"status" default:"1" form:"status" binding:"required"`
-	Type   int   `json:"type" form:"type"`
-	Types  []int `json:"types" form:"types"`
+	Status int    `json:"status" default:"1" form:"status" binding:"required"`
+	Types  string `json:"types" form:"types"`
 }
 
 // 已读
 type HaveReadWebMessageRequest struct {
-	MsgId  int64   `json:"msgId" form:"msgId"`
-	MsgIds []int64 `json:"msgIds" form:"msgIds"`
+	MsgIds string `json:"msgIds" form:"msgIds"`
 }

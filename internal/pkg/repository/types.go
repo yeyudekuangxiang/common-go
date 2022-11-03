@@ -376,7 +376,7 @@ type FindMessageParams struct {
 	SendId     int64     `json:"sendId"`
 	RecId      int64     `json:"recId"`
 	Type       int       `json:"type"` // 1互动消息 2酷喵圈社区 3二手交易
-	Types      []int     `json:"types"`
+	Types      []string  `json:"types"`
 	Status     int       `json:"status" default:"1"` // 1未读 2已读
 	StartTime  time.Time `json:"startTime"`
 	EndTime    time.Time `json:"endTime"`
@@ -385,7 +385,6 @@ type FindMessageParams struct {
 }
 
 type SetHaveReadMessageParams struct {
-	MsgId  int64   `json:"msgId"`
-	MsgIds []int64 `json:"msgIds"`
-	RecId  int64   `json:"recId"`
+	MsgIds []string `json:"msgIds"`
+	RecId  int64    `json:"recId"`
 }
