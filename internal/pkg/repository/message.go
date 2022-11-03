@@ -58,7 +58,7 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.Use
 		query = query.Limit(params.Limit).Offset(params.Offset)
 	}
 
-	err := query.Count(&total).Order("mcustomer.id asc").Find(&resp).Error
+	err := query.Count(&total).Order("mcustomer.id desc").Find(&resp).Error
 
 	if err == nil {
 		return resp, total, nil
