@@ -92,7 +92,7 @@ func (srv Service) SendCoupon(typeId int64, user entity.User) (string, error) {
 func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) {
 	commonParams := srv.getCommonParams()
 	rand.Seed(time.Now().UnixNano())
-	tradeNo := "ytx" + strconv.FormatInt(time.Now().UnixMilli(), 10) + strconv.FormatInt(rand.Int63(), 10)
+	tradeNo := "jhx" + strconv.FormatInt(time.Now().UnixMilli(), 10) + strconv.FormatInt(rand.Int63(), 10)
 	commonParams["tradeno"] = tradeNo
 	commonParams["mobile"] = user.PhoneNumber
 
@@ -147,7 +147,7 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 
 //消费通知
 func (srv Service) TicketNotify(sign string, params map[string]interface{}) error {
-	if err := platformUtil.CheckSign(sign, params, "scene.Key", "&"); err != nil {
+	if err := platformUtil.CheckSign(sign, params, "d7b47f379109", "&"); err != nil {
 		return err
 	}
 
@@ -166,19 +166,25 @@ func (srv Service) TicketNotify(sign string, params map[string]interface{}) erro
 	//如果 status 相等 不处理 返回 nil
 	j, _ := strconv.ParseInt(ticketNotify.Status, 10, 32)
 	status := int32(j)
+	var usedStatus int32
+	if status == 1 {
+		usedStatus = 2
+	} else if status == 2 {
+		usedStatus = 1
+	}
 
 	if !coupon.Exist {
 		return errno.ErrCommon.WithMessage("券码不存在")
 	}
 
-	if coupon.CouponInfo.UsedStatus == status {
+	if coupon.CouponInfo.UsedStatus == usedStatus {
 		return errno.ErrCommon.WithMessage("该券码已失效")
 	}
 
 	//如果 status 不等 根据 tradeno 更新status,used_time 返回nil
 	_, err = app.RpcService.CouponRpcSrv.UpdateCouponUsedStatus(srv.ctx, &couponclient.UpdateCouponUsedStatusReq{
 		CouponCardId: coupon.CouponInfo.CouponCardId,
-		UsedStatus:   status,
+		UsedStatus:   usedStatus,
 		UsedTime:     time.Now().UnixMilli(),
 	})
 	if err != nil {
