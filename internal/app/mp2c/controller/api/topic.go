@@ -116,7 +116,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	topicLikeService := service.NewTopicLikeService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	like, point, recId, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
+	like, topic, point, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
@@ -124,9 +124,10 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	//发送消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   user.ID,
-		RecId:    recId,
+		RecId:    topic.UserId,
 		Key:      "like_topic",
-		RecObjId: like.TopicId,
+		TurnType: 1,
+		TurnId:   topic.Id,
 		Type:     1,
 	})
 	if err != nil {

@@ -30,7 +30,7 @@ type (
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
-		Like(userId, commentId int64, openId string) (*entity.CommentLike, int64, int64, error)
+		Like(userId, commentId int64, openId string) (*entity.CommentLike, *entity.CommentIndex, int64, error)
 		AddTopicLikeCount(commentId int64, num int) error
 	}
 )
@@ -281,10 +281,10 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	return comment, recId, nil
 }
 
-func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, int64, int64, error) {
+func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, *entity.CommentIndex, int64, error) {
 	comment, err := srv.commentModel.FindOne(commentId)
 	if err != nil {
-		return &entity.CommentLike{}, 0, 0, err
+		return &entity.CommentLike{}, &entity.CommentIndex{}, 0, err
 	}
 
 	like := srv.commentLikeModel.FindBy(repository.FindCommentLikeBy{
@@ -336,10 +336,10 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	}
 
 	if err = srv.commentLikeModel.Save(&like); err != nil {
-		return nil, 0, 0, err
+		return &entity.CommentLike{}, &entity.CommentIndex{}, 0, err
 	}
 
-	return &like, point, comment.MemberId, nil
+	return &like, comment, point, nil
 }
 
 func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {

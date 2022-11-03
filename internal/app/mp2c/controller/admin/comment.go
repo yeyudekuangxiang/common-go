@@ -56,9 +56,10 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   0,
 		RecId:    comment.MemberId,
+		Type:     6,
 		Key:      "fail_comment",
-		RecObjId: comment.Id,
-		Type:     1,
+		TurnId:   comment.Id,
+		TurnType: 2,
 	})
 
 	if err != nil {

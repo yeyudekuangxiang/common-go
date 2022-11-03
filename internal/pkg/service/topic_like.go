@@ -24,10 +24,10 @@ type TopicLikeService struct {
 	topicModel     repository.TopicModel
 }
 
-func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (*entity.TopicLike, int64, int64, error) {
+func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (entity.TopicLike, entity.Topic, int64, error) {
 	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
-		return nil, 0, 0, errno.ErrCommon.WithMessage("帖子不存在")
+		return entity.TopicLike{}, entity.Topic{}, 0, errno.ErrCommon.WithMessage("帖子不存在")
 	}
 	title := topic.Title
 	if len([]rune(title)) > 8 {
@@ -72,10 +72,10 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 	}
 	err := srv.topicLikeModel.Save(&like)
 	if err != nil {
-		return nil, 0, 0, err
+		return entity.TopicLike{}, entity.Topic{}, 0, err
 	}
 
-	return &like, point, topic.UserId, nil
+	return like, topic, point, nil
 }
 
 func (srv TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {

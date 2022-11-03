@@ -176,51 +176,29 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 }
 
 func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
-	sendUser, b, err := d.user.GetUserByID(param.SendId)
-	if err != nil {
-		return err
-	}
-
-	if !b {
-		return errno.ErrUserNotFound.WithMessage("发送消息用户不存在")
-	}
-
-	_, b, err = d.user.GetUserByID(param.RecId)
-	if err != nil {
-		return err
-	}
-
-	if !b {
-		return errno.ErrUserNotFound.WithMessage("发送消息用户不存在")
-	}
-
 	content := d.getTemplate(param.Key)
 
 	if content == "" {
 		return errors.New("模板不存在")
 	}
 
-	content = strings.ReplaceAll(content, "userName", sendUser.Nickname)
-	keys := strings.Split(param.Key, "_")
-	if len(keys) >= 2 {
-		if keys[1] == "topic" {
-			content = d.replaceTempForTopic(content, param.RecObjId)
-		}
-
-		if keys[1] == "comment" {
-			content = d.replaceTempForComment(content, param.RecObjId)
-		}
-
-	} else {
-		content = strings.ReplaceAll(content, param.Key, d.options.Val)
+	if param.TurnType == 1 {
+		obj := d.topic.FindById(param.TurnId)
+		content = strings.ReplaceAll(content, "{0}", obj.Title)
+	}
+	if param.TurnType == 2 {
+		obj, _ := d.comment.FindOne(param.TurnId)
+		content = strings.ReplaceAll(content, "{0}", obj.Message)
 	}
 
 	//入库
-	err = d.message.SendMessage(repository.SendMessage{
-		SendId:  param.SendId,
-		RecId:   param.RecId,
-		Type:    param.Type,
-		Message: content,
+	err := d.message.SendMessage(repository.SendMessage{
+		SendId:   param.SendId,
+		RecId:    param.RecId,
+		Type:     param.Type,
+		TurnType: param.TurnType,
+		TurnId:   param.TurnId,
+		Message:  content,
 	})
 	if err != nil {
 		return err
@@ -229,31 +207,10 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	return nil
 }
 
-func (d defaultWebMessage) replaceTempForTopic(content string, recObjID int64) string {
-	var topic entity.Topic
-	var title string
-	if d.options.SendObjID != 0 {
-		topic = d.topic.FindById(d.options.SendObjID)
-		title = topic.Title
-		topicRune := []rune(topic.Title)
-		if len(topicRune) > 5 {
-			title = string(topicRune[0:7]) + "..."
-		}
-		return strings.ReplaceAll(content, "reTopicTitle", title)
-	}
-
-	topic = d.topic.FindById(recObjID)
-	title = topic.Title
-	topicRune := []rune(topic.Title)
-	if len(topicRune) > 5 {
-		title = string(topicRune[0:7]) + "..."
-	}
-	return strings.ReplaceAll(content, "topicTitle", title)
-}
-
 func (d defaultWebMessage) replaceTempForComment(content string, recObjID int64) string {
 	var comment, recComment *entity.CommentIndex
 	var message, recMessage string
+
 	if d.options.SendObjID != 0 {
 		comment, _ = d.comment.FindOne(d.options.SendObjID)
 		message = comment.Message

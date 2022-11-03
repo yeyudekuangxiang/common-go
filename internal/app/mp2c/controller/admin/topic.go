@@ -203,18 +203,22 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 	//发消息
 	var key string
+	var t int
 	if form.Status == 3 {
 		key = "post_topic"
+		t = 4
 	}
 	if form.Status == 4 {
 		key = "fail_topic"
+		t = 6
 	}
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   0,
 		RecId:    user.ID,
 		Key:      key,
-		RecObjId: topic.Id,
-		Type:     1,
+		TurnId:   topic.Id,
+		TurnType: 1,
+		Type:     t,
 	})
 
 	if err != nil {
@@ -244,8 +248,9 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 		SendId:   0,
 		RecId:    topic.UserId,
 		Key:      "top_topic",
-		RecObjId: topic.Id,
-		Type:     1,
+		TurnType: 1,
+		TurnId:   topic.Id,
+		Type:     5,
 	})
 
 	if err != nil {
@@ -296,8 +301,9 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 		SendId:   0,
 		RecId:    topic.UserId,
 		Key:      "essence_topic",
-		RecObjId: topic.Id,
-		Type:     1,
+		TurnType: 1,
+		TurnId:   topic.Id,
+		Type:     5,
 	})
 
 	if err != nil {

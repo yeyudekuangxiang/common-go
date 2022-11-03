@@ -174,18 +174,23 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	//发送消息
 	msgKey := "reply_topic"
-	recObjId := form.ObjId
+	turnId := comment.ObjId
+	turnType := 1
+	t := 2
 	if form.Parent != 0 {
 		msgKey = "reply_comment"
-		recObjId = form.Parent
+		turnId = comment.Id
+		turnType = 2
+		t = 3
 	}
 
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   user.ID,
 		RecId:    recId,
 		Key:      msgKey,
-		RecObjId: recObjId,
-		Type:     1,
+		TurnType: turnType,
+		TurnId:   turnId,
+		Type:     t,
 	})
 
 	if err != nil {
@@ -276,16 +281,17 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	commentService := service.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	like, point, recId, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
+	like, comment, point, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
 
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   user.ID,
-		RecId:    recId,
+		RecId:    comment.MemberId,
 		Key:      "like_comment",
-		RecObjId: form.CommentId,
+		TurnType: 2,
+		TurnId:   comment.Id,
 		Type:     1,
 	})
 

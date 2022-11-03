@@ -145,6 +145,8 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 			SendId:    params.SendId,
 			RecId:     params.RecId,
 			Type:      params.Type,
+			TurnType:  params.TurnType,
+			TurnId:    params.TurnId,
 			CreatedAt: time.Now(),
 		}
 		if err := d.ctx.DB.Model(&entity.Message{}).Create(&message).Error; err != nil {
