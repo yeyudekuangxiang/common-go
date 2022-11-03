@@ -16,6 +16,5 @@ type WebMessageRequest struct {
 // 已读
 type HaveReadWebMessageRequest struct {
 	MsgId  int64   `json:"msgId" form:"msgId"`
-	RecId  int64   `json:"recId" form:"recId" binding:"required"`
 	MsgIds []int64 `json:"msgIds" form:"msgIds"`
 }
