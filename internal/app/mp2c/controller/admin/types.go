@@ -116,7 +116,7 @@ type ChangeTopicStatus struct {
 	ID        int64  `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
 	IsTop     int    `json:"isTop" form:"isTop" alias:"isTop" binding:"oneof=0 1"`
 	IsEssence int    `json:"isEssence" form:"isEssence" alias:"isEssence" binding:"oneof=0 1"`
-	Status    int    `json:"status" form:"status" alias:"审核状态" binding:"min=1,max=4"`
+	Status    int    `json:"status" form:"status" alias:"审核状态" binding:"min=0,max=4"`
 	Reason    string `json:"reason" form:"reason" alias:"审核未通过理由"`
 }
 

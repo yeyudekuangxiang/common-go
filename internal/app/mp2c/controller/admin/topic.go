@@ -277,7 +277,6 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	}
 
 	//发放积分
-	//发放积分
 	if form.IsEssence == 1 {
 		title := topic.Title
 		if len([]rune(title)) > 8 {

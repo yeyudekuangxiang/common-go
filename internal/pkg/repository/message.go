@@ -163,9 +163,10 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 		messageCustomer := entity.MessageCustomer{
 			RecId:     params.RecId,
 			MessageId: message.Id,
+			Status:    1,
 			CreatedAt: time.Now(),
 		}
-		if err := d.ctx.DB.Model(&entity.MessageContent{}).Create(&messageCustomer).Error; err != nil {
+		if err := d.ctx.DB.Model(&entity.MessageCustomer{}).Create(&messageCustomer).Error; err != nil {
 			return err
 		}
 		return nil
