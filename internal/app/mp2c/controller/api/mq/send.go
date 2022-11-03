@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/message"
+	"mio/pkg/errno"
 )
 
 var DefaultMqController = SmsSendController{}
@@ -19,6 +20,9 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	form := api_types.GetSendSmsForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
+	}
+	if form.Phone == "" || form.Msg == "" {
+		return nil, errno.ErrCommon.WithMessage("手机号或者msg为空")
 	}
 	err := message.SendSms(form.Phone, form.Msg)
 	if err != nil {
