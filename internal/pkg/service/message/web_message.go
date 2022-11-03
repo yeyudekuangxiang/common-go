@@ -184,6 +184,7 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 		obj := d.topic.FindById(param.TurnId)
 		content = strings.ReplaceAll(content, "{0}", obj.Title)
 	}
+
 	if param.TurnType == 2 {
 		obj, _ := d.comment.FindOne(param.TurnId)
 		content = strings.ReplaceAll(content, "{0}", obj.Message)
