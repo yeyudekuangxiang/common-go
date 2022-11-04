@@ -17,6 +17,15 @@ import (
 	"os"
 )
 
+func InitLog() {
+	if config.Config.AliLog.AccessKey != "" && config.Config.AliLog.AccessSecret != "" {
+		log.Println("发现阿里云日志配置,自动初始化阿里云日志")
+		InitAliyunLog()
+	} else {
+		log.Println("未发现阿里云日志配置,自动初始化控制台日志")
+		InitConsoleLog()
+	}
+}
 func InitConsoleLog() {
 	log.Println("初始化控制台日志组件...")
 	logger := mzap.NewConsoleLogger(config.Config.Log.Level, zap.AddCaller(), wxRobotHook).With(mzap.LogOperation)
