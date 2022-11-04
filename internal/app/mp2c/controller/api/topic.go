@@ -273,26 +273,40 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
 	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	topicService := service.NewTopicService(ctx)
+	topicLikeService := service.NewTopicLikeService(ctx)
+	collectService := service.NewCollectionService(ctx)
+
 	//获取帖子
-	topic, err := service.DefaultTopicService.DetailTopic(form.ID)
+	topic, err := topicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
 	}
 	topicRes := topic.TopicItemRes()
 	//获取评论数量
 
-	CommentCount := service.DefaultTopicService.GetCommentCount([]int64{topicRes.Id})
-	//组装数据---帖子的顶级评论数量
+	CommentCount := topicService.GetCommentCount([]int64{topicRes.Id})
+	// 组装数据
+	// 评论
 	if len(CommentCount) > 0 {
 		topicRes.CommentCount = CommentCount[0].Total
 	}
-	//获取点赞数据
-	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
+
+	// 点赞
 	like, err := topicLikeService.GetOneByTopic(topic.Id, user.ID)
 	if err == nil {
 		topicRes.IsLike = int(like.Status)
 	}
+	// 收藏
+	collection, err := collectService.FindOneByTopic(topic.Id, user.OpenId)
+	if err == nil {
+		topicRes.IsCollection = int(collection.Status)
+	}
+
 	return gin.H{
 		"topic": topicRes,
 	}, nil

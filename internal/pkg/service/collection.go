@@ -18,6 +18,7 @@ type (
 		CancelCollection(objId int64, objType int, openId string) error                    //取消收藏
 		Collections(openId string, objType, limit, offset int) []int64                     //收藏数据
 		CollectionV2(objId int64, objType int, openId string) error                        //收藏
+		FindOneByTopic(topicId int64, openId string) (*entity.Collection, error)
 	}
 
 	defaultCollectionService struct {
@@ -26,6 +27,14 @@ type (
 		topicModel      repository.TopicModel
 	}
 )
+
+func (d defaultCollectionService) FindOneByTopic(topicId int64, openId string) (*entity.Collection, error) {
+	ojb, err := d.collectionModel.FindOneByObj(topicId, 0, openId)
+	if err != nil {
+		return nil, err
+	}
+	return ojb, nil
+}
 
 func (d defaultCollectionService) Collections(openId string, objType, limit, offset int) []int64 {
 	return d.getCollections(objType, openId, limit, offset)
@@ -54,7 +63,7 @@ func (d defaultCollectionService) TopicCollections(openId string, limit, offset 
 }
 
 func (d defaultCollectionService) Collection(objId int64, objType int, openId string) error {
-	result, err := d.collectionModel.FindOneByOjb(objId, objType, openId)
+	result, err := d.collectionModel.FindOneByObj(objId, objType, openId)
 	if err != nil {
 		if err == entity.ErrNotFount {
 			//insert
@@ -97,7 +106,7 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
 		collectionModel := repository.NewCollectionRepository(ctx)
 		topicModel := repository.NewTopicModel(ctx)
-		result, err := collectionModel.FindOneByOjb(objId, objType, openId)
+		result, err := collectionModel.FindOneByObj(objId, objType, openId)
 		if err != nil {
 			if err == entity.ErrNotFount {
 				//insert
@@ -147,7 +156,7 @@ func (d defaultCollectionService) CancelCollection(objId int64, objType int, ope
 		collectionModel := repository.NewCollectionRepository(ctx)
 		topicModel := repository.NewTopicModel(ctx)
 
-		result, err := collectionModel.FindOneByOjb(objId, objType, openId)
+		result, err := collectionModel.FindOneByObj(objId, objType, openId)
 		if err != nil {
 			return err
 		}

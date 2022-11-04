@@ -16,7 +16,7 @@ type (
 		Update(data *entity.Collection) error
 		FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error)
 		FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error)
-		FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error)
+		FindOneByObj(objId int64, objType int, openId string) (*entity.Collection, error)
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 	}
 
@@ -29,7 +29,7 @@ func (d defaultCollectionModel) Trans(fc func(tx *gorm.DB) error, opts ...*sql.T
 	return d.ctx.DB.Transaction(fc, opts...)
 }
 
-func (d defaultCollectionModel) FindOneByOjb(objId int64, objType int, openId string) (*entity.Collection, error) {
+func (d defaultCollectionModel) FindOneByObj(objId int64, objType int, openId string) (*entity.Collection, error) {
 	var resp entity.Collection
 	err := d.ctx.DB.Model(&entity.Collection{}).
 		Where("obj_id = ?", objId).
