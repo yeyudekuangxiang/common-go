@@ -62,6 +62,17 @@ Level=info
 #单位:兆
 MaxSize=100
 
+[aliLog]
+Endpoint=cn-shanghai.log.aliyuncs.com
+AccessKey=
+AccessSecret=
+ProjectName=lvmiao
+LogStore=mp2c-go-dev
+Level=info
+Topic=
+Source=
+
+
 [weapp]
 AppId=
 Secret=

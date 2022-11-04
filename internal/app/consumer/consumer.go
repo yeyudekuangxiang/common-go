@@ -5,7 +5,7 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/pkg/zap"
+	"mio/pkg/logger/zap"
 	"os"
 )
 

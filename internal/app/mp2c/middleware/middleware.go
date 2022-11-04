@@ -18,10 +18,14 @@ import (
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/wxworkpdr"
+	"mio/internal/pkg/queue/types/wxworkqueue"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
+	mzap "mio/pkg/logger/zap"
 	"mio/pkg/wxwork"
 	"os"
 	"runtime"
@@ -79,7 +83,7 @@ func callers() string {
 }
 
 func access() gin.HandlerFunc {
-	return Access(mzap.DefaultLogger().WithOptions(zap.Fields(zap.String("scene", "access"))), time.RFC3339, false)
+	return Access(app.OriginLogger.With(mzap.LogAccess), time.RFC3339, false)
 }
 func auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {

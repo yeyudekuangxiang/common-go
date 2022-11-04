@@ -1,13 +1,12 @@
 package initialize
 
 import (
-	"go.uber.org/zap"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util"
 	"mio/pkg/db"
-	mzap "mio/pkg/zap"
+	mzap "mio/pkg/logger/zap"
 )
 
 func InitDB() {
@@ -17,7 +16,9 @@ func InitDB() {
 	if err != nil {
 		log.Panic(err)
 	}
-	conf.Logger = mzap.NewGormLogger(mzap.DefaultLogger(config.Config.Log.Level).WithOptions(zap.Fields(zap.String("scene", "database"))).Sugar())
+
+	logger := app.OriginLogger.With(mzap.LogDatabase)
+	conf.Logger = mzap.NewGormLogger(logger.Sugar())
 	gormDb, err := db.NewDB(conf)
 	if err != nil {
 		log.Panic(err)
@@ -33,7 +34,8 @@ func InitBusinessDB() {
 	if err != nil {
 		log.Panic(err)
 	}
-	conf.Logger = mzap.NewGormLogger(mzap.DefaultLogger(config.Config.Log.Level).WithOptions(zap.Fields(zap.String("scene", "database"))).Sugar())
+	logger := app.OriginLogger.With(mzap.LogDatabase)
+	conf.Logger = mzap.NewGormLogger(logger.Sugar())
 	gormDb, err := db.NewDB(conf)
 	if err != nil {
 		log.Panic(err)

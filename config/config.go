@@ -9,6 +9,7 @@ var Config = app{
 	Http:             httpSetting{},
 	Database:         databaseSetting{},
 	Log:              logSetting{},
+	AliLog:           aliLogSetting{},
 	Weapp:            wxSetting{},
 	MioSubOA:         wxSetting{},
 	MioSrvOA:         wxSetting{},
@@ -33,6 +34,7 @@ type app struct {
 	Database         databaseSetting         `ini:"database"`
 	DatabaseBusiness databaseSetting         `ini:"databaseBusiness"`
 	Log              logSetting              `ini:"log"`
+	AliLog           aliLogSetting           `ini:"aliLog"`
 	Weapp            wxSetting               `ini:"weapp"`
 	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
 	MioSrvOA         wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
@@ -78,6 +80,16 @@ type databaseSetting struct {
 type logSetting struct {
 	Level   string
 	MaxSize int
+}
+type aliLogSetting struct {
+	Endpoint     string
+	AccessKey    string
+	AccessSecret string
+	ProjectName  string
+	LogStore     string
+	Topic        string
+	Source       string
+	Level        string
 }
 type wxSetting struct {
 	AppId  string
