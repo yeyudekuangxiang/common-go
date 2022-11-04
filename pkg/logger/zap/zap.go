@@ -20,7 +20,7 @@ var LogOperation = zap.String("scene", "operation_log")
 var LogAccess = zap.String("scene", "access_log")
 
 // LogDatabase 数据库日志
-var LogDatabase = zap.String("scene", "access_log")
+var LogDatabase = zap.String("scene", "database")
 
 var LevelMap = map[string]zapcore.Level{
 	"debug": zapcore.DebugLevel,

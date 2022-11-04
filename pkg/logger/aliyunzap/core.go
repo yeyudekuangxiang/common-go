@@ -1,7 +1,6 @@
 package aliyunzap
 
 import (
-	"fmt"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"github.com/gogo/protobuf/proto"
@@ -84,7 +83,6 @@ func (a *AliYunCore) Write(entry zapcore.Entry, fields []zapcore.Field) error {
 		source = os.Getenv("HOSTNAME")
 	}
 
-	fmt.Println("project store topic source", a.ProjectName, a.LogStore, a.Topic, source)
 	return a.producer.SendLog(a.ProjectName, a.LogStore, a.Topic, source, log)
 
 }
