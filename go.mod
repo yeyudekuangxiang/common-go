@@ -30,6 +30,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+	github.com/sony/sonyflake v1.1.0
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.8.0
 	github.com/ulule/limiter/v3 v3.8.0
