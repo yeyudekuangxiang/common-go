@@ -197,7 +197,7 @@ func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMes
 		messageContent:  repository.NewMessageContentModel(ctx),
 		template:        repository.NewMessageTemplateModel(ctx),
 		user:            repository.NewUserRepository(),
-		topic:           repository.NewTopicRepository(ctx),
+		topic:           repository.NewTopicModel(ctx),
 		comment:         repository.NewCommentRepository(ctx),
 		options:         option,
 	}

@@ -212,7 +212,7 @@ func (d defaultTopicRepository) UpdateColumn(id int64, key string, value interfa
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(key, value).Error
 }
 
-func NewTopicRepository(ctx *mioContext.MioContext) TopicModel {
+func NewTopicModel(ctx *mioContext.MioContext) TopicModel {
 	return defaultTopicRepository{
 		ctx: ctx,
 	}

@@ -65,6 +65,7 @@ func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {
 		OpenId: user.OpenId,
 		Type:   entity.PointTransactionType(form.PointCollectType),
 	})
+
 	res, err := client.HandlePageDataCommand()
 	if err != nil {
 		return nil, err

@@ -18,7 +18,7 @@ var DefaultTopicAdminService = NewTopicAdminService(context.NewMioContext())
 
 func NewTopicAdminService(ctx *context.MioContext) TopicAdminService {
 	return TopicAdminService{
-		topicModel: repository.NewTopicRepository(ctx),
+		topicModel: repository.NewTopicModel(ctx),
 		tag:        repository.DefaultTagRepository,
 	}
 }

@@ -151,8 +151,7 @@ func (c *defaultClientHandle) getTodayData(openIds []string, types []entity.Poin
 }
 
 func (c *defaultClientHandle) getCarbonDayData(openId string) float64 {
-	user, _ := service.DefaultUserService.GetUserByOpenId(openId)
-	return service.NewCarbonTransactionService(c.ctx).GetTodayCarbon(user.ID)
+	return service.NewCarbonTransactionService(c.ctx).GetTodayCarbonByType(openId, string(entity.CARBON_JHX))
 }
 
 func (c *defaultClientHandle) getMonthData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {

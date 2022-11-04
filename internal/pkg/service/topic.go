@@ -30,7 +30,7 @@ var DefaultTopicService = NewTopicService(mioContext.NewMioContext())
 
 func NewTopicService(ctx *mioContext.MioContext) TopicService {
 	return TopicService{
-		topicModel:     repository.NewTopicRepository(ctx),
+		topicModel:     repository.NewTopicModel(ctx),
 		topicLikeModel: repository.NewTopicLikeRepository(ctx),
 	}
 }

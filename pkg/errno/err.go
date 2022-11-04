@@ -22,7 +22,7 @@ var (
 
 	ErrCommon         = err{code: 10000, message: "系统繁忙,请稍后再试"}   // ErrCommon 通用错误
 	ErrInternalServer = err{code: 10001, message: "内部服务器错误"}      // ErrInternalServer 系统错误
-	ErrBind           = err{code: 10002, message: "绑定失败"}         // ErrBind 绑定错误
+	ErrBind           = err{code: 10002, message: "参数错误"}         // ErrBind 参数错误
 	ErrLimit          = err{code: 10003, message: "操作太频繁了、请稍后再试"} // ErrLimit 超出频率限制
 	ErrTimeout        = err{code: 10004, message: "操作已超时"}        //超时
 

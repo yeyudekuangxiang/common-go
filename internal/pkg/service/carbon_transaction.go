@@ -485,3 +485,21 @@ func (srv CarbonTransactionService) AddHistory() {
 		})
 	}
 }
+
+// 根据type获取当日减碳量
+func (srv CarbonTransactionService) GetTodayCarbonByType(openId, typeStr string) float64 {
+	results, err := srv.repo.GetSumTodayCarbonByType(openId, typeStr)
+	if err != nil {
+		return 0
+	}
+	var carbon float64
+	if len(results) == 0 {
+		return 0
+	}
+
+	for _, item := range results {
+		carbon += item.Value
+	}
+
+	return carbon
+}
