@@ -83,7 +83,7 @@ type allReceiveRequest struct {
 	PlatformKey string `json:"platformKey" form:"platformKey" alias:"platformKey" binding:"required"`
 }
 
-type PrePointListRequest struct {
+type prePointListRequestV2 struct {
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 }
 
