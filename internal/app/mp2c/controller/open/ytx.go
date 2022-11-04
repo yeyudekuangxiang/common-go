@@ -167,7 +167,7 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 }
 
 func (ctr YtxController) PrePointList(c *gin.Context) (gin.H, error) {
-	form := prePointListRequestV2{}
+	form := PrePointListRequestV2{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
