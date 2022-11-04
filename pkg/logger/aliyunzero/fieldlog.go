@@ -1,0 +1,74 @@
+package aliyunzero
+
+import (
+	"context"
+	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
+	"time"
+)
+
+// FiledLog 可以初始化一个 logx.LogField 数组 每次记录日志都会把这些LogField一起记录上去
+type FiledLog struct {
+	logx.Logger
+	fields []logx.LogField
+}
+
+func WithFiledLogger(logger logx.Logger, fields ...logx.LogField) *FiledLog {
+	return &FiledLog{Logger: logger, fields: fields}
+}
+
+func (f FiledLog) Error(i ...interface{}) {
+	f.Logger.Errorw(fmt.Sprint(i...), f.fields...)
+}
+
+func (f FiledLog) Errorf(s string, i ...interface{}) {
+	f.Logger.Errorw(fmt.Errorf(s, i...).Error(), f.fields...)
+}
+
+func (f FiledLog) Errorv(i interface{}) {
+	f.Logger.Errorw(fmt.Sprintf("%v", i), f.fields...)
+}
+
+func (f FiledLog) Errorw(s string, field ...logx.LogField) {
+	f.Logger.Errorw(s, field...)
+}
+
+func (f FiledLog) Info(i ...interface{}) {
+	f.Logger.Infow(fmt.Sprint(i...), f.fields...)
+}
+
+func (f FiledLog) Infof(s string, i ...interface{}) {
+	f.Logger.Infow(fmt.Sprintf(s, i...), f.fields...)
+}
+
+func (f FiledLog) Infov(i interface{}) {
+	f.Logger.Infow(fmt.Sprintf("%v", i), f.fields...)
+}
+
+func (f FiledLog) Infow(s string, field ...logx.LogField) {
+	f.Logger.Infow(s, field...)
+}
+
+func (f FiledLog) Slow(i ...interface{}) {
+	f.Logger.Sloww(fmt.Sprint(i...), f.fields...)
+}
+
+func (f FiledLog) Slowf(s string, i ...interface{}) {
+	f.Logger.Sloww(fmt.Sprintf(s, i...), f.fields...)
+}
+
+func (f FiledLog) Slowv(i interface{}) {
+	f.Logger.Sloww(fmt.Sprintf("%v", i), f.fields...)
+}
+
+func (f FiledLog) Sloww(s string, field ...logx.LogField) {
+	f.Logger.Sloww(s, field...)
+}
+
+func (f FiledLog) WithContext(ctx context.Context) logx.Logger {
+	return f.Logger.WithContext(ctx)
+}
+
+func (f FiledLog) WithDuration(duration time.Duration) logx.Logger {
+	return f.Logger.WithDuration(duration)
+}

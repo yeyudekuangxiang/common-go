@@ -5,7 +5,7 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/pkg/zap"
+	"mio/pkg/logger/zap"
 )
 
 func initQueueProducer() {
@@ -49,6 +49,19 @@ func initQueueProducer() {
 				}
 			}
 		}()
+	}
+
+}
+func closeQueueProducer() {
+
+	if app.QueueProduct != nil {
+		log.Println("关闭QueueProduct")
+		err := app.QueueProduct.Close()
+		if err != nil {
+			log.Println("关闭QueueProduct异常", err)
+		} else {
+			log.Println("关闭QueueProduct成功")
+		}
 	}
 
 }
