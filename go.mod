@@ -32,6 +32,7 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/sony/sonyflake v1.1.0
 	github.com/spf13/cobra v1.4.0
+	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.8.0
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/wagslane/go-rabbitmq v0.10.0
@@ -47,7 +48,7 @@ require (
 )
 
 require (
-	github.com/goccy/go-json v0.9.7 // indirect
+	github.com/goccy/go-json v0.9.7
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 )
 
@@ -139,7 +140,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/tdewolff/minify/v2 v2.9.4 // indirect
 	github.com/tdewolff/parse/v2 v2.5.2 // indirect
 	github.com/toolkits/concurrent v0.0.0-20150624120057-a4371d70e3e3 // indirect
