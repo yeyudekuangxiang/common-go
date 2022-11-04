@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"strings"
 )
 
@@ -89,10 +90,14 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	types := strings.Split(form.Types, ",")
+
+	if len(types) == 0 {
+		return nil, errno.ErrCommon.WithMessage("参数错误")
+	}
+
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
-
-	types := strings.Split(form.Types, ",")
 
 	messageService := messageSrv.NewWebMessageService(ctx)
 	msgList, total, err := messageService.GetMessage(messageSrv.GetWebMessage{
@@ -139,6 +144,9 @@ func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
 	}
 
 	msgIds := strings.Split(form.MsgIds, ",")
+	if len(msgIds) == 0 {
+		return nil, errno.ErrCommon.WithMessage("参数错误")
+	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)

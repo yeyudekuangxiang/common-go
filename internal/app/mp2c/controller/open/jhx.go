@@ -14,8 +14,8 @@ import (
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
-	platformUtil "mio/pkg/platform"
 	"time"
 )
 
