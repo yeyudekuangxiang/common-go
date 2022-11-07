@@ -340,7 +340,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 	}
 
 	switch form.Params {
-	case virtualCouponJhx2Yuan:
+	case virtualCouponJhx2Yuan, virtualCouponYtx1Yuan, virtualCouponYtx2Yuan, virtualCouponYtx5Yuan, virtualCouponYtx10Yuan, virtualCouponYtx30Yuan:
 		err := srv.SendVirtualCoupon(form.OrderNum, form.Uid, form.Params)
 		if err != nil {
 			app.Logger.Error("发放兑吧虚拟商品优惠券失败", err)
@@ -365,6 +365,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 
 	return "", 0, errno.ErrCommon.WithMessage("虚拟商品不存在")
 }
+
 func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productItemId string) (int64, error) {
 	point := virtualGoodMap[productItemId]
 	if point == 0 {
