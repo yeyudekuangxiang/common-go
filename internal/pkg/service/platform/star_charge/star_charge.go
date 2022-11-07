@@ -156,14 +156,13 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	}
 
 	//保存记录
-	history := entity.CouponHistory{
+	_, err = srv.history.Insert(&entity.CouponHistory{
 		OpenId:     openId,
 		CouponType: "star_charge",
 		Code:       provideResult.CouponCode,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
-	}
-	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
+	})
 
 	if err != nil {
 		app.Logger.Errorf("星星充电发券记录插入失败:%s", err.Error())
