@@ -195,7 +195,7 @@ func (srv TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []e
 }
 
 // FindById 根据id查询 entity.Topic
-func (srv TopicService) FindById(topicId int64) entity.Topic {
+func (srv TopicService) FindById(topicId int64) *entity.Topic {
 	return srv.topicModel.FindById(topicId)
 }
 
@@ -486,8 +486,8 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
-	topicModel := entity.Topic{}
+func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
+	topicModel := &entity.Topic{}
 
 	// 文本内容审核
 	if content != "" {
@@ -518,7 +518,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 	imageStr := strings.Join(images, ",")
 
 	//topic
-	topicModel = entity.Topic{
+	topicModel = &entity.Topic{
 		UserId:    userId,
 		Title:     title,
 		Content:   content,
@@ -544,22 +544,25 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
 	}
-	if err := srv.topicModel.Save(&topicModel); err != nil {
+	
+	if err := srv.topicModel.Save(topicModel); err != nil {
 		return topicModel, errno.ErrCommon.WithMessage("帖子保存失败")
 	}
+
 	return srv.topicModel.FindById(topicModel.Id), nil
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) (entity.Topic, error) {
+func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
 
 	//查询记录是否存在
 	topicModel := srv.topicModel.FindById(topicId)
+
 	if topicModel.Id == 0 {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("该帖子不存在")
+		return topicModel, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("无权限修改")
+		return topicModel, errno.ErrCommon.WithMessage("无权限修改")
 	}
 	if content != "" {
 		//检查内容
@@ -569,7 +572,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 			zhuGeAttr["场景"] = "更新帖子"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-			return entity.Topic{}, errno.ErrCommon.WithMessage(err.Error())
+			return topicModel, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 
@@ -611,7 +614,7 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
-			return entity.Topic{}, errno.ErrCommon.WithMessage("Tag更新失败")
+			return topicModel, errno.ErrCommon.WithMessage("Tag更新失败")
 		}
 
 	} else {
@@ -619,27 +622,27 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTagId = ""
 		err := app.DB.Model(&topicModel).Association("Tags").Clear()
 		if err != nil {
-			return entity.Topic{}, errno.ErrCommon.WithMessage("Tag更新失败")
+			return topicModel, errno.ErrCommon.WithMessage("Tag更新失败")
 		}
 	}
 
 	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("帖子更新失败")
+		return topicModel, errno.ErrCommon.WithMessage("帖子更新失败")
 	}
 	return topicModel, nil
 }
 
 // DetailTopic 获取topic详情
-func (srv TopicService) DetailTopic(topicId int64) (entity.Topic, error) {
+func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	//查询数据是否存在
 	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
+		return topic, errno.ErrCommon.WithMessage("数据不存在")
 	}
 	//更新查看次数 todo
 	err := srv.topicModel.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
 	if err != nil {
-		return entity.Topic{}, errno.ErrInternalServer
+		return topic, errno.ErrInternalServer
 	}
 	return topic, nil
 }
