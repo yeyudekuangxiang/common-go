@@ -39,6 +39,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	user := apiutil.GetAuthUser(c)
 	//查询渠道号
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
+
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
 		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
