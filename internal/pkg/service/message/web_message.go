@@ -91,6 +91,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 }
 
 func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error) {
+
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
 		RecId:  params.UserId,
 		Status: params.Status,

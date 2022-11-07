@@ -281,26 +281,44 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	commentService := service.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	like, comment, point, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
+	resp, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
 
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   user.ID,
-		RecId:    comment.MemberId,
-		Key:      "like_comment",
-		TurnType: 2,
-		TurnId:   comment.Id,
-		Type:     1,
-	})
+	var point int64
+	if resp.LikeStatus == 1 && resp.IsFirst {
+		pointService := service.NewPointService(context.NewMioContext())
+		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+			AdminId:      0,
+			Note:         "评论 \"" + resp.CommentMessage + "\" 点赞",
+			AdditionInfo: "commendId: " + strconv.FormatInt(resp.CommentId, 10),
+		})
 
-	if err != nil {
-		app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+		if err == nil {
+			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		}
+
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   user.ID,
+			RecId:    resp.CommentUserId,
+			Key:      "like_comment",
+			TurnType: 2,
+			TurnId:   resp.CommentId,
+			Type:     1,
+		})
+
+		if err != nil {
+			app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+		}
 	}
 
 	return gin.H{
-		"status": like.Status,
+		"status": resp.LikeStatus,
 		"point":  point,
 	}, nil
 }

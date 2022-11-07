@@ -9,8 +9,11 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/message"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"strconv"
 )
 
 var DefaultTopicController = TopicController{}
@@ -116,27 +119,51 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	topicLikeService := service.NewTopicLikeService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	like, topic, point, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
+	resp, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
 
-	//发送消息
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   user.ID,
-		RecId:    topic.UserId,
-		Key:      "like_topic",
-		TurnType: 1,
-		TurnId:   topic.Id,
-		Type:     1,
-	})
-	if err != nil {
-		app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+	title := resp.TopicTitle
+	if len([]rune(title)) > 8 {
+		title = string([]rune(title)[0:8]) + "..."
+	}
+
+	var point int64
+	if resp.LikeStatus == 1 && resp.IsFirst == true {
+		pointService := service.NewPointService(ctx)
+		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+			AdminId:      0,
+			Note:         "为文章 \"" + title + "\" 点赞",
+			AdditionInfo: strconv.FormatInt(resp.TopicId, 10),
+		})
+
+		if err == nil {
+			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		}
+
+		//发送消息
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   user.ID,
+			RecId:    resp.TopicUserId,
+			Key:      "like_topic",
+			TurnType: 1,
+			TurnId:   resp.TopicId,
+			Type:     1,
+		})
+		if err != nil {
+			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+		}
+
 	}
 
 	return gin.H{
 		"point":  point,
-		"status": like.Status,
+		"status": resp.LikeStatus,
 	}, nil
 }
 
