@@ -6,7 +6,7 @@ import (
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultCouponHistoryRepository = NewCouponHistoryRepository(mioContext.NewMioContext())
+var DefaultCouponHistoryRepository = NewCouponHistoryModel(mioContext.NewMioContext())
 
 type (
 	CouponHistoryModel interface {
@@ -52,7 +52,7 @@ func (m *defaultCouponHistoryRepository) FindAll(params FindCouponHistoryParams)
 func (m *defaultCouponHistoryRepository) Update(data *entity.CouponHistory) error {
 	var result entity.CouponHistory
 	err := m.ctx.DB.Model(&result).Where("open_id = ?", data.OpenId).First(&result).Error
-	
+
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (m *defaultCouponHistoryRepository) Update(data *entity.CouponHistory) erro
 	return m.ctx.DB.Model(&result).Updates(&result).Error
 }
 
-func NewCouponHistoryRepository(ctx *mioContext.MioContext) CouponHistoryModel {
+func NewCouponHistoryModel(ctx *mioContext.MioContext) CouponHistoryModel {
 	return &defaultCouponHistoryRepository{
 		ctx: ctx,
 	}

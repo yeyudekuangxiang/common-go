@@ -2,28 +2,45 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultBdSceneUserRepository = BdSceneUserRepository{DB: app.DB}
+var DefaultBdSceneUserRepository = NewBdSceneUserModel(mioContext.NewMioContext())
 
-type BdSceneUserRepository struct {
-	DB *gorm.DB
+type (
+	BdSceneUserModel interface {
+		FindOne(params GetSceneUserOne) *entity.BdSceneUser
+		FindByCh(platformKey string) entity.BdSceneUser
+		FindPlatformUserByPlatformUserId(memberId string, platformKey string) entity.BdSceneUser
+		FindPlatformUser(openId, platformKey string) entity.BdSceneUser
+		FindPlatformUserByOpenId(openId string) entity.BdSceneUser
+		Create(data *entity.BdSceneUser) error
+	}
+
+	defaultBdSceneUserModel struct {
+		ctx *mioContext.MioContext
+	}
+)
+
+func NewBdSceneUserModel(ctx *mioContext.MioContext) BdSceneUserModel {
+	return &defaultBdSceneUserModel{
+		ctx: ctx,
+	}
 }
 
-func (repo BdSceneUserRepository) FindByCh(platformKey string) entity.BdSceneUser {
+func (m defaultBdSceneUserModel) FindByCh(platformKey string) entity.BdSceneUser {
 	item := entity.BdSceneUser{}
-	err := repo.DB.Where("platform_key = ?", platformKey).First(&item).Error
+	err := m.ctx.DB.Where("platform_key = ?", platformKey).First(&item).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
 	return item
 }
 
-func (repo BdSceneUserRepository) FindPlatformUserByPlatformUserId(memberId string, platformKey string) entity.BdSceneUser {
+func (m defaultBdSceneUserModel) FindPlatformUserByPlatformUserId(memberId string, platformKey string) entity.BdSceneUser {
 	item := entity.BdSceneUser{}
-	err := repo.DB.
+	err := m.ctx.DB.
 		Where("platform_key = ?", platformKey).
 		Where("platform_user_id = ?", memberId).
 		First(&item).Error
@@ -33,9 +50,9 @@ func (repo BdSceneUserRepository) FindPlatformUserByPlatformUserId(memberId stri
 	return item
 }
 
-func (repo BdSceneUserRepository) FindPlatformUser(openId, platformKey string) entity.BdSceneUser {
+func (m defaultBdSceneUserModel) FindPlatformUser(openId, platformKey string) entity.BdSceneUser {
 	item := entity.BdSceneUser{}
-	err := repo.DB.
+	err := m.ctx.DB.
 		Where("open_id = ?", openId).
 		Where("platform_key = ?", platformKey).
 		First(&item).Error
@@ -45,9 +62,9 @@ func (repo BdSceneUserRepository) FindPlatformUser(openId, platformKey string) e
 	return item
 }
 
-func (repo BdSceneUserRepository) FindPlatformUserByOpenId(openId string) entity.BdSceneUser {
+func (m defaultBdSceneUserModel) FindPlatformUserByOpenId(openId string) entity.BdSceneUser {
 	item := entity.BdSceneUser{}
-	err := repo.DB.
+	err := m.ctx.DB.
 		Where("open_id = ?", openId).
 		First(&item).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -56,13 +73,13 @@ func (repo BdSceneUserRepository) FindPlatformUserByOpenId(openId string) entity
 	return item
 }
 
-func (repo BdSceneUserRepository) Create(data *entity.BdSceneUser) error {
-	return repo.DB.Model(&entity.BdSceneUser{}).Create(data).Error
+func (m defaultBdSceneUserModel) Create(data *entity.BdSceneUser) error {
+	return m.ctx.DB.Model(&entity.BdSceneUser{}).Create(data).Error
 }
 
-func (repo BdSceneUserRepository) FindOne(params GetSceneUserOne) *entity.BdSceneUser {
+func (m defaultBdSceneUserModel) FindOne(params GetSceneUserOne) *entity.BdSceneUser {
 	one := entity.BdSceneUser{}
-	query := repo.DB.Model(&one)
+	query := m.ctx.DB.Model(&one)
 
 	if params.Id != 0 {
 		query.Where("id = ?", params.Id)
