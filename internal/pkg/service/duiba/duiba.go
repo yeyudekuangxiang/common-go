@@ -413,23 +413,38 @@ func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string
 		return nil
 	case virtualCouponYtx1Yuan:
 		ytxService := ytx.NewYtxService(context.NewMioContext())
-		ytxService.SendCoupon(1001, 1, *user)
+		_, err = ytxService.SendCoupon(1001, 1, *user)
+		if err != nil {
+			return err
+		}
 		return nil
 	case virtualCouponYtx2Yuan:
 		ytxService := ytx.NewYtxService(context.NewMioContext())
-		ytxService.SendCoupon(1001, 2, *user)
+		_, err = ytxService.SendCoupon(1001, 2, *user)
+		if err != nil {
+			return err
+		}
 		return nil
 	case virtualCouponYtx5Yuan:
 		ytxService := ytx.NewYtxService(context.NewMioContext())
-		ytxService.SendCoupon(1001, 5, *user)
+		_, err = ytxService.SendCoupon(1001, 5, *user)
+		if err != nil {
+			return err
+		}
 		return nil
 	case virtualCouponYtx10Yuan:
 		ytxService := ytx.NewYtxService(context.NewMioContext())
-		ytxService.SendCoupon(1001, 10, *user)
+		_, err = ytxService.SendCoupon(1001, 10, *user)
+		if err != nil {
+			return err
+		}
 		return nil
 	case virtualCouponYtx30Yuan:
 		ytxService := ytx.NewYtxService(context.NewMioContext())
-		ytxService.SendCoupon(1001, 30, *user)
+		_, err = ytxService.SendCoupon(1001, 30, *user)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 
