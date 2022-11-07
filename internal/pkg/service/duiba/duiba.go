@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
+	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -384,27 +385,53 @@ func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productIte
 }
 
 const (
-	virtualCouponJhx2Yuan = "3323df0ce743a3e55a38c62dbc92eac4"
+	virtualCouponJhx2Yuan  = "3323df0ce743a3e55a38c62dbc92eac4"
+	virtualCouponYtx1Yuan  = "3323df0ce743a3e55a38c62dbc92eac1"
+	virtualCouponYtx2Yuan  = "3323df0ce743a3e55a38c62dbc92eac2"
+	virtualCouponYtx5Yuan  = "3323df0ce743a3e55a38c62dbc92eac5"
+	virtualCouponYtx10Yuan = "3323df0ce743a3e55a38c62dbc92ea10"
+	virtualCouponYtx30Yuan = "3323df0ce743a3e55a38c62dbc92ea30"
 )
 
 func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string) error {
+	user, err := service.DefaultUserService.GetUserByOpenId(openid)
+	if err != nil {
+		return err
+	}
+	if user.ID == 0 {
+		return errno.ErrUserNotFound.WithCaller()
+	}
 	switch productItemId {
 	case virtualCouponJhx2Yuan:
 		jhxService := jhx.NewJhxService(context.NewMioContext())
-		user, err := service.DefaultUserService.GetUserByOpenId(openid)
-		if err != nil {
-			return err
-		}
-		if user.ID == 0 {
-			return errno.ErrUserNotFound.WithCaller()
-		}
 		tradeNo, err := jhxService.SendCoupon(1000, *user)
 		println(tradeNo)
 		if err != nil {
 			return err
 		}
 		return nil
+	case virtualCouponYtx1Yuan:
+		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService.SendCoupon(1001, 1, *user)
+		return nil
+	case virtualCouponYtx2Yuan:
+		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService.SendCoupon(1001, 2, *user)
+		return nil
+	case virtualCouponYtx5Yuan:
+		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService.SendCoupon(1001, 5, *user)
+		return nil
+	case virtualCouponYtx10Yuan:
+		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService.SendCoupon(1001, 10, *user)
+		return nil
+	case virtualCouponYtx30Yuan:
+		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService.SendCoupon(1001, 30, *user)
+		return nil
 	}
+
 	app.Logger.Error("未知的虚拟商品类型", orderNum, openid, productItemId)
 	return errno.ErrCommon.WithMessage("未知的虚拟商品类型")
 }
