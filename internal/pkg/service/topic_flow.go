@@ -131,7 +131,7 @@ func (t TopicFlowService) AddUserFlowSeeCount(userId int64, topicId int64) {
 		return
 	}
 	flow.SeeCount++
-	flow.Sort = t.CalculateSort(topic, flow)
+	flow.Sort = t.CalculateSort(*topic, flow)
 
 	if err := t.repo.Save(&flow); err != nil {
 		app.Logger.Error("更新查看数量失败", err)
@@ -155,7 +155,7 @@ func (t TopicFlowService) AddUserFlowShowCount(userId int64, topicId int64) {
 		return
 	}
 	flow.ShowCount++
-	flow.Sort = t.CalculateSort(topic, flow)
+	flow.Sort = t.CalculateSort(*topic, flow)
 
 	if err := t.repo.Save(&flow); err != nil {
 		app.Logger.Error("更新查看数量失败", err)
@@ -177,7 +177,7 @@ func (t TopicFlowService) AfterUpdateTopic(topicId int64) {
 			topicFlow := entity2.TopicFlow{}
 			app.DB.Where("user_id = ? and topic_id = ?", item.UserId, topicId).First(&topicFlow)
 			if topicFlow.ID != 0 {
-				topicFlow.Sort = t.CalculateSort(topic, topicFlow)
+				topicFlow.Sort = t.CalculateSort(*topic, topicFlow)
 				if err := app.DB.Save(&topicFlow).Error; err != nil {
 					app.Logger.Error("同步topic_flow失败", topicId, item.UserId, err)
 				}
@@ -190,7 +190,7 @@ func (t TopicFlowService) AfterUpdateTopic(topicId int64) {
 					TopicCreatedAt: topic.CreatedAt,
 					TopicUpdatedAt: topic.UpdatedAt,
 				}
-				topicFlow.Sort = t.CalculateSort(topic, topicFlow)
+				topicFlow.Sort = t.CalculateSort(*topic, topicFlow)
 				if err := app.DB.Create(&topicFlow).Error; err != nil {
 					app.Logger.Error("同步topic_flow失败", topicId, item.UserId, err)
 				}
