@@ -19,6 +19,8 @@ var (
 	BusinessDB = new(gorm.DB)
 	// Logger 日志
 	Logger = new(zap.SugaredLogger)
+	// OriginLogger 日志
+	OriginLogger = new(zap.Logger)
 	// Weapp 微信小程序 SDK
 	Weapp = new(wxapp.Client)
 	// WxOa 绿喵服务号 SDK
@@ -30,7 +32,7 @@ var (
 	// STSClient 阿里云sts
 	STSClient = new(sts.Client)
 
-	QueueProduct = new(rabbitmq.Publisher)
+	QueueProduct *rabbitmq.Publisher
 
 	RpcService = new(RpcClient)
 )

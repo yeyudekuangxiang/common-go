@@ -7,6 +7,7 @@ package cmd
 import (
 	"mio/internal/app/cmd/auth"
 	"mio/internal/app/cmd/certificate"
+	"mio/internal/app/cmd/coupon"
 	"mio/internal/app/cmd/db"
 	"mio/internal/app/cmd/gitlab"
 	"mio/internal/app/cmd/quiz"
@@ -63,4 +64,5 @@ func cmds() {
 	RootCmd.AddCommand(certificate.CertificateCmd)
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(quiz.QuizCmd)
+	RootCmd.AddCommand(coupon.CouponCmd)
 }
