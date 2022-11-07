@@ -18,50 +18,53 @@ func WithFiledLogger(logger logx.Logger, fields ...logx.LogField) *FiledLog {
 }
 
 func (f FiledLog) Error(i ...interface{}) {
-	f.Logger.Errorw(fmt.Sprint(i...), f.fields...)
+	f.Errorw(fmt.Sprint(i...))
 }
 
 func (f FiledLog) Errorf(s string, i ...interface{}) {
-	f.Logger.Errorw(fmt.Errorf(s, i...).Error(), f.fields...)
+	f.Errorw(fmt.Errorf(s, i...).Error())
 }
 
 func (f FiledLog) Errorv(i interface{}) {
-	f.Logger.Errorw(fmt.Sprintf("%v", i), f.fields...)
+	f.Errorw(fmt.Sprintf("%v", i))
 }
 
 func (f FiledLog) Errorw(s string, field ...logx.LogField) {
+	field = append(field, f.fields...)
 	f.Logger.Errorw(s, field...)
 }
 
 func (f FiledLog) Info(i ...interface{}) {
-	f.Logger.Infow(fmt.Sprint(i...), f.fields...)
+	f.Infow(fmt.Sprint(i...))
 }
 
 func (f FiledLog) Infof(s string, i ...interface{}) {
-	f.Logger.Infow(fmt.Sprintf(s, i...), f.fields...)
+	f.Infow(fmt.Sprintf(s, i...))
 }
 
 func (f FiledLog) Infov(i interface{}) {
-	f.Logger.Infow(fmt.Sprintf("%v", i), f.fields...)
+	f.Infow(fmt.Sprintf("%v", i))
 }
 
 func (f FiledLog) Infow(s string, field ...logx.LogField) {
+	field = append(field, f.fields...)
 	f.Logger.Infow(s, field...)
 }
 
 func (f FiledLog) Slow(i ...interface{}) {
-	f.Logger.Sloww(fmt.Sprint(i...), f.fields...)
+	f.Sloww(fmt.Sprint(i...))
 }
 
 func (f FiledLog) Slowf(s string, i ...interface{}) {
-	f.Logger.Sloww(fmt.Sprintf(s, i...), f.fields...)
+	f.Sloww(fmt.Sprintf(s, i...))
 }
 
 func (f FiledLog) Slowv(i interface{}) {
-	f.Logger.Sloww(fmt.Sprintf("%v", i), f.fields...)
+	f.Sloww(fmt.Sprintf("%v", i))
 }
 
 func (f FiledLog) Sloww(s string, field ...logx.LogField) {
+	field = append(field, f.fields...)
 	f.Logger.Sloww(s, field...)
 }
 
