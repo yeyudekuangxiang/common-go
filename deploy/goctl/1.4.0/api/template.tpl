@@ -7,19 +7,15 @@ info (
 	email: "{{.gitEmail}}"
 )
 
-type request {
-	UserId int64 `form:"userId" json:"userId" binding:"required" alias:"userId"`
+type PingReq {
+
 }
 
-type response {
-	UserId int64 `json:"userId"`
-	Nickname string `json:"nickname"`
+type PingResp {
+    Pong string `json:"pong"`
 }
 
 service {{.serviceName}} {
-	@handler GetUser // TODO: set handler name and delete this comment
-	get /users/id/:userId(request) returns(response)
-
-	@handler CreateUser // TODO: set handler name and delete this comment
-	post /users/create(request)
+	@handler Ping
+	get /ping(PingReq) returns(PingResp)
 }
