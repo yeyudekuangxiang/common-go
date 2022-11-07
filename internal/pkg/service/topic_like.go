@@ -59,7 +59,7 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		TopicTitle:  topic.Title,
 		TopicId:     topic.Id,
 		TopicUserId: topic.User.ID,
-		LikeStatus:  0,
+		LikeStatus:  int(like.Status),
 		IsFirst:     isFirst,
 	}, nil
 }

@@ -155,7 +155,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		return "", err
 	}
 
-	respData, _ := json.Marshal(response.SubData)
+	respData, _ := json.Marshal(response)
 	err = activity.NewYtxLogRepository(context.NewMioContext()).Save(&entityActivity.YtxLog{
 		OrderNo:        response.SubData.OrderNo,
 		OpenId:         sceneUser.OpenId,
@@ -180,6 +180,8 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		UserId:           user.ID,
 		BizId:            response.SubData.OrderNo,
 		CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+		StartTime:        time.Now().UnixMilli(),
+		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
 	})
 
 	if err != nil {
