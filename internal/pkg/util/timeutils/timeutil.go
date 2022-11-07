@@ -31,3 +31,10 @@ func EndOfMonth(t time.Time) time.Time {
 	m = (m + 1) % 12
 	return time.Date(y, m, 1, 0, 0, 0, -1, time.Local)
 }
+
+// 时间戳转换成日期
+
+func UnixToTime(timestamp int64) string {
+	t := time.Unix(timestamp, 0)
+	return t.Format("2006-01-02 15:04:05")
+}

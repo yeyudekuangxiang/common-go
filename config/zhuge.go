@@ -14,6 +14,7 @@ type zhuGeEventName struct {
 	NewUserAdd             string
 	MsgSecCheck            string
 	MediaCheck             string
+	DuiBaOrder             string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -29,4 +30,5 @@ var ZhuGeEventName = zhuGeEventName{
 	NewUserAdd:             "新用户",
 	MsgSecCheck:            "文本内容审核",
 	MediaCheck:             "媒体文件审核",
+	DuiBaOrder:             "兑吧商城订单",
 }
