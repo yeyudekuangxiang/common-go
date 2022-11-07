@@ -500,6 +500,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 			return topicModel, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
+
 	// 图片内容审核
 	if len(images) > 1 {
 		for i, imgUrl := range images {
@@ -544,12 +545,12 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
 	}
-	
+
 	if err := srv.topicModel.Save(topicModel); err != nil {
 		return topicModel, errno.ErrCommon.WithMessage("帖子保存失败")
 	}
 
-	return srv.topicModel.FindById(topicModel.Id), nil
+	return topicModel, nil
 }
 
 // UpdateTopic 更新帖子
@@ -644,6 +645,7 @@ func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	if err != nil {
 		return topic, errno.ErrInternalServer
 	}
+
 	return topic, nil
 }
 

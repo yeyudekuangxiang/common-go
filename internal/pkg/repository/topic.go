@@ -180,7 +180,7 @@ func (d defaultTopicRepository) FindById(topicId int64) *entity.Topic {
 		Preload("Tags").
 		Where("id = ?", topicId).
 		First(&topic).Error
-	if err == nil && err != gorm.ErrRecordNotFound {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
 

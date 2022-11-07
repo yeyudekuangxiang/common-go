@@ -12,10 +12,12 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
+	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -113,24 +115,104 @@ func (ctr JhxController) JhxGetPreCollectPoint(ctx *gin.Context) (gin.H, error) 
 }
 
 //消费积分气泡
-func (ctr JhxController) JhxCollectPoint(ctx *gin.Context) (gin.H, error) {
+func (ctr JhxController) JhxCollectPoint(c *gin.Context) (gin.H, error) {
 	form := jhxCollectRequest{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
+	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
+	scene := repository.DefaultBdSceneRepository.FindByCh(form.PlatformKey)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
+	}
+
+	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
+		PlatformKey:    form.PlatformKey,
+		PlatformUserId: form.MemberId,
+		OpenId:         form.OpenId,
+	})
+	if sceneUser.ID == 0 {
+		return nil, errno.ErrCommon.WithMessage("未找到绑定关系")
+	}
+
 	params := make(map[string]interface{}, 0)
 	err := util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
+
 	sign := form.Sign
 	delete(params, "sign")
 
-	jhxService := jhx.NewJhxService(context.NewMioContext())
-	point, err := jhxService.CollectPoint(sign, params)
+	if err = platformUtil.CheckSign(sign, params, "", "&"); err != nil {
+		return nil, err
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+
+	var collect jhx.Collect
+	_ = util.MapTo(&form, &collect)
+
+	resp, err := jhx.NewJhxService(ctx).CollectPoint(collect)
+
 	if err != nil {
 		return nil, err
 	}
+
+	//检查上限
+	var isHalf bool
+	var halfPoint int64
+	timeStr := time.Now().Format("2006-01-02")
+	key := timeStr + ":prePoint:" + form.PlatformKey + form.MemberId
+	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx.Context, key).Val(), 10, 64)
+
+	incPoint := resp.Point
+
+	totalPoint := lastPoint + incPoint
+
+	limit := int64(scene.PrePointLimit)
+	if lastPoint >= limit {
+		return nil, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
+	}
+
+	if totalPoint > limit {
+		p := incPoint
+		incPoint = limit - lastPoint
+		totalPoint = limit
+		isHalf = true
+		halfPoint = p - incPoint
+	}
+
+	app.Redis.Set(ctx.Context, key, totalPoint, 24*time.Hour)
+
+	//积分
+	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:      sceneUser.OpenId,
+		Type:        entity.POINT_JHX,
+		BizId:       util.UUID(),
+		ChangePoint: incPoint,
+		AdminId:     0,
+		Note:        form.PlatformKey + "#" + resp.Tradeno,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	//更新pre_point对应数据
+	resp.Status = 2
+	resp.UpdatedAt = time.Now()
+	if isHalf {
+		resp.Status = 1
+		resp.Point = halfPoint
+	}
+
+	err = service.NewBdScenePrePointService(ctx).Save(resp)
+	
+	if err != nil {
+		return nil, err
+	}
+
 	return gin.H{
 		"point": point,
 	}, nil

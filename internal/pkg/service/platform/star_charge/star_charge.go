@@ -17,7 +17,7 @@ import (
 func NewStarChargeService(ctx *context.MioContext) *StarChargeService {
 	return &StarChargeService{
 		ctx:            ctx,
-		history:        repository.NewCouponHistoryRepository(ctx),
+		history:        repository.NewCouponHistoryModel(ctx),
 		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
 		OperatorID:     "MA1FY5992",
 		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",

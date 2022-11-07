@@ -11,8 +11,6 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/httputil"
 	platformUtil "mio/internal/pkg/util/platform"
@@ -46,16 +44,18 @@ func NewJhxService(ctx *context.MioContext, jhxOptions ...Options) *Service {
 	}
 
 	return &Service{
-		ctx:     ctx,
-		history: repository.NewCouponHistoryRepository(ctx),
-		option:  options,
+		ctx:      ctx,
+		history:  repository.NewCouponHistoryModel(ctx),
+		prePoint: repository.NewBdScenePrePointModel(ctx),
+		option:   options,
 	}
 }
 
 type Service struct {
-	ctx     *context.MioContext
-	history repository.CouponHistoryModel
-	option  *jhxOption
+	ctx      *context.MioContext
+	history  repository.CouponHistoryModel
+	prePoint repository.BdScenePrePointModel
+	option   *jhxOption
 }
 
 func WithJhxDomain(domain string) Options {
@@ -282,7 +282,7 @@ func (srv Service) PreCollectPoint(sign string, params map[string]interface{}) e
 	}
 
 	point := fromString.Mul(decimal.NewFromInt(10)).Round(2).IntPart()
-	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
+	err = srv.prePoint.Create(&entity.BdScenePrePoint{
 		PlatformKey:    params["platformKey"].(string),
 		PlatformUserId: params["memberId"].(string),
 		Point:          point,
@@ -349,93 +349,22 @@ func (srv Service) GetPreCollectPointList(sign string, params map[string]interfa
 }
 
 //消费气泡数据
-func (srv Service) CollectPoint(sign string, params map[string]interface{}) (int64, error) {
-	if err := platformUtil.CheckSign(sign, params, "", "&"); err != nil {
-		return 0, err
-	}
-
-	collect := Collect{}
-	_ = util.MapTo(&params, &collect)
-
-	scene := repository.DefaultBdSceneRepository.FindByCh(collect.PlatformKey)
-	if scene.Key == "" || scene.Key == "e" {
-		return 0, errno.ErrCommon.WithMessage("渠道查询失败")
-	}
-
-	sceneUserCondition := repository.GetSceneUserOne{PlatformKey: collect.PlatformKey}
-	if collect.MemberId != "" {
-		sceneUserCondition.PlatformUserId = collect.MemberId
-	}
-
-	if collect.OpenId != "" {
-		sceneUserCondition.OpenId = collect.OpenId
-	}
-
-	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(sceneUserCondition)
-	if sceneUser.ID == 0 {
-		return 0, errno.ErrCommon.WithMessage("未找到绑定关系")
-	}
-
+func (srv Service) CollectPoint(collect Collect) (*entity.BdScenePrePoint, error) {
 	//获取pre_point数据 one limit
 	id, _ := strconv.ParseInt(collect.PrePointId, 10, 64)
-	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
-		PlatformKey:    sceneUser.PlatformKey,
-		PlatformUserId: sceneUser.PlatformUserId,
+
+	one, err := srv.prePoint.FindOne(repository.GetScenePrePoint{
+		PlatformKey:    collect.PlatformKey,
+		PlatformUserId: collect.MemberId,
 		Id:             id,
 		Status:         1,
 	})
+
 	if err != nil {
-		return 0, errno.ErrRecordNotFound
+		return nil, errno.ErrRecordNotFound
 	}
 
-	//检查上限
-	var isHalf bool
-	var halfPoint int64
-	timeStr := time.Now().Format("2006-01-02")
-	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + sceneUser.Phone
-	lastPoint, _ := strconv.ParseInt(app.Redis.Get(srv.ctx, key).Val(), 10, 64)
-	incPoint := one.Point
-	totalPoint := lastPoint + incPoint
-	if lastPoint >= int64(scene.PrePointLimit) {
-		return 0, errno.ErrCommon.WithMessage("今日获取积分已达到上限")
-	}
-
-	if totalPoint > int64(scene.PrePointLimit) {
-		p := incPoint
-		incPoint = int64(scene.PrePointLimit) - lastPoint
-		totalPoint = int64(scene.PrePointLimit)
-		isHalf = true
-		halfPoint = p - incPoint
-	}
-
-	app.Redis.Set(srv.ctx, key, totalPoint, 24*time.Hour)
-	//积分
-	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:      sceneUser.OpenId,
-		Type:        entity.POINT_JHX,
-		BizId:       util.UUID(),
-		ChangePoint: incPoint,
-		AdminId:     0,
-		Note:        collect.PlatformKey + "#" + one.Tradeno,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	//更新pre_point对应数据
-	one.Status = 2
-	one.UpdatedAt = time.Now()
-	if isHalf {
-		one.Status = 1
-		one.Point = halfPoint
-	}
-
-	err = repository.DefaultBdScenePrePointRepository.Save(&one)
-	if err != nil {
-		return 0, err
-	}
-
-	return point, nil
+	return &one, nil
 }
 
 func (srv Service) getCommonParams() map[string]interface{} {

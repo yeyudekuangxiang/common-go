@@ -90,9 +90,11 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 
 	requestParams := make(map[string]interface{}, 0)
 	err := util.MapTo(&synchroRequest, &requestParams)
+
 	if err != nil {
 		return err
 	}
+
 	requestParams["secret"] = srv.option.Secret
 	synchroRequest.Signature = platformUtil.GetSign(requestParams, "", "&")
 
@@ -173,7 +175,6 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	//记录
-
 	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
 		CouponCardTypeId: typeId,
 		UserId:           user.ID,
