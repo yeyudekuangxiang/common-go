@@ -388,3 +388,10 @@ type SetHaveReadMessageParams struct {
 	MsgIds []string `json:"msgIds"`
 	RecId  int64    `json:"recId"`
 }
+
+type FindCouponHistoryParams struct {
+	OpenId    string    `json:"openId"`
+	Types     string    `json:"types"`
+	StartTime time.Time `json:"startTime"`
+	EndTime   time.Time `json:"endTime"`
+}
