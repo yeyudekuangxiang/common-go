@@ -31,26 +31,62 @@ import (
 var DefaultUserService = NewUserService(
 	repository.DefaultUserRepository,
 	repository.InviteRepository{},
-	repository.NewCityRepository(contextMix.NewMioContext()))
+	repository.NewCityRepository(contextMix.NewMioContext()),
+	repository.NewUserExtendInfoRepository(contextMix.NewMioContext()))
 
 func NewUserService(r repository.UserRepository,
-	rInvite repository.InviteRepository, rCity repository.CityRepository) UserService {
+	rInvite repository.InviteRepository, rCity repository.CityRepository, rUserExtend repository.UserExtentInfoRepository) UserService {
 	return UserService{
-		r:       r,
-		rInvite: rInvite,
-		rCity:   rCity,
+		r:           r,
+		rInvite:     rInvite,
+		rCity:       rCity,
+		rUserExtend: rUserExtend,
 	}
 }
 
 type UserService struct {
-	r       repository.UserRepository
-	rInvite repository.InviteRepository
-	rCity   repository.CityRepository
+	r           repository.UserRepository
+	rInvite     repository.InviteRepository
+	rCity       repository.CityRepository
+	rUserExtend repository.UserExtentInfoRepository
 }
 
 // GetUser 查询用户信息
 func (u UserService) GetUser(by repository.GetUserBy) (*entity.User, bool, error) {
 	return u.r.GetUser(by)
+}
+
+// GetUserExtend 查询用户信息
+
+func (u UserService) GetUserExtend(by repository.GetUserExtendBy) (*entity.UserExtendInfo, bool, error) {
+	return u.rUserExtend.GetUserExtend(by)
+}
+
+func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.UserExtendInfo, error) {
+	user, exist, err := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
+		OpenId: param.OpenId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !exist {
+		userExtend := &entity.UserExtendInfo{}
+		if err := util2.MapTo(param, &userExtend); err != nil {
+			return nil, err
+		}
+		userExtend.Ip = param.Ip
+		userExtend.Openid = param.OpenId
+		userExtend.Uid = param.Uid
+		userExtend.CreatedAt = time.Now()
+		ret := u.rUserExtend.Create(userExtend)
+		return userExtend, ret
+	} else {
+		if param.Ip != "" {
+			user.Ip = param.Ip
+		}
+		ret := u.rUserExtend.Save(user)
+		return user, ret
+	}
 }
 
 // GetUserByID 根据用户id获取用户信息

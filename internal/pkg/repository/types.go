@@ -374,3 +374,8 @@ type FindMessageParams struct {
 	Limit      int       `json:"limit"`
 	Offset     int       `json:"offset"`
 }
+
+type GetUserExtendBy struct {
+	OpenId string
+	Uid    int64
+}

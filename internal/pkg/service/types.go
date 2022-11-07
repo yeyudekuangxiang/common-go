@@ -38,6 +38,12 @@ type CreateUserParam struct {
 	CityCode    string            `json:"city_code"`
 }
 
+type CreateUserExtendParam struct {
+	OpenId string `json:"openId"`
+	Uid    int64  `json:"uid"`
+	Ip     string `json:"ip"`
+}
+
 type unidianTypeId struct {
 	Test       string
 	FiveYuan   string

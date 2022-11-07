@@ -124,6 +124,12 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		}
 	}
 
+	//更新用户的最新ip
+	service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
+		OpenId: user.OpenId,
+		Uid:    user.ID,
+		Ip:     ip,
+	})
 	return user, cookie, isNewUser, nil
 }
 
