@@ -12,8 +12,10 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/limit"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var DefaultTopicController = TopicController{}
@@ -162,74 +164,68 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	adminTopicService := service.NewTopicAdminService(ctx)
 
-	topic, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
+	topic, isFirst, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
 	if err != nil {
 		return nil, err
 	}
 
 	pointService := service.NewPointService(ctx)
-	pointTransService := service.NewPointTransactionService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	user, _ := service.DefaultUserService.GetUserById(topic.UserId)
+	if topic.Status == 3 {
+		keyPrefix := "periodLimit:sendPoint:article:push:"
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour*24), 2, app.Redis, keyPrefix, limit.Align())
+		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
 
-	by, err := pointTransService.FindBy(repository.FindPointTransactionBy{
-		OpenId:       user.OpenId,
-		Type:         string(entity.POINT_ARTICLE),
-		AdditionInfo: strconv.FormatInt(topic.Id, 10),
-	})
+		if err != nil {
+			return nil, err
+		}
 
-	var point int64
-	var isSend bool
-	if topic.Status == 3 && form.Status == 4 {
-		isSend = true
-		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-	} else if form.Status == 3 && by.ID == 0 {
-		isSend = true
-		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
+		key := "push_topic_v2"
+		if resNumber == 1 {
+			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       topic.User.OpenId,
+				Type:         entity.POINT_ARTICLE,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
+				AdminId:      0,
+				Note:         fmt.Sprintf("审核笔记:%s；审核状态:%d", topic.Title, topic.Status),
+				AdditionInfo: strconv.FormatInt(topic.Id, 10),
+			})
+			key = "push_topic"
+		}
+
+		if isFirst {
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:   0,
+				RecId:    topic.User.ID,
+				Key:      key,
+				TurnId:   topic.Id,
+				TurnType: 1,
+				Type:     4,
+			})
+
+			if err != nil {
+				app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+			}
+		}
 	}
 
-	title := topic.Title
-	if len([]rune(title)) > 8 {
-		title = string([]rune(title)[0:8]) + "..."
-	}
-
-	if isSend {
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_ARTICLE,
-			BizId:        util.UUID(),
-			ChangePoint:  point,
-			AdminId:      0,
-			Note:         fmt.Sprintf("审核笔记:%s；审核状态:%d", topic.Title, topic.Status),
-			AdditionInfo: strconv.FormatInt(topic.Id, 10),
+	if topic.Status == 4 {
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    topic.User.ID,
+			Key:      "down_topic",
+			TurnId:   topic.Id,
+			TurnType: 1,
+			Type:     4,
 		})
+
+		if err != nil {
+			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+		}
 	}
 
-	//发消息
-	var key string
-	var t int
-	if form.Status == 3 {
-		key = "post_topic"
-		t = 4
-	}
-	if form.Status == 4 {
-		key = "fail_topic"
-		t = 6
-	}
-
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   0,
-		RecId:    user.ID,
-		Key:      key,
-		TurnId:   topic.Id,
-		TurnType: 1,
-		Type:     t,
-	})
-
-	if err != nil {
-		app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
-	}
 	return nil, nil
 }
 
@@ -244,16 +240,18 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	adminTopicService := service.NewTopicAdminService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	topic, err := adminTopicService.Top(form.ID, form.IsTop)
+	topic, _, err := adminTopicService.Top(form.ID, form.IsTop)
+
 	if err != nil {
 		return nil, err
 	}
 
+	//if isFirst {
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:   0,
 		RecId:    topic.UserId,
-		Key:      "top_topic",
+		Key:      "top_topic_v2",
 		TurnType: 1,
 		TurnId:   topic.Id,
 		Type:     5,
@@ -262,6 +260,7 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Errorf("【文章置顶】站内信发送失败:%s", err.Error())
 	}
+	//}
 
 	return nil, nil
 }
@@ -275,44 +274,52 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	adminTopicService := service.NewTopicAdminService(ctx)
+	pointService := service.NewPointService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	topic, err := adminTopicService.Essence(form.ID, form.IsEssence)
+	topic, isFirst, err := adminTopicService.Essence(form.ID, form.IsEssence)
 	if err != nil {
 		return nil, err
 	}
 
-	//发放积分
-	if form.IsEssence == 1 {
-		title := topic.Title
-		if len([]rune(title)) > 8 {
-			title = string([]rune(title)[0:8]) + "..."
+	if topic.IsEssence == 1 {
+		keyPrefix := "periodLimit:sendPoint:article:essence:"
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour*24), 2, app.Redis, keyPrefix, limit.Align())
+		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
+
+		if err != nil {
+			return nil, err
 		}
-		user, _ := service.DefaultUserService.GetUserById(topic.UserId)
-		pointService := service.NewPointService(context.NewMioContext())
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_RECOMMEND,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
-			AdminId:      0,
-			Note:         "笔记 \"" + title + "...\" 被设为精华",
-			AdditionInfo: strconv.FormatInt(topic.Id, 10),
-		})
-	}
 
-	//发消息
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   0,
-		RecId:    topic.UserId,
-		Key:      "essence_topic",
-		TurnType: 1,
-		TurnId:   topic.Id,
-		Type:     5,
-	})
+		key := "essence_topic_v2"
+		if resNumber == 1 {
+			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       topic.User.OpenId,
+				Type:         entity.POINT_RECOMMEND,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
+				AdminId:      0,
+				Note:         "笔记 \"" + topic.Title + "...\" 被设为精华",
+				AdditionInfo: strconv.FormatInt(topic.Id, 10),
+			})
+			key = "essence_topic"
+		}
 
-	if err != nil {
-		app.Logger.Errorf("【精华文章】站内信发送失败:%s", err.Error())
+		//发消息
+		if isFirst {
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:   0,
+				RecId:    topic.User.ID,
+				Key:      key,
+				TurnType: 1,
+				TurnId:   topic.Id,
+				Type:     5,
+			})
+
+			if err != nil {
+				app.Logger.Errorf("【精华文章】站内信发送失败:%s", err.Error())
+			}
+		}
 	}
 
 	return nil, nil

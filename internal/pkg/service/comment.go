@@ -10,12 +10,9 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
-	"strconv"
 	"time"
 )
 
@@ -30,7 +27,7 @@ type (
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
-		Like(userId, commentId int64, openId string) (*entity.CommentLike, *entity.CommentIndex, int64, error)
+		Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error)
 		AddTopicLikeCount(commentId int64, num int) error
 	}
 )
@@ -282,16 +279,18 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	return comment, recId, nil
 }
 
-func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (*entity.CommentLike, *entity.CommentIndex, int64, error) {
+func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error) {
 	comment, err := srv.commentModel.FindOne(commentId)
 	if err != nil {
-		return &entity.CommentLike{}, &entity.CommentIndex{}, 0, err
+		return CommentChangeLikeResp{}, err
 	}
+	//var resp CommentChangeLikeResp
 
 	like := srv.commentLikeModel.FindBy(repository.FindCommentLikeBy{
 		CommentId: commentId,
 		UserId:    userId,
 	})
+
 	var isFirst bool
 	if like.Id == 0 {
 		like = entity.CommentLike{
@@ -317,30 +316,20 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	if len([]rune(message)) > 8 {
 		message = string([]rune(message)[0:8]) + "..."
 	}
-	//发放积分
-	var point int64
-
-	if like.Status == 1 && isFirst {
-		pointService := NewPointService(context.NewMioContext())
-		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       openId,
-			Type:         entity.POINT_LIKE,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-			AdminId:      0,
-			Note:         "评论 \"" + message + "\" 点赞",
-			AdditionInfo: strconv.FormatInt(commentId, 10) + "#" + strconv.FormatInt(like.Id, 10),
-		})
-		if err == nil {
-			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
-		}
-	}
 
 	if err = srv.commentLikeModel.Save(&like); err != nil {
-		return &entity.CommentLike{}, &entity.CommentIndex{}, 0, err
+		return CommentChangeLikeResp{}, err
 	}
 
-	return &like, comment, point, nil
+	resp := CommentChangeLikeResp{
+		CommentMessage: message,
+		CommentId:      comment.Id,
+		CommentUserId:  comment.MemberId,
+		LikeStatus:     int(like.Status),
+		IsFirst:        isFirst,
+	}
+
+	return resp, nil
 }
 
 func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {

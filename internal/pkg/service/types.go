@@ -467,3 +467,19 @@ type ChangeUserPartner struct {
 	UserId  int64 `json:"userId"`
 	Partner int   `json:"partner"`
 }
+
+type TopicChangeLikeResp struct {
+	TopicTitle  string `json:"topic"`
+	TopicId     int64  `json:"topicId"`
+	TopicUserId int64  `json:"TopicUserId"`
+	LikeStatus  int    `json:"likeStatus"`
+	IsFirst     bool   `json:"isFirst"`
+}
+
+type CommentChangeLikeResp struct {
+	CommentMessage string `json:"topic"`
+	CommentId      int64  `json:"topicId"`
+	CommentUserId  int64  `json:"TopicUserId"`
+	LikeStatus     int    `json:"likeStatus"`
+	IsFirst        bool   `json:"isFirst"`
+}

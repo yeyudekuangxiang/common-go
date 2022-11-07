@@ -173,7 +173,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 
 // CheckChargeLimit 充电检测
 func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) error {
-	keyPrefix := "periodLimit:SendCoupon:star_charge:" + time.Now().Format("20060102") + ":"
+	keyPrefix := "periodLimit:sendCoupon:star_charge:" + time.Now().Format("20060102") + ":"
 	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds())*24, 1, app.Redis, keyPrefix, limit.Align())
 	res1, err := periodLimit.TakeCtx(srv.ctx.Context, openId)
 	if err != nil {
@@ -184,7 +184,7 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 		return errno.ErrCommon.WithMessage("每日上限1次")
 	}
 
-	keyPrefix2 := "periodLimit:SendCoupon:star_charge:"
+	keyPrefix2 := "periodLimit:sendCoupon:star_charge:"
 	periodLimit2 := limit.NewPeriodLimit(int(endTime.Sub(time.Now()).Seconds()), 2, app.Redis, keyPrefix2, limit.Align())
 	res2, err := periodLimit2.TakeCtx(srv.ctx.Context, openId)
 	if err != nil {

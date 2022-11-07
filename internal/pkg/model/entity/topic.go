@@ -42,9 +42,13 @@ type Topic struct {
 	CreatedAt       model.Time     `json:"createdAt"`
 	UpdatedAt       model.Time     `json:"updatedAt"`
 	ImportId        int            `json:"-"`
-	IsTop           int            `json:"isTop"`     //是否置顶
-	IsEssence       int            `json:"isEssence"` //是否精华
-	DelReason       string         `json:"delReason"` //审核不通过 or 删除 的理由
+	IsTop           int            `json:"isTop"`       //是否置顶
+	IsEssence       int            `json:"isEssence"`   //是否精华
+	DelReason       string         `json:"delReason"`   //审核不通过 or 删除 的理由
+	TopTime         model.Time     `json:"topTime"`     //设置置顶时间
+	EssenceTime     model.Time     `json:"essenceTime"` //设置精华时间
+	PushTime        model.Time     `json:"pushTime"`    //上架时间
+	DownTime        model.Time     `json:"downTime"`    //下架时间
 }
 
 func (Topic) TableName() string {

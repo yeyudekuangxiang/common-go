@@ -198,50 +198,71 @@ func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) error {
 }
 
 // Review 审核
-func (srv TopicAdminService) Review(topicId int64, status int, reason string) (entity.Topic, error) {
+func (srv TopicAdminService) Review(topicId int64, status int, reason string) (entity.Topic, bool, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-
-	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
+	var isFirst bool
 
 	if topic.Id == 0 {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
+		return entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
-	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
-		return entity.Topic{}, err
+	if topic.PushTime.IsZero() {
+		isFirst = true
 	}
 
-	return topic, nil
+	if status == entity.TopicStatusPublished {
+		topic.PushTime = model.NewTime()
+	}
+
+	if status == entity.TopicStatusHidden {
+		topic.DownTime = model.NewTime()
+	}
+
+	//更新帖子
+	err := srv.topicModel.Save(topic)
+
+	if err != nil {
+		return entity.Topic{}, isFirst, err
+	}
+
+	return *topic, isFirst, nil
 }
 
 // Top 置顶
-func (srv TopicAdminService) Top(topicId int64, isTop int) (entity.Topic, error) {
+func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
+
+	var isFirst bool
 	if topic.Id == 0 {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
+		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
+
+	if topic.TopTime.IsZero() {
+		isFirst = true
+	}
+
 	if err := app.DB.Model(&topic).Update("is_top", isTop).Error; err != nil {
-		return entity.Topic{}, err
+		return &entity.Topic{}, isFirst, err
 	}
-	return topic, nil
+
+	return topic, isFirst, nil
 }
 
 // Essence 精华
-func (srv TopicAdminService) Essence(topicId int64, isEssence int) (entity.Topic, error) {
+func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
+	var isFirst bool
 	if topic.Id == 0 {
-		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
+		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
 	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
-		return entity.Topic{}, err
+		return &entity.Topic{}, isFirst, err
 	}
 
-	return topic, nil
+	return topic, isFirst, nil
 }
 
 func (srv TopicAdminService) GetCommentCount(ids []int64) (result []CommentCount) {

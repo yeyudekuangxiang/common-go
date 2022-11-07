@@ -5,10 +5,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-	"strconv"
 	"time"
 )
 
@@ -24,19 +21,17 @@ type TopicLikeService struct {
 	topicModel     repository.TopicModel
 }
 
-func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (entity.TopicLike, entity.Topic, int64, error) {
+func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (TopicChangeLikeResp, error) {
 	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
-		return entity.TopicLike{}, entity.Topic{}, 0, errno.ErrCommon.WithMessage("帖子不存在")
+		return TopicChangeLikeResp{}, errno.ErrCommon.WithMessage("帖子不存在")
 	}
-	title := topic.Title
-	if len([]rune(title)) > 8 {
-		title = string([]rune(topic.Title)[0:8]) + "..."
-	}
+
 	like := srv.topicLikeModel.FindBy(repository.FindTopicLikeBy{
 		TopicId: topicId,
 		UserId:  userId,
 	})
+
 	var isFirst bool
 	if like.Id == 0 {
 		like.Status = 1
@@ -54,28 +49,19 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 	} else {
 		_ = srv.topicModel.AddTopicLikeCount(topicId, -1)
 	}
-	var point int64
-	if like.Status == 1 && isFirst == true {
-		pointService := NewPointService(context.NewMioContext())
-		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       openId,
-			Type:         entity.POINT_LIKE,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-			AdminId:      0,
-			Note:         "为文章 \"" + title + "\" 点赞",
-			AdditionInfo: strconv.FormatInt(topic.Id, 10),
-		})
-		if err == nil {
-			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
-		}
-	}
+
 	err := srv.topicLikeModel.Save(&like)
 	if err != nil {
-		return entity.TopicLike{}, entity.Topic{}, 0, err
+		return TopicChangeLikeResp{}, err
 	}
 
-	return like, topic, point, nil
+	return TopicChangeLikeResp{
+		TopicTitle:  topic.Title,
+		TopicId:     topic.Id,
+		TopicUserId: topic.User.ID,
+		LikeStatus:  0,
+		IsFirst:     isFirst,
+	}, nil
 }
 
 func (srv TopicLikeService) GetLikeInfoByUser(userId int64) ([]entity.TopicLike, error) {

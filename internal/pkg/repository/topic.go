@@ -12,7 +12,7 @@ import (
 type (
 	TopicModel interface {
 		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
-		FindById(topicId int64) entity.Topic
+		FindById(topicId int64) *entity.Topic
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
@@ -169,16 +169,22 @@ func (d defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []
 	if err != nil {
 		panic(err)
 	}
+
 	return
 }
 
-func (d defaultTopicRepository) FindById(topicId int64) entity.Topic {
+func (d defaultTopicRepository) FindById(topicId int64) *entity.Topic {
 	var topic entity.Topic
-	err := d.ctx.DB.Model(&entity.Topic{}).Preload("User").Preload("Tags").Where("id = ?", topicId).First(&topic).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
+	err := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Where("id = ?", topicId).
+		First(&topic).Error
+	if err == nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
-	return topic
+
+	return &topic
 }
 
 func (d defaultTopicRepository) Save(topic *entity.Topic) error {
