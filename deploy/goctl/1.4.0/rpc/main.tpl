@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"{{.projectPath}}/common/interceptor/rpcserver"
     "{{.projectPath}}/common/errno"
+    "{{.projectPath}}/common/globalclient"
 
 	{{.imports}}
 
@@ -24,6 +25,7 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 	fmt.Printf("配置文件 %+v\n",c)
 	errno.Debug = c.Debug
+	globalclient.InitGlobalClient(c)
 
 	ctx := svc.NewServiceContext(c)
 

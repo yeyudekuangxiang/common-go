@@ -3,10 +3,12 @@ package config
 import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/zrpc"
+    "{{.projectPath}}/common/globalclient"
 )
 
 type Config struct {
 	zrpc.RpcServerConf
+	globalclient.GlobalClientConf
 	Database DbConf
 	Cache    cache.CacheConf
 	Debug bool

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v4/request"
     "{{.projectPath}}/common/errno"
-	
+	"{{.projectPath}}/common/globalclient"
 
 	{{.importPackages}}
 )
@@ -23,6 +23,7 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 	fmt.Printf("配置文件 %+v\n",c)
 	errno.Debug = c.Debug
+	globalclient.InitGlobalClient(c)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
