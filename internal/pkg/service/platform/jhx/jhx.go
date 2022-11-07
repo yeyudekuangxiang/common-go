@@ -46,14 +46,16 @@ func NewJhxService(ctx *context.MioContext, jhxOptions ...Options) *Service {
 	}
 
 	return &Service{
-		ctx:    ctx,
-		option: options,
+		ctx:     ctx,
+		history: repository.NewCouponHistoryRepository(ctx),
+		option:  options,
 	}
 }
 
 type Service struct {
-	ctx    *context.MioContext
-	option *jhxOption
+	ctx     *context.MioContext
+	history repository.CouponHistoryModel
+	option  *jhxOption
 }
 
 func WithJhxDomain(domain string) Options {
@@ -128,6 +130,19 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 		expireTime = time.Now().AddDate(1, 0, 0)
 	} else {
 		expireTime, _ = time.Parse("2006-01-02", ticketCreateResponse.ExpireTime)
+	}
+
+	//本地记录
+	_, err = srv.history.Insert(&entity.CouponHistory{
+		OpenId:       user.OpenId,
+		CouponType:   "jhx",
+		Code:         ticketCreateResponse.QrCodeStr,
+		AdditionInfo: string(body),
+		CreateTime:   time.Now(),
+	})
+
+	if err != nil {
+		app.Logger.Errorf("亿通行发券记录插入失败:%s", err.Error())
 	}
 
 	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
