@@ -13,7 +13,7 @@ type (
 		FindOne(id int64) (*entity.Collection, error)
 		Insert(data *entity.Collection) (*entity.Collection, error)
 		Delete(id int64) error
-		Update(data *entity.Collection) error
+		Save(data *entity.Collection) error
 		FindAllByOpenId(objType int, openId string, limit, offset int) ([]*entity.Collection, int64, error)
 		FindAllByTime(startTime, endTime time.Time, limit, offset int) ([]*entity.Collection, int64, error)
 		FindOneByObj(objId int64, objType int, openId string) (*entity.Collection, error)
@@ -78,7 +78,7 @@ func (d defaultCollectionModel) Delete(id int64) error {
 	return d.ctx.DB.WithContext(d.ctx.Context).Delete(result).Error
 }
 
-func (d defaultCollectionModel) Update(data *entity.Collection) error {
+func (d defaultCollectionModel) Save(data *entity.Collection) error {
 	if data.Id == 0 {
 		return gorm.ErrPrimaryKeyRequired
 	}

@@ -87,9 +87,9 @@ func (d defaultCollectionService) Collection(objId int64, objType int, openId st
 		return err
 	}
 	//update
-	if result.Status == 2 {
+	if result.Status == 0 {
 		result.Status = 1
-		err = d.collectionModel.Update(result)
+		err = d.collectionModel.Save(result)
 		if err != nil {
 			return err
 		}
@@ -134,9 +134,9 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 			return err
 		}
 
-		if result.Status == 2 {
+		if result.Status == 0 {
 			result.Status = 1
-			err = collectionModel.Update(result)
+			err = collectionModel.Save(result)
 			if err != nil {
 				return err
 			}
@@ -165,11 +165,12 @@ func (d defaultCollectionService) CancelCollection(objId int64, objType int, ope
 		if err != nil {
 			return err
 		}
-		if result.Status == 2 {
+		
+		if result.Status == 0 {
 			return nil
 		}
-		result.Status = 2
-		err = collectionModel.Update(result)
+		result.Status = 0
+		err = collectionModel.Save(result)
 		if err != nil {
 			return err
 		}
