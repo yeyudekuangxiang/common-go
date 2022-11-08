@@ -107,9 +107,11 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return gin.H{
 		"list":     msgList,
 		"total":    total,
