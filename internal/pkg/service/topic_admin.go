@@ -216,20 +216,20 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 	}
 
 	if status == entity.TopicStatusPublished {
-		topic.Status = entity.TopicStatusPublished
-		topic.PushTime = model.NewTime()
 		if topic.PushTime.IsZero() {
 			isFirst = true
 		}
+		topic.Status = entity.TopicStatusPublished
+		topic.PushTime = model.NewTime()
 	}
 
 	if status == entity.TopicStatusHidden {
-		topic.Status = entity.TopicStatusHidden
-		topic.DownTime = model.NewTime()
-		topic.DelReason = reason
 		if topic.DownTime.IsZero() {
 			isFirst = true
 		}
+		topic.Status = entity.TopicStatusHidden
+		topic.DownTime = model.NewTime()
+		topic.DelReason = reason
 	}
 
 	if status == entity.TopicStatusVerifyFailed {
@@ -252,15 +252,19 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool,
 	topic := srv.topicModel.FindById(topicId)
 
 	var isFirst bool
+
 	if topic.Id == 0 {
 		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
-
-	if topic.TopTime.IsZero() {
-		isFirst = true
+	update := entity.Topic{IsTop: isTop}
+	if isTop == 1 {
+		if topic.TopTime.IsZero() {
+			isFirst = true
+		}
+		update.TopTime = model.NewTime()
 	}
 
-	if err := app.DB.Model(&topic).Update("is_top", isTop).Error; err != nil {
+	if err := app.DB.Model(&topic).Updates(update).Error; err != nil {
 		return &entity.Topic{}, isFirst, err
 	}
 
@@ -276,11 +280,18 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topi
 		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
-	if topic.EssenceTime.IsZero() {
-		isFirst = true
+	update := entity.Topic{
+		IsEssence: isEssence,
 	}
 
-	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
+	if isEssence == 1 {
+		if topic.EssenceTime.IsZero() {
+			isFirst = true
+		}
+		update.EssenceTime = model.NewTime()
+	}
+
+	if err := app.DB.Model(&topic).Updates(update).Error; err != nil {
 		return &entity.Topic{}, false, err
 	}
 
