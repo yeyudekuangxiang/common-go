@@ -215,21 +215,25 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 		return entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
-	if topic.PushTime.IsZero() {
-		isFirst = true
-	} else if topic.DownTime.IsZero() {
-		isFirst = true
-	}
-
 	if status == entity.TopicStatusPublished {
 		topic.Status = entity.TopicStatusPublished
 		topic.PushTime = model.NewTime()
+		if topic.PushTime.IsZero() {
+			isFirst = true
+		}
 	}
 
 	if status == entity.TopicStatusHidden {
 		topic.Status = entity.TopicStatusHidden
 		topic.DownTime = model.NewTime()
 		topic.DelReason = reason
+		if topic.DownTime.IsZero() {
+			isFirst = true
+		}
+	}
+
+	if status == entity.TopicStatusVerifyFailed {
+		topic.Status = entity.TopicStatusVerifyFailed
 	}
 
 	//更新帖子
