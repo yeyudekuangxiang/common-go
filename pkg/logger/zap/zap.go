@@ -23,6 +23,7 @@ var LogAccess = zap.String("scene", "access_log")
 var LogDatabase = zap.String("scene", "database")
 
 var LevelMap = map[string]zapcore.Level{
+	"":      zapcore.InfoLevel,
 	"debug": zapcore.DebugLevel,
 	"info":  zapcore.InfoLevel,
 	"warn":  zapcore.WarnLevel,

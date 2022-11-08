@@ -208,7 +208,7 @@ func (ctr JhxController) JhxCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	err = service.NewBdScenePrePointService(ctx).Save(resp)
-	
+
 	if err != nil {
 		return nil, err
 	}

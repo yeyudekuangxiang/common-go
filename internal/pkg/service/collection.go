@@ -109,7 +109,6 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 		topicModel := repository.NewTopicModel(ctx)
 
 		result, err := collectionModel.FindOneByObj(objId, objType, openId)
-
 		if err != nil {
 			if err == entity.ErrNotFount {
 				isFirst = true

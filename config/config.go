@@ -89,7 +89,6 @@ type aliLogSetting struct {
 	LogStore     string
 	Topic        string
 	Source       string
-	Level        string
 }
 type wxSetting struct {
 	AppId  string

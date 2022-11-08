@@ -330,7 +330,6 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	}
 	// 收藏
 	collection, err := collectService.FindOneByTopic(topic.Id, user.OpenId)
-
 	if err == nil {
 		topicRes.IsCollection = int(collection.Status)
 	}

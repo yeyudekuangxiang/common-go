@@ -110,6 +110,6 @@ func (ctr *TagController) Create(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return nil, nil
 }

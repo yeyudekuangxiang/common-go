@@ -384,6 +384,11 @@ type FindMessageParams struct {
 	Offset     int       `json:"offset"`
 }
 
+type GetUserExtendBy struct {
+	OpenId string
+	Uid    int64
+}
+
 type SetHaveReadMessageParams struct {
 	MsgIds []string `json:"msgIds"`
 	RecId  int64    `json:"recId"`

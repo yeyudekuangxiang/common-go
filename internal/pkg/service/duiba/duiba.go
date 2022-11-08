@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
+	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/service/product"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -339,7 +340,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 	}
 
 	switch form.Params {
-	case virtualCouponJhx2Yuan:
+	case virtualCouponJhx2Yuan, virtualCouponYtx1Yuan, virtualCouponYtx2Yuan, virtualCouponYtx5Yuan, virtualCouponYtx10Yuan, virtualCouponYtx30Yuan:
 		err := srv.SendVirtualCoupon(form.OrderNum, form.Uid, form.Params)
 		if err != nil {
 			app.Logger.Error("发放兑吧虚拟商品优惠券失败", err)
@@ -364,6 +365,7 @@ func (srv DuiBaService) VirtualGoodCallback(form duibaApi.VirtualGood) (orderId 
 
 	return "", 0, errno.ErrCommon.WithMessage("虚拟商品不存在")
 }
+
 func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productItemId string) (int64, error) {
 	point := virtualGoodMap[productItemId]
 	if point == 0 {
@@ -384,27 +386,87 @@ func (srv DuiBaService) SendVirtualGoodPoint(orderNum, openid string, productIte
 }
 
 const (
-	virtualCouponJhx2Yuan = "3323df0ce743a3e55a38c62dbc92eac4"
+	virtualCouponJhx2Yuan  = "3323df0ce743a3e55a38c62dbc92eac4"
+	virtualCouponYtx1Yuan  = "3323df0ce743a3e55a38c62dbc92eac1"
+	virtualCouponYtx2Yuan  = "3323df0ce743a3e55a38c62dbc92eac2"
+	virtualCouponYtx5Yuan  = "3323df0ce743a3e55a38c62dbc92eac5"
+	virtualCouponYtx10Yuan = "3323df0ce743a3e55a38c62dbc92ea10"
+	virtualCouponYtx30Yuan = "3323df0ce743a3e55a38c62dbc92ea30"
 )
 
 func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string) error {
+	user, err := service.DefaultUserService.GetUserByOpenId(openid)
+	if err != nil {
+		return err
+	}
+	if user.ID == 0 {
+		return errno.ErrUserNotFound.WithCaller()
+	}
 	switch productItemId {
 	case virtualCouponJhx2Yuan:
 		jhxService := jhx.NewJhxService(context.NewMioContext())
-		user, err := service.DefaultUserService.GetUserByOpenId(openid)
-		if err != nil {
-			return err
-		}
-		if user.ID == 0 {
-			return errno.ErrUserNotFound.WithCaller()
-		}
 		tradeNo, err := jhxService.SendCoupon(1000, *user)
 		println(tradeNo)
 		if err != nil {
 			return err
 		}
 		return nil
+	case virtualCouponYtx1Yuan:
+		ytxService := initYtx()
+		_, err = ytxService.SendCoupon(1001, 1, *user)
+		if err != nil {
+			return err
+		}
+		return nil
+	case virtualCouponYtx2Yuan:
+		ytxService := initYtx()
+		_, err = ytxService.SendCoupon(1001, 2, *user)
+		if err != nil {
+			return err
+		}
+		return nil
+	case virtualCouponYtx5Yuan:
+		ytxService := initYtx()
+		_, err = ytxService.SendCoupon(1001, 5, *user)
+		if err != nil {
+			return err
+		}
+		return nil
+	case virtualCouponYtx10Yuan:
+		ytxService := initYtx()
+		_, err = ytxService.SendCoupon(1001, 10, *user)
+		if err != nil {
+			return err
+		}
+		return nil
+	case virtualCouponYtx30Yuan:
+		ytxService := initYtx()
+		_, err = ytxService.SendCoupon(1001, 30, *user)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
+
 	app.Logger.Error("未知的虚拟商品类型", orderNum, openid, productItemId)
 	return errno.ErrCommon.WithMessage("未知的虚拟商品类型")
+}
+
+func initYtx() *ytx.Service {
+	//bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
+	/*var options []ytx.Options
+	options = append(options, ytx.WithPoolCode("RP202211041000030"))
+	options = append(options, ytx.WithSecret("qR1ubNcPFqpXZZS"))
+	options = append(options, ytx.WithAppId("8c7fd18fab824db69d52739547151e38"))
+	options = append(options, ytx.WithDomain("https://apigw.ruubypay.com"))
+	*/
+	bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
+	var options []ytx.Options
+	options = append(options, ytx.WithPoolCode(bdscene.AppId2))
+	options = append(options, ytx.WithSecret(bdscene.Secret))
+	options = append(options, ytx.WithAppId(bdscene.AppId))
+	options = append(options, ytx.WithDomain(bdscene.Domain))
+	ytxService := ytx.NewYtxService(context.NewMioContext(), options...)
+	return ytxService
+
 }
