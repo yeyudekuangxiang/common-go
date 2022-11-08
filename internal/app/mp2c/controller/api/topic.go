@@ -333,7 +333,7 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	collection, err := collectService.FindOneByTopic(topic.Id, user.OpenId)
 
 	if err == nil {
-		topicRes.IsCollection = int(collection.Status)
+		topicRes.IsCollection = collection.Status
 	}
 
 	return gin.H{

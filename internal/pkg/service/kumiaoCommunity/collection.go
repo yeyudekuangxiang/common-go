@@ -140,8 +140,7 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 			if err != nil {
 				return err
 			}
-
-			err = topicModel.UpdateColumn(objId, "collection_count", 1)
+			err = topicModel.ChangeTopicCollectionCount(objId, "collection_count", 1)
 			if err != nil {
 				return err
 			}
@@ -169,15 +168,18 @@ func (d defaultCollectionService) CancelCollection(objId int64, objType int, ope
 		if result.Status == 0 {
 			return nil
 		}
+
 		result.Status = 0
 		err = collectionModel.Save(result)
 		if err != nil {
 			return err
 		}
+
 		err = topicModel.ChangeTopicCollectionCount(objId, "collection_count", -1)
 		if err != nil {
 			return err
 		}
+		
 		return nil
 	})
 
