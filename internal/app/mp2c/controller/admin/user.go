@@ -76,22 +76,27 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 		Partners: form.Partners,
 		Auth:     form.Auth,
 	})
+
 	if err != nil {
 		return nil, err
 	}
-	//发消息 partners == 1
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   0,
-		RecId:    form.ID,
-		Key:      "wechat",
-		TurnType: 0,
-		TurnId:   0,
-		Type:     7,
-	})
 
-	if err != nil {
-		app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+	//发消息 partners == 1
+	if form.Partners == 1 {
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    form.ID,
+			Key:      "wechat",
+			TurnType: 0,
+			TurnId:   0,
+			Type:     7,
+		})
+
+		if err != nil {
+			app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+		}
 	}
+
 	return nil, nil
 }
 

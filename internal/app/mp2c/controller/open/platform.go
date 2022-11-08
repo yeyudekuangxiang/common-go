@@ -147,7 +147,6 @@ func (receiver PlatformController) SyncPoint(c *gin.Context) (gin.H, error) {
 func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	form := setPrePointRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
 	}
 
