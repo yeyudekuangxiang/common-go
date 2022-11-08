@@ -60,6 +60,7 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 		Key:      "fail_comment",
 		TurnId:   comment.Id,
 		TurnType: 2,
+		ShowId:   comment.Id,
 	})
 
 	if err != nil {

@@ -163,6 +163,7 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 		TurnId:   topic.Id,
 		TurnType: 1,
 		Type:     4,
+		ShowId:   topic.Id,
 	})
 
 	if err != nil {
@@ -221,6 +222,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 				TurnId:   topic.Id,
 				TurnType: 1,
 				Type:     4,
+				ShowId:   topic.Id,
 			})
 
 			if err != nil {
@@ -237,6 +239,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			TurnId:   topic.Id,
 			TurnType: 1,
 			Type:     4,
+			ShowId:   topic.Id,
 		})
 
 		if err != nil {
@@ -273,6 +276,7 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 			TurnType: 1,
 			TurnId:   topic.Id,
 			Type:     5,
+			ShowId:   topic.Id,
 		})
 
 		if err != nil {
@@ -333,6 +337,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				TurnType: 1,
 				TurnId:   topic.Id,
 				Type:     5,
+				ShowId:   topic.Id,
 			})
 
 			if err != nil {
