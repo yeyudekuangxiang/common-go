@@ -49,7 +49,6 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 		return nil, errno.ErrCommon.WithMessage("用户未登陆")
 	}
 
-	//绑定
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil {
 		if err != errno.ErrExisting {

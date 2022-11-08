@@ -1,8 +1,14 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
+	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/track"
+	"mio/internal/pkg/util/timeutils"
 	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
 )
@@ -55,6 +61,91 @@ func (srv DuiBaOrderService) CreateOrUpdate(orderId string, info duibaApi.OrderI
 	order.OrderStatus = info.OrderStatus
 	order.ErrorMsg = info.ErrorMsg
 	order.OrderItemList = string(info.OrderItemList)
-	return &order, srv.repo.Save(&order)
 
+	//只有成功才能上报到诸葛
+	if info.OrderStatus == "success" {
+		err = srv.OrderMaiDian(info, user.ID, user.OpenId)
+	}
+
+	return &order, srv.repo.Save(&order)
+}
+
+type OrderItem struct {
+	Title     string `json:"title"`
+	IsSelf    string `json:"isSelf"`
+	PerCredit string `json:"perCredit"`
+	PerPrice  string `json:"perPrice"`
+}
+
+func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, openid string) error {
+	redisKey := "mp2c:order_duiba_to_zhuge_test_v6"
+	typeName := order.Type
+	switch order.Type {
+	case "coupon":
+		typeName = "虚拟券"
+		break
+	case "virtual":
+		typeName = "充值商品"
+		break
+	case "object":
+		typeName = "实物商品"
+		break
+	}
+	statusName := order.OrderStatus
+	switch order.OrderStatus {
+	case "fail":
+		statusName = "失败"
+		break
+	case "afterSend":
+		statusName = "已发货"
+		break
+	case "success":
+		statusName = "成功"
+		break
+	case "waitSend":
+		statusName = "待发货"
+		break
+	}
+	//上报到诸葛
+	zhuGeAttr := make(map[string]interface{}, 0)
+
+	zhuGeAttr["用户uid"] = uid
+	zhuGeAttr["兑吧订单号"] = order.OrderNum
+	zhuGeAttr["下单时间"] = timeutils.UnixToTime(order.CreateTime.ToInt() / 1000)
+	zhuGeAttr["消耗积分数"] = order.TotalCredits
+	zhuGeAttr["支付金额"] = order.ConsumerPayPrice
+	zhuGeAttr["兑换类型"] = order.Source
+	zhuGeAttr["商品类型"] = typeName
+	zhuGeAttr["运费"] = order.ExpressPrice
+	zhuGeAttr["订单状态"] = statusName
+	zhuGeAttr["用户openid"] = openid
+
+	var orderItemList []OrderItem
+
+	json.Unmarshal([]byte(order.OrderItemList), &orderItemList)
+	for _, item := range orderItemList {
+		orderItemType := ""
+		switch item.IsSelf {
+		case "1":
+			orderItemType = "自有"
+			break
+		case "0":
+			orderItemType = "兑吧"
+			break
+		}
+		zhuGeAttr["商品名称"] = item.Title
+		zhuGeAttr["商品来源"] = orderItemType
+		zhuGeAttr["所需兑换积分"] = item.PerCredit
+		zhuGeAttr["所需兑换金额"] = item.PerPrice
+		break
+	}
+
+	isExit := app.Redis.SIsMember(context.Background(), redisKey, uid)
+	if isExit.Val() == true {
+		zhuGeAttr["是否首单"] = "否"
+	} else {
+		zhuGeAttr["是否首单"] = "是"
+	}
+	track.DefaultZhuGeService().Track(config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
+	return nil
 }

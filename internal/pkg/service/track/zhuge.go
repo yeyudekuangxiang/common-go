@@ -1,8 +1,12 @@
 package track
 
 import (
+	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/repository"
+	service "mio/internal/pkg/service/userExtend"
+
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/zhuge"
@@ -32,10 +36,17 @@ func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 		app.Logger.Info("诸葛打点已关闭", point)
 		return
 	}
-	err := srv.client.Track(types.Event{
+	ip := ""
+	//没传递，用户扩展表查
+	userExtend, exist, err := service.DefaultUserExtendService.GetUserExtend(repository.GetUserExtendBy{OpenId: point.OpenId})
+	if err == nil && exist == true {
+		ip = userExtend.Ip
+	}
+	err = srv.client.Track(types.Event{
 		Dt:    "evt",
 		Pl:    "js",
 		Debug: 0,
+		Ip:    ip,
 		Pr: types.EventJs{
 			Ct:   time.Now().UnixMilli(),
 			Eid:  "积分变动",
@@ -62,10 +73,18 @@ func (srv ZhuGeService) TrackPoints(point srv_types.TrackPoints) {
 		app.Logger.Info("诸葛打点已关闭", point)
 		return
 	}
-	err := srv.client.Track(types.Event{
+	ip := ""
+	//没传递，用户扩展表查
+	userExtend, exist, err := service.DefaultUserExtendService.GetUserExtend(repository.GetUserExtendBy{OpenId: point.OpenId})
+	if err == nil && exist == true {
+		ip = userExtend.Ip
+	}
+
+	err = srv.client.Track(types.Event{
 		Dt:    "evt",
 		Pl:    "js",
 		Debug: 0,
+		Ip:    ip,
 		Pr: types.EventJs{
 			Ct:   time.Now().UnixMilli(),
 			Eid:  "积分变动",
@@ -151,10 +170,23 @@ func (srv ZhuGeService) Track(eventName, openId string, attr map[string]interfac
 		app.Logger.Infof("积分打点失败 %+v %v %+v", eventName, openId, attr)
 		return
 	}
+	ip := ""
+	ipAttr, ok := attr["ip"]
+	if ok && ipAttr != "" {
+		ip = fmt.Sprintf("%s", ipAttr)
+	} else {
+		//没传递，用户扩展表查
+		userExtend, exist, err := service.DefaultUserExtendService.GetUserExtend(repository.GetUserExtendBy{OpenId: openId})
+		if err == nil && exist == true {
+			ip = userExtend.Ip
+		}
+	}
+
 	err := srv.client.Track(types.Event{
 		Dt:    "evt",
 		Pl:    "js",
 		Debug: util.Ternary(srv.Debug, int(1), int(0)).Int(),
+		Ip:    ip,
 		Pr: types.EventJs{
 			Ct:   time.Now().UnixMilli(),
 			Eid:  eventName,

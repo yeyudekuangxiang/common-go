@@ -395,3 +395,8 @@ type FindCouponHistoryParams struct {
 	StartTime time.Time `json:"startTime"`
 	EndTime   time.Time `json:"endTime"`
 }
+
+type GetUserExtendBy struct {
+	OpenId string
+	Uid    int64
+}
