@@ -200,7 +200,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		}
 
 		key := "push_topic_v2"
-		if resNumber == 1 {
+		if resNumber == 1 || resNumber == 2 {
 			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_ARTICLE,
@@ -311,7 +311,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 		}
 
 		key := "essence_topic_v2"
-		if resNumber == 1 {
+		if resNumber == 1 || resNumber == 2 {
 			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_RECOMMEND,

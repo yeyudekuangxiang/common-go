@@ -168,7 +168,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	}
 	point := 0
 
-	if resNumber == 1 {
+	if resNumber == 1 || resNumber == 2 {
 		pointService := service.NewPointService(ctx)
 		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       user.OpenId,

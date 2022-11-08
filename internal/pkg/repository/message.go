@@ -64,7 +64,7 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.Use
 		query = query.Offset(params.Offset)
 	}
 
-	err := query.Order("mcustomer.created_at desc").Find(&resp).Error
+	err := query.Order("mcustomer.status asc,mcustomer.created_at desc").Find(&resp).Error
 
 	if err == nil {
 		return resp, total, nil
