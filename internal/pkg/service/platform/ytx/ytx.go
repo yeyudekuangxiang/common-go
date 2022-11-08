@@ -122,8 +122,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		PlatformKey: "yitongxing",
 		OpenId:      user.OpenId,
 	})
-	app.Logger.Errorf("亿通行发放红包记录openid:%s", user.OpenId)
-
+	app.Logger.Info(fmt.Printf("亿通行发转盘红包openid: %s,typeId:%d,amount %g", user.OpenId, typeId, amount))
 	if sceneUser.PlatformUserId == "" {
 		return "", errno.ErrBindRecordNotFound
 	}
@@ -137,7 +136,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 			PoolCode: srv.option.PoolCode,
 			Amount:   amount,
 			OpenId:   sceneUser.PlatformUserId,
-			Remark:   "lvmiao5元红包",
+			Remark:   "lvmiao" + strconv.FormatFloat(1, 'f', -1, 64) + "元红包",
 		},
 	}
 
