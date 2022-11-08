@@ -138,7 +138,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 			PoolCode: srv.option.PoolCode,
 			Amount:   amount,
 			OpenId:   sceneUser.PlatformUserId,
-			Remark:   "lvmiao" + strconv.FormatFloat(1, 'f', -1, 64) + "元红包",
+			Remark:   "lvmiao" + strconv.FormatFloat(amount, 'f', -1, 64) + "元红包",
 		},
 	}
 
