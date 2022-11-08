@@ -6,8 +6,8 @@ import (
 	"mio/internal/pkg/core/app"
 	activity3 "mio/internal/pkg/model/entity/activity"
 	activity2 "mio/internal/pkg/repository/activity"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/activity"
+	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 	"strconv"
@@ -91,7 +91,7 @@ func (ctr AnswerController) PutFile(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	object, err := service.DefaultOssService.PutObject(fmt.Sprintf("/activity/gd/%d_%d", user.ID, time.Now().Unix()), open)
+	object, err := oss.DefaultOssService.PutObject(fmt.Sprintf("/activity/gd/%d_%d", user.ID, time.Now().Unix()), open)
 	if err != nil {
 		return nil, err
 	}

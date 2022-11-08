@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -20,7 +20,7 @@ func (ctr *TagController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagAdminService := service.NewTagAdminService(ctx)
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
 
 	list, total, err := tagAdminService.GetTagPageList(repository.GetTagPageListBy{
 		Name:        form.Name,
@@ -46,7 +46,7 @@ func (ctr *TagController) Detail(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagAdminService := service.NewTagAdminService(ctx)
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
 
 	topic := tagAdminService.Detail(form.ID)
 	return gin.H{
@@ -62,7 +62,7 @@ func (ctr *TagController) Update(c *gin.Context) (gin.H, error) {
 
 	//更新帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagAdminService := service.NewTagAdminService(ctx)
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
 
 	err := tagAdminService.Update(repository.UpdateTag{
 		ID: form.ID,
@@ -85,7 +85,7 @@ func (ctr *TagController) Delete(c *gin.Context) (gin.H, error) {
 
 	//更新帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagAdminService := service.NewTagAdminService(ctx)
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
 
 	if err := tagAdminService.Delete(form.ID); err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (ctr *TagController) Create(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagAdminService := service.NewTagAdminService(ctx)
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
 
 	err := tagAdminService.Create(repository.CreateTag{
 		Name:        form.Name,

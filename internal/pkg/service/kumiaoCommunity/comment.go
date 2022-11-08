@@ -1,4 +1,4 @@
-package service
+package kumiaoCommunity
 
 import (
 	"fmt"
@@ -36,6 +36,7 @@ type defaultCommentService struct {
 	ctx              *context.MioContext
 	commentModel     repository.CommentModel
 	commentLikeModel repository.CommentLikeModel
+	topicModel       repository.TopicModel
 }
 
 func NewCommentService(ctx *context.MioContext) CommentService {
@@ -43,6 +44,7 @@ func NewCommentService(ctx *context.MioContext) CommentService {
 		ctx:              ctx,
 		commentModel:     repository.NewCommentModel(ctx),
 		commentLikeModel: repository.NewCommentLikeRepository(ctx),
+		topicModel:       repository.NewTopicModel(ctx),
 	}
 }
 
@@ -183,14 +185,15 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 }
 
 func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, int64, error) {
-	topic, err := DefaultTopicService.DetailTopic(topicId)
-	if err != nil {
-		return entity.CommentIndex{}, 0, err
+	topic := srv.topicModel.FindById(topicId)
+
+	if topic.Id == 0 {
+		return entity.CommentIndex{}, 0, errno.ErrRecordNotFound
 	}
 
 	if message != "" {
 		//检查内容
-		if err = validator.CheckMsgWithOpenId(openId, message); err != nil {
+		if err := validator.CheckMsgWithOpenId(openId, message); err != nil {
 			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "发布评论"
@@ -213,7 +216,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		comment.IsAuthor = 1
 	}
 
-	_, err = srv.commentModel.Insert(&comment)
+	_, err := srv.commentModel.Insert(&comment)
 	if err != nil {
 		return entity.CommentIndex{}, 0, err
 	}

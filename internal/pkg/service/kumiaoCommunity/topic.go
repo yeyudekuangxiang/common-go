@@ -1,4 +1,4 @@
-package service
+package kumiaoCommunity
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	"io/ioutil"
-	"log"
 	"math"
 	"math/rand"
 	"mio/config"
@@ -15,6 +14,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
@@ -33,6 +33,7 @@ func NewTopicService(ctx *mioContext.MioContext) TopicService {
 		topicModel:     repository.NewTopicModel(ctx),
 		topicLikeModel: repository.NewTopicLikeRepository(ctx),
 		tagModel:       repository.NewTagModel(ctx),
+		userModel:      repository.NewUserRepository(),
 	}
 }
 
@@ -40,7 +41,8 @@ type TopicService struct {
 	topicModel     repository.TopicModel
 	topicLikeModel repository.TopicLikeModel
 	tagModel       repository.TagModel
-	TokenServer    *wxoa.AccessTokenServer
+	tokenServer    *wxoa.AccessTokenServer
+	userModel      repository.UserRepository
 }
 
 //将 entity.Topic 列表填充为 TopicDetail 列表
@@ -63,16 +65,32 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 
 	//整理数据
 	detailList := make([]TopicDetail, 0)
+	uidsMap := make(map[int64]struct{}, len(topicList))
+	uids := make([]int64, 0)
+	uinfoMap := make(map[int64]entity.ShortUser, 0)
 	for _, topic := range topicList {
-		user, err := DefaultUserService.GetUserById(topic.UserId)
-		if err != nil {
-			return nil, err
+		if _, ok := uidsMap[topic.UserId]; ok {
+			continue
 		}
+		uidsMap[topic.UserId] = struct{}{}
+		uids = append(uids, topic.UserId)
+	}
+	uList := srv.userModel.GetUserListBy(repository.GetUserListBy{
+		UserIds: uids,
+	})
+
+	for _, user := range uList {
+		if _, ok := uidsMap[user.ID]; ok {
+			uinfoMap[user.ID] = user.ShortUser()
+		}
+	}
+
+	for _, topic := range topicList {
 		detailList = append(detailList, TopicDetail{
 			Topic:         topic,
 			IsLike:        topicLikeMap[topic.Id],
 			UpdatedAtDate: topic.UpdatedAt.Format("01-02"),
-			User:          user.ShortUser(),
+			User:          uinfoMap[topic.UserId],
 		})
 	}
 
@@ -115,36 +133,36 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 }
 
 // GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
-func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
-
-	topicList, total := srv.topicModel.GetFlowPageList(repository.GetTopicFlowPageListBy{
-		Offset:     param.Offset,
-		Limit:      param.Limit,
-		UserId:     param.UserId,
-		TopicId:    param.ID,
-		TopicTagId: param.TopicTagId,
-		Status:     entity.TopicStatusPublished,
-	})
-	if total == 0 {
-		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
-		return srv.GetTopicDetailPageList(param)
-	}
-
-	//更新曝光和查看次数
-	srv.UpdateTopicFlowListShowCount(topicList, param.UserId)
-
-	if param.ID != 0 && len(topicList) > 0 {
-		app.Logger.Info("更新查看次数", param.UserId, topicList[0].Id)
-		srv.UpdateTopicSeeCount(topicList[0].Id, param.UserId)
-	}
-
-	topicDetailList, err := srv.fillTopicList(topicList, param.UserId)
-
-	if err != nil {
-		return nil, 0, err
-	}
-	return topicDetailList, total, nil
-}
+//func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+//
+//	topicList, total := srv.topicModel.GetFlowPageList(repository.GetTopicFlowPageListBy{
+//		Offset:     param.Offset,
+//		Limit:      param.Limit,
+//		UserId:     param.UserId,
+//		TopicId:    param.ID,
+//		TopicTagId: param.TopicTagId,
+//		Status:     entity.TopicStatusPublished,
+//	})
+//	if total == 0 {
+//		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
+//		return srv.GetTopicDetailPageList(param)
+//	}
+//
+//	//更新曝光和查看次数
+//	srv.UpdateTopicFlowListShowCount(topicList, param.UserId)
+//
+//	if param.ID != 0 && len(topicList) > 0 {
+//		app.Logger.Info("更新查看次数", param.UserId, topicList[0].Id)
+//		srv.UpdateTopicSeeCount(topicList[0].Id, param.UserId)
+//	}
+//
+//	topicDetailList, err := srv.fillTopicList(topicList, param.UserId)
+//
+//	if err != nil {
+//		return nil, 0, err
+//	}
+//	return topicDetailList, total, nil
+//}
 
 // UpdateTopicSeeCount 更新内容的查看次数加1
 func (srv TopicService) UpdateTopicSeeCount(topicId int64, userId int64) {
@@ -213,64 +231,64 @@ func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	return nil
 }
 
-func (srv TopicService) ImportUser(filename string) error {
-
-	file, err := excelize.OpenFile(filename)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	defer file.Close()
-
-	if file.SheetCount == 0 {
-		return errno.ErrCommon.WithMessage("没有数据")
-	}
-
-	rows, err := file.GetRows(file.GetSheetList()[0])
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	for i, row := range rows {
-		if i == 0 {
-			continue
-		}
-		importId := row[0]
-		nickname := row[1]
-		//avatarImage := row[2]
-		wechat := row[3]
-		phone := row[4]
-		user := entity.User{}
-		if nickname == "星星充电" {
-			app.DB.Where("openid = ?", wechat).First(&user)
-		} else {
-			app.DB.Where("nick_name = ?", nickname).First(&user)
-		}
-
-		if user.ID != 0 {
-			if user.PhoneNumber != phone {
-				return errors.Errorf("存在同名但手机号不同用户 %s", nickname)
-			}
-			log.Println("用户已存在", user)
-			continue
-		}
-
-		avatar, err := srv.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
-		if err != nil {
-			return errors.WithMessage(err, "上传头像失败"+importId)
-		}
-		_, err = DefaultUserService.CreateUser(CreateUserParam{
-			OpenId:      wechat,
-			AvatarUrl:   avatar,
-			Nickname:    nickname,
-			PhoneNumber: phone,
-			Source:      entity.UserSourceMio,
-		})
-		if err != nil {
-			return errors.Errorf("创建用户失败 %s %v", nickname, err)
-		}
-	}
-	return nil
-}
+//func (srv TopicService) ImportUser(filename string) error {
+//
+//	file, err := excelize.OpenFile(filename)
+//	if err != nil {
+//		return errors.WithStack(err)
+//	}
+//	defer file.Close()
+//
+//	if file.SheetCount == 0 {
+//		return errno.ErrCommon.WithMessage("没有数据")
+//	}
+//
+//	rows, err := file.GetRows(file.GetSheetList()[0])
+//	if err != nil {
+//		return errors.WithStack(err)
+//	}
+//
+//	for i, row := range rows {
+//		if i == 0 {
+//			continue
+//		}
+//		importId := row[0]
+//		nickname := row[1]
+//		//avatarImage := row[2]
+//		wechat := row[3]
+//		phone := row[4]
+//		user := entity.User{}
+//		if nickname == "星星充电" {
+//			app.DB.Where("openid = ?", wechat).First(&user)
+//		} else {
+//			app.DB.Where("nick_name = ?", nickname).First(&user)
+//		}
+//
+//		if user.ID != 0 {
+//			if user.PhoneNumber != phone {
+//				return errors.Errorf("存在同名但手机号不同用户 %s", nickname)
+//			}
+//			log.Println("用户已存在", user)
+//			continue
+//		}
+//
+//		avatar, err := srv.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
+//		if err != nil {
+//			return errors.WithMessage(err, "上传头像失败"+importId)
+//		}
+//		_, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
+//			OpenId:      wechat,
+//			AvatarUrl:   avatar,
+//			Nickname:    nickname,
+//			PhoneNumber: phone,
+//			Source:      entity.UserSourceMio,
+//		})
+//		if err != nil {
+//			return errors.Errorf("创建用户失败 %s %v", nickname, err)
+//		}
+//	}
+//	return nil
+//}
 
 func (srv TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 	file, err := os.Open(filepath)
@@ -286,11 +304,11 @@ func (srv TopicService) uploadImportUserAvatar(filepath string) (string, error) 
 
 	defer file.Close()
 
-	avatarPath, err := DefaultOssService.PutObject(name, file)
+	avatarPath, err := oss.DefaultOssService.PutObject(name, file)
 	if err != nil {
 		return "", err
 	}
-	return DefaultOssService.FullUrl(avatarPath), nil
+	return oss.DefaultOssService.FullUrl(avatarPath), nil
 }
 
 func (srv TopicService) UploadImportTopicImage(dirPath string) ([]string, error) {
@@ -313,12 +331,12 @@ func (srv TopicService) UploadImportTopicImage(dirPath string) ([]string, error)
 		name := fmt.Sprintf("images/topic/%s/%s/%s", path.Base(path.Dir(dirPath)), path.Base(dirPath), fileInfo.Name())
 
 		fmt.Println("上传内容图片", path.Join(dirPath, fileInfo.Name()), name)
-		topicPath, err := DefaultOssService.PutObject(name, file)
+		topicPath, err := oss.DefaultOssService.PutObject(name, file)
 		if err != nil {
 			file.Close()
 			return nil, err
 		}
-		images = append(images, DefaultOssService.FullUrl(topicPath))
+		images = append(images, oss.DefaultOssService.FullUrl(topicPath))
 	}
 	return images, nil
 }
@@ -640,12 +658,6 @@ func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	if topic.Id == 0 {
 		return topic, errno.ErrCommon.WithMessage("数据不存在")
 	}
-	//更新查看次数 todo
-	err := srv.topicModel.UpdateColumn(topicId, "see_count", topic.SeeCount+1)
-	if err != nil {
-		return topic, errno.ErrInternalServer
-	}
-
 	return topic, nil
 }
 

@@ -7,7 +7,7 @@ package topic
 import (
 	"github.com/spf13/cobra"
 	"log"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"strconv"
 )
 
@@ -41,13 +41,13 @@ to quickly create a Cobra application.`,
 		}
 
 		if userPath != "" {
-			err = service.DefaultTopicService.ImportUser(userPath)
+			err = kumiaoCommunity.DefaultTopicService.ImportUser(userPath)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 
-		err = service.DefaultTopicService.ImportTopic(topicPath, importId)
+		err = kumiaoCommunity.DefaultTopicService.ImportTopic(topicPath, importId)
 		if err != nil {
 			log.Fatal(err)
 		}

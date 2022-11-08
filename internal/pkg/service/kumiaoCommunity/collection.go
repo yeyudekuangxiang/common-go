@@ -1,4 +1,4 @@
-package service
+package kumiaoCommunity
 
 import (
 	mioContext "mio/internal/pkg/core/context"
@@ -165,7 +165,7 @@ func (d defaultCollectionService) CancelCollection(objId int64, objType int, ope
 		if err != nil {
 			return err
 		}
-		
+
 		if result.Status == 0 {
 			return nil
 		}

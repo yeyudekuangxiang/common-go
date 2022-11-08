@@ -1,4 +1,4 @@
-package service
+package kumiaoCommunity
 
 import (
 	"github.com/mlogclub/simple"
