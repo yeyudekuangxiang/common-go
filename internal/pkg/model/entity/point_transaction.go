@@ -54,7 +54,7 @@ func (p PointTransactionType) Text() string {
 		return "系统扣减"
 	case POINT_SYSTEM_ADD:
 		return "系统补发"
-	case POINT_JHX, POINT_YTX:
+	case POINT_JHX:
 		return "公交出行"
 	case POINT_PLATFORM:
 		return "活动奖励" //平台活动
@@ -78,6 +78,8 @@ func (p PointTransactionType) Text() string {
 		return "零碳小先锋"
 	case POINT_CYCLING:
 		return "骑行"
+	case POINT_YTX:
+		return "地铁出行"
 	}
 	return "未知积分"
 }
@@ -121,6 +123,8 @@ func (p PointTransactionType) RealText() string {
 		return "快电"
 	case POINT_CYCLING:
 		return "骑行"
+	case POINT_YTX:
+		return "亿通行"
 	}
 	return p.Text()
 }

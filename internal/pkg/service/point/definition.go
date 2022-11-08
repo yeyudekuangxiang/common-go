@@ -46,4 +46,5 @@ var pageDataMap = map[string]*commandDescription{
 	"FMY_RECYCLE":      {FnPageData: (*defaultClientHandle).fmyRecyclePageData},
 	"REDUCE_PLASTIC":   {FnPageData: (*defaultClientHandle).reducePlasticPageData},
 	"JHX":              {FnPageData: (*defaultClientHandle).jhxPageData},
+	"YTX":              {FnPageData: (*defaultClientHandle).ytxPageData},
 }
