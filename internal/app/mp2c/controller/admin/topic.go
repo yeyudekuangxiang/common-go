@@ -146,11 +146,28 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	//更新帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	adminTopicService := service.NewTopicAdminService(ctx)
+	messageService := message.NewWebMessageService(ctx)
 
-	if err := adminTopicService.DeleteTopic(form.ID, form.Reason); err != nil {
+	topic, err := adminTopicService.DeleteTopic(form.ID, form.Reason)
+
+	if err != nil {
 		return nil, err
 	}
-	//
+
+	//发消息
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   0,
+		RecId:    topic.User.ID,
+		Key:      "down_topic",
+		TurnId:   topic.Id,
+		TurnType: 1,
+		Type:     4,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【文章下架】站内信发送失败:%s", err.Error())
+	}
+
 	return nil, nil
 }
 
@@ -240,27 +257,28 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	adminTopicService := service.NewTopicAdminService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	topic, _, err := adminTopicService.Top(form.ID, form.IsTop)
+	topic, isFirst, err := adminTopicService.Top(form.ID, form.IsTop)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//if isFirst {
-	//发消息
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   0,
-		RecId:    topic.UserId,
-		Key:      "top_topic_v2",
-		TurnType: 1,
-		TurnId:   topic.Id,
-		Type:     5,
-	})
+	if isFirst {
+		//发消息
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    topic.UserId,
+			Key:      "top_topic_v2",
+			TurnType: 1,
+			TurnId:   topic.Id,
+			Type:     5,
+		})
 
-	if err != nil {
-		app.Logger.Errorf("【文章置顶】站内信发送失败:%s", err.Error())
+		if err != nil {
+			app.Logger.Errorf("【文章置顶】站内信发送失败:%s", err.Error())
+		}
+
 	}
-	//}
 
 	return nil, nil
 }

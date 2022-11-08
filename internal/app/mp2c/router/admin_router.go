@@ -68,6 +68,7 @@ func adminRouter(router *gin.Engine) {
 			articleRouter.POST("/top", apiutil.Format(admin.DefaultTopicController.Top))         //置顶
 			articleRouter.POST("/essence", apiutil.Format(admin.DefaultTopicController.Essence)) //精华
 		}
+
 		//后台接口-评论管理
 		commentRouter := adminRouter.Group("/comment")
 		{
