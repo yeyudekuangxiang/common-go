@@ -51,12 +51,18 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 
 	//绑定
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
-	if err != nil && err != errno.ErrExisting {
-		return nil, errno.ErrInternalServer.WithErr(err)
+	if err != nil {
+		if err != errno.ErrExisting {
+			return nil, errno.ErrCommon.WithMessage(scene.Ch + "用户绑定失败")
+		}
+		return gin.H{
+			"memberId":     sceneUser.PlatformUserId,
+			"lvmiaoUserId": sceneUser.OpenId,
+		}, nil
 	}
 
 	//绑定回调
-	if scene.Ch == "jinhuaxing" && err != errno.ErrExisting {
+	if scene.Ch == "jinhuaxing" {
 		params := make(map[string]interface{}, 0)
 		params["mobile"] = user.PhoneNumber
 		params["status"] = "1"
@@ -66,7 +72,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
 		}
 	}
-	if scene.Ch == "yitongxing" && err != errno.ErrExisting {
+	if scene.Ch == "yitongxing" {
 		params := make(map[string]interface{}, 0)
 		params["memberId"] = sceneUser.PlatformUserId
 		params["openId"] = sceneUser.OpenId

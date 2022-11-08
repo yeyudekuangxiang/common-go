@@ -112,6 +112,7 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	commentMap := make(map[int64]struct{}, l+1)
 	orderMap := make(map[int64]struct{}, l+1)
 	goodsMap := make(map[int64]struct{}, l+1)
+
 	for i, item := range msgList {
 		one := &GetWebMessageResp{}
 		_ = util.MapTo(item, one)
@@ -131,6 +132,7 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 		if item.TurnType == 4 {
 			goodsMap[item.TurnId] = struct{}{}
 		}
+
 	}
 
 	//User
@@ -152,7 +154,12 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	gMap := d.turnGoods(goodsMap)     // 商品
 
 	for _, item := range result {
-		item.User = uMap[item.SendId]
+		if item.SendId == 0 {
+			item.User.Nickname = "酷喵圈"
+			item.User.AvatarUrl = "https://resources.miotech.com/static/mp2c/user/avatar/oy_BA5Jod6_ItzG6bvmPAX2kRYz8/21a36ea8-b252-406e-881c-1ee97334a594.png"
+		} else {
+			item.User = uMap[item.SendId]
+		}
 		//文章组合
 		if item.TurnType == 1 {
 			item.TurnNotes = tMap[item.TurnId]
