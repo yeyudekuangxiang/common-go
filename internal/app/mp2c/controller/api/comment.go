@@ -188,7 +188,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	t := 2
 	if form.Parent != 0 {
 		msgKey = "reply_comment"
-		turnId = comment.Id
+		turnId = comment.ToCommentId
 		turnType = 2
 		t = 3
 	}
