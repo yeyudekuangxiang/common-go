@@ -18,6 +18,7 @@ import (
 )
 
 func InitLog() {
+	logx.DisableStat()
 	if config.Config.AliLog.AccessKey != "" && config.Config.AliLog.AccessSecret != "" {
 		log.Println("发现阿里云日志配置,自动初始化阿里云日志")
 		InitAliyunLog()
@@ -28,9 +29,9 @@ func InitLog() {
 }
 func InitConsoleLog() {
 	log.Println("初始化控制台日志组件...")
-	logger := mzap.NewConsoleLogger(config.Config.Log.Level, zap.AddCaller(), wxRobotHook).With(mzap.LogOperation)
-	s := logger.Sugar()
+	logger := mzap.NewConsoleLogger("debug", zap.AddCaller(), wxRobotHook)
 	*app.OriginLogger = *logger
+	s := logger.WithOptions(zap.IncreaseLevel(mzap.LevelMap[config.Config.Log.Level])).With(mzap.LogOperation).Sugar()
 	*app.Logger = *s
 	log.Println("初始化控制台日志组件成功")
 }
@@ -44,9 +45,15 @@ func InitFileLog() {
 	}
 	loggerConfig.Path = "runtime"
 	loggerConfig.FileName = "log.log"
-	logger := mzap.NewFileLogger(loggerConfig, zap.AddCaller(), wxRobotHook).With(mzap.LogOperation)
-	s := logger.Sugar()
+	logger := mzap.NewFileLogger(mzap.LoggerConfig{
+		Level:    "debug",
+		Path:     loggerConfig.Path,
+		FileName: loggerConfig.FileName,
+		MaxSize:  loggerConfig.MaxSize,
+	}, zap.AddCaller(), wxRobotHook)
 	*app.OriginLogger = *logger
+
+	s := logger.WithOptions(zap.IncreaseLevel(mzap.LevelMap[loggerConfig.Level])).With(mzap.LogOperation).Sugar()
 	*app.Logger = *s
 	log.Println("初始化文件日志组件成功")
 }
@@ -60,23 +67,25 @@ func InitAliyunLog() {
 	})
 	prd.Start()
 
-	//替换
+	//替换zero log
 	aliWriter := aliyunzero.NewAlyWriter(prd, aliyunzero.Option{
 		Project:  aliConfig.ProjectName,
 		LogStore: aliConfig.LogStore,
 	}).With(aliyunzero.LogTopicOperation)
 	logx.SetWriter(aliWriter)
 
+	//zap logger
 	core := aliyunzap.NewAliYunCore(aliyunzap.DefaultEncoder, prd, aliyunzap.LogConfig{
 		ProjectName:  aliConfig.ProjectName,
 		LogStore:     aliConfig.LogStore,
 		Topic:        aliConfig.Topic,
 		Source:       aliConfig.Source,
-		LevelEnabler: mzap.LevelMap[aliConfig.Level],
+		LevelEnabler: zap.DebugLevel,
 	})
-	logger := zap.New(core, zap.AddCaller()).With(mzap.LogOperation)
-	s := logger.Sugar()
+	logger := zap.New(core, zap.AddCaller(), wxRobotHook)
 	*app.OriginLogger = *logger
+
+	s := logger.WithOptions(zap.IncreaseLevel(mzap.LevelMap[config.Config.Log.Level])).With(mzap.LogOperation).Sugar()
 	*app.Logger = *s
 	log.Println("初始化阿里云日志组件成功")
 }
