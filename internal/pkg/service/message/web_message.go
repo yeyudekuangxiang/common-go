@@ -189,12 +189,12 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	}
 
 	if param.TurnType == 1 {
-		obj := d.topic.FindById(param.TurnId)
+		obj := d.topic.FindById(param.ForId)
 		content = strings.ReplaceAll(content, "{0}", obj.Title)
 	}
 
 	if param.TurnType == 2 {
-		obj, _ := d.comment.FindOne(param.TurnId)
+		obj, _ := d.comment.FindOne(param.ForId)
 		content = strings.ReplaceAll(content, "{0}", obj.Message)
 	}
 
