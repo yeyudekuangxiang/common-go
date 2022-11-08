@@ -124,10 +124,12 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		PlatformKey: "yitongxing",
 		OpenId:      user.OpenId,
 	})
-	app.Logger.Info(fmt.Printf("亿通行发转盘红包openid: %s,typeId:%d,amount %g", user.OpenId, typeId, amount))
+
 	if sceneUser.PlatformUserId == "" {
+		app.Logger.Errorf("亿通行-未找到绑定关系: %s", user.OpenId)
 		return "", errno.ErrBindRecordNotFound
 	}
+
 	rand.Seed(time.Now().UnixNano())
 	grantV2Request := GrantV2Request{
 		AppId:     srv.option.AppId,
@@ -144,7 +146,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 	url := srv.option.Domain + "/markting_redenvelopegateway/redenvelope/grantV2"
 	body, err := httputil.PostJson(url, grantV2Request)
-	fmt.Printf("ytx synchro response body: %s\n", body)
+	app.Logger.Infof("亿通行-grantV2返回body: %s\n", body)
 	if err != nil {
 		return "", err
 	}
@@ -152,7 +154,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	response := GrantV2Response{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		fmt.Printf("Unmarshal body: %s\n", err.Error())
+		app.Logger.Errorf("亿通行-grantV2 decode json错误: %s\n", err.Error())
 		return "", err
 	}
 
@@ -168,10 +170,11 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行发放红包记录保存失败:%s", err.Error())
+		app.Logger.Errorf("亿通行-发放红包记录保存失败:%s", err.Error())
 	}
 
 	if response.SubCode != "0000" {
+		app.Logger.Errorf("亿通行-grantV2返回错误: %s\n", response.SubMessage)
 		return "", errors.New(response.SubMessage)
 	}
 
@@ -186,6 +189,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
+		app.Logger.Errorf("亿通行-券包发放错误: %s\n", err.Error())
 		return "", err
 	}
 
