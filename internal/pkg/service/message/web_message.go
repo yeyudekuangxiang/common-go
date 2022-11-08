@@ -137,7 +137,7 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 
 	//User
 	var uIds []int64
-	for id, _ := range uKeyMap {
+	for id := range uKeyMap {
 		uIds = append(uIds, id)
 	}
 
@@ -251,7 +251,7 @@ func (d defaultWebMessage) getTemplate(key string) string {
 func (d defaultWebMessage) turnTopic(topicMap map[int64]struct{}) map[int64]string {
 	if len(topicMap) >= 1 {
 		var topicIds []int64
-		for id, _ := range topicMap {
+		for id := range topicMap {
 			topicIds = append(topicIds, id)
 		}
 		topicList := d.topic.GetTopicNotes(topicIds)
@@ -279,7 +279,7 @@ func (d defaultWebMessage) turnTopic(topicMap map[int64]struct{}) map[int64]stri
 func (d defaultWebMessage) turnComment(commentMap map[int64]struct{}) map[int64]string {
 	if len(commentMap) >= 1 {
 		var commentIds []int64
-		for id, _ := range commentMap {
+		for id := range commentMap {
 			commentIds = append(commentIds, id)
 		}
 		commentList := d.comment.FindListByIds(commentIds)

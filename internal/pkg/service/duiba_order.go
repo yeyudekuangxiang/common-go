@@ -111,7 +111,7 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 
 	zhuGeAttr["用户uid"] = uid
 	zhuGeAttr["兑吧订单号"] = order.OrderNum
-	zhuGeAttr["下单时间"] = timeutils.UnixToTime(order.CreateTime.ToInt() / 1000)
+	zhuGeAttr["下单时间"] = timeutils.UnixMilli(order.CreateTime.ToInt()).Format(timeutils.TimeFormat)
 	zhuGeAttr["消耗积分数"] = order.TotalCredits
 	zhuGeAttr["支付金额"] = order.ConsumerPayPrice
 	zhuGeAttr["兑换类型"] = order.Source
