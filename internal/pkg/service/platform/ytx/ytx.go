@@ -122,6 +122,8 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		PlatformKey: "yitongxing",
 		OpenId:      user.OpenId,
 	})
+	app.Logger.Errorf("亿通行发放红包记录openid:%s", user.OpenId)
+
 	if sceneUser.PlatformUserId == "" {
 		return "", errno.ErrBindRecordNotFound
 	}
