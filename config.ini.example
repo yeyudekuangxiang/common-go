@@ -68,7 +68,6 @@ AccessKey=
 AccessSecret=
 ProjectName=lvmiao
 LogStore=mp2c-go-dev
-Level=info
 Topic=
 Source=
 

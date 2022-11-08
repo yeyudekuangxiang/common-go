@@ -1,24 +1,41 @@
 package initialize
 
 import (
+	"gorm.io/gorm/logger"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/util"
 	"mio/pkg/db"
 	mzap "mio/pkg/logger/zap"
 )
 
+//Silent Error Warn Info
+var gormLevelMap = map[string]logger.LogLevel{
+	"Silent": logger.Silent,
+	"Error":  logger.Error,
+	"Warn":   logger.Warn,
+	"Info":   logger.Info,
+}
+
 func InitDB() {
 	log.Println("初始化数据库连接...")
-	var conf db.Config
-	err := util.MapTo(config.Config.Database, &conf)
-	if err != nil {
-		log.Panic(err)
+	dbc := config.Config.Database
+
+	zlogger := app.OriginLogger.With(mzap.LogDatabase)
+	conf := db.Config{
+		Type:         dbc.Type,
+		Host:         dbc.Host,
+		UserName:     dbc.UserName,
+		Password:     dbc.Password,
+		Database:     dbc.Database,
+		Port:         dbc.Port,
+		TablePrefix:  dbc.TablePrefix,
+		MaxOpenConns: dbc.MaxOpenConns,
+		MaxIdleConns: dbc.MaxIdleConns,
+		MaxLifetime:  dbc.MaxLifetime,
+		Logger:       mzap.NewGormLogger(zlogger.Sugar()).LogMode(gormLevelMap[dbc.LogLevel]),
 	}
 
-	logger := app.OriginLogger.With(mzap.LogDatabase)
-	conf.Logger = mzap.NewGormLogger(logger.Sugar())
 	gormDb, err := db.NewDB(conf)
 	if err != nil {
 		log.Panic(err)
@@ -29,13 +46,23 @@ func InitDB() {
 
 func InitBusinessDB() {
 	log.Println("初始化企业版数据库连接...")
-	var conf db.Config
-	err := util.MapTo(config.Config.DatabaseBusiness, &conf)
-	if err != nil {
-		log.Panic(err)
+	dbc := config.Config.Database
+
+	zlogger := app.OriginLogger.With(mzap.LogDatabase)
+	conf := db.Config{
+		Type:         dbc.Type,
+		Host:         dbc.Host,
+		UserName:     dbc.UserName,
+		Password:     dbc.Password,
+		Database:     dbc.Database,
+		Port:         dbc.Port,
+		TablePrefix:  dbc.TablePrefix,
+		MaxOpenConns: dbc.MaxOpenConns,
+		MaxIdleConns: dbc.MaxIdleConns,
+		MaxLifetime:  dbc.MaxLifetime,
+		Logger:       mzap.NewGormLogger(zlogger.Sugar()).LogMode(gormLevelMap[dbc.LogLevel]),
 	}
-	logger := app.OriginLogger.With(mzap.LogDatabase)
-	conf.Logger = mzap.NewGormLogger(logger.Sugar())
+
 	gormDb, err := db.NewDB(conf)
 	if err != nil {
 		log.Panic(err)
