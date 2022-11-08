@@ -185,13 +185,13 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	msgKey := "reply_topic"
 	turnId := comment.ObjId
 	turnType := 1
-	forId := comment.Id
+	showId := comment.Id
 	t := 2
 	if form.Parent != 0 {
 		msgKey = "reply_comment"
 		turnType = 2
 		turnId = comment.ToCommentId
-		forId = comment.Id
+		showId = comment.Id
 		t = 3
 	}
 
@@ -201,7 +201,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		Key:      msgKey,
 		TurnType: turnType,
 		TurnId:   turnId,
-		ForId:    forId,
+		ShowId:   showId,
 		Type:     t,
 	})
 
@@ -322,6 +322,7 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 			TurnType: 2,
 			TurnId:   resp.CommentId,
 			Type:     1,
+			ShowId:   resp.CommentId,
 		})
 
 		if err != nil {

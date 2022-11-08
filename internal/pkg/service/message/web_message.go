@@ -188,14 +188,22 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 		return errors.New("模板不存在")
 	}
 
-	if param.TurnType == 1 {
-		obj := d.topic.FindById(param.ForId)
-		content = strings.ReplaceAll(content, "{0}", obj.Title)
-	}
+	keys := strings.Split(param.Key, "_")
+	if len(keys) > 1 {
+		if keys[0] == "reply" {
+			obj, _ := d.comment.FindOne(param.ShowId)
+			content = strings.ReplaceAll(content, "{0}", obj.Message)
+		} else {
+			if keys[1] == "topic" {
+				obj := d.topic.FindById(param.ShowId)
+				content = strings.ReplaceAll(content, "{0}", obj.Title)
+			}
 
-	if param.TurnType == 2 {
-		obj, _ := d.comment.FindOne(param.ForId)
-		content = strings.ReplaceAll(content, "{0}", obj.Message)
+			if keys[1] == "comment" {
+				obj, _ := d.comment.FindOne(param.ShowId)
+				content = strings.ReplaceAll(content, "{0}", obj.Message)
+			}
+		}
 	}
 
 	//入库

@@ -155,6 +155,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 			TurnType: 1,
 			TurnId:   resp.TopicId,
 			Type:     1,
+			ShowId:   resp.TopicId,
 		})
 		if err != nil {
 			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
