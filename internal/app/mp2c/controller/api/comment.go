@@ -166,8 +166,8 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	point := 0
 
+	point := 0
 	if resNumber == 1 || resNumber == 2 {
 		pointService := service.NewPointService(ctx)
 		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
@@ -185,11 +185,13 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	msgKey := "reply_topic"
 	turnId := comment.ObjId
 	turnType := 1
+	forId := comment.Id
 	t := 2
 	if form.Parent != 0 {
 		msgKey = "reply_comment"
-		turnId = comment.ToCommentId
 		turnType = 2
+		turnId = comment.ToCommentId
+		forId = comment.Id
 		t = 3
 	}
 
@@ -199,6 +201,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		Key:      msgKey,
 		TurnType: turnType,
 		TurnId:   turnId,
+		ForId:    forId,
 		Type:     t,
 	})
 

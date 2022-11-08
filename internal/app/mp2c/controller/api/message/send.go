@@ -3,7 +3,6 @@ package message
 import (
 	"github.com/gin-gonic/gin"
 	"mio/config"
-	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
@@ -73,7 +72,7 @@ func (ctr MsgController) SendSign(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
-	form := api_types.MessageGetTemplateIdForm{}
+	form := MessageGetTemplateIdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -85,7 +84,7 @@ func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
-	form := api_types.WebMessageRequest{}
+	form := WebMessageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -140,14 +139,17 @@ func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
-	form := api_types.HaveReadWebMessageRequest{}
+	form := HaveReadWebMessageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	msgIds := strings.Split(form.MsgIds, ",")
-	if len(msgIds) == 0 {
-		return nil, errno.ErrCommon.WithMessage("参数错误")
+	var msgIds []string
+	if form.MsgIds != "" {
+		ids := strings.Split(strings.Trim(form.MsgIds, ","), ",")
+		if ids[0] != "" {
+			msgIds = ids
+		}
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))

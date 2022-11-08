@@ -38,17 +38,36 @@ func apiRouter(router *gin.Engine) {
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		//tag
-		authRouter.GET("/tag/list", apiutil.Format(api.DefaultTagController.List))
-		authRouter.GET("/tag/detail", apiutil.Format(api.DefaultTagController.DetailTag))
+		tagRouter := authRouter.Group("/tag")
+		{
+			tagRouter.GET("/list", apiutil.Format(api.DefaultTagController.List))
+			tagRouter.GET("/detail", apiutil.Format(api.DefaultTagController.DetailTag))
+		}
 
 		//社区文章列表
-		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
-		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
-		authRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		topicRouter := authRouter.Group("/topic")
+		{
+			topicRouter.POST("/list", apiutil.Format(api.DefaultTopicController.List))
+			topicRouter.GET("/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
+			topicRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		}
 
 		//文章评论列表
-		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
-		authRouter.GET("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
+		commentRouter := authRouter.Group("/topic/comment")
+		{
+			commentRouter.GET("/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
+			commentRouter.GET("/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
+		}
+
+		//统计计数接口
+		countRouter := authRouter.Group("/count")
+		{
+			countRouter.POST("/topic/views")
+			countRouter.POST("/topic/collections")
+			countRouter.POST("/topic/likes")
+			countRouter.POST("/topic/comments")
+			countRouter.POST("/comment/likes")
+		}
 
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 
