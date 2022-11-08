@@ -24,7 +24,7 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	if form.Phone == "" || form.Msg == "" {
 		return nil, errno.ErrCommon.WithMessage("手机号或者msg为空")
 	}
-	err := message.SendSms(form.Phone, form.Msg)
+	err := message.SendSmsV2(form.Phone, form.Msg)
 	if err != nil {
 		log.Println("短信发送失败", err, form.Phone, form.Msg)
 		return nil, err
