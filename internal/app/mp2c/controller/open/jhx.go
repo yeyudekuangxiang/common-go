@@ -71,7 +71,7 @@ func (ctr JhxController) BusTicketNotify(ctx *gin.Context) (gin.H, error) {
 	}
 	sign := form.Sign
 	delete(params, "sign")
-	
+
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	err = jhxService.TicketNotify(sign, params)
 	if err != nil {
