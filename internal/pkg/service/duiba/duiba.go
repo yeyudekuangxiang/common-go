@@ -454,11 +454,19 @@ func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string
 
 func initYtx() *ytx.Service {
 	//bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
-	var options []ytx.Options
+	/*var options []ytx.Options
 	options = append(options, ytx.WithPoolCode("RP202211041000030"))
 	options = append(options, ytx.WithSecret("qR1ubNcPFqpXZZS"))
 	options = append(options, ytx.WithAppId("8c7fd18fab824db69d52739547151e38"))
 	options = append(options, ytx.WithDomain("https://apigw.ruubypay.com"))
+	*/
+	bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
+	var options []ytx.Options
+	options = append(options, ytx.WithPoolCode(bdscene.AppId2))
+	options = append(options, ytx.WithSecret(bdscene.Secret))
+	options = append(options, ytx.WithAppId(bdscene.AppId))
+	options = append(options, ytx.WithDomain(bdscene.Domain))
 	ytxService := ytx.NewYtxService(context.NewMioContext(), options...)
 	return ytxService
+
 }
