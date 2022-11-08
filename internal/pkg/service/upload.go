@@ -5,6 +5,7 @@ import (
 	"io"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -20,20 +21,20 @@ type UploadService struct {
 
 func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filename string, collectType PointCollectType) (string, error) {
 	key := fmt.Sprintf("ocr/%s/%s/%s%s", strings.ToLower(string(collectType)), openid, util.UUID(), path.Ext(filename))
-	ocrPath, err := DefaultOssService.PutObject(key, reader)
+	ocrPath, err := oss.DefaultOssService.PutObject(key, reader)
 	if err != nil {
 		return "", err
 	}
-	return DefaultOssService.FullUrl(ocrPath), nil
+	return oss.DefaultOssService.FullUrl(ocrPath), nil
 }
 
 func (srv UploadService) UploadImage(openid string, reader io.Reader, filename string, scene string) (string, error) {
-	key := fmt.Sprintf("%s%s/%s%s", strings.TrimLeft(scene, DefaultOssService.BasePath), openid, util.UUID(), path.Ext(filename))
-	ocrPath, err := DefaultOssService.PutObject(key, reader)
+	key := fmt.Sprintf("%s%s/%s%s", strings.TrimLeft(scene, oss.DefaultOssService.BasePath), openid, util.UUID(), path.Ext(filename))
+	ocrPath, err := oss.DefaultOssService.PutObject(key, reader)
 	if err != nil {
 		return "", err
 	}
-	return DefaultOssService.FullUrl(ocrPath), nil
+	return oss.DefaultOssService.FullUrl(ocrPath), nil
 }
 
 //CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
@@ -68,7 +69,7 @@ func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, 
 		return nil, err
 	}
 
-	tokenInfo, err := DefaultOssService.GetPolicyToken(srv_types.GetOssPolicyTokenParam{
+	tokenInfo, err := oss.DefaultOssService.GetPolicyToken(srv_types.GetOssPolicyTokenParam{
 		ExpireTime:  time.Minute * 5,
 		MaxSize:     uploadScene.MaxSize,
 		UploadDir:   uploadScene.OssDir,
@@ -107,7 +108,7 @@ func (srv UploadService) GetUrlByLogId(logId string) (string, error) {
 
 func (srv UploadService) MultipartUploadOcrImage(openid string, reader io.Reader, filename string) (string, error) {
 	key := fmt.Sprintf("multpart/%s/%s/%s", openid, util.UUID(), path.Ext(filename))
-	ocrPath, err := DefaultOssService.MultipartPutObject(key, reader, filename)
+	ocrPath, err := oss.DefaultOssService.MultipartPutObject(key, reader, filename)
 	if err != nil {
 		return "", err
 	}
@@ -147,7 +148,7 @@ func (srv UploadService) CreateStsToken(operatorId int64, operatorType int8, sce
 	}
 
 	fmt.Println("路径", path.Join("acs:oss:*:*:miotech-resource", uploadScene.OssDir, "*"))
-	cert, err := DefaultOssService.GetSTSToken(srv_types.AssumeRoleParam{
+	cert, err := oss.DefaultOssService.GetSTSToken(srv_types.AssumeRoleParam{
 		Scheme:          "https",
 		Method:          "POST",
 		RoleArn:         "acs:ram::1742387841614768:role/corplinkosscrurole-miotech-resource",

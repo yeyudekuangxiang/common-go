@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
 	"time"
@@ -23,7 +23,7 @@ func (ctr *CommentController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminCommentService := service.NewCommentAdminService(ctx)
+	adminCommentService := kumiaoCommunity.NewCommentAdminService(ctx)
 
 	list, total, err := adminCommentService.CommentList(form.Comment, form.UserId, form.TopicId, form.Limit(), form.Offset())
 	if err != nil {
@@ -44,7 +44,7 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminCommentService := service.NewCommentAdminService(ctx)
+	adminCommentService := kumiaoCommunity.NewCommentAdminService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
 	comment, err := adminCommentService.DelCommentSoft(form.ID, form.Reason)

@@ -15,6 +15,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -391,7 +392,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	//更新特殊用户的数据
 	if ok && specialUser.ID != 0 && !u.checkOpenId(userByMobile.OpenId) && specialUser.Status == 0 {
 		//更新topic userid
-		err := DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
+		err := kumiaoCommunity.DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
 		if err != nil {
 			app.Logger.Info("special用户topic数据更新失败", err.Error())
 		}

@@ -7,7 +7,15 @@ import (
 	"time"
 )
 
-//(log10())
+/*
+
+log10(Qviews)*4	: 浏览次数
+Qscore*Qanswers/5 : Qscore 得分 Qanswers 评论
+Ascores: 回答得分
+Qage: 距离问题发表的时间
+Qupdated: 距离最后一个回答的时间
+
+*/
 func hot(Qviews, Qanswers, Qscore, Ascores float64, dataAsk, dateActive time.Time) {
 	Qage := time.Now().Sub(dataAsk).Seconds()
 	Qage, _ = decimal.NewFromFloat(Qage / 3600).Round(1).Float64()

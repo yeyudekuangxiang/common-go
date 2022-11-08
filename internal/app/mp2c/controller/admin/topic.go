@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -53,7 +54,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 
 	//get topic by params
 	list, total, err := adminTopicService.GetTopicList(cond)
@@ -92,7 +93,7 @@ func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 
 	topic, err := adminTopicService.DetailTopic(form.ID)
 	if err != nil {
@@ -110,7 +111,7 @@ func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 	}
 	//创建帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 
 	err := adminTopicService.CreateTopic(int64(1451), form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
@@ -127,7 +128,7 @@ func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 	}
 	//更新帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 
 	err := adminTopicService.UpdateTopic(form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
@@ -145,7 +146,7 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 
 	//更新帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
 	topic, err := adminTopicService.DeleteTopic(form.ID, form.Reason)
@@ -179,7 +180,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 
 	topic, isFirst, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
 	if err != nil {
@@ -254,7 +255,7 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
 	topic, isFirst, err := adminTopicService.Top(form.ID, form.IsTop)
@@ -291,7 +292,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	adminTopicService := service.NewTopicAdminService(ctx)
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
 	pointService := service.NewPointService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 

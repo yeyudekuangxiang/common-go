@@ -5,7 +5,7 @@ import (
 	"mio/internal/pkg/core/context"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -21,7 +21,7 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagService := service.NewTagService(ctx)
+	tagService := kumiaoCommunity.NewTagService(ctx)
 
 	list, total, err := tagService.GetTagPageList(repository.GetTagPageListBy{
 		ID:      form.ID,
@@ -47,7 +47,7 @@ func (TagController) DetailTag(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagService := service.NewTagService(ctx)
+	tagService := kumiaoCommunity.NewTagService(ctx)
 
 	tag, err := tagService.GetOne(form.ID)
 	if err != nil {
