@@ -54,6 +54,8 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.Use
 		query = query.Where("mcustomer.created_at < ?", params.EndTime)
 	}
 
+	query = query.Count(&total)
+
 	if params.Limit != 0 {
 		query = query.Limit(params.Limit)
 	}
@@ -62,7 +64,7 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.Use
 		query = query.Offset(params.Offset)
 	}
 
-	err := query.Count(&total).Order("mcustomer.created_at desc").Find(&resp).Error
+	err := query.Order("mcustomer.created_at desc").Find(&resp).Error
 
 	if err == nil {
 		return resp, total, nil
