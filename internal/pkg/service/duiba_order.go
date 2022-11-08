@@ -64,7 +64,7 @@ func (srv DuiBaOrderService) CreateOrUpdate(orderId string, info duibaApi.OrderI
 
 	//只有成功才能上报到诸葛
 	if info.OrderStatus == "success" {
-		srv.OrderMaiDian(info, user.ID, user.OpenId)
+		err = srv.OrderMaiDian(info, user.ID, user.OpenId)
 	}
 
 	return &order, srv.repo.Save(&order)

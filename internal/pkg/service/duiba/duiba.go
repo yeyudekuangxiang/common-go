@@ -412,35 +412,35 @@ func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string
 		}
 		return nil
 	case virtualCouponYtx1Yuan:
-		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService := initYtx()
 		_, err = ytxService.SendCoupon(1001, 1, *user)
 		if err != nil {
 			return err
 		}
 		return nil
 	case virtualCouponYtx2Yuan:
-		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService := initYtx()
 		_, err = ytxService.SendCoupon(1001, 2, *user)
 		if err != nil {
 			return err
 		}
 		return nil
 	case virtualCouponYtx5Yuan:
-		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService := initYtx()
 		_, err = ytxService.SendCoupon(1001, 5, *user)
 		if err != nil {
 			return err
 		}
 		return nil
 	case virtualCouponYtx10Yuan:
-		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService := initYtx()
 		_, err = ytxService.SendCoupon(1001, 10, *user)
 		if err != nil {
 			return err
 		}
 		return nil
 	case virtualCouponYtx30Yuan:
-		ytxService := ytx.NewYtxService(context.NewMioContext())
+		ytxService := initYtx()
 		_, err = ytxService.SendCoupon(1001, 30, *user)
 		if err != nil {
 			return err
@@ -450,4 +450,15 @@ func (srv DuiBaService) SendVirtualCoupon(orderNum, openid, productItemId string
 
 	app.Logger.Error("未知的虚拟商品类型", orderNum, openid, productItemId)
 	return errno.ErrCommon.WithMessage("未知的虚拟商品类型")
+}
+
+func initYtx() *ytx.Service {
+	//bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
+	var options []ytx.Options
+	options = append(options, ytx.WithPoolCode("RP202211041000030"))
+	options = append(options, ytx.WithSecret("qR1ubNcPFqpXZZS"))
+	options = append(options, ytx.WithAppId("8c7fd18fab824db69d52739547151e38"))
+	options = append(options, ytx.WithDomain("https://apigw.ruubypay.com"))
+	ytxService := ytx.NewYtxService(context.NewMioContext(), options...)
+	return ytxService
 }
