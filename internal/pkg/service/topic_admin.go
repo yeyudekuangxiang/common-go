@@ -183,18 +183,26 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 }
 
 // DeleteTopic 删除（下架）
-func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) error {
+func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) (*entity.Topic, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&entity.Topic{}).Preload("Tags").Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
-		return errno.ErrCommon.WithMessage("数据不存在")
+		return nil, errno.ErrCommon.WithMessage("数据不存在")
 	}
-	err := app.DB.Model(&topic).Updates(entity.Topic{Status: 4, DelReason: reason}).Error
+
+	if topic.Status == 4 {
+		return nil, nil
+	}
+
+	topic.Status = 4
+	topic.DelReason = reason
+
+	err := srv.topicModel.Save(topic)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	return topic, nil
 }
 
 // Review 审核
@@ -209,14 +217,19 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 
 	if topic.PushTime.IsZero() {
 		isFirst = true
+	} else if topic.DownTime.IsZero() {
+		isFirst = true
 	}
 
 	if status == entity.TopicStatusPublished {
+		topic.Status = entity.TopicStatusPublished
 		topic.PushTime = model.NewTime()
 	}
 
 	if status == entity.TopicStatusHidden {
+		topic.Status = entity.TopicStatusHidden
 		topic.DownTime = model.NewTime()
+		topic.DelReason = reason
 	}
 
 	//更新帖子
@@ -256,10 +269,15 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topi
 	topic := srv.topicModel.FindById(topicId)
 	var isFirst bool
 	if topic.Id == 0 {
-		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
+		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
 	}
+
+	if topic.EssenceTime.IsZero() {
+		isFirst = true
+	}
+
 	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
-		return &entity.Topic{}, isFirst, err
+		return &entity.Topic{}, false, err
 	}
 
 	return topic, isFirst, nil

@@ -13,6 +13,7 @@ type (
 	TopicModel interface {
 		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
+		FindOneTopic(topicId int64) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
@@ -28,6 +29,20 @@ type (
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicRepository) FindOneTopic(topicId int64) (*entity.Topic, error) {
+	var resp entity.Topic
+	err := d.ctx.DB.Model(&entity.Topic{}).WithContext(d.ctx.Context).
+		Where("id = ?", topicId).First(&resp).Error
+	switch err {
+	case nil:
+		return &resp, nil
+	case gorm.ErrRecordNotFound:
+		return nil, entity.ErrNotFount
+	default:
+		return nil, err
+	}
+}
 
 func (d defaultTopicRepository) GetTopicNotes(topicIds []int64) []*entity.Topic {
 	topList := make([]*entity.Topic, 0)
@@ -174,17 +189,17 @@ func (d defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []
 }
 
 func (d defaultTopicRepository) FindById(topicId int64) *entity.Topic {
-	var topic entity.Topic
+	var resp entity.Topic
 	err := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
 		Where("id = ?", topicId).
-		First(&topic).Error
+		First(&resp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
 
-	return &topic
+	return &resp
 }
 
 func (d defaultTopicRepository) Save(topic *entity.Topic) error {
