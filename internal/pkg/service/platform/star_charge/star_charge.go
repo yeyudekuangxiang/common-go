@@ -180,7 +180,7 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 		return err
 	}
 
-	if res1 != 1 {
+	if res1 != 1 && res1 != 2 {
 		return errno.ErrCommon.WithMessage("每日上限1次")
 	}
 
@@ -191,7 +191,7 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 		return err
 	}
 
-	if res2 != 1 {
+	if res2 != 1 && res2 != 2 {
 		return errno.ErrCommon.WithMessage("活动内上限2次")
 	}
 

@@ -192,7 +192,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 	if topic.Status == 3 {
 		keyPrefix := "periodLimit:sendPoint:article:push:"
-		PeriodLimit := limit.NewPeriodLimit(int(time.Hour*24), 2, app.Redis, keyPrefix, limit.Align())
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.Align())
 		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
 
 		if err != nil {
@@ -200,7 +200,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		}
 
 		key := "push_topic_v2"
-		if resNumber == 1 {
+		if resNumber == 1 || resNumber == 2 {
 			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_ARTICLE,
@@ -303,7 +303,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 
 	if topic.IsEssence == 1 {
 		keyPrefix := "periodLimit:sendPoint:article:essence:"
-		PeriodLimit := limit.NewPeriodLimit(int(time.Hour*24), 2, app.Redis, keyPrefix, limit.Align())
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.Align())
 		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
 
 		if err != nil {
@@ -311,7 +311,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 		}
 
 		key := "essence_topic_v2"
-		if resNumber == 1 {
+		if resNumber == 1 || resNumber == 2 {
 			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_RECOMMEND,

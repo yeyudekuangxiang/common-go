@@ -14,9 +14,11 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/limit"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"strconv"
+	"time"
 )
 
 var DefaultCommentController = &CommentController{}
@@ -158,19 +160,25 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		msg = string(messagerune[0:8])
 	}
 
-	point := int64(entity.PointCollectValueMap[entity.POINT_COMMENT])
-	pointService := service.NewPointService(ctx)
-	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       user.OpenId,
-		Type:         entity.POINT_COMMENT,
-		BizId:        util.UUID(),
-		ChangePoint:  point,
-		AdminId:      0,
-		Note:         "评论" + msg + "..." + "成功",
-		AdditionInfo: strconv.FormatInt(form.ObjId, 10) + "#" + strconv.FormatInt(comment.Id, 10),
-	})
+	keyPrefix := "periodLimit:sendPoint:comment:push:"
+	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 3, app.Redis, keyPrefix, limit.Align())
+	resNumber, err := periodLimit.TakeCtx(ctx.Context, user.OpenId)
 	if err != nil {
-		point = 0
+		return nil, err
+	}
+	point := 0
+
+	if resNumber == 1 || resNumber == 2 {
+		pointService := service.NewPointService(ctx)
+		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_COMMENT,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_COMMENT]),
+			AdminId:      0,
+			Note:         "评论" + msg + "..." + "成功",
+			AdditionInfo: strconv.FormatInt(form.ObjId, 10) + "#" + strconv.FormatInt(comment.Id, 10),
+		})
 	}
 
 	//发送消息
