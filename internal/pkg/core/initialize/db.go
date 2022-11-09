@@ -11,10 +11,11 @@ import (
 
 //Silent Error Warn Info
 var gormLevelMap = map[string]logger.LogLevel{
-	"Silent": logger.Silent,
-	"Error":  logger.Error,
-	"Warn":   logger.Warn,
-	"Info":   logger.Info,
+	"silent": logger.Silent,
+	"error":  logger.Error,
+	"warn":   logger.Warn,
+	"info":   logger.Info,
+	"":       logger.Info,
 }
 
 func InitDB() {
