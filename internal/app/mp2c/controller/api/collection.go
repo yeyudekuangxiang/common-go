@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -25,7 +25,7 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	collectionService := service.NewCollectionService(ctx)
+	collectionService := kumiaoCommunity.NewCollectionService(ctx)
 
 	collections, total, err := collectionService.TopicCollections(user.OpenId, form.Limit(), form.Offset())
 	if err != nil {
@@ -36,7 +36,7 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
-	topicLikeService := service.NewTopicLikeService(ctx)
+	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
 	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
@@ -50,7 +50,7 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 		ids = append(ids, item.Id)
 	}
 
-	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
+	rootCommentCount := kumiaoCommunity.DefaultTopicService.GetRootCommentCount(ids)
 
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
@@ -87,8 +87,10 @@ func (ctr CollectionController) Collection(c *gin.Context) (gin.H, error) {
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
-	collectionService := service.NewCollectionService(ctx)
-	err := collectionService.CollectionV2(form.ObjId, form.ObjType, user.OpenId)
+
+	collectionService := kumiaoCommunity.NewCollectionService(ctx)
+	_, err := collectionService.CollectionV2(form.ObjId, form.ObjType, user.OpenId)
+
 	return nil, err
 }
 
@@ -99,7 +101,7 @@ func (ctr CollectionController) CancelCollection(c *gin.Context) (gin.H, error) 
 	}
 
 	user := apiutil.GetAuthUser(c)
-	collectionService := service.NewCollectionService(context.NewMioContext(context.WithContext(c.Request.Context())))
+	collectionService := kumiaoCommunity.NewCollectionService(context.NewMioContext(context.WithContext(c.Request.Context())))
 	err := collectionService.CancelCollection(form.ObjId, form.ObjType, user.OpenId)
 	return nil, err
 }

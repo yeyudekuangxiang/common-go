@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
+	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
@@ -11,7 +12,8 @@ import (
 type (
 	TopicModel interface {
 		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
-		FindById(topicId int64) entity.Topic
+		FindById(topicId int64) *entity.Topic
+		FindOneTopic(topicId int64) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
@@ -20,12 +22,43 @@ type (
 		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
+		GetTopicNotes(topicIds []int64) []*entity.Topic
 	}
 
 	defaultTopicRepository struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicRepository) FindOneTopic(topicId int64) (*entity.Topic, error) {
+	var resp entity.Topic
+	err := d.ctx.DB.Model(&entity.Topic{}).WithContext(d.ctx.Context).
+		Where("id = ?", topicId).First(&resp).Error
+	switch err {
+	case nil:
+		return &resp, nil
+	case gorm.ErrRecordNotFound:
+		return nil, entity.ErrNotFount
+	default:
+		return nil, err
+	}
+}
+
+func (d defaultTopicRepository) GetTopicNotes(topicIds []int64) []*entity.Topic {
+	topList := make([]*entity.Topic, 0)
+	err := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Where("topic.id in ?", topicIds).
+		Where("topic.status = ?", entity.TopicStatusPublished).
+		Group("topic.id").
+		Find(&topList).Error
+	if err != nil {
+		app.Logger.Error(err)
+		return []*entity.Topic{}
+	}
+	return topList
+}
 
 func (d defaultTopicRepository) Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
 	return d.ctx.DB.Transaction(fc, opts...)
@@ -151,16 +184,22 @@ func (d defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []
 	if err != nil {
 		panic(err)
 	}
+
 	return
 }
 
-func (d defaultTopicRepository) FindById(topicId int64) entity.Topic {
-	var topic entity.Topic
-	err := d.ctx.DB.Model(&entity.Topic{}).Preload("User").Preload("Tags").Where("id = ?", topicId).First(&topic).Error
+func (d defaultTopicRepository) FindById(topicId int64) *entity.Topic {
+	var resp entity.Topic
+	err := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Where("id = ?", topicId).
+		First(&resp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
-	return topic
+
+	return &resp
 }
 
 func (d defaultTopicRepository) Save(topic *entity.Topic) error {

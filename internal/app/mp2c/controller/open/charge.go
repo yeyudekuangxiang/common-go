@@ -133,7 +133,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		BizId:        util.UUID(),
 		AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
 	})
-	
+
 	if err != nil {
 		fmt.Println("charge 加积分失败 ", form)
 	}
@@ -201,7 +201,7 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 				return
 			}
 			//限制一次
-			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, startTime.Format("2006-01-02"), endTime.Format("2006-01-02")); err != nil {
+			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, endTime); err != nil {
 				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
 				return

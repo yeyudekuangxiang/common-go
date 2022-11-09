@@ -1,4 +1,4 @@
-package service
+package kumiaoCommunity
 
 import (
 	mioContext "mio/internal/pkg/core/context"
@@ -17,7 +17,7 @@ type (
 		Collection(objId int64, objType int, openId string) error                          //收藏
 		CancelCollection(objId int64, objType int, openId string) error                    //取消收藏
 		Collections(openId string, objType, limit, offset int) []int64                     //收藏数据
-		CollectionV2(objId int64, objType int, openId string) error                        //收藏
+		CollectionV2(objId int64, objType int, openId string) (bool, error)                //收藏
 		FindOneByTopic(topicId int64, openId string) (*entity.Collection, error)
 	}
 
@@ -87,9 +87,9 @@ func (d defaultCollectionService) Collection(objId int64, objType int, openId st
 		return err
 	}
 	//update
-	if result.Status == 2 {
+	if result.Status == 0 {
 		result.Status = 1
-		err = d.collectionModel.Update(result)
+		err = d.collectionModel.Save(result)
 		if err != nil {
 			return err
 		}
@@ -102,13 +102,17 @@ func (d defaultCollectionService) Collection(objId int64, objType int, openId st
 	return nil
 }
 
-func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId string) error {
+func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId string) (bool, error) {
+	var isFirst bool
 	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
 		collectionModel := repository.NewCollectionRepository(ctx)
 		topicModel := repository.NewTopicModel(ctx)
+
 		result, err := collectionModel.FindOneByObj(objId, objType, openId)
+
 		if err != nil {
 			if err == entity.ErrNotFount {
+				isFirst = true
 				//insert
 				data := &entity.Collection{
 					ObjId:     objId,
@@ -129,26 +133,26 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 			}
 			return err
 		}
-		if result.Status == 2 {
+
+		if result.Status == 0 {
 			result.Status = 1
-			err = collectionModel.Update(result)
+			err = collectionModel.Save(result)
 			if err != nil {
 				return err
 			}
-
-			err = topicModel.UpdateColumn(objId, "collection_count", 1)
+			err = topicModel.ChangeTopicCollectionCount(objId, "collection_count", 1)
 			if err != nil {
 				return err
 			}
-
 		}
 		return nil
 	})
+
 	if err != nil {
-		return err
+		return isFirst, err
 	}
 
-	return nil
+	return isFirst, nil
 }
 
 func (d defaultCollectionService) CancelCollection(objId int64, objType int, openId string) error {
@@ -160,18 +164,22 @@ func (d defaultCollectionService) CancelCollection(objId int64, objType int, ope
 		if err != nil {
 			return err
 		}
-		if result.Status == 2 {
+
+		if result.Status == 0 {
 			return nil
 		}
-		result.Status = 2
-		err = collectionModel.Update(result)
+
+		result.Status = 0
+		err = collectionModel.Save(result)
 		if err != nil {
 			return err
 		}
+
 		err = topicModel.ChangeTopicCollectionCount(objId, "collection_count", -1)
 		if err != nil {
 			return err
 		}
+		
 		return nil
 	})
 

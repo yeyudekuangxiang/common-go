@@ -9,6 +9,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/util"
 	"time"
 )
@@ -231,7 +232,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 		}
 
 		fileName := util.UUID() + ".csv"
-		filePath, err := DefaultOssService.PutObject("images/file-export/point/"+fileName, bytes.NewReader(data))
+		filePath, err := oss.DefaultOssService.PutObject("images/file-export/point/"+fileName, bytes.NewReader(data))
 		if err != nil {
 			_, err := DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 				Status:  entity.FileExportStatusFailed,
@@ -244,7 +245,7 @@ func (srv PointTransactionService) ExportPointTransactionList(adminId int, by Ex
 		}
 		_, err = DefaultFileExportService.Update(fileExport.ID, UpdateFileExportParam{
 			Status: entity.FileExportStatusSuccess,
-			Url:    DefaultOssService.FullUrl(filePath),
+			Url:    oss.DefaultOssService.FullUrl(filePath),
 		})
 		if err != nil {
 			app.Logger.Error("更新导出状态失败", fileExport.ID, err)

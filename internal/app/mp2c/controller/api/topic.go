@@ -8,8 +8,13 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
+	"mio/internal/pkg/service/message"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
+	"strconv"
 )
 
 var DefaultTopicController = TopicController{}
@@ -26,7 +31,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 
-	list, total, err := service.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
+	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
 		ID:         form.ID,
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
@@ -51,37 +56,37 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr *TopicController) ListFlow(c *gin.Context) (gin.H, error) {
-	form := GetTopicPageListForm{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
-	}
-
-	user := apiutil.GetAuthUser(c)
-
-	list, total, err := service.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
-		ID:         form.ID,
-		TopicTagId: form.TopicTagId,
-		Offset:     form.Offset(),
-		Limit:      form.Limit(),
-		UserId:     user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]int64, 0)
-	for _, item := range list {
-		ids = append(ids, item.Id)
-	}
-	app.Logger.Infof("user:%d form:%+v ids:%+v", user.ID, form, ids)
-
-	return gin.H{
-		"list":     list,
-		"total":    total,
-		"page":     form.Page,
-		"pageSize": form.PageSize,
-	}, nil
-}
+//func (ctr *TopicController) ListFlow(c *gin.Context) (gin.H, error) {
+//	form := GetTopicPageListForm{}
+//	if err := apiutil.BindForm(c, &form); err != nil {
+//		return nil, err
+//	}
+//
+//	user := apiutil.GetAuthUser(c)
+//
+//	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
+//		ID:         form.ID,
+//		TopicTagId: form.TopicTagId,
+//		Offset:     form.Offset(),
+//		Limit:      form.Limit(),
+//		UserId:     user.ID,
+//	})
+//	if err != nil {
+//		return nil, err
+//	}
+//	ids := make([]int64, 0)
+//	for _, item := range list {
+//		ids = append(ids, item.Id)
+//	}
+//	app.Logger.Infof("user:%d form:%+v ids:%+v", user.ID, form, ids)
+//
+//	return gin.H{
+//		"list":     list,
+//		"total":    total,
+//		"page":     form.Page,
+//		"pageSize": form.PageSize,
+//	}, nil
+//}
 
 //GetShareWeappQrCode 获取分享二维码
 func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
@@ -111,14 +116,56 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(c)
-	topicLikeService := service.NewTopicLikeService(context.NewMioContext(context.WithContext(c.Request.Context())))
-	like, point, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	resp, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
 	if err != nil {
 		return nil, err
 	}
+
+	title := resp.TopicTitle
+	if len([]rune(title)) > 8 {
+		title = string([]rune(title)[0:8]) + "..."
+	}
+
+	var point int64
+	if resp.LikeStatus == 1 && resp.IsFirst == true {
+		pointService := service.NewPointService(ctx)
+		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       user.OpenId,
+			Type:         entity.POINT_LIKE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+			AdminId:      0,
+			Note:         "为文章 \"" + title + "\" 点赞",
+			AdditionInfo: strconv.FormatInt(resp.TopicId, 10),
+		})
+
+		if err == nil {
+			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+		}
+
+		//发送消息
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   user.ID,
+			RecId:    resp.TopicUserId,
+			Key:      "like_topic",
+			TurnType: 1,
+			TurnId:   resp.TopicId,
+			Type:     1,
+			ShowId:   resp.TopicId,
+		})
+		if err != nil {
+			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+		}
+
+	}
+
 	return gin.H{
 		"point":  point,
-		"status": like.Status,
+		"status": resp.LikeStatus,
 	}, nil
 }
 
@@ -130,7 +177,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	list, total, err := service.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
+	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
@@ -142,7 +189,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	resList := make([]*entity.TopicItemRes, 0)
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
-	topicLikeService := service.NewTopicLikeService(ctx)
+	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
 	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
@@ -151,7 +198,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	//收藏数据
 	collectionMap := make(map[int64]struct{}, 0)
-	collectionService := service.NewCollectionService(ctx)
+	collectionService := kumiaoCommunity.NewCollectionService(ctx)
 	collectionIds := collectionService.Collections(user.OpenId, 0, 0, 0)
 	for _, collectionId := range collectionIds {
 		collectionMap[collectionId] = struct{}{}
@@ -163,7 +210,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		ids = append(ids, item.Id)
 	}
 
-	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
+	rootCommentCount := kumiaoCommunity.DefaultTopicService.GetRootCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
@@ -200,7 +247,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//创建帖子
-	topic, err := service.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := kumiaoCommunity.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +270,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	}
 
 	//更新帖子
-	topic, err := service.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := kumiaoCommunity.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +290,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 	//更新帖子
-	err := service.DefaultTopicService.DelTopic(user.ID, form.ID)
+	err := kumiaoCommunity.DefaultTopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -259,9 +306,9 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	topicService := service.NewTopicService(ctx)
-	topicLikeService := service.NewTopicLikeService(ctx)
-	collectService := service.NewCollectionService(ctx)
+	topicService := kumiaoCommunity.NewTopicService(ctx)
+	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
+	collectService := kumiaoCommunity.NewCollectionService(ctx)
 
 	//获取帖子
 	topic, err := topicService.DetailTopic(form.ID)
@@ -285,8 +332,9 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	}
 	// 收藏
 	collection, err := collectService.FindOneByTopic(topic.Id, user.OpenId)
+
 	if err == nil {
-		topicRes.IsCollection = int(collection.Status)
+		topicRes.IsCollection = collection.Status
 	}
 
 	return gin.H{
@@ -301,6 +349,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
+	status := form.Status
 	if form.UserId != 0 {
 		u, b, err := service.DefaultUserService.GetUserByID(form.UserId)
 		if err != nil {
@@ -310,11 +359,12 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 			return nil, errno.ErrUserNotFound
 		}
 		user = *u
+		status = 3
 	}
 
-	list, total, err := service.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
+	list, total, err := kumiaoCommunity.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
-		Status: form.Status,
+		Status: status,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})
@@ -327,7 +377,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
-	topicLikeService := service.NewTopicLikeService(ctx)
+	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
 	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
@@ -343,19 +393,19 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 
 	//收藏数据
 	collectionMap := make(map[int64]struct{}, 0)
-	collectionService := service.NewCollectionService(ctx)
+	collectionService := kumiaoCommunity.NewCollectionService(ctx)
 	collectionIds := collectionService.Collections(user.OpenId, 0, 0, 0)
 	for _, collectionId := range collectionIds {
 		collectionMap[collectionId] = struct{}{}
 	}
 
-	rootCommentCount := service.DefaultTopicService.GetRootCommentCount(ids)
-	//组装数据---帖子的顶级评论数量
+	rootCommentCount := kumiaoCommunity.DefaultTopicService.GetRootCommentCount(ids)
+	// 组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
 		topic2comment[item.TopicId] = item.Total
 	}
-	//组装数据---点赞数据 收藏数据
+	// 组装数据---点赞数据 收藏数据
 	for _, item := range list {
 		res := item.TopicItemRes()
 		res.CommentCount = topic2comment[res.Id]

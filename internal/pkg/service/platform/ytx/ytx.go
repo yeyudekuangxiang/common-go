@@ -15,8 +15,8 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
+	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
-	platformUtil "mio/pkg/platform"
 	"strconv"
 	"time"
 )
@@ -90,15 +90,17 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 
 	requestParams := make(map[string]interface{}, 0)
 	err := util.MapTo(&synchroRequest, &requestParams)
+
 	if err != nil {
 		return err
 	}
+
 	requestParams["secret"] = srv.option.Secret
 	synchroRequest.Signature = platformUtil.GetSign(requestParams, "", "&")
 
 	url := srv.option.Domain + "/markting_activity/network/lvmiao/synchro"
 	body, err := httputil.PostJson(url, synchroRequest)
-	fmt.Printf("ytx synchro response body: %s\n", body)
+	app.Logger.Infof("亿通行 注册回调 返回 : %s", body)
 	if err != nil {
 		return err
 	}
@@ -106,11 +108,12 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 	response := synchroResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		fmt.Printf("Unmarshal body: %s\n", err.Error())
+		app.Logger.Errorf("亿通行 json_decode_err: %s", err.Error())
 		return err
 	}
 
 	if response.ResCode != "0000" {
+		app.Logger.Errorf("亿通行 注册回调 错误 : %s", response.ResMessage)
 		return errors.New(response.ResMessage)
 	}
 
@@ -124,7 +127,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if sceneUser.PlatformUserId == "" {
-		app.Logger.Errorf("亿通行-未找到绑定关系: %s", user.OpenId)
+		app.Logger.Errorf("亿通行 未找到绑定关系 : %s", user.OpenId)
 		return "", errno.ErrBindRecordNotFound
 	}
 
@@ -144,7 +147,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 	url := srv.option.Domain + "/markting_redenvelopegateway/redenvelope/grantV2"
 	body, err := httputil.PostJson(url, grantV2Request)
-	app.Logger.Infof("亿通行-grantV2返回body: %s; request: %v\n", body, grantV2Request)
+	app.Logger.Infof("亿通行 grantV2 返回 : %s", body)
 	if err != nil {
 		return "", err
 	}
@@ -152,7 +155,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	response := GrantV2Response{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		app.Logger.Errorf("亿通行-grantV2 decode json错误: %s\n", err.Error())
+		app.Logger.Errorf("亿通行 grantV2 json_decode_err: %s", err.Error())
 		return "", err
 	}
 
@@ -169,12 +172,11 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行-发放红包记录保存失败:%s", err.Error())
+		app.Logger.Errorf("亿通行 save_log_err : %s", err.Error())
 	}
 
 	if response.SubCode != "0000" {
-		reqData, _ := json.Marshal(grantV2Request)
-		app.Logger.Errorf("亿通行-grantV2返回错误: %s; request: %s\n", response.SubMessage, reqData)
+		app.Logger.Errorf("亿通行 grantV2 err: %s\n", response.SubMessage)
 		return "", errors.New(response.SubMessage)
 	}
 
@@ -189,7 +191,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行-券包发放错误: %s\n", err.Error())
+		app.Logger.Errorf("亿通行 券包 发放错误 : %s\n", err.Error())
 		return "", err
 	}
 

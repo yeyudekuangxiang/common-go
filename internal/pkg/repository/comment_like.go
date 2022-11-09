@@ -2,37 +2,49 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultCommentLikeRepository = NewCommentLikeRepository(app.DB)
+type (
+	CommentLikeModel interface {
+		Save(like *entity.CommentLike) error
+		Create(commentLike *entity.CommentLike) error
+		Update(commentLike *entity.CommentLike) error
+		FindBy(by FindCommentLikeBy) entity.CommentLike
+		GetListBy(by GetCommentLikeListBy) []entity.CommentLike
+	}
 
-func NewCommentLikeRepository(db *gorm.DB) CommentLikeRepository {
-	return CommentLikeRepository{
-		DB: db,
+	defaultCommentLikeModel struct {
+		ctx *mioContext.MioContext
+	}
+)
+
+func NewCommentLikeRepository(ctx *mioContext.MioContext) CommentLikeModel {
+	return defaultCommentLikeModel{
+		ctx: ctx,
 	}
 }
 
 type CommentLikeRepository struct {
-	DB *gorm.DB
+	ctx *mioContext.MioContext
 }
 
-func (t CommentLikeRepository) Save(like *entity.CommentLike) error {
-	return t.DB.Save(like).Error
+func (m defaultCommentLikeModel) Save(like *entity.CommentLike) error {
+	return m.ctx.DB.Save(like).Error
 }
 
-func (t CommentLikeRepository) Create(commentLike *entity.CommentLike) error {
-	return t.DB.Debug().Create(commentLike).Error
+func (m defaultCommentLikeModel) Create(commentLike *entity.CommentLike) error {
+	return m.ctx.DB.Debug().Create(commentLike).Error
 }
 
-func (t CommentLikeRepository) Update(commentLike *entity.CommentLike) error {
-	return t.DB.Debug().Updates(commentLike).Error
+func (m defaultCommentLikeModel) Update(commentLike *entity.CommentLike) error {
+	return m.ctx.DB.Debug().Updates(commentLike).Error
 }
 
-func (t CommentLikeRepository) FindBy(by FindCommentLikeBy) entity.CommentLike {
+func (m defaultCommentLikeModel) FindBy(by FindCommentLikeBy) entity.CommentLike {
 	like := entity.CommentLike{}
-	db := t.DB.Model(&like)
+	db := m.ctx.DB.Model(&like)
 	if by.CommentId > 0 {
 		db.Where("comment_id = ?", by.CommentId)
 	}
@@ -46,9 +58,9 @@ func (t CommentLikeRepository) FindBy(by FindCommentLikeBy) entity.CommentLike {
 	}
 	return like
 }
-func (t CommentLikeRepository) GetListBy(by GetCommentLikeListBy) []entity.CommentLike {
+func (m defaultCommentLikeModel) GetListBy(by GetCommentLikeListBy) []entity.CommentLike {
 	list := make([]entity.CommentLike, 0)
-	db := t.DB.Model(&entity.CommentLike{})
+	db := m.ctx.DB.Model(&entity.CommentLike{})
 	if len(by.CommentIds) > 0 {
 		db.Where("comment_id in (?)", by.CommentIds)
 	}

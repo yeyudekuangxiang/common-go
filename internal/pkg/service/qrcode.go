@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
@@ -92,7 +93,7 @@ func (srv QRCodeService) GetUnlimitedQRCode(qrScene entity.QrCodeScene, page, sc
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
 	}
 
-	imagePath, err := DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(resp.Buffer))
+	imagePath, err := oss.DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(resp.Buffer))
 	if err != nil {
 		//app.Logger.Errorf("上传分享码失败 %v %v %+v\n", topicId, userId, err)
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
@@ -183,7 +184,7 @@ func (srv QRCodeService) GetLimitedQRCode(qrScene entity.QrCodeScene, path strin
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
 	}
 
-	imagePath, err := DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(resp.Buffer))
+	imagePath, err := oss.DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(resp.Buffer))
 	if err != nil {
 		//app.Logger.Errorf("上传分享码失败 %v %v %+v\n", topicId, userId, err)
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
@@ -272,7 +273,7 @@ func (srv QRCodeService) GetWxQrcode(qrScene entity.QrCodeScene, path string, wi
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
 	}
 
-	imagePath, err := DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(resp.Buffer))
+	imagePath, err := oss.DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(resp.Buffer))
 	if err != nil {
 		//app.Logger.Errorf("上传分享码失败 %v %v %+v\n", topicId, userId, err)
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
@@ -345,7 +346,7 @@ func (srv QRCodeService) GetTextQrCode(qrScene entity.QrCodeScene, content strin
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)
 	}
 
-	imagePath, err := DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(qrData))
+	imagePath, err := oss.DefaultOssService.PutObject(fmt.Sprintf("qrcode/%s/%s.png", qrScene, key), bytes.NewReader(qrData))
 	if err != nil {
 		//app.Logger.Errorf("上传分享码失败 %v %v %+v\n", topicId, userId, err)
 		return nil, errno.ErrCommon.WithMessage("生成分享码失败").WithErr(err)

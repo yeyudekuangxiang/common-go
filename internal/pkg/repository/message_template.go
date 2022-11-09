@@ -6,8 +6,6 @@ import (
 	"mio/internal/pkg/model/entity"
 )
 
-var ()
-
 type (
 	MessageTemplateModel interface {
 		FindOne(key string) (*entity.MessageTemplate, error)

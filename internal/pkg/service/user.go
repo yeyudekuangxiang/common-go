@@ -15,11 +15,13 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
@@ -390,7 +392,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	//更新特殊用户的数据
 	if ok && specialUser.ID != 0 && !u.checkOpenId(userByMobile.OpenId) && specialUser.Status == 0 {
 		//更新topic userid
-		err := DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
+		err := kumiaoCommunity.DefaultTopicService.UpdateAuthor(userInfo.ID, userByMobile.ID)
 		if err != nil {
 			app.Logger.Info("special用户topic数据更新失败", err.Error())
 		}
@@ -593,10 +595,20 @@ func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, 
 	return u.r.GetUserListBy(by), nil
 }
 func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
+	//图片审核
 	user := u.r.GetUserById(param.UserId)
+
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
 	}
+
+	if param.Avatar != "" {
+		err := validator.CheckMediaWithOpenId(user.OpenId, param.Avatar)
+		if err != nil {
+			return errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+
 	if param.PhoneNumber != nil {
 		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
 			return errno.ErrCommon.WithMessage("该手机号已被其他账号绑定")

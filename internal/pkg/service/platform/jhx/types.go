@@ -33,10 +33,11 @@ type JhxTicketStatusResponse struct {
 
 // request
 type Collect struct {
-	MemberId    string `json:"memberId" from:"memberId"`
-	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
-	OpenId      string `json:"openId" form:"openId"`
-	PrePointId  string `json:"prePointId" form:"prePointId"`
+	MemberId      string `json:"memberId" from:"memberId"`
+	PlatformKey   string `json:"platformKey" form:"platformKey" binding:"required"`
+	OpenId        string `json:"openId" form:"openId"`
+	PrePointId    string `json:"prePointId" form:"prePointId"`
+	PrePointLimit int64  `json:"prePointLimit"`
 }
 
 type GetPreCollect struct {
@@ -51,4 +52,10 @@ type TicketNotify struct {
 	Status   string `json:"status" form:"status" binding:"required"`
 	UsedTime string `json:"used_time" form:"used_time" binding:"required"`
 	Sign     string `json:"sign" form:"sign" binding:"required"`
+}
+
+type CollectPointResp struct {
+	OpenId   string `json:"openId"`
+	IncPoint int64  `json:"incPoint"`
+	TradeNo  string `json:"tradeNo"`
 }

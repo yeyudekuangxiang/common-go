@@ -10,6 +10,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/message"
+	rabbitmqApi "mio/internal/app/mp2c/controller/api/mq"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
@@ -37,17 +38,36 @@ func apiRouter(router *gin.Engine) {
 		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		//tag
-		authRouter.GET("/tag/list", apiutil.Format(api.DefaultTagController.List))
-		authRouter.GET("/tag/detail", apiutil.Format(api.DefaultTagController.DetailTag))
+		tagRouter := authRouter.Group("/tag")
+		{
+			tagRouter.GET("/list", apiutil.Format(api.DefaultTagController.List))
+			tagRouter.GET("/detail", apiutil.Format(api.DefaultTagController.DetailTag))
+		}
 
 		//社区文章列表
-		authRouter.POST("/topic/list", apiutil.Format(api.DefaultTopicController.List))
-		authRouter.GET("/topic/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
-		authRouter.GET("/topic/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		topicRouter := authRouter.Group("/topic")
+		{
+			topicRouter.POST("/list", apiutil.Format(api.DefaultTopicController.List))
+			topicRouter.GET("/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
+			topicRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+		}
 
 		//文章评论列表
-		authRouter.GET("/topic/comment/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
-		authRouter.GET("/topic/comment/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
+		commentRouter := authRouter.Group("/topic/comment")
+		{
+			commentRouter.GET("/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
+			commentRouter.GET("/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
+		}
+
+		//统计计数接口
+		countRouter := authRouter.Group("/count")
+		{
+			countRouter.POST("/topic/views")
+			countRouter.POST("/topic/collections")
+			countRouter.POST("/topic/likes")
+			countRouter.POST("/topic/comments")
+			countRouter.POST("/comment/likes")
+		}
 
 		authRouter.POST("/unidian/callback", api.DefaultUnidianController.Callback) //手机充值回调函数
 
@@ -98,7 +118,9 @@ func apiRouter(router *gin.Engine) {
 		{
 			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
 			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
-			messageRouter.GET("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
+			messageRouter.POST("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
+			messageRouter.POST("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
+			messageRouter.POST("/web-message-haveread", apiutil.Format(message.DefaultMessageController.SetHaveReadWebMessage))
 		}
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
@@ -119,7 +141,6 @@ func apiRouter(router *gin.Engine) {
 			//社区2.0 用户相关
 			userRouter.GET("/home-page", apiutil.Format(api.DefaultUserController.HomePage))                      //主页
 			userRouter.POST("/update-introduction", apiutil.Format(api.DefaultUserController.UpdateIntroduction)) //更新简介
-			userRouter.POST("/message", apiutil.Format(api.DefaultUserController.UpdateIntroduction))             //更新简介
 		}
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
@@ -279,4 +300,13 @@ func apiRouter(router *gin.Engine) {
 
 	}
 
+	mqAuthRouter := router.Group("/api/mp2c")
+	mqAuthRouter.Use(middleware.MqAuth2(), middleware.Throttle())
+	{
+		mqRouter := mqAuthRouter.Group("/mq")
+		{
+			mqRouter.POST("/send_sms", apiutil.Format(rabbitmqApi.DefaultMqController.SendSms))
+			mqRouter.POST("/send_zhuge", apiutil.Format(rabbitmqApi.DefaultMqController.SendZhuGe))
+		}
+	}
 }

@@ -52,7 +52,7 @@ type jhxCollectRequest struct {
 	MemberId    string `json:"memberId" from:"memberId"`
 	PlatformKey string `json:"platformKey" form:"platformKey" binding:"required"`
 	OpenId      string `json:"openId" form:"openId"`
-	PrePointId  string `json:"prePointId" form:"prePointId"`
+	PrePointId  string `json:"prePointId" form:"prePointId" binding:"required"`
 	Sign        string `json:"sign" form:"sign" binding:"required"`
 }
 type jhxMyOrderRequest struct {

@@ -25,6 +25,7 @@ var Config = app{
 	BaiDuImageSearch: baiDuImageSearchSetting{},
 	TokenCenterRpc:   rpcSetting{},
 	DatabaseBusiness: databaseSetting{},
+	Sms:              sms{},
 }
 
 type app struct {
@@ -48,6 +49,7 @@ type app struct {
 	ActivityZyh      activityZyh             `ini:"activityZyh"`
 	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
 	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
+	Sms              sms                     `ini:"sms"`
 }
 type appSetting struct {
 	TokenKey string
@@ -140,6 +142,11 @@ type activityZyh struct {
 	AccessKeyId     string
 	AccessKeySecret string
 	Domain          string
+}
+
+type sms struct {
+	Account  string
+	Password string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {

@@ -1,12 +1,22 @@
 package admin
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
+	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
+	"mio/internal/pkg/service/message"
+	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/limit"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var DefaultTopicController = TopicController{}
@@ -43,8 +53,11 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		cond.TagIds = tagIds
 	}
 
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+
 	//get topic by params
-	list, total, err := service.DefaultTopicAdminService.GetTopicList(cond)
+	list, total, err := adminTopicService.GetTopicList(cond)
 
 	if err != nil {
 		return nil, err
@@ -57,7 +70,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
-	rootCommentCount := service.DefaultTopicAdminService.GetCommentCount(ids)
+	rootCommentCount := adminTopicService.GetCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
@@ -79,7 +92,10 @@ func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	topic, err := service.DefaultTopicAdminService.DetailTopic(form.ID)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+
+	topic, err := adminTopicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -93,9 +109,11 @@ func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	//user
 	//创建帖子
-	err := service.DefaultTopicAdminService.CreateTopic(int64(1451), form.Title, form.Content, form.TagIds, form.Images)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+
+	err := adminTopicService.CreateTopic(int64(1451), form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +127,10 @@ func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//更新帖子
-	err := service.DefaultTopicAdminService.UpdateTopic(form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+
+	err := adminTopicService.UpdateTopic(form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -122,10 +143,33 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
 	//更新帖子
-	if err := service.DefaultTopicAdminService.DeleteTopic(form.ID, form.Reason); err != nil {
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	topic, err := adminTopicService.DeleteTopic(form.ID, form.Reason)
+
+	if err != nil {
 		return nil, err
 	}
+
+	//发消息
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:   0,
+		RecId:    topic.User.ID,
+		Key:      "down_topic",
+		TurnId:   topic.Id,
+		TurnType: 1,
+		Type:     4,
+		ShowId:   topic.Id,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【文章下架】站内信发送失败:%s", err.Error())
+	}
+
 	return nil, nil
 }
 
@@ -135,10 +179,74 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Review(form.ID, form.Status, form.Reason)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+
+	topic, isFirst, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
 	if err != nil {
 		return nil, err
 	}
+
+	pointService := service.NewPointService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	if topic.Status == 3 {
+		keyPrefix := "periodLimit:sendPoint:article:push:"
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.Align())
+		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		key := "push_topic_v2"
+		if resNumber == 1 || resNumber == 2 {
+			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       topic.User.OpenId,
+				Type:         entity.POINT_ARTICLE,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
+				AdminId:      0,
+				Note:         fmt.Sprintf("审核笔记:%s；审核状态:%d", topic.Title, topic.Status),
+				AdditionInfo: strconv.FormatInt(topic.Id, 10),
+			})
+			key = "push_topic"
+		}
+
+		if isFirst {
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:   0,
+				RecId:    topic.User.ID,
+				Key:      key,
+				TurnId:   topic.Id,
+				TurnType: 1,
+				Type:     4,
+				ShowId:   topic.Id,
+			})
+
+			if err != nil {
+				app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+			}
+		}
+	}
+
+	if topic.Status == 4 {
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    topic.User.ID,
+			Key:      "down_topic",
+			TurnId:   topic.Id,
+			TurnType: 1,
+			Type:     4,
+			ShowId:   topic.Id,
+		})
+
+		if err != nil {
+			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+		}
+	}
+
 	return nil, nil
 }
 
@@ -148,10 +256,35 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Top(form.ID, form.IsTop)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	topic, isFirst, err := adminTopicService.Top(form.ID, form.IsTop)
+
 	if err != nil {
 		return nil, err
 	}
+
+	if isFirst {
+		//发消息
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    topic.UserId,
+			Key:      "top_topic_v2",
+			TurnType: 1,
+			TurnId:   topic.Id,
+			Type:     5,
+			ShowId:   topic.Id,
+		})
+
+		if err != nil {
+			app.Logger.Errorf("【文章置顶】站内信发送失败:%s", err.Error())
+		}
+
+	}
+
 	return nil, nil
 }
 
@@ -161,9 +294,57 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTopicAdminService.Essence(form.ID, form.IsEssence)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := kumiaoCommunity.NewTopicAdminService(ctx)
+	pointService := service.NewPointService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	topic, isFirst, err := adminTopicService.Essence(form.ID, form.IsEssence)
 	if err != nil {
 		return nil, err
 	}
+
+	if topic.IsEssence == 1 {
+		keyPrefix := "periodLimit:sendPoint:article:essence:"
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.Align())
+		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		key := "essence_topic_v2"
+		if resNumber == 1 || resNumber == 2 {
+			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       topic.User.OpenId,
+				Type:         entity.POINT_RECOMMEND,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
+				AdminId:      0,
+				Note:         "笔记 \"" + topic.Title + "...\" 被设为精华",
+				AdditionInfo: strconv.FormatInt(topic.Id, 10),
+			})
+			key = "essence_topic"
+		}
+
+		//发消息
+		if isFirst {
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:   0,
+				RecId:    topic.User.ID,
+				Key:      key,
+				TurnType: 1,
+				TurnId:   topic.Id,
+				Type:     5,
+				ShowId:   topic.Id,
+			})
+
+			if err != nil {
+				app.Logger.Errorf("【精华文章】站内信发送失败:%s", err.Error())
+			}
+		}
+	}
+
 	return nil, nil
 }

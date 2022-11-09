@@ -141,6 +141,47 @@ func (u UserRepository) GetUserListBy(by GetUserListBy) []entity.User {
 	return list
 }
 
+func (u UserRepository) GetShortUserListBy(by GetUserListBy) []entity.ShortUser {
+	list := make([]entity.ShortUser, 0)
+	db := app.DB.Model(entity.User{})
+
+	if by.Mobile != "" {
+		db.Where("phone_number = ?", by.Mobile)
+	}
+	if len(by.UserIds) > 0 {
+		db.Where("id in (?)", by.UserIds)
+	}
+	if len(by.Mobiles) > 0 {
+		db.Where("phone_number in (?)", by.Mobiles)
+	}
+	if by.Source != "" {
+		db.Where("source = ?", by.Source)
+	}
+	if by.Nickname != "" {
+		db.Where("nick_name like ?", "%"+by.Nickname+"%")
+	}
+	if by.LikeMobile != "" {
+		db.Where("phone_number like ?", "%"+by.LikeMobile+"%")
+	}
+	if by.UserId != 0 {
+		db.Where("id = ?", by.UserId)
+	}
+	if by.OpenId != "" {
+		db.Where("openid = ?", by.OpenId)
+	}
+	if !by.StartTime.IsZero() {
+		db.Where("time >= ?", by.StartTime)
+	}
+	if !by.EndTime.IsZero() {
+		db.Where("time <= ?", by.EndTime)
+	}
+
+	if err := db.Find(&list).Error; err != nil {
+		panic(err)
+	}
+	return list
+}
+
 func (u UserRepository) GetUserPageListBy(bp GetUserPageListBy) ([]entity.User, int64) {
 	list := make([]entity.User, 0)
 	var count int64

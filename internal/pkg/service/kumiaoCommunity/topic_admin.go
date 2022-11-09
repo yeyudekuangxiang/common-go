@@ -1,4 +1,4 @@
-package service
+package kumiaoCommunity
 
 import (
 	"mio/internal/pkg/core/app"
@@ -6,26 +6,24 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"strconv"
 	"strings"
 )
 
-var DefaultTopicAdminService = NewTopicAdminService(context.NewMioContext())
-
 func NewTopicAdminService(ctx *context.MioContext) TopicAdminService {
 	return TopicAdminService{
+		ctx:        ctx,
 		topicModel: repository.NewTopicModel(ctx),
-		tag:        repository.DefaultTagRepository,
+		tag:        repository.NewTagModel(ctx),
 	}
 }
 
 type TopicAdminService struct {
+	ctx         *context.MioContext
 	topicModel  repository.TopicModel
-	tag         repository.ITagRepository
+	tag         repository.TagModel
 	TokenServer *wxoa.AccessTokenServer
 }
 
@@ -185,115 +183,119 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 }
 
 // DeleteTopic 删除（下架）
-func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) error {
+func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) (*entity.Topic, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&entity.Topic{}).Preload("Tags").Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
 	if topic.Id == 0 {
-		return errno.ErrCommon.WithMessage("数据不存在")
+		return nil, errno.ErrCommon.WithMessage("数据不存在")
 	}
-	err := app.DB.Model(&topic).Updates(entity.Topic{Status: 4, DelReason: reason}).Error
+
+	if topic.Status == 4 {
+		return nil, nil
+	}
+
+	topic.Status = 4
+	topic.DelReason = reason
+
+	err := srv.topicModel.Save(topic)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	return topic, nil
 }
 
 // Review 审核
-func (srv TopicAdminService) Review(topicId int64, status int, reason string) error {
+func (srv TopicAdminService) Review(topicId int64, status int, reason string) (entity.Topic, bool, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
+	var isFirst bool
+
 	if topic.Id == 0 {
-		return errno.ErrCommon.WithMessage("数据不存在")
+		return entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
-	if err := app.DB.Model(&topic).Updates(entity.Topic{Status: entity.TopicStatus(status), DelReason: reason}).Error; err != nil {
-		return err
+	if status == entity.TopicStatusPublished {
+		if topic.PushTime.IsZero() {
+			isFirst = true
+		}
+		topic.Status = entity.TopicStatusPublished
+		topic.PushTime = model.NewTime()
 	}
-	ctx := context.NewMioContext()
 
-	pointService := NewPointService(ctx)
-	pointTransService := NewPointTransactionService(ctx)
-	user, _ := DefaultUserService.GetUserById(topic.UserId)
+	if status == entity.TopicStatusHidden {
+		if topic.DownTime.IsZero() {
+			isFirst = true
+		}
+		topic.Status = entity.TopicStatusHidden
+		topic.DownTime = model.NewTime()
+		topic.DelReason = reason
+	}
 
-	by, err := pointTransService.FindBy(repository.FindPointTransactionBy{
-		OpenId:       user.OpenId,
-		Type:         string(entity.POINT_ARTICLE),
-		AdditionInfo: strconv.FormatInt(topic.Id, 10),
-	})
+	if status == entity.TopicStatusVerifyFailed {
+		topic.Status = entity.TopicStatusVerifyFailed
+	}
+
+	//更新帖子
+	err := srv.topicModel.Save(topic)
+
 	if err != nil {
-		return err
+		return entity.Topic{}, isFirst, err
 	}
 
-	var point int64
-	if topic.Status == 3 && status == 4 {
-		point = -int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-	}
-	title := topic.Title
-	if len([]rune(title)) > 8 {
-		title = string([]rune(title)[0:8]) + "..."
-	}
-	//发放积分
-	if status == 3 && by.ID == 0 {
-		point = int64(entity.PointCollectValueMap[entity.POINT_ARTICLE])
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_ARTICLE,
-			BizId:        util.UUID(),
-			ChangePoint:  point,
-			AdminId:      0,
-			Note:         "笔记 " + title + "... 审核通过，发布成功",
-			AdditionInfo: strconv.FormatInt(topic.Id, 10),
-		})
-	}
-	return nil
+	return *topic, isFirst, nil
 }
 
 // Top 置顶
-func (srv TopicAdminService) Top(topicId int64, isTop int) error {
+func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
+
+	var isFirst bool
+
 	if topic.Id == 0 {
-		return errno.ErrCommon.WithMessage("数据不存在")
+		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
-	if err := app.DB.Model(&topic).Update("is_top", isTop).Error; err != nil {
-		return err
+	update := entity.Topic{IsTop: isTop}
+	if isTop == 1 {
+		if topic.TopTime.IsZero() {
+			isFirst = true
+		}
+		update.TopTime = model.NewTime()
 	}
-	return nil
+
+	if err := app.DB.Model(&topic).Updates(update).Error; err != nil {
+		return &entity.Topic{}, isFirst, err
+	}
+
+	return topic, isFirst, nil
 }
 
 // Essence 精华
-func (srv TopicAdminService) Essence(topicId int64, isEssence int) error {
+func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	var topic entity.Topic
-	app.DB.Model(&topic).Where("id = ?", topicId).Find(&topic)
+	topic := srv.topicModel.FindById(topicId)
+	var isFirst bool
 	if topic.Id == 0 {
-		return errno.ErrCommon.WithMessage("数据不存在")
+		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
 	}
-	if err := app.DB.Model(&topic).Update("is_essence", isEssence).Error; err != nil {
-		return err
+
+	update := entity.Topic{
+		IsEssence: isEssence,
 	}
-	//发放积分
+
 	if isEssence == 1 {
-		title := topic.Title
-		if len([]rune(title)) > 8 {
-			title = string([]rune(title)[0:8]) + "..."
+		if topic.EssenceTime.IsZero() {
+			isFirst = true
 		}
-		user, _ := DefaultUserService.GetUserById(topic.UserId)
-		pointService := NewPointService(context.NewMioContext())
-		_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_RECOMMEND,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
-			AdminId:      0,
-			Note:         "笔记 \"" + title + "...\" 被设为精华",
-			AdditionInfo: strconv.FormatInt(topic.Id, 10),
-		})
+		update.EssenceTime = model.NewTime()
 	}
-	return nil
+
+	if err := app.DB.Model(&topic).Updates(update).Error; err != nil {
+		return &entity.Topic{}, false, err
+	}
+
+	return topic, isFirst, nil
 }
 
 func (srv TopicAdminService) GetCommentCount(ids []int64) (result []CommentCount) {

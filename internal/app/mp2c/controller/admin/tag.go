@@ -2,8 +2,9 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -17,7 +18,11 @@ func (ctr *TagController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	list, total, err := service.DefaultTagAdminService.GetTagPageList(repository.GetTagPageListBy{
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
+
+	list, total, err := tagAdminService.GetTagPageList(repository.GetTagPageListBy{
 		Name:        form.Name,
 		Description: form.Description,
 		Offset:      form.Offset(),
@@ -39,7 +44,11 @@ func (ctr *TagController) Detail(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	topic := service.DefaultTagAdminService.Detail(form.ID)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
+
+	topic := tagAdminService.Detail(form.ID)
 	return gin.H{
 		"topic": topic,
 	}, nil
@@ -50,8 +59,12 @@ func (ctr *TagController) Update(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
 	//更新帖子
-	err := service.DefaultTagAdminService.Update(repository.UpdateTag{
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
+
+	err := tagAdminService.Update(repository.UpdateTag{
 		ID: form.ID,
 		CreateTag: repository.CreateTag{
 			Name:        form.Name,
@@ -69,8 +82,12 @@ func (ctr *TagController) Delete(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
 	//更新帖子
-	if err := service.DefaultTagAdminService.Delete(form.ID); err != nil {
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
+
+	if err := tagAdminService.Delete(form.ID); err != nil {
 		return nil, err
 	}
 	return nil, nil
@@ -81,7 +98,11 @@ func (ctr *TagController) Create(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	err := service.DefaultTagAdminService.Create(repository.CreateTag{
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagAdminService := kumiaoCommunity.NewTagAdminService(ctx)
+
+	err := tagAdminService.Create(repository.CreateTag{
 		Name:        form.Name,
 		Description: form.Description,
 		Image:       form.Image,
@@ -89,5 +110,6 @@ func (ctr *TagController) Create(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return nil, nil
 }

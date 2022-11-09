@@ -41,6 +41,9 @@ func (t Time) EndOfMonth() Time {
 	return Time{Time: EndOfMonth(t.Time)}
 }
 func (t Time) Format(format string) string {
+	if t.Time.IsZero() {
+		return ""
+	}
 	return t.Time.Format(format)
 }
 func (t Time) AddDay(day int) Time {
@@ -58,7 +61,7 @@ func (t Time) AddYear(year int) Time {
 func (t Time) String() string {
 	return t.Time.Format(TimeFormat)
 }
-func (t *Time) UnmarshalJSON(data []byte) error {
+func (t Time) UnmarshalJSON(data []byte) error {
 	if string(data) == "\"\"" {
 		return nil
 	}
@@ -82,7 +85,7 @@ func (t Time) Value() (driver.Value, error) {
 	}
 	return t.Time, nil
 }
-func (t *Time) Scan(value interface{}) error {
+func (t Time) Scan(value interface{}) error {
 	ti, ok := value.(time.Time)
 	if !ok {
 		return errors.New("Time type error")
@@ -93,14 +96,53 @@ func (t *Time) Scan(value interface{}) error {
 func (t Time) Date() Date {
 	return ToDate(t.Time)
 }
-
 func (t Time) GetDiffDays(t1, t2 time.Time) int {
 	t1 = time.Date(t1.Year(), t1.Month(), t1.Day(), 0, 0, 0, 0, time.Local)
 	t2 = time.Date(t2.Year(), t2.Month(), t2.Day(), 0, 0, 0, 0, time.Local)
 	return int(t1.Sub(t2).Hours() / 24)
 }
 
-// 获取t1和t2的相差天数，单位：秒，0表同一天，正数表t1>t2，负数表t1<t2
+// 返回两日期相差 格式为 年 月 日
+func (t Time) SubTime(t1, t2 time.Time) string {
+	y1 := t1.Year()
+	y2 := t2.Year()
+	m1 := int(t1.Month())
+	m2 := int(t2.Month())
+	d1 := t1.Day()
+	d2 := t2.Day()
+
+	//年差
+	yearInterval := y1 - y2
+	if m1 < m2 || m1 == m2 && d1 < d2 {
+		yearInterval--
+	}
+
+	//月差
+	monthInterval := (m1 + 12) - m2
+	if d1 < d2 {
+		monthInterval--
+	}
+	monthInterval %= 12
+
+	//日差
+	dayInterval := d1 - d2
+	return fmt.Sprintf("%d年%d月%d日", yearInterval, monthInterval, dayInterval)
+}
+
+func Unix(sec int64) Time {
+	if sec == 0 {
+		return Time{}
+	}
+	t := time.Unix(sec, 0)
+	return Time{Time: t}
+}
+func UnixMilli(msec int64) Time {
+	if msec == 0 {
+		return Time{}
+	}
+	t := time.UnixMilli(msec)
+	return Time{Time: t}
+}
 
 /*func (t Time) GetDiffDaysBySecond(t1, t2 int64) int {
 	time1 := time.Unix(t1, 0)

@@ -42,6 +42,9 @@ var (
 	ErrBindRecordNotFound = err{code: 20305, message: "未找到绑定关系"}
 
 	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
+
+	// 其他
+	ErrCheckErr = err{code: 40001, message: "审核未通过"}
 )
 
 // Err 定义错误

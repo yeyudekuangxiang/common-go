@@ -9,13 +9,15 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
+	"mio/internal/pkg/util/limit"
 	"mio/pkg/errno"
 	"time"
 )
 
-func NewStarChargeService(context *context.MioContext) *StarChargeService {
+func NewStarChargeService(ctx *context.MioContext) *StarChargeService {
 	return &StarChargeService{
-		ctx:            context,
+		ctx:            ctx,
+		history:        repository.NewCouponHistoryModel(ctx),
 		OperatorSecret: "3YEnj8W0negqs44Lh9ETTVEi2W1JZyt9",
 		OperatorID:     "MA1FY5992",
 		SigSecret:      "5frdjVGMJIblh58xGNn6tQdZrBzaC9cU",
@@ -28,6 +30,7 @@ func NewStarChargeService(context *context.MioContext) *StarChargeService {
 
 type StarChargeService struct {
 	ctx            *context.MioContext
+	history        repository.CouponHistoryModel
 	OperatorSecret string `json:"OperatorSecret,omitempty"` //运营商密钥
 	OperatorID     string `json:"OperatorID,omitempty"`     //运营商标识
 	SigSecret      string `json:"SigSecret,omitempty"`      //签名密钥
@@ -151,47 +154,46 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	if provideResult.SuccStat != 0 {
 		return errno.ErrCommon.WithMessage(provideResult.FailReasonMsg)
 	}
+
 	//保存记录
-	history := entity.CouponHistory{
+	_, err = srv.history.Insert(&entity.CouponHistory{
 		OpenId:     openId,
 		CouponType: "star_charge",
 		Code:       provideResult.CouponCode,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
-	}
-	_, err = repository.DefaultCouponHistoryRepository.Insert(&history)
+	})
+
 	if err != nil {
-		fmt.Printf("星星充电,insert error:%s", err.Error())
-		return err
+		app.Logger.Errorf("星星充电发券记录插入失败:%s", err.Error())
 	}
+
 	return nil
 }
 
 // CheckChargeLimit 充电检测
-func (srv StarChargeService) CheckChargeLimit(openId string, startTime, endTime string) error {
-	todayBuilder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	todayBuilder.Where("open_id = ?", openId).
-		Where("coupon_type = ?", "star_charge").
-		Where("date(create_time) = CURRENT_DATE")
-	count, err := repository.DefaultCouponHistoryRepository.FindCount(todayBuilder)
+func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) error {
+	keyPrefix := "periodLimit:sendCoupon:star_charge:" + time.Now().Format("20060102") + ":"
+	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds())*24, 1, app.Redis, keyPrefix, limit.Align())
+	res1, err := periodLimit.TakeCtx(srv.ctx.Context, openId)
 	if err != nil {
 		return err
 	}
-	if count >= 1 {
-		return errno.ErrCommon.WithMessage("每日每位用户限制领取 1 次")
-	}
-	builder := repository.DefaultCouponHistoryRepository.RowBuilder()
-	builder.Where("open_id = ?", openId).
-		Where("coupon_type = ?", "star_charge").
-		Where("create_time > ?", startTime).
-		Where("create_time < ?", endTime)
-	count, err = repository.DefaultCouponHistoryRepository.FindCount(builder)
-	if err != nil {
-		return err
-	}
-	if count >= 2 {
-		return errno.ErrCommon.WithMessage("活动期间每位用户限制领取 2 次")
-	}
-	return nil
 
+	if res1 != 1 && res1 != 2 {
+		return errno.ErrCommon.WithMessage("每日上限1次")
+	}
+
+	keyPrefix2 := "periodLimit:sendCoupon:star_charge:"
+	periodLimit2 := limit.NewPeriodLimit(int(endTime.Sub(time.Now()).Seconds()), 2, app.Redis, keyPrefix2, limit.Align())
+	res2, err := periodLimit2.TakeCtx(srv.ctx.Context, openId)
+	if err != nil {
+		return err
+	}
+
+	if res2 != 1 && res2 != 2 {
+		return errno.ErrCommon.WithMessage("活动内上限2次")
+	}
+
+	return nil
 }

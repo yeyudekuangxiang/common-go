@@ -8,16 +8,17 @@ import (
 	"github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
+	"mio/internal/pkg/queue/types/message/wxworkmsg"
+	"mio/internal/pkg/util/encrypt"
+
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
-	"mio/internal/pkg/queue/types/wxworkqueue"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util/apiutil"
-	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	mzap "mio/pkg/logger/zap"
 	"mio/pkg/wxwork"
@@ -49,7 +50,7 @@ func recovery() gin.HandlerFunc {
 				return
 			}
 
-			sendErr := wxworkpdr.SendRobotMessage(wxworkqueue.RobotMessage{
+			sendErr := wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{
 				Key:  config.Constants.WxWorkBugRobotKey,
 				Type: wxwork.MsgTypeMarkdown,
 				Message: wxwork.Markdown{
@@ -239,4 +240,19 @@ func corsM() gin.HandlerFunc {
 	cfg.AllowAllOrigins = true
 	cfg.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid", "channel")
 	return cors.New(cfg)
+}
+
+//临时使用openid作为登陆验证
+func MqAuth2() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("token")
+		if token == "" {
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
+			return
+		}
+		if token != config.FindMqToken(ctx.FullPath()) {
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
+			return
+		}
+	}
 }

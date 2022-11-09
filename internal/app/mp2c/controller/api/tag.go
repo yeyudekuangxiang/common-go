@@ -2,9 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/context"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -19,7 +20,10 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	list, total, err := service.DefaultTagService.GetTagPageList(repository.GetTagPageListBy{
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagService := kumiaoCommunity.NewTagService(ctx)
+
+	list, total, err := tagService.GetTagPageList(repository.GetTagPageListBy{
 		ID:      form.ID,
 		Offset:  form.Offset(),
 		Limit:   form.Limit(),
@@ -41,7 +45,11 @@ func (TagController) DetailTag(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	tag, err := service.DefaultTagService.GetOne(form.ID)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	tagService := kumiaoCommunity.NewTagService(ctx)
+
+	tag, err := tagService.GetOne(form.ID)
 	if err != nil {
 		return nil, err
 	}

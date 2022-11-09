@@ -3,10 +3,11 @@ package message
 import (
 	"github.com/gin-gonic/gin"
 	"mio/config"
-	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
+	"strings"
 )
 
 var DefaultMessageController = MsgController{}
@@ -71,7 +72,7 @@ func (ctr MsgController) SendSign(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
-	form := api_types.MessageGetTemplateIdForm{}
+	form := MessageGetTemplateIdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -83,23 +84,84 @@ func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
-	form := api_types.WebMessageRequest{}
+	form := WebMessageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
+	}
+
+	types := strings.Split(form.Types, ",")
+
+	if len(types) == 0 {
+		return nil, errno.ErrCommon.WithMessage("参数错误")
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
 
 	messageService := messageSrv.NewWebMessageService(ctx)
-	msgList, total, err := messageService.GetMessage(user.ID, form.Status, form.Limit(), form.Offset())
+	msgList, total, err := messageService.GetMessage(messageSrv.GetWebMessage{
+		UserId: user.ID,
+		Status: form.Status,
+		Types:  types,
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return gin.H{
 		"list":     msgList,
 		"total":    total,
-		"page":     form.Limit(),
-		"pageSize": form.Offset(),
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
+}
+
+func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	resp, err := messageService.GetMessageCount(messageSrv.GetWebMessageCount{
+		RecId: user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"total":            resp.Total,
+		"exchangeMsgTotal": resp.ExchangeMsgTotal,
+		"systemMsgTotal":   resp.SystemMsgTotal,
+	}, nil
+}
+
+func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
+	form := HaveReadWebMessageRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	var msgIds []string
+	if form.MsgIds != "" {
+		ids := strings.Split(strings.Trim(form.MsgIds, ","), ",")
+		if ids[0] != "" {
+			msgIds = ids
+		}
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+
+	messageService := messageSrv.NewWebMessageService(ctx)
+	err := messageService.SetHaveRead(messageSrv.SetHaveReadMessage{
+		RecId:  user.ID,
+		MsgIds: msgIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

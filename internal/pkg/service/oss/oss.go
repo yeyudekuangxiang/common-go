@@ -1,4 +1,4 @@
-package service
+package oss
 
 import (
 	"crypto/hmac"

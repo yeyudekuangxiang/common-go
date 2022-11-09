@@ -3,10 +3,12 @@ package admin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/wxamp"
 	"mio/pkg/errno"
@@ -63,15 +65,38 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	messageService := message.NewWebMessageService(ctx)
+
+	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:   form.ID,
 		Status:   form.Status,
 		Position: form.Position,
 		Partners: form.Partners,
 		Auth:     form.Auth,
-	}); err != nil {
+	})
+
+	if err != nil {
 		return nil, err
 	}
+
+	//发消息 partners == 1
+	if form.Partners == 1 {
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    form.ID,
+			Key:      "wechat",
+			TurnType: 0,
+			TurnId:   0,
+			Type:     7,
+		})
+
+		if err != nil {
+			app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+		}
+	}
+
 	return nil, nil
 }
 

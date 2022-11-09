@@ -2,20 +2,39 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"mio/internal/pkg/core/app"
+	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 )
 
-var DefaultBdScenePrePointRepository = BdScenePrePointRepository{DB: app.DB}
+var DefaultBdScenePrePointRepository = NewBdScenePrePointModel(mioContext.NewMioContext())
 
-type BdScenePrePointRepository struct {
-	DB *gorm.DB
+type (
+	BdScenePrePointModel interface {
+		FindByPlatformUser(platformKey, memberId string) ([]entity.BdScenePrePoint, int64, error)
+		FindByOpenId(openId, platformKey string) ([]entity.BdScenePrePoint, int64, error)
+		FindAllByOpenId(openId string) ([]entity.BdScenePrePoint, int64, error)
+		FindAllByPlatformKey(platformKey string) ([]entity.BdScenePrePoint, int64, error)
+		FindBy(by GetScenePrePoint) ([]entity.BdScenePrePoint, int64, error)
+		FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, error)
+		Create(data *entity.BdScenePrePoint) error
+		Save(data *entity.BdScenePrePoint) error
+		Updates(cond GetScenePrePoint, up map[string]interface{}) error
+	}
+	defaultBdScenePrePointModel struct {
+		ctx *mioContext.MioContext
+	}
+)
+
+func NewBdScenePrePointModel(ctx *mioContext.MioContext) BdScenePrePointModel {
+	return &defaultBdScenePrePointModel{
+		ctx: ctx,
+	}
 }
 
-func (repo BdScenePrePointRepository) FindByPlatformUser(platformKey, memberId string) ([]entity.BdScenePrePoint, int64, error) {
+func (m defaultBdScenePrePointModel) FindByPlatformUser(platformKey, memberId string) ([]entity.BdScenePrePoint, int64, error) {
 	var item []entity.BdScenePrePoint
 	var total int64
-	err := repo.DB.
+	err := m.ctx.DB.
 		Where("platform_key = ?", platformKey).
 		Where("platform_user_id = ?", memberId).
 		Count(&total).
@@ -29,10 +48,10 @@ func (repo BdScenePrePointRepository) FindByPlatformUser(platformKey, memberId s
 	return item, total, nil
 }
 
-func (repo BdScenePrePointRepository) FindByOpenId(openId, platformKey string) ([]entity.BdScenePrePoint, int64, error) {
+func (m defaultBdScenePrePointModel) FindByOpenId(openId, platformKey string) ([]entity.BdScenePrePoint, int64, error) {
 	var item []entity.BdScenePrePoint
 	var total int64
-	err := repo.DB.
+	err := m.ctx.DB.
 		Where("platform_key = ?", platformKey).
 		Where("open_id = ?", openId).
 		Count(&total).
@@ -46,10 +65,10 @@ func (repo BdScenePrePointRepository) FindByOpenId(openId, platformKey string) (
 	return item, total, nil
 }
 
-func (repo BdScenePrePointRepository) FindAllByOpenId(openId string) ([]entity.BdScenePrePoint, int64, error) {
+func (m defaultBdScenePrePointModel) FindAllByOpenId(openId string) ([]entity.BdScenePrePoint, int64, error) {
 	var items []entity.BdScenePrePoint
 	var total int64
-	err := repo.DB.
+	err := m.ctx.DB.
 		Where("open_id = ?", openId).
 		Count(&total).
 		Find(&items).Error
@@ -62,10 +81,10 @@ func (repo BdScenePrePointRepository) FindAllByOpenId(openId string) ([]entity.B
 	return items, total, nil
 }
 
-func (repo BdScenePrePointRepository) FindAllByPlatformKey(platformKey string) ([]entity.BdScenePrePoint, int64, error) {
+func (m defaultBdScenePrePointModel) FindAllByPlatformKey(platformKey string) ([]entity.BdScenePrePoint, int64, error) {
 	var items []entity.BdScenePrePoint
 	var total int64
-	err := repo.DB.Where("platform_key = ?", platformKey).Count(&total).Find(&items).Error
+	err := m.ctx.DB.Where("platform_key = ?", platformKey).Count(&total).Find(&items).Error
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
@@ -75,9 +94,9 @@ func (repo BdScenePrePointRepository) FindAllByPlatformKey(platformKey string) (
 	return items, total, nil
 }
 
-func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) ([]entity.BdScenePrePoint, int64, error) {
+func (m defaultBdScenePrePointModel) FindBy(by GetScenePrePoint) ([]entity.BdScenePrePoint, int64, error) {
 	var items []entity.BdScenePrePoint
-	query := repo.DB.Model(&entity.BdScenePrePoint{}).Where("platform_key = ?", by.PlatformKey)
+	query := m.ctx.DB.Model(&entity.BdScenePrePoint{}).Where("platform_key = ?", by.PlatformKey)
 	if by.OpenId != "" {
 		query.Where("open_id = ?", by.OpenId)
 	}
@@ -104,10 +123,10 @@ func (repo BdScenePrePointRepository) FindBy(by GetScenePrePoint) ([]entity.BdSc
 	return items, total, nil
 }
 
-func (repo BdScenePrePointRepository) FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, error) {
+func (m defaultBdScenePrePointModel) FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, error) {
 	var item entity.BdScenePrePoint
 
-	query := repo.DB.Where("id = ?", by.Id)
+	query := m.ctx.DB.Where("id = ?", by.Id)
 	if by.OpenId != "" {
 		query.Where("open_id = ?", by.OpenId)
 	}
@@ -131,16 +150,16 @@ func (repo BdScenePrePointRepository) FindOne(by GetScenePrePoint) (entity.BdSce
 	return item, nil
 }
 
-func (repo BdScenePrePointRepository) Create(data *entity.BdScenePrePoint) error {
-	return repo.DB.Model(&entity.BdScenePrePoint{}).Create(data).Error
+func (m defaultBdScenePrePointModel) Create(data *entity.BdScenePrePoint) error {
+	return m.ctx.DB.Model(&entity.BdScenePrePoint{}).Create(data).Error
 }
 
-func (repo BdScenePrePointRepository) Save(data *entity.BdScenePrePoint) error {
-	return repo.DB.Save(data).Error
+func (m defaultBdScenePrePointModel) Save(data *entity.BdScenePrePoint) error {
+	return m.ctx.DB.Save(data).Error
 }
 
-func (repo BdScenePrePointRepository) Updates(cond GetScenePrePoint, up map[string]interface{}) error {
-	query := repo.DB.Model(&entity.BdScenePrePoint{})
+func (m defaultBdScenePrePointModel) Updates(cond GetScenePrePoint, up map[string]interface{}) error {
+	query := m.ctx.DB.Model(&entity.BdScenePrePoint{})
 	if cond.Id != 0 {
 		query.Where("id = ?", cond.Id)
 	}
