@@ -190,6 +190,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
 		}
+
 		//社区2.0 评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
 		{

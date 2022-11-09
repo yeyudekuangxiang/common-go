@@ -16,6 +16,7 @@ type (
 		FindOneTopic(topicId int64) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
+		AddTopicSeeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
 		UpdateColumn(id int64, key string, value interface{}) error
 		GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
@@ -23,6 +24,7 @@ type (
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 		GetTopicNotes(topicIds []int64) []*entity.Topic
+		GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error)
 	}
 
 	defaultTopicRepository struct {
@@ -161,6 +163,38 @@ func (d defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.T
 	return topList, total, nil
 }
 
+func (d defaultTopicRepository) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error) {
+	topList := make([]*entity.Topic, 0)
+	query := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Preload("Comment", func(db *gorm.DB) *gorm.DB {
+			return db.Where("comment_index.to_comment_id = ?", 0).
+				Order("like_count desc").Limit(10)
+		}).
+		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Order("comment_index.like_count desc")
+		}).
+		Preload("Comment.RootChild.Member").
+		Preload("Comment.Member")
+
+	if by.ID != 0 {
+		query.Where("topic.id = ?", by.ID)
+	} else if len(by.Ids) > 0 {
+		query.Where("topic.id in ?", by.Ids)
+	} else if len(by.Rids) > 0 {
+		query.Where("topic.id in ?", by.Rids)
+	}
+
+	err := query.Group("topic.id").Find(&topList).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return topList, nil
+}
+
 func (d defaultTopicRepository) GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
 
@@ -207,13 +241,23 @@ func (d defaultTopicRepository) Save(topic *entity.Topic) error {
 }
 
 func (d defaultTopicRepository) AddTopicLikeCount(topicId int64, num int) error {
-	db := d.ctx.DB.Model(entity.Topic{}).
+	db := d.ctx.DB.Model(&entity.Topic{}).
 		Where("id = ?", topicId)
 	//避免点赞数为负数
 	if num < 0 {
 		db.Where("like_count >= ?", -num)
 	}
 	return db.Update("like_count", gorm.Expr("like_count + ?", num)).Error
+}
+
+func (d defaultTopicRepository) AddTopicSeeCount(topicId int64, num int) error {
+	db := d.ctx.DB.Model(&entity.Topic{}).
+		Where("id = ?", topicId)
+	//避免点赞数为负数
+	if num < 0 {
+		db.Where("see_count >= ?", -num)
+	}
+	return db.Update("see_count", gorm.Expr("see_count + ?", num)).Error
 }
 
 func (d defaultTopicRepository) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
