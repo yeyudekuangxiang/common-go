@@ -16,6 +16,7 @@ type (
 		GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error)
 		GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error)
 		SetHaveRead(params SetHaveReadMessage) error
+		GetTemplate(key string) string
 	}
 
 	defaultWebMessage struct {
@@ -187,7 +188,7 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 }
 
 func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
-	content := d.getTemplate(param.Key)
+	content := d.GetTemplate(param.Key)
 
 	if content == "" {
 		return errors.New("模板不存在")
@@ -253,7 +254,7 @@ func (d defaultWebMessage) replaceTempForComment(content string, recObjID int64)
 	return content
 }
 
-func (d defaultWebMessage) getTemplate(key string) string {
+func (d defaultWebMessage) GetTemplate(key string) string {
 	one, err := d.template.FindOne(key)
 	if err != nil {
 		return ""
