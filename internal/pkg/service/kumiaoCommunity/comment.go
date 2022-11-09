@@ -28,7 +28,7 @@ type (
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
 		Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error)
-		AddTopicLikeCount(commentId int64, num int) error
+		AddCommentLikeCount(commentId int64, num int) error
 	}
 )
 
@@ -222,7 +222,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 	}
 
 	//更新topic
-	app.DB.Model(&topic).Update("updated_at", model.Time{Time: time.Now()})
+	//app.DB.Model(&topic).Update("updated_at", model.Time{Time: time.Now()})
 	//更新count数据
 	recId := topic.UserId
 	if ToCommentId != 0 {
@@ -310,9 +310,9 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	}
 
 	if like.Status == 1 {
-		_ = srv.AddTopicLikeCount(commentId, 1)
+		_ = srv.AddCommentLikeCount(commentId, 1)
 	} else {
-		_ = srv.AddTopicLikeCount(commentId, -1)
+		_ = srv.AddCommentLikeCount(commentId, -1)
 	}
 
 	message := comment.Message
@@ -335,8 +335,8 @@ func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (
 	return resp, nil
 }
 
-func (srv *defaultCommentService) AddTopicLikeCount(commentId int64, num int) error {
-	err := srv.commentModel.AddTopicLikeCount(commentId, num)
+func (srv *defaultCommentService) AddCommentLikeCount(commentId int64, num int) error {
+	err := srv.commentModel.AddCommentLikeCount(commentId, num)
 	if err != nil {
 		return err
 	}
