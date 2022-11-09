@@ -108,7 +108,7 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 
 	total := app.Redis.ZCard(srv.ctx.Context, "topic:rank").Val()
 
-	ids, err := app.Redis.ZRange(srv.ctx.Context, "topic:rank", int64(param.Offset), int64(param.Limit)).Result()
+	ids, err := app.Redis.ZRevRange(srv.ctx.Context, "topic:rank", int64(param.Offset), int64(param.Limit)).Result()
 
 	if err != nil {
 		app.Logger.Errorf("Topic 获取topicId错误:%s", err.Error())
@@ -140,7 +140,8 @@ func (srv TopicService) zAddTopic() {
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {
 			for _, topic := range results {
 				hot := util.NewHot()
-				score := hot.Hot(int64(topic.SeeCount), topic.LikeCount, topic.CommentCount, topic.CreatedAt.Time)
+				score := hot.Hot(int64(topic.SeeCount), topic.LikeCount, topic.CommentCount, int64(topic.IsEssence),
+					topic.CreatedAt.Time)
 				members = append(members, &redis.Z{
 					Score:  score,
 					Member: topic.Id,

@@ -26,13 +26,17 @@ exp : 欧拉数
 a ： 冷却系数 如第一天100分 第二天自然冷却到80分； 反推得到系数为 0.223
 t : 出始时间 - 当前时间
 */
-func (n *Hot) Hot(views, likes, comments int64, createdTime time.Time) float64 {
+func (n *Hot) Hot(views, likes, comments, isEssence int64, createdTime time.Time) float64 {
 	//本期热度 = (seeCount * 1 + likeCount * 2 + commentCount * 3) * exp^(-a*t)
 	//t := createdTime.Sub(time.Now()).Hours()
+	var essence int64
+	if isEssence == 1 {
+		essence = 40
+	}
 	t := time.Now().Sub(createdTime).Hours() / 24
 	exp := math.Exp(-col * t)
 	fmt.Printf("exp:%f; views: %d, likes:%d, comments:%d; t:%f \n", exp, views, likes, comments, t)
-	high, _ := decimal.NewFromInt(views + likes*2 + comments*3).Mul(decimal.NewFromFloat(exp)).Float64()
+	high, _ := decimal.NewFromInt(views + likes*2 + comments*3 + essence).Mul(decimal.NewFromFloat(exp)).Round(9).Float64()
 	return high
 }
 
