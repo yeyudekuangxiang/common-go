@@ -89,9 +89,9 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	types := strings.Split(form.Types, ",")
+	types := strings.Split(strings.Trim(form.Types, ","), ",")
 
-	if len(types) == 0 {
+	if types[0] == "" {
 		return nil, errno.ErrCommon.WithMessage("参数错误")
 	}
 
