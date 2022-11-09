@@ -1,29 +1,36 @@
 package message
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/chanxuehong/util/url"
+	"github.com/square/go-jose/v3/json"
 	"io/ioutil"
 	"mio/config"
 	"mio/pkg/errno"
 	"net/http"
 	"strings"
-	"unsafe"
 )
 
-type JsonPostSample struct {
+//{"code":"0","failNum":"0","successNum":"1","msgId":"22110915322300602201000033772693","time":"20221109153223","errorMsg":""}
+//{"code":"102","msgId":"","time":"20221109153305","errorMsg":"密码错误"}
+//发送短信返回结构
+
+type SmsReturn struct {
+	Code       string `json:"code"`
+	FailNum    string `json:"failNum"`
+	SuccessNum string `json:"successNum"`
+	MsgId      string `json:"msgId"`
+	Time       string `json:"time"`
+	ErrorMsg   string `json:"errorMsg"`
 }
 
-func SendYZMV4(mobile string, code string) {
+//发送验证码
 
-	url := "https://smssh1.253.com/msg/v1/send/json"
+func SendYZMSms(mobile string, code string) (smsReturn *SmsReturn, err error) {
+	url := config.Config.Sms.Url
 	method := "POST"
-
 	payload := strings.NewReader(`{
-    "account": "YZM7795025",
-    "password": "P4tDNsDCXI5380", //需要加入K8S
+    "account": "` + config.Config.Sms.Account + `",
+    "password": "` + config.Config.Sms.Password + `", //需要加入K8S
     "msg": "验证码` + code + `，30分钟有效。参与低碳任务，体验格调生活。如非本人操作请忽略。",
     "phone": "` + mobile + `",
     "sendtime": "201704101400",
@@ -39,42 +46,44 @@ func SendYZMV4(mobile string, code string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil, err
 	}
-	fmt.Println(string(body))
+
+	ret := &SmsReturn{}
+	err = json.Unmarshal(body, ret)
+	if err != nil {
+		return nil, err
+	}
+	if ret.Code != "0" {
+		return ret, errno.ErrCommon.WithMessage(ret.ErrorMsg)
+	}
+	return ret, nil
 }
 
-var TemplateMap = map[string]string{
-	"839944": "您发布的“{$var}”，买家已付款，等待您发货，戳 ezjf.cn/v-3dzyg{$var} 查看 退订回T",
-	"839946": "您发布的“{$var}”，由于您超时未发货，交易取消，戳 ezjf.cn/v-3dzyg{$var}",
-}
+//发送营销短信，也叫模版短信
 
-func SendYZMV5(templateId string, phone string, msg string) (string, error) {
-	msg = phone + ", " + msg + ";"
-	template, ok := TemplateMap[templateId]
-	if !ok {
-		return "", errno.ErrCommon.WithMessage("模版有误" + templateId)
-	}
-	url := "https://smssh1.253.com/msg/variable/json"
+func SendMarketSms(templateContent string, phone string, msg string) (smsReturn *SmsReturn, err error) {
+	msg = phone + "," + msg + ";" //组装 18840853003,小李,1;
+	url := config.Config.SmsMarket.Url
 	method := "POST"
 	payload := strings.NewReader(`{
-    "account": "M4232956",
-    "password": "8Xx53be5pXc568", //需要加入K8S
-    "msg": "` + template + `",
+    "account": "` + config.Config.SmsMarket.Account + `",
+    "password": "` + config.Config.SmsMarket.Password + `", //需要加入K8S
+    "msg": "` + templateContent + `",
 	"params":"` + msg + `",
     "sendtime": "201704101400",
     "report": "true",
@@ -83,108 +92,29 @@ func SendYZMV5(templateId string, phone string, msg string) (string, error) {
 }`)
 
 	fmt.Println(payload)
-
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
-
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-
 	res, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer res.Body.Close()
-
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	fmt.Println(string(body))
-
-	return string(body), nil
-}
-
-func SendSmsV2(mobile string, sms string) error {
-	params := make(map[string]interface{})
-	//请登录zz.253.com获取API账号、密码以及短信发送的URL
-	params["account"] = config.Config.Sms.Account   //创蓝API账号
-	params["password"] = config.Config.Sms.Password //创蓝API密码
-	params["phone"] = mobile                        //手机号码
-
-	//设置您要发送的内容：其中“【】”中括号为运营商签名符号，多签名内容前置添加提交
-	a := "验证码{686739}，30分钟有效。参与低碳任务，体验格调生活。如非本人操作请忽略。"
-	params["msg"] = url.QueryEscape(a)
-
-	params["report"] = "true"
-	bytesData, err := json.Marshal(params)
+	//fmt.Println(string(body))
+	ret := &SmsReturn{}
+	err = json.Unmarshal(body, ret)
 	if err != nil {
-		fmt.Println(err.Error())
-		return err
+		return nil, err
 	}
-	reader := bytes.NewReader(bytesData)
-	url := "https://smssh1.253.com/msg/v1/send/json" //短信发送URL
-	request, err := http.NewRequest("POST", url, reader)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
+	if ret.Code != "0" {
+		return ret, errno.ErrCommon.WithMessage(ret.ErrorMsg)
 	}
-	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
-	client := http.Client{}
-	resp, err := client.Do(request)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	str := (*string)(unsafe.Pointer(&respBytes))
-	fmt.Println(*str)
-	return nil
-}
-
-func SendSms(mobile string, sms string) error {
-	url := "https://smssh1.253.com/msg/v1/send/json"
-	method := "POST"
-	payload := strings.NewReader(`{
-    "account": "` + config.Config.Sms.Account + `",
-    "password": "` + config.Config.Sms.Password + `", //需要加入K8S
-    "msg": "` + sms + `",
-    "phone": "` + mobile + `",
-    "sendtime": "201704101400",
-    "report": "true",
-    "extend": "555",
-    "uid": "321abc"
-}`)
-
-	fmt.Println(payload)
-
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
-
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	fmt.Println(string(body))
-	return nil
+	return ret, nil
 }
