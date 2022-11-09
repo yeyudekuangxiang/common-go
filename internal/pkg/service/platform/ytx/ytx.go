@@ -134,7 +134,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		AppSecret: srv.getAppSecret(),
 		Ts:        strconv.FormatInt(time.Now().Unix(), 10),
 		ReqData: GrantV2ReqData{
-			OrderNo:  "ytx" + strconv.FormatInt(time.Now().UnixMilli(), 10) + strconv.FormatInt(rand.Int63(), 10),
+			OrderNo:  "ytx" + util.UUID(),
 			PoolCode: srv.option.PoolCode,
 			Amount:   amount,
 			OpenId:   sceneUser.PlatformUserId,
@@ -157,6 +157,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	respData, _ := json.Marshal(response)
+
 	err = activity.NewYtxLogRepository(srv.ctx).Save(&entityActivity.YtxLog{
 		OrderNo:        response.SubData.OrderNo,
 		OpenId:         sceneUser.OpenId,
@@ -172,7 +173,8 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	if response.SubCode != "0000" {
-		app.Logger.Errorf("亿通行-grantV2返回错误: %s\n", response.SubMessage)
+		reqData, _ := json.Marshal(grantV2Request)
+		app.Logger.Errorf("亿通行-grantV2返回错误: %s; request: %s\n", response.SubMessage, reqData)
 		return "", errors.New(response.SubMessage)
 	}
 
