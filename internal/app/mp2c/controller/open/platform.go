@@ -370,11 +370,12 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	}
 
 	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
-
+	pointService := service.NewPointService(ctx)
 	//积分
-	point, err := service.NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+	types := entity.PointTypesMap[form.PlatformKey]
+	point, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
-		Type:        entity.POINT_JHX,
+		Type:        types,
 		BizId:       util.UUID(),
 		ChangePoint: incPoint,
 		AdminId:     0,

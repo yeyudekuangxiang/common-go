@@ -254,6 +254,11 @@ var PointCollectLimitOnceMap = map[PointTransactionType]int{
 	POINT_ZCYP_APPLY:  1,
 }
 
+var PointTypesMap = map[string]PointTransactionType{
+	"yitongxing":  POINT_YTX,
+	"jinghuaxing": POINT_JHX,
+}
+
 //每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_COFFEE_CUP:     2, //	次
