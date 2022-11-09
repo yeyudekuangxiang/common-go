@@ -131,26 +131,33 @@ func (srv TopicService) zAddTopic() {
 	}
 	//从redis获取topicIds一小时更新一次
 	var results []entity.Topic
-	var members []*redis.Z
 
 	app.DB.Model(&entity.Topic{}).
 		Where("status = ?", 3).
 		Where("is_top = ?", 0).
 		Where("is_essence = ?", 0).
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {
+			var members []redis.Z
 			for _, topic := range results {
 				hot := util.NewHot()
 				score := hot.Hot(int64(topic.SeeCount), topic.LikeCount, topic.CommentCount, int64(topic.IsEssence),
 					topic.CreatedAt.Time)
-				members = append(members, &redis.Z{
+				members = append(members, redis.Z{
 					Score:  score,
 					Member: topic.Id,
 				})
 			}
-			app.Redis.ZAdd(srv.ctx.Context, "topic:rank", members...)
+			app.Redis.ZAddArgs(srv.ctx.Context, "topic:rank", redis.ZAddArgs{
+				NX:      false,
+				XX:      false,
+				LT:      false,
+				GT:      false,
+				Ch:      true,
+				Members: members,
+			})
 			return nil
 		})
-	app.Redis.Expire(srv.ctx.Context, "topic:rank", time.Hour)
+	app.Redis.Expire(srv.ctx.Context, "topic:rank", time.Hour*24)
 }
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
