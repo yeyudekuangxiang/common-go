@@ -103,9 +103,14 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	if err != nil {
 		return nil, 0, err
 	}
+
 	l := len(msgList)
 
 	result := make([]*GetWebMessageResp, l)
+
+	if l == 0 {
+		return result, 0, nil
+	}
 
 	uKeyMap := make(map[int64]struct{}, l+1)
 	topicMap := make(map[int64]struct{}, l+1)
