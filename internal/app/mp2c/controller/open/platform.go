@@ -20,6 +20,7 @@ import (
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -49,7 +50,8 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 		return nil, errno.ErrCommon.WithMessage("用户未登陆")
 	}
 
-	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
+	memberId, _ := url.QueryUnescape(form.MemberId)
+	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, memberId)
 	if err != nil {
 		if err != errno.ErrExisting {
 			return nil, errno.ErrCommon.WithMessage(scene.Ch + "用户绑定失败")
@@ -61,27 +63,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	}
 
 	//绑定回调
-	if scene.Ch == "jinhuaxing" {
-		params := make(map[string]interface{}, 0)
-		params["mobile"] = user.PhoneNumber
-		params["status"] = "1"
-		jhxSvr := jhx.NewJhxService(context.NewMioContext())
-		err = jhxSvr.BindSuccess(params)
-		if err != nil {
-			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
-		}
-	}
-	if scene.Ch == "yitongxing" {
-		params := make(map[string]interface{}, 0)
-		params["memberId"] = sceneUser.PlatformUserId
-		params["openId"] = sceneUser.OpenId
-		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Secret2), ytx.WithDomain(scene.Domain2))
-		err = ytxSrv.BindSuccess(params)
-		if err != nil {
-			app.Logger.Errorf("%s回调失败: %s", scene.Ch, err.Error())
-		}
-	}
-
+	receiver.bindCallback(*scene, *sceneUser, user)
 	//返回
 	return gin.H{
 		"memberId":     sceneUser.PlatformUserId,
@@ -477,4 +459,31 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 		}
 	}
 	return nil, nil
+}
+
+func (receiver PlatformController) bindCallback(scene entity.BdScene, sceneUser entity.BdSceneUser, user entity.User) {
+	//绑定回调
+	var err error
+	var ch_key string
+	if scene.Ch == "jinhuaxing" {
+		params := make(map[string]interface{}, 0)
+		params["mobile"] = user.PhoneNumber
+		params["status"] = "1"
+		jhxSvr := jhx.NewJhxService(context.NewMioContext())
+		err = jhxSvr.BindSuccess(params)
+		ch_key = "金华行"
+	}
+
+	if scene.Ch == "yitongxing" {
+		params := make(map[string]interface{}, 0)
+		params["memberId"] = sceneUser.PlatformUserId
+		params["openId"] = sceneUser.OpenId
+		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Secret2), ytx.WithDomain(scene.Domain2))
+		err = ytxSrv.BindSuccess(params)
+		ch_key = "亿通行"
+	}
+
+	if err != nil {
+		app.Logger.Errorf("%s 回调失败 : %s", ch_key, err.Error())
+	}
 }
