@@ -24,13 +24,21 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	if form.Phone == "" || form.Msg == "" {
 		return nil, errno.ErrCommon.WithMessage("手机号或者msg为空")
 	}
-	err := message.SendSmsV2(form.Phone, form.Msg)
+	body, err := message.SendYZMV5(form.TemplateId, form.Phone, form.Msg)
+
+	err = message.SendSmsV2(form.Phone, form.Msg)
 	if err != nil {
 		log.Println("短信发送失败", err, form.Phone, form.Msg)
 		return nil, err
 	}
+
 	//发送短信
-	return gin.H{}, nil
+	return gin.H{
+		"body":       body,
+		"templateId": form.TemplateId,
+		"phone":      form.Phone,
+		"msg":        form.Msg,
+	}, nil
 }
 
 func (c SmsSendController) SendZhuGe(ctx *gin.Context) (gin.H, error) {
