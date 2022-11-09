@@ -256,12 +256,16 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool,
 	if topic.Id == 0 {
 		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
-	update := entity.Topic{IsTop: isTop}
+	update := map[string]interface{}{"is_top": isTop}
 	if isTop == 1 {
 		if topic.TopTime.IsZero() {
 			isFirst = true
 		}
-		update.TopTime = model.NewTime()
+		update["top_time"] = model.NewTime()
+	}
+
+	if topic.IsTop == isTop {
+		return topic, isFirst, nil
 	}
 
 	if err := app.DB.Model(&topic).Updates(update).Error; err != nil {
@@ -280,15 +284,17 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topi
 		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
-	update := entity.Topic{
-		IsEssence: isEssence,
-	}
+	update := map[string]interface{}{"is_essence": isEssence}
 
 	if isEssence == 1 {
 		if topic.EssenceTime.IsZero() {
 			isFirst = true
 		}
-		update.EssenceTime = model.NewTime()
+		update["essence_time"] = model.NewTime()
+	}
+
+	if topic.IsEssence == isEssence {
+		return topic, isFirst, nil
 	}
 
 	if err := app.DB.Model(&topic).Updates(update).Error; err != nil {

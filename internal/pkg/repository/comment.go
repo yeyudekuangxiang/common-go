@@ -27,7 +27,7 @@ type (
 		RowBuilder() *gorm.DB
 		CountBuilder(field string) *gorm.DB
 		SumBuilder(field string) *gorm.DB
-		AddTopicLikeCount(commentId int64, num int) error
+		AddCommentLikeCount(commentId int64, num int) error
 		FindListByIds(ids []int64) []*entity.CommentIndex
 	}
 
@@ -253,7 +253,7 @@ func (m *defaultCommentModel) Update(data *entity.CommentIndex) error {
 	return m.ctx.DB.Model(&result).Updates(&result).Error
 }
 
-func (m *defaultCommentModel) AddTopicLikeCount(commentId int64, num int) error {
+func (m *defaultCommentModel) AddCommentLikeCount(commentId int64, num int) error {
 	db := m.ctx.DB.Model(&entity.CommentIndex{}).Where("id = ?", commentId)
 	//避免点赞数为负数
 	if num < 0 {
