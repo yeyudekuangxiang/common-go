@@ -30,8 +30,8 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
-		Offset: form.Offset(),
-		Limit:  form.Limit(),
+		Offset: form.Page,
+		Limit:  form.PageSize,
 	})
 
 	if err != nil {

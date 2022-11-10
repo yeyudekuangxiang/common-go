@@ -165,6 +165,7 @@ func (d defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.T
 
 func (d defaultTopicRepository) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error) {
 	topList := make([]*entity.Topic, 0)
+
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
@@ -179,12 +180,12 @@ func (d defaultTopicRepository) GetTopicListV2(by GetTopicPageListBy) ([]*entity
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
 
-	if by.ID != 0 {
-		query.Where("topic.id = ?", by.ID)
-	} else if len(by.Ids) > 0 {
-		query.Where("topic.id in ?", by.Ids)
-	} else if len(by.Rids) > 0 {
+	if len(by.Rids) > 0 {
 		query.Where("topic.id in ?", by.Rids)
+	}
+
+	if by.IsTop != 0 {
+		query.Where("topic.is_top = ?", by.IsTop)
 	}
 
 	err := query.Group("topic.id").Find(&topList).Error
