@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -78,6 +77,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	params["pointValue"] = form.PointValue
 	params["uid"] = form.Uid
 	params["time"] = form.Time
+	params["info"] = form.Info
 	params["privateKey"] = "mio2022"
 	sign := GetSignToJava(params)
 	if sign != form.Sign {
@@ -103,7 +103,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 		OpenId:   form.Uid,
 		Type:     carbonType,
 		AddValue: carbonValue,
-		Info:     fmt.Sprintf("{sign=%s,serialNumber=%s}", form.SerialNumber, form.SerialNumber),
+		Info:     form.Info,
 		AdminId:  0,
 		Ip:       "", //ctx.ClientIP()*/
 	})
