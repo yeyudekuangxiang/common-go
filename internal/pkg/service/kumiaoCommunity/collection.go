@@ -179,7 +179,7 @@ func (d defaultCollectionService) CancelCollection(objId int64, objType int, ope
 		if err != nil {
 			return err
 		}
-		
+
 		return nil
 	})
 

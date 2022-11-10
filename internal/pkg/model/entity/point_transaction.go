@@ -80,6 +80,12 @@ func (p PointTransactionType) Text() string {
 		return "骑行"
 	case POINT_YTX:
 		return "地铁出行"
+	case POINT_SECONDHAND_ORDER:
+		return "二手交易"
+	case POINT_SECONDHAND_ORDER_AWARD:
+		return "二手交易奖励"
+	case POINT_NEW_TASK_PUBLISH_COMMODITY:
+		return "发布二手奖励"
 	}
 	return "未知积分"
 }
@@ -182,7 +188,10 @@ const (
 	POINT_ZCYP_SIGNUP PointTransactionType = "ZCYP_SIGNUP"
 	POINT_ZCYP_APPLY  PointTransactionType = "ZCYP_APPLY"
 
-	POINT_CYCLING PointTransactionType = "CYCLING"
+	POINT_CYCLING                    PointTransactionType = "CYCLING"
+	POINT_SECONDHAND_ORDER           PointTransactionType = "SECONDHAND_ORDER"
+	POINT_SECONDHAND_ORDER_AWARD     PointTransactionType = "SECONDHAND_ORDER_AWARD"
+	POINT_NEW_TASK_PUBLISH_COMMODITY PointTransactionType = "NEW_TASK_PUBLISH_COMMODITY"
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -228,6 +237,9 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_LIKE,
 	POINT_REDUCE_PLASTIC,
 	POINT_CYCLING,
+	POINT_SECONDHAND_ORDER,
+	POINT_SECONDHAND_ORDER_AWARD,
+	POINT_NEW_TASK_PUBLISH_COMMODITY,
 }
 
 const (
