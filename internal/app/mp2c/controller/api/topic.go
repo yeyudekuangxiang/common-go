@@ -30,14 +30,14 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
-		TopicTagId: form.TopicTagId,
-		Offset:     form.Offset(),
-		Limit:      form.Limit(),
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
 	})
 
 	if err != nil {
 		return nil, err
 	}
+
 	return gin.H{
 		"list":     list,
 		"total":    total,

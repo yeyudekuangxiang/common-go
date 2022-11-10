@@ -11,6 +11,7 @@ var c = cron.New(cron.WithLocation(time.Local))
 func Run() {
 	businessCron()
 	mp2cCron()
+	kumiaoCron()
 	c.Start()
 }
 func AddFunc(spec string, f func()) {

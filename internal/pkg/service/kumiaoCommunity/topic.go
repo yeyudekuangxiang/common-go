@@ -103,39 +103,44 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 
 // GetTopicDetailPageList 通过topic表直接查询获取内容列表
 func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	//list, total := srv.topicModel.GetTopicPageList(param)
-	srv.zAddTopic()
+	//srv.ZAddTopic()
+	total := app.Redis.ZCard(srv.ctx.Context, config.RedisKey.TopicRank).Val()
 
-	total := app.Redis.ZCard(srv.ctx.Context, "topic:rank").Val()
-
-	ids, err := app.Redis.ZRevRange(srv.ctx.Context, "topic:rank", int64(param.Offset), int64(param.Limit)).Result()
+	ids, err := app.Redis.ZRevRange(srv.ctx.Context, config.RedisKey.TopicRank, int64(param.Offset), int64(param.Limit-1)).Result()
 
 	if err != nil {
 		app.Logger.Errorf("Topic 获取topicId错误:%s", err.Error())
 	}
 
-	list, err := srv.topicModel.GetTopicListV2(repository.GetTopicPageListBy{
+	topicList, err := srv.topicModel.GetTopicListV2(repository.GetTopicPageListBy{
 		Rids: ids,
 	})
 
 	if err != nil {
 		return nil, 0, err
 	}
-	return list, total, nil
+
+	topicMap := make(map[int64]*entity.Topic, len(topicList))
+	resultList := make([]*entity.Topic, len(topicList))
+	for _, topic := range topicList {
+		topicMap[topic.Id] = topic
+	}
+
+	for i, id := range ids {
+		int64Id, _ := strconv.ParseInt(id, 10, 64)
+		resultList[i] = topicMap[int64Id]
+	}
+
+	return resultList, total, nil
 }
 
-func (srv TopicService) zAddTopic() {
-	n := app.Redis.Exists(srv.ctx.Context, "topic:rank").Val()
-	if n != 0 {
-		return
-	}
-	//从redis获取topicIds一小时更新一次
+func (srv TopicService) ZAddTopic() {
+
 	var results []entity.Topic
 
 	app.DB.Model(&entity.Topic{}).
 		Where("status = ?", 3).
 		Where("is_top = ?", 0).
-		Where("is_essence = ?", 0).
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {
 			var members []redis.Z
 			for _, topic := range results {
@@ -147,17 +152,16 @@ func (srv TopicService) zAddTopic() {
 					Member: topic.Id,
 				})
 			}
-			app.Redis.ZAddArgs(srv.ctx.Context, "topic:rank", redis.ZAddArgs{
-				NX:      false,
-				XX:      false,
-				LT:      false,
-				GT:      false,
+			var zaddArgs redis.ZAddArgs
+
+			zaddArgs = redis.ZAddArgs{
 				Ch:      true,
 				Members: members,
-			})
+			}
+
+			app.Redis.ZAddArgs(srv.ctx.Context, config.RedisKey.TopicRank, zaddArgs)
 			return nil
 		})
-	app.Redis.Expire(srv.ctx.Context, "topic:rank", time.Hour*24)
 }
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
