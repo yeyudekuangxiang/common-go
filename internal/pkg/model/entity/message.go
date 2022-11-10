@@ -9,6 +9,7 @@ type Message struct {
 	Type      int       `json:"type"`     // 1点赞 2评论 3回复 4发布 5精选 6违规 7合作社
 	TurnType  int       `json:"turnType"` // 1文章 2评论 3订单 4商品
 	TurnId    int64     `json:"turnId"`
+	ShowId    int64     `json:"showId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
