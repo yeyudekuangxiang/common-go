@@ -92,7 +92,6 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 }
 
 func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error) {
-
 	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
 		RecId:  params.UserId,
 		Status: params.Status,
@@ -113,11 +112,11 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 		return result, 0, nil
 	}
 
-	uKeyMap := make(map[int64]struct{}, l+1)
-	topicMap := make(map[int64]struct{}, l+1)
-	commentMap := make(map[int64]struct{}, l+1)
-	orderMap := make(map[int64]struct{}, l+1)
-	goodsMap := make(map[int64]struct{}, l+1)
+	uKeyMap := make(map[int64]struct{}, l+1)    // 发送者id map
+	topicMap := make(map[int64]struct{}, l+1)   // 帖子 map
+	commentMap := make(map[int64]struct{}, l+1) // 评论 map
+	orderMap := make(map[int64]struct{}, l+1)   // 订单 map
+	goodsMap := make(map[int64]struct{}, l+1)   // 商品 map
 
 	for i, item := range msgList {
 		one := &GetWebMessageResp{}
@@ -127,16 +126,18 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 		uKeyMap[item.SendId] = struct{}{}
 		//turnMap
 		if item.TurnType == 1 {
-			topicMap[item.TurnId] = struct{}{}
+			topicMap[item.ShowId] = struct{}{}
 		}
+
 		if item.TurnType == 2 {
-			commentMap[item.TurnId] = struct{}{}
+			commentMap[item.ShowId] = struct{}{}
 		}
+
 		if item.TurnType == 3 {
-			orderMap[item.TurnId] = struct{}{}
+			orderMap[item.ShowId] = struct{}{}
 		}
 		if item.TurnType == 4 {
-			goodsMap[item.TurnId] = struct{}{}
+			goodsMap[item.ShowId] = struct{}{}
 		}
 
 	}
@@ -168,19 +169,19 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 		}
 		//文章组合
 		if item.TurnType == 1 {
-			item.TurnNotes = tMap[item.TurnId]
+			item.TurnNotes = tMap[item.ShowId]
 		}
 		//评论组合
 		if item.TurnType == 2 {
-			item.TurnNotes = cMap[item.TurnId]
+			item.TurnNotes = cMap[item.ShowId]
 		}
 		//商品组合
 		if item.TurnType == 3 {
-			item.TurnNotes = oMap[item.TurnId]
+			item.TurnNotes = oMap[item.ShowId]
 		}
 		//订单组合
 		if item.TurnType == 4 {
-			item.TurnNotes = gMap[item.TurnId]
+			item.TurnNotes = gMap[item.ShowId]
 		}
 	}
 
@@ -197,16 +198,16 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	keys := strings.Split(param.Key, "_")
 	if len(keys) > 1 {
 		if keys[0] == "reply" {
-			obj, _ := d.comment.FindOne(param.ShowId)
+			obj, _ := d.comment.FindOne(param.TurnId)
 			content = strings.ReplaceAll(content, "{0}", obj.Message)
 		} else {
 			if keys[1] == "topic" {
-				obj := d.topic.FindById(param.ShowId)
+				obj := d.topic.FindById(param.TurnId)
 				content = strings.ReplaceAll(content, "{0}", obj.Title)
 			}
 
 			if keys[1] == "comment" {
-				obj, _ := d.comment.FindOne(param.ShowId)
+				obj, _ := d.comment.FindOne(param.TurnId)
 				content = strings.ReplaceAll(content, "{0}", obj.Message)
 			}
 		}
@@ -219,6 +220,7 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 		Type:     param.Type,
 		TurnType: param.TurnType,
 		TurnId:   param.TurnId,
+		ShowId:   param.ShowId,
 		Message:  content,
 	})
 	if err != nil {
