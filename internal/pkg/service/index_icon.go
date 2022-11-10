@@ -26,7 +26,7 @@ type IndexIconService struct {
 func (srv IndexIconService) DeleteById(dto repotypes.DeleteIndexIconDO) error {
 	do := repotypes.DeleteIndexIconDO{
 		Id:     dto.Id,
-		Status: 2,
+		Status: entity.IndexIconStatusDown,
 	}
 	return srv.repo.Delete(&do)
 }
@@ -46,6 +46,7 @@ func (srv IndexIconService) Create(dto entity.IndexIcon) error {
 
 func (srv IndexIconService) Update(dto entity.IndexIcon) error {
 	return srv.repo.Update(srv_types.UpdateIndexIconDTO{
+		Id:     dto.ID,
 		Title:  dto.Title,
 		RowNum: dto.RowNum,
 		Sort:   dto.Sort,

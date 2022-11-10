@@ -60,7 +60,7 @@ func (repo IndexIconRepository) GetOne(do repotypes.GetIndexIconOneDO) (*entity.
 
 func (repo IndexIconRepository) Update(dto srv_types.UpdateIndexIconDTO) error {
 	//判断是否存在
-	_, exit, err := repo.GetOne(repotypes.GetIndexIconOneDO{
+	info, exit, err := repo.GetOne(repotypes.GetIndexIconOneDO{
 		ID: dto.Id,
 	})
 	if err != nil {
@@ -70,6 +70,8 @@ func (repo IndexIconRepository) Update(dto srv_types.UpdateIndexIconDTO) error {
 		errno.ErrCommon.WithMessage("金刚位不存在")
 	}
 	do := entity.IndexIcon{
+		CreatedAt: info.CreatedAt,
+		Type:      info.Type,
 		UpdatedAt: time.Now()}
 	if err := util.MapTo(dto, &do); err != nil {
 		return err

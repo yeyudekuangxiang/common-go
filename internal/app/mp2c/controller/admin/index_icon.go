@@ -67,8 +67,7 @@ func (ctl IndexIconController) Delete(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	err := service.NewIndexIconService(context.NewMioContext()).DeleteById(repotypes.DeleteIndexIconDO{
-		Id:     form.Id,
-		Status: entity.IndexIconStatusDown,
+		Id: form.Id,
 	})
 	if err != nil {
 		return nil, err
