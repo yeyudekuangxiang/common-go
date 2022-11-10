@@ -1,6 +1,9 @@
 package repotypes
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/pkg/model/entity"
+	"time"
+)
 
 type GetIndexIconOneDO struct {
 	ID int64
@@ -23,4 +26,15 @@ type GetIndexIconPageDO struct {
 	Title  string
 	Status entity.IndexIconStatus
 	IsOpen int8
+}
+
+type UpdateIndexIconDO struct {
+	ID        int64
+	Title     string
+	RowNum    string
+	Sort      int8
+	Status    entity.IndexIconStatus
+	IsOpen    int8
+	Pic       string
+	UpdatedAt time.Time
 }
