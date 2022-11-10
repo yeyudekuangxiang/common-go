@@ -28,6 +28,7 @@ type redisKey struct {
 	MessageSignUser          string
 	MessageLimitTopicShow    string
 	MessageLimitPlatformShow string
+	TopicRank                string
 }
 
 var RedisKey = redisKey{
@@ -58,4 +59,5 @@ var RedisKey = redisKey{
 	MessageSignUser:          "mp2c:message_sign_user",               //小程序消息推送
 	MessageLimitPlatformShow: "mp2c:message_limit_platform_show:%s",  //订阅消息每天弹出限制 平台普通
 	MessageLimitTopicShow:    "mp2c:message_limit_topic_show:%s",     //订阅消息每天弹出限制 帖子
+	TopicRank:                "mp2c:topic:rank",
 }
