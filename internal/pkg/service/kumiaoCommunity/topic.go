@@ -135,9 +135,7 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 
 	//组装置顶数据
 	if param.Offset == 1 {
-		topList, err := srv.topicModel.GetTopicListV2(repository.GetTopicPageListBy{
-			IsTop: 1,
-		})
+		topList, err := srv.topicModel.GetTopList()
 		if err != nil {
 			return nil, 0, err
 		}
