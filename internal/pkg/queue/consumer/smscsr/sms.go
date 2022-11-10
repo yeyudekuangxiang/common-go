@@ -9,6 +9,7 @@ import (
 )
 
 func SendSms(delivery rabbitmq.Delivery) rabbitmq.Action {
+
 	msg := smsmsg.MsgMessage{}
 	err := json.Unmarshal(delivery.Body, &msg)
 	if err != nil {
@@ -16,9 +17,6 @@ func SendSms(delivery rabbitmq.Delivery) rabbitmq.Action {
 		return rabbitmq.Ack
 	}
 	//发送短信
-	err = message.SendSms(msg.Phone, msg.Msg)
-	if err != nil {
-		log.Println("短信发送失败", err, string(delivery.Body))
-	}
+	message.SendYZM(msg.Phone, msg.Msg)
 	return rabbitmq.Ack
 }
