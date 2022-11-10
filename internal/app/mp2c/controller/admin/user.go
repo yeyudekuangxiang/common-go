@@ -89,6 +89,7 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 			Key:      "wechat",
 			TurnType: 0,
 			TurnId:   0,
+			ShowId:   0,
 			Type:     7,
 		})
 

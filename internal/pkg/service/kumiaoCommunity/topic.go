@@ -103,14 +103,19 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 
 // GetTopicDetailPageList 通过topic表直接查询获取内容列表
 func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	//srv.ZAddTopic()
-	total := app.Redis.ZCard(srv.ctx.Context, config.RedisKey.TopicRank).Val()
-
-	ids, err := app.Redis.ZRevRange(srv.ctx.Context, config.RedisKey.TopicRank, int64(param.Offset), int64(param.Limit-1)).Result()
+	// page = page-1, pagesize = 10-1
+	// page = 1, pageSize = 10; page = 0, pagesize = 9
+	// page = 2, pageSize = 10; page = 10, pagesize = 19
+	// 0+10-1+1,
+	start := (param.Offset - 1) * 10
+	stop := (param.Limit * param.Offset) - 1
+	ids, err := app.Redis.ZRevRange(srv.ctx.Context, config.RedisKey.TopicRank, int64(start), int64(stop)).Result()
 
 	if err != nil {
 		app.Logger.Errorf("Topic 获取topicId错误:%s", err.Error())
 	}
+
+	total := app.Redis.ZCard(srv.ctx.Context, config.RedisKey.TopicRank).Val()
 
 	topicList, err := srv.topicModel.GetTopicListV2(repository.GetTopicPageListBy{
 		Rids: ids,
@@ -120,15 +125,28 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 		return nil, 0, err
 	}
 
+	//按ids顺序排序
 	topicMap := make(map[int64]*entity.Topic, len(topicList))
-	resultList := make([]*entity.Topic, len(topicList))
+	resultList := make([]*entity.Topic, 0)
+
 	for _, topic := range topicList {
 		topicMap[topic.Id] = topic
 	}
 
-	for i, id := range ids {
+	//组装置顶数据
+	if param.Offset == 1 {
+		topList, err := srv.topicModel.GetTopList()
+		if err != nil {
+			return nil, 0, err
+		}
+		for _, topic := range topList {
+			resultList = append(resultList, topic)
+		}
+	}
+
+	for _, id := range ids {
 		int64Id, _ := strconv.ParseInt(id, 10, 64)
-		resultList[i] = topicMap[int64Id]
+		resultList = append(resultList, topicMap[int64Id])
 	}
 
 	return resultList, total, nil

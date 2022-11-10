@@ -30,8 +30,8 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
-		Offset: form.Offset(),
-		Limit:  form.Limit(),
+		Offset: form.Page,
+		Limit:  form.PageSize,
 	})
 
 	if err != nil {
@@ -142,9 +142,9 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 			SendId:   user.ID,
 			RecId:    resp.TopicUserId,
 			Key:      "like_topic",
+			Type:     1,
 			TurnType: 1,
 			TurnId:   resp.TopicId,
-			Type:     1,
 			ShowId:   resp.TopicId,
 		})
 		if err != nil {

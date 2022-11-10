@@ -183,15 +183,16 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	//发送消息
 	msgKey := "reply_topic"
-	turnId := comment.ObjId
+	turnId := comment.Id
 	turnType := 1
-	showId := comment.Id
+	showId := form.ObjId
 	t := 2
+
 	if form.Parent != 0 {
 		msgKey = "reply_comment"
 		turnType = 2
-		turnId = comment.ToCommentId
-		showId = comment.Id
+		turnId = comment.Id
+		showId = comment.ToCommentId
 		t = 3
 	}
 
@@ -319,9 +320,9 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 			SendId:   user.ID,
 			RecId:    resp.CommentUserId,
 			Key:      "like_comment",
+			Type:     1,
 			TurnType: 2,
 			TurnId:   resp.CommentId,
-			Type:     1,
 			ShowId:   resp.CommentId,
 		})
 

@@ -219,9 +219,9 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 				SendId:   0,
 				RecId:    topic.User.ID,
 				Key:      key,
+				Type:     4,
 				TurnId:   topic.Id,
 				TurnType: 1,
-				Type:     4,
 				ShowId:   topic.Id,
 			})
 
@@ -236,9 +236,9 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			SendId:   0,
 			RecId:    topic.User.ID,
 			Key:      "down_topic",
-			TurnId:   topic.Id,
-			TurnType: 1,
 			Type:     4,
+			TurnType: 1,
+			TurnId:   topic.Id,
 			ShowId:   topic.Id,
 		})
 
@@ -273,9 +273,9 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 			SendId:   0,
 			RecId:    topic.UserId,
 			Key:      "top_topic_v2",
+			Type:     5,
 			TurnType: 1,
 			TurnId:   topic.Id,
-			Type:     5,
 			ShowId:   topic.Id,
 		})
 
@@ -334,9 +334,9 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				SendId:   0,
 				RecId:    topic.User.ID,
 				Key:      key,
+				Type:     5,
 				TurnType: 1,
 				TurnId:   topic.Id,
-				Type:     5,
 				ShowId:   topic.Id,
 			})
 

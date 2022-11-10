@@ -27,6 +27,7 @@ type UserWebMessage struct {
 	//obj
 	TurnType int   `json:"turnType"` // 1文章 2 评论 3订单 4商品
 	TurnId   int64 `json:"turnId"`
+	ShowId   int64 `json:"showId"`
 	//user
 	SendId int64 `json:"sendId"`
 	//NickName  string `json:"nickName"`
