@@ -5,10 +5,11 @@ import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	QuestionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"time"
 )
 
 func NewIndexIconRepository(ctx *context.MioContext) *IndexIconRepository {
@@ -25,6 +26,9 @@ func (repo IndexIconRepository) Save(data *entity.IndexIcon) error {
 	return repo.ctx.DB.Save(data).Error
 }
 
+func (repo IndexIconRepository) Create(data *entity.IndexIcon) error {
+	return repo.ctx.DB.Create(data).Error
+}
 func (repo IndexIconRepository) CreateInBatches(data []entity.IndexIcon) error {
 	return repo.ctx.DB.CreateInBatches(data, len(data)).Error
 }
@@ -54,7 +58,7 @@ func (repo IndexIconRepository) GetOne(do repotypes.GetIndexIconOneDO) (*entity.
 	return &data, true, nil
 }
 
-func (repo IndexIconRepository) Update(dto srv_types.UpdateDuiBaActivityDTO) error {
+func (repo IndexIconRepository) Update(dto srv_types.UpdateIndexIconDTO) error {
 	//判断是否存在
 	_, exit, err := repo.GetOne(repotypes.GetIndexIconOneDO{
 		ID: dto.Id,
@@ -65,45 +69,27 @@ func (repo IndexIconRepository) Update(dto srv_types.UpdateDuiBaActivityDTO) err
 	if !exit {
 		errno.ErrCommon.WithMessage("金刚位不存在")
 	}
-
-	return nil
-	/*
-		data := entity.IndexIcon{}
-		db := repo.ctx.DB.Model(data)
-
-		do := entity.IndexIcon{
-			UpdatedAt: time.Now()}
-		if err := util.MapTo(dto, &do); err != nil {
-			return err
-		}
-		return repo.Save(&do)*/
+	do := entity.IndexIcon{
+		UpdatedAt: time.Now()}
+	if err := util.MapTo(dto, &do); err != nil {
+		return err
+	}
+	return repo.Save(&do)
 }
 
-func (repo IndexIconRepository) GetListBy(by repotypes.GetQuestOptionGetListBy) ([]entity.IndexIcon, error) {
-	list := make([]entity.IndexIcon, 0)
+func (repo IndexIconRepository) GetPage(do repotypes.GetIndexIconPageDO) ([]entity.IndexIcon, int64, error) {
 	db := repo.ctx.DB.Model(entity.IndexIcon{})
-	if len(by.SubjectIds) != 0 {
-		db.Where("subject_id in (?) ", by.SubjectIds)
+	if do.Status != 0 {
+		db.Where("status = ?", do.Status)
 	}
-	db.Order("sort desc")
-	if err := db.Find(&list).Error; err != nil {
-		panic(err)
+	if do.IsOpen != 0 {
+		db.Where("is_open = ?", do.IsOpen)
 	}
-	return list, nil
-}
-
-func (repo IndexIconRepository) GetListByUid(by repotypes.GetQuestionOptionGetListByUid) ([]QuestionEntity.Answer, error) {
-	list := make([]QuestionEntity.Answer, 0)
-	db := repo.ctx.DB.Model(QuestionEntity.Answer{})
-	if by.QuestionId != 0 {
-		db.Where("question_id", by.QuestionId)
+	if do.Title != "" {
+		db.Where("name like ?", "%"+do.Title+"%")
 	}
-	if by.Uid != 0 {
-		db.Where("user_id", by.Uid)
-	}
-	db.Order("sort desc")
-	if err := db.Find(&list).Error; err != nil {
-		panic(err)
-	}
-	return list, nil
+	db.Order("id desc")
+	list := make([]entity.IndexIcon, 0)
+	var total int64
+	return list, total, db.Count(&total).Offset(do.Offset).Limit(do.Limit).Find(&list).Error
 }

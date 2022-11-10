@@ -95,6 +95,14 @@ func adminRouter(router *gin.Engine) {
 			userRouter.GET("/risk/statistics", apiutil.Format(admin.DefaultUserController.RiskStatistics)) //风险用户统计
 			userRouter.POST("/update/risk", apiutil.Format(admin.DefaultUserController.UpdateRisk))
 		}
+
+		iconRouter := adminRouter.Group("/icon")
+		{
+			iconRouter.POST("/create", apiutil.Format(admin.DefaultIndexIconController.Create))
+			iconRouter.POST("/update", apiutil.Format(admin.DefaultIndexIconController.Update))
+			iconRouter.GET("/list", apiutil.Format(admin.DefaultIndexIconController.Page))
+			iconRouter.POST("/delete", apiutil.Format(admin.DefaultIndexIconController.Delete))
+		}
 	}
 	//adminRouter.POST("/user/risk", apiutil.Format(admin.UpdateUserRisk))
 }
