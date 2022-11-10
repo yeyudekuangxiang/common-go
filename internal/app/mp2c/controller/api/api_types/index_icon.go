@@ -14,3 +14,12 @@ type IndexIconVO struct {
 	CreatedAt string                 `json:"createdAt"`
 	UpdatedAt string                 `json:"updatedAt"`
 }
+
+type IndexIconApiVO struct {
+	ID     int64  `json:"id"`
+	Title  string `json:"title"`
+	Type   string `json:"type"`
+	RowNum string `json:"rowNum"`
+	Sort   int8   `json:"sort"`
+	Pic    string `json:"pic"`
+}

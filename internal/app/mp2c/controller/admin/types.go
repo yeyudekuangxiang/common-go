@@ -281,7 +281,6 @@ type UpdateIndexIconForm struct {
 
 type GetIndexIconPageForm struct {
 	Title  string `json:"title" form:"title" binding:"" alias:"标题"`
-	Type   string `json:"type" form:"type" binding:"" alias:"类型"`
 	IsOpen int8   `json:"isOpen" form:"isOpen" binding:"" alias:"是否开启 1开启 2关闭"`
 	controller.PageFrom
 }
