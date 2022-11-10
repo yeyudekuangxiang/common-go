@@ -25,12 +25,38 @@ type (
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 		GetTopicNotes(topicIds []int64) []*entity.Topic
 		GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error)
+		GetTopList() ([]*entity.Topic, error)
 	}
 
 	defaultTopicRepository struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicRepository) GetTopList() ([]*entity.Topic, error) {
+	topList := make([]*entity.Topic, 0)
+
+	query := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Preload("Comment", func(db *gorm.DB) *gorm.DB {
+			return db.Where("comment_index.to_comment_id = ?", 0).
+				Order("like_count desc").Limit(10)
+		}).
+		Preload("Comment.RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Order("comment_index.like_count desc")
+		}).
+		Preload("Comment.RootChild.Member").
+		Preload("Comment.Member")
+
+	err := query.Where("topic.is_top = 1").Group("topic.id").Find(&topList).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return topList, nil
+}
 
 func (d defaultTopicRepository) FindOneTopic(topicId int64) (*entity.Topic, error) {
 	var resp entity.Topic
@@ -165,6 +191,7 @@ func (d defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.T
 
 func (d defaultTopicRepository) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error) {
 	topList := make([]*entity.Topic, 0)
+
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
@@ -179,13 +206,7 @@ func (d defaultTopicRepository) GetTopicListV2(by GetTopicPageListBy) ([]*entity
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
 
-	if by.ID != 0 {
-		query.Where("topic.id = ?", by.ID)
-	} else if len(by.Ids) > 0 {
-		query.Where("topic.id in ?", by.Ids)
-	} else if len(by.Rids) > 0 {
-		query.Where("topic.id in ?", by.Rids)
-	}
+	query.Where("topic.id in ?", by.Rids)
 
 	err := query.Group("topic.id").Find(&topList).Error
 

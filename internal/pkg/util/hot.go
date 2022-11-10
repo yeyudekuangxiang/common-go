@@ -31,12 +31,11 @@ func (n *Hot) Hot(views, likes, comments, isEssence int64, createdTime time.Time
 	//t := createdTime.Sub(time.Now()).Hours()
 	var essence int64
 	if isEssence == 1 {
-		essence = 40
+		essence = 80
 	}
 	t := time.Now().Sub(createdTime).Hours() / 24
 	exp := math.Exp(-col * t)
-	fmt.Printf("exp:%f; views: %d, likes:%d, comments:%d; t:%f \n", exp, views, likes, comments, t)
-	high, _ := decimal.NewFromInt(views + likes*2 + comments*3 + essence).Mul(decimal.NewFromFloat(exp)).Round(9).Float64()
+	high, _ := decimal.NewFromInt(views + likes*5 + comments*10 + essence).Mul(decimal.NewFromFloat(exp)).Round(4).Float64()
 	return high
 }
 
