@@ -1,20 +1,20 @@
 package entity
 
 import (
-	"mio/internal/pkg/model"
+	"time"
 )
 
 type IndexIcon struct {
-	ID        int64      `gorm:"primary_key;column:id" json:"id"`
-	Title     string     `gorm:"column:title" json:"title"`
-	Type      string     `gorm:"column:type" json:"type"`
-	RowNum    string     `gorm:"column:row_num" json:"rowNum"`
-	Sort      int8       `gorm:"column:sort" json:"sort"`
-	Status    int8       `gorm:"column:status" json:"status"`
-	IsOpen    int8       `gorm:"column:is_open" json:"isOpen"`
-	Pic       string     `gorm:"column:pic" json:"pic"`
-	CreatedAt model.Time `gorm:"column:created_at" json:"createdAt"`
-	UpdatedAt model.Time `gorm:"column:updated_at" json:"updatedAt"`
+	ID        int64     `gorm:"primary_key;column:id" json:"id"`
+	Title     string    `gorm:"column:title" json:"title"`
+	Type      string    `gorm:"column:type" json:"type"`
+	RowNum    string    `gorm:"column:row_num" json:"rowNum"`
+	Sort      int8      `gorm:"column:sort" json:"sort"`
+	Status    int8      `gorm:"column:status" json:"status"`
+	IsOpen    int8      `gorm:"column:is_open" json:"isOpen"`
+	Pic       string    `gorm:"column:pic" json:"pic"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updatedAt"`
 }
 
 func (IndexIcon) TableName() string {

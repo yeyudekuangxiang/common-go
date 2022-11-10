@@ -7,6 +7,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	QuestionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/repository/repotypes"
+	"mio/internal/pkg/service/srv_types"
+	"mio/pkg/errno"
 )
 
 func NewIndexIconRepository(ctx *context.MioContext) *IndexIconRepository {
@@ -19,12 +21,12 @@ type IndexIconRepository struct {
 	ctx *context.MioContext
 }
 
-func (repo IndexIconRepository) Save(transaction *entity.IndexIcon) error {
-	return repo.ctx.DB.Save(transaction).Error
+func (repo IndexIconRepository) Save(data *entity.IndexIcon) error {
+	return repo.ctx.DB.Save(data).Error
 }
 
-func (repo IndexIconRepository) CreateInBatches(transaction []entity.IndexIcon) error {
-	return repo.ctx.DB.CreateInBatches(transaction, len(transaction)).Error
+func (repo IndexIconRepository) CreateInBatches(data []entity.IndexIcon) error {
+	return repo.ctx.DB.CreateInBatches(data, len(data)).Error
 }
 
 func (repo IndexIconRepository) Delete(by *repotypes.DeleteIndexIconDO) error {
@@ -36,7 +38,7 @@ func (repo IndexIconRepository) Delete(by *repotypes.DeleteIndexIconDO) error {
 	return db.Updates(by).Error
 }
 
-func (repo IndexIconRepository) GetOne(do repotypes.GetBannerOneDO) (*entity.IndexIcon, bool, error) {
+func (repo IndexIconRepository) GetOne(do repotypes.GetIndexIconOneDO) (*entity.IndexIcon, bool, error) {
 	data := entity.IndexIcon{}
 	db := repo.ctx.DB.Model(data)
 	if do.ID != 0 {
@@ -50,6 +52,31 @@ func (repo IndexIconRepository) GetOne(do repotypes.GetBannerOneDO) (*entity.Ind
 		return nil, false, err
 	}
 	return &data, true, nil
+}
+
+func (repo IndexIconRepository) Update(dto srv_types.UpdateDuiBaActivityDTO) error {
+	//判断是否存在
+	_, exit, err := repo.GetOne(repotypes.GetIndexIconOneDO{
+		ID: dto.Id,
+	})
+	if err != nil {
+		return err
+	}
+	if !exit {
+		errno.ErrCommon.WithMessage("金刚位不存在")
+	}
+
+	return nil
+	/*
+		data := entity.IndexIcon{}
+		db := repo.ctx.DB.Model(data)
+
+		do := entity.IndexIcon{
+			UpdatedAt: time.Now()}
+		if err := util.MapTo(dto, &do); err != nil {
+			return err
+		}
+		return repo.Save(&do)*/
 }
 
 func (repo IndexIconRepository) GetListBy(by repotypes.GetQuestOptionGetListBy) ([]entity.IndexIcon, error) {
