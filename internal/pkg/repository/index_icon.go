@@ -88,7 +88,7 @@ func (repo IndexIconRepository) GetPage(do repotypes.GetIndexIconPageDO) ([]enti
 	if do.Title != "" {
 		db.Where("name like ?", "%"+do.Title+"%")
 	}
-	db.Order("id desc")
+	db.Order("sort desc ,id desc")
 	list := make([]entity.IndexIcon, 0)
 	var total int64
 	return list, total, db.Count(&total).Offset(do.Offset).Limit(do.Limit).Find(&list).Error
