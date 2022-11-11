@@ -2,6 +2,7 @@ package open
 
 import (
 	"fmt"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -89,4 +90,9 @@ func isPalindrome(s string) bool {
 
 func isalnum(ch byte) bool {
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')
+}
+
+func TestDecodeUrl(t *testing.T) {
+	memberId, _ := url.QueryUnescape("79qzWagZCDqp4ZgCCAS8deVC%2BqvkJjLaq8AIn42TQAU%3D")
+	fmt.Println(memberId)
 }
