@@ -83,7 +83,7 @@ func (c SmsSendController) SendZhuGe(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	zhuGeAttr := make(map[string]interface{})
-	if form.Data != "{}" {
+	if form.Data != "" {
 		err := json.Unmarshal([]byte(form.Data), &zhuGeAttr)
 		if err != nil {
 			return nil, err
