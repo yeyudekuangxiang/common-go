@@ -22,7 +22,7 @@ type UserWebMessage struct {
 	//message
 	Id             int64     `json:"id"`
 	MessageContent string    `json:"messageContent"`
-	MessageNotes   int64     `json:"messageNotes"`
+	MessageNotes   string    `json:"messageNotes"`
 	Type           int       `json:"type"`   //1点赞 2评论 3回复 4发布 5精选 6违规 7合作社
 	Status         int       `json:"status"` //1未读 2已读
 	CreatedAt      time.Time `json:"createdAt"`
