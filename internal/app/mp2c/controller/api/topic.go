@@ -167,12 +167,19 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicList(repository.GetTopicPageListBy{
+
+	params := repository.GetTopicPageListBy{
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
 		Order:      form.Order,
-	})
+	}
+	if form.Order == "recommend" {
+		params.Limit = form.PageSize
+		params.Offset = form.Page
+	}
+
+	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicList(params)
 	if err != nil {
 		return nil, err
 	}

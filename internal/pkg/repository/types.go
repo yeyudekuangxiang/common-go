@@ -38,15 +38,15 @@ type GetTopicPageListBy struct {
 	Ids         []int64            `json:"ids"`
 	Rids        []string           `json:"rids"`
 	TopicTagId  int64              `json:"topicTagId"`
-	Offset      int                `json:"offset"`
 	Status      int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
 	IsTop       int                `json:"isTop"`
 	IsEssence   int                `json:"isEssence"`
-	Limit       int                `json:"limit"`  // limit为0时不限制数量
 	UserId      int64              `json:"userId"` // 用于查询用户对帖子是否点赞
 	OrderByList entity.OrderByList `json:"orderByList"`
 	OrderBy     entity.OrderBy     `json:"orderBy"`
 	Order       string             `json:"order"`
+	Offset      int                `json:"offset"`
+	Limit       int                `json:"limit"` // limit为0时不限制数量
 }
 
 type GetTopicCountBy struct {
