@@ -50,7 +50,7 @@ func (d defaultTopicRepository) GetTopList() ([]*entity.Topic, error) {
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
 
-	err := query.Where("topic.is_top = 1").Group("topic.id").Find(&topList).Error
+	err := query.Where("topic.is_top = 1").Where("status = 3").Group("topic.id").Find(&topList).Error
 
 	if err != nil {
 		return nil, err
@@ -204,7 +204,7 @@ func (d defaultTopicRepository) GetTopicListV2(by GetTopicPageListBy) ([]*entity
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
 
-	query.Where("topic.id in ?", by.Rids)
+	query.Where("topic.id in ?", by.Rids).Where("status = 3")
 
 	err := query.Group("topic.id").Find(&topList).Error
 
