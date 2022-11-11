@@ -5,7 +5,6 @@ import "mio/internal/pkg/model/entity"
 type UpdateIndexIconDTO struct {
 	Id     int64
 	Title  string
-	Type   string
 	RowNum string
 	Sort   int8
 	Status entity.IndexIconStatus
