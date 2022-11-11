@@ -157,13 +157,13 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   0,
-		RecId:    topic.User.ID,
-		Key:      "down_topic",
-		TurnId:   topic.Id,
-		TurnType: 1,
-		Type:     4,
-		ShowId:   topic.Id,
+		SendId:       0,
+		RecId:        topic.User.ID,
+		Key:          "down_topic",
+		TurnId:       topic.Id,
+		TurnType:     1,
+		Type:         4,
+		MessageNotes: topic.Title,
 	})
 
 	if err != nil {
@@ -222,7 +222,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 				Type:     4,
 				TurnId:   topic.Id,
 				TurnType: 1,
-				ShowId:   topic.Id,
+				//MessageNotes: topic.Title,
 			})
 
 			if err != nil {
@@ -239,7 +239,6 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			Type:     4,
 			TurnType: 1,
 			TurnId:   topic.Id,
-			ShowId:   topic.Id,
 		})
 
 		if err != nil {
@@ -276,7 +275,6 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 			Type:     5,
 			TurnType: 1,
 			TurnId:   topic.Id,
-			ShowId:   topic.Id,
 		})
 
 		if err != nil {
@@ -337,7 +335,6 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				Type:     5,
 				TurnType: 1,
 				TurnId:   topic.Id,
-				ShowId:   topic.Id,
 			})
 
 			if err != nil {

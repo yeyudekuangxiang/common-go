@@ -6,14 +6,13 @@ import (
 )
 
 type SendWebMessage struct {
-	SendId   int64  `json:"sendId"`
-	RecId    int64  `json:"recId"`
-	Key      string `json:"key"`
-	Type     int    `json:"type"`     // 1点赞 2评论 3回复 4发布 5精选 6违规 7合作社 8 商品 9订单
-	TurnType int    `json:"turnType"` // object_turn_type 1文章 2评论 3订单 4商品
-	TurnId   int64  `json:"turnId"`   // object_turn_id   要跳转的object的id
-	ShowId   int64  `json:"forId"`    // object_show_id   展示id
-	//ShowParentId int64  `json:"showParentId"`
+	SendId       int64  `json:"sendId"`
+	RecId        int64  `json:"recId"`
+	Key          string `json:"key"`
+	Type         int    `json:"type"`     // 1点赞 2评论 3回复 4发布 5精选 6违规 7合作社 8 商品 9订单
+	TurnType     int    `json:"turnType"` // object_turn_type 1文章 2评论 3订单 4商品
+	TurnId       int64  `json:"turnId"`   // object_turn_id   要跳转的object的id
+	MessageNotes string `json:"messageNotes"`
 }
 
 type SetHaveReadMessage struct {
