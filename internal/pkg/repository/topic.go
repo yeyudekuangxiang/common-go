@@ -168,8 +168,6 @@ func (d defaultTopicRepository) GetTopicList(by GetTopicPageListBy) ([]*entity.T
 		Group("topic.id")
 	if by.Order == "time" {
 		query.Order("topic.created_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
-	} else if by.Order == "recommend" {
-		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
 	} else {
 		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
 	}
