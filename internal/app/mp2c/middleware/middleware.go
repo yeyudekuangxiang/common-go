@@ -100,18 +100,17 @@ func auth() gin.HandlerFunc {
 }
 func AuthAdmin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		return
 		token := ctx.GetHeader("token")
 		if token == "" {
-			//ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
-			//return
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
+			return
 		}
 
 		admin, exists, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || !exists {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			//ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
-			//return
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
+			return
 		}
 
 		ctx.Set("AuthAdmin", *admin)
