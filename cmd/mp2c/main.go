@@ -24,6 +24,7 @@ func init() {
 
 	server.InitServer()
 }
+
 func main() {
 	cron.Run()
 	server.RunServer()

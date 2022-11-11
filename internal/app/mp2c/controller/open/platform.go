@@ -1,6 +1,7 @@
 package open
 
 import (
+	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/config"
@@ -63,7 +64,40 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	}
 
 	//绑定回调
-	receiver.bindCallback(*scene, *sceneUser, user)
+	//err = receiver.bindCallback(*scene, *sceneUser, user)
+	//if err != nil {
+	//	app.Logger.Errorf("注册回调失败:%s", err.Error())
+	//}
+	err = retry.Do(
+		func() error {
+			//绑定回调
+			var err error
+			//var ch_key string
+			if scene.Ch == "jinhuaxing" {
+				params := make(map[string]interface{}, 0)
+				params["mobile"] = user.PhoneNumber
+				params["status"] = "1"
+				jhxSvr := jhx.NewJhxService(context.NewMioContext())
+				err = jhxSvr.BindSuccess(params)
+				//ch_key = "金华行"
+			}
+
+			if scene.Ch == "yitongxing" {
+				params := make(map[string]interface{}, 0)
+				params["memberId"] = sceneUser.PlatformUserId
+				params["openId"] = sceneUser.OpenId
+				ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Secret2), ytx.WithDomain(scene.Domain2))
+				err = ytxSrv.BindSuccess(params)
+				//ch_key = "亿通行"
+			}
+			return err
+		},
+	)
+
+	if err != nil {
+		app.Logger.Errorf("注册回调失败:%s", err.Error())
+	}
+
 	//返回
 	return gin.H{
 		"memberId":     sceneUser.PlatformUserId,
@@ -462,17 +496,17 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (receiver PlatformController) bindCallback(scene entity.BdScene, sceneUser entity.BdSceneUser, user entity.User) {
+func (receiver PlatformController) bindCallback(scene entity.BdScene, sceneUser entity.BdSceneUser, user entity.User) error {
 	//绑定回调
 	var err error
-	var ch_key string
+	//var ch_key string
 	if scene.Ch == "jinhuaxing" {
 		params := make(map[string]interface{}, 0)
 		params["mobile"] = user.PhoneNumber
 		params["status"] = "1"
 		jhxSvr := jhx.NewJhxService(context.NewMioContext())
 		err = jhxSvr.BindSuccess(params)
-		ch_key = "金华行"
+		//ch_key = "金华行"
 	}
 
 	if scene.Ch == "yitongxing" {
@@ -481,10 +515,8 @@ func (receiver PlatformController) bindCallback(scene entity.BdScene, sceneUser 
 		params["openId"] = sceneUser.OpenId
 		ytxSrv := ytx.NewYtxService(context.NewMioContext(), ytx.WithSecret(scene.Secret2), ytx.WithDomain(scene.Domain2))
 		err = ytxSrv.BindSuccess(params)
-		ch_key = "亿通行"
+		//ch_key = "亿通行"
 	}
 
-	if err != nil {
-		app.Logger.Errorf("%s 回调失败 : %s", ch_key, err.Error())
-	}
+	return err
 }
