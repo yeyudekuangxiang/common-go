@@ -153,7 +153,6 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 			Type:      params.Type,
 			TurnType:  params.TurnType,
 			TurnId:    params.TurnId,
-			ShowId:    params.ShowId,
 			CreatedAt: time.Now(),
 		}
 		if err := d.ctx.DB.Model(&entity.Message{}).Create(&message).Error; err != nil {
@@ -162,6 +161,7 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 		messageContent := entity.MessageContent{
 			MessageId:      message.Id,
 			MessageContent: params.Message,
+			MessageNotes:   params.MessageNotes,
 			CreatedAt:      time.Now(),
 		}
 		if err := d.ctx.DB.Model(&entity.MessageContent{}).Create(&messageContent).Error; err != nil {
