@@ -149,7 +149,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	messageService := message.NewWebMessageService(ctx)
 	topicService := kumiaoCommunity.NewTopicService(ctx)
 
-	comment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
+	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
@@ -206,7 +206,12 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		turnType = 2
 		turnId = comment.Id
 		types = 3
-		notes = msg
+		toMsg := toComment.Message
+		messagerune = []rune(comment.Message)
+		if len(messagerune) > 8 {
+			toMsg = string(messagerune[0:8])
+		}
+		notes = toMsg
 	}
 
 	err = messageService.SendMessage(message.SendWebMessage{

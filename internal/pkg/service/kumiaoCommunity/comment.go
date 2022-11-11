@@ -23,7 +23,7 @@ type (
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
 		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
-		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, int64, error)
+		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, entity.CommentIndex, int64, error)
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
@@ -184,11 +184,11 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, int64, error) {
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, entity.CommentIndex, int64, error) {
 	topic := srv.topicModel.FindById(topicId)
 
 	if topic.Id == 0 {
-		return entity.CommentIndex{}, 0, errno.ErrRecordNotFound
+		return entity.CommentIndex{}, entity.CommentIndex{}, 0, errno.ErrRecordNotFound
 	}
 
 	if message != "" {
@@ -199,7 +199,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			zhuGeAttr["场景"] = "发布评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
-			return entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
+			return entity.CommentIndex{}, entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 
@@ -218,24 +218,25 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 
 	_, err := srv.commentModel.Insert(&comment)
 	if err != nil {
-		return entity.CommentIndex{}, 0, err
+		return entity.CommentIndex{}, entity.CommentIndex{}, 0, err
 	}
 
 	//更新topic
 	//app.DB.Model(&topic).Update("updated_at", model.Time{Time: time.Now()})
 	//更新count数据
 	recId := topic.UserId
+	var toComment *entity.CommentIndex
 	if ToCommentId != 0 {
 		//回复的评论
-		ToComment, err := srv.commentModel.FindOne(ToCommentId)
+		toComment, err = srv.commentModel.FindOne(ToCommentId)
 		if err != nil {
-			return entity.CommentIndex{}, 0, err
+			return entity.CommentIndex{}, entity.CommentIndex{}, 0, err
 		}
-		recId = ToComment.MemberId
+		recId = toComment.MemberId
 		err = srv.commentModel.Trans(func(tx *gorm.DB) error {
-			ToComment.RootCount++ //更新父评论的根评论数量
-			ToComment.Count++     //更新父评论的评论数量
-			err = tx.Model(ToComment).Select("root_count", "count").Updates(ToComment).Error
+			toComment.RootCount++ //更新父评论的根评论数量
+			toComment.Count++     //更新父评论的评论数量
+			err = tx.Model(toComment).Select("root_count", "count").Updates(toComment).Error
 			if err != nil {
 				return errors.WithMessage(err, "update ToCommentIdRow:")
 			}
@@ -246,8 +247,8 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 				return err
 			}
 
-			if ToComment.RootCommentId != 0 {
-				ToCommentId = ToComment.RootCommentId
+			if toComment.RootCommentId != 0 {
+				ToCommentId = toComment.RootCommentId
 			}
 
 			comment.RootCommentId = ToCommentId          //更新RootCommentId
@@ -258,14 +259,14 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			}
 
 			//顶级评论
-			if ToComment.RootCommentId != 0 {
-				RootCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("root_comment_id = ?", ToComment.RootCommentId))
+			if toComment.RootCommentId != 0 {
+				RootCommentIdChildCount, err := srv.commentModel.FindCount(srv.commentModel.CountBuilder("id").Where("root_comment_id = ?", toComment.RootCommentId))
 				if err != nil {
 					return err
 				}
 
 				//更新顶级评论下的评论数量
-				err = tx.Model(&entity.CommentIndex{}).Where("id = ?", ToComment.RootCommentId).Update("count", RootCommentIdChildCount).Error
+				err = tx.Model(&entity.CommentIndex{}).Where("id = ?", toComment.RootCommentId).Update("count", RootCommentIdChildCount).Error
 				if err != nil {
 					return errors.WithMessage(err, "update RootCommentIdRow:")
 				}
@@ -274,12 +275,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return nil
 		})
 		if err != nil {
-			return entity.CommentIndex{}, 0, err
+			return entity.CommentIndex{}, entity.CommentIndex{}, 0, err
 		}
 
 	}
 
-	return comment, recId, nil
+	return comment, *toComment, recId, nil
 }
 
 func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error) {
