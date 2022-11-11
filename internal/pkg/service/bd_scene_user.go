@@ -41,6 +41,7 @@ func (srv BdSceneUserService) Create(data *entity.BdSceneUser) error {
 }
 
 func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, memberId string) (*entity.BdSceneUser, error) {
+	app.Logger.Errorf("第三方绑定 入库: platformId:%s; openId:%s", memberId, user.OpenId)
 	sceneUser := srv.FindOne(repository.GetSceneUserOne{
 		PlatformKey: scene.Ch,
 		//PlatformUserId: memberId,
@@ -56,7 +57,6 @@ func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, membe
 	sceneUser.UnionId = user.UnionId
 	err := srv.Create(sceneUser)
 	if err != nil {
-		app.Logger.Errorf("create db_scene_user error:%s", err.Error())
 		return nil, err
 	}
 	return sceneUser, nil
