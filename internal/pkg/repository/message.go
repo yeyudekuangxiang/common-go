@@ -26,7 +26,7 @@ type (
 
 func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.UserWebMessage, int64, error) {
 	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
-		Select("message.*,mcontent.message_content,mcustomer.status").
+		Select("message.*,mcontent.message_content,mcontent.message_notes,mcustomer.status").
 		Joins("left join message_content mcontent on message.id = mcontent.message_id").
 		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
 	var resp []*entity.UserWebMessage
@@ -153,7 +153,6 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 			Type:      params.Type,
 			TurnType:  params.TurnType,
 			TurnId:    params.TurnId,
-			ShowId:    params.ShowId,
 			CreatedAt: time.Now(),
 		}
 		if err := d.ctx.DB.Model(&entity.Message{}).Create(&message).Error; err != nil {
@@ -162,6 +161,7 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 		messageContent := entity.MessageContent{
 			MessageId:      message.Id,
 			MessageContent: params.Message,
+			MessageNotes:   params.MessageNotes,
 			CreatedAt:      time.Now(),
 		}
 		if err := d.ctx.DB.Model(&entity.MessageContent{}).Create(&messageContent).Error; err != nil {

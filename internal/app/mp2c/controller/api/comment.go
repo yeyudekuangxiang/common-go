@@ -147,6 +147,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := kumiaoCommunity.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
+	topicService := kumiaoCommunity.NewTopicService(ctx)
 
 	comment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
 	if err != nil {
@@ -182,28 +183,40 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	}
 
 	//发送消息
-	msgKey := "reply_topic"
-	turnId := comment.Id
-	turnType := 1
-	showId := form.ObjId
-	t := 2
+	var notes, msgKey string
+	var turnId int64
+	var turnType, types int
 
-	if form.Parent != 0 {
+	if form.Parent == 0 {
+		msgKey = "reply_topic"
+		turnId = comment.Id
+		turnType = 1
+		types = 2
+		topic := topicService.FindById(form.ObjId)
+		//n := len(topic.Tags)
+		//if n > 2 {
+		//	n = 2
+		//}
+		//for i := 0; i < n; i++ {
+		//	notes += topic.Tags[i].Name + "|"
+		//}
+		notes = topic.Title
+	} else {
 		msgKey = "reply_comment"
 		turnType = 2
 		turnId = comment.Id
-		showId = comment.ToCommentId
-		t = 3
+		types = 3
+		notes = msg
 	}
 
 	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:   user.ID,
-		RecId:    recId,
-		Key:      msgKey,
-		TurnType: turnType,
-		TurnId:   turnId,
-		ShowId:   showId,
-		Type:     t,
+		SendId:       user.ID,
+		RecId:        recId,
+		Key:          msgKey,
+		TurnType:     turnType,
+		TurnId:       turnId,
+		Type:         types,
+		MessageNotes: notes,
 	})
 
 	if err != nil {
@@ -317,13 +330,13 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 		}
 
 		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:   user.ID,
-			RecId:    resp.CommentUserId,
-			Key:      "like_comment",
-			Type:     1,
-			TurnType: 2,
-			TurnId:   resp.CommentId,
-			ShowId:   resp.CommentId,
+			SendId:       user.ID,
+			RecId:        resp.CommentUserId,
+			Key:          "like_comment",
+			Type:         1,
+			TurnType:     2,
+			TurnId:       resp.CommentId,
+			MessageNotes: resp.CommentMessage,
 		})
 
 		if err != nil {

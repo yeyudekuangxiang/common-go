@@ -139,13 +139,13 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 		//发送消息
 		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:   user.ID,
-			RecId:    resp.TopicUserId,
-			Key:      "like_topic",
-			Type:     1,
-			TurnType: 1,
-			TurnId:   resp.TopicId,
-			ShowId:   resp.TopicId,
+			SendId:       user.ID,
+			RecId:        resp.TopicUserId,
+			Key:          "like_topic",
+			Type:         1,
+			TurnType:     1,
+			TurnId:       resp.TopicId,
+			MessageNotes: title,
 		})
 		if err != nil {
 			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
