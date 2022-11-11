@@ -83,12 +83,14 @@ func (c SmsSendController) SendZhuGe(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	zhuGeAttr := make(map[string]interface{})
-	err := json.Unmarshal([]byte(form.Data), &zhuGeAttr)
-	if err != nil {
-		return nil, err
+	if form.Data != "" {
+		err := json.Unmarshal([]byte(form.Data), &zhuGeAttr)
+		if err != nil {
+			return nil, err
+		}
 	}
 	//上报到诸葛
-	err = track.DefaultZhuGeService().TrackWithErr(form.EventKey, form.Openid, zhuGeAttr)
+	err := track.DefaultZhuGeService().TrackWithErr(form.EventKey, form.Openid, zhuGeAttr)
 	if err != nil {
 		return nil, err
 	}
