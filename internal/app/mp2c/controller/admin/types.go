@@ -256,3 +256,41 @@ type UpdateUserRisk struct {
 	Type int    `json:"type" form:"type"  binding:"oneof=1 2 3" alias:"提交类型  1 uid、2 手机号、3 openid "`
 	Risk int    `json:"risk" form:"risk"  binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
 }
+
+//index_icon start 金刚位
+
+type CreateIndexIconForm struct {
+	Title  string                 `json:"title" form:"title" binding:"required" alias:"标题"`
+	RowNum string                 `json:"rowNum" form:"rowNum" binding:"oneof=1 2" alias:"行"`
+	Sort   int8                   `json:"sort" form:"sort" binding:"" alias:"排序"`
+	Status entity.IndexIconStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"是否删除 1 正常 2删除"`
+	IsOpen int8                   `json:"isOpen" form:"isOpen" binding:"oneof=1 2" alias:"是否开启 1开启 2关闭"`
+	Pic    string                 `json:"pic" form:"pic" binding:"" alias:"图标"`
+}
+
+type UpdateIndexIconForm struct {
+	Id     int64                  `json:"id" form:"id" binding:"required" alias:"id"`
+	Title  string                 `json:"title" form:"title" binding:"required" alias:"标题"`
+	Type   string                 `json:"type" form:"type" binding:"" alias:"类型"`
+	RowNum string                 `json:"rowNum" form:"rowNum" binding:"oneof=1 2" alias:"行"`
+	Sort   int8                   `json:"sort" form:"sort" binding:"" alias:"排序"`
+	Status entity.IndexIconStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"是否删除 1 正常 2删除"`
+	IsOpen int8                   `json:"isOpen" form:"isOpen" binding:"oneof=1 2" alias:"是否开启 1开启 2关闭"`
+	Pic    string                 `json:"pic" form:"pic" binding:"" alias:"图标"`
+}
+
+type GetIndexIconPageForm struct {
+	Title  string `json:"title" form:"title" binding:"" alias:"标题"`
+	IsOpen int8   `json:"isOpen" form:"isOpen" binding:"" alias:"是否开启 1开启 2关闭"`
+	controller.PageFrom
+}
+
+type DeleteIndexIconForm struct {
+	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
+}
+
+type ShowIndexIconForm struct {
+	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
+}
+
+//index_icon end 金刚位
