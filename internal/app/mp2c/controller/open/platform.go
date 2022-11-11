@@ -51,7 +51,10 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 		return nil, errno.ErrCommon.WithMessage("第三方绑定 用户未登陆")
 	}
 
+	app.Logger.Infof("第三方绑定 解码前: platformId:%s; openId:%s", form.MemberId, user.OpenId)
 	memberId, _ := url.QueryUnescape(form.MemberId)
+	app.Logger.Infof("第三方绑定 解码后: platformId:%s; openId:%s", memberId, user.OpenId)
+
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, memberId)
 	if err != nil {
 		if err != errno.ErrExisting {
