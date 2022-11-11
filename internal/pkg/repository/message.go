@@ -26,7 +26,7 @@ type (
 
 func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.UserWebMessage, int64, error) {
 	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
-		Select("message.*,mcontent.message_content,mcustomer.status").
+		Select("message.*,mcontent.message_content,mcontent.message_notes,mcustomer.status").
 		Joins("left join message_content mcontent on message.id = mcontent.message_id").
 		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
 	var resp []*entity.UserWebMessage
