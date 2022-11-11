@@ -88,7 +88,7 @@ func (repo IndexIconRepository) GetPage(do repotypes.GetIndexIconPageDO) ([]enti
 		db.Where("is_open = ?", do.IsOpen)
 	}
 	if do.Title != "" {
-		db.Where("name like ?", "%"+do.Title+"%")
+		db.Where("title like ?", "%"+do.Title+"%")
 	}
 	db.Order("sort desc ,id desc")
 	list := make([]entity.IndexIcon, 0)
