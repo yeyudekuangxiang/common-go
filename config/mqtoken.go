@@ -25,5 +25,4 @@ func FindMqToken(fullPath string) string {
 	default:
 		return ""
 	}
-	return ""
 }

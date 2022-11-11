@@ -112,7 +112,6 @@ func AuthAdmin() gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
 			return
 		}
-
 		ctx.Set("AuthAdmin", *admin)
 	}
 }
