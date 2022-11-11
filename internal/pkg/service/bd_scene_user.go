@@ -41,13 +41,15 @@ func (srv BdSceneUserService) Create(data *entity.BdSceneUser) error {
 
 func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, memberId string) (*entity.BdSceneUser, error) {
 	sceneUser := srv.FindOne(repository.GetSceneUserOne{
-		PlatformKey: scene.Ch,
-		//PlatformUserId: memberId,
-		OpenId: user.OpenId,
+		PlatformKey:    scene.Ch,
+		PlatformUserId: memberId,
+		OpenId:         user.OpenId,
 	})
+
 	if sceneUser.ID != 0 {
 		return sceneUser, errno.ErrExisting
 	}
+	
 	sceneUser.PlatformKey = scene.Ch
 	sceneUser.PlatformUserId = memberId
 	sceneUser.Phone = user.PhoneNumber
