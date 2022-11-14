@@ -11,7 +11,7 @@ type GetSendYzmSmsForm struct {
 }
 
 type GetSendZhugeForm struct {
-	EventKey string `json:"eventKey" form:"eventKey" binding:"required" alias:"时间名称"`
+	EventKey string `json:"eventKey" form:"eventKey" binding:"required" alias:"事件名称"`
 	Openid   string `json:"openid" form:"openid" binding:"required" alias:"openid"`
 	Data     string `json:"data" form:"data" binging:"" alias:"data"`
 }

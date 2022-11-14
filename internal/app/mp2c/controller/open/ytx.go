@@ -77,7 +77,8 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	var halfPoint, incPoint, totalPoint, halfId, thanPoint int64
 	var ids []int64
 
-	key := time.Now().Format("2006-01-02") + ":prePoint:" + scene.Ch + sceneUser.OpenId
+	timeStr := time.Now().Format("2006-01-02")
+	key := timeStr + ":prePoint:" + scene.Ch + sceneUser.PlatformUserId + user.PhoneNumber
 
 	totalPoint, _ = strconv.ParseInt(app.Redis.Get(ctx, key).Val(), 10, 64)
 

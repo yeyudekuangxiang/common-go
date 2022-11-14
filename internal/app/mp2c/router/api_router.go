@@ -94,6 +94,8 @@ func apiRouter(router *gin.Engine) {
 		//星星发券接口限制
 		authRouter.POST("/set-exception", apiutil.Format(open.DefaultChargeController.SetException))
 		authRouter.POST("/del-exception", apiutil.Format(open.DefaultChargeController.DelException))
+		authRouter.GET("icon/list", apiutil.Format(api.DefaultIndexIconController.Page))
+
 	}
 
 	//必须登陆的路由

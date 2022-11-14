@@ -47,7 +47,7 @@ func InitDB() {
 
 func InitBusinessDB() {
 	log.Println("初始化企业版数据库连接...")
-	dbc := config.Config.Database
+	dbc := config.Config.DatabaseBusiness
 
 	zlogger := app.OriginLogger.With(mzap.LogDatabase)
 	conf := db.Config{
