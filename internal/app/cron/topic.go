@@ -7,5 +7,5 @@ import (
 
 func kumiaoCron() {
 	//文章列表 每天一次更新热度
-	AddFunc("@midnight", kumiaoCommunity.NewTopicService(context.NewMioContext()).ZAddTopic)
+	AddFunc("@hourly", kumiaoCommunity.NewTopicService(context.NewMioContext()).ZAddTopic)
 }
