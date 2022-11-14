@@ -159,7 +159,7 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 	return resultList, total, nil
 }
 
-func (srv TopicService) ZAddTopic(params repository.GetTopicPageListBy) {
+func (srv TopicService) ZAddTopic() {
 
 	var results []entity.Topic
 
@@ -167,9 +167,6 @@ func (srv TopicService) ZAddTopic(params repository.GetTopicPageListBy) {
 		Preload("User").
 		Where("status = ?", 3).
 		Where("is_top = ?", 0)
-	if params.TopicTagId != 0 {
-		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
-	}
 	//Where("created_at > ?", time.Now().AddDate(-2, 0, 0)).
 	query.Order("id desc").
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {

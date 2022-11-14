@@ -37,6 +37,9 @@ func (repo CityRepository) GetList(by repotypes.GetCityListDO) ([]entity.City, e
 	if by.Name != "" {
 		db.Where("name = ?", by.Name)
 	}
+	if by.PidCode != "" {
+		db.Where("pid_code = ?", by.PidCode)
+	}
 	if err := db.Find(&list).Error; err != nil {
 		panic(err)
 	}

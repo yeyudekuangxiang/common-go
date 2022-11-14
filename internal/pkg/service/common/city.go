@@ -1,7 +1,6 @@
-package service
+package common
 
 import (
-	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -20,7 +19,7 @@ type CityService struct {
 
 //  添加发放碳量记录并且更新用户剩余碳量
 
-func (srv CityService) Create(dto api_types.CreateCityDto) (*entity.City, error) {
+func (srv CityService) Create(dto CreateCityParams) (*entity.City, error) {
 	//入库
 	cityDo := entity.City{
 		CityCode:  dto.CityCode,
@@ -35,7 +34,7 @@ func (srv CityService) Create(dto api_types.CreateCityDto) (*entity.City, error)
 	return nil, nil
 }
 
-func (srv CityService) GetByCityCode(dto api_types.GetByCityCode) (entity.City, error) {
+func (srv CityService) GetByCityCode(dto GetByCityCodeParams) (entity.City, error) {
 	ret, err := srv.repo.GetByCityCode(repotypes.GetCityByCode{
 		CityCode: dto.CityCode,
 	})
@@ -43,4 +42,16 @@ func (srv CityService) GetByCityCode(dto api_types.GetByCityCode) (entity.City, 
 		return entity.City{}, err
 	}
 	return ret, nil
+}
+
+func (srv CityService) GetCity(params GetByCityCodeParams) ([]entity.City, error) {
+	list, err := srv.repo.GetList(repotypes.GetCityListDO{
+		PidCode: params.CityCode,
+	})
+
+	if err != nil {
+		return []entity.City{}, err
+	}
+
+	return list, nil
 }
