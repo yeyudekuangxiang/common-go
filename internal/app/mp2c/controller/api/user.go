@@ -9,6 +9,7 @@ import (
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/common"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/util"
@@ -224,7 +225,7 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	}
 
 	//归属地
-	location, err := service.NewCityService(mioctx.NewMioContext()).GetByCityCode(api_types.GetByCityCode{CityCode: user.CityCode})
+	location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
 	if err != nil {
 		return nil, err
 	}

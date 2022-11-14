@@ -12,8 +12,6 @@ import (
 	"mio/pkg/errno"
 )
 
-var DefaultAnswerService = OptionService{ctx: context.NewMioContext()}
-
 func NewAnswerService(ctx *context.MioContext) *AnswerService {
 	return &AnswerService{
 		ctx:         ctx,
