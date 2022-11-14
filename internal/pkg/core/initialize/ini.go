@@ -4,6 +4,7 @@ import (
 	"gopkg.in/ini.v1"
 	"log"
 	"mio/config"
+	"mio/internal/pkg/service/duiba"
 	"mio/internal/pkg/service/oss"
 )
 
@@ -23,6 +24,6 @@ func InitIni(source interface{}) {
 }
 
 func afterInitIni() {
-	//duiba.InitDefaultDuibaService()
+	duiba.InitDefaultDuibaService()
 	oss.InitDefaultOssService()
 }
