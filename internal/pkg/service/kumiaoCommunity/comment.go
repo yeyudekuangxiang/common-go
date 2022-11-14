@@ -221,11 +221,9 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
 	}
 
-	//更新topic
-	//app.DB.Model(&topic).Update("updated_at", model.Time{Time: time.Now()})
 	//更新count数据
 	recId := topic.UserId
-	var toComment *entity.CommentIndex
+	toComment := &entity.CommentIndex{}
 	if ToCommentId != 0 {
 		//回复的评论
 		toComment, err = srv.commentModel.FindOne(ToCommentId)
