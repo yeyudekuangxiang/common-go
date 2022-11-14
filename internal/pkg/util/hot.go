@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"math"
+	"mio/internal/pkg/model/entity"
 	"time"
 )
 
@@ -26,16 +27,27 @@ exp : 欧拉数
 a ： 冷却系数 如第一天100分 第二天自然冷却到80分； 反推得到系数为 0.223
 t : 出始时间 - 当前时间
 */
-func (n *Hot) Hot(views, likes, comments, isEssence int64, createdTime time.Time) float64 {
+func (n *Hot) Hot(views, likes, comments, collection, isEssence int64, uPosition entity.UserPosition, uPartner entity.Partner, createdTime time.Time) float64 {
 	//本期热度 = (seeCount * 1 + likeCount * 2 + commentCount * 3) * exp^(-a*t)
 	//t := createdTime.Sub(time.Now()).Hours()
-	var essence int64
+	var essence, position, partner int64
 	if isEssence == 1 {
 		essence = 80
 	}
+
+	if uPosition == "yellow" {
+		position = 80
+	} else if uPosition == "blue" {
+		position = 80
+	}
+
+	if uPartner == 1 {
+		partner = 100
+	}
+
 	t := time.Now().Sub(createdTime).Hours() / 24
 	exp := math.Exp(-col * t)
-	high, _ := decimal.NewFromInt(views + likes*5 + comments*10 + essence).Mul(decimal.NewFromFloat(exp)).Round(4).Float64()
+	high, _ := decimal.NewFromInt(views + likes*3 + comments*5 + collection*10 + essence + position + partner).Mul(decimal.NewFromFloat(exp)).Round(4).Float64()
 	return high
 }
 

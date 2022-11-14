@@ -159,15 +159,21 @@ func (srv TopicService) ZAddTopic() {
 	var results []entity.Topic
 
 	app.DB.Model(&entity.Topic{}).
+		Preload("User").
 		Where("status = ?", 3).
 		Where("is_top = ?", 0).
+		//Where("created_at > ?", time.Now().AddDate(-2, 0, 0)).
+		Order("id desc").
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {
-			var members []redis.Z
+			var topics []redis.Z
+
 			for _, topic := range results {
 				hot := util.NewHot()
-				score := hot.Hot(int64(topic.SeeCount), topic.LikeCount, topic.CommentCount, int64(topic.IsEssence),
+				score := hot.Hot(
+					int64(topic.SeeCount), topic.LikeCount, topic.CommentCount, topic.CollectionCount, int64(topic.IsEssence),
+					topic.User.Position, topic.User.Partners,
 					topic.CreatedAt.Time)
-				members = append(members, redis.Z{
+				topics = append(topics, redis.Z{
 					Score:  score,
 					Member: topic.Id,
 				})
@@ -176,7 +182,7 @@ func (srv TopicService) ZAddTopic() {
 
 			zaddArgs = redis.ZAddArgs{
 				Ch:      true,
-				Members: members,
+				Members: topics,
 			}
 
 			app.Redis.ZAddArgs(srv.ctx.Context, config.RedisKey.TopicRank, zaddArgs)
