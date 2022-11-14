@@ -146,7 +146,9 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 
 	for _, id := range ids {
 		int64Id, _ := strconv.ParseInt(id, 10, 64)
-		resultList = append(resultList, topicMap[int64Id])
+		if _, ok := topicMap[int64Id]; ok {
+			resultList = append(resultList, topicMap[int64Id])
+		}
 	}
 
 	return resultList, total, nil
