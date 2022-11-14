@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"mio/config"
-	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -14,6 +13,7 @@ import (
 	questionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/queue/types/message/zhugemsg"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/common"
 	"mio/internal/pkg/service/platform"
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
@@ -4896,7 +4896,7 @@ func (PugcController) AddCity(c *gin.Context) (gin.H, error) {
 			println(i)
 			println(i2)
 			//入库记录
-			service.NewCityService(context.NewMioContext()).Create(api_types.CreateCityDto{
+			common.NewCityService(context.NewMioContext()).Create(common.CreateCityParams{
 				CityCode: i,
 				Name:     i2,
 				PidCode:  pid,
