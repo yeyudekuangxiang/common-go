@@ -45,8 +45,8 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	//获取点赞记录
-	commentRes := make([]*entity.CommentRes, 0)
 	likeMap := make(map[int64]int, 0)
 	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)
 	if len(commentLike) > 0 {
@@ -55,6 +55,7 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 		}
 	}
 
+	commentRes := make([]*entity.CommentRes, 0)
 	for _, item := range list {
 		res := item.CommentRes()
 		if _, ok := likeMap[item.Id]; ok {
