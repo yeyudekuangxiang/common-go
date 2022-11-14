@@ -402,3 +402,10 @@ type FindCouponHistoryParams struct {
 	StartTime time.Time `json:"startTime"`
 	EndTime   time.Time `json:"endTime"`
 }
+
+type UpdatesTopicCond struct {
+	Id        int64   `json:"id"`
+	Ids       []int64 `json:"ids"`
+	IsEssence int     `json:"isEssence"`
+	IsTop     int     `json:"isTop"`
+}

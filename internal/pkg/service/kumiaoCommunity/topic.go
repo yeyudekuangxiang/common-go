@@ -146,7 +146,9 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 
 	for _, id := range ids {
 		int64Id, _ := strconv.ParseInt(id, 10, 64)
-		resultList = append(resultList, topicMap[int64Id])
+		if _, ok := topicMap[int64Id]; ok {
+			resultList = append(resultList, topicMap[int64Id])
+		}
 	}
 
 	return resultList, total, nil
@@ -813,4 +815,43 @@ func (srv TopicService) CountTopic(param repository.GetTopicCountBy) (int64, err
 
 func (srv TopicService) UpdateAuthor(userId, passiveUserId int64) error {
 	return app.DB.Model(&entity.Topic{}).Where("topic.user_id = ?", passiveUserId).Update("user_id", userId).Error
+}
+
+func (srv TopicService) SetWeekTopic() error {
+	// 取导入的文章，更新文章的created_time字段值为现在，并且加精华。
+	// 限制条件为 每个人取一个 一共50篇
+	// 所取的文章的import更新为0 排除下次筛选
+	topics, err := srv.topicModel.GetImportTopic()
+	if err != nil {
+		return err
+	}
+
+	if len(topics) == 0 {
+		return nil
+	}
+
+	uMapToTopic := make(map[int64]struct{}, 0) // 每个用户一篇文章
+	uSliceToTopic := make([]int64, 0)
+	var j int64
+	for _, item := range topics {
+		if _, ok := uMapToTopic[item.UserId]; ok {
+			continue
+		}
+		uMapToTopic[item.UserId] = struct{}{}
+		uSliceToTopic = append(uSliceToTopic, item.Id)
+		if j == 49 {
+			break
+		}
+		j++
+	}
+	//更新uMapToTopic中的50篇文章
+	cond := repository.UpdatesTopicCond{Ids: uSliceToTopic, IsEssence: -1}
+	upColumns := map[string]interface{}{"created_at": time.Now(), "is_essence": 1}
+	err = srv.topicModel.Updates(cond, upColumns)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("uSliceToTopic:%v", uSliceToTopic)
+	return nil
 }

@@ -23,7 +23,7 @@ type (
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
 		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
-		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, entity.CommentIndex, int64, error)
+		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, *entity.CommentIndex, int64, error)
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
@@ -184,11 +184,11 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, entity.CommentIndex, int64, error) {
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
 	topic := srv.topicModel.FindById(topicId)
 
 	if topic.Id == 0 {
-		return entity.CommentIndex{}, entity.CommentIndex{}, 0, errno.ErrRecordNotFound
+		return entity.CommentIndex{}, &entity.CommentIndex{}, 0, errno.ErrRecordNotFound
 	}
 
 	if message != "" {
@@ -199,7 +199,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			zhuGeAttr["场景"] = "发布评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
-			return entity.CommentIndex{}, entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
+			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 
@@ -218,7 +218,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 
 	_, err := srv.commentModel.Insert(&comment)
 	if err != nil {
-		return entity.CommentIndex{}, entity.CommentIndex{}, 0, err
+		return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
 	}
 
 	//更新topic
@@ -230,7 +230,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		//回复的评论
 		toComment, err = srv.commentModel.FindOne(ToCommentId)
 		if err != nil {
-			return entity.CommentIndex{}, entity.CommentIndex{}, 0, err
+			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
 		}
 		recId = toComment.MemberId
 		err = srv.commentModel.Trans(func(tx *gorm.DB) error {
@@ -275,12 +275,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return nil
 		})
 		if err != nil {
-			return entity.CommentIndex{}, entity.CommentIndex{}, 0, err
+			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
 		}
 
 	}
 
-	return comment, *toComment, recId, nil
+	return comment, toComment, recId, nil
 }
 
 func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error) {

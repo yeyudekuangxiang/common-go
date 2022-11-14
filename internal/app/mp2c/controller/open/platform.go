@@ -21,7 +21,6 @@ import (
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -51,16 +50,14 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 		return nil, errno.ErrCommon.WithMessage("第三方绑定 用户未登陆")
 	}
 
-	app.Logger.Infof("第三方绑定 解码前: platformId:%s; openId:%s", form.MemberId, user.OpenId)
-	memberId, _ := url.QueryUnescape(form.MemberId)
-	app.Logger.Infof("第三方绑定 解码后: platformId:%s; openId:%s", memberId, user.OpenId)
-
-	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, memberId)
+	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", form.MemberId, user.OpenId)
+	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil {
 		if err != errno.ErrExisting {
-			app.Logger.Errorf("第三方绑定 绑定失败:%s; platformId:%s; openId:%s", err.Error(), memberId, user.OpenId)
+			app.Logger.Errorf("第三方绑定 绑定失败:%s; platformId:%s; openId:%s", err.Error(), form.MemberId, user.OpenId)
 			return nil, errno.ErrCommon.WithMessage(scene.Ch + "用户绑定失败")
 		}
+
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
 			"lvmiaoUserId": sceneUser.OpenId,
@@ -92,10 +89,11 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 			}
 			return err
 		},
+		retry.Attempts(3),
 	)
 
 	if err != nil {
-		app.Logger.Errorf("第三方绑定 注册回调失败:%s; platformId:%s; openId:%s", err.Error(), memberId, user.OpenId)
+		app.Logger.Errorf("第三方绑定 注册回调失败:%s; platformId:%s; openId:%s", err.Error(), form.MemberId, user.OpenId)
 	}
 
 	//返回
