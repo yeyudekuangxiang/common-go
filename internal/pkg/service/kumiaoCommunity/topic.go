@@ -109,7 +109,12 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 	// 0+10-1+1,
 	start := (param.Offset - 1) * 10
 	stop := (param.Limit * param.Offset) - 1
-	ids, err := app.Redis.ZRevRange(srv.ctx.Context, config.RedisKey.TopicRank, int64(start), int64(stop)).Result()
+	key := config.RedisKey.TopicRank
+	//if param.TopicTagId != 0 {
+	//	key = key + ":" + strconv.FormatInt(param.TopicTagId, 10)
+	//}
+
+	ids, err := app.Redis.ZRevRange(srv.ctx.Context, key, int64(start), int64(stop)).Result()
 
 	if err != nil {
 		app.Logger.Errorf("Topic 获取topicId错误:%s", err.Error())
@@ -154,16 +159,19 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 	return resultList, total, nil
 }
 
-func (srv TopicService) ZAddTopic() {
+func (srv TopicService) ZAddTopic(params repository.GetTopicPageListBy) {
 
 	var results []entity.Topic
 
-	app.DB.Model(&entity.Topic{}).
+	query := app.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Where("status = ?", 3).
-		Where("is_top = ?", 0).
-		//Where("created_at > ?", time.Now().AddDate(-2, 0, 0)).
-		Order("id desc").
+		Where("is_top = ?", 0)
+	if params.TopicTagId != 0 {
+		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
+	}
+	//Where("created_at > ?", time.Now().AddDate(-2, 0, 0)).
+	query.Order("id desc").
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {
 			var topics []redis.Z
 
@@ -193,7 +201,7 @@ func (srv TopicService) ZAddTopic() {
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
 func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
 
-	if param.Order == "recommend" {
+	if param.Order == "recommend" && param.TopicTagId == 0 {
 		list, i, err := srv.GetTopicDetailPageList(param)
 		if err != nil {
 			return nil, 0, err

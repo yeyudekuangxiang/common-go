@@ -7,6 +7,7 @@ import (
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/api/badge"
 	"mio/internal/app/mp2c/controller/api/business"
+	"mio/internal/app/mp2c/controller/api/common"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/message"
@@ -102,19 +103,30 @@ func apiRouter(router *gin.Engine) {
 	mustAuthRouter := router.Group("/api/mp2c")
 	mustAuthRouter.Use(middleware.MustAuth2(), middleware.Throttle())
 	{
-		qnrRouter := mustAuthRouter.Group("/qnr")
+		//答题相关
+		qnrRouter := mustAuthRouter.Group("/qnr") //活动答题
 		{
 			//答题相关路由
 			qnrRouter.GET("/subject", apiutil.Format(qnr.DefaultSubjectController.GetList))
 			qnrRouter.POST("/create", apiutil.Format(qnr.DefaultSubjectController.Create))
 		}
-		questRouter := mustAuthRouter.Group("/question")
+		quizRouter := mustAuthRouter.Group("/quiz") //活动答题
+		{
+			quizRouter.GET("/daily-questions", apiutil.Format(api.DefaultQuizController.GetDailyQuestions))
+			quizRouter.GET("/availability", apiutil.Format(api.DefaultQuizController.Availability))
+			quizRouter.POST("/check", apiutil.Format(api.DefaultQuizController.AnswerQuestion))
+			quizRouter.POST("/submit", apiutil.Format(api.DefaultQuizController.Submit))
+			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
+			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
+		}
+		questRouter := mustAuthRouter.Group("/question") //通用答题
 		{
 			//答题相关路由
 			questRouter.GET("/subject", apiutil.Format(question.DefaultSubjectController.GetList))
 			questRouter.POST("/create", apiutil.Format(question.DefaultSubjectController.Create))
 			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
 		}
+
 		//小程序订阅消息
 		messageRouter := mustAuthRouter.Group("/message")
 		{
@@ -124,6 +136,7 @@ func apiRouter(router *gin.Engine) {
 			messageRouter.POST("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
 			messageRouter.POST("/web-message-haveread", apiutil.Format(message.DefaultMessageController.SetHaveReadWebMessage))
 		}
+
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
@@ -144,6 +157,13 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/home-page", apiutil.Format(api.DefaultUserController.HomePage))                      //主页
 			userRouter.POST("/update-introduction", apiutil.Format(api.DefaultUserController.UpdateIntroduction)) //更新简介
 		}
+
+		//公共接口
+		commonRouter := mustAuthRouter.Group("/common")
+		{
+			commonRouter.GET("/city/list", apiutil.Format(common.DefaultCityController.List))
+		}
+
 		//邀请得积分
 		inviteRouter := mustAuthRouter.Group("/invite")
 		{
@@ -225,17 +245,6 @@ func apiRouter(router *gin.Engine) {
 		{
 			checkinRouter.GET("/info", apiutil.Format(api.DefaultCheckinController.GetCheckinInfo))
 			//checkinRouter.POST("/collect", apiutil.Format(api.DefaultCheckinController.Checkin))
-		}
-
-		//答题相关路由
-		quizRouter := mustAuthRouter.Group("/quiz")
-		{
-			quizRouter.GET("/daily-questions", apiutil.Format(api.DefaultQuizController.GetDailyQuestions))
-			quizRouter.GET("/availability", apiutil.Format(api.DefaultQuizController.Availability))
-			quizRouter.POST("/check", apiutil.Format(api.DefaultQuizController.AnswerQuestion))
-			quizRouter.POST("/submit", apiutil.Format(api.DefaultQuizController.Submit))
-			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
-			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
 		}
 
 		//扫小票得积分相关路由
