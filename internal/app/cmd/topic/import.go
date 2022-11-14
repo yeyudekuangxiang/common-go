@@ -1,4 +1,4 @@
-/*
+/*/*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 
 */
@@ -7,12 +7,13 @@ package topic
 import (
 	"github.com/spf13/cobra"
 	"log"
+	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service/kumiaoCommunity"
 	"strconv"
 )
 
 // importCmd represents the import command
-var importCmd = &cobra.Command{
+var ImportCmd = &cobra.Command{
 	Use:   "import",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -41,7 +42,7 @@ to quickly create a Cobra application.`,
 		}
 
 		if userPath != "" {
-			err = kumiaoCommunity.DefaultTopicService.ImportUser(userPath)
+			err = kumiaoCommunity.NewTopicService(context.NewMioContext()).ImportUser(userPath)
 			if err != nil {
 				log.Fatal(err)
 			}
