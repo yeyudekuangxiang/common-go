@@ -7,7 +7,6 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	"io/ioutil"
-	"log"
 	"math"
 	"math/rand"
 	"mio/config"
@@ -16,7 +15,6 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
@@ -309,64 +307,64 @@ func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	return nil
 }
 
-func (srv TopicService) ImportUser(filename string) error {
-
-	file, err := excelize.OpenFile(filename)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	defer file.Close()
-
-	if file.SheetCount == 0 {
-		return errno.ErrCommon.WithMessage("没有数据")
-	}
-
-	rows, err := file.GetRows(file.GetSheetList()[0])
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	for i, row := range rows {
-		if i == 0 {
-			continue
-		}
-		importId := row[0]
-		nickname := row[1]
-		//avatarImage := row[2]
-		wechat := row[3]
-		phone := row[4]
-		user := entity.User{}
-		if nickname == "星星充电" {
-			app.DB.Where("openid = ?", wechat).First(&user)
-		} else {
-			app.DB.Where("nick_name = ?", nickname).First(&user)
-		}
-
-		if user.ID != 0 {
-			if user.PhoneNumber != phone {
-				return errors.Errorf("存在同名但手机号不同用户 %s", nickname)
-			}
-			log.Println("用户已存在", user)
-			continue
-		}
-
-		avatar, err := srv.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
-		if err != nil {
-			return errors.WithMessage(err, "上传头像失败"+importId)
-		}
-		_, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
-			OpenId:      wechat,
-			AvatarUrl:   avatar,
-			Nickname:    nickname,
-			PhoneNumber: phone,
-			Source:      entity.UserSourceMio,
-		})
-		if err != nil {
-			return errors.Errorf("创建用户失败 %s %v", nickname, err)
-		}
-	}
-	return nil
-}
+//func (srv TopicService) ImportUser(filename string) error {
+//
+//	file, err := excelize.OpenFile(filename)
+//	if err != nil {
+//		return errors.WithStack(err)
+//	}
+//	defer file.Close()
+//
+//	if file.SheetCount == 0 {
+//		return errno.ErrCommon.WithMessage("没有数据")
+//	}
+//
+//	rows, err := file.GetRows(file.GetSheetList()[0])
+//	if err != nil {
+//		return errors.WithStack(err)
+//	}
+//
+//	for i, row := range rows {
+//		if i == 0 {
+//			continue
+//		}
+//		importId := row[0]
+//		nickname := row[1]
+//		//avatarImage := row[2]
+//		wechat := row[3]
+//		phone := row[4]
+//		user := entity.User{}
+//		if nickname == "星星充电" {
+//			app.DB.Where("openid = ?", wechat).First(&user)
+//		} else {
+//			app.DB.Where("nick_name = ?", nickname).First(&user)
+//		}
+//
+//		if user.ID != 0 {
+//			if user.PhoneNumber != phone {
+//				return errors.Errorf("存在同名但手机号不同用户 %s", nickname)
+//			}
+//			log.Println("用户已存在", user)
+//			continue
+//		}
+//
+//		avatar, err := srv.uploadImportUserAvatar(path.Join(strings.Split(filename, "_")[0], importId+".jpg"))
+//		if err != nil {
+//			return errors.WithMessage(err, "上传头像失败"+importId)
+//		}
+//		_, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
+//			OpenId:      wechat,
+//			AvatarUrl:   avatar,
+//			Nickname:    nickname,
+//			PhoneNumber: phone,
+//			Source:      entity.UserSourceMio,
+//		})
+//		if err != nil {
+//			return errors.Errorf("创建用户失败 %s %v", nickname, err)
+//		}
+//	}
+//	return nil
+//}
 
 func (srv TopicService) uploadImportUserAvatar(filepath string) (string, error) {
 	file, err := os.Open(filepath)
@@ -815,4 +813,43 @@ func (srv TopicService) CountTopic(param repository.GetTopicCountBy) (int64, err
 
 func (srv TopicService) UpdateAuthor(userId, passiveUserId int64) error {
 	return app.DB.Model(&entity.Topic{}).Where("topic.user_id = ?", passiveUserId).Update("user_id", userId).Error
+}
+
+func (srv TopicService) SetWeekTopic() error {
+	// 取导入的文章，更新文章的created_time字段值为现在，并且加精华。
+	// 限制条件为 每个人取一个 一共50篇
+	// 所取的文章的import更新为0 排除下次筛选
+	topics, err := srv.topicModel.GetImportTopic()
+	if err != nil {
+		return err
+	}
+
+	if len(topics) == 0 {
+		return nil
+	}
+
+	uMapToTopic := make(map[int64]struct{}, 0) // 每个用户一篇文章
+	uSliceToTopic := make([]int64, 0)
+	var j int64
+	for _, item := range topics {
+		if _, ok := uMapToTopic[item.UserId]; ok {
+			continue
+		}
+		uMapToTopic[item.UserId] = struct{}{}
+		uSliceToTopic = append(uSliceToTopic, item.Id)
+		if j == 49 {
+			break
+		}
+		j++
+	}
+	//更新uMapToTopic中的50篇文章
+	cond := repository.UpdatesTopicCond{Ids: uSliceToTopic, IsEssence: -1}
+	upColumns := map[string]interface{}{"created_at": time.Now(), "is_essence": 1}
+	err = srv.topicModel.Updates(cond, upColumns)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("uSliceToTopic:%v", uSliceToTopic)
+	return nil
 }

@@ -6,10 +6,14 @@ package topic
 
 import (
 	"github.com/spf13/cobra"
+	"log"
+	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/core/initialize"
+	"mio/internal/pkg/service/kumiaoCommunity"
 )
 
 // importCmd represents the import command
-var hotTopic = &cobra.Command{
+var hotTopicCmd = &cobra.Command{
 	Use:   "hot-topic",
 	Short: "hot",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -19,44 +23,31 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//initialize.Initialize("./config-prod.ini")
-		//
+		initialize.Initialize("./config.ini")
+
 		//err := cmd.ParseFlags(args)
 		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//topicPath := cmd.Flag("topic").Value.String()
-		//userPath := cmd.Flag("user").Value.String()
-		//if topicPath == "" {
-		//	log.Fatal("参数错误")
+		//	log.Fatalf("args not found: %s", err.Error())
 		//}
 		//
-		//importIdStr := cmd.Flag("importId").Value.String()
-		//importId, err := strconv.Atoi(importIdStr)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
+		//configPath := cmd.Flag("config").Value.String()
+		//initialize.Initialize(configPath)
 		//
-		////if userPath != "" {
-		////	err = kumiaoCommunity.NewTopicService(context.NewMioContext()).ImportUser(userPath)
-		////	if err != nil {
-		////		log.Fatal(err)
-		////	}
-		////}
-		//
-		//err = kumiaoCommunity.DefaultTopicService.ImportTopic(topicPath, importId)
-		//if err != nil {
-		//	log.Fatal(err)
+		//if configPath == "" {
+		//	log.Fatal("config path is required")
 		//}
+
+		err := kumiaoCommunity.NewTopicService(context.NewMioContext()).SetWeekTopic()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
 func init() {
-	//TopicCmd.AddCommand(importCmd)
-	//
-	//importCmd.Flags().StringP("topic", "t", "", "topic file path")
-	//importCmd.Flags().StringP("user", "u", "", "user file path")
-	//importCmd.Flags().StringP("importId", "i", "", "base importId")
+	TopicCmd.AddCommand(hotTopicCmd)
+
+	//hotTopicCmd.Flags().StringP("config", "-c", "", "config file relative path")
 
 	// Here you will define your flags and configuration settings.
 

@@ -89,6 +89,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 			}
 			return err
 		},
+		retry.Attempts(3),
 	)
 
 	if err != nil {
