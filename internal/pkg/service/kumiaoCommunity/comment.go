@@ -127,7 +127,7 @@ func (srv *defaultCommentService) FindListAndChild(params *entity.CommentIndex, 
 		Where("obj_id = ?", params.ObjId).
 		Where("state = ?", 0).
 		Count(&total).
-		Order("comment_index.like_count desc,comment_index.id asc").
+		Order("comment_index.id desc").
 		Limit(limit).
 		Offset(offset).
 		Find(&commentList).Error
