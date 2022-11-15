@@ -52,31 +52,30 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_foot.png"
 	case CARBON_COFFEE_CUP:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_cup.png"
-
 	case CARBON_BIKE_RIDE:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
-	case CARBON_POWER_REPLACE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/power_replace.png"
-	case CARBON_REDUCE_PLASTIC:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/reduce_plastic.png"
-	case CARBON_RECYCLING_CLOTHING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_clothing.png"
-	case CARBON_RECYCLING_DIGITAL:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_digital.png"
-	case CARBON_RECYCLING_APPLIANCE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_appliance.png"
-	case CARBON_RECYCLING_BOOK:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_book.png"
-	case CARBON_FMY_RECYCLING_CLOTHING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/fmy_recycling_clothing.png"
-	case CARBON_JHX:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/jhx.png"
-	case CARBON_RECYCLING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling.png"
 	case CARBON_YTX:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/ytx.png"
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_metro.png"
+	case CARBON_JHX:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_bus.png"
+	case CARBON_RECYCLING_CLOTHING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING_DIGITAL:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING_APPLIANCE:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING_BOOK:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_FMY_RECYCLING_CLOTHING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_POWER_REPLACE:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+	case CARBON_REDUCE_PLASTIC:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	}
 	return ""
 }
