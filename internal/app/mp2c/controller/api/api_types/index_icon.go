@@ -22,4 +22,6 @@ type IndexIconApiVO struct {
 	RowNum string `json:"rowNum"`
 	Sort   int8   `json:"sort"`
 	Pic    string `json:"pic"`
+	Custom string `json:"custom"`
+	Abbr   string `json:"abbr"`
 }
