@@ -25,7 +25,7 @@ type GetIndexIconPageDO struct {
 	Limit  int
 	Title  string
 	Status entity.IndexIconStatus
-	IsOpen int8
+	IsOpen entity.IndexIconIsOpen
 }
 
 type UpdateIndexIconDO struct {
