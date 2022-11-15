@@ -72,6 +72,8 @@ func (repo IndexIconRepository) Update(dto srv_types.UpdateIndexIconDTO) error {
 	do := entity.IndexIcon{
 		CreatedAt: info.CreatedAt,
 		Type:      info.Type,
+		Custom:    info.Custom,
+		Abbr:      info.Abbr,
 		UpdatedAt: time.Now()}
 	if err := util.MapTo(dto, &do); err != nil {
 		return err
