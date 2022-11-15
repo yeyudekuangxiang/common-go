@@ -79,6 +79,8 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	params["time"] = form.Time
 	params["info"] = form.Info
 	params["privateKey"] = "mio2022"
+	params["info"] = form.Info
+
 	sign := GetSignToJava(params)
 	if sign != form.Sign {
 		return gin.H{
