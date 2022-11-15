@@ -35,6 +35,8 @@ func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 			RowNum: activity.RowNum,
 			Sort:   activity.Sort,
 			Pic:    activity.Pic,
+			Custom: activity.Custom,
+			Abbr:   activity.Abbr,
 		}
 		switch activity.RowNum {
 		case "1":
