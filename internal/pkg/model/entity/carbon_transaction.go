@@ -52,11 +52,11 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_foot.png"
 	case CARBON_COFFEE_CUP:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_cup.png"
-
 	case CARBON_BIKE_RIDE:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+
 	case CARBON_POWER_REPLACE:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/power_replace.png"
 	case CARBON_REDUCE_PLASTIC:

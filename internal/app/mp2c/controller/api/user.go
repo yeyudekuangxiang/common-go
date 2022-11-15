@@ -112,6 +112,19 @@ func (ctr UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	}
 }
 
+func (ctr UserController) CheckYZMCommon(c *gin.Context) (gin.H, error) {
+	form := GetYZMForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
+		return gin.H{}, nil
+	} else {
+		err := errno.ErrCommon.WithMessage("验证码错误,请重新输入")
+		return gin.H{}, err
+	}
+}
+
 func (ctr UserController) BindMobileByYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
