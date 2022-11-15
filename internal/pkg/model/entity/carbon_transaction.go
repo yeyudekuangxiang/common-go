@@ -39,6 +39,9 @@ func (p CarbonTransactionType) Text() string {
 		return "旧物回收"
 	case CARBON_JHX:
 		return "金华行"
+	case CARBON_YTX:
+		return "地铁"
+
 	}
 	return "未知积分"
 }
@@ -49,6 +52,7 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_foot.png"
 	case CARBON_COFFEE_CUP:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_cup.png"
+
 	case CARBON_BIKE_RIDE:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
@@ -71,7 +75,8 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/jhx.png"
 	case CARBON_RECYCLING:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling.png"
-
+	case CARBON_YTX:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/ytx.png"
 	}
 	return ""
 }
@@ -107,6 +112,8 @@ func (p CarbonTransactionType) RealText() string {
 		return "旧物回收"
 	case CARBON_CYCLING:
 		return "骑行"
+	case CARBON_YTX:
+		return "地铁"
 	}
 	return p.Text()
 }
