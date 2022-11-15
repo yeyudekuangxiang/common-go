@@ -27,7 +27,5 @@ func StartOfMonth(t time.Time) time.Time {
 	return time.Date(y, m, 1, 0, 0, 0, 0, time.Local)
 }
 func EndOfMonth(t time.Time) time.Time {
-	y, m, _ := t.Date()
-	m = (m + 1) % 12
-	return time.Date(y, m, 1, 0, 0, 0, -1, time.Local)
+	return StartOfMonth(t).AddDate(0, 1, 0).Add(-1)
 }
