@@ -77,6 +77,7 @@ type GetCarbonTransactionCreateForm struct {
 	Uid          string `json:"uid" form:"uid" binding:"required" alias:"uid"`
 	Time         string `json:"time" form:"time" binding:"datetime=2006-01-02 15:04:05" alias:"时间"`
 	Sign         string `json:"sign" form:"sign" binding:"required" alias:"sign"`
+	Info         string `json:"info" form:"info" binding:"required" alias:"info"`
 }
 
 // DTO
