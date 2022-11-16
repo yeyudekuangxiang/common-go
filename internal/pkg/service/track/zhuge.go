@@ -1,6 +1,7 @@
 package track
 
 import (
+	"encoding/json"
 	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -202,9 +203,11 @@ func (srv ZhuGeService) Track(eventName, openId string, attr map[string]interfac
 }
 
 func (srv ZhuGeService) TrackWithErr(eventName, openId string, attr map[string]interface{}) error {
+
 	if !srv.Open {
 		app.Logger.Infof("积分打点失败 %+v %v %+v", eventName, openId, attr)
-		return errno.ErrCommon.WithMessage("未开启打点，请联系开发")
+		attrString, _ := json.Marshal(attr)
+		return errno.ErrCommon.WithMessage("未开启打点，请联系开发" + string(attrString))
 	}
 	ip := ""
 	ipAttr, ok := attr["ip"]
