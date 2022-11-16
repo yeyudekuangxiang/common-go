@@ -76,9 +76,6 @@ func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.User
 		if err := util2.MapTo(param, &userExtend); err != nil {
 			return nil, err
 		}
-		userExtend.Ip = param.Ip
-		userExtend.Openid = param.OpenId
-		userExtend.Uid = param.Uid
 		userExtend.CreatedAt = time.Now()
 		ret := u.rUserExtend.Create(userExtend)
 		return userExtend, ret

@@ -109,16 +109,30 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			return nil, "", false, err
 		}
+		_, err = service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
+			OpenId:       user.OpenId,
+			Uid:          user.ID,
+			Ip:           ip,
+			Adcode:       city.Content.AddressDetail.Adcode,
+			CityCode:     city.Content.AddressDetail.CityCode,
+			Province:     city.Content.AddressDetail.Province,
+			City:         city.Content.AddressDetail.City,
+			District:     city.Content.AddressDetail.District,
+			Street:       city.Content.AddressDetail.Street,
+			StreetNumber: city.Content.AddressDetail.StreetNumber,
+		})
+		if err != nil {
+			return nil, "", false, err
+		}
 	} else if user.UnionId == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
+		//更新用户的最新ip
+		service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
+			OpenId: user.OpenId,
+			Uid:    user.ID,
+			Ip:     ip,
+		})
 	}
-
-	//更新用户的最新ip
-	service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
-		OpenId: user.OpenId,
-		Uid:    user.ID,
-		Ip:     ip,
-	})
 
 	if isNewUser {
 		err := userDealPool.Submit(func() {
