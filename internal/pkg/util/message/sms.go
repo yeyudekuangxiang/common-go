@@ -127,7 +127,7 @@ func SendYZMSms2B(mobile string, code string) (smsReturn *SmsReturn, err error) 
 	payload := strings.NewReader(`{
     "account": "` + config.Config.Sms.Account + `",
     "password": "` + config.Config.Sms.Password + `", //需要加入K8S
-    "msg": "验证码` + code + `，10分钟有效。如非本人操作，请忽略。",
+    "msg": "【企业员工碳减排管理平台】验证码：` + code + `，10分钟有效。如非本人操作，请忽略",
     "phone": "` + mobile + `",
     "sendtime": "201704101400",
     "report": "true",
