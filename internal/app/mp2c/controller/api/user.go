@@ -89,6 +89,20 @@ func (ctr UserController) GetYZM(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+func (ctr UserController) GetYZM2B(c *gin.Context) (gin.H, error) {
+	form := GetYZM2BForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	_, err := service.DefaultUserService.GetYZM2B(form.Mobile)
+	if err != nil {
+		return gin.H{
+			"msg": "fail",
+		}, err
+	}
+	return nil, nil
+}
+
 func (ctr UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -112,12 +126,12 @@ func (ctr UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	}
 }
 
-func (ctr UserController) CheckYZMCommon(c *gin.Context) (gin.H, error) {
-	form := GetYZMForm{}
+func (ctr UserController) CheckYZM2B(c *gin.Context) (gin.H, error) {
+	form := CheckYZM2BForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if service.DefaultUserService.CheckYZM(form.Mobile, form.Code) {
+	if service.DefaultUserService.CheckYZM2B(form.Mobile, form.Code) {
 		return gin.H{}, nil
 	} else {
 		err := errno.ErrCommon.WithMessage("验证码错误,请重新输入")

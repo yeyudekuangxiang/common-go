@@ -118,3 +118,54 @@ func SendMarketSms(templateContent string, phone string, msg string) (smsReturn 
 	}
 	return ret, nil
 }
+
+//验证码：{s}，10分钟有效。如非本人操作，请忽略
+
+func SendYZMSms2B(mobile string, code string) (smsReturn *SmsReturn, err error) {
+	url := config.Config.Sms.Url
+	method := "POST"
+	payload := strings.NewReader(`{
+    "account": "` + config.Config.Sms.Account + `",
+    "password": "` + config.Config.Sms.Password + `", //需要加入K8S
+    "msg": "验证码` + code + `，10分钟有效。如非本人操作，请忽略。",
+    "phone": "` + mobile + `",
+    "sendtime": "201704101400",
+    "report": "true",
+    "extend": "555",
+    "uid": "4321abc"
+}`)
+
+	fmt.Println(payload)
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	ret := &SmsReturn{}
+	err = json.Unmarshal(body, ret)
+	if err != nil {
+		return nil, err
+	}
+	if ret.Code != "0" {
+		return ret, errno.ErrCommon.WithMessage(ret.ErrorMsg)
+	}
+	return ret, nil
+}
