@@ -29,12 +29,14 @@ type redisKey struct {
 	MessageLimitTopicShow    string
 	MessageLimitPlatformShow string
 	TopicRank                string
+	YZM2B                    string
 }
 
 var RedisKey = redisKey{
 	UserInfo:                 "mp2c:userinfo:%d",                // 变量1:用户id 使用 fmt.Sprintf(RedisKey.UserInfo,"1")
 	AccessToken:              "mp2c:access_token:%s:%s",         // 变量1:应用平台 变量2:应用id
 	YZM:                      "yzm:",                            // 拼接用户id
+	YZM2B:                    "yzm2b:",                          //验证码给b端，拼接用户id
 	UniDian:                  "unidian:",                        // 拼接手机号
 	FriendsHelp:              "friends_help:",                   // 拼接手机号
 	SendPhoneByQnr:           "SendPhoneByQnr",                  //拼接手机号
