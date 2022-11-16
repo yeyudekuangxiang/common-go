@@ -31,9 +31,11 @@ func apiRouter(router *gin.Engine) {
 	{
 		userRouter := authRouter.Group("/user")
 		{
-			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))                  //获取验证码
-			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM))              //校验验证码
-			userRouter.GET("/check-yzm-common", apiutil.Format(api.DefaultUserController.CheckYZMCommon)) //校验验证码
+			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))          //获取验证码
+			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM))      //校验验证码
+			userRouter.GET("/get-yzm-2b", apiutil.Format(api.DefaultUserController.GetYZM2B))     //获取验证码2b
+			userRouter.GET("/check-yzm-2b", apiutil.Format(api.DefaultUserController.CheckYZM2B)) //校验验证码2b
+
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
 

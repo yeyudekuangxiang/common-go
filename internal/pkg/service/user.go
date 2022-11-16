@@ -301,6 +301,21 @@ func (u UserService) GetYZM(mobile string) (string, error) {
 
 	return code, nil
 }
+func (u UserService) GetYZM2B(mobile string) (string, error) {
+	code := ""
+	for i := 0; i < 4; i++ {
+		code += strconv.Itoa(rand.Intn(9))
+	}
+	//加入缓存
+	cmd := app.Redis.Set(context.Background(), config.RedisKey.YZM2B+mobile, code, time.Second*10*60)
+	fmt.Println(cmd.String())
+	//发送短信
+	_, err := message.SendYZMSms2B(mobile, code)
+	if err != nil {
+		return "", err
+	}
+	return code, nil
+}
 func (u UserService) CheckYZM(mobile string, code string) bool {
 	//取出缓存
 	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM+mobile)
@@ -309,9 +324,21 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 		fmt.Println("验证码验证通过")
 		return true
 	}
-
 	return false
 }
+
+//企业版验证验证码
+
+func (u UserService) CheckYZM2B(mobile string, code string) bool {
+	//取出缓存
+	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM2B+mobile)
+	if codeCmd.Val() == code {
+		fmt.Println("验证码验证通过")
+		return true
+	}
+	return false
+}
+
 func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
 
