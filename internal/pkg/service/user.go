@@ -14,7 +14,6 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
@@ -184,8 +183,13 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
 	user.ChannelId = ch.Cid
 	ret := repository.DefaultUserRepository.Save(&user)
+	/*
+		retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
+	*/
+	userExtend, exist, _ := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
+		OpenId: user.OpenId,
+	})
 
-	retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
@@ -193,10 +197,13 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	zhuGeAttr["城市code"] = user.CityCode
 	zhuGeAttr["openid"] = user.OpenId
 	zhuGeAttr["ip"] = user.Ip
-	if cityErr == nil {
-		zhuGeAttr["城市名"] = retCity.Name
+	if exist {
+		zhuGeAttr["省"] = userExtend.Province
+		zhuGeAttr["市"] = userExtend.City
 	}
-
+	/*if cityErr == nil {
+		zhuGeAttr["城市名"] = retCity.Name
+	}*/
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
 
