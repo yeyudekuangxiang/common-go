@@ -11,11 +11,11 @@ func Initialize(configPath string) {
 	InitBusinessDB()
 	InitRedis()
 	InitValidator()
-	//InitWeapp()
+	InitWeapp()
 	InitOss()
 	InitSts()
-	//InitWxoa()
-	//InitRpc()
+	InitWxoa()
+	InitRpc()
 	//initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
 }
