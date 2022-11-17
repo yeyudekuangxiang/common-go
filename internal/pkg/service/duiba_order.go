@@ -2,6 +2,7 @@ package service
 
 import (
 	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
@@ -138,6 +139,8 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	} else {
 		zhuGeAttr["是否首单"] = "否"
 	}
+	app.Logger.Infof("商场订单，积分打点失败 %+v %v %+v", config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
+
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
 	return nil
 }
