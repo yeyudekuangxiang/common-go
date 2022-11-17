@@ -45,7 +45,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	/*
 		rand.Seed(time.Now().UnixNano())
 		grantV2Request := GrantV3Request{
-			AppId:     srv.option.AppId,
+			AppId:     "264735a59163453d9772f92e1f703123",
 			AppSecret: srv.getAppSecret(),
 			Ts:        strconv.FormatInt(time.Now().Unix(), 10),
 			ReqData: GrantV3ReqData{
@@ -57,41 +57,42 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 			},
 		}
 
-		url := srv.option.Domain + "/markting_redenvelopegateway/redenvelope/grantV2"
+		url := "https://app.trtpazyz.com/tj-metro-api/open-forward/api/eTicket/allot"
 		body, err := httputil.PostJson(url, grantV2Request)
 		app.Logger.Infof("天津地铁 grantV2 返回 : %s", body)
 		if err != nil {
 			return "", err
 		}
+
+		response := GrantV3Response{}
+		err = json.Unmarshal(body, &response)
+		if err != nil {
+			app.Logger.Errorf("天津地铁 grantV2 json_decode_err: %s", err.Error())
+			return "", err
+		}
+
+		if response.SubCode != "0000" {
+			app.Logger.Errorf("天津地铁 grantV2 err: %s\n", response.SubMessage)
+			return "", errors.New(response.SubMessage)
+		}
+
+		//记录
+		_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+			CouponCardTypeId: typeId,
+			UserId:           user.ID,
+			BizId:            response.SubData.OrderNo,
+			CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+			StartTime:        time.Now().UnixMilli(),
+			EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
+		})
+
+		if err != nil {
+			app.Logger.Errorf("天津地铁 券包 发放错误 : %s\n", err.Error())
+			return "", err
+		}
 	*/
-	/*response := GrantV3Response{}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		app.Logger.Errorf("天津地铁 grantV2 json_decode_err: %s", err.Error())
-		return "", err
-	}
+	//	return response.SubData.OrderNo, nil
 
-	if response.SubCode != "0000" {
-		app.Logger.Errorf("天津地铁 grantV2 err: %s\n", response.SubMessage)
-		return "", errors.New(response.SubMessage)
-	}
-
-	//记录
-	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
-		CouponCardTypeId: typeId,
-		UserId:           user.ID,
-		BizId:            response.SubData.OrderNo,
-		CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
-		StartTime:        time.Now().UnixMilli(),
-		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
-	})
-
-	if err != nil {
-		app.Logger.Errorf("天津地铁 券包 发放错误 : %s\n", err.Error())
-		return "", err
-	}*/
-
-	//return response.SubData.OrderNo, nil
 	return "", nil
 }
 
