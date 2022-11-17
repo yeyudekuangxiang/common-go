@@ -1,10 +1,7 @@
 package service
 
 import (
-	"context"
-	"encoding/json"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
@@ -34,6 +31,11 @@ func (srv DuiBaOrderService) CreateOrUpdate(orderId string, info duibaApi.OrderI
 		return nil, errno.ErrUserNotFound
 	}
 
+	//只有成功才能上报到诸葛
+	if info.OrderStatus == "success" {
+		err = srv.OrderMaiDian(info, user.ID, user.OpenId)
+	}
+
 	order := srv.repo.FindByOrderId(orderId)
 	if order.ID == 0 {
 		order = entity.DuiBaOrder{
@@ -61,12 +63,6 @@ func (srv DuiBaOrderService) CreateOrUpdate(orderId string, info duibaApi.OrderI
 	order.OrderStatus = info.OrderStatus
 	order.ErrorMsg = info.ErrorMsg
 	order.OrderItemList = string(info.OrderItemList)
-
-	//只有成功才能上报到诸葛
-	if info.OrderStatus == "success" {
-		err = srv.OrderMaiDian(info, user.ID, user.OpenId)
-	}
-
 	return &order, srv.repo.Save(&order)
 }
 
@@ -78,7 +74,7 @@ type OrderItem struct {
 }
 
 func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, openid string) error {
-	redisKey := "mp2c:order_duiba_to_zhuge_test_v6"
+	//redisKey := "mp2c:order_duiba_to_zhuge_test_v6"
 	typeName := order.Type
 	switch order.Type {
 	case "coupon":
@@ -108,7 +104,6 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	}
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
-
 	zhuGeAttr["用户uid"] = uid
 	zhuGeAttr["兑吧订单号"] = order.OrderNum
 	zhuGeAttr["下单时间"] = timeutils.UnixMilli(order.CreateTime.ToInt()).Format(timeutils.TimeFormat)
@@ -119,11 +114,9 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	zhuGeAttr["运费"] = order.ExpressPrice
 	zhuGeAttr["订单状态"] = statusName
 	zhuGeAttr["用户openid"] = openid
-
-	var orderItemList []OrderItem
-
-	json.Unmarshal([]byte(order.OrderItemList), &orderItemList)
-	for _, item := range orderItemList {
+	//var orderItemList []OrderItem
+	//json.Unmarshal([]byte(order.OrderItemList), &orderItemList)
+	for _, item := range order.OrderItemList.OrderItemList() {
 		orderItemType := ""
 		switch item.IsSelf {
 		case "1":
@@ -139,12 +132,11 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 		zhuGeAttr["所需兑换金额"] = item.PerPrice
 		break
 	}
-
-	isExit := app.Redis.SIsMember(context.Background(), redisKey, uid)
-	if isExit.Val() == true {
-		zhuGeAttr["是否首单"] = "否"
-	} else {
+	duibaOrder := srv.repo.FindByUid(uid)
+	if duibaOrder.ID == 0 {
 		zhuGeAttr["是否首单"] = "是"
+	} else {
+		zhuGeAttr["是否首单"] = "否"
 	}
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
 	return nil
