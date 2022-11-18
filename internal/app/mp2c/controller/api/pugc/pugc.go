@@ -12,9 +12,11 @@ import (
 	"mio/internal/pkg/model/entity/pugc"
 	questionEntity "mio/internal/pkg/model/entity/question"
 	"mio/internal/pkg/queue/types/message/zhugemsg"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/common"
 	"mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service/platform/tianjin_metro"
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -27,6 +29,18 @@ import (
 var DefaultPugcController = PugcController{}
 
 type PugcController struct {
+}
+
+func (receiver PugcController) SendTianjinMetro(c *gin.Context) (gin.H, error) {
+	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
+	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
+	str, err := serviceNew.SendCoupon(1, 1, *user)
+	if err != nil {
+		return gin.H{}, nil
+	}
+	return gin.H{
+		"str": str,
+	}, nil
 }
 
 func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {

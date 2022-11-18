@@ -56,16 +56,18 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	grantV5Request := GrantV4Request{
-		allotId:     "33333333",
-		etUserPhone: sceneUser.Phone,
-		allotNum:    1,
+		AllotId:     "33333333",
+		EtUserPhone: sceneUser.Phone,
+		AllotNum:    1,
 	}
 	//加密过程
-	message, err := json.Marshal(grantV5Request)
-	if err != nil {
-		return "", nil
+	jsons, errs := json.Marshal(grantV5Request) //转换成JSON返回的是byte[]
+	if errs != nil {
+		fmt.Println(errs.Error())
 	}
-	str := Encode(string(message))
+	fmt.Println(string(jsons))
+
+	str := Encode(string(jsons))
 	data, _ := encrypt.RsaEncrypt([]byte(str))
 	signature := base64.StdEncoding.EncodeToString(data)
 

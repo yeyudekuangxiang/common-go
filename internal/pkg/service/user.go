@@ -206,7 +206,6 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	}*/
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
-
 	} else {
 		zhuGeAttr["是否成功"] = "失败"
 		zhuGeAttr["失败原因"] = ret.Error()
