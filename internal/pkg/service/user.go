@@ -14,7 +14,6 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
@@ -76,9 +75,6 @@ func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.User
 		if err := util2.MapTo(param, &userExtend); err != nil {
 			return nil, err
 		}
-		userExtend.Ip = param.Ip
-		userExtend.Openid = param.OpenId
-		userExtend.Uid = param.Uid
 		userExtend.CreatedAt = time.Now()
 		ret := u.rUserExtend.Create(userExtend)
 		return userExtend, ret
@@ -187,8 +183,13 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
 	user.ChannelId = ch.Cid
 	ret := repository.DefaultUserRepository.Save(&user)
+	/*
+		retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
+	*/
+	userExtend, exist, _ := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
+		OpenId: user.OpenId,
+	})
 
-	retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
@@ -196,10 +197,13 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	zhuGeAttr["城市code"] = user.CityCode
 	zhuGeAttr["openid"] = user.OpenId
 	zhuGeAttr["ip"] = user.Ip
-	if cityErr == nil {
-		zhuGeAttr["城市名"] = retCity.Name
+	if exist {
+		zhuGeAttr["省"] = userExtend.Province
+		zhuGeAttr["市"] = userExtend.City
 	}
-
+	/*if cityErr == nil {
+		zhuGeAttr["城市名"] = retCity.Name
+	}*/
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
 
@@ -301,6 +305,21 @@ func (u UserService) GetYZM(mobile string) (string, error) {
 
 	return code, nil
 }
+func (u UserService) GetYZM2B(mobile string) (string, error) {
+	code := ""
+	for i := 0; i < 4; i++ {
+		code += strconv.Itoa(rand.Intn(9))
+	}
+	//加入缓存
+	cmd := app.Redis.Set(context.Background(), config.RedisKey.YZM2B+mobile, code, time.Second*10*60)
+	fmt.Println(cmd.String())
+	//发送短信
+	_, err := message.SendYZMSms2B(mobile, code)
+	if err != nil {
+		return "", err
+	}
+	return code, nil
+}
 func (u UserService) CheckYZM(mobile string, code string) bool {
 	//取出缓存
 	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM+mobile)
@@ -309,9 +328,21 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 		fmt.Println("验证码验证通过")
 		return true
 	}
-
 	return false
 }
+
+//企业版验证验证码
+
+func (u UserService) CheckYZM2B(mobile string, code string) bool {
+	//取出缓存
+	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM2B+mobile)
+	if codeCmd.Val() == code {
+		fmt.Println("验证码验证通过")
+		return true
+	}
+	return false
+}
+
 func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
 

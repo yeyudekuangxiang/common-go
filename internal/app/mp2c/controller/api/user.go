@@ -9,11 +9,11 @@ import (
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/common"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strings"
 	"time"
@@ -89,6 +89,20 @@ func (ctr UserController) GetYZM(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+func (ctr UserController) GetYZM2B(c *gin.Context) (gin.H, error) {
+	form := GetYZM2BForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	_, err := service.DefaultUserService.GetYZM2B(form.Mobile)
+	if err != nil {
+		return gin.H{
+			"msg": "fail",
+		}, err
+	}
+	return nil, nil
+}
+
 func (ctr UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 	form := GetYZMForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -106,6 +120,19 @@ func (ctr UserController) CheckYZM(c *gin.Context) (gin.H, error) {
 			"token":  token,
 			"userId": userId,
 		}, err
+	} else {
+		err := errno.ErrCommon.WithMessage("验证码错误,请重新输入")
+		return gin.H{}, err
+	}
+}
+
+func (ctr UserController) CheckYZM2B(c *gin.Context) (gin.H, error) {
+	form := CheckYZM2BForm{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	if service.DefaultUserService.CheckYZM2B(form.Mobile, form.Code) {
+		return gin.H{}, nil
 	} else {
 		err := errno.ErrCommon.WithMessage("验证码错误,请重新输入")
 		return gin.H{}, err
@@ -225,7 +252,9 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	}
 
 	//归属地
-	location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
+	//location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
+	location, err := baidu.IpToCity(c.ClientIP())
+
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +266,7 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	shortUser := user.ShortUser()
 	result := make(map[string]interface{}, 0)
 	_ = util.MapTo(&shortUser, &result)
-	result["ipLocation"] = location.Name
+	result["ipLocation"] = location.Content.AddressDetail.Province
 	return result, nil
 }
 

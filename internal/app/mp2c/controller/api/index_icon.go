@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
 )
@@ -21,6 +22,7 @@ func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 	list, _, err := service.NewIndexIconService(context.NewMioContext()).Page(repotypes.GetIndexIconPageDO{
 		Offset: 0,
 		Limit:  20,
+		IsOpen: entity.IndexIconIsOpenOk,
 	})
 	if err != nil {
 		return gin.H{}, err
@@ -35,6 +37,8 @@ func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 			RowNum: activity.RowNum,
 			Sort:   activity.Sort,
 			Pic:    activity.Pic,
+			Custom: activity.Custom,
+			Abbr:   activity.Abbr,
 		}
 		switch activity.RowNum {
 		case "1":

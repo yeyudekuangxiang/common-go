@@ -72,6 +72,8 @@ func (repo IndexIconRepository) Update(dto srv_types.UpdateIndexIconDTO) error {
 	do := entity.IndexIcon{
 		CreatedAt: info.CreatedAt,
 		Type:      info.Type,
+		Custom:    info.Custom,
+		Abbr:      info.Abbr,
 		UpdatedAt: time.Now()}
 	if err := util.MapTo(dto, &do); err != nil {
 		return err
@@ -90,7 +92,7 @@ func (repo IndexIconRepository) GetPage(do repotypes.GetIndexIconPageDO) ([]enti
 	if do.Title != "" {
 		db.Where("title like ?", "%"+do.Title+"%")
 	}
-	db.Order("sort desc ,id desc")
+	db.Order("sort asc ,id desc")
 	list := make([]entity.IndexIcon, 0)
 	var total int64
 	return list, total, db.Count(&total).Offset(do.Offset).Limit(do.Limit).Find(&list).Error

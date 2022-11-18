@@ -39,6 +39,9 @@ func (p CarbonTransactionType) Text() string {
 		return "旧物回收"
 	case CARBON_JHX:
 		return "金华行"
+	case CARBON_YTX:
+		return "地铁"
+
 	}
 	return "未知积分"
 }
@@ -53,25 +56,26 @@ func (p CarbonTransactionType) Cover() string {
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
 		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
-	case CARBON_POWER_REPLACE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/power_replace.png"
-	case CARBON_REDUCE_PLASTIC:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/reduce_plastic.png"
-	case CARBON_RECYCLING_CLOTHING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_clothing.png"
-	case CARBON_RECYCLING_DIGITAL:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_digital.png"
-	case CARBON_RECYCLING_APPLIANCE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_appliance.png"
-	case CARBON_RECYCLING_BOOK:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling_book.png"
-	case CARBON_FMY_RECYCLING_CLOTHING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/fmy_recycling_clothing.png"
+	case CARBON_YTX:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_metro.png"
 	case CARBON_JHX:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/jhx.png"
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_bus.png"
+	case CARBON_RECYCLING_CLOTHING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING_DIGITAL:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING_APPLIANCE:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_RECYCLING_BOOK:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_FMY_RECYCLING_CLOTHING:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_RECYCLING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/recycling.png"
-
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_POWER_REPLACE:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+	case CARBON_REDUCE_PLASTIC:
+		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	}
 	return ""
 }
@@ -107,6 +111,8 @@ func (p CarbonTransactionType) RealText() string {
 		return "旧物回收"
 	case CARBON_CYCLING:
 		return "骑行"
+	case CARBON_YTX:
+		return "地铁"
 	}
 	return p.Text()
 }

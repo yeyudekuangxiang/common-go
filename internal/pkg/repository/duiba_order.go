@@ -26,3 +26,12 @@ func (repo DuiBaOrderRepository) FindByOrderId(orderId string) entity.DuiBaOrder
 	}
 	return order
 }
+
+func (repo DuiBaOrderRepository) FindByUid(userId int64) entity.DuiBaOrder {
+	order := entity.DuiBaOrder{}
+	err := repo.DB.Where("user_id = ?", userId).First(&order).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return order
+}

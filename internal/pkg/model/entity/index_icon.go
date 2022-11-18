@@ -13,6 +13,8 @@ type IndexIcon struct {
 	Status    IndexIconStatus `gorm:"column:status" json:"status"`
 	IsOpen    int8            `gorm:"column:is_open" json:"isOpen"`
 	Pic       string          `gorm:"column:pic" json:"pic"`
+	Custom    string          `gorm:"column:custom" json:"custom"`
+	Abbr      string          `gorm:"column:abbr" json:"abbr"`
 	CreatedAt time.Time       `gorm:"column:created_at" json:"createdAt"`
 	UpdatedAt time.Time       `gorm:"column:updated_at" json:"updatedAt"`
 }

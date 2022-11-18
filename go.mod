@@ -150,6 +150,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.1 // indirect
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
+	github.com/wechatpay-apiv3/wechatpay-go v0.2.16 // indirect
 	github.com/xuri/efp v0.0.0-20220603152613-6918739fd470 // indirect
 	github.com/xuri/nfp v0.0.0-20220409054826-5e722a1d9e22 // indirect
 	github.com/yosssi/ace v0.0.5 // indirect
