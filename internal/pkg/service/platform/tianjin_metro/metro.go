@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/encrypt"
 	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
@@ -45,6 +46,7 @@ type Service struct {
 }
 
 func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (string, error) {
+	// 用user加cid验证
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
 		PlatformKey: "tianjinmetro",
 		OpenId:      user.OpenId,
@@ -71,14 +73,21 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	data, _ := encrypt.RsaEncrypt([]byte(str))
 	signature := base64.StdEncoding.EncodeToString(data)
 
-	authToken := httputil.HttpWithHeader("appid", "264735a59163453d9772f92e1f703123")         //天津地铁分配给开发者/商户的appid
-	authToken = httputil.HttpWithHeader("random", "111")                                      //加密后的随机码，当报文中有需要加密的字段的时候需要传此参数
-	authToken = httputil.HttpWithHeader("sequence", strconv.FormatInt(time.Now().Unix(), 10)) //yyyyMMddHHmmss+10位数字（在一定时间内不重复），仅作为接口调用跟踪用途，不作为业务用途，业务流水在业务接口中定义。
-	authToken = httputil.HttpWithHeader("version", "1.0")                                     //版本号 1.0。
-	authToken = httputil.HttpWithHeader("signature", signature)                               //签名
+	bdScene := service.DefaultBdSceneService.FindByCh("tianjinmetro")
 
-	url := "https://app.trtpazyz.com/tj-metro-api/open-forward/api/eTicket/allot"
-	body, err := httputil.PostJson(url, grantV5Request, authToken)
+	if bdScene.ID == 0 {
+		return "", errno.ErrNotFound
+	}
+
+	options := []httputil.HttpOption{
+		httputil.HttpWithHeader("appid", bdScene.AppId),
+		httputil.HttpWithHeader("random", ""),
+		httputil.HttpWithHeader("sequence", strconv.FormatInt(time.Now().Unix(), 10)),
+		httputil.HttpWithHeader("signature", signature),
+	}
+
+	url := bdScene.Domain + "/tj-metro-api/open-forward/api/eTicket/allot"
+	body, err := httputil.PostJson(url, grantV5Request, options...)
 	app.Logger.Infof("天津地铁 grantV2 返回 : %s", body)
 	if err != nil {
 		return "", err
@@ -100,7 +109,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		CouponCardTypeId: typeId,
 		UserId:           user.ID,
 		BizId:            response.SubData.OrderNo,
-		CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+		CouponCardTitle:  "天津地铁" + fmt.Sprintf("%.0f", amount) + "元出行红包",
 		StartTime:        time.Now().UnixMilli(),
 		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
 	})
