@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
+	"math/rand"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -31,6 +32,9 @@ type Service struct {
 	ctx *context.MioContext
 }
 
+func random(min, max int) int {
+	return rand.Intn(max-min) + min
+}
 func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (string, error) {
 	//查询配置场景
 	bdScene := service.DefaultBdSceneService.FindByCh("tianjinmetro")
@@ -50,24 +54,21 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 	//请求参数
 	Request := MetroRequest{
-		AllotId:     "33333333",
-		EtUserPhone: sceneUser.Phone,
+		AllotId:     "11231231231231",
+		EtUserPhone: "15000000000",
 		AllotNum:    1,
 	}
 
-	//加密过程
-	jsons, errs := json.Marshal(Request) //转换成JSON返回的是byte[]
-	if errs != nil {
-		return "", errs
+	//获取签名
+	signature, err := getSign(Request)
+	if err != nil {
+		return "", err
 	}
-	str := Encode(string(jsons))
-	data, _ := encrypt.RsaEncrypt([]byte(str))
-	signature := base64.StdEncoding.EncodeToString(data)
 
 	//header头
 	options := []httputil.HttpOption{
 		httputil.HttpWithHeader("appid", bdScene.AppId),
-		httputil.HttpWithHeader("sequence", strconv.FormatInt(time.Now().Unix(), 10)),
+		httputil.HttpWithHeader("sequence", getSequence()),
 		httputil.HttpWithHeader("signature", signature),
 	}
 
@@ -108,8 +109,41 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 //参考 https://iswxw.blog.csdn.net/article/details/122612927?spm=1001.2101.3001.6650.4&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=5
 
-func Encode(data string) string {
+/*func Encode(data string) string {
 	h := md5.New()
 	h.Write([]byte(data))
 	return strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
+}*/
+
+//签名开始
+/**
+转换：将请求参数转换为json消息。
+摘要：把转换好的字符串采用utf-8编码，使用摘要算法对编码后的字节流进行摘要。使用MD5算法，对转换后的字符串进行摘要，如：md5(json)；
+将摘要得到的字节流结果使用十六进制大写表示，如：hex(“helloworld”.getBytes(“utf-8”)) = “68656C6C6F776F726C64”
+签名：使用加密算法对摘要后的16进制文本进行加密。
+使用RSA算法，1024位，填充方式采用RSA/ECB/PKCS1Padding，如RSA(“ 68656C6C6F776F726C64”, key)。
+*/
+
+func getSign(request MetroRequest) (string, error) {
+	jsons, errs := json.Marshal(request) //转换成JSON返回的是byte[]
+	if errs != nil {
+		return "", errs
+	}
+
+	h := md5.New()
+	h.Write(jsons)
+	str := strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
+
+	data, _ := encrypt.RsaEncrypt([]byte(str))
+	signature := base64.StdEncoding.EncodeToString(data) //签名
+	return signature, nil
+}
+
+//业务流水  yyyyMMddHHmmss+10位数字（在一定时间内不重复），仅作为接口调用跟踪用途，不作为业务用途，业务流水在业务接口中定义。
+
+func getSequence() string {
+	timeNowStr := time.Now().Format("20060102150405")
+	rand.Seed(time.Now().Unix())                                          //Seed生成的随机数
+	sequence := timeNowStr + strconv.Itoa(random(1000000000, 9999999999)) //业务流水
+	return sequence
 }
