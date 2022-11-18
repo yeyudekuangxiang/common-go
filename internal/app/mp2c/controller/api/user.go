@@ -13,6 +13,7 @@ import (
 	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strings"
@@ -218,8 +219,16 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	if form.Gender != nil {
 		gender = (*entity.UserGender)(form.Gender)
 	}
+	if strings.Trim(form.Nickname, " ") == "" {
+		return nil, errno.ErrCommon.WithMessage("昵称不可为空")
+	}
 
-	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	err := validator.CheckMsgWithOpenId(user.OpenId, form.Nickname)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
+	}
+
+	err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
@@ -283,7 +292,12 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("内容不可以为空")
 	}
 
-	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	err := validator.CheckMsgWithOpenId(user.OpenId, strings.Trim(form.Introduction, " "))
+	if err != nil {
+		return nil, err
+	}
+
+	err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:       user.ID,
 		Introduction: form.Introduction,
 	})
