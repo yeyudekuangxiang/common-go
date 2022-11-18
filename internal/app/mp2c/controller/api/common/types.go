@@ -1,5 +1,6 @@
 package common
 
 type CityListRequest struct {
-	CityPCode string `json:"cityPCode"`
+	//CityCode    string `json:"cityCode"`
+	CityPidCode string `json:"cityPidCode" form:"cityPidCode"`
 }

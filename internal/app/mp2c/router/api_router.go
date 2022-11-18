@@ -35,7 +35,6 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM))      //校验验证码
 			userRouter.GET("/get-yzm-2b", apiutil.Format(api.DefaultUserController.GetYZM2B))     //获取验证码2b
 			userRouter.GET("/check-yzm-2b", apiutil.Format(api.DefaultUserController.CheckYZM2B)) //校验验证码2b
-
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
 

@@ -20,8 +20,9 @@ func (ctr CityController) List(c *gin.Context) (gin.H, error) {
 	//user := apiutil.GetAuthUser(c)
 	citySrv := common.NewCityService(context.NewMioContext(context.WithContext(c.Request.Context())))
 
-	list, err := citySrv.GetCity(common.GetByCityCodeParams{
-		CityCode: form.CityPCode,
+	list, err := citySrv.GetCityList(common.GetCityListParams{
+		//CityCode:    form.CityCode,
+		CityPidCode: form.CityPidCode,
 	})
 
 	if err != nil {

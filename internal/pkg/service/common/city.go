@@ -34,19 +34,20 @@ func (srv CityService) Create(dto CreateCityParams) (*entity.City, error) {
 	return nil, nil
 }
 
-func (srv CityService) GetByCityCode(dto GetByCityCodeParams) (entity.City, error) {
+func (srv CityService) GetByCityCode(params GetCityParams) (entity.City, error) {
 	ret, err := srv.repo.GetByCityCode(repotypes.GetCityByCode{
-		CityCode: dto.CityCode,
+		CityCode: params.CityCode,
 	})
+
 	if err != nil {
 		return entity.City{}, err
 	}
 	return ret, nil
 }
 
-func (srv CityService) GetCity(params GetByCityCodeParams) ([]entity.City, error) {
+func (srv CityService) GetCityList(params GetCityListParams) ([]entity.City, error) {
 	list, err := srv.repo.GetList(repotypes.GetCityListDO{
-		PidCode: params.CityCode,
+		PidCode: params.CityPidCode,
 	})
 
 	if err != nil {
