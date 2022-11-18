@@ -12,6 +12,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/message"
 	rabbitmqApi "mio/internal/app/mp2c/controller/api/mq"
+	"mio/internal/app/mp2c/controller/api/platform"
 	"mio/internal/app/mp2c/controller/api/points"
 	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
@@ -24,6 +25,8 @@ import (
 func apiRouter(router *gin.Engine) {
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 	router.GET("/sendSign", apiutil.Format(message.DefaultMessageController.SendSign))
+
+	router.GET("/tj-metro/ticket-status", apiutil.Format(platform.DefaultCommonController.GetTjMetroTicketStatus))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
@@ -299,6 +302,8 @@ func apiRouter(router *gin.Engine) {
 			platformRouter.GET("/jhx/ticket-status", apiutil.Format(open.DefaultJhxController.TicketStatus))  //金华行-查询券码状态
 			platformRouter.POST("/all-receive", apiutil.Format(open.DefaultYtxController.AllReceive))         //一键领取
 			platformRouter.POST("/pre-point", apiutil.Format(open.DefaultYtxController.PrePointList))         //预加积分列表
+			platformRouter.GET("/tj-metro/ticket-status", apiutil.Format(platform.DefaultCommonController.GetTjMetroTicketStatus))
+
 		}
 
 		//碳成就相关路由
@@ -312,7 +317,6 @@ func apiRouter(router *gin.Engine) {
 			carbonRouter.GET("/classify", apiutil.Format(api.DefaultCarbonController.Classify))
 			carbonRouter.GET("/history", apiutil.Format(api.DefaultCarbonController.History))
 		}
-
 	}
 
 	mqAuthRouter := router.Group("/api/mp2c")
