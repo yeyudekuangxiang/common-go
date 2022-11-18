@@ -67,7 +67,6 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	//header头
 	options := []httputil.HttpOption{
 		httputil.HttpWithHeader("appid", bdScene.AppId),
-		httputil.HttpWithHeader("random", ""),
 		httputil.HttpWithHeader("sequence", strconv.FormatInt(time.Now().Unix(), 10)),
 		httputil.HttpWithHeader("signature", signature),
 	}
@@ -86,15 +85,15 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		return "", err
 	}
 
-	if response.SubCode != "0000" {
-		app.Logger.Errorf("天津地铁 err: %s\n", response.SubMessage)
-		return "", errors.New(response.SubMessage)
+	if response.ResultCode != "0000" {
+		app.Logger.Errorf("天津地铁 err: %s\n", response.ResultDesc)
+		return "", errors.New(response.ResultDesc)
 	}
 	//记录
 	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
 		CouponCardTypeId: typeId,
 		UserId:           user.ID,
-		BizId:            response.SubData.OrderNo,
+		BizId:            response.ResultData.OrderNo,
 		CouponCardTitle:  "天津地铁" + fmt.Sprintf("%.0f", amount) + "元出行红包",
 		StartTime:        time.Now().UnixMilli(),
 		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
@@ -104,14 +103,10 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		app.Logger.Errorf("天津地铁 券包 发放错误 : %s\n", err.Error())
 		return "", err
 	}
-	return response.SubData.OrderNo, nil
+	return response.ResultData.OrderNo, nil
 }
 
-func Check(content, encrypted string) bool {
-	return strings.EqualFold(Encode(content), encrypted)
-}
-
-//学习网址 https://iswxw.blog.csdn.net/article/details/122612927?spm=1001.2101.3001.6650.4&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=5
+//参考 https://iswxw.blog.csdn.net/article/details/122612927?spm=1001.2101.3001.6650.4&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=5
 
 func Encode(data string) string {
 	h := md5.New()
