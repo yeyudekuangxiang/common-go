@@ -9,11 +9,11 @@ import (
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/common"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strings"
 	"time"
@@ -252,7 +252,9 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	}
 
 	//归属地
-	location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
+	//location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
+	location, err := baidu.IpToCity(c.ClientIP())
+
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +266,7 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	shortUser := user.ShortUser()
 	result := make(map[string]interface{}, 0)
 	_ = util.MapTo(&shortUser, &result)
-	result["ipLocation"] = location.Name
+	result["ipLocation"] = location.Content.AddressDetail.Province
 	return result, nil
 }
 
