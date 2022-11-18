@@ -596,6 +596,12 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
 	topicModel := &entity.Topic{}
 
+	//title审核
+	err := validator.CheckMsgWithOpenId(openid, title)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
+	}
+
 	// 文本内容审核
 	if content != "" {
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
