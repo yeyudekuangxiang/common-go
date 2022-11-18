@@ -21,20 +21,6 @@ import (
 	"time"
 )
 
-type ytxOption struct {
-	Domain   string
-	Secret   string
-	PoolCode string
-	AppId    string
-}
-
-type Options func(options *ytxOption)
-
-//openid:  CpziorTGUL02NrrBqsbbhsAN0Ve4ZMSpPEmgBPAGZOY=
-//secret:   a123456
-//appid: cc5dec82209c45888620eabec3a29b50
-//poolCode: RP202110251300002
-
 func NewTianjinMetroService(ctx *context.MioContext) *Service {
 	return &Service{
 		ctx: ctx,
@@ -57,7 +43,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		return "", errno.ErrBindRecordNotFound
 	}
 
-	grantV5Request := GrantV4Request{
+	grantV5Request := MetroRequest{
 		AllotId:     "33333333",
 		EtUserPhone: sceneUser.Phone,
 		AllotNum:    1,
@@ -93,7 +79,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		return "", err
 	}
 
-	response := GrantV3Response{}
+	response := MetroResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		app.Logger.Errorf("天津地铁 grantV2 json_decode_err: %s", err.Error())
@@ -120,8 +106,6 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	return response.SubData.OrderNo, nil
-
-	//return "", nil
 }
 
 func Check(content, encrypted string) bool {
@@ -135,11 +119,3 @@ func Encode(data string) string {
 	h.Write([]byte(data))
 	return strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 }
-
-// RSA算法
-
-/*
-func (srv *Service) getAppSecret() string {
-	t := time.Now().Unix()
-	return encrypt.Md5(srv.option.AppId + encrypt.Md5(srv.option.Secret) + strconv.FormatInt(t, 10))
-}*/
