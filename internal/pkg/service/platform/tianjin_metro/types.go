@@ -15,9 +15,9 @@ type MetroRequest struct {
 }
 
 type MetroResponse struct {
-	SubCode    string       `json:"subCode,omitempty"`
-	SubData    MetroSubData `json:"subData"`
-	SubMessage string       `json:"subMessage,omitempty"`
+	ResultCode string       `json:"resultCode,omitempty"`
+	ResultData MetroSubData `json:"resultData"`
+	ResultDesc string       `json:"resultDesc,omitempty"`
 }
 
 type MetroSubData struct {
