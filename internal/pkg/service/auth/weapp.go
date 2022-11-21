@@ -105,6 +105,8 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 			ChannelId:   cid,
 			Ip:          ip,
 			CityCode:    city.Content.AddressDetail.Adcode,
+			City:        city.Content.AddressDetail.City,
+			Province:    city.Content.AddressDetail.Province,
 		})
 		if err != nil {
 			return nil, "", false, err
