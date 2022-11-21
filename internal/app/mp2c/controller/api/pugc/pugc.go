@@ -34,7 +34,7 @@ type PugcController struct {
 func (receiver PugcController) SendTianjinMetro(c *gin.Context) (gin.H, error) {
 	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	str, err := serviceNew.SendCoupon(1, 1, *user)
+	str, err := serviceNew.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *user)
 	if err != nil {
 		return gin.H{}, nil
 	}

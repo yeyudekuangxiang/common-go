@@ -27,6 +27,11 @@ var Config = app{
 	DatabaseBusiness: databaseSetting{},
 	Sms:              sms{},
 	SmsMarket:        smsMarket{},
+	ThirdCouponTypes: thirdCouponTypes{},
+}
+
+type thirdCouponTypes struct {
+	TjMetro int64
 }
 
 type app struct {
@@ -52,6 +57,7 @@ type app struct {
 	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
 	Sms              sms                     `ini:"sms"`
 	SmsMarket        smsMarket               `ini:"smsMarket"`
+	ThirdCouponTypes thirdCouponTypes        `int:"thirdCouponTypes"`
 }
 
 type appSetting struct {

@@ -5,8 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/coupon"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"
 	"mio/config"
@@ -14,10 +13,8 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/quiz"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
 	"strconv"
 	"strings"
@@ -38,69 +35,23 @@ var channelTypes = map[int64]string{
 	1073: "天津地铁",
 }
 
-func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (string, error) {
-	_, err := srv.GetTjMetroTicketStatus(config.ThirdCouponTypes.TjMetro, user.OpenId)
+func (srv *Service) SendCoupon(typeId int64, user entity.User) (*coupon.SendCouponV2Resp, error) {
+	_, err := srv.GetTjMetroTicketStatus(config.Config.ThirdCouponTypes.TjMetro, user.OpenId)
+	if err != nil {
+		return nil, err
+	}
 	//调用微服务，发地铁券
-
-	//查询配置场景
-	bdScene := service.DefaultBdSceneService.FindByCh("tianjinmetro")
-	if bdScene.ID == 0 {
-		return "", errno.ErrNotFound
-	}
-
-	//请求参数
-	Request := MetroRequest{
-		AllotId:     "11231231231231",
-		EtUserPhone: "15000000000",
-		AllotNum:    1,
-	}
-
-	//获取签名
-	signature, err := getSign(Request)
-	if err != nil {
-		return "", err
-	}
-
-	//header头
-	options := []httputil.HttpOption{
-		httputil.HttpWithHeader("appid", bdScene.AppId),
-		httputil.HttpWithHeader("sequence", getSequence()),
-		httputil.HttpWithHeader("signature", signature),
-	}
-
-	url := bdScene.Domain + "/tj-metro-api/open-forward/api/eTicket/allot"
-	body, err := httputil.PostJson(url, Request, options...)
-	app.Logger.Infof("天津地铁 返回 : %s", body)
-	if err != nil {
-		return "", err
-	}
-
-	response := MetroResponse{}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		app.Logger.Errorf("天津地铁 json_decode_err: %s", err.Error())
-		return "", err
-	}
-
-	if response.ResultCode != "0000" {
-		app.Logger.Errorf("天津地铁 err: %s\n", response.ResultDesc)
-		return "", errors.New(response.ResultDesc)
-	}
-	//记录
-	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
-		CouponCardTypeId: typeId,
-		UserId:           user.ID,
-		BizId:            response.ResultData.OrderNo,
-		CouponCardTitle:  "天津地铁" + fmt.Sprintf("%.0f", amount) + "元出行红包",
-		StartTime:        time.Now().UnixMilli(),
-		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
+	SendCouponV2Resp, err := app.RpcService.CouponRpcSrv.SendCouponV2(srv.ctx, &couponclient.SendCouponV2Req{
+		UserId:              user.ID,
+		ThirdUserId:         user.PhoneNumber,
+		CouponCardTypeId:    typeId,
+		BizId:               util.UUID(),
+		DistributionChannel: "天津地铁答题发电子票",
 	})
-
 	if err != nil {
-		app.Logger.Errorf("天津地铁 券包 发放错误 : %s\n", err.Error())
-		return "", err
+		return nil, err
 	}
-	return response.ResultData.OrderNo, nil
+	return SendCouponV2Resp, nil
 }
 
 func (srv Service) GetTjMetroTicketStatus(typeId int64, openid string) (*entity.User, error) {
@@ -129,13 +80,13 @@ func (srv Service) GetTjMetroTicketStatus(typeId int64, openid string) (*entity.
 		return nil, errno.ErrCouponReceived
 	}
 	//查看今天是否答题，没答题满足条件
-	availability, err := quiz.DefaultQuizService.Availability(openid)
+	/*availability, err := quiz.DefaultQuizService.Availability(openid)
 	if err != nil {
 		return nil, err
 	}
 	if !availability {
 		return nil, errno.ErrCommon.WithMessage("不满足答题条件")
-	}
+	}*/
 	return userInfo, nil
 }
 
