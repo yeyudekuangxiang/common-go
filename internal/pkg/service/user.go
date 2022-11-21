@@ -186,10 +186,10 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	/*
 		retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
 	*/
-	userExtend, exist, _ := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
-		OpenId: user.OpenId,
-	})
-
+	/*	userExtend, exist, _ := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
+			OpenId: user.OpenId,
+		})
+	*/
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
@@ -197,10 +197,9 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	zhuGeAttr["城市code"] = user.CityCode
 	zhuGeAttr["openid"] = user.OpenId
 	zhuGeAttr["ip"] = user.Ip
-	if exist {
-		zhuGeAttr["省"] = userExtend.Province
-		zhuGeAttr["市"] = userExtend.City
-	}
+	zhuGeAttr["省"] = param.Province
+	zhuGeAttr["市"] = param.City
+
 	/*if cityErr == nil {
 		zhuGeAttr["城市名"] = retCity.Name
 	}*/
