@@ -41,6 +41,7 @@ var (
 	ErrBindMobile         = err{code: 20304, message: "绑定手机号码失败"} // ErrBindMobile 绑定手机号时异常
 	ErrBindRecordNotFound = err{code: 20305, message: "未找到绑定关系"}
 	ErrNotFound           = err{code: 20305, message: "未找到资源"}
+	ErrCouponReceived     = err{code: 20306, message: "券已领取"}
 
 	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
 

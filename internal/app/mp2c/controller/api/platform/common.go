@@ -28,17 +28,15 @@ func (ctr CommonController) SendMetro(c *gin.Context) (gin.H, error) {
 
 }
 
+//天津地铁获取用户状态
+
 func (ctr CommonController) GetTjMetroTicketStatus(c *gin.Context) (gin.H, error) {
 	//user := apiutil.GetAuthUser(c)
-	userV2, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
-
+	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	str, err := serviceNew.GetTjMetroTicketStatus(userV2.OpenId)
+	err := serviceNew.GetTjMetroTicketStatus(user.OpenId, user.ID, user.ChannelId, 1000)
 	if err != nil {
 		return gin.H{}, err
 	}
-	return gin.H{
-		"str": str,
-	}, nil
-
+	return gin.H{}, nil
 }
