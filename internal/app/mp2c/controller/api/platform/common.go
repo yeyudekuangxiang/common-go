@@ -2,6 +2,7 @@ package platform
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -18,7 +19,7 @@ func (ctr CommonController) SendMetro(c *gin.Context) (gin.H, error) {
 	userV2, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	str, err := serviceNew.SendCoupon(1, 1, *userV2)
+	str, err := serviceNew.SendCoupon(config.ThirdCouponTypes.TjMetro, 1, *userV2)
 	if err != nil {
 		return gin.H{}, nil
 	}
@@ -34,7 +35,7 @@ func (ctr CommonController) GetTjMetroTicketStatus(c *gin.Context) (gin.H, error
 	//user := apiutil.GetAuthUser(c)
 	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	err := serviceNew.GetTjMetroTicketStatus(user.OpenId, user.ID, user.ChannelId, 1000)
+	_, err := serviceNew.GetTjMetroTicketStatus(config.ThirdCouponTypes.TjMetro, user.OpenId)
 	if err != nil {
 		return gin.H{}, err
 	}
