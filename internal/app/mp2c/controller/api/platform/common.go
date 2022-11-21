@@ -6,6 +6,8 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/tianjin_metro"
+	"mio/internal/pkg/service/quiz"
+	"mio/pkg/errno"
 )
 
 var DefaultCommonController = CommonController{}
@@ -34,9 +36,16 @@ func (ctr CommonController) GetTjMetroTicketStatus(c *gin.Context) (gin.H, error
 	//user := apiutil.GetAuthUser(c)
 	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	err := serviceNew.GetTjMetroTicketStatus(user.OpenId, user.ID, user.ChannelId, 1000)
+	_, err := serviceNew.GetTjMetroTicketStatus(user.OpenId)
 	if err != nil {
 		return gin.H{}, err
+	}
+	availability, err := quiz.DefaultQuizService.Availability(user.OpenId)
+	if err != nil {
+		return gin.H{}, err
+	}
+	if !availability {
+		return gin.H{}, errno.ErrCommon.WithMessage("今日已答题")
 	}
 	return gin.H{}, nil
 }

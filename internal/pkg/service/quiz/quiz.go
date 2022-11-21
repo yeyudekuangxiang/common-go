@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/platform/tianjin_metro"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
@@ -82,6 +83,10 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
+	//判断是否可以发放天津地铁优惠券
+	serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
+	userInfo, ticketStatuser := serviceTianjin.GetTjMetroTicketStatus(openId)
+
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timeutils.Now())
 	if err != nil {
 		return 0, err
@@ -95,6 +100,10 @@ func (srv QuizService) Submit(openId string) (int, error) {
 		return 0, err
 	}
 
+	//发放优惠券
+	if ticketStatuser != nil {
+		serviceTianjin.SendCoupon(1000, 1, *userInfo)
+	}
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
