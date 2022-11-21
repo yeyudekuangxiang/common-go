@@ -35,12 +35,12 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693
 	github.com/streadway/amqp v1.0.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.6.1
 	github.com/zeromicro/go-zero v1.3.4
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.6
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.8
 	go.uber.org/zap v1.21.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -64,7 +64,6 @@ require (
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible // indirect
-	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -150,7 +149,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.1 // indirect
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
-	github.com/wechatpay-apiv3/wechatpay-go v0.2.16 // indirect
 	github.com/xuri/efp v0.0.0-20220603152613-6918739fd470 // indirect
 	github.com/xuri/nfp v0.0.0-20220409054826-5e722a1d9e22 // indirect
 	github.com/yosssi/ace v0.0.5 // indirect
@@ -188,4 +186,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.6 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.6
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.8 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.8

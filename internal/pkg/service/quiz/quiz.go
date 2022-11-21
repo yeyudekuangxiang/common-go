@@ -86,7 +86,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 
 	//判断是否可以发放天津地铁优惠券
 	serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(config.ThirdCouponTypes.TjMetro, openId)
+	userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(config.Config.ThirdCouponTypes.TjMetro, openId)
 
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timeutils.Now())
 	if err != nil {
@@ -105,7 +105,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	if ticketErr != nil {
 		app.Logger.Infof("答题发天津地铁优惠券失败 %+v %v", ticketErr, userInfo.OpenId)
 	} else {
-		serviceTianjin.SendCoupon(config.ThirdCouponTypes.TjMetro, 1, *userInfo)
+		serviceTianjin.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userInfo)
 	}
 
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)

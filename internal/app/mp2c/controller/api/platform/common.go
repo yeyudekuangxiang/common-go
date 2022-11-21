@@ -19,7 +19,7 @@ func (ctr CommonController) SendMetro(c *gin.Context) (gin.H, error) {
 	userV2, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	str, err := serviceNew.SendCoupon(config.ThirdCouponTypes.TjMetro, 1, *userV2)
+	str, err := serviceNew.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userV2)
 	if err != nil {
 		return gin.H{}, nil
 	}
@@ -35,7 +35,7 @@ func (ctr CommonController) GetTjMetroTicketStatus(c *gin.Context) (gin.H, error
 	//user := apiutil.GetAuthUser(c)
 	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	_, err := serviceNew.GetTjMetroTicketStatus(config.ThirdCouponTypes.TjMetro, user.OpenId)
+	_, err := serviceNew.GetTjMetroTicketStatus(config.Config.ThirdCouponTypes.TjMetro, user.OpenId)
 	if err != nil {
 		return gin.H{}, err
 	}
