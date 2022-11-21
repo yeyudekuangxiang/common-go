@@ -103,7 +103,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 
 	//发放优惠券
 	if ticketErr != nil {
-		app.Logger.Infof("答题发天津地铁优惠券失败 %+v %v", ticketErr, userInfo.OpenId)
+		app.Logger.Infof("答题发天津地铁优惠券失败 %+v", ticketErr)
 	} else {
 		serviceTianjin.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userInfo)
 	}
