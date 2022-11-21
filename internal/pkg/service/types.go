@@ -36,6 +36,8 @@ type CreateUserParam struct {
 	ChannelId   int64             `json:"int64"`
 	Ip          string            `json:"ip"`
 	CityCode    string            `json:"city_code"`
+	Province    string            `json:"province"`
+	City        string            `json:"city"`
 }
 
 type CreateUserExtendParam struct {
