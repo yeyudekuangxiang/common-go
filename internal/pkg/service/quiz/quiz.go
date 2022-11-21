@@ -3,6 +3,7 @@ package quiz
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -85,7 +86,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 
 	//判断是否可以发放天津地铁优惠券
 	serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	userInfo, ticketStatuser := serviceTianjin.GetTjMetroTicketStatus(openId)
+	userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(config.ThirdCouponTypes.TjMetro, openId)
 
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timeutils.Now())
 	if err != nil {
@@ -101,9 +102,12 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	}
 
 	//发放优惠券
-	if ticketStatuser != nil {
-		serviceTianjin.SendCoupon(1000, 1, *userInfo)
+	if ticketErr != nil {
+		app.Logger.Infof("答题发天津地铁优惠券失败 %+v %v", ticketErr, userInfo.OpenId)
+	} else {
+		serviceTianjin.SendCoupon(config.ThirdCouponTypes.TjMetro, 1, *userInfo)
 	}
+
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {

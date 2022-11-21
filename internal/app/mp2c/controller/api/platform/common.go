@@ -2,12 +2,11 @@ package platform
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/tianjin_metro"
-	"mio/internal/pkg/service/quiz"
-	"mio/pkg/errno"
 )
 
 var DefaultCommonController = CommonController{}
@@ -20,7 +19,7 @@ func (ctr CommonController) SendMetro(c *gin.Context) (gin.H, error) {
 	userV2, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	str, err := serviceNew.SendCoupon(1, 1, *userV2)
+	str, err := serviceNew.SendCoupon(config.ThirdCouponTypes.TjMetro, 1, *userV2)
 	if err != nil {
 		return gin.H{}, nil
 	}
@@ -36,16 +35,9 @@ func (ctr CommonController) GetTjMetroTicketStatus(c *gin.Context) (gin.H, error
 	//user := apiutil.GetAuthUser(c)
 	user, _, _ := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: "oMD8d5CPOCCTAzfohzl_3t7ZBBB0"})
 	serviceNew := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	_, err := serviceNew.GetTjMetroTicketStatus(user.OpenId)
+	_, err := serviceNew.GetTjMetroTicketStatus(config.ThirdCouponTypes.TjMetro, user.OpenId)
 	if err != nil {
 		return gin.H{}, err
-	}
-	availability, err := quiz.DefaultQuizService.Availability(user.OpenId)
-	if err != nil {
-		return gin.H{}, err
-	}
-	if !availability {
-		return gin.H{}, errno.ErrCommon.WithMessage("今日已答题")
 	}
 	return gin.H{}, nil
 }
