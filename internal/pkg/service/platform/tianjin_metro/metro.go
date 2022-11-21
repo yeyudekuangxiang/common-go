@@ -12,7 +12,6 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/quiz"
 	"mio/internal/pkg/util/encrypt"
@@ -34,24 +33,13 @@ type Service struct {
 }
 
 var channelTypes = map[int64]string{
-	56: "天津地铁",
+	1073: "天津地铁",
 }
 
 func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (string, error) {
-	userInfo, err := srv.GetTjMetroTicketStatus(user.OpenId)
-	println(userInfo.ID)
-	/*userInfo, exit, err := repository.DefaultUserRepository.GetUser(repository.GetUserBy{
-		OpenId: user.OpenId,
-	})
-	if !exit {
-		app.Logger.Errorf("天津地铁 未注册到绿喵平台 : %s", user.OpenId)
-		return "", errno.ErrBindRecordNotFound
-	}
-	_, ok := channelTypes[userInfo.ChannelId]
-	if !ok {
-		return "", errno.ErrCommon.WithMessage("不满足参与条件")
-	}
-	*/
+	err := srv.GetTjMetroTicketStatus(user.OpenId, user.ID, user.ChannelId, 1000)
+	//调用微服务，发地铁券
+
 	//查询配置场景
 	bdScene := service.DefaultBdSceneService.FindByCh("tianjinmetro")
 	if bdScene.ID == 0 {
@@ -113,33 +101,32 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	return response.ResultData.OrderNo, nil
 }
 
-func (srv Service) GetTjMetroTicketStatus(openid string) (*entity.User, error) {
-	userInfo, exit, _ := repository.DefaultUserRepository.GetUser(repository.GetUserBy{
-		OpenId: openid,
-	})
-
-	//判断是否注册绿喵
-	if !exit {
-		app.Logger.Errorf("天津地铁 未注册到绿喵平台 : %s", userInfo.OpenId)
-		return nil, errno.ErrBindRecordNotFound
-	}
-
+func (srv Service) GetTjMetroTicketStatus(openid string, uid int64, channelId int64, typeId int64) error {
 	//判断是否指定渠道用户
-	_, ok := channelTypes[userInfo.ChannelId]
+	_, ok := channelTypes[channelId]
 	if !ok {
-		return nil, errno.ErrCommon.WithMessage("不满足参与条件")
+		return errno.ErrCommon.WithMessage("不满足参与条件")
 	}
-
 	//查看是否领取了，没领取满足条件
-
-	//查看今天是否答题，没答题满足条件
-
-	availability, _ := quiz.DefaultQuizService.Availability(userInfo.OpenId)
-	if !availability {
-		return nil, errno.ErrCommon.WithMessage("不满足答题条件")
+	couponResp, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
+		UserId:           uid,
+		CouponCardTypeId: typeId,
+	})
+	if err != nil {
+		return err
 	}
-
-	return userInfo, nil
+	if couponResp.Exist {
+		return errno.ErrCouponReceived
+	}
+	//查看今天是否答题，没答题满足条件
+	availability, err := quiz.DefaultQuizService.Availability(openid)
+	if err != nil {
+		return err
+	}
+	if !availability {
+		return errno.ErrCommon.WithMessage("不满足答题条件")
+	}
+	return nil
 }
 
 //参考 https://iswxw.blog.csdn.net/article/details/122612927?spm=1001.2101.3001.6650.4&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-4-122612927-blog-125201969.pc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=5
