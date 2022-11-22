@@ -18,7 +18,6 @@ func initQueueProducer() {
 		} else {
 			log.Println("初始化amqp生产者失败", err)
 		}
-
 	} else {
 		app.QueueProduct = pub
 		log.Println("初始化amqp生产者成功")
