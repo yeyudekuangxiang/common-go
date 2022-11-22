@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"time"
@@ -29,6 +30,7 @@ type (
 		DelCommentSoft(userId, commentId int64) error
 		Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error)
 		AddCommentLikeCount(commentId int64, num int) error
+		TurnComment(params TurnCommentReq) ([]*APIComment, int64, error)
 	}
 )
 
@@ -340,4 +342,207 @@ func (srv *defaultCommentService) AddCommentLikeCount(commentId int64, num int) 
 		return err
 	}
 	return nil
+}
+
+func (srv *defaultCommentService) TurnComment(params TurnCommentReq) ([]*APIComment, int64, error) {
+	kuMio, _ := util.InArray(params.Types, []int{1, 2, 3})
+	mall, _ := util.InArray(params.Types, []int{10, 11, 12})
+	var total int64
+	var err error
+	commentList := make([]*APIComment, 0)
+
+	if kuMio {
+		commentList, total, err = srv.kuMioComment(params.TurnId, params.UserId, params.Limit, params.Offset)
+	} else if mall {
+		commentList, total, err = srv.mallComment(params.TurnId, params.UserId, params.Limit, params.Offset)
+	}
+	if err != nil {
+		return commentList, 0, err
+	}
+
+	return commentList, total, nil
+}
+
+func (srv *defaultCommentService) kuMioComment(id, userId int64, limit, offset int) ([]*APIComment, int64, error) {
+	commentList := make([]*APIComment, 0)
+	kuMioList := make([]entity.CommentIndex, 0)
+
+	var kuMioOne entity.CommentIndex
+	var total int64
+	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", id).First(&kuMioOne).Error
+	if err != nil {
+		return commentList, 0, err
+	}
+
+	if kuMioOne.Id == 0 {
+		return commentList, 0, errno.ErrRecordNotFound
+	}
+
+	if kuMioOne.RootCommentId != 0 {
+		id = kuMioOne.RootCommentId
+	}
+
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).
+		Preload("RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.
+				//Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Preload("Member")
+		}).
+		Preload("Member").
+		Where("id = ?", id).
+		//Where("obj_id = ?", id).
+		Where("state = ?", 0).
+		Count(&total).
+		//Order("comment_index.id desc").
+		Limit(limit).
+		Offset(offset).
+		Find(&kuMioList).Error
+	if err != nil {
+		return commentList, 0, err
+	}
+
+	likeMap := make(map[int64]int, 0)
+	commentLike := srv.commentLikeModel.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
+	if len(commentLike) > 0 {
+		for _, item := range commentLike {
+			likeMap[item.CommentId] = int(item.Status)
+		}
+	}
+
+	for _, item := range kuMioList {
+		res := &APIComment{
+			Id:        item.Id,
+			ObjId:     item.ObjId,
+			ObjType:   item.ObjType,
+			Message:   item.Message,
+			MemberId:  item.MemberId,
+			Floor:     item.Floor,
+			Count:     item.Count,
+			RootCount: item.RootCount,
+			LikeCount: item.LikeCount,
+			HateCount: item.HateCount,
+			Member:    item.Member,
+			IsAuthor:  item.IsAuthor,
+		}
+		if _, ok := likeMap[item.Id]; ok {
+			res.IsLike = likeMap[item.Id]
+		}
+		if item.RootChild != nil {
+			for _, childItem := range item.RootChild {
+				childRes := childItem.APIComment()
+				if _, ok := likeMap[childItem.Id]; ok {
+					childRes.IsLike = likeMap[childItem.Id]
+				}
+				res.RootChild = append(res.RootChild, &APIComment{
+					Id:        childRes.Id,
+					ObjId:     childRes.ObjId,
+					ObjType:   childRes.ObjType,
+					Message:   childRes.Message,
+					MemberId:  childRes.MemberId,
+					Floor:     childRes.Floor,
+					Count:     childRes.Count,
+					RootCount: childRes.RootCount,
+					LikeCount: childRes.LikeCount,
+					HateCount: childRes.HateCount,
+					Member:    childRes.Member,
+					IsAuthor:  childRes.IsAuthor,
+					IsLike:    childRes.IsLike,
+				})
+			}
+		}
+		commentList = append(commentList, res)
+	}
+	return commentList, total, nil
+}
+
+func (srv *defaultCommentService) mallComment(id, userId int64, limit, offset int) ([]*APIComment, int64, error) {
+	commentList := make([]*APIComment, 0)
+	mallList := make([]entity.CommentIndex, 0)
+
+	var mallOne entity.CommentIndex
+	var total int64
+	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", id).First(&mallOne).Error
+	if err != nil {
+		return commentList, 0, err
+	}
+
+	if mallOne.Id == 0 {
+		return commentList, 0, errno.ErrRecordNotFound
+	}
+
+	if mallOne.RootCommentId != 0 {
+		id = mallOne.RootCommentId
+	}
+
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).
+		Preload("RootChild", func(db *gorm.DB) *gorm.DB {
+			return db.
+				//Where("(select count(*) from comment_index index where index.root_comment_id = comment_index.root_comment_id and index.id <= comment_index.id) <= ?", 3).
+				Preload("Member")
+		}).
+		Preload("Member").
+		Where("id = ?", id).
+		//Where("obj_id = ?", id).
+		Where("state = ?", 0).
+		Count(&total).
+		//Order("comment_index.id desc").
+		Limit(limit).
+		Offset(offset).
+		Find(&mallList).Error
+	if err != nil {
+		return commentList, 0, err
+	}
+
+	likeMap := make(map[int64]int, 0)
+	commentLike := srv.commentLikeModel.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
+	if len(commentLike) > 0 {
+		for _, item := range commentLike {
+			likeMap[item.CommentId] = int(item.Status)
+		}
+	}
+
+	for _, item := range mallList {
+		res := &APIComment{
+			Id:        item.Id,
+			ObjId:     item.ObjId,
+			ObjType:   item.ObjType,
+			Message:   item.Message,
+			MemberId:  item.MemberId,
+			Floor:     item.Floor,
+			Count:     item.Count,
+			RootCount: item.RootCount,
+			LikeCount: item.LikeCount,
+			HateCount: item.HateCount,
+			Member:    item.Member,
+			IsAuthor:  item.IsAuthor,
+		}
+		if _, ok := likeMap[item.Id]; ok {
+			res.IsLike = likeMap[item.Id]
+		}
+		if item.RootChild != nil {
+			for _, childItem := range item.RootChild {
+				childRes := childItem.APIComment()
+				if _, ok := likeMap[childItem.Id]; ok {
+					childRes.IsLike = likeMap[childItem.Id]
+				}
+				res.RootChild = append(res.RootChild, &APIComment{
+					Id:        childRes.Id,
+					ObjId:     childRes.ObjId,
+					ObjType:   childRes.ObjType,
+					Message:   childRes.Message,
+					MemberId:  childRes.MemberId,
+					Floor:     childRes.Floor,
+					Count:     childRes.Count,
+					RootCount: childRes.RootCount,
+					LikeCount: childRes.LikeCount,
+					HateCount: childRes.HateCount,
+					Member:    childRes.Member,
+					IsAuthor:  childRes.IsAuthor,
+					IsLike:    childRes.IsLike,
+				})
+			}
+		}
+		commentList = append(commentList, res)
+	}
+	return commentList, total, nil
 }

@@ -132,7 +132,7 @@ func apiRouter(router *gin.Engine) {
 			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
 		}
 
-		//小程序订阅消息
+		//消息相关路由
 		messageRouter := mustAuthRouter.Group("/message")
 		{
 			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
@@ -140,6 +140,7 @@ func apiRouter(router *gin.Engine) {
 			messageRouter.POST("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
 			messageRouter.POST("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
 			messageRouter.POST("/web-message-haveread", apiutil.Format(message.DefaultMessageController.SetHaveReadWebMessage))
+			messageRouter.POST("/web-message-turn", apiutil.Format(message.DefaultMessageController.TurnWebMessage))
 		}
 
 		//用户相关路由
@@ -226,6 +227,7 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
 			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
+			commentRouter.GET("/turn-comment", apiutil.Format(api.DefaultCommentController.TurnComment))
 		}
 
 		//积分相关路由

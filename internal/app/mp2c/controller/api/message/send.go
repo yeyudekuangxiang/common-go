@@ -71,6 +71,7 @@ func (ctr MsgController) SendSign(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//获取模板
 func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	form := MessageGetTemplateIdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -83,6 +84,7 @@ func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//获取消息
 func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	form := WebMessageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -119,6 +121,7 @@ func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//获取消息数量
 func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	user := apiutil.GetAuthUser(c)
@@ -138,6 +141,7 @@ func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+//设置已读
 func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
 	form := HaveReadWebMessageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -163,5 +167,18 @@ func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	return nil, nil
+}
+
+//消息跳转
+func (ctr MsgController) TurnWebMessage(c *gin.Context) (gin.H, error) {
+	//form := TurnWebMessageRequest{}
+	//if err := apiutil.BindForm(c, &form); err != nil {
+	//	return nil, err
+	//}
+	//
+	//ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	//user := apiutil.GetAuthUser(c)
+	//
 	return nil, nil
 }

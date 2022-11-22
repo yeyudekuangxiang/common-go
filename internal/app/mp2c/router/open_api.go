@@ -1,13 +1,14 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api"
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
 	"mio/internal/app/mp2c/controller/open"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
+
+	"github.com/gin-gonic/gin"
 )
 
 func openRouter(router *gin.Engine) {

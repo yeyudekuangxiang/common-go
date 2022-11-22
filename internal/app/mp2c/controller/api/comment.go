@@ -45,7 +45,7 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	//获取点赞记录
 	likeMap := make(map[int64]int, 0)
 	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)
@@ -55,15 +55,15 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	commentRes := make([]*entity.CommentRes, 0)
+	commentRes := make([]*entity.APIComment, 0)
 	for _, item := range list {
-		res := item.CommentRes()
+		res := item.APIComment()
 		if _, ok := likeMap[item.Id]; ok {
 			res.IsLike = likeMap[item.Id]
 		}
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
-				childRes := childItem.CommentRes()
+				childRes := childItem.APIComment()
 				if _, ok := likeMap[childItem.Id]; ok {
 					childRes.IsLike = likeMap[childItem.Id]
 				}
@@ -101,7 +101,7 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//获取点赞记录
-	commentRes := make([]*entity.CommentRes, 0)
+	commentRes := make([]*entity.APIComment, 0)
 	likeMap := make(map[int64]int, 0)
 	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)
 	if len(commentLike) > 0 {
@@ -111,13 +111,13 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 	}
 
 	for _, item := range list {
-		res := item.CommentRes()
+		res := item.APIComment()
 		if _, ok := likeMap[item.Id]; ok {
 			res.IsLike = likeMap[item.Id]
 		}
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
-				childRes := childItem.CommentRes()
+				childRes := childItem.APIComment()
 				if _, ok := likeMap[childItem.Id]; ok {
 					childRes.IsLike = likeMap[childItem.Id]
 				}
@@ -353,5 +353,36 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"status": resp.LikeStatus,
 		"point":  point,
+	}, nil
+}
+
+func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
+	form := TurnCommentRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := kumiaoCommunity.NewCommentService(ctx)
+
+	list, total, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
+		UserId: user.ID,
+		Types:  form.Types,
+		TurnId: form.TurnId,
+		Limit:  form.Limit(),
+		Offset: form.Offset(),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
 	}, nil
 }

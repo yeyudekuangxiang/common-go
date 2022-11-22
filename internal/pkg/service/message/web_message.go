@@ -263,60 +263,6 @@ func (d defaultWebMessage) GetTemplate(key string) string {
 	return one.TempContent
 }
 
-func (d defaultWebMessage) turnTopic(topicMap map[int64]struct{}) map[int64]string {
-	if len(topicMap) >= 1 {
-		var topicIds []int64
-		for id := range topicMap {
-			topicIds = append(topicIds, id)
-		}
-		topicList := d.topic.GetTopicNotes(topicIds)
-		if len(topicList) >= 1 {
-			tMap := make(map[int64]string, len(topicIds))
-			for _, topicItem := range topicList {
-				notes := ""
-				n := len(topicItem.Tags)
-				if n > 2 {
-					n = 2
-				}
-				for i := 0; i < n; i++ {
-					notes += topicItem.Tags[i].Name + "|"
-				}
-				notes += topicItem.Title
-				tMap[topicItem.Id] = notes
-			}
-			return tMap
-		}
-	}
-
-	return map[int64]string{}
-}
-
-func (d defaultWebMessage) turnComment(commentMap map[int64]struct{}) map[int64]string {
-	if len(commentMap) >= 1 {
-		var commentIds []int64
-		for id := range commentMap {
-			commentIds = append(commentIds, id)
-		}
-		commentList := d.comment.FindListByIds(commentIds)
-		if len(commentList) >= 1 {
-			cMap := make(map[int64]string, len(commentIds))
-			for _, commentItem := range commentList {
-				cMap[commentItem.Id] = commentItem.Message
-			}
-			return cMap
-		}
-	}
-	return map[int64]string{}
-}
-
-func (d defaultWebMessage) turnOrder(commentMap map[int64]struct{}) map[int64]string {
-	return map[int64]string{}
-}
-
-func (d defaultWebMessage) turnGoods(commentMap map[int64]struct{}) map[int64]string {
-	return map[int64]string{}
-}
-
 func WithSendObjId(sendObjId int64) Options {
 	return func(option *webMessageOption) {
 		option.SendObjID = sendObjId
