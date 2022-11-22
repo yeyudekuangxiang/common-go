@@ -7,8 +7,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/thirdPlatformPdr"
+	"mio/internal/pkg/queue/types/message/thirdPlatform"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/platform/tianjin_metro"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/timeutils"
@@ -84,10 +85,6 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
-	//判断是否可以发放天津地铁优惠券
-	serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(config.Config.ThirdCouponTypes.TjMetro, openId)
-
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timeutils.Now())
 	if err != nil {
 		return 0, err
@@ -101,12 +98,24 @@ func (srv QuizService) Submit(openId string) (int, error) {
 		return 0, err
 	}
 
-	//发放优惠券
-	if ticketErr != nil {
-		app.Logger.Infof("答题发天津地铁优惠券失败 %+v", ticketErr)
-	} else {
-		serviceTianjin.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userInfo)
+	sendErr := thirdPlatformPdr.SendRobotMessage(thirdPlatform.TjMetroMessage{
+		OpenId:           openId,
+		ThirdCouponTypes: config.Config.ThirdCouponTypes.TjMetro,
+	})
+	if sendErr != nil {
+		app.Logger.Infof("答题发天津地铁优惠券失败 %+v", sendErr.Error())
 	}
+	/*
+		//判断是否可以发放天津地铁优惠券
+		serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
+		userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(config.Config.ThirdCouponTypes.TjMetro, openId)
+
+		//发放优惠券
+		if ticketErr != nil {
+			app.Logger.Infof("答题发天津地铁优惠券失败 %+v", ticketErr)
+		} else {
+			serviceTianjin.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userInfo)
+		}*/
 
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
 }

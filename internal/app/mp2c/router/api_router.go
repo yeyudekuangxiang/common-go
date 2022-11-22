@@ -328,6 +328,7 @@ func apiRouter(router *gin.Engine) {
 			mqRouter.POST("/send_sms", apiutil.Format(rabbitmqApi.DefaultMqController.SendSms))
 			mqRouter.POST("/send_zhuge", apiutil.Format(rabbitmqApi.DefaultMqController.SendZhuGe))
 			mqRouter.POST("/send_yzm_sms", apiutil.Format(rabbitmqApi.DefaultMqController.SendYzmSms))
+			mqRouter.POST("/send_tj_metro_ticket", apiutil.Format(rabbitmqApi.DefaultMqController.SendTjMetro))
 		}
 	}
 }

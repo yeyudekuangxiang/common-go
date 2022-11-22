@@ -60,7 +60,7 @@ func (srv Service) GetTjMetroTicketStatus(typeId int64, openid string) (*entity.
 	})
 	//判断是否注册绿喵
 	if !exit {
-		app.Logger.Errorf("天津地铁 未注册到绿喵平台 : %s", userInfo.OpenId)
+		app.Logger.Errorf("天津地铁 未注册到绿喵平台 : %s", openid)
 		return nil, errno.ErrBindRecordNotFound
 	}
 	//判断是否指定渠道用户
@@ -69,16 +69,16 @@ func (srv Service) GetTjMetroTicketStatus(typeId int64, openid string) (*entity.
 		return nil, errno.ErrCommon.WithMessage("不满足参与条件")
 	}
 	//查看是否领取了，没领取满足条件
-	couponResp, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
+	/*couponResp, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
 		UserId:           userInfo.ID,
 		CouponCardTypeId: typeId,
-	})
-	if err != nil {
-		return nil, err
+	})*/
+	/*if err != nil {
+		//return nil, err
 	}
 	if couponResp.Exist {
-		return nil, errno.ErrCouponReceived
-	}
+		//	return nil, errno.ErrCouponReceived
+	}*/
 	//查看今天是否答题，没答题满足条件
 	/*availability, err := quiz.DefaultQuizService.Availability(openid)
 	if err != nil {

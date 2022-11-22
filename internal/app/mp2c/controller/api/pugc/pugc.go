@@ -11,6 +11,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/pugc"
 	questionEntity "mio/internal/pkg/model/entity/question"
+	"mio/internal/pkg/queue/producer/thirdPlatformPdr"
+	"mio/internal/pkg/queue/types/message/thirdPlatform"
 	"mio/internal/pkg/queue/types/message/zhugemsg"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -29,6 +31,17 @@ import (
 var DefaultPugcController = PugcController{}
 
 type PugcController struct {
+}
+
+func (receiver PugcController) SendTjMq(c *gin.Context) (gin.H, error) {
+	sendErr := thirdPlatformPdr.SendRobotMessage(thirdPlatform.TjMetroMessage{
+		OpenId:           "oMD8d5CPOCCTAzfohzl_3t7ZBBB0",
+		ThirdCouponTypes: 1,
+	})
+	if sendErr != nil {
+		return gin.H{}, sendErr
+	}
+	return gin.H{}, nil
 }
 
 func (receiver PugcController) SendTianjinMetro(c *gin.Context) (gin.H, error) {

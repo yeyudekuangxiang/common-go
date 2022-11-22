@@ -15,3 +15,8 @@ type GetSendZhugeForm struct {
 	Openid   string `json:"openid" form:"openid" binding:"required" alias:"openid"`
 	Data     string `json:"data" form:"data" binging:"" alias:"data"`
 }
+
+type GetSendTjMetroForm struct {
+	ThirdCouponTypes int64  `json:"thirdCouponTypes" form:"thirdCouponTypes" binding:"required" alias:"类型"`
+	Openid           string `json:"openid" form:"openid" binding:"required" alias:"openid"`
+}
