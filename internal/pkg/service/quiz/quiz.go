@@ -97,7 +97,6 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	sendErr := thirdPlatformPdr.SendRobotMessage(thirdPlatform.TjMetroMessage{
 		OpenId:           openId,
 		ThirdCouponTypes: config.Config.ThirdCouponTypes.TjMetro,
