@@ -32,7 +32,7 @@ var (
 	// STSClient 阿里云sts
 	STSClient = new(sts.Client)
 
-	QueueProduct *rabbitmq.Publisher
+	QueueProduct = new(rabbitmq.Publisher)
 
 	RpcService = new(RpcClient)
 )
