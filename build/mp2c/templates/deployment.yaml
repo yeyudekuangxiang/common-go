@@ -24,36 +24,6 @@ spec:
           env:
             - name: RESTART_TIME
               value: {{ .Values.restartTime }}
-            - name: APOLLO_APPID
-              valueFrom:
-                secretKeyRef:
-                name: mio-apollo-config
-                key: APOLLO_APPID
-            - name: APOLLO_CLUSTER
-              valueFrom:
-                secretKeyRef:
-                name: mio-apollo-config
-                key: APOLLO_CLUSTER
-            - name: APOLLO_IP
-              valueFrom:
-                secretKeyRef:
-                name: mio-apollo-config
-                key: APOLLO_IP
-            - name: APOLLO_ISBACKUPCONFIG
-              valueFrom:
-                secretKeyRef:
-                name: mio-apollo-config
-                key: APOLLO_ISBACKUPCONFIG
-            - name: APOLLO_NAMESPACENAME
-              valueFrom:
-                secretKeyRef:
-                name: mio-apollo-config
-                key: APOLLO_NAMESPACENAME
-            - name: APOLLO_SECRET
-              valueFrom:
-                secretKeyRef:
-                name: mio-apollo-config
-                key: APOLLO_SECRET
           args:
             - '-c=/app/config/config.ini'
           imagePullPolicy: Always
