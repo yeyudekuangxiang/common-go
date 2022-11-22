@@ -2,8 +2,7 @@ package apitool
 
 import (
 	"github.com/gin-gonic/gin/binding"
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/errno"
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/validator"
+	"gitlab.miotech.com/miotech-application/backend/common-go/validator"
 	"net/http"
 	"strings"
 )
@@ -15,7 +14,7 @@ func SetValidator(structValidator binding.StructValidator) {
 func BindForm(req *http.Request, data interface{}) error {
 	if err := ShouldBind(req, data); err != nil {
 		err = validator.TranslateError(err)
-		return errno.ErrValidation.With(err)
+		return err
 	}
 	return nil
 }

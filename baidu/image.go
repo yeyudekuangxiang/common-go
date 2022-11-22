@@ -3,7 +3,7 @@ package baidu
 import (
 	"encoding/json"
 	"fmt"
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/tool/httptool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 )
 
 const (

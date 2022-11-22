@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/tool/httptool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"time"
 )
 

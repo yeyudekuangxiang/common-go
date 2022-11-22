@@ -1,7 +1,7 @@
 package duiba
 
 import (
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/duiba/util"
+	"gitlab.miotech.com/miotech-application/backend/common-go/duiba/util"
 	"sort"
 )
 

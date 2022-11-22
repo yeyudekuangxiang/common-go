@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/zhuge/types"
+	types2 "gitlab.miotech.com/miotech-application/backend/common-go/zhuge/types"
 	"net/http"
 	"time"
 )
@@ -30,7 +30,7 @@ func (client Client) sign() string {
 	signStr := client.appKey + ":" + client.secretKey
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(signStr))
 }
-func (client Client) Track(event types.Event, others map[string]interface{}) error {
+func (client Client) Track(event types2.Event, others map[string]interface{}) error {
 	var pr map[string]interface{}
 	if event.Pr != nil {
 		pr = event.Pr.ToMap()
@@ -41,9 +41,9 @@ func (client Client) Track(event types.Event, others map[string]interface{}) err
 	for k, v := range others {
 		pr[k] = v
 	}
-	event.Pr = types.MapPr(pr)
+	event.Pr = types2.MapPr(pr)
 
-	fullEvent := types.EventWithAk{
+	fullEvent := types2.EventWithAk{
 		Event: event,
 		Ak:    client.appKey,
 	}
@@ -82,11 +82,11 @@ func (client Client) Track(event types.Event, others map[string]interface{}) err
 	return nil
 }
 func (client Client) TrackSimple(eventName, openId string, attr map[string]interface{}) error {
-	err := client.Track(types.Event{
+	err := client.Track(types2.Event{
 		Dt:    "evt",
 		Pl:    "js",
 		Debug: client.debug,
-		Pr: types.EventJs{
+		Pr: types2.EventJs{
 			Ct:   time.Now().UnixMilli(),
 			Eid:  eventName,
 			Cuid: openId,

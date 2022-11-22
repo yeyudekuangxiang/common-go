@@ -3,7 +3,7 @@ package duiba
 import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/pkg/errors"
-	"gitlab.miotech.com/miotech-application/backend/common-go/pkg/duiba/util"
+	"gitlab.miotech.com/miotech-application/backend/common-go/duiba/util"
 	"net/url"
 	"strconv"
 	"time"
