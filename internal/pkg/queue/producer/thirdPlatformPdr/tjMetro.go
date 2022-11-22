@@ -32,7 +32,7 @@ func SendRobotMessage(msg thirdPlatform.TjMetroMessage) error {
 		if err != nil {
 			return err
 		}
-		err = app.QueueProduct.Publish(data, []string{routerkey.TjMetroSend}, rabbitmq.WithPublishOptionsExchange("quizExchange"))
+		err = app.QueueProduct.Publish(data, []string{routerkey.TjMetroSend}, rabbitmq.WithPublishOptionsExchange("quiz"))
 		if err != nil {
 			app.Logger.Infof("答题发天津地铁优惠券失败,发放后失败 %+v", ticketErr)
 		}

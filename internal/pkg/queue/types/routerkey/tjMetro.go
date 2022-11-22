@@ -1,3 +1,3 @@
 package routerkey
 
-const TjMetroSend = "quiz.submit.key"
+const TjMetroSend = "quiz.submit"
