@@ -30,23 +30,18 @@ func (CommentIndex) TableName() string {
 	return "comment_index"
 }
 
-func (c CommentIndex) CommentRes() *CommentRes {
-	return &CommentRes{
-		Id:       c.Id,
-		ObjId:    c.ObjId,
-		Message:  c.Message,
-		MemberId: c.MemberId,
-		//RootCommentId: c.RootCommentId,
-		//ToCommentId: c.ToCommentId,
+func (c CommentIndex) APIComment() *APIComment {
+	return &APIComment{
+		Id:        c.Id,
+		ObjId:     c.ObjId,
+		Message:   c.Message,
+		MemberId:  c.MemberId,
 		Floor:     c.Floor,
 		Count:     c.Count,
 		RootCount: c.RootCount,
 		LikeCount: c.LikeCount,
 		HateCount: c.HateCount,
 		State:     c.State,
-		//DelReason: c.DelReason,
-		//Attrs:     c.Attrs,
-		//Version:   c.Version,
 		CreatedAt: c.CreatedAt,
 		UpdatedAt: c.UpdatedAt,
 		Member:    c.Member,
@@ -56,7 +51,7 @@ func (c CommentIndex) CommentRes() *CommentRes {
 	}
 }
 
-type CommentRes struct {
+type APIComment struct {
 	Id            int64         `gorm:"primaryKey;autoIncrement" json:"id"`
 	ObjId         int64         `gorm:"type:int8;not null" json:"objId" json:"objId"` // 对象id （文章）
 	ObjType       int8          `gorm:"type:int2" json:"objType"`                     // 保留字段
@@ -78,9 +73,5 @@ type CommentRes struct {
 	Member        ShortUser     `gorm:"foreignKey:ID;references:MemberId" json:"member"` // 评论用户
 	IsAuthor      int8          `gorm:"type:int2" json:"isAuthor"`                       // 是否作者
 	IsLike        int           `json:"isLike"`
-	RootChild     []*CommentRes `gorm:"foreignKey:RootCommentId;association_foreignKey:Id" json:"rootChild"`
-}
-
-func (CommentRes) TableName() string {
-	return "comment_index"
+	RootChild     []*APIComment `gorm:"foreignKey:RootCommentId;association_foreignKey:Id" json:"rootChild"`
 }

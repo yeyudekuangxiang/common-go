@@ -837,7 +837,7 @@ func (srv TopicService) UpdateAuthor(userId, passiveUserId int64) error {
 func (srv TopicService) SetWeekTopic() error {
 	// 取导入的文章，更新文章的created_time字段值为现在，并且加精华。
 	// 限制条件为 每个人取一个 一共50篇
-	// 所取的文章的import更新为0 排除下次筛选
+	// 导入的文章的is_essence字段都为0, 更新后为1。筛选该字段为0的导入文章即可
 	topics, err := srv.topicModel.GetImportTopic()
 	if err != nil {
 		return err

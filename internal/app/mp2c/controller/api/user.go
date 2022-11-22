@@ -294,7 +294,7 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 
 	err := validator.CheckMsgWithOpenId(user.OpenId, strings.Trim(form.Introduction, " "))
 	if err != nil {
-		return nil, err
+		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
 	err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
