@@ -219,16 +219,15 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	if form.Gender != nil {
 		gender = (*entity.UserGender)(form.Gender)
 	}
-	if strings.Trim(form.Nickname, " ") == "" {
-		return nil, errno.ErrCommon.WithMessage("昵称不可为空")
+
+	if strings.Trim(form.Nickname, " ") != "" {
+		err := validator.CheckMsgWithOpenId(user.OpenId, form.Nickname)
+		if err != nil {
+			return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
+		}
 	}
 
-	err := validator.CheckMsgWithOpenId(user.OpenId, form.Nickname)
-	if err != nil {
-		return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
-	}
-
-	err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
