@@ -367,12 +367,10 @@ func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := kumiaoCommunity.NewCommentService(ctx)
 
-	list, total, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
+	comment, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
 		UserId: user.ID,
 		Types:  form.Types,
 		TurnId: form.TurnId,
-		Limit:  form.Limit(),
-		Offset: form.Offset(),
 	})
 
 	if err != nil {
@@ -380,9 +378,6 @@ func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
 	}
 
 	return gin.H{
-		"list":     list,
-		"total":    total,
-		"page":     form.Page,
-		"pageSize": form.PageSize,
+		"comment": comment,
 	}, nil
 }

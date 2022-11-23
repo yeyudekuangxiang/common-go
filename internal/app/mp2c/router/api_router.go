@@ -224,7 +224,7 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
 			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
-			commentRouter.GET("/turn-comment", apiutil.Format(api.DefaultCommentController.TurnComment))
+			commentRouter.POST("/turn-comment", apiutil.Format(api.DefaultCommentController.TurnComment))
 		}
 
 		//积分相关路由

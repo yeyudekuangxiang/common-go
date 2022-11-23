@@ -68,8 +68,6 @@ type TurnCommentReq struct {
 	UserId int64 `json:"userId"`
 	Types  int   `json:"types"`
 	TurnId int64 `json:"turnId"`
-	Limit  int   `json:"limit"`
-	Offset int   `json:"offset"`
 }
 
 type APIComment struct {
@@ -93,6 +91,47 @@ type APIComment struct {
 	UpdatedAt     time.Time        `json:"updatedAt"`
 	Member        entity.ShortUser `gorm:"foreignKey:ID;references:MemberId" json:"member"` // 评论用户
 	IsAuthor      int8             `gorm:"type:int2" json:"isAuthor"`                       // 是否作者
-	IsLike        int              `json:"isLike"`
 	RootChild     []*APIComment    `gorm:"foreignKey:RootCommentId;association_foreignKey:Id" json:"rootChild"`
+}
+
+type APICommentResp struct {
+	Id        int64            `gorm:"primaryKey;autoIncrement" json:"id"`
+	Message   string           `gorm:"type:text;not null" json:"message"`
+	MemberId  int64            `gorm:"type:int8;not null" json:"memberId"`            // 评论用户id
+	Floor     int32            `gorm:"type:int4;not null:default:0" json:"floor"`     // 评论楼层
+	Count     int32            `gorm:"type:int4;not null:default:0" json:"count"`     // 该评论下评论总数
+	RootCount int32            `gorm:"type:int4;not null:default:0" json:"rootCount"` // 该评论下根评论总数
+	LikeCount int32            `gorm:"type:int4;not null:default:0" json:"likeCount"` // 该评论点赞总数
+	HateCount int32            `gorm:"type:int4;not null:default:0" json:"hateCount"` // 该评论点踩总数
+	CreatedAt time.Time        `json:"createdAt"`
+	UpdatedAt time.Time        `json:"updatedAt"`
+	Member    entity.ShortUser `json:"member"`
+	Detail    Detail
+	IsAuthor  int8              `json:"isAuthor"` // 是否作者
+	IsLike    int               `json:"isLike"`
+	RootChild []*APICommentResp `json:"rootChild"`
+}
+
+type Detail struct {
+	ObjId       int64  `json:"objId"`
+	ObjType     int64  `json:"objType"`
+	ImageList   string `json:"imageList"`
+	Description string `json:"description"`
+}
+
+func (a APIComment) ApiComment() *APICommentResp {
+	return &APICommentResp{
+		Id:        a.Id,
+		Message:   a.Message,
+		MemberId:  a.MemberId,
+		Floor:     a.Floor,
+		Count:     a.Count,
+		RootCount: a.RootCount,
+		LikeCount: a.LikeCount,
+		HateCount: a.HateCount,
+		CreatedAt: a.CreatedAt,
+		UpdatedAt: a.UpdatedAt,
+		Member:    a.Member,
+		IsAuthor:  a.IsAuthor,
+	}
 }
