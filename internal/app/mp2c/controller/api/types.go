@@ -209,7 +209,6 @@ type ChangeCommentLikeForm struct {
 type TurnCommentRequest struct {
 	Types  int   `json:"types" form:"types" binding:"required"`
 	TurnId int64 `json:"turnId" form:"turnId" binding:"required"`
-	controller.PageFrom
 }
 
 type JinHuaXingForm struct {
