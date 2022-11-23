@@ -95,18 +95,18 @@ type APIComment struct {
 }
 
 type APICommentResp struct {
-	Id        int64            `gorm:"primaryKey;autoIncrement" json:"id"`
-	Message   string           `gorm:"type:text;not null" json:"message"`
-	MemberId  int64            `gorm:"type:int8;not null" json:"memberId"`            // 评论用户id
-	Floor     int32            `gorm:"type:int4;not null:default:0" json:"floor"`     // 评论楼层
-	Count     int32            `gorm:"type:int4;not null:default:0" json:"count"`     // 该评论下评论总数
-	RootCount int32            `gorm:"type:int4;not null:default:0" json:"rootCount"` // 该评论下根评论总数
-	LikeCount int32            `gorm:"type:int4;not null:default:0" json:"likeCount"` // 该评论点赞总数
-	HateCount int32            `gorm:"type:int4;not null:default:0" json:"hateCount"` // 该评论点踩总数
-	CreatedAt time.Time        `json:"createdAt"`
-	UpdatedAt time.Time        `json:"updatedAt"`
-	Member    entity.ShortUser `json:"member"`
-	Detail    Detail
+	Id        int64             `gorm:"primaryKey;autoIncrement" json:"id"`
+	Message   string            `gorm:"type:text;not null" json:"message"`
+	MemberId  int64             `gorm:"type:int8;not null" json:"memberId"`            // 评论用户id
+	Floor     int32             `gorm:"type:int4;not null:default:0" json:"floor"`     // 评论楼层
+	Count     int32             `gorm:"type:int4;not null:default:0" json:"count"`     // 该评论下评论总数
+	RootCount int32             `gorm:"type:int4;not null:default:0" json:"rootCount"` // 该评论下根评论总数
+	LikeCount int32             `gorm:"type:int4;not null:default:0" json:"likeCount"` // 该评论点赞总数
+	HateCount int32             `gorm:"type:int4;not null:default:0" json:"hateCount"` // 该评论点踩总数
+	CreatedAt time.Time         `json:"createdAt"`
+	UpdatedAt time.Time         `json:"updatedAt"`
+	Member    entity.ShortUser  `json:"member"`
+	Detail    Detail            `json:"detail"`
 	IsAuthor  int8              `json:"isAuthor"` // 是否作者
 	IsLike    int               `json:"isLike"`
 	RootChild []*APICommentResp `json:"rootChild"`
