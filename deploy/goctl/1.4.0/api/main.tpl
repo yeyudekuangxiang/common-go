@@ -8,6 +8,7 @@ import (
 	"{{.projectPath}}/common/globalclient"
 
 	{{.importPackages}}
+	"{{.projectPath}}/common/result"
 )
 
 var configFile = flag.String("f", "etc/{{.serviceName}}.yaml", "the config file")
@@ -24,8 +25,9 @@ func main() {
 	fmt.Printf("配置文件 %+v\n",c)
 	errno.Debug = c.Debug
 	globalclient.InitGlobalClient(c)
+	defer globalclient.Close()
 
-	server := rest.MustNewServer(c.RestConf)
+	server := rest.MustNewServer(c.RestConf, rest.WithCors(), rest.WithUnauthorizedCallback(result.HttpUnAuthCallback))
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)

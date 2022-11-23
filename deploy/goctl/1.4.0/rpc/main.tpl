@@ -26,6 +26,7 @@ func main() {
 	fmt.Printf("配置文件 %+v\n",c)
 	errno.Debug = c.Debug
 	globalclient.InitGlobalClient(c)
+	defer globalclient.Close()
 
 	ctx := svc.NewServiceContext(c)
 
