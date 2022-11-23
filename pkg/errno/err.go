@@ -42,6 +42,7 @@ var (
 	ErrBindRecordNotFound = err{code: 20305, message: "未找到绑定关系"}
 	ErrNotFound           = err{code: 20305, message: "未找到资源"}
 	ErrCouponReceived     = err{code: 20306, message: "券已领取"}
+	ErrChannelErr         = err{code: 20307, message: "渠道不符合条件~"}
 
 	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
 

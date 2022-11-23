@@ -66,19 +66,19 @@ func (srv Service) GetTjMetroTicketStatus(typeId int64, openid string) (*entity.
 	//判断是否指定渠道用户
 	_, ok := channelTypes[userInfo.ChannelId]
 	if !ok {
-		return nil, errno.ErrCommon.WithMessage("不满足参与条件")
+		return nil, errno.ErrChannelErr
 	}
 	//查看是否领取了，没领取满足条件
-	/*couponResp, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
+	couponResp, err := app.RpcService.CouponRpcSrv.FindCoupon(srv.ctx, &couponclient.FindCouponReq{
 		UserId:           userInfo.ID,
 		CouponCardTypeId: typeId,
-	})*/
-	/*if err != nil {
-		//return nil, err
+	})
+	if err != nil {
+		return nil, err
 	}
 	if couponResp.Exist {
-		//	return nil, errno.ErrCouponReceived
-	}*/
+		return nil, errno.ErrCouponReceived
+	}
 	//查看今天是否答题，没答题满足条件
 	/*availability, err := quiz.DefaultQuizService.Availability(openid)
 	if err != nil {
