@@ -377,6 +377,7 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 	commentResp := &APICommentResp{}
 	commentRespChild := make([]*APICommentResp, 0)
 	//root
+
 	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", id).First(&comment).Error
 	if err != nil {
 		return commentResp, err
@@ -388,11 +389,12 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 
 	if comment.RootCommentId != 0 {
 		id = comment.RootCommentId
-		//root
-		err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", id).First(&comment).Error
-		if err != nil {
-			return commentResp, err
-		}
+	}
+
+	//root
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", id).Preload("Member").First(&comment).Error
+	if err != nil {
+		return commentResp, err
 	}
 
 	// child
