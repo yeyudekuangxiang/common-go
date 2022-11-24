@@ -5,6 +5,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/message"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"strings"
@@ -21,10 +22,10 @@ type (
 
 	defaultWebMessage struct {
 		ctx             *mioContext.MioContext
-		message         repository.MessageModel
-		messageCustomer repository.MessageCustomerModel
-		messageContent  repository.MessageContentModel
-		template        repository.MessageTemplateModel
+		message         message.MessageModel
+		messageCustomer message.MessageCustomerModel
+		messageContent  message.MessageContentModel
+		template        message.MessageTemplateModel
 		user            repository.UserRepository
 		topic           repository.TopicModel
 		comment         repository.CommentModel
@@ -37,11 +38,11 @@ type (
 		Val       string `json:"val"`
 	}
 
-	Options func(option *webMessageOption)
+	WMOptions func(option *webMessageOption)
 )
 
 func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
-	err := d.messageCustomer.HaveReadMessage(repository.SetHaveReadMessageParams{
+	err := d.messageCustomer.HaveReadMessage(message.SetHaveReadMessageParams{
 		MsgIds: params.MsgIds,
 		RecId:  params.RecId,
 	})
@@ -54,7 +55,7 @@ func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
 func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error) {
 	res := GetWebMessageCountResp{}
 
-	total, err := d.message.CountAll(repository.FindMessageParams{
+	total, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
 	})
@@ -65,7 +66,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 
 	res.Total = total
 
-	exchangeMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
+	exchangeMsgTotal, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
 		Types:  []string{"1", "2", "3"},
@@ -77,7 +78,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 
 	res.ExchangeMsgTotal = exchangeMsgTotal
 
-	systemMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
+	systemMsgTotal, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
 		Types:  []string{"4", "5", "6", "7", "8", "9", "10", "11", "12"},
@@ -92,7 +93,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 }
 
 func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error) {
-	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
+	msgList, total, err := d.message.GetMessage(message.FindMessageParams{
 		RecId:  params.UserId,
 		Status: params.Status,
 		Types:  params.Types,
@@ -213,7 +214,7 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	}
 
 	//入库
-	err := d.message.SendMessage(repository.SendMessage{
+	err := d.message.SendMessage(message.SendMessage{
 		SendId:       param.SendId,
 		RecId:        param.RecId,
 		Type:         param.Type,
@@ -263,25 +264,25 @@ func (d defaultWebMessage) GetTemplate(key string) string {
 	return one.TempContent
 }
 
-func WithSendObjId(sendObjId int64) Options {
+func WithSendObjId(sendObjId int64) WMOptions {
 	return func(option *webMessageOption) {
 		option.SendObjID = sendObjId
 	}
 }
 
-func WithRecObjId(recObjId int64) Options {
+func WithRecObjId(recObjId int64) WMOptions {
 	return func(option *webMessageOption) {
 		option.RecObjId = recObjId
 	}
 }
 
-func WithVal(val string) Options {
+func WithVal(val string) WMOptions {
 	return func(option *webMessageOption) {
 		option.Val = val
 	}
 }
 
-func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMessage {
+func NewWebMessageService(ctx *mioContext.MioContext, options ...WMOptions) WebMessage {
 	option := &webMessageOption{}
 	for i := range options {
 		options[i](option)
@@ -289,10 +290,10 @@ func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMes
 
 	return &defaultWebMessage{
 		ctx:             ctx,
-		message:         repository.NewMessageModel(ctx),
-		messageCustomer: repository.NewMessageCustomerModel(ctx),
-		messageContent:  repository.NewMessageContentModel(ctx),
-		template:        repository.NewMessageTemplateModel(ctx),
+		message:         message.NewMessageModel(ctx),
+		messageCustomer: message.NewMessageCustomerModel(ctx),
+		messageContent:  message.NewMessageContentModel(ctx),
+		template:        message.NewMessageTemplateModel(ctx),
 		user:            repository.NewUserRepository(),
 		topic:           repository.NewTopicModel(ctx),
 		comment:         repository.NewCommentModel(ctx),
