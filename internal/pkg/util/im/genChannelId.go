@@ -1,4 +1,4 @@
-package util
+package im
 
 import (
 	"mio/internal/pkg/util/encrypt"
