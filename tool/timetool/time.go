@@ -1,6 +1,7 @@
 package timetool
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"github.com/pkg/errors"
@@ -22,46 +23,46 @@ type Time struct {
 	time.Time
 }
 
-func (t Time) StartOfDay() Time {
+func (t *Time) StartOfDay() Time {
 	return Time{Time: StartOfDay(t.Time)}
 }
-func (t Time) EndOfDay() Time {
+func (t *Time) EndOfDay() Time {
 	return Time{Time: EndOfDay(t.Time)}
 }
-func (t Time) StartOfWeek() Time {
+func (t *Time) StartOfWeek() Time {
 	return Time{Time: StartOfWeek(t.Time)}
 }
-func (t Time) EndOfWeek() Time {
+func (t *Time) EndOfWeek() Time {
 	return Time{Time: EndOfWeek(t.Time)}
 }
-func (t Time) StartOfMonth() Time {
+func (t *Time) StartOfMonth() Time {
 	return Time{Time: StartOfMonth(t.Time)}
 }
-func (t Time) EndOfMonth() Time {
+func (t *Time) EndOfMonth() Time {
 	return Time{Time: EndOfMonth(t.Time)}
 }
-func (t Time) Format(format string) string {
+func (t *Time) Format(format string) string {
 	if t.IsZero() {
 		return ""
 	}
 	return t.Time.Format(format)
 }
-func (t Time) AddDay(day int) Time {
+func (t *Time) AddDay(day int) Time {
 	return Time{Time: t.Time.AddDate(0, 0, day)}
 }
-func (t Time) AddWeek(week int) Time {
+func (t *Time) AddWeek(week int) Time {
 	return Time{Time: t.Time.AddDate(0, 0, week*7)}
 }
-func (t Time) AddMonth(month int) Time {
+func (t *Time) AddMonth(month int) Time {
 	return Time{Time: t.Time.AddDate(0, month, 0)}
 }
-func (t Time) AddYear(year int) Time {
+func (t *Time) AddYear(year int) Time {
 	return Time{Time: t.Time.AddDate(year, 0, 0)}
 }
-func (t Time) Add(duration time.Duration) Time {
+func (t *Time) Add(duration time.Duration) Time {
 	return Time{Time: t.Time.Add(duration)}
 }
-func (t Time) String() string {
+func (t *Time) String() string {
 	return t.Time.Format(TimeFormat)
 }
 func (t *Time) UnmarshalJSON(data []byte) error {
@@ -75,14 +76,14 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 	t.Time = ti
 	return nil
 }
-func (t Time) MarshalJSON() ([]byte, error) {
+func (t *Time) MarshalJSON() ([]byte, error) {
 	if t.Time.IsZero() {
 		return []byte(fmt.Sprintf("\"\"")), nil
 	}
 	var stamp = fmt.Sprintf("\"%s\"", t.Format(TimeFormat))
 	return []byte(stamp), nil
 }
-func (t Time) Value() (driver.Value, error) {
+func (t *Time) Value() (driver.Value, error) {
 	if t.Time.IsZero() {
 		return nil, nil
 	}
@@ -96,9 +97,23 @@ func (t *Time) Scan(value interface{}) error {
 	t.Time = ti
 	return nil
 }
-func (t Time) Date() Date {
+func (t *Time) Date() Date {
 	return ToDate(t.Time)
 }
+func (t *Time) SqlNull() sql.NullTime {
+	if t.IsZero() {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Valid: true, Time: t.Time}
+}
+func (t *Time) FormatWithDefault(format string, dft string) string {
+	if t.IsZero() {
+		return dft
+	}
+	return t.Format(format)
+}
+
+//Parse 将时间字符串按照layout解析成 Time 如果val为空字符串 则解析为空 Time
 func Parse(layout string, val string) (Time, error) {
 	if val == "" {
 		return Time{}, nil
@@ -108,6 +123,8 @@ func Parse(layout string, val string) (Time, error) {
 		Time: t,
 	}, err
 }
+
+//MustParse 将时间字符串按照layout解析成 Time 如果val为空字符串 则解析为空 Time 如果出现错误则抛出异常
 func MustParse(layout string, val string) Time {
 	if val == "" {
 		return Time{}
@@ -120,15 +137,10 @@ func MustParse(layout string, val string) Time {
 		Time: t,
 	}
 }
-func (t Time) IfNotZero(f func(t Time) Time) Time {
-	return f(t)
-}
-func UnixMilli(msec int64) Time {
-	return UnixMilliZero(msec, true)
-}
 
-func UnixMilliZero(msec int64, zeroTime bool) Time {
-	if msec == 0 && zeroTime {
+//UnixMilli 将毫秒时间戳 Time 时间戳小于或者等于0则解析为空 Time
+func UnixMilli(msec int64) Time {
+	if msec <= 0 {
 		return Time{}
 	}
 	return Time{Time: time.UnixMilli(msec)}

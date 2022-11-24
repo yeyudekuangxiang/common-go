@@ -1,7 +1,6 @@
 package timetool
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -29,21 +28,4 @@ func StartOfMonth(t time.Time) time.Time {
 }
 func EndOfMonth(t time.Time) time.Time {
 	return StartOfMonth(t).AddDate(0, 1, 0).Add(-1)
-}
-func Format(t time.Time, format string, zeroStr string) string {
-	if t.IsZero() {
-		return zeroStr
-	}
-
-	return t.Format(format)
-}
-func UnixMilliNullTIme(msec int64) sql.NullTime {
-	if msec <= 0 {
-		return sql.NullTime{}
-	}
-
-	return sql.NullTime{
-		Valid: true,
-		Time:  time.UnixMilli(msec),
-	}
 }
