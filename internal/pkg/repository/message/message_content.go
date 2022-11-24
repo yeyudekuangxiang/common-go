@@ -1,14 +1,14 @@
-package repository
+package message
 
 import (
 	"gorm.io/gorm"
 	mioContext "mio/internal/pkg/core/context"
-	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity/message"
 )
 
 type (
 	MessageContentModel interface {
-		FindContentByMsgIds(messageId []int64) []entity.MessageContent
+		FindContentByMsgIds(messageId []int64) []message.MessageContent
 	}
 
 	defaultMessageContentModel struct {
@@ -16,9 +16,9 @@ type (
 	}
 )
 
-func (d defaultMessageContentModel) FindContentByMsgIds(messageIds []int64) []entity.MessageContent {
-	var resp []entity.MessageContent
-	err := d.ctx.DB.Model(&entity.MessageContent{}).WithContext(d.ctx.Context).
+func (d defaultMessageContentModel) FindContentByMsgIds(messageIds []int64) []message.MessageContent {
+	var resp []message.MessageContent
+	err := d.ctx.DB.Model(&message.MessageContent{}).WithContext(d.ctx.Context).
 		Where("message_id in (?)", messageIds).Find(&resp).Error
 
 	if err == nil {

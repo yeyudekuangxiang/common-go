@@ -1,20 +1,20 @@
-package repository
+package message
 
 import (
 	"gorm.io/gorm"
 	mioContext "mio/internal/pkg/core/context"
-	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/model/entity/message"
 	"time"
 )
 
 type (
 	MessageModel interface {
-		FindOne(id int64) (*entity.Message, error)
-		Insert(data *entity.Message) (*entity.Message, error)
+		FindOne(id int64) (*message.Message, error)
+		Insert(data *message.Message) (*message.Message, error)
 		Delete(id int64) error
-		Update(data *entity.Message) error
+		Update(data *message.Message) error
 		SendMessage(data SendMessage) error
-		GetMessage(params FindMessageParams) ([]*entity.UserWebMessage, int64, error)
+		GetMessage(params FindMessageParams) ([]*message.UserWebMessage, int64, error)
 		CountAll(params FindMessageParams) (int64, error)
 		HaveRead(params FindMessageParams) error
 	}
@@ -24,12 +24,12 @@ type (
 	}
 )
 
-func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.UserWebMessage, int64, error) {
-	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
+func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*message.UserWebMessage, int64, error) {
+	query := d.ctx.DB.Model(&message.Message{}).WithContext(d.ctx.Context).
 		Select("message.*,mcontent.message_content,mcontent.message_notes,mcustomer.status").
 		Joins("left join message_content mcontent on message.id = mcontent.message_id").
 		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
-	var resp []*entity.UserWebMessage
+	var resp []*message.UserWebMessage
 	var total int64
 
 	if params.RecId != 0 {
@@ -78,7 +78,7 @@ func (d defaultMessageModel) GetMessage(params FindMessageParams) ([]*entity.Use
 }
 
 func (d defaultMessageModel) CountAll(params FindMessageParams) (int64, error) {
-	query := d.ctx.DB.Model(&entity.Message{}).WithContext(d.ctx.Context).
+	query := d.ctx.DB.Model(&message.Message{}).WithContext(d.ctx.Context).
 		Joins("left join message_customer mcustomer on message.id = mcustomer.message_id")
 
 	var total int64
@@ -116,7 +116,7 @@ func (d defaultMessageModel) CountAll(params FindMessageParams) (int64, error) {
 }
 
 func (d defaultMessageModel) HaveRead(params FindMessageParams) error {
-	query := d.ctx.DB.Model(&entity.MessageCustomer{}).WithContext(d.ctx.Context)
+	query := d.ctx.DB.Model(&message.MessageCustomer{}).WithContext(d.ctx.Context)
 
 	if len(params.MessageIds) > 0 {
 		query = query.Where("message_id in (?)", params.MessageIds)
@@ -147,7 +147,7 @@ func (d defaultMessageModel) HaveRead(params FindMessageParams) error {
 
 func (d defaultMessageModel) SendMessage(params SendMessage) error {
 	err := d.ctx.DB.Transaction(func(tx *gorm.DB) error {
-		message := entity.Message{
+		msg := message.Message{
 			SendId:    params.SendId,
 			RecId:     params.RecId,
 			Type:      params.Type,
@@ -155,25 +155,25 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 			TurnId:    params.TurnId,
 			CreatedAt: time.Now(),
 		}
-		if err := d.ctx.DB.Model(&entity.Message{}).Create(&message).Error; err != nil {
+		if err := d.ctx.DB.Model(&message.Message{}).Create(&msg).Error; err != nil {
 			return err
 		}
-		messageContent := entity.MessageContent{
-			MessageId:      message.Id,
+		messageContent := message.MessageContent{
+			MessageId:      msg.Id,
 			MessageContent: params.Message,
 			MessageNotes:   params.MessageNotes,
 			CreatedAt:      time.Now(),
 		}
-		if err := d.ctx.DB.Model(&entity.MessageContent{}).Create(&messageContent).Error; err != nil {
+		if err := d.ctx.DB.Model(&message.MessageContent{}).Create(&messageContent).Error; err != nil {
 			return err
 		}
-		messageCustomer := entity.MessageCustomer{
+		messageCustomer := message.MessageCustomer{
 			RecId:     params.RecId,
-			MessageId: message.Id,
+			MessageId: msg.Id,
 			Status:    1,
 			CreatedAt: time.Now(),
 		}
-		if err := d.ctx.DB.Model(&entity.MessageCustomer{}).Create(&messageCustomer).Error; err != nil {
+		if err := d.ctx.DB.Model(&message.MessageCustomer{}).Create(&messageCustomer).Error; err != nil {
 			return err
 		}
 		return nil
@@ -181,12 +181,12 @@ func (d defaultMessageModel) SendMessage(params SendMessage) error {
 	return err
 }
 
-func (d defaultMessageModel) FindOne(id int64) (*entity.Message, error) {
+func (d defaultMessageModel) FindOne(id int64) (*message.Message, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (d defaultMessageModel) Insert(params *entity.Message) (*entity.Message, error) {
+func (d defaultMessageModel) Insert(params *message.Message) (*message.Message, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -196,7 +196,7 @@ func (d defaultMessageModel) Delete(id int64) error {
 	panic("implement me")
 }
 
-func (d defaultMessageModel) Update(data *entity.Message) error {
+func (d defaultMessageModel) Update(data *message.Message) error {
 	//TODO implement me
 	panic("implement me")
 }

@@ -169,16 +169,3 @@ func (ctr MsgController) SetHaveReadWebMessage(c *gin.Context) (gin.H, error) {
 	}
 	return nil, nil
 }
-
-//消息跳转
-func (ctr MsgController) TurnWebMessage(c *gin.Context) (gin.H, error) {
-	//form := TurnWebMessageRequest{}
-	//if err := apiutil.BindForm(c, &form); err != nil {
-	//	return nil, err
-	//}
-	//
-	//ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	//user := apiutil.GetAuthUser(c)
-	//
-	return nil, nil
-}
