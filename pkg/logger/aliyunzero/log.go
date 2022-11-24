@@ -9,6 +9,8 @@ import (
 )
 import "github.com/aliyun/aliyun-log-go-sdk/producer"
 
+var _ logx.Writer = (*AlyWriter)(nil)
+
 // LogTopicApplication 应用日志 框架自带
 var LogTopicApplication = logx.Field("__topic__", "application_log")
 
@@ -31,6 +33,10 @@ type AlyWriter struct {
 	producer *producer.Producer
 	opts     Option
 	fields   []logx.LogField
+}
+
+func (l *AlyWriter) Debug(v interface{}, fields ...logx.LogField) {
+	l.Writer("debug", v, fields...)
 }
 
 func NewAlyWriter(producer *producer.Producer, option Option) *AlyWriter {
