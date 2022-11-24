@@ -197,7 +197,6 @@ func (srv TopicService) ZAddTopic() {
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
 func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-
 	if param.Order == "recommend" && param.TopicTagId == 0 {
 		list, i, err := srv.GetTopicDetailPageList(param)
 		if err != nil {

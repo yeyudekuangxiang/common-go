@@ -174,7 +174,8 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		Limit:      form.Limit(),
 		Order:      form.Order,
 	}
-	if form.Order == "recommend" {
+
+	if form.Order == "recommend" && form.TopicTagId == 0 {
 		params.Limit = form.PageSize
 		params.Offset = form.Page
 	}
