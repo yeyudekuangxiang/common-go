@@ -15,23 +15,27 @@ type IDForm struct {
 }
 
 type GetPointRecordPageListFrom struct {
-	UserId    int64                       `json:"userId" form:"userId" binding:"gte=0" alias:"用户ID"`
-	Nickname  string                      `json:"nickname" form:"nickname" binding:"lte=30" alias:"用户昵称"`
-	OpenId    string                      `json:"openId" form:"openId" binding:"lte=50" alias:"openId"`
-	Phone     string                      `json:"phone" form:"phone" binding:"lte=30" alias:"手机号"`
-	StartTime time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
-	EndTime   time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
-	Type      entity.PointTransactionType `json:"type" form:"type" alias:"积分类型"`
+	UserId          int64                       `json:"userId" form:"userId" binding:"gte=0" alias:"用户ID"`
+	Nickname        string                      `json:"nickname" form:"nickname" binding:"lte=30" alias:"用户昵称"`
+	OpenId          string                      `json:"openId" form:"openId" binding:"lte=50" alias:"openId"`
+	Phone           string                      `json:"phone" form:"phone" binding:"lte=30" alias:"手机号"`
+	StartTime       time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime         time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	Type            entity.PointTransactionType `json:"type" form:"type" alias:"积分类型"`
+	StartExpireTime string                      `json:"startExpireTime" form:"startExpireTime" binding:"omitempty,datetime=2006-01-02"`
+	EndExpireTime   string                      `json:"endExpireTime" form:"endExpireTime" binding:"omitempty,datetime=2006-01-02"`
 	controller.PageFrom
 }
 type ExportPointRecordListFrom struct {
-	UserId    int64                       `json:"userId" form:"userId" binding:"gte=0" alias:"用户ID"`
-	Nickname  string                      `json:"nickname" form:"nickname" binding:"lte=30" alias:"用户昵称"`
-	OpenId    string                      `json:"openId" form:"openId" binding:"lte=50" alias:"openId"`
-	Phone     string                      `json:"phone" form:"phone" binding:"lte=30" alias:"手机号"`
-	StartTime time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
-	EndTime   time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
-	Type      entity.PointTransactionType `json:"type" form:"type" alias:"积分类型"`
+	UserId          int64                       `json:"userId" form:"userId" binding:"gte=0" alias:"用户ID"`
+	Nickname        string                      `json:"nickname" form:"nickname" binding:"lte=30" alias:"用户昵称"`
+	OpenId          string                      `json:"openId" form:"openId" binding:"lte=50" alias:"openId"`
+	Phone           string                      `json:"phone" form:"phone" binding:"lte=30" alias:"手机号"`
+	StartTime       time.Time                   `json:"startTime" form:"startTime" alias:"开始时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	EndTime         time.Time                   `json:"endTime" form:"endTime" alias:"结束时间" time_format:"2006-01-02" time_utc:"false" time_location:"Asia/Shanghai"`
+	StartExpireTime string                      `json:"startExpireTime" form:"startExpireTime" binding:"omitempty,datetime=2006-01-02"`
+	EndExpireTime   string                      `json:"endExpireTime" form:"endExpireTime" binding:"omitempty,datetime=2006-01-02"`
+	Type            entity.PointTransactionType `json:"type" form:"type" alias:"积分类型"`
 }
 type GetFileExportPageListForm struct {
 	AdminId        int64                   `json:"adminId" form:"adminId" alias:"adminId"`

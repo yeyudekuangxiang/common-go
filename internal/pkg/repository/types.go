@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"time"
@@ -150,11 +151,15 @@ type GetPointTransactionPageListBy struct {
 	OpenIds   []string
 	StartTime model.Time
 	EndTime   model.Time
-	OrderBy   entity.OrderByList
-	Type      entity.PointTransactionType
-	Types     []entity.PointTransactionType
-	Offset    int
-	Limit     int
+	//expire_month >=StartExpireMonth
+	StartExpireTime sql.NullTime
+	////expire_month<=StartExpireMonth
+	EndExpireTime sql.NullTime
+	OrderBy       entity.OrderByList
+	Type          entity.PointTransactionType
+	Types         []entity.PointTransactionType
+	Offset        int
+	Limit         int
 }
 type GetPointTransactionCountBy struct {
 	AdminId int

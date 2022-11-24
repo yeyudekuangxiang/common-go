@@ -14,6 +14,7 @@ import (
 	"log"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
+	"sync"
 	"time"
 )
 
@@ -23,7 +24,7 @@ var pointSql = `SELECT ID,
 	COALESCE ( log.aa, 0 ) new_point 
 FROM
 	point
-	LEFT JOIN ( SELECT openid, SUM ( VALUE ) aa FROM point_transaction WHERE create_time >= '2022-01-01 00:00:00' AND VALUE > 0 GROUP BY openid ) log ON point.openid = log.openid`
+	LEFT JOIN ( SELECT openid, SUM ( VALUE ) aa FROM point_transaction WHERE create_time >= '2022-01-01 00:00:00' AND VALUE > 0  GROUP BY openid ) log ON point.openid = log.openid`
 
 var ant, _ = ants.NewPool(100)
 
@@ -40,13 +41,16 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		initialize.Initialize("./config-dev.ini")
 		list := make([]PointExpire, 0)
+		wg := sync.WaitGroup{}
 		fmt.Println("haha")
 		app.DB.Table(fmt.Sprintf("(%s) point_expire", pointSql)).FindInBatches(&list, 100, func(tx *gorm.DB, batch int) error {
 			fmt.Println("处理批次", batch, "处理条数", len(list))
 			for i, item := range list {
 				i := i
 				item := item
+				wg.Add(1)
 				err := ant.Submit(func() {
+					defer wg.Done()
 					dealOne(i, item)
 				})
 				if err != nil {
@@ -55,6 +59,7 @@ to quickly create a Cobra application.`,
 			}
 			return nil
 		})
+		wg.Wait()
 	},
 }
 
@@ -153,7 +158,7 @@ func dealNew(openId string, newPoint int64) error {
 			}
 			pa := PointAvailable{
 				Openid:         openId,
-				AvailablePoint: item.Point,
+				AvailablePoint: point,
 				IsExpired:      false,
 				TimePoint:      item.Tm,
 				ExpireMonth:    tm.AddDate(1, 0, 0).Format("200601"),
