@@ -25,7 +25,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/mlogclub/simple v1.1.14
 	github.com/nacos-group/nacos-sdk-go v1.0.6
-	github.com/panjf2000/ants/v2 v2.4.8
+	github.com/panjf2000/ants/v2 v2.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
