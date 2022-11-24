@@ -49,7 +49,7 @@ func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, membe
 	if sceneUser.ID != 0 {
 		return sceneUser, errno.ErrExisting
 	}
-	
+
 	sceneUser.PlatformKey = scene.Ch
 	sceneUser.PlatformUserId = memberId
 	sceneUser.Phone = user.PhoneNumber

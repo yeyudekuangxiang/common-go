@@ -45,7 +45,7 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	//获取点赞记录
 	likeMap := make(map[int64]int, 0)
 	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)

@@ -76,6 +76,22 @@ func (srv PointService) DecUserPoint(dto srv_types.DecUserPointDTO) (int64, erro
 
 //changeUserPoint 变动积分操作
 func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64, error) {
+
+	lockKey := "changeUserPoint" + dto.OpenId
+	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
+		return 0, errno.ErrCommon.WithMessage("操作频繁")
+	}
+	defer util.DefaultLock.UnLock(lockKey)
+
+	//检测积分发放次数限制
+	if dto.ChangePoint >= 0 {
+		limitService := NewPointTransactionCountLimitService(srv.ctx)
+		err := limitService.CheckLimitAndUpdate(dto.Type, dto.OpenId)
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	var balance int64
 	var err error
 	var ptId int64

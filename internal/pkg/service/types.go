@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util/timeutils"
@@ -137,17 +138,19 @@ type FindStepHistoryBy struct {
 	OrderBy entity.OrderByList
 }
 type GetPointTransactionPageListBy struct {
-	UserId    int64
-	AdminId   int
-	Nickname  string
-	OpenId    string
-	Phone     string
-	StartTime model.Time
-	EndTime   model.Time
-	Type      entity.PointTransactionType
-	Types     []entity.PointTransactionType
-	Offset    int
-	Limit     int
+	UserId          int64
+	AdminId         int
+	Nickname        string
+	OpenId          string
+	Phone           string
+	StartTime       model.Time
+	EndTime         model.Time
+	StartExpireTime sql.NullTime
+	EndExpireTime   sql.NullTime
+	Type            entity.PointTransactionType
+	Types           []entity.PointTransactionType
+	Offset          int
+	Limit           int
 }
 type ExportPointTransactionListBy struct {
 	UserId    int64
@@ -166,6 +169,7 @@ type PointRecord struct {
 	TypeText       string                      `json:"typeText"`
 	Value          int64                       `json:"value"`
 	CreateTime     model.Time                  `json:"createTime"`
+	ExpireTime     string                      `json:"expireTime"`
 	AdditionalInfo string                      `json:"additionalInfo"`
 	User           entity.User                 `json:"user"`
 	Note           string                      `json:"note"` //操作备注
