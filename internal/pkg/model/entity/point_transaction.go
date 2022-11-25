@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"database/sql"
 	"mio/internal/pkg/model"
 	duibaApi "mio/pkg/duiba/api/model"
 )
@@ -299,6 +300,7 @@ type PointTransaction struct {
 	AdditionalInfo AdditionalInfo       `json:"additionalInfo"`
 	AdminId        int                  `json:"adminId"`
 	Note           string               `json:"note"`
+	ExpireTime     sql.NullTime         `json:"expireTime"`
 }
 type AdditionalInfo string
 

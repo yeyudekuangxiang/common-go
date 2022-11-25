@@ -10,6 +10,7 @@ import (
 	"mio/internal/app/cmd/coupon"
 	"mio/internal/app/cmd/db"
 	"mio/internal/app/cmd/gitlab"
+	"mio/internal/app/cmd/point"
 	"mio/internal/app/cmd/quiz"
 	"mio/internal/app/cmd/topic"
 	"mio/internal/app/cmd/user"
@@ -65,4 +66,5 @@ func cmds() {
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(quiz.QuizCmd)
 	RootCmd.AddCommand(coupon.CouponCmd)
+	RootCmd.AddCommand(point.PointCmd)
 }

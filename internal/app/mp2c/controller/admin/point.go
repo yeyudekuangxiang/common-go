@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/service"
@@ -25,16 +26,24 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	if !endTime.IsZero() {
 		endTime = form.EndTime.Add(time.Hour*24 - time.Nanosecond)
 	}
+
+	endExpireTime := timetool.MustParse("2006-01-02", form.EndExpireTime)
+	if !endExpireTime.IsZero() {
+		endExpireTime = endExpireTime.EndOfDay()
+	}
+
 	list, total, err := pointTranService.PagePointRecord(service.GetPointTransactionPageListBy{
-		UserId:    form.UserId,
-		Nickname:  form.Nickname,
-		OpenId:    form.OpenId,
-		Phone:     form.Phone,
-		StartTime: model.Time{Time: form.StartTime},
-		EndTime:   model.Time{Time: endTime},
-		Type:      form.Type,
-		Offset:    form.Offset(),
-		Limit:     form.Limit(),
+		UserId:          form.UserId,
+		Nickname:        form.Nickname,
+		OpenId:          form.OpenId,
+		Phone:           form.Phone,
+		StartTime:       model.Time{Time: form.StartTime},
+		EndTime:         model.Time{Time: endTime},
+		StartExpireTime: timetool.MustParse("2006-01-02", form.StartExpireTime).SqlNull(),
+		EndExpireTime:   endExpireTime.SqlNull(),
+		Type:            form.Type,
+		Offset:          form.Offset(),
+		Limit:           form.Limit(),
 	})
 	if err != nil {
 		return nil, err
