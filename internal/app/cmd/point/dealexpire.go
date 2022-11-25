@@ -18,6 +18,7 @@ import (
 	"time"
 )
 
+var openids = []string{"oMD8d5CPOCCTAzfohzl_3t7ZBBB0", "oy_BA5Nwkt6hzECxIXwNYkhLyzSs", "oy_BA5EsE0mPQvll8eAqPCkBvI8Q", "oy_BA5IALjF5InQo3TqEp61B75MU", "oy_BA5DGmQBqMeCj_9Eozj8dXhoA", "oy_BA5JnOorsszStyxYk3fuMJHM8", "oy_BA5GMFWKT57PTfO46eBgvsaxA", "oy_BA5IGl1JgkJKbD14wq_-Yorqw", "oy_BA5Mma34QREkVtRZsBzGfeoTU", "oy_BA5OGAMgICOtA0_TDSVMPL3TY", "oy_BA5PGjCAVUy8HlFogAZpEDfw0", "oy_BA5OxthTrQwSA0HET6d0OO8mc", "oy_BA5HvRDftLNhkkZ0PKgDZmkjQ", "oy_BA5FK1t3dEwrMZndhlUoI2-HY"}
 var pointSql = `SELECT ID,
 	point.openid,
 	point.balance,
@@ -42,8 +43,12 @@ to quickly create a Cobra application.`,
 		initialize.Initialize("./config-dev.ini")
 		list := make([]PointExpire, 0)
 		wg := sync.WaitGroup{}
-		fmt.Println("haha")
-		app.DB.Table(fmt.Sprintf("(%s) point_expire", pointSql)).FindInBatches(&list, 100, func(tx *gorm.DB, batch int) error {
+		bindings := make([]interface{}, 0)
+		if len(openids) > 0 {
+			pointSql += " where point.openid in (?)"
+			bindings = append(bindings, openids)
+		}
+		app.DB.Table(fmt.Sprintf("(%s) point_expire", pointSql), bindings...).FindInBatches(&list, 100, func(tx *gorm.DB, batch int) error {
 			fmt.Println("处理批次", batch, "处理条数", len(list))
 			for i, item := range list {
 				i := i
