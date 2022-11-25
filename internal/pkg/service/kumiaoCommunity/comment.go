@@ -218,8 +218,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		MemberId:      userId,
 		RootCommentId: RootCommentId,
 		ToCommentId:   ToCommentId,
-		CreatedAt:     time.Time{},
-		UpdatedAt:     time.Time{},
 	}
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
@@ -435,7 +433,7 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 		ObjId:       obj.Id,
 		ObjType:     0,
 		ImageList:   obj.ImageList,
-		Description: obj.Content,
+		Description: obj.Title,
 	}
 	commentResp.Detail = detail
 	return commentResp, nil

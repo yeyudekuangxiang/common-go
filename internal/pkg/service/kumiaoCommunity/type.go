@@ -1,6 +1,7 @@
 package kumiaoCommunity
 
 import (
+	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"time"
 )
@@ -87,8 +88,8 @@ type APIComment struct {
 	DelReason     string           `gorm:"type:varchar(200)" json:"delReason"`                //删除理由
 	Attrs         int8             `gorm:"type:int2" json:"attrs"`                            // 属性 00-正常 10-运营置顶 01-用户置顶 保留字段
 	Version       int64            `gorm:"type:int8;version" json:"version"`                  // 版本号 保留字段
-	CreatedAt     time.Time        `json:"createdAt"`
-	UpdatedAt     time.Time        `json:"updatedAt"`
+	CreatedAt     model.Time       `gorm:"createdAt" json:"createdAt"`
+	UpdatedAt     model.Time       `gorm:"updatedAt" json:"updatedAt"`
 	Member        entity.ShortUser `gorm:"foreignKey:ID;references:MemberId" json:"member"` // 评论用户
 	IsAuthor      int8             `gorm:"type:int2" json:"isAuthor"`                       // 是否作者
 	RootChild     []*APIComment    `gorm:"foreignKey:RootCommentId;association_foreignKey:Id" json:"rootChild"`
@@ -103,8 +104,8 @@ type APICommentResp struct {
 	RootCount int32             `gorm:"type:int4;not null:default:0" json:"rootCount"` // 该评论下根评论总数
 	LikeCount int32             `gorm:"type:int4;not null:default:0" json:"likeCount"` // 该评论点赞总数
 	HateCount int32             `gorm:"type:int4;not null:default:0" json:"hateCount"` // 该评论点踩总数
-	CreatedAt time.Time         `json:"createdAt"`
-	UpdatedAt time.Time         `json:"updatedAt"`
+	CreatedAt model.Time        `json:"createdAt"`
+	UpdatedAt model.Time        `json:"updatedAt"`
 	Member    entity.ShortUser  `json:"member"`
 	Detail    Detail            `json:"detail"`
 	IsAuthor  int8              `json:"isAuthor"` // 是否作者
