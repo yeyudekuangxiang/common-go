@@ -218,8 +218,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		MemberId:      userId,
 		RootCommentId: RootCommentId,
 		ToCommentId:   ToCommentId,
-		CreatedAt:     time.Time{},
-		UpdatedAt:     time.Time{},
 	}
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
