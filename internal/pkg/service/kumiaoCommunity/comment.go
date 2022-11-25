@@ -456,11 +456,12 @@ func (srv *defaultCommentService) mallComment(id, userId int64) (*APICommentResp
 
 	if comment.RootCommentId != 0 {
 		id = comment.RootCommentId
-		//root
-		err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", id).First(&comment).Error
-		if err != nil {
-			return commentResp, err
-		}
+	}
+
+	//root
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", id).Preload("Member").First(&comment).Error
+	if err != nil {
+		return commentResp, err
 	}
 
 	// child
