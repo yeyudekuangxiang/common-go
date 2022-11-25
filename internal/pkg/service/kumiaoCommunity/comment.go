@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -218,8 +219,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		MemberId:      userId,
 		RootCommentId: RootCommentId,
 		ToCommentId:   ToCommentId,
-		CreatedAt:     time.Time{},
-		UpdatedAt:     time.Time{},
 	}
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
@@ -371,28 +370,28 @@ func (srv *defaultCommentService) TurnComment(params TurnCommentReq) (*APICommen
 	return comment, nil
 }
 
-func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentResp, error) {
+func (srv *defaultCommentService) kuMioComment(turnId string, userId int64) (*APICommentResp, error) {
 	childList := make([]*APIComment, 0)
 	comment := &APIComment{}
 	commentResp := &APICommentResp{}
 	commentRespChild := make([]*APICommentResp, 0)
 	//root
 
-	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", id).First(&comment).Error
+	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", turnId).First(&comment).Error
 	if err != nil {
 		return commentResp, err
 	}
 
-	if comment.Id == 0 {
+	if comment.Id == "" {
 		return commentResp, errno.ErrRecordNotFound
 	}
 
 	if comment.RootCommentId != 0 {
-		id = comment.RootCommentId
+		turnId = strconv.FormatInt(comment.RootCommentId, 10)
 	}
 
 	//root
-	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", id).Preload("Member").First(&comment).Error
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", turnId).Preload("Member").First(&comment).Error
 	if err != nil {
 		return commentResp, err
 	}
@@ -400,7 +399,7 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 	// child
 	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).
 		Preload("Member").
-		Where("root_comment_id = ?", id).
+		Where("root_comment_id = ?", turnId).
 		Where("state = ?", 0).
 		Find(&childList).Error
 	if err != nil {
@@ -409,11 +408,11 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 
 	commentResp = comment.ApiComment()
 	//like
-	likeMap := make(map[int64]int, 0)
+	likeMap := make(map[string]int, 0)
 	commentLike := srv.commentLikeModel.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
 	if len(commentLike) > 0 {
 		for _, item := range commentLike {
-			likeMap[item.CommentId] = int(item.Status)
+			likeMap[strconv.FormatInt(item.CommentId, 10)] = int(item.Status)
 		}
 	}
 
@@ -430,45 +429,49 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 	}
 	commentResp.RootChild = commentRespChild
 	// obj
-	obj := srv.topicModel.FindById(comment.ObjId)
-	detail := Detail{
-		ObjId:       obj.Id,
-		ObjType:     0,
-		ImageList:   obj.ImageList,
-		Description: obj.Content,
+	parseInt, _ := strconv.ParseInt(comment.ObjId, 10, 64)
+	obj := srv.topicModel.FindById(parseInt)
+	if obj.Id != 0 {
+		detail := Detail{
+			ObjId:       comment.ObjId,
+			ObjType:     0,
+			ImageList:   obj.ImageList,
+			Description: obj.Title,
+		}
+		commentResp.Detail = detail
 	}
-	commentResp.Detail = detail
 	return commentResp, nil
 }
 
-func (srv *defaultCommentService) mallComment(id, userId int64) (*APICommentResp, error) {
+func (srv *defaultCommentService) mallComment(turnId string, userId int64) (*APICommentResp, error) {
 	childList := make([]*APIComment, 0)
 	comment := &APIComment{}
 	commentResp := &APICommentResp{}
 	commentRespChild := make([]*APICommentResp, 0)
 	//root
-	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", id).First(&comment).Error
+	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", turnId).First(&comment).Error
 	if err != nil {
 		return commentResp, err
 	}
 
-	if comment.Id == 0 {
+	if comment.Id == "" {
 		return commentResp, errno.ErrRecordNotFound
 	}
 
 	if comment.RootCommentId != 0 {
-		id = comment.RootCommentId
-		//root
-		err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", id).First(&comment).Error
-		if err != nil {
-			return commentResp, err
-		}
+		turnId = strconv.FormatInt(comment.RootCommentId, 10)
+	}
+
+	//root
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", turnId).Preload("Member").First(&comment).Error
+	if err != nil {
+		return commentResp, err
 	}
 
 	// child
 	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).
 		Preload("Member").
-		Where("root_comment_id = ?", id).
+		Where("root_comment_id = ?", turnId).
 		Where("state = ?", 0).
 		Find(&childList).Error
 	if err != nil {
@@ -477,11 +480,11 @@ func (srv *defaultCommentService) mallComment(id, userId int64) (*APICommentResp
 
 	commentResp = comment.ApiComment()
 	//like
-	likeMap := make(map[int64]int, 0)
+	likeMap := make(map[string]int, 0)
 	commentLike := srv.carbonCommentLikeModel.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
 	if len(commentLike) > 0 {
 		for _, item := range commentLike {
-			likeMap[item.CommentId] = int(item.Status)
+			likeMap[strconv.FormatInt(item.CommentId, 10)] = int(item.Status)
 		}
 	}
 
@@ -498,13 +501,17 @@ func (srv *defaultCommentService) mallComment(id, userId int64) (*APICommentResp
 	}
 	commentResp.RootChild = commentRespChild
 	//obj
-	obj, _ := srv.carbonSecondHandCommodityModel.FindOne(comment.ObjId)
-	detail := Detail{
-		ObjId:       obj.Id,
-		ObjType:     1,
-		ImageList:   obj.ImageList,
-		Description: obj.Description,
+	objId, _ := strconv.ParseInt(comment.ObjId, 10, 64)
+	obj, err := srv.carbonSecondHandCommodityModel.FindOne(objId)
+	if err == nil {
+		detail := Detail{
+			ObjId:       comment.ObjId,
+			ObjType:     1,
+			ImageList:   obj.ImageList,
+			Description: obj.Description,
+		}
+		commentResp.Detail = detail
 	}
-	commentResp.Detail = detail
+
 	return commentResp, nil
 }

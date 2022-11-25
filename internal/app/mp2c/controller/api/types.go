@@ -207,8 +207,8 @@ type ChangeCommentLikeForm struct {
 }
 
 type TurnCommentRequest struct {
-	Types  int   `json:"types" form:"types" binding:"required"`
-	TurnId int64 `json:"turnId" form:"turnId" binding:"required"`
+	Types  int    `json:"types" form:"types" binding:"required"`
+	TurnId string `json:"turnId" form:"turnId" binding:"required"`
 }
 
 type JinHuaXingForm struct {
