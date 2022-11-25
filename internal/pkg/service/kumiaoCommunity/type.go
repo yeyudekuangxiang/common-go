@@ -66,14 +66,14 @@ type TopicDetail struct {
 }
 
 type TurnCommentReq struct {
-	UserId int64 `json:"userId"`
-	Types  int   `json:"types"`
-	TurnId int64 `json:"turnId"`
+	UserId int64  `json:"userId"`
+	Types  int    `json:"types"`
+	TurnId string `json:"turnId"`
 }
 
 type APIComment struct {
-	Id            int64            `gorm:"primaryKey;autoIncrement" json:"id"`
-	ObjId         int64            `gorm:"type:int8;not null" json:"objId" json:"objId"` // 对象id （文章）
+	Id            string           `gorm:"primaryKey;autoIncrement" json:"id"`
+	ObjId         string           `gorm:"type:int8;not null" json:"objId" json:"objId"` // 对象id （文章）
 	ObjType       int8             `gorm:"type:int2" json:"objType"`                     // 保留字段
 	Message       string           `gorm:"type:text;not null" json:"message"`
 	MemberId      int64            `gorm:"type:int8;not null" json:"memberId"`                // 评论用户id
@@ -96,7 +96,7 @@ type APIComment struct {
 }
 
 type APICommentResp struct {
-	Id        int64             `gorm:"primaryKey;autoIncrement" json:"id"`
+	Id        string            `gorm:"primaryKey;autoIncrement" json:"id"`
 	Message   string            `gorm:"type:text;not null" json:"message"`
 	MemberId  int64             `gorm:"type:int8;not null" json:"memberId"`            // 评论用户id
 	Floor     int32             `gorm:"type:int4;not null:default:0" json:"floor"`     // 评论楼层
@@ -114,7 +114,7 @@ type APICommentResp struct {
 }
 
 type Detail struct {
-	ObjId       int64  `json:"objId"`
+	ObjId       string `json:"objId"`
 	ObjType     int64  `json:"objType"`
 	ImageList   string `json:"imageList"`
 	Description string `json:"description"`

@@ -6,8 +6,8 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/message"
-	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
 	"strings"
 )
 
@@ -114,32 +114,21 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	}
 
 	uKeyMap := make(map[int64]struct{}, l+1) // 发送者id map
-	//topicMap := make(map[int64]struct{}, l+1)   // 帖子 map
-	//commentMap := make(map[int64]struct{}, l+1) // 评论 map
-	//orderMap := make(map[int64]struct{}, l+1)   // 订单 map
-	//goodsMap := make(map[int64]struct{}, l+1)   // 商品 map
+
 	for i, item := range msgList {
-		one := &GetWebMessageResp{}
-		_ = util.MapTo(item, one)
+		one := &GetWebMessageResp{
+			Id:             item.Id,
+			MessageContent: item.MessageContent,
+			MessageNotes:   item.MessageNotes,
+			Type:           item.Type,
+			Status:         item.Status,
+			CreatedAt:      item.CreatedAt,
+			TurnType:       item.TurnType,
+			TurnId:         strconv.FormatInt(item.TurnId, 10),
+			SendId:         item.SendId,
+		}
 		result[i] = one
-		//	//uKeyMap
 		uKeyMap[item.SendId] = struct{}{}
-		//	//turnMap
-		//	if item.TurnType == 1 {
-		//		topicMap[item.ShowId] = struct{}{}
-		//	}
-		//
-		//	if item.TurnType == 2 {
-		//		commentMap[item.ShowId] = struct{}{}
-		//	}
-		//
-		//	if item.TurnType == 3 {
-		//		orderMap[item.ShowId] = struct{}{}
-		//	}
-		//	if item.TurnType == 4 {
-		//		goodsMap[item.ShowId] = struct{}{}
-		//	}
-		//
 	}
 
 	//User
@@ -153,12 +142,6 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	for _, uItem := range uList {
 		uMap[uItem.ID] = uItem
 	}
-
-	//Turn
-	//tMap := d.turnTopic(topicMap)     //文章
-	//cMap := d.turnComment(commentMap) //评论
-	//oMap := d.turnOrder(orderMap)     // 订单
-	//gMap := d.turnGoods(goodsMap)     // 商品
 
 	for _, item := range result {
 		if item.SendId == 0 {
