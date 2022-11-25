@@ -435,7 +435,7 @@ func (srv *defaultCommentService) kuMioComment(id, userId int64) (*APICommentRes
 		ObjId:       obj.Id,
 		ObjType:     0,
 		ImageList:   obj.ImageList,
-		Description: obj.Content,
+		Description: obj.Title,
 	}
 	commentResp.Detail = detail
 	return commentResp, nil
