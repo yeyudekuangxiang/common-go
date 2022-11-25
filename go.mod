@@ -41,7 +41,7 @@ require (
 	github.com/xuri/excelize/v2 v2.6.1
 	github.com/zeromicro/go-zero v1.4.2
 	gitlab.miotech.com/miotech-application/backend/common-go v1.0.2
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.6
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.9-develop
 	go.uber.org/zap v1.23.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -138,7 +138,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rabbitmq/amqp091-go v1.4.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.5.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -195,6 +195,6 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.6 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.6
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.9-develop => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.9-develop
 
 replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.2 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.2

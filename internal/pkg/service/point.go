@@ -104,13 +104,13 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			AdminId:      uint64(dto.AdminId),
 			Node:         dto.Note,
 			AdditionInfo: dto.AdditionInfo,
-			InviteId:     dto.InviteId,
+			BizName:      string("mp2c-go-" + dto.Type),
 		})
 		if err != nil {
 			return 0, err
 		}
 		balance = resp.Point
-		ptId = resp.PointTransactionId
+		ptId = resp.LogId
 	} else {
 		resp, err := app.RpcService.PointRpcSrv.DecPoint(srv.ctx, &pointclient.DecPointReq{
 			Openid:       dto.OpenId,
@@ -120,13 +120,13 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			AdminId:      uint64(dto.AdminId),
 			Node:         dto.Note,
 			AdditionInfo: dto.AdditionInfo,
-			InviteId:     dto.InviteId,
+			BizName:      string("mp2c-go-" + dto.Type),
 		})
 		if err != nil {
 			return 0, err
 		}
 		balance = resp.Point
-		ptId = resp.PointTransactionId
+		ptId = resp.LogId
 	}
 	go srv.afterChangePoint(ptId, balance, dto)
 	return balance, err
