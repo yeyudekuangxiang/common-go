@@ -9,7 +9,10 @@ type QuizMessage struct {
 }
 
 type QuizSendMessage struct {
-	Uid    int64
-	OpenId string
-	BizId  string
+	Uid              int64
+	OpenId           string
+	BizId            string
+	QuizTime         int64
+	TodayCorrectNum  int
+	TodayAnsweredNum int
 }
