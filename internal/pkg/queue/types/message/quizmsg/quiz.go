@@ -5,6 +5,7 @@ type QuizMessage struct {
 	QuizTime         int64
 	TodayCorrectNum  int
 	TodayAnsweredNum int
+	BizId            string
 }
 
 type QuizSendMessage struct {

@@ -113,6 +113,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 		TodayCorrectNum:  todayResult.CorrectNum,
 		TodayAnsweredNum: todayResult.IncorrectNum,
 		QuizTime:         time.Now().Unix(),
+		BizId:            util.UUID(),
 	})
 	if mqErr != nil {
 		//不做返回处理
