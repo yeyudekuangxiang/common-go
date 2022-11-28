@@ -185,27 +185,17 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	//发送消息
 	var notes, msgKey string
-	var turnId int64
-	var turnType, types int
+	var types int
+	turnType := 2
+	turnId := comment.Id
 
 	if form.Parent == 0 {
 		msgKey = "reply_topic"
-		turnId = comment.Id
-		turnType = 1
 		types = 2
 		topic := topicService.FindById(form.ObjId)
-		//n := len(topic.Tags)
-		//if n > 2 {
-		//	n = 2
-		//}
-		//for i := 0; i < n; i++ {
-		//	notes += topic.Tags[i].Name + "|"
-		//}
 		notes = topic.Title
 	} else {
 		msgKey = "reply_comment"
-		turnType = 2
-		turnId = comment.Id
 		types = 3
 		toMsg := toComment.Message
 		messagerune = []rune(comment.Message)
