@@ -12,8 +12,11 @@ import (
 func SendMessage(msg quizmsg.QuizMessage) error {
 	//发放优惠券
 	sendMsg := quizmsg.QuizSendMessage{
-		OpenId: msg.OpenId,
-		BizId:  util.UUID(),
+		OpenId:           msg.OpenId,
+		BizId:            util.UUID(),
+		QuizTime:         msg.QuizTime,
+		TodayCorrectNum:  msg.TodayCorrectNum,
+		TodayAnsweredNum: msg.TodayAnsweredNum,
 	}
 	data, err := json.Marshal(sendMsg)
 	if err != nil {
