@@ -13,8 +13,6 @@ func pugcRouter(router *gin.Engine) {
 	//pugcRouter.Use(mustAuth())
 	{
 		pugcRouter.GET("/mq", apiutil.Format(pugc.DefaultPugcController.TestMqV2))
-		pugcRouter.GET("/tianjin", apiutil.Format(pugc.DefaultPugcController.SendTianjinMetro))
-		pugcRouter.POST("/sendTjMq", apiutil.Format(pugc.DefaultPugcController.SendTjMq))
 
 		pugcRouter.GET("/sendZyhPoint", apiutil.Format(pugc.DefaultPugcController.SendZyhPoint))
 		pugcRouter.GET("/SendZyhPointV2", apiutil.Format(pugc.DefaultPugcController.SendZyhPointV2))

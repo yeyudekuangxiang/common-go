@@ -4,12 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"log"
-	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
-	"mio/internal/pkg/service/platform/tianjin_metro"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/message"
@@ -96,28 +93,6 @@ func (c SmsSendController) SendZhuGe(ctx *gin.Context) (gin.H, error) {
 	err := track.DefaultZhuGeService().TrackWithErr(form.EventKey, form.Openid, zhuGeAttr)
 	if err != nil {
 		return nil, err
-	}
-	return gin.H{}, nil
-}
-
-//发放天津地铁优惠券
-
-func (c SmsSendController) SendTjMetro(ctx *gin.Context) (gin.H, error) {
-	form := api_types.GetSendTjMetroForm{}
-	if err := apiutil.BindForm(ctx, &form); err != nil {
-		return nil, err
-	}
-	//判断是否可以发放天津地铁优惠券
-	serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-	userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(form.ThirdCouponTypes, form.Openid)
-	//发放优惠券
-	if ticketErr != nil {
-		app.Logger.Infof("天津地铁答题发电子票,发放前失败 %+v", ticketErr)
-	} else {
-		_, err := serviceTianjin.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userInfo)
-		if err != nil {
-			app.Logger.Infof("答题发天津地铁优惠券失败,发放后失败 %+v", ticketErr)
-		}
 	}
 	return gin.H{}, nil
 }

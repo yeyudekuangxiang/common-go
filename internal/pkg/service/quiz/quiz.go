@@ -3,12 +3,11 @@ package quiz
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/queue/producer/thirdPlatformPdr"
-	"mio/internal/pkg/queue/types/message/thirdPlatform"
+	"mio/internal/pkg/queue/producer/quizpdr"
+	"mio/internal/pkg/queue/types/message/quizmsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -38,6 +37,17 @@ func (srv QuizService) Availability(openid string) (bool, error) {
 	}
 	return !isAnsweredToday, nil
 }
+
+// 答题总次数
+
+func (srv QuizService) QuestionsCount(openid string) (int64, error) {
+	isAnsweredToday, err := DefaultQuizDailyResultService.QuestionsCount(openid)
+	if err != nil {
+		return 0, err
+	}
+	return isAnsweredToday, nil
+}
+
 func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*AnswerQuestionResult, error) {
 	if !util.DefaultLock.Lock("QuizAnswerQuestion"+openid, time.Second*5) {
 		return nil, errno.ErrLimit
@@ -97,25 +107,16 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	sendErr := thirdPlatformPdr.SendRobotMessage(thirdPlatform.TjMetroMessage{
+
+	mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
 		OpenId:           openId,
-		ThirdCouponTypes: config.Config.ThirdCouponTypes.TjMetro,
+		TodayCorrectNum:  todayResult.CorrectNum,
+		TodayAnsweredNum: todayResult.IncorrectNum,
+		QuizTime:         time.Now().Unix(),
 	})
-	if sendErr != nil {
-		app.Logger.Infof("答题发天津地铁优惠券失败 %+v", sendErr.Error())
+	if mqErr != nil {
+		//不做返回处理
 	}
-	/*
-		//判断是否可以发放天津地铁优惠券
-		serviceTianjin := tianjin_metro.NewTianjinMetroService(context.NewMioContext())
-		userInfo, ticketErr := serviceTianjin.GetTjMetroTicketStatus(config.Config.ThirdCouponTypes.TjMetro, openId)
-
-		//发放优惠券
-		if ticketErr != nil {
-			app.Logger.Infof("答题发天津地铁优惠券失败 %+v", ticketErr)
-		} else {
-			serviceTianjin.SendCoupon(config.Config.ThirdCouponTypes.TjMetro, *userInfo)
-		}*/
-
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
