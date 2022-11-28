@@ -1,6 +1,7 @@
 package quizmsg
 
 type QuizMessage struct {
+	Uid              int64
 	OpenId           string
 	QuizTime         int64
 	TodayCorrectNum  int
