@@ -12,6 +12,7 @@ import (
 func SendMessage(msg quizmsg.QuizMessage) error {
 	//发放优惠券
 	sendMsg := quizmsg.QuizSendMessage{
+		Uid:              msg.Uid,
 		OpenId:           msg.OpenId,
 		BizId:            util.UUID(),
 		QuizTime:         msg.QuizTime,

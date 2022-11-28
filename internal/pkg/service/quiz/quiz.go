@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/quizpdr"
 	"mio/internal/pkg/queue/types/message/quizmsg"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -107,17 +108,27 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
-		OpenId:           openId,
-		TodayCorrectNum:  todayResult.CorrectNum,
-		TodayAnsweredNum: todayResult.IncorrectNum,
-		QuizTime:         time.Now().Unix(),
-		BizId:            util.UUID(),
+	user, b, err := service.DefaultUserService.GetUser(repository.GetUserBy{
+		OpenId: openId,
+		Source: "mio",
 	})
-	if mqErr != nil {
-		//不做返回处理
+	if err != nil {
+		return 0, err
 	}
+	if b {
+		mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
+			Uid:              user.ID,
+			OpenId:           user.OpenId,
+			TodayCorrectNum:  todayResult.CorrectNum,
+			TodayAnsweredNum: todayResult.IncorrectNum,
+			QuizTime:         time.Now().Unix(),
+			BizId:            util.UUID(),
+		})
+		if mqErr != nil {
+			return 0, err
+		}
+	}
+
 	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
