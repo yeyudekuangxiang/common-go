@@ -98,6 +98,10 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	answerPoint, err := srv.SendAnswerPoint(openId, todayResult.CorrectNum)
+	if err != nil {
+		return 0, err
+	}
 	user, b, err := service.DefaultUserService.GetUser(repository.GetUserBy{
 		OpenId: openId,
 		Source: "mio",
@@ -118,8 +122,7 @@ func (srv QuizService) Submit(openId string) (int, error) {
 			return 0, err
 		}
 	}
-
-	return srv.SendAnswerPoint(openId, todayResult.CorrectNum)
+	return answerPoint, nil
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
 	if correctNum > OneDayAnswerNum {
