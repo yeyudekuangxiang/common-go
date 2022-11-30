@@ -352,7 +352,7 @@ func (srv *defaultCommentService) AddCommentLikeCount(commentId int64, num int) 
 
 func (srv *defaultCommentService) TurnComment(params TurnCommentReq) (*APICommentResp, error) {
 	kuMio, _ := util.InArray(params.Types, []int{1, 2, 3})
-	mall, _ := util.InArray(params.Types, []int{10, 11, 12})
+	mall, _ := util.InArray(params.Types, []int{8, 9, 10, 11, 12})
 	var err error
 	comment := &APICommentResp{}
 

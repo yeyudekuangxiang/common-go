@@ -15,6 +15,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/limit"
 	"mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
 	"strconv"
@@ -293,4 +294,93 @@ func (ctr RecycleController) turnPlatform(user *entity.User, form api.RecyclePus
 		}
 	}
 	return
+}
+
+func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
+	form := recycleReq{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
+	}
+
+	params := make(map[string]interface{}, 0)
+	err := util.MapTo(&form, &params)
+	if err != nil {
+		return nil, errno.ErrCommon
+	}
+
+	//校验sign
+	if err := platform.CheckSign(form.Sign, params, scene.Key, "&"); err != nil {
+		return nil, errno.ErrCommon.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
+	}
+
+	//校验用户
+	uid, err := strconv.ParseInt(form.MemberId, 10, 64)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+	userInfo, _ := service.DefaultUserService.GetUserById(uid)
+	if userInfo.ID == 0 {
+		return nil, errno.ErrUserNotFound
+	}
+
+	ctx := context.NewMioContext()
+
+	//校验重复订单
+	RecycleService := recycle.NewRecycleService(ctx)
+	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
+		return nil, errno.ErrLimit.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
+	}
+
+	//每日次数限制
+	keyPrefix := fmt.Sprintf("periodLimit:sendPoint:recycle:%s:", form.Ch)
+	PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), scene.Override, app.Redis, keyPrefix, limit.Align())
+	resNumber, err := PeriodLimit.TakeCtx(ctx.Context, form.MemberId)
+
+	if err != nil {
+		return nil, errno.ErrCommon
+	}
+
+	if resNumber != 1 && resNumber != 2 {
+		app.Logger.Infof("旧物回收: ch:%s user:%s 超过每日次数上限", scene.Ch, form.MemberId)
+		return nil, nil
+	}
+
+	//计算积分
+	PointService := service.NewPointService(ctx)
+	currPoint, _ := RecycleService.GetPoint(form.Category, form.Number) //本次可得积分
+	currCo2, _ := RecycleService.GetCo2(form.Category, form.Number)     //本次可得减碳量
+
+	//加积分
+	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       userInfo.OpenId,
+		Type:         entity.POINT_RECYCLING,
+		ChangePoint:  currPoint,
+		BizId:        util.UUID(),
+		AdditionInfo: fmt.Sprint(params),
+		Note:         form.OrderNo,
+	})
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(fmt.Sprintf("增加积分失败:%s", err.Error()))
+	}
+
+	//发碳量
+	_, err = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
+		OpenId: userInfo.OpenId,
+		UserId: userInfo.ID,
+		Type:   entity.CARBON_RECYCLING,
+		Value:  currCo2,
+		Info:   fmt.Sprint(params),
+	})
+
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
+	}
+
+	return gin.H{}, nil
 }
