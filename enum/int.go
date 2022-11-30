@@ -56,6 +56,7 @@ func (l EnumIntStatusList) Exist(status int64) bool {
 func (l EnumIntStatusList) List() []IEnumIntStatus {
 	return l
 }
-func (l EnumIntStatusList) Find(status int64) IEnumIntStatus {
-	return l.Map()[status]
+func (l EnumIntStatusList) Find(status int64) (enumStatus IEnumIntStatus, exist bool) {
+	enumStatus, exist = l.Map()[status]
+	return
 }

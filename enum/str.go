@@ -55,6 +55,7 @@ func (l EnumStrStatusList) Exist(status string) bool {
 func (l EnumStrStatusList) List() []IEnumStrStatus {
 	return l
 }
-func (l EnumStrStatusList) Find(status string) IEnumStrStatus {
-	return l.Map()[status]
+func (l EnumStrStatusList) Find(status string) (enumStatus IEnumStrStatus, exist bool) {
+	enumStatus, exist = l.Map()[status]
+	return
 }
