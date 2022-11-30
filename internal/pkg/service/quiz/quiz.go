@@ -39,16 +39,6 @@ func (srv QuizService) Availability(openid string) (bool, error) {
 	return !isAnsweredToday, nil
 }
 
-// 答题总次数
-
-func (srv QuizService) QuestionsCount(openid string) (int64, error) {
-	isAnsweredToday, err := DefaultQuizDailyResultService.QuestionsCount(openid)
-	if err != nil {
-		return 0, err
-	}
-	return isAnsweredToday, nil
-}
-
 func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*AnswerQuestionResult, error) {
 	if !util.DefaultLock.Lock("QuizAnswerQuestion"+openid, time.Second*5) {
 		return nil, errno.ErrLimit
