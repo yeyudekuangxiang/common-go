@@ -106,11 +106,8 @@ func (srv QuizService) Submit(openId string) (int, error) {
 		OpenId: openId,
 		Source: "mio",
 	})
-	if err != nil {
-		return 0, err
-	}
 	if b {
-		mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
+		quizpdr.SendMessage(quizmsg.QuizMessage{
 			Uid:              user.ID,
 			OpenId:           user.OpenId,
 			TodayCorrectNum:  todayResult.CorrectNum,
@@ -118,9 +115,6 @@ func (srv QuizService) Submit(openId string) (int, error) {
 			QuizTime:         time.Now().Unix(),
 			BizId:            util.UUID(),
 		})
-		if mqErr != nil {
-			return 0, err
-		}
 	}
 	return answerPoint, nil
 }
