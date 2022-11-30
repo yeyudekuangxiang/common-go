@@ -8,15 +8,10 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	globalclient.GlobalClientConf
+	GlobalClientConf globalclient.GlobalClientConf
 	Database DbConf
 	Cache    cache.CacheConf
 	Debug bool
-}
-type RedisConf struct {
-	Host     string
-	Password string `json:",optional"`
-	DB       int    `json:",optional"`
 }
 type DbConf struct {
 	Type         string

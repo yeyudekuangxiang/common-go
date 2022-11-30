@@ -24,11 +24,12 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 	fmt.Printf("配置文件 %+v\n",c)
 	errno.Debug = c.Debug
-	globalclient.InitGlobalClient(c)
-	defer globalclient.Close()
 
 	server := rest.MustNewServer(c.RestConf, rest.WithCors(), rest.WithUnauthorizedCallback(result.HttpUnAuthCallback))
 	defer server.Stop()
+
+	globalclient.InitGlobalClient(c)
+	defer globalclient.Close()
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)

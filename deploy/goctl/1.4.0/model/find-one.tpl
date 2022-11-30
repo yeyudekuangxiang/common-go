@@ -1,12 +1,23 @@
 
 func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}},opts ...option) (*{{.upperStartCamelObject}},bool, error) {
-	db:= initOptions(m.db.WithContext(ctx),opts)
-	{{if .withCache}}{{.cacheKey}}
+
+	{{if .withCache}}
+	db,op:= initOptions(m.db.WithContext(ctx),&m.options,opts)
+
+	{{.cacheKey}}
 	var resp {{.upperStartCamelObject}}
-	err := m.cache.TakeCtx(ctx, &resp, {{.cacheKeyVariable}}, func(val interface{}) error {
+	var err error
+
+	if op.skipFindCache {
+	    err = db.Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Take(&resp).Error
+	    goto skipFindCache
+	}
+
+	err= m.cache.TakeCtx(ctx, &resp, {{.cacheKeyVariable}}, func(val interface{}) error {
 		return db.Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Take(&resp).Error
 	})
 
+    skipFindCache:
 	if err == nil {
 		return &resp, true, nil
 	}
@@ -14,7 +25,9 @@ func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{
 		return nil, false, nil
 	}
 	return nil, false, err
-    {{else}}var resp {{.upperStartCamelObject}}
+    {{else}}
+    db,_:= initOptions(m.db.WithContext(ctx),&m.options,opts)
+    var resp {{.upperStartCamelObject}}
     err:=db.Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Take(&resp).Error
  	if err == nil {
  		return &resp, true, nil

@@ -2,7 +2,7 @@ package svc
 
 import {{.imports}}
 import (
-	"{{.projectPath}}/common/db"
+	"gitlab.miotech.com/miotech-application/backend/common-go/db"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"

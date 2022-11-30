@@ -3,7 +3,7 @@ package {{.PkgName}}
 import (
 	"net/http"
 	"{{.projectPath}}/common/result"
-	"{{.projectPath}}/common/tool/api"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/apitool"
 
 	{{.ImportPackages}}
 )
@@ -11,7 +11,7 @@ import (
 func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		{{if .HasRequest}}var req types.{{.RequestType}}
-		if err := api.BindForm(r, &req); err != nil {
+		if err := apitool.BindForm(r, &req); err != nil {
 			result.HttpResult(r, w, nil, err)
 			return
 		}
