@@ -34,7 +34,7 @@ type PugcController struct {
 func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
 
 	mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
-		OpenId:   "oMD8d5CPOCCTAzfohzl_3t7ZBBB0",
+		Uid:      921216,
 		BizId:    "1111",
 		QuizTime: time.Now().Unix(),
 	})
