@@ -136,9 +136,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			app.Logger.Errorf("提交新用户处理事件失败 %+v %s %s", user, invitedBy, partnershipWith)
 		}
-	}
-
-	if !isNewUser {
+	} else {
 		//更新用户的最新ip
 		service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
 			OpenId: user.OpenId,
