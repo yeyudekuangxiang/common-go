@@ -314,7 +314,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 
 		key := "essence_topic_v2"
 		if resNumber == 1 || resNumber == 2 {
-			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_RECOMMEND,
 				BizId:        util.UUID(),
@@ -323,6 +323,9 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				Note:         "笔记 \"" + topic.Title + "...\" 被设为精华",
 				AdditionInfo: strconv.FormatInt(topic.Id, 10),
 			})
+			if err != nil {
+				app.Logger.Errorf("积分增加失败:%s", err.Error())
+			}
 			key = "essence_topic"
 		}
 
