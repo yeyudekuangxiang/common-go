@@ -89,7 +89,6 @@ func openRouter(router *gin.Engine) {
 		//外部平台调绿喵 需要登陆
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
 		{
-			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 			openAuthRouter.GET("/platform/bind", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 			openAuthRouter.POST("/check/msg", apiutil.Format(open.DefaultPlatformController.CheckMgs))
 			openAuthRouter.POST("/check/media", apiutil.Format(open.DefaultPlatformController.CheckMedia))
@@ -110,6 +109,9 @@ func openRouter(router *gin.Engine) {
 			openPlatformRouter.POST("/pre_point", apiutil.Format(open.DefaultPlatformController.PrePoint))                //第三方平台 预加积分
 			openPlatformRouter.POST("/get_pre_point", apiutil.Format(open.DefaultPlatformController.GetPrePointList))     //第三方平台 获取积分
 			openPlatformRouter.POST("/collect_pre_point", apiutil.Format(open.DefaultPlatformController.CollectPrePoint)) //第三方平台 消费积分
+			//第三方
+			openAuthRouter.GET("/recycle", apiutil.Format(open.DefaultRecycleController.Recycle))  //旧物回收
+			openAuthRouter.GET("/syncusr", apiutil.Format(open.DefaultPlatformController.Syncusr)) //注册回调
 		}
 	}
 }

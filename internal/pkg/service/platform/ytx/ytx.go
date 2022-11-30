@@ -79,7 +79,7 @@ func WithAppId(appId string) Options {
 	}
 }
 
-//绑定回调
+//绑定回调第三方
 func (srv *Service) BindSuccess(params map[string]interface{}) error {
 	synchroRequest := SynchroRequest{
 		OpenId:         params["memberId"].(string),

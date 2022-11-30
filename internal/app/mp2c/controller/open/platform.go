@@ -31,6 +31,7 @@ var DefaultPlatformController = PlatformController{}
 type PlatformController struct {
 }
 
+//嵌入绑定第三方 用户绑定
 func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, error) {
 	//接收参数 platformKey, phone
 	form := bindPlatform{}
@@ -101,6 +102,11 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 		"memberId":     sceneUser.PlatformUserId,
 		"lvmiaoUserId": sceneUser.OpenId,
 	}, nil
+}
+
+//第三方回调绿喵 注册回调
+func (receiver PlatformController) Syncusr(c *gin.Context) (gin.H, error) {
+	return nil, nil
 }
 
 func (receiver PlatformController) SyncPoint(c *gin.Context) (gin.H, error) {
