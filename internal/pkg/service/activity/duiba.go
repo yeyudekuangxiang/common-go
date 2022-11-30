@@ -301,6 +301,9 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		}
 		break
 
+	case entity.DuiBaActivityYtxLuckyDrawActivity:
+		return "", errno.ErrCommon
+		break
 	default:
 		break
 	}
