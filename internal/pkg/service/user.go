@@ -75,7 +75,20 @@ func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.User
 		if err := util2.MapTo(param, &userExtend); err != nil {
 			return nil, err
 		}
+		city, errCity := baidu.IpToCity(param.Ip)
+		if errCity != nil {
+			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+		}
+
 		userExtend.CreatedAt = time.Now()
+		userExtend.Adcode = city.Content.AddressDetail.Adcode
+		userExtend.CityCode = city.Content.AddressDetail.CityCode
+		userExtend.Province = city.Content.AddressDetail.Province
+		userExtend.City = city.Content.AddressDetail.City
+		userExtend.District = city.Content.AddressDetail.District
+		userExtend.Street = city.Content.AddressDetail.Street
+		userExtend.StreetNumber = city.Content.AddressDetail.StreetNumber
+
 		ret := u.rUserExtend.Create(userExtend)
 		return userExtend, ret
 	} else {
@@ -205,7 +218,6 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	}*/
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
-
 	} else {
 		zhuGeAttr["是否成功"] = "失败"
 		zhuGeAttr["失败原因"] = ret.Error()
