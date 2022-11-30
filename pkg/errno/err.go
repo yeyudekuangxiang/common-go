@@ -40,12 +40,7 @@ var (
 	ErrNotBindMobile      = err{code: 20303, message: "未授权手机号码"}  // ErrNotBindMobile 未绑定手机号
 	ErrBindMobile         = err{code: 20304, message: "绑定手机号码失败"} // ErrBindMobile 绑定手机号时异常
 	ErrBindRecordNotFound = err{code: 20305, message: "未找到绑定关系"}
-	ErrNotFound           = err{code: 20305, message: "未找到资源"}
-	ErrCouponReceived     = err{code: 20306, message: "券已领取"}
-	ErrChannelErr         = err{code: 20307, message: "渠道不符合条件~"}
-	ErrCouponQuestionErr  = err{code: 20308, message: "已答题"}
-
-	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
+	ErrAdminNotFound      = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
 
 	// 其他
 	ErrCheckErr = err{code: 40001, message: "审核未通过"}
