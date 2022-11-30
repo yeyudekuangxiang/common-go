@@ -60,6 +60,7 @@ const (
 	DuiBaActivityIsPhoneAnniversaryActivity         DuiBaActivityVipType = 2
 	DuiBaActivityRecyclingPublicWelfareWeekActivity DuiBaActivityVipType = 3
 	DuiBaActivityInviteActivity                     DuiBaActivityVipType = 4
+	DuiBaActivityYtxLuckyDrawActivity               DuiBaActivityVipType = 5
 )
 
 const (
