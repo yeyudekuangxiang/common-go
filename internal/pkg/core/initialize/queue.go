@@ -9,7 +9,6 @@ import (
 )
 
 func initQueueProducer() {
-	println(config.Config.AMQP.Url)
 	log.Println("初始化amqp生产者...")
 	pub, err := rabbitmq.NewPublisher(config.Config.AMQP.Url, rabbitmq.Config{}, rabbitmq.WithPublisherOptionsLogger(zap.NewRabbitmqLogger(app.Logger)))
 	if err != nil {

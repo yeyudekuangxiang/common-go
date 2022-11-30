@@ -128,14 +128,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		}
 	} else if user.UnionId == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
-		//更新用户的最新ip
-		service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
-			OpenId: user.OpenId,
-			Uid:    user.ID,
-			Ip:     ip,
-		})
 	}
-
 	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
@@ -145,6 +138,13 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			app.Logger.Errorf("提交新用户处理事件失败 %+v %s %s", user, invitedBy, partnershipWith)
 		}
+	} else {
+		//更新用户的最新ip
+		service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
+			OpenId: user.OpenId,
+			Uid:    user.ID,
+			Ip:     ip,
+		})
 	}
 
 	return user, cookie, isNewUser, nil

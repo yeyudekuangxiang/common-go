@@ -32,19 +32,25 @@ type PugcController struct {
 }
 
 func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
+	/*	commonParams := make(map[string]interface{}, 0)
+		commonParams["mobile"] = 18840853003
+		sign := strings.ToUpper(platformUtil.GetSign(commonParams, "0tlrEVZtRE", "&"))
 
+		println(sign)
+
+		return gin.H{}, nil
+	*/
 	mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
-		Uid:      921216,
-		BizId:    "1111",
+		Uid:      1549096,
+		BizId:    "liumei_test_v1",
 		QuizTime: time.Now().Unix(),
 	})
 	if mqErr != nil {
 		//不做返回处理
 	}
 
-	return gin.H{
-		"err": mqErr,
-	}, nil
+	return gin.H{}, nil
+
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = "1"
