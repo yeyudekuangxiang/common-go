@@ -8,7 +8,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/quizpdr"
 	"mio/internal/pkg/queue/types/message/quizmsg"
-	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -80,7 +79,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 		CurrentIndex:        DefaultQuizSingleRecordService.GetTodayAnswerNum(openid),
 	}, nil
 }
-func (srv QuizService) Submit(openId string) (int, error) {
+func (srv QuizService) Submit(openId string, uid int64) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("QUIZ_Ssubmit%s", openId), time.Second*10) {
 		return 0, errno.ErrLimit
 	}
@@ -102,20 +101,14 @@ func (srv QuizService) Submit(openId string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	user, b, err := service.DefaultUserService.GetUser(repository.GetUserBy{
-		OpenId: openId,
-		Source: "mio",
+	quizpdr.SendMessage(quizmsg.QuizMessage{
+		Uid:              uid,
+		OpenId:           openId,
+		TodayCorrectNum:  todayResult.CorrectNum,
+		TodayAnsweredNum: todayResult.IncorrectNum,
+		QuizTime:         time.Now().Unix(),
+		BizId:            util.UUID(),
 	})
-	if b {
-		quizpdr.SendMessage(quizmsg.QuizMessage{
-			Uid:              user.ID,
-			OpenId:           user.OpenId,
-			TodayCorrectNum:  todayResult.CorrectNum,
-			TodayAnsweredNum: todayResult.IncorrectNum,
-			QuizTime:         time.Now().Unix(),
-			BizId:            util.UUID(),
-		})
-	}
 	return answerPoint, nil
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
