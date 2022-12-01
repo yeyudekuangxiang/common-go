@@ -309,11 +309,13 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		mergeStash[request.ObjectAttributes.ID] = mergeUser
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
-				Content: fmt.Sprintf("请求合并通知 \n%s发起一个合并请求【%s】 \n请%s进行代码审查,请%s进行代码合并",
+				Content: fmt.Sprintf("【%s】项目请求合并通知 \n%s发起一个合并请求【%s】 \n请%s进行代码审查,请%s进行代码合并 \n%s",
+					request.Project.Name,
 					user["nickname"],
 					request.ObjectAttributes.Title,
 					seeUser["nickname"],
 					mergeUser["nickname"],
+					request.ObjectAttributes.URL,
 				),
 				MentionedList:       nil,
 				MentionedMobileList: []string{seeUser["mobile"], mergeUser["mobile"]},
@@ -323,10 +325,12 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
 			mergeUser := mergeStash[request.ObjectAttributes.ID]
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
-				Content: fmt.Sprintf("【%s】合并请求已被%s核准,请%s进行代码合并",
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求已被%s核准,请%s进行代码合并 \n%s",
+					request.Project.Name,
 					request.ObjectAttributes.Title,
 					user["nickname"],
 					mergeUser["nickname"],
+					request.ObjectAttributes.URL,
 				),
 				MentionedList:       nil,
 				MentionedMobileList: []string{mergeUser["mobile"]},
@@ -336,10 +340,12 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
 			requestUser := mergeUserStash[request.ObjectAttributes.ID]
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
-				Content: fmt.Sprintf("【%s】合并请求核准已被%s撤销,请%s复查代码",
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求核准已被%s撤销,请%s复查代码 \n%s",
+					request.Project.Name,
 					request.ObjectAttributes.Title,
 					user["nickname"],
 					requestUser["nickname"],
+					request.ObjectAttributes.URL,
 				),
 				MentionedList:       nil,
 				MentionedMobileList: []string{requestUser["mobile"]},
@@ -351,9 +357,11 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 			delete(mergeUserStash, request.ObjectAttributes.ID)
 			delete(mergeStash, request.ObjectAttributes.ID)
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
-				Content: fmt.Sprintf("【%s】合并请求已被%s关闭",
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求已被%s关闭 \n%s",
+					request.Project.Name,
 					request.ObjectAttributes.Title,
 					user["nickname"],
+					request.ObjectAttributes.URL,
 				),
 				MentionedList:       nil,
 				MentionedMobileList: []string{requestUser["mobile"]},
@@ -369,10 +377,12 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 				masterAlert = ",别忘记合并到develop哦"
 			}
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
-				Content: fmt.Sprintf("【%s】合并请求已被%s合并%s",
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求已被%s合并%s \n%s",
+					request.Project.Name,
 					request.ObjectAttributes.Title,
 					user["nickname"],
 					masterAlert,
+					request.ObjectAttributes.URL,
 				),
 				MentionedList:       nil,
 				MentionedMobileList: []string{requestUser["mobile"]},
