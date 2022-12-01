@@ -74,6 +74,24 @@ var recycleCo2ByNum = map[string]float64{
 	"旧物回收":  4500,
 }
 
+// 回收 台 单位对应积分 比如 电视机 1台 获得 69积分
+var recyclePointV2 = map[int]int64{
+	1:   21, //1000g : 21 积分
+	2:   6,  //1000g : 6 积分
+	3:   113,
+	4:   384,
+	100: 21,
+}
+
+// 回收 台/重量 单位对应减碳量 比如 电视机 1台 获得 15000g 减碳量
+var recycleCo2V2 = map[int]float64{
+	1:   4500, //1000g : 4500g
+	2:   1400, //1000g : 1400g
+	3:   25000,
+	4:   83000,
+	100: 4500,
+}
+
 //每个类型对应次数
 var recycleLimit = map[string]int{
 	"衣帽鞋包":  1,
@@ -277,4 +295,40 @@ func (srv RecycleService) getPointType(typeText string) entity.PointTransactionT
 	default:
 		return entity.PointTransactionType("未知类型")
 	}
+}
+
+func (srv RecycleService) GetPointV2(tp, number string) (int64, error) {
+	num, _ := strconv.ParseFloat(number, 64)
+	types, _ := strconv.Atoi(tp)
+	var point int64
+	if types == 0 || num == 0 {
+		return point, nil
+	}
+
+	//获取point
+	if pointByOne, ok := recyclePointV2[types]; ok {
+		point = pointByOne * int64(math.Floor(num))
+	} else {
+		return point, errno.ErrRecordNotFound.WithMessage("为匹配到对应积分规则")
+	}
+
+	return point, nil
+}
+
+func (srv RecycleService) GetCo2V2(tp, number string) (float64, error) {
+	num, _ := strconv.ParseFloat(number, 64)
+	types, _ := strconv.Atoi(tp)
+
+	var co2 float64
+	if types == 0 || num == 0 {
+		return co2, nil
+	}
+	//获取co2
+	if co2ByOne, ok := recycleCo2V2[types]; ok {
+		co2 = co2ByOne * math.Floor(num)
+	} else {
+		return co2, errno.ErrRecordNotFound.WithMessage("为匹配到对应减碳规则")
+	}
+
+	return co2, nil
 }
