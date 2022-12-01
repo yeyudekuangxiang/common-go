@@ -111,14 +111,14 @@ type checkMedia struct {
 }
 
 type recycleReq struct {
-	Ch           string `json:"ch"`
-	OrderNo      string `json:"orderNo"`
-	MemberId     string `json:"memberId"`
-	PlatformId   string `json:"platformId"`
-	Name         string `json:"name"`
-	Category     string `json:"category"`
-	Number       string `json:"number"`
+	Ch           string `json:"ch" form:"ch" binding:"required"`
+	OrderNo      string `json:"orderNo" form:"orderNo" binding:"required"`
+	MemberId     string `json:"memberId" form:"memberId" binding:"required"`
+	PlatformId   string `json:"platformId" form:"platformId"`
+	Name         string `json:"name" form:"name" binding:"required"`
+	Category     string `json:"category" form:"category" binding:"required"`
+	Number       string `json:"number" form:"number" binding:"required"`
 	CreatedTime  string `json:"createdTime"`
 	CompleteTime string `json:"completeTime"`
-	Sign         string `json:"sign"`
+	Sign         string `json:"sign" form:"sign" binding:"required"`
 }
