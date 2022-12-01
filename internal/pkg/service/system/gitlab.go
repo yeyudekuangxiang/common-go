@@ -3,6 +3,7 @@ package system
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
@@ -116,15 +117,22 @@ func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, err
 	}
 	return mergeRequest.State, err
 }
-func (srv GitlabService) Callback(event glbtyp.EventType, body []byte) error {
+func (srv GitlabService) Callback(event glbtyp.EventHookType, body []byte) error {
 	switch event {
-	case glbtyp.EventTypeDeploymentHook:
+	case glbtyp.EventDeploymentHook:
 		data := glbtyp.Deployment{}
 		err := json.Unmarshal(body, &data)
 		if err != nil {
 			return err
 		}
 		return srv.deployment(data)
+	case glbtyp.EventMergeRequestHook:
+		data := glbtyp.MergeRequest{}
+		err := json.Unmarshal(body, &data)
+		if err != nil {
+			return err
+		}
+		return srv.mergeRequest(data)
 	}
 	return nil
 }
@@ -238,4 +246,138 @@ func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
 			deployment.User.Name,
 			deployment.DeployableId, deployment.DeployableUrl),
 	}})
+}
+
+var gitlabUserMobileList = []map[string]string{
+	{
+		"mobile":   "17624865520",
+		"username": "neiljin",
+		"nickname": "金战领",
+	},
+	{
+		"mobile":   "18840853003",
+		"username": "meiliu",
+		"nickname": "刘梅",
+	},
+	{
+		"mobile":   "13083605153",
+		"username": "yunfenglian",
+		"nickname": "连云峰",
+	},
+}
+var adminMobileList = []map[string]string{
+	{
+		"mobile":   "17624865520",
+		"username": "neiljin",
+		"nickname": "金战领",
+	},
+	{
+		"mobile":   "13817715315",
+		"username": "leoliu",
+		"nickname": "刘旭",
+	},
+}
+var mergeStash = map[int]map[string]string{}
+var mergeUserStash = map[int]map[string]string{}
+
+func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
+	user := map[string]string{
+		"mobile":   "17624865520",
+		"username": request.User.Username,
+		"nickname": request.User.Name,
+	}
+	for _, u := range gitlabUserMobileList {
+		if u["username"] == request.User.Username {
+			user = u
+			break
+		}
+	}
+
+	switch request.ObjectAttributes.Action {
+	case "open", "reopen":
+		m2 := make([]map[string]string, 0)
+		for _, u := range gitlabUserMobileList {
+			if u["username"] == request.User.Username {
+				continue
+			}
+			m2 = append(m2, u)
+		}
+		mergeUserStash[request.ObjectAttributes.ID] = user
+
+		seeUser := m2[rand.Int31n(int32(len(m2)))]
+		mergeUser := adminMobileList[rand.Int31n(2)]
+		mergeStash[request.ObjectAttributes.ID] = mergeUser
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("请求合并通知 \n%s发起一个合并请求【%s】 \n请%s进行代码审查,请%s进行代码合并",
+					user["nickname"],
+					request.ObjectAttributes.Title,
+					seeUser["nickname"],
+					mergeUser["nickname"],
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{seeUser["mobile"], mergeUser["mobile"]},
+			}})
+		}
+	case "approved", "approval":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			mergeUser := mergeStash[request.ObjectAttributes.ID]
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】合并请求已被%s核准,请%s进行代码合并",
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					mergeUser["nickname"],
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{mergeUser["mobile"]},
+			}})
+		}
+	case "unapproved", "unapproval":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			requestUser := mergeUserStash[request.ObjectAttributes.ID]
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】合并请求核准已被%s撤销,请%s复查代码",
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					requestUser["nickname"],
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{requestUser["mobile"]},
+			}})
+		}
+	case "close":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			requestUser := mergeUserStash[request.ObjectAttributes.ID]
+			delete(mergeUserStash, request.ObjectAttributes.ID)
+			delete(mergeStash, request.ObjectAttributes.ID)
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】合并请求已被%s关闭",
+					request.ObjectAttributes.Title,
+					user["nickname"],
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{requestUser["mobile"]},
+			}})
+		}
+	case "merge":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			requestUser := mergeUserStash[request.ObjectAttributes.ID]
+			delete(mergeUserStash, request.ObjectAttributes.ID)
+			delete(mergeStash, request.ObjectAttributes.ID)
+			masterAlert := ""
+			if request.ObjectAttributes.TargetBranch == "master" {
+				masterAlert = ",别忘记合并到develop哦"
+			}
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】合并请求已被%s合并%s",
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					masterAlert,
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{requestUser["mobile"]},
+			}})
+		}
+	}
+	return nil
 }
