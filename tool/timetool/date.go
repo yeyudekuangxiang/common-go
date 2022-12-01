@@ -98,6 +98,20 @@ func (d Date) SqlNull() sql.NullTime {
 	}
 	return sql.NullTime{Valid: true, Time: d.Time}
 }
+func (d Date) UnixMilliPointer() *int64 {
+	if d.IsZero() {
+		return nil
+	}
+	um := d.UnixMilli()
+	return &um
+}
+func (d Date) UnixPointer() *int64 {
+	if d.IsZero() {
+		return nil
+	}
+	um := d.Unix()
+	return &um
+}
 func (d Date) FormatWithDefault(format string, dft string) string {
 	if d.IsZero() {
 		return dft

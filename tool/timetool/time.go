@@ -112,6 +112,20 @@ func (t Time) FormatWithDefault(format string, dft string) string {
 	}
 	return t.Format(format)
 }
+func (t Time) UnixMilliPointer() *int64 {
+	if t.IsZero() {
+		return nil
+	}
+	um := t.UnixMilli()
+	return &um
+}
+func (t Time) UnixPointer() *int64 {
+	if t.IsZero() {
+		return nil
+	}
+	um := t.Unix()
+	return &um
+}
 
 //Parse 将时间字符串按照layout解析成 Time 如果val为空字符串 则解析为空 Time
 func Parse(layout string, val string) (Time, error) {
