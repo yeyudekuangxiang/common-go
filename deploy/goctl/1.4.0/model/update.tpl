@@ -23,8 +23,8 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
 // {{.lowerStartCamelPrimaryKey}} 主键
 // column 列名
 // val 列值
-// skipHook 是否跳过 Hook 方法且不追踪更新时间 true跳过 false不跳过
-func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.primaryKeyDataType}}, column string, val interface{}, skipHook bool) error {
+// skipHook 是否跳过 Hook 方法且不追踪更新时间 true跳过 false不跳过 默认不跳过
+func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.primaryKeyDataType}}, column string, val interface{}, skipHook ...bool) error {
 	var err error
 	{{if .withCache}}
 	data, exist, err := m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
@@ -38,7 +38,7 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Contex
 	{{.keys}}
 	{{end}}
 
-	if skipHook {
+	if len(skipHook)>0 && skipHook[0] {
 		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumn(column, val).Error
 	} else {
 		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Update(column, val).Error
@@ -56,8 +56,8 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Contex
 // UpdateColumns 更新多列数据
 // {{.lowerStartCamelPrimaryKey}} 主键
 // values map或者struct 当使用 struct 更新时，默认情况下，GORM 只会更新非零值的字段
-// skipHook 是否跳过 Hook 方法且不追踪更新时间 true跳过 false不跳过
-func (m *default{{.upperStartCamelObject}}Model) UpdateColumns(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.primaryKeyDataType}}, values interface{}, skipHook bool) error {
+// skipHook 是否跳过 Hook 方法且不追踪更新时间 true跳过 false不跳过 默认不跳过
+func (m *default{{.upperStartCamelObject}}Model) UpdateColumns(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.primaryKeyDataType}}, values interface{}, skipHook ...bool) error {
 	var err error
 	{{if .withCache}}
 	data, exist, err := m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
@@ -71,7 +71,7 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumns(ctx context.Conte
 	{{.keys}}
 	{{end}}
 
-	if skipHook {
+	if len(skipHook)>0 && skipHook[0] {
 		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumns(values).Error
 	} else {
 		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Updates(values).Error
