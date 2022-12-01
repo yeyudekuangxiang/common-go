@@ -29,7 +29,7 @@ var (
 	ErrRecordNotFound  = err{code: 20100, message: "数据异常"}   // ErrRecordNotFound 数据库错误
 	ErrChannelNotFound = err{code: 20101, message: "渠道数据异常"} // ErrChannelNotFound 渠道数据异常
 	ErrExisting        = err{code: 20102, message: "数据已存在"}  // ErrExisting 数据已存在
-	ErrCreate          = err{code: 20102, message: "保存失败"}   // ErrExisting 保存失败
+	ErrSave            = err{code: 20102, message: "保存失败"}   // ErrExisting 保存失败
 	ErrUpdate          = err{code: 20102, message: "更新失败"}   // ErrExisting 更新失败
 	ErrDelete          = err{code: 20102, message: "删除失败"}   // ErrExisting 删除失败
 
@@ -40,7 +40,9 @@ var (
 	ErrNotBindMobile      = err{code: 20303, message: "未授权手机号码"}  // ErrNotBindMobile 未绑定手机号
 	ErrBindMobile         = err{code: 20304, message: "绑定手机号码失败"} // ErrBindMobile 绑定手机号时异常
 	ErrBindRecordNotFound = err{code: 20305, message: "未找到绑定关系"}
-	ErrAdminNotFound      = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
+	ErrUpperLimit         = err{code: 20306, message: "次数超过上限"}
+
+	ErrAdminNotFound = err{code: 20401, message: "未查询到管理员信息"} // ErrAdminNotFound 管理员错误 前缀204
 
 	// 其他
 	ErrCheckErr = err{code: 40001, message: "审核未通过"}
