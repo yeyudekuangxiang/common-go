@@ -6,10 +6,11 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/types/message/wxworkmsg"
 	"mio/internal/pkg/queue/types/routerkey"
+	"mio/pkg/wxwork"
 )
 
 func SendRobotMessage(message wxworkmsg.RobotMessage) error {
-	//return wxwork.SendRobotMessage(message.Key, message.Message)
+	return wxwork.SendRobotMessage(message.Key, message.Message)
 	data, err := json.Marshal(message)
 	if err != nil {
 		return err
