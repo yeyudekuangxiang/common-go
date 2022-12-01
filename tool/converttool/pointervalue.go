@@ -32,11 +32,3 @@ func PointerFloat32(val float32) *float32 {
 func PointerTime(t time.Time) *time.Time {
 	return &t
 }
-
-// PointerTime2Milli 指针类型的time转换为指针类型的时间戳
-func PointerTime2Milli(t *time.Time) *int64 {
-	if t == nil {
-		return nil
-	}
-	return PointerInt64(t.UnixMilli())
-}

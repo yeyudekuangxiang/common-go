@@ -1,8 +1,8 @@
 package types
 
-type EventType string
+type EventHookType string
 
 const (
-	EventTypeDeploymentHook EventType = "DeploymentHook"
-	EventTypeJobHook        EventType = "JobHook"
+	EventDeploymentHook   EventHookType = "Deployment Hook"
+	EventMergeRequestHook EventHookType = "Merge Request Hook"
 )

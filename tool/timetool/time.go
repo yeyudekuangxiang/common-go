@@ -145,3 +145,21 @@ func UnixMilli(msec int64) Time {
 	}
 	return Time{Time: time.UnixMilli(msec)}
 }
+
+//ParseUnixMilli 将毫秒时间戳 Time 时间戳小于或者等于0则解析为空 Time
+func ParseUnixMilli(msec int64) Time {
+	if msec <= 0 {
+		return Time{}
+	}
+	return Time{Time: time.UnixMilli(msec)}
+}
+
+//ParsePointUnixMilli 将指针类型的毫秒时间戳转换成 Time
+func ParsePointUnixMilli(msec *int64) Time {
+	if msec == nil {
+		return Time{}
+	}
+	return Time{
+		Time: time.UnixMilli(*msec),
+	}
+}
