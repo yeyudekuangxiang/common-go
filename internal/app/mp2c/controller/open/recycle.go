@@ -305,7 +305,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
-		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
+		return nil, errno.ErrChannelNotFound.WithMessage("渠道查询失败")
 	}
 
 	params := make(map[string]interface{}, 0)
@@ -316,7 +316,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//校验sign
 	if err := platform.CheckSign(form.Sign, params, scene.Key, "&"); err != nil {
-		return nil, errno.ErrCommon.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
+		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
 	}
 
 	//校验用户
@@ -334,7 +334,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	//校验重复订单
 	RecycleService := recycle.NewRecycleService(ctx)
 	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
-		return nil, errno.ErrLimit.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
+		return nil, errno.ErrExisting.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
 	}
 
 	//每日次数限制
@@ -349,6 +349,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if resNumber != 1 && resNumber != 2 {
 		app.Logger.Infof("旧物回收: ch:%s user:%s 超过每日次数上限", scene.Ch, form.MemberId)
 		return nil, nil
+		// errno.ErrLimit.WithMessage("超过每日次数上限")
 	}
 
 	//计算积分
@@ -363,10 +364,11 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		ChangePoint:  currPoint,
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprint(params),
-		Note:         form.OrderNo,
+		Note:         scene.Ch + "#" + form.OrderNo,
 	})
 	if err != nil {
-		return nil, errno.ErrCommon.WithMessage(fmt.Sprintf("增加积分失败:%s", err.Error()))
+		app.Logger.Errorf(fmt.Sprintf("%s 增加积分失败: err:%s; form:%s", form.Ch, err.Error(), fmt.Sprint(params)))
+		//return nil, errno.ErrSave.WithMessage(fmt.Sprintf("增加积分失败:%s", err.Error()))
 	}
 
 	//发碳量
@@ -379,7 +381,8 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	})
 
 	if err != nil {
-		return nil, errno.ErrCommon.WithMessage(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
+		app.Logger.Errorf(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
+		//return nil, errno.ErrSave.WithMessage(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
 	}
 
 	return gin.H{}, nil
