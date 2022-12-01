@@ -1,31 +1,9 @@
-package gitlab
+package types
 
-import "time"
-
-type MergeRequestFrom struct {
-	ObjectKind string `json:"object_kind"`
-	User       struct {
-		Name      string `json:"name"`
-		Username  string `json:"username"`
-		AvatarURL string `json:"avatar_url"`
-	} `json:"user"`
-	Project struct {
-		ID                int     `json:"id"`
-		Name              string  `json:"name"`
-		Description       string  `json:"description"`
-		WebURL            string  `json:"web_url"`
-		AvatarURL         *string `json:"avatar_url"`
-		GitSSHURL         string  `json:"git_ssh_url"`
-		GitHTTPURL        string  `json:"git_http_url"`
-		Namespace         string  `json:"namespace"`
-		VisibilityLevel   int     `json:"visibility_level"`
-		PathWithNamespace string  `json:"path_with_namespace"`
-		DefaultBranch     string  `json:"default_branch"`
-		Homepage          string  `json:"homepage"`
-		URL               string  `json:"url"`
-		SSHURL            string  `json:"ssh_url"`
-		HTTPURL           string  `json:"http_url"`
-	} `json:"project"`
+type MergeRequest struct {
+	ObjectKind string  `json:"object_kind"`
+	User       User    `json:"user"`
+	Project    Project `json:"project"`
 	Repository struct {
 		Name        string `json:"name"`
 		URL         string `json:"url"`
@@ -40,8 +18,8 @@ type MergeRequestFrom struct {
 		AuthorID        int         `json:"author_id"`
 		AssigneeID      int         `json:"assignee_id"`
 		Title           string      `json:"title"`
-		CreatedAt       time.Time   `json:"created_at"`
-		UpdatedAt       time.Time   `json:"updated_at"`
+		CreatedAt       string      `json:"created_at"`
+		UpdatedAt       string      `json:"updated_at"`
 		MilestoneID     interface{} `json:"milestone_id"`
 		State           string      `json:"state"`
 		MergeStatus     string      `json:"merge_status"`
@@ -81,10 +59,10 @@ type MergeRequestFrom struct {
 			HTTPURL           string  `json:"http_url"`
 		} `json:"target"`
 		LastCommit struct {
-			ID        string    `json:"id"`
-			Message   string    `json:"message"`
-			Timestamp time.Time `json:"timestamp"`
-			URL       string    `json:"url"`
+			ID        string `json:"id"`
+			Message   string `json:"message"`
+			Timestamp string `json:"timestamp"`
+			URL       string `json:"url"`
 			Author    struct {
 				Name  string `json:"name"`
 				Email string `json:"email"`
@@ -100,16 +78,16 @@ type MergeRequestFrom struct {
 		} `json:"assignee"`
 	} `json:"object_attributes"`
 	Labels []struct {
-		ID          int       `json:"id"`
-		Title       string    `json:"title"`
-		Color       string    `json:"color"`
-		ProjectID   int       `json:"project_id"`
-		CreatedAt   time.Time `json:"created_at"`
-		UpdatedAt   time.Time `json:"updated_at"`
-		Template    bool      `json:"template"`
-		Description string    `json:"description"`
-		Type        string    `json:"type"`
-		GroupID     int       `json:"group_id"`
+		ID          int    `json:"id"`
+		Title       string `json:"title"`
+		Color       string `json:"color"`
+		ProjectID   int    `json:"project_id"`
+		CreatedAt   string `json:"created_at"`
+		UpdatedAt   string `json:"updated_at"`
+		Template    bool   `json:"template"`
+		Description string `json:"description"`
+		Type        string `json:"type"`
+		GroupID     int    `json:"group_id"`
 	} `json:"labels"`
 	Changes struct {
 		UpdatedByID struct {
@@ -122,58 +100,29 @@ type MergeRequestFrom struct {
 		} `json:"updated_at"`
 		Labels struct {
 			Previous []struct {
-				ID          int       `json:"id"`
-				Title       string    `json:"title"`
-				Color       string    `json:"color"`
-				ProjectID   int       `json:"project_id"`
-				CreatedAt   time.Time `json:"created_at"`
-				UpdatedAt   time.Time `json:"updated_at"`
-				Template    bool      `json:"template"`
-				Description string    `json:"description"`
-				Type        string    `json:"type"`
-				GroupID     int       `json:"group_id"`
+				ID          int    `json:"id"`
+				Title       string `json:"title"`
+				Color       string `json:"color"`
+				ProjectID   int    `json:"project_id"`
+				CreatedAt   string `json:"created_at"`
+				UpdatedAt   string `json:"updated_at"`
+				Template    bool   `json:"template"`
+				Description string `json:"description"`
+				Type        string `json:"type"`
+				GroupID     int    `json:"group_id"`
 			} `json:"previous"`
 			Current []struct {
-				ID          int       `json:"id"`
-				Title       string    `json:"title"`
-				Color       string    `json:"color"`
-				ProjectID   int       `json:"project_id"`
-				CreatedAt   time.Time `json:"created_at"`
-				UpdatedAt   time.Time `json:"updated_at"`
-				Template    bool      `json:"template"`
-				Description string    `json:"description"`
-				Type        string    `json:"type"`
-				GroupID     int       `json:"group_id"`
+				ID          int    `json:"id"`
+				Title       string `json:"title"`
+				Color       string `json:"color"`
+				ProjectID   int    `json:"project_id"`
+				CreatedAt   string `json:"created_at"`
+				UpdatedAt   string `json:"updated_at"`
+				Template    bool   `json:"template"`
+				Description string `json:"description"`
+				Type        string `json:"type"`
+				GroupID     int    `json:"group_id"`
 			} `json:"current"`
 		} `json:"labels"`
 	} `json:"changes"`
-}
-
-type GitlabWebHookForm struct {
-	EventType  string
-	User       GitlabWebHookUser `json:"user"`
-	Attributes ObjectAttributes  `json:"object_attributes"`
-	Project    GitlabProject     `json:"project"`
-}
-type GitlabProject struct {
-	Id int `json:"id"`
-}
-type GitlabWebHookUser struct {
-	Name string
-}
-type ObjectAttributes struct {
-	LastCommit   LastCommit `json:"last_commit"`
-	AuthorId     int        `json:"author_id"`
-	Title        string
-	Url          string
-	Action       string
-	SourceBranch string `json:"source_branch"`
-	TargetBranch string `json:"target_branch"`
-}
-type LastCommit struct {
-	Message string
-	Author  Author
-}
-type Author struct {
-	Name string
 }
