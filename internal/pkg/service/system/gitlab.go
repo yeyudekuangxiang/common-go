@@ -299,7 +299,7 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		}
 
 		seeUser := m2[rand.Int31n(int32(len(m2)))]
-		mergeUser := adminMobileList[rand.Int31n(2)]
+		mergeUser := adminMobileList[rand.Int31n(1)]
 
 		ud, _ := json.Marshal(user)
 		mud, _ := json.Marshal(mergeUser)
