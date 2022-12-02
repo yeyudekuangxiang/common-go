@@ -5,6 +5,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-redis/redis/v8"
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
@@ -42,4 +43,5 @@ type RpcClient struct {
 	CouponRpcSrv      couponclient.Coupon
 	TokenCenterRpcSrv tokencenterclient.TokenCenter
 	PointRpcSrv       pointclient.Point
+	ActivityRpcSrv    activityclient.Activity
 }

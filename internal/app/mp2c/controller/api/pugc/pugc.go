@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -20,9 +22,11 @@ import (
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/wxapp"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -32,14 +36,46 @@ type PugcController struct {
 }
 
 func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
-	/*	commonParams := make(map[string]interface{}, 0)
-		commonParams["mobile"] = 18840853003
-		sign := strings.ToUpper(platformUtil.GetSign(commonParams, "0tlrEVZtRE", "&"))
+	commonParams := make(map[string]interface{}, 0)
+	commonParams["mobile"] = 15797705451
+	sign := strings.ToUpper(platformUtil.GetSign(commonParams, "0tlrEVZtRE", "&"))
 
-		println(sign)
+	println(sign)
 
-		return gin.H{}, nil
-	*/
+	return gin.H{}, nil
+
+	var activityIdPrc int64
+	if config.Config.App.Env == "prod" {
+		activityIdPrc = 2
+	} else {
+		activityIdPrc = 3
+	}
+	//获取详情
+	user, err := app.RpcService.ActivityRpcSrv.DetailActivityThirdUser(context.NewMioContext(), &activityclient.DetailActivityThirdUserReq{
+		ActivityId: activityIdPrc,
+		Phone:      "18840853003",
+	})
+	if err != nil {
+
+	}
+	if !user.Exist {
+
+	}
+
+	thirdUser, err := app.RpcService.ActivityRpcSrv.UpdateActivityThirdUser(context.NewMioContext(), &activityclient.UpdateActivityThirdUserReq{
+		ActivityId: activityIdPrc,
+		UserId:     1,
+		Openid:     "121212",
+		ThirdId:    "1212",
+		Phone:      "18840853003",
+		Notes:      "12121212",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	println(thirdUser.String())
+
 	mqErr := quizpdr.SendMessage(quizmsg.QuizMessage{
 		Uid:      1549096,
 		BizId:    "liumei_test_v1",
