@@ -173,7 +173,9 @@ func (ctr UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	err := service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
 	if err == nil {
 		ctr.sendCoupon(user)
+
 	}
+
 	return nil, err
 }
 
