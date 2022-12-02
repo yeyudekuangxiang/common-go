@@ -25,7 +25,7 @@ func (repo FileExportRepository) GetPageList(by GetFileExportPageListBy) ([]enti
 	list := make([]entity.FileExport, 0)
 	var total int64
 
-	if by.Type > 0 {
+	if by.Type != nil {
 		db.Where("type = ?", by.Type)
 	}
 	if by.AdminId > 0 {

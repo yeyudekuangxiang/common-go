@@ -1,12 +1,12 @@
 package initialize
 
 import (
+	mzap "gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
 	"gorm.io/gorm/logger"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/pkg/db"
-	mzap "mio/pkg/logger/zap"
 )
 
 //Silent Error Warn Info

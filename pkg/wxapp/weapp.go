@@ -25,7 +25,7 @@ func (noCache) Get(key string) (interface{}, bool) {
 }
 
 func NewClient(appId, appSecret string, tokenCenter AccessTokenCenter, level logger.Level) *Client {
-	wpClient := weapp.NewClient(appId, appSecret, weapp.WithAccessTokenSetter(func(appid, secret string) (token string, expireIn uint) {
+	wpClient := weapp.NewClient(appId, appSecret, weapp.WithAccessTokenSetter(func(_, _ string) (token string, expireIn uint) {
 		token, expireAt, err := tokenCenter.AccessToken()
 
 		if err != nil {
