@@ -2,7 +2,7 @@ package api_types
 
 type GetSendSmsForm struct {
 	Phone       string `json:"phone" form:"phone" binding:"required" alias:"手机号"`
-	Msg         string `json:"msg" form:"msg" binding:"required" alias:"短信内容"`
+	Msg         string `json:"msg" form:"msg" binding:"" alias:"短信内容"`
 	TemplateKey string `json:"templateKey" form:"templateKey" binding:"required" alias:"templateKey"`
 }
 type GetSendYzmSmsForm struct {

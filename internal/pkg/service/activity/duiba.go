@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
@@ -302,7 +303,26 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		break
 
 	case entity.DuiBaActivityYtxLuckyDrawActivity:
-		return "", errno.ErrCommon
+		if userInfo.PhoneNumber == "" {
+			return "", errno.ErrMisMatchCondition
+		}
+		var activityIdPrc int64
+		if config.Config.App.Env == "prod" {
+			activityIdPrc = 2
+		} else {
+			activityIdPrc = 3
+		}
+		//获取详情
+		user, err := app.RpcService.ActivityRpcSrv.DetailActivityThirdUser(context.Background(), &activityclient.DetailActivityThirdUserReq{
+			ActivityId: activityIdPrc,
+			Phone:      userInfo.PhoneNumber,
+		})
+		if err != nil {
+			return "", err
+		}
+		if !user.Exist {
+			return "", errno.ErrMisMatchCondition
+		}
 		break
 	default:
 		break

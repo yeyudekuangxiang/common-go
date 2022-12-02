@@ -48,17 +48,20 @@ func (l *AlyWriter) clone() *AlyWriter {
 		fields:   l.fields,
 	}
 }
-func (l AlyWriter) Alert(v interface{}) {
+func (l *AlyWriter) Alert(v interface{}) {
 
 	l.Writer("alert", v)
 }
 
-func (l AlyWriter) Close() error {
+func (l *AlyWriter) Close() error {
 	//l.producer.Close(5000)  //开始关闭producer的时候开始计时，超过传递的设定值还未能完全关闭producer的话会强制退出producer，此时可能会有部分数据未被成功发送而丢失
 	l.producer.SafeClose() //producer提供了两种关闭模式，分为有限关闭和安全关闭，安全关闭会等待producer中缓存的所有的数据全部发送完成以后在关闭producer
 	return nil
 }
-func (l AlyWriter) Writer(level string, v interface{}, fields ...logx.LogField) {
+func (l *AlyWriter) Debug(v interface{}, fields ...logx.LogField) {
+	return
+}
+func (l *AlyWriter) Writer(level string, v interface{}, fields ...logx.LogField) {
 	logData := make(map[string]string)
 	topic := ""
 	fields = append(fields, l.fields...)
@@ -80,34 +83,34 @@ func (l AlyWriter) Writer(level string, v interface{}, fields ...logx.LogField) 
 		fmt.Println("发送日志异常", err)
 	}
 }
-func (l AlyWriter) Error(v interface{}, fields ...logx.LogField) {
+func (l *AlyWriter) Error(v interface{}, fields ...logx.LogField) {
 	l.Writer("error", v, fields...)
 }
 
-func (l AlyWriter) Info(v interface{}, fields ...logx.LogField) {
+func (l *AlyWriter) Info(v interface{}, fields ...logx.LogField) {
 	l.Writer("info", v, fields...)
 }
 
 //严峻的
 
-func (l AlyWriter) Severe(v interface{}) {
+func (l *AlyWriter) Severe(v interface{}) {
 	l.Writer("severe", v)
 }
 
 //缓慢的
 
-func (l AlyWriter) Slow(v interface{}, fields ...logx.LogField) {
+func (l *AlyWriter) Slow(v interface{}, fields ...logx.LogField) {
 	l.Writer("slow", v, fields...)
 }
 
 //堆栈
 
-func (l AlyWriter) Stack(v interface{}) {
+func (l *AlyWriter) Stack(v interface{}) {
 	l.Writer("stack", v)
 }
 
 //统计
 
-func (l AlyWriter) Stat(v interface{}, fields ...logx.LogField) {
+func (l *AlyWriter) Stat(v interface{}, fields ...logx.LogField) {
 	l.Writer("stat", v, fields...)
 }
