@@ -35,7 +35,7 @@ type ExportPointRecordListFrom struct {
 }
 type GetFileExportPageListForm struct {
 	AdminId        int64                   `json:"adminId" form:"adminId" alias:"adminId"`
-	Type           entity.FileExportType   `json:"type" form:"type" alias:"type"`
+	Type           int                     `json:"type" form:"type" alias:"type"`
 	Status         entity.FileExportStatus `json:"status" form:"status" alias:"status"`
 	StartCreatedAt time.Time               `json:"startCreatedAt" form:"startCreatedAt" alias:"startCreatedAt" time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
 	EndCreatedAt   time.Time               `json:"endCreatedAt" form:"endCreatedAt" alias:"endCreatedAt" time_format:"2006-01-02 15:04:05" time_utc:"false" time_location:"Asia/Shanghai"`
