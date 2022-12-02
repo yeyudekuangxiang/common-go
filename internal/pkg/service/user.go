@@ -483,15 +483,8 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}
 
 	//随申行，绑定关系
-
-	var activityIdPrc int64
-	if config.Config.App.Env == "prod" {
-		activityIdPrc = 2
-	} else {
-		activityIdPrc = 3
-	}
 	_, err = app.RpcService.ActivityRpcSrv.UpdateActivityThirdUser(context.Background(), &activityclient.UpdateActivityThirdUserReq{
-		ActivityId: activityIdPrc,
+		ActivityId: 2,
 		UserId:     userInfo.ID,
 		Openid:     userInfo.OpenId,
 		Phone:      userInfo.PhoneNumber,

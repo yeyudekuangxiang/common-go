@@ -306,15 +306,9 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		if userInfo.PhoneNumber == "" {
 			return "", errno.ErrMisMatchCondition
 		}
-		var activityIdPrc int64
-		if config.Config.App.Env == "prod" {
-			activityIdPrc = 2
-		} else {
-			activityIdPrc = 3
-		}
 		//获取详情
 		user, err := app.RpcService.ActivityRpcSrv.DetailActivityThirdUser(context.Background(), &activityclient.DetailActivityThirdUserReq{
-			ActivityId: activityIdPrc,
+			ActivityId: 2,
 			Phone:      userInfo.PhoneNumber,
 		})
 		if err != nil {
