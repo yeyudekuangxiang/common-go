@@ -921,6 +921,8 @@ github.com/rabbitmq/amqp091-go v1.1.0/go.mod h1:ogQDLSOACsLPsIq0NpbtiifNZi2YOz0V
 github.com/rabbitmq/amqp091-go v1.3.4/go.mod h1:ogQDLSOACsLPsIq0NpbtiifNZi2YOz0VTJ0kHRghqbM=
 github.com/rabbitmq/amqp091-go v1.4.0 h1:T2G+J9W9OY4p64Di23J6yH7tOkMocgnESvYeBjuG9cY=
 github.com/rabbitmq/amqp091-go v1.4.0/go.mod h1:JsV0ofX5f1nwOGafb8L5rBItt9GyhfQfcJj+oyz0dGg=
+github.com/rabbitmq/amqp091-go v1.5.0 h1:VouyHPBu1CrKyJVfteGknGOGCzmOz0zcv/tONLkb7rg=
+github.com/rabbitmq/amqp091-go v1.5.0/go.mod h1:JsV0ofX5f1nwOGafb8L5rBItt9GyhfQfcJj+oyz0dGg=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/richardlehane/mscfb v1.0.4 h1:WULscsljNPConisD5hR0+OyZjwK46Pfyr6mPu5ZawpM=
@@ -1104,6 +1106,8 @@ gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.6 h1:/A73m4mPl
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.6/go.mod h1:+gjPYn2r6RqDHmVezIgdNf8xJlaGLGWqMoOZAqsRqZc=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.8 h1:TubO5/wGVL/gdzqPDcAS99Mo2Htb24r1172TDnRWCfo=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.8/go.mod h1:CZeeLXKOkwRa96deXymgjF77l8BYFhYGWqFeskTc/GU=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.1.1-develop h1:Wxdf9owQoccfhMQwFSycH3DgA4TSxyxol0fz2hrhI9U=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.1.1-develop/go.mod h1:4sYzBsUXXZd8o8KDXuLL34TfuMHayB/pie7StRTelcE=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738 h1:VcrIfasaLFkyjk6KNlXQSzO+B0fZcnECiDrKJsfxka0=

@@ -77,14 +77,20 @@ func SendYZMSms(mobile string, code string) (smsReturn *SmsReturn, err error) {
 //发送营销短信，也叫模版短信
 
 func SendMarketSms(templateContent string, phone string, msg string) (smsReturn *SmsReturn, err error) {
-	msg = phone + "," + msg + ";" //组装 18840853003,小李,1;
+	params := ""
+	if msg == "" {
+		params = phone //组装 18840853003,小李,1;
+	} else {
+		params = phone + "," + msg + ";" //组装 18840853003,小李,1;
+	}
+
 	url := config.Config.SmsMarket.Url
 	method := "POST"
 	payload := strings.NewReader(`{
     "account": "` + config.Config.SmsMarket.Account + `",
     "password": "` + config.Config.SmsMarket.Password + `", //需要加入K8S
     "msg": "` + templateContent + `",
-	"params":"` + msg + `",
+	"params":"` + params + `",
     "sendtime": "201704101400",
     "report": "true",
     "extend": "555",

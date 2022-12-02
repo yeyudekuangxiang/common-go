@@ -24,6 +24,7 @@ var Config = app{
 	ActivityZyh:      activityZyh{},
 	BaiDuImageSearch: baiDuImageSearchSetting{},
 	TokenCenterRpc:   rpcSetting{},
+	ActivityRpc:      rpcSetting{},
 	DatabaseBusiness: databaseSetting{},
 	Sms:              sms{},
 	SmsMarket:        smsMarket{},
@@ -50,6 +51,7 @@ type app struct {
 	ActivityZyh      activityZyh             `ini:"activityZyh"`
 	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
 	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
+	ActivityRpc      rpcSetting              `ini:"activityRpc"`
 	Sms              sms                     `ini:"sms"`
 	SmsMarket        smsMarket               `ini:"smsMarket"`
 }

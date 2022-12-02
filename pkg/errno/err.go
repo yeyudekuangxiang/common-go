@@ -44,6 +44,8 @@ var (
 
 	// 其他
 	ErrCheckErr = err{code: 40001, message: "审核未通过"}
+
+	ErrMisMatchCondition = err{code: 40002, message: "不符合参与条件"}
 )
 
 // Err 定义错误
