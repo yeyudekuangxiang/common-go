@@ -1,6 +1,9 @@
 package enum
 
-import "database/sql/driver"
+import (
+	"database/sql/driver"
+	"encoding/json"
+)
 
 var _ IEnumStrStatus = (*StrStatus)(nil)
 
@@ -11,12 +14,17 @@ type IEnumStrStatus interface {
 	Status() string
 	Others() []string
 	driver.Valuer
+	json.Marshaler
 }
 type StrStatus struct {
 	status   string
 	text     string
 	realText string
 	others   []string
+}
+
+func (e StrStatus) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + e.status + `"`), nil
 }
 
 func (e StrStatus) Value() (driver.Value, error) {
