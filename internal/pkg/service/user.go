@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3/phonenumber"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"math/rand"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -482,16 +481,16 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 
 	}
 
-	//随申行，绑定关系
-	_, err = app.RpcService.ActivityRpcSrv.UpdateActivityThirdUser(context.Background(), &activityclient.UpdateActivityThirdUserReq{
-		ActivityId: 2,
-		UserId:     userInfo.ID,
-		Openid:     userInfo.OpenId,
-		Phone:      userInfo.PhoneNumber,
-	})
-	if err != nil {
-		app.Logger.Errorf("【绑定手机号】随申行绑定手机号失败:%s", err.Error())
-	}
+	/*	//随申行，绑定关系
+		_, err = app.RpcService.ActivityRpcSrv.UpdateActivityThirdUser(context.Background(), &activityclient.UpdateActivityThirdUserReq{
+			ActivityId: 2,
+			UserId:     userInfo.ID,
+			Openid:     userInfo.OpenId,
+			Phone:      userInfo.PhoneNumber,
+		})
+		if err != nil {
+			app.Logger.Errorf("【绑定手机号】随申行绑定手机号失败:%s", err.Error())
+		}*/
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
