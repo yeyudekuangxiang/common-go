@@ -63,7 +63,7 @@ type FileExport struct {
 	Params    string           `json:"params"`
 	Status    FileExportStatus `json:"status"` //1 未开始 2进行中 3导出成功 4导出失败
 	Message   string           `json:"message"`
-	Type      FileExportType   `json:"type"` // 1 积分明细
+	Type      int64            `json:"type"` // 1 积分明细
 	CreatedAt model.Time       `json:"createdAt"`
 	UpdatedAt model.Time       `json:"updatedAt"`
 }

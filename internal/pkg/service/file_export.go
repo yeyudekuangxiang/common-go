@@ -16,7 +16,7 @@ type FileExportService struct {
 func (srv FileExportService) Add(param AddFileExportParam) (*entity.FileExport, error) {
 	fileExport := entity.FileExport{
 		AdminId:   param.AdminId,
-		Type:      param.Type,
+		Type:      param.Type.Status(),
 		Params:    param.Params,
 		CreatedAt: model.NewTime(),
 		UpdatedAt: model.NewTime(),
@@ -44,9 +44,14 @@ func (srv FileExportService) GetPageList(by repository.GetFileExportPageListBy) 
 		if err != nil {
 			return nil, 0, err
 		}
+		t, exist := entity.FileExportTypeList.Find(fileExport.Type)
+		typeText := ""
+		if exist {
+			typeText = t.Text()
+		}
 		recordList = append(recordList, FileExportRecord{
 			FileExport: fileExport,
-			TypeText:   fileExport.Type.Text(),
+			TypeText:   typeText,
 			StatusText: fileExport.Status.Text(),
 			Admin:      *admin,
 		})
