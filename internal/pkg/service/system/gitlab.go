@@ -324,7 +324,7 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		}
 	case "approved", "approval":
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
-			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeStash", strconv.Itoa(request.ObjectAttributes.ID)).String()
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
 			mergeUser := make(map[string]string)
 			json.Unmarshal([]byte(ud), &mergeUser)
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
@@ -341,7 +341,7 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		}
 	case "unapproved", "unapproval":
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
-			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).String()
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
 			requestUser := make(map[string]string)
 			json.Unmarshal([]byte(ud), &requestUser)
 			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
@@ -358,7 +358,7 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		}
 	case "close":
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
-			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).String()
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
 			requestUser := make(map[string]string)
 			json.Unmarshal([]byte(ud), &requestUser)
 
@@ -378,7 +378,7 @@ func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
 		}
 	case "merge":
 		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
-			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).String()
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
 			requestUser := make(map[string]string)
 			json.Unmarshal([]byte(ud), &requestUser)
 
