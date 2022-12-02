@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/queue/types/message/wxworkmsg"
 	"mio/internal/pkg/util/encrypt"
 
+	mzap "gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -20,7 +21,6 @@ import (
 	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	mzap "mio/pkg/logger/zap"
 	"mio/pkg/wxwork"
 	"os"
 	"runtime"

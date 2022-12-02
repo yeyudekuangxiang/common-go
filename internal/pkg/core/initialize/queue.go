@@ -2,10 +2,10 @@ package initialize
 
 import (
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/pkg/logger/zap"
 )
 
 func initQueueProducer() {
