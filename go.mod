@@ -17,7 +17,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/gogo/protobuf v1.3.2
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
 	github.com/jszwec/csvutil v1.7.1
@@ -39,11 +38,10 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.6.1
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.0.2
+	gitlab.miotech.com/miotech-application/backend/common-go v1.0.6
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.9-develop
 	go.uber.org/zap v1.23.0
 	gopkg.in/ini.v1 v1.62.0
-	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/gorm v1.24.2
@@ -86,6 +84,7 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
@@ -176,6 +175,7 @@ require (
 	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.22.9 // indirect
@@ -190,3 +190,5 @@ require (
 replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.9-develop => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.9-develop
 
 replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.2 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.2
+
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.6 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.6

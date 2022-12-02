@@ -1,23 +1,24 @@
 package entity
 
-import "mio/internal/pkg/model"
-
-type FileExportType int
-
-func (f FileExportType) Text() string {
-	switch f {
-	case FileExportTypePoint:
-		return "积分明细"
-	}
-	return "未知类型"
-}
-
-const (
-	FileExportTypePoint FileExportType = 1 //积分明细
+import (
+	"gitlab.miotech.com/miotech-application/backend/common-go/enum"
+	"mio/internal/pkg/model"
 )
 
-var FileExportTypeList = []FileExportType{
+type FileExportType interface {
+	enum.IEnumIntStatus
+}
+
+var (
+	FileExportTypePoint    FileExportType = enum.NewEnumIntStatus(1, "积分明细", "积分明细")
+	FileExportTypeCoupon   FileExportType = enum.NewEnumIntStatus(2, "优惠券码", "优惠券码")
+	FileExportTypeExchange FileExportType = enum.NewEnumIntStatus(3, "兑换券码", "兑换券码")
+)
+
+var FileExportTypeList = enum.EnumIntStatusList{
 	FileExportTypePoint,
+	FileExportTypeCoupon,
+	FileExportTypeExchange,
 }
 
 type FileExportStatus int

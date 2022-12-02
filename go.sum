@@ -1096,8 +1096,9 @@ github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9/go.mod h1:E1AXubJB
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
 github.com/zeromicro/go-zero v1.4.2 h1:1P9TuzxONqxQG3Bvpk7r7vPOGEnfXn3lTX/4W5Y2GlQ=
 github.com/zeromicro/go-zero v1.4.2/go.mod h1:OK8ilGkhRzhi1NRRC76h5qTNFm6NbsYrUqld38i4NF4=
-gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.2 h1:x6ZT7EmhSY8bHtZY/zhJYgTCRT/3rKfPPAR3s97Ltus=
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.2/go.mod h1:w/1Z162IiFAsG+02NJxOoSHyZw9HL2FMgyGgQVnDn90=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.6 h1:/A73m4mPlv2tifPXSeo4hl/A4v+reQTDuDRisVz1dag=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.6/go.mod h1:+gjPYn2r6RqDHmVezIgdNf8xJlaGLGWqMoOZAqsRqZc=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.9-develop h1:/+SMmV/7GbGOx8Mv4hkLZGuwHTQp+8iOw0sWib+rew0=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.0.9-develop/go.mod h1:4sYzBsUXXZd8o8KDXuLL34TfuMHayB/pie7StRTelcE=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
