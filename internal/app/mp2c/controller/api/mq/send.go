@@ -32,23 +32,36 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	if templateContent == "" {
 		return nil, errno.ErrCommon.WithMessage(form.TemplateKey + "该模版不存在")
 	}
-
 	//{"code":"0","failNum":"0","successNum":"1","msgId":"22110915322300602201000033772693","time":"20221109153223","errorMsg":""}
 	//{"code":"102","msgId":"","time":"20221109153305","errorMsg":"密码错误"}
-
-	body, err := message.SendMarketSms(templateContent, form.Phone, form.Msg)
-	if err != nil {
-		log.Println("短信发送失败", err, form.Phone, form.Msg)
-		return nil, err
+	//发普通短信
+	if form.TemplateKey == "sms-suishenxing-luckydraw" {
+		body, err := message.SendCommonSms(form.Phone, templateContent)
+		if err != nil {
+			log.Println("发普通短信失败", err, form.Phone, form.Msg)
+			return nil, err
+		}
+		//发送短信
+		return gin.H{
+			"body":       body,
+			"templateId": form.TemplateKey,
+			"phone":      form.Phone,
+		}, nil
+	} else {
+		//发模版短信
+		body, err := message.SendMarketSms(templateContent, form.Phone, form.Msg)
+		if err != nil {
+			log.Println("发模版短信失败", err, form.Phone, form.Msg)
+			return nil, err
+		}
+		//发送短信
+		return gin.H{
+			"body":       body,
+			"templateId": form.TemplateKey,
+			"phone":      form.Phone,
+			"msg":        form.Msg,
+		}, nil
 	}
-
-	//发送短信
-	return gin.H{
-		"body":       body,
-		"templateId": form.TemplateKey,
-		"phone":      form.Phone,
-		"msg":        form.Msg,
-	}, nil
 }
 
 //发送验证码短信
