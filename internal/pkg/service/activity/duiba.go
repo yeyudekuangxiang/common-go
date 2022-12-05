@@ -308,7 +308,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		}
 		//获取详情
 		user, err := app.RpcService.ActivityRpcSrv.DetailActivityThirdUser(context.Background(), &activityclient.DetailActivityThirdUserReq{
-			ActivityId: 2,
+			ActivityId: 3,
 			Phone:      userInfo.PhoneNumber,
 		})
 		if err != nil {
