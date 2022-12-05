@@ -54,3 +54,12 @@ type GetWebMessageCountResp struct {
 	ExchangeMsgTotal int64 `json:"exchangeMsgTotal"`
 	SystemMsgTotal   int64 `json:"systemMsgTotal"`
 }
+
+type GetMessageTemplate struct {
+	Id          int64     `json:"id"`
+	Key         string    `json:"key"`
+	Type        int       `json:"type"`
+	TempContent string    `json:"tempContent"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+}
