@@ -1,4 +1,4 @@
-package activitypdr
+package userpdr
 
 import (
 	"github.com/wagslane/go-rabbitmq"
@@ -8,6 +8,6 @@ import (
 
 func BindMobileForActivity(msg []byte) error {
 	return app.QueueProduct.Publish(msg,
-		[]string{routerkey.ActivityNewUser},
-		rabbitmq.WithPublishOptionsExchange("activityExchange"))
+		[]string{routerkey.BindMobileForActivity},
+		rabbitmq.WithPublishOptionsExchange("userExchange"))
 }
