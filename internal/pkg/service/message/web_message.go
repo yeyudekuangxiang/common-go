@@ -18,6 +18,7 @@ type (
 		GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error)
 		SetHaveRead(params SetHaveReadMessage) error
 		GetTemplate(key string) string
+		GetTemplateInfo(key string) (*GetMessageTemplate, error)
 	}
 
 	defaultWebMessage struct {
@@ -245,6 +246,21 @@ func (d defaultWebMessage) GetTemplate(key string) string {
 		return ""
 	}
 	return one.TempContent
+}
+
+func (d defaultWebMessage) GetTemplateInfo(key string) (*GetMessageTemplate, error) {
+	var one, err = d.template.FindOne(key)
+	if err != nil {
+		return nil, err
+	}
+	return &GetMessageTemplate{
+		Id:          one.Id,
+		Key:         one.Key,
+		Type:        one.Type,
+		TempContent: one.TempContent,
+		CreatedAt:   one.CreatedAt,
+		UpdatedAt:   one.UpdatedAt,
+	}, nil
 }
 
 func WithSendObjId(sendObjId int64) WMOptions {
