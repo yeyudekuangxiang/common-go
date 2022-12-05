@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
@@ -11,6 +12,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/validator"
@@ -334,6 +336,15 @@ func (ctr UserController) sendCoupon(user entity.User) {
 				app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
 				return
 			}
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["发放日期"] = time.Now().Format("2006-01-02 15:04:05")
+			zhuGeAttr["发放奖励名称"] = "新人亿通行地铁红包"
+			zhuGeAttr["活动名称"] = "喵出行，亿起来"
+			zhuGeAttr["渠道名称"] = "亿通行App落地页"
+			zhuGeAttr["用户Id"] = user.ID
+			zhuGeAttr["用户openId"] = user.OpenId
+			zhuGeAttr["用户mobile"] = user.PhoneNumber
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.YTXReward, user.OpenId, zhuGeAttr)
 			app.Logger.Info("亿通行发红包结束")
 		}()
 	}

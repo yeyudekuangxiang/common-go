@@ -249,6 +249,15 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+	eventName := config.ZhuGeEventName.YTXOrder
+	if form.PlatformKey == "yitongxing" {
+		eventName = config.ZhuGeEventName.YTXOrder
+	}
+
+	zhuGeAttr := make(map[string]interface{}, 0)
+	zhuGeAttr["用户openId"] = mobile
+	zhuGeAttr["用户mobile"] = openId
+	track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
 
 	return gin.H{}, nil
 }
@@ -453,6 +462,17 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 			app.Logger.Errorf("预加积分 err:%s", err.Error())
 		}
 	}
+
+	eventName := config.ZhuGeEventName.YTXCollectPoint
+	if form.PlatformKey == "yitongxing" {
+		eventName = config.ZhuGeEventName.YTXCollectPoint
+	}
+
+	zhuGeAttr := make(map[string]interface{}, 0)
+	zhuGeAttr["用户Id"] = userInfo.ID
+	zhuGeAttr["用户openId"] = userInfo.OpenId
+	zhuGeAttr["用户mobile"] = userInfo.PhoneNumber
+	track.DefaultZhuGeService().Track(eventName, userInfo.OpenId, zhuGeAttr)
 
 	return gin.H{
 		"point":     point,
