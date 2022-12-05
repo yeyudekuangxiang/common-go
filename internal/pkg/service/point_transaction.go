@@ -86,9 +86,12 @@ func (srv PointTransactionService) PagePointRecord(by GetPointTransactionPageLis
 			return nil, 0, err
 		}
 
-		userPoint, err := pointService.FindByOpenId(user.OpenId)
-		if err != nil {
-			return nil, 0, err
+		userPoint := &entity.Point{}
+		if user.OpenId != "" {
+			userPoint, err = pointService.FindByOpenId(user.OpenId)
+			if err != nil {
+				return nil, 0, err
+			}
 		}
 
 		admin, err := DefaultSystemAdminService.GetAdminById(point.AdminId)
