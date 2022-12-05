@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/userpdr"
+	"mio/internal/pkg/queue/types/message/usermsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
@@ -172,8 +174,17 @@ func (ctr UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	//绑定后
 	err := service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
 	if err == nil {
+		//活动
+		err = userpdr.BindMobileForActivity(usermsg.BindMobile{
+			UserId:    user.ID,
+			OpenId:    user.OpenId,
+			ChannelId: user.ChannelId,
+		})
+		if err != nil {
+			app.Logger.Errorf("BindMobileForActivity error: %s", err.Error())
+		}
+		//发券
 		ctr.sendCoupon(user)
-
 	}
 
 	return nil, err
