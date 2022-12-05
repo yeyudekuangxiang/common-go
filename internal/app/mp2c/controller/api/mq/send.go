@@ -28,14 +28,16 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	//调用模版服务，获取模版内容
 	ctxMio := context.NewMioContext(context.WithContext(ctx.Request.Context()))
 	messageService := messageSrv.NewWebMessageService(ctxMio)
-	templateContent := messageService.GetTemplate(form.TemplateKey)
-	if templateContent == "" {
-		return nil, errno.ErrCommon.WithMessage(form.TemplateKey + "该模版不存在")
+	templateContentInfo, err := messageService.GetTemplateInfo(form.TemplateKey)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(form.TemplateKey + "获取模版配置有误")
 	}
+	templateContent := templateContentInfo.TempContent
 	//{"code":"0","failNum":"0","successNum":"1","msgId":"22110915322300602201000033772693","time":"20221109153223","errorMsg":""}
 	//{"code":"102","msgId":"","time":"20221109153305","errorMsg":"密码错误"}
 	//发普通短信
-	if form.TemplateKey == "sms-suishenxing-luckydraw" {
+
+	if templateContentInfo.Type == 3 {
 		body, err := message.SendCommonSms(form.Phone, templateContent)
 		if err != nil {
 			log.Println("发普通短信失败", err, form.Phone, form.Msg)
