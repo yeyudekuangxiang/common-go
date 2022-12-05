@@ -15,6 +15,9 @@ type zhuGeEventName struct {
 	MsgSecCheck            string
 	MediaCheck             string
 	DuiBaOrder             string
+	YTXOrder               string
+	YTXCollectPoint        string
+	YTXReward              string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -31,4 +34,7 @@ var ZhuGeEventName = zhuGeEventName{
 	MsgSecCheck:            "文本内容审核",
 	MediaCheck:             "媒体文件审核",
 	DuiBaOrder:             "兑吧商城订单",
+	YTXReward:              "亿通行-发放奖励",
+	YTXOrder:               "亿通行-完成乘车",
+	YTXCollectPoint:        "亿通行-收取气泡",
 }
