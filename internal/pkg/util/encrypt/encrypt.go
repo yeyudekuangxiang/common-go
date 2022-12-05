@@ -10,7 +10,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"github.com/pkg/errors"
+	"errors"
 	"mio/config"
 	"mio/internal/pkg/util"
 	"net/url"
@@ -21,6 +21,7 @@ import (
 func Md5(str string) string {
 	return Md5Byte([]byte(str))
 }
+
 func Md5Byte(data []byte) string {
 	encrypt := md5.New()
 	encrypt.Write(data)
