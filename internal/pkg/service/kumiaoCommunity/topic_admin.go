@@ -221,6 +221,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 		}
 		topic.Status = entity.TopicStatusPublished
 		topic.PushTime = model.NewTime()
+		topic.DelReason = ""
 	}
 
 	if status == entity.TopicStatusHidden {
@@ -234,6 +235,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 
 	if status == entity.TopicStatusVerifyFailed {
 		topic.Status = entity.TopicStatusVerifyFailed
+		topic.DelReason = reason
 	}
 
 	//更新帖子
