@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
+	"google.golang.org/grpc/status"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -115,13 +116,15 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*service.Excha
 	result, err := service.NewPointService(context.NewMioContext()).DecUserPointResult(srv_types.DecUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         pointType,
-		BizId:        util.UUID(),
+		BizId:        form.OrderNum,
+		BizName:      "mp2c-go-duiba-exchange",
 		ChangePoint:  form.Credits,
 		AdditionInfo: string(data),
 	})
 	if err != nil {
+		stat := status.Convert(err)
 		app.Logger.Errorf("%+v %v", form, err)
-		return nil, errors.New("系统异常,请联系管理员")
+		return nil, errors.New(stat.Message())
 	}
 
 	return &service.ExchangeCallbackResult{
@@ -155,7 +158,9 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		TransactionId: &form.BizId,
 	})
 	if err != nil {
-		return err
+		stat := status.Convert(err)
+		app.Logger.Errorf("%+v %v", form, err)
+		return errors.New(stat.Message())
 	}
 	if !findResp.Exist {
 		return nil
@@ -171,7 +176,8 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         entity.POINT_DUIBA_REFUND,
-		BizId:        util.UUID(),
+		BizId:        form.OrderNum,
+		BizName:      "mp2c-go-duiba-exchange-refund",
 		ChangePoint:  refundPoint,
 		AdditionInfo: string(data),
 	})
