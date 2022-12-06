@@ -119,6 +119,10 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (*Chan
 	var result ChangeResult
 	var balance int64
 
+	if dto.BizName == "" {
+		dto.BizName = "mp2c-go-" + string(dto.Type)
+	}
+
 	if dto.ChangePoint > 0 {
 		resp, err := app.RpcService.PointRpcSrv.IncPoint(srv.ctx, &pointclient.IncPointReq{
 			Openid:       dto.OpenId,
@@ -128,7 +132,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (*Chan
 			AdminId:      uint64(dto.AdminId),
 			Node:         dto.Note,
 			AdditionInfo: dto.AdditionInfo,
-			BizName:      string("mp2c-go-" + dto.Type),
+			BizName:      dto.BizName,
 		})
 		if err != nil {
 			return nil, err
@@ -145,7 +149,7 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (*Chan
 			AdminId:      uint64(dto.AdminId),
 			Node:         dto.Note,
 			AdditionInfo: dto.AdditionInfo,
-			BizName:      string("mp2c-go-" + dto.Type),
+			BizName:      dto.BizName,
 		})
 		if err != nil {
 			return nil, err
