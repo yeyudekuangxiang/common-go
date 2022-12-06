@@ -1,7 +1,7 @@
 package platform
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"sort"

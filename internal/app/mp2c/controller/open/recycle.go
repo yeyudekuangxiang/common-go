@@ -315,6 +315,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
+	delete(params, "sign")
 	if err := platform.CheckSign(form.Sign, params, scene.Key, "&"); err != nil {
 		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
 	}
@@ -348,8 +349,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	if resNumber != 1 && resNumber != 2 {
 		app.Logger.Infof("旧物回收: ch:%s user:%s 超过每日次数上限", scene.Ch, form.MemberId)
-		return nil, nil
-		// errno.ErrLimit.WithMessage("超过每日次数上限")
+		return nil, errno.ErrLimit.WithMessage("超过每日次数上限")
 	}
 
 	//计算积分
