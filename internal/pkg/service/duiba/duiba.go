@@ -111,11 +111,10 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*service.Excha
 
 	pointType := duibaTypeToPointType[form.Type]
 
-	bizId := util.UUID()
-	balance, err := service.NewPointService(context.NewMioContext()).DecUserPoint(srv_types.DecUserPointDTO{
+	result, err := service.NewPointService(context.NewMioContext()).DecUserPointResult(srv_types.DecUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         pointType,
-		BizId:        bizId,
+		BizId:        util.UUID(),
 		ChangePoint:  form.Credits,
 		AdditionInfo: string(data),
 	})
@@ -125,8 +124,8 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*service.Excha
 	}
 
 	return &service.ExchangeCallbackResult{
-		BizId:   bizId,
-		Credits: balance,
+		BizId:   result.TransactionId,
+		Credits: result.Balance,
 	}, nil
 }
 
@@ -151,6 +150,7 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		return errno.ErrCommon.WithMessage("用户信息不存在")
 	}
 
+	app.RpcService.PointRpcSrv.fin
 	pointTranService := service.NewPointTransactionService(context.NewMioContext())
 	pt, err := pointTranService.FindBy(repository.FindPointTransactionBy{
 		TransactionId: form.BizId,

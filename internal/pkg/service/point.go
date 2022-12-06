@@ -54,32 +54,56 @@ func (srv PointService) FindByOpenId(openId string) (*entity.Point, error) {
 
 // IncUserPoint 加积分操作
 func (srv PointService) IncUserPoint(dto srv_types.IncUserPointDTO) (int64, error) {
+	result, err := srv.IncUserPointResult(dto)
+	if err != nil {
+		return 0, err
+	}
+	return result.Balance, nil
+}
+
+// IncUserPointResult 加积分操作
+func (srv PointService) IncUserPointResult(dto srv_types.IncUserPointDTO) (*ChangeResult, error) {
 	changePointDto := srv_types.ChangeUserPointDTO{}
 	if err := util.MapTo(dto, &changePointDto); err != nil {
-		return 0, err
+		return nil, err
 	}
 	return srv.changeUserPoint(changePointDto)
 }
 
 // DecUserPoint 减积分操作
 func (srv PointService) DecUserPoint(dto srv_types.DecUserPointDTO) (int64, error) {
+	result, err := srv.DecUserPointResult(dto)
+	if err != nil {
+		return 0, err
+	}
+	return result.Balance, nil
+}
+
+// DecUserPointResult 减积分操作
+func (srv PointService) DecUserPointResult(dto srv_types.DecUserPointDTO) (*ChangeResult, error) {
 	if dto.ChangePoint < 0 {
-		return 0, errors.New("DecUserPoint Value error")
+		return nil, errors.New("DecUserPoint Value error")
 	}
 	changePointDto := srv_types.ChangeUserPointDTO{}
 	if err := util.MapTo(dto, &changePointDto); err != nil {
-		return 0, err
+		return nil, err
 	}
 	changePointDto.ChangePoint = -changePointDto.ChangePoint
 	return srv.changeUserPoint(changePointDto)
 }
 
+type ChangeResult struct {
+	LogId         int64
+	TransactionId string
+	Balance       int64
+}
+
 //changeUserPoint 变动积分操作
-func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64, error) {
+func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (*ChangeResult, error) {
 
 	lockKey := "changeUserPoint" + dto.OpenId
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		return 0, errno.ErrCommon.WithMessage("操作频繁")
+		return nil, errno.ErrCommon.WithMessage("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -88,13 +112,13 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		limitService := NewPointTransactionCountLimitService(srv.ctx)
 		err := limitService.CheckLimitAndUpdate(dto.Type, dto.OpenId)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
 	}
 
+	var result ChangeResult
 	var balance int64
-	var err error
-	var ptId int64
+
 	if dto.ChangePoint > 0 {
 		resp, err := app.RpcService.PointRpcSrv.IncPoint(srv.ctx, &pointclient.IncPointReq{
 			Openid:       dto.OpenId,
@@ -107,10 +131,11 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			BizName:      string("mp2c-go-" + dto.Type),
 		})
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
-		balance = resp.Point
-		ptId = resp.LogId
+		result.LogId = resp.LogId
+		result.TransactionId = resp.TransactionId
+		result.Balance = resp.Point
 	} else {
 		resp, err := app.RpcService.PointRpcSrv.DecPoint(srv.ctx, &pointclient.DecPointReq{
 			Openid:       dto.OpenId,
@@ -123,15 +148,23 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 			BizName:      string("mp2c-go-" + dto.Type),
 		})
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
-		balance = resp.Point
-		ptId = resp.LogId
+		result.LogId = resp.LogId
+		result.TransactionId = resp.TransactionId
+		result.Balance = resp.Point
 	}
-	go srv.afterChangePoint(ptId, balance, dto)
-	return balance, err
+
+	go srv.afterChangePoint(result.LogId, balance, dto)
+	return &result, nil
 }
 func (srv PointService) afterChangePoint(ptId int64, balance int64, dto srv_types.ChangeUserPointDTO) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			app.Logger.Error("afterChangePoint panic", dto, err)
+		}
+	}()
 	//积分变动提醒
 	types := map[entity.PointTransactionType]string{
 		entity.POINT_JHX:                    "金华行",
@@ -222,54 +255,6 @@ func (srv PointService) afterChangePoint(ptId int64, balance int64, dto srv_type
 			app.Logger.Error("更新邀请状态失败", dto.InviteId, err)
 		}
 	}
-}
-
-//ChangeUserPointByOffline 线下发积分
-func (srv PointService) ChangeUserPointByOffline(dto srv_types.ChangeUserPointDTO) (int64, error) {
-	var balance int64 = 0
-	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
-		//查询积分账户
-		pointRepo := repository.NewPointRepository(ctx)
-		point, err := pointRepo.FindForUpdate(dto.OpenId)
-		if err != nil {
-			return err
-		}
-		//判读积分余额是否充足
-		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
-			return errno.ErrCommon.WithMessage("积分不足")
-		}
-		if point.Id == 0 {
-			//创建积分账户
-			point.OpenId = dto.OpenId
-			point.Balance += dto.ChangePoint
-			if err := pointRepo.Create(&point); err != nil {
-				return err
-			}
-		} else {
-			//更新积分账户
-			point.Balance += dto.ChangePoint
-			if err := pointRepo.Save(&point); err != nil {
-				return err
-			}
-		}
-		balance = point.Balance
-		//增加积分变动记录
-		tranService := NewPointTransactionService(ctx)
-		_, err = tranService.CreateTransaction(CreatePointTransactionParam{
-			BizId:        dto.BizId,
-			OpenId:       dto.OpenId,
-			Type:         dto.Type,
-			Value:        dto.ChangePoint,
-			AdminId:      dto.AdminId,
-			Note:         dto.Note,
-			AdditionInfo: dto.AdditionInfo,
-		})
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	return balance, err
 }
 
 //AdminAdjustUserPoint 管理员变动积分

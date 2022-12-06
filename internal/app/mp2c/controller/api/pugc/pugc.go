@@ -241,44 +241,6 @@ func (PugcController) ExportExcel(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-//周年庆双倍积分奖励明细
-
-func (PugcController) SendPoint(c *gin.Context) (gin.H, error) {
-	return nil, nil
-	f, err := excelize.OpenFile("/Users/apple/Desktop/0808.xlsx")
-	if err != nil {
-		fmt.Println(err)
-		return nil, nil
-	}
-	// Get all the rows in the Sheet2.
-	rows, err := f.GetRows("Sheet2")
-	if err != nil {
-		fmt.Println(err)
-		return nil, nil
-	}
-	//后续进行实际话费充值操作                                      //需要手机号码
-	for i, row := range rows {
-		pointVal, err := strconv.ParseInt(row[1], 10, 64)
-		if err != nil {
-			continue
-		}
-		if i > 1 {
-			return nil, nil
-		}
-		pointService := service.NewPointService(context.NewMioContext())
-		_, sendErr := pointService.ChangeUserPointByOffline(srv_types.ChangeUserPointDTO{
-			OpenId:      row[0],
-			ChangePoint: pointVal,
-			Type:        entity.POINT_PLATFORM,
-			BizId:       util.UUID(),
-		})
-		println(sendErr)
-		println("给" + row[0] + "发积分" + row[1])
-	}
-	fmt.Println("发完了")
-	return nil, nil
-}
-
 //发送20元优惠券的时候用  http://127.0.0.1:port/pugc/phoneTen
 func (PugcController) SendTwentyYuanByExcel(c *gin.Context) (gin.H, error) {
 	f, err := excelize.OpenFile("/Users/apple/Desktop/金融问卷10元话费奖励名单1010.xlsx")
