@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -150,15 +151,13 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		return errno.ErrCommon.WithMessage("用户信息不存在")
 	}
 
-	app.RpcService.PointRpcSrv.fin
-	pointTranService := service.NewPointTransactionService(context.NewMioContext())
-	pt, err := pointTranService.FindBy(repository.FindPointTransactionBy{
-		TransactionId: form.BizId,
+	findResp, err := app.RpcService.PointRpcSrv.FindPointTransaction(context.NewMioContext(), &pointclient.FindPointTransactionReq{
+		TransactionId: &form.BizId,
 	})
 	if err != nil {
 		return err
 	}
-	if pt.ID == 0 {
+	if !findResp.Exist {
 		return nil
 	}
 
@@ -166,8 +165,8 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 	if err != nil {
 		return err
 	}
-	refundPoint := -pt.Value
 
+	refundPoint := -findResp.PointTransaction.Value
 	pointService := service.NewPointService(context.NewMioContext())
 	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
