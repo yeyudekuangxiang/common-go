@@ -14,7 +14,6 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
@@ -76,10 +75,20 @@ func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.User
 		if err := util2.MapTo(param, &userExtend); err != nil {
 			return nil, err
 		}
-		userExtend.Ip = param.Ip
-		userExtend.Openid = param.OpenId
-		userExtend.Uid = param.Uid
+		city, errCity := baidu.IpToCity(param.Ip)
+		if errCity != nil {
+			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+		}
+
 		userExtend.CreatedAt = time.Now()
+		userExtend.Adcode = city.Content.AddressDetail.Adcode
+		userExtend.CityCode = city.Content.AddressDetail.CityCode
+		userExtend.Province = city.Content.AddressDetail.Province
+		userExtend.City = city.Content.AddressDetail.City
+		userExtend.District = city.Content.AddressDetail.District
+		userExtend.Street = city.Content.AddressDetail.Street
+		userExtend.StreetNumber = city.Content.AddressDetail.StreetNumber
+
 		ret := u.rUserExtend.Create(userExtend)
 		return userExtend, ret
 	} else {
@@ -187,8 +196,13 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	ch := DefaultUserChannelService.GetChannelByCid(param.ChannelId) //获取渠道id
 	user.ChannelId = ch.Cid
 	ret := repository.DefaultUserRepository.Save(&user)
-
-	retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
+	/*
+		retCity, cityErr := u.rCity.GetByCityCode(repotypes.GetCityByCode{CityCode: "140900"})
+	*/
+	/*	userExtend, exist, _ := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
+			OpenId: user.OpenId,
+		})
+	*/
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
@@ -196,13 +210,14 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	zhuGeAttr["城市code"] = user.CityCode
 	zhuGeAttr["openid"] = user.OpenId
 	zhuGeAttr["ip"] = user.Ip
-	if cityErr == nil {
-		zhuGeAttr["城市名"] = retCity.Name
-	}
+	zhuGeAttr["省"] = param.Province
+	zhuGeAttr["市"] = param.City
 
+	/*if cityErr == nil {
+		zhuGeAttr["城市名"] = retCity.Name
+	}*/
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
-
 	} else {
 		zhuGeAttr["是否成功"] = "失败"
 		zhuGeAttr["失败原因"] = ret.Error()
@@ -466,6 +481,16 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 
 	}
 
+	/*	//随申行，绑定关系
+		_, err = app.RpcService.ActivityRpcSrv.UpdateActivityThirdUser(context.Background(), &activityclient.UpdateActivityThirdUserReq{
+			ActivityId: 2,
+			UserId:     userInfo.ID,
+			Openid:     userInfo.OpenId,
+			Phone:      userInfo.PhoneNumber,
+		})
+		if err != nil {
+			app.Logger.Errorf("【绑定手机号】随申行绑定手机号失败:%s", err.Error())
+		}*/
 	return ret
 }
 func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {

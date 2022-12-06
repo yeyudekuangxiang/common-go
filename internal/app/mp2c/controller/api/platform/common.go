@@ -1,6 +1,6 @@
 package platform
 
-var DefaultCommonController = Controller{}
+var DefaultCommonController = CommonController{}
 
-type Controller struct {
+type CommonController struct {
 }

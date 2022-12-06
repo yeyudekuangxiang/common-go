@@ -206,6 +206,11 @@ type ChangeCommentLikeForm struct {
 	CommentId int64 `json:"commentId" form:"commentId" binding:"required" alias:"评论id"`
 }
 
+type TurnCommentRequest struct {
+	Types  int    `json:"types" form:"types" binding:"required"`
+	TurnId string `json:"turnId" form:"turnId" binding:"required"`
+}
+
 type JinHuaXingForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required"`
 }

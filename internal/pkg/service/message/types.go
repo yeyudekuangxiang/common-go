@@ -38,8 +38,8 @@ type GetWebMessageResp struct {
 	Status         int       `json:"status"` // 1未读 2已读
 	CreatedAt      time.Time `json:"createdAt"`
 	//turn obj
-	TurnType int   `json:"turnType"` // 1文章 2评论 3订单 4商品
-	TurnId   int64 `json:"turnId"`
+	TurnType int    `json:"turnType"` // 1文章 2评论 3订单 4商品
+	TurnId   string `json:"turnId"`
 	//user
 	SendId int64            `json:"sendId"`
 	User   entity.ShortUser `json:"user"`
@@ -53,4 +53,13 @@ type GetWebMessageCountResp struct {
 	Total            int64 `json:"total"`
 	ExchangeMsgTotal int64 `json:"exchangeMsgTotal"`
 	SystemMsgTotal   int64 `json:"systemMsgTotal"`
+}
+
+type GetMessageTemplate struct {
+	Id          int64     `json:"id"`
+	Key         string    `json:"key"`
+	Type        int       `json:"type"`
+	TempContent string    `json:"tempContent"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }

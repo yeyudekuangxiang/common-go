@@ -1,8 +1,10 @@
 package system
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
@@ -14,6 +16,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var DefaultGitlabService = GitlabService{}
@@ -116,15 +119,22 @@ func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, err
 	}
 	return mergeRequest.State, err
 }
-func (srv GitlabService) Callback(event glbtyp.EventType, body []byte) error {
+func (srv GitlabService) Callback(event glbtyp.EventHookType, body []byte) error {
 	switch event {
-	case glbtyp.EventTypeDeploymentHook:
+	case glbtyp.EventDeploymentHook:
 		data := glbtyp.Deployment{}
 		err := json.Unmarshal(body, &data)
 		if err != nil {
 			return err
 		}
 		return srv.deployment(data)
+	case glbtyp.EventMergeRequestHook:
+		data := glbtyp.MergeRequest{}
+		err := json.Unmarshal(body, &data)
+		if err != nil {
+			return err
+		}
+		return srv.mergeRequest(data)
 	}
 	return nil
 }
@@ -238,4 +248,158 @@ func (srv GitlabService) deployCancel(deployment glbtyp.Deployment) error {
 			deployment.User.Name,
 			deployment.DeployableId, deployment.DeployableUrl),
 	}})
+}
+
+var gitlabUserMobileList = []map[string]string{
+	{
+		"mobile":   "17624865520",
+		"username": "neiljin",
+		"nickname": "金战领",
+	},
+	{
+		"mobile":   "18840853003",
+		"username": "meiliu",
+		"nickname": "刘梅",
+	},
+	{
+		"mobile":   "13083605153",
+		"username": "yunfenglian",
+		"nickname": "连云峰",
+	},
+}
+var adminMobileList = []map[string]string{
+	{
+		"mobile":   "17624865520",
+		"username": "neiljin",
+		"nickname": "金战领",
+	},
+}
+
+func (srv GitlabService) mergeRequest(request glbtyp.MergeRequest) error {
+	user := map[string]string{
+		"mobile":   "17624865520",
+		"username": request.User.Username,
+		"nickname": request.User.Name,
+	}
+	for _, u := range gitlabUserMobileList {
+		if u["username"] == request.User.Username {
+			user = u
+			break
+		}
+	}
+
+	switch request.ObjectAttributes.Action {
+	case "open", "reopen":
+		m2 := make([]map[string]string, 0)
+		for _, u := range gitlabUserMobileList {
+			if u["username"] == request.User.Username {
+				continue
+			}
+			m2 = append(m2, u)
+		}
+
+		seeUser := m2[rand.Int31n(int32(len(m2)))]
+		mergeUser := adminMobileList[rand.Int31n(1)]
+
+		ud, _ := json.Marshal(user)
+		mud, _ := json.Marshal(mergeUser)
+
+		app.Redis.HSet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID), string(ud))
+		app.Redis.HSet(context.Background(), config.RedisKey.GitlabHook+"mergeStash", strconv.Itoa(request.ObjectAttributes.ID), string(mud))
+		app.Redis.Expire(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", time.Hour*24)
+		app.Redis.Expire(context.Background(), config.RedisKey.GitlabHook+"mergeStash", time.Hour*24)
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】项目请求合并通知 \n%s发起一个合并请求【%s】 \n请%s进行代码审查,请%s进行代码合并 \n%s",
+					request.Project.Name,
+					user["nickname"],
+					request.ObjectAttributes.Title,
+					seeUser["nickname"],
+					mergeUser["nickname"],
+					request.ObjectAttributes.URL,
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{seeUser["mobile"], mergeUser["mobile"]},
+			}})
+		}
+	case "approved", "approval":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
+			mergeUser := make(map[string]string)
+			json.Unmarshal([]byte(ud), &mergeUser)
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求已被%s核准,请%s进行代码合并 \n%s",
+					request.Project.Name,
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					mergeUser["nickname"],
+					request.ObjectAttributes.URL,
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{mergeUser["mobile"]},
+			}})
+		}
+	case "unapproved", "unapproval":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
+			requestUser := make(map[string]string)
+			json.Unmarshal([]byte(ud), &requestUser)
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求核准已被%s撤销,请%s复查代码 \n%s",
+					request.Project.Name,
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					requestUser["nickname"],
+					request.ObjectAttributes.URL,
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{requestUser["mobile"]},
+			}})
+		}
+	case "close":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
+			requestUser := make(map[string]string)
+			json.Unmarshal([]byte(ud), &requestUser)
+
+			app.Redis.HDel(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID))
+			app.Redis.HDel(context.Background(), config.RedisKey.GitlabHook+"mergeStash", strconv.Itoa(request.ObjectAttributes.ID))
+
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求已被%s关闭 \n%s",
+					request.Project.Name,
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					request.ObjectAttributes.URL,
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{requestUser["mobile"]},
+			}})
+		}
+	case "merge":
+		if request.ObjectAttributes.TargetBranch == "master" || request.ObjectAttributes.TargetBranch == "develop" {
+			ud := app.Redis.HGet(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID)).Val()
+			requestUser := make(map[string]string)
+			json.Unmarshal([]byte(ud), &requestUser)
+
+			app.Redis.HDel(context.Background(), config.RedisKey.GitlabHook+"mergeUserStash", strconv.Itoa(request.ObjectAttributes.ID))
+			app.Redis.HDel(context.Background(), config.RedisKey.GitlabHook+"mergeStash", strconv.Itoa(request.ObjectAttributes.ID))
+			masterAlert := ""
+			if request.ObjectAttributes.TargetBranch == "master" {
+				masterAlert = ",别忘记合并到develop哦"
+			}
+			return wxworkpdr.SendRobotMessage(wxworkmsg.RobotMessage{Key: config.Constants.WxWorkGitlabRobotKey, Type: wxwork.MsgTypeText, Message: wxwork.Text{
+				Content: fmt.Sprintf("【%s】项目【%s】合并请求已被%s合并%s \n%s",
+					request.Project.Name,
+					request.ObjectAttributes.Title,
+					user["nickname"],
+					masterAlert,
+					request.ObjectAttributes.URL,
+				),
+				MentionedList:       nil,
+				MentionedMobileList: []string{requestUser["mobile"]},
+			}})
+		}
+	}
+	return nil
 }

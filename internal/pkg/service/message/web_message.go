@@ -5,8 +5,9 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/util"
+	"mio/internal/pkg/repository/message"
 	"mio/pkg/errno"
+	"strconv"
 	"strings"
 )
 
@@ -17,14 +18,15 @@ type (
 		GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error)
 		SetHaveRead(params SetHaveReadMessage) error
 		GetTemplate(key string) string
+		GetTemplateInfo(key string) (*GetMessageTemplate, error)
 	}
 
 	defaultWebMessage struct {
 		ctx             *mioContext.MioContext
-		message         repository.MessageModel
-		messageCustomer repository.MessageCustomerModel
-		messageContent  repository.MessageContentModel
-		template        repository.MessageTemplateModel
+		message         message.MessageModel
+		messageCustomer message.MessageCustomerModel
+		messageContent  message.MessageContentModel
+		template        message.MessageTemplateModel
 		user            repository.UserRepository
 		topic           repository.TopicModel
 		comment         repository.CommentModel
@@ -37,11 +39,11 @@ type (
 		Val       string `json:"val"`
 	}
 
-	Options func(option *webMessageOption)
+	WMOptions func(option *webMessageOption)
 )
 
 func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
-	err := d.messageCustomer.HaveReadMessage(repository.SetHaveReadMessageParams{
+	err := d.messageCustomer.HaveReadMessage(message.SetHaveReadMessageParams{
 		MsgIds: params.MsgIds,
 		RecId:  params.RecId,
 	})
@@ -54,7 +56,7 @@ func (d defaultWebMessage) SetHaveRead(params SetHaveReadMessage) error {
 func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMessageCountResp, error) {
 	res := GetWebMessageCountResp{}
 
-	total, err := d.message.CountAll(repository.FindMessageParams{
+	total, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
 	})
@@ -65,7 +67,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 
 	res.Total = total
 
-	exchangeMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
+	exchangeMsgTotal, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
 		Types:  []string{"1", "2", "3"},
@@ -77,7 +79,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 
 	res.ExchangeMsgTotal = exchangeMsgTotal
 
-	systemMsgTotal, err := d.message.CountAll(repository.FindMessageParams{
+	systemMsgTotal, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
 		Types:  []string{"4", "5", "6", "7", "8", "9", "10", "11", "12"},
@@ -92,7 +94,7 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 }
 
 func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageResp, int64, error) {
-	msgList, total, err := d.message.GetMessage(repository.FindMessageParams{
+	msgList, total, err := d.message.GetMessage(message.FindMessageParams{
 		RecId:  params.UserId,
 		Status: params.Status,
 		Types:  params.Types,
@@ -113,32 +115,21 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	}
 
 	uKeyMap := make(map[int64]struct{}, l+1) // 发送者id map
-	//topicMap := make(map[int64]struct{}, l+1)   // 帖子 map
-	//commentMap := make(map[int64]struct{}, l+1) // 评论 map
-	//orderMap := make(map[int64]struct{}, l+1)   // 订单 map
-	//goodsMap := make(map[int64]struct{}, l+1)   // 商品 map
+
 	for i, item := range msgList {
-		one := &GetWebMessageResp{}
-		_ = util.MapTo(item, one)
+		one := &GetWebMessageResp{
+			Id:             item.Id,
+			MessageContent: item.MessageContent,
+			MessageNotes:   item.MessageNotes,
+			Type:           item.Type,
+			Status:         item.Status,
+			CreatedAt:      item.CreatedAt,
+			TurnType:       item.TurnType,
+			TurnId:         strconv.FormatInt(item.TurnId, 10),
+			SendId:         item.SendId,
+		}
 		result[i] = one
-		//	//uKeyMap
 		uKeyMap[item.SendId] = struct{}{}
-		//	//turnMap
-		//	if item.TurnType == 1 {
-		//		topicMap[item.ShowId] = struct{}{}
-		//	}
-		//
-		//	if item.TurnType == 2 {
-		//		commentMap[item.ShowId] = struct{}{}
-		//	}
-		//
-		//	if item.TurnType == 3 {
-		//		orderMap[item.ShowId] = struct{}{}
-		//	}
-		//	if item.TurnType == 4 {
-		//		goodsMap[item.ShowId] = struct{}{}
-		//	}
-		//
 	}
 
 	//User
@@ -152,12 +143,6 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	for _, uItem := range uList {
 		uMap[uItem.ID] = uItem
 	}
-
-	//Turn
-	//tMap := d.turnTopic(topicMap)     //文章
-	//cMap := d.turnComment(commentMap) //评论
-	//oMap := d.turnOrder(orderMap)     // 订单
-	//gMap := d.turnGoods(goodsMap)     // 商品
 
 	for _, item := range result {
 		if item.SendId == 0 {
@@ -213,7 +198,7 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	}
 
 	//入库
-	err := d.message.SendMessage(repository.SendMessage{
+	err := d.message.SendMessage(message.SendMessage{
 		SendId:       param.SendId,
 		RecId:        param.RecId,
 		Type:         param.Type,
@@ -263,79 +248,40 @@ func (d defaultWebMessage) GetTemplate(key string) string {
 	return one.TempContent
 }
 
-func (d defaultWebMessage) turnTopic(topicMap map[int64]struct{}) map[int64]string {
-	if len(topicMap) >= 1 {
-		var topicIds []int64
-		for id := range topicMap {
-			topicIds = append(topicIds, id)
-		}
-		topicList := d.topic.GetTopicNotes(topicIds)
-		if len(topicList) >= 1 {
-			tMap := make(map[int64]string, len(topicIds))
-			for _, topicItem := range topicList {
-				notes := ""
-				n := len(topicItem.Tags)
-				if n > 2 {
-					n = 2
-				}
-				for i := 0; i < n; i++ {
-					notes += topicItem.Tags[i].Name + "|"
-				}
-				notes += topicItem.Title
-				tMap[topicItem.Id] = notes
-			}
-			return tMap
-		}
+func (d defaultWebMessage) GetTemplateInfo(key string) (*GetMessageTemplate, error) {
+	var one, err = d.template.FindOne(key)
+	if err != nil {
+		return nil, err
 	}
-
-	return map[int64]string{}
+	return &GetMessageTemplate{
+		Id:          one.Id,
+		Key:         one.Key,
+		Type:        one.Type,
+		TempContent: one.TempContent,
+		CreatedAt:   one.CreatedAt,
+		UpdatedAt:   one.UpdatedAt,
+	}, nil
 }
 
-func (d defaultWebMessage) turnComment(commentMap map[int64]struct{}) map[int64]string {
-	if len(commentMap) >= 1 {
-		var commentIds []int64
-		for id := range commentMap {
-			commentIds = append(commentIds, id)
-		}
-		commentList := d.comment.FindListByIds(commentIds)
-		if len(commentList) >= 1 {
-			cMap := make(map[int64]string, len(commentIds))
-			for _, commentItem := range commentList {
-				cMap[commentItem.Id] = commentItem.Message
-			}
-			return cMap
-		}
-	}
-	return map[int64]string{}
-}
-
-func (d defaultWebMessage) turnOrder(commentMap map[int64]struct{}) map[int64]string {
-	return map[int64]string{}
-}
-
-func (d defaultWebMessage) turnGoods(commentMap map[int64]struct{}) map[int64]string {
-	return map[int64]string{}
-}
-
-func WithSendObjId(sendObjId int64) Options {
+func WithSendObjId(sendObjId int64) WMOptions {
 	return func(option *webMessageOption) {
 		option.SendObjID = sendObjId
 	}
 }
 
-func WithRecObjId(recObjId int64) Options {
+func WithRecObjId(recObjId int64) WMOptions {
 	return func(option *webMessageOption) {
 		option.RecObjId = recObjId
 	}
 }
 
-func WithVal(val string) Options {
+func WithVal(val string) WMOptions {
 	return func(option *webMessageOption) {
 		option.Val = val
 	}
 }
 
-func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMessage {
+func NewWebMessageService(ctx *mioContext.MioContext, options ...WMOptions) WebMessage {
 	option := &webMessageOption{}
 	for i := range options {
 		options[i](option)
@@ -343,10 +289,10 @@ func NewWebMessageService(ctx *mioContext.MioContext, options ...Options) WebMes
 
 	return &defaultWebMessage{
 		ctx:             ctx,
-		message:         repository.NewMessageModel(ctx),
-		messageCustomer: repository.NewMessageCustomerModel(ctx),
-		messageContent:  repository.NewMessageContentModel(ctx),
-		template:        repository.NewMessageTemplateModel(ctx),
+		message:         message.NewMessageModel(ctx),
+		messageCustomer: message.NewMessageCustomerModel(ctx),
+		messageContent:  message.NewMessageContentModel(ctx),
+		template:        message.NewMessageTemplateModel(ctx),
 		user:            repository.NewUserRepository(),
 		topic:           repository.NewTopicModel(ctx),
 		comment:         repository.NewCommentModel(ctx),

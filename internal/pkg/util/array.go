@@ -1,6 +1,7 @@
 package util
 
 import (
+	"reflect"
 	"strings"
 )
 
@@ -12,14 +13,15 @@ func ArrayIsContains(items []string, item string) bool {
 	}
 	return false
 }
-func InArray(items []string, item string) bool {
-	for _, item1 := range items {
-		if item1 == item {
-			return true
-		}
-	}
-	return false
-}
+
+//func InArray(items []string, item string) bool {
+//	for _, item1 := range items {
+//		if item1 == item {
+//			return true
+//		}
+//	}
+//	return false
+//}
 
 func Intersect(nums1 []string, nums2 []string) []string {
 	if len(nums1) > len(nums2) {
@@ -84,4 +86,24 @@ func SortArray(nums []int) []int {
 		return nums
 	}
 	return quick(nums, 0, len(nums)-1)
+}
+
+func InArray(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+
+	return
 }

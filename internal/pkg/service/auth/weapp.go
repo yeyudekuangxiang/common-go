@@ -105,6 +105,23 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 			ChannelId:   cid,
 			Ip:          ip,
 			CityCode:    city.Content.AddressDetail.Adcode,
+			City:        city.Content.AddressDetail.City,
+			Province:    city.Content.AddressDetail.Province,
+		})
+		if err != nil {
+			return nil, "", false, err
+		}
+		_, err = service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
+			OpenId:       user.OpenId,
+			Uid:          user.ID,
+			Ip:           ip,
+			Adcode:       city.Content.AddressDetail.Adcode,
+			CityCode:     city.Content.AddressDetail.CityCode,
+			Province:     city.Content.AddressDetail.Province,
+			City:         city.Content.AddressDetail.City,
+			District:     city.Content.AddressDetail.District,
+			Street:       city.Content.AddressDetail.Street,
+			StreetNumber: city.Content.AddressDetail.StreetNumber,
 		})
 		if err != nil {
 			return nil, "", false, err
@@ -112,14 +129,6 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	} else if user.UnionId == "" && session.WxUnionId != "" { //更新用户unionid
 		service.DefaultUserService.UpdateUserUnionId(user.ID, session.WxUnionId)
 	}
-
-	//更新用户的最新ip
-	service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
-		OpenId: user.OpenId,
-		Uid:    user.ID,
-		Ip:     ip,
-	})
-
 	if isNewUser {
 		err := userDealPool.Submit(func() {
 			srv.AfterCreateUser(user, invitedBy, partnershipWith)
@@ -129,6 +138,13 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 		if err != nil {
 			app.Logger.Errorf("提交新用户处理事件失败 %+v %s %s", user, invitedBy, partnershipWith)
 		}
+	} else {
+		//更新用户的最新ip
+		service.DefaultUserService.CreateUserExtend(service.CreateUserExtendParam{
+			OpenId: user.OpenId,
+			Uid:    user.ID,
+			Ip:     ip,
+		})
 	}
 
 	return user, cookie, isNewUser, nil

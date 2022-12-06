@@ -37,12 +37,21 @@ type CreateUserParam struct {
 	ChannelId   int64             `json:"int64"`
 	Ip          string            `json:"ip"`
 	CityCode    string            `json:"city_code"`
+	Province    string            `json:"province"`
+	City        string            `json:"city"`
 }
 
 type CreateUserExtendParam struct {
-	OpenId string `json:"openId"`
-	Uid    int64  `json:"uid"`
-	Ip     string `json:"ip"`
+	OpenId       string `json:"openId"`
+	Uid          int64  `json:"uid"`
+	Ip           string `json:"ip"`
+	Province     string `json:"province"`
+	City         string `json:"city"`
+	District     string `json:"district"`
+	StreetNumber string `json:"street_number"`
+	Adcode       string `json:"adcode"`
+	Street       string `json:"street"`
+	CityCode     int    `json:"city_code"`
 }
 
 type unidianTypeId struct {

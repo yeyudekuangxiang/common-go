@@ -55,15 +55,15 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	commentRes := make([]*entity.CommentRes, 0)
+	commentRes := make([]*entity.Comment, 0)
 	for _, item := range list {
-		res := item.CommentRes()
+		res := item.CommentResp()
 		if _, ok := likeMap[item.Id]; ok {
 			res.IsLike = likeMap[item.Id]
 		}
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
-				childRes := childItem.CommentRes()
+				childRes := childItem.CommentResp()
 				if _, ok := likeMap[childItem.Id]; ok {
 					childRes.IsLike = likeMap[childItem.Id]
 				}
@@ -101,7 +101,7 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	//获取点赞记录
-	commentRes := make([]*entity.CommentRes, 0)
+	commentRes := make([]*entity.Comment, 0)
 	likeMap := make(map[int64]int, 0)
 	commentLike := commentLikeService.GetLikeInfoByUser(user.ID)
 	if len(commentLike) > 0 {
@@ -111,13 +111,13 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 	}
 
 	for _, item := range list {
-		res := item.CommentRes()
+		res := item.CommentResp()
 		if _, ok := likeMap[item.Id]; ok {
 			res.IsLike = likeMap[item.Id]
 		}
 		if item.RootChild != nil {
 			for _, childItem := range item.RootChild {
-				childRes := childItem.CommentRes()
+				childRes := childItem.CommentResp()
 				if _, ok := likeMap[childItem.Id]; ok {
 					childRes.IsLike = likeMap[childItem.Id]
 				}
@@ -185,27 +185,17 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	//发送消息
 	var notes, msgKey string
-	var turnId int64
-	var turnType, types int
+	var types int
+	turnType := 2
+	turnId := comment.Id
 
 	if form.Parent == 0 {
 		msgKey = "reply_topic"
-		turnId = comment.Id
-		turnType = 1
 		types = 2
 		topic := topicService.FindById(form.ObjId)
-		//n := len(topic.Tags)
-		//if n > 2 {
-		//	n = 2
-		//}
-		//for i := 0; i < n; i++ {
-		//	notes += topic.Tags[i].Name + "|"
-		//}
 		notes = topic.Title
 	} else {
 		msgKey = "reply_comment"
-		turnType = 2
-		turnId = comment.Id
 		types = 3
 		toMsg := toComment.Message
 		messagerune = []rune(comment.Message)
@@ -353,5 +343,31 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	return gin.H{
 		"status": resp.LikeStatus,
 		"point":  point,
+	}, nil
+}
+
+func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
+	form := TurnCommentRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	commentService := kumiaoCommunity.NewCommentService(ctx)
+
+	comment, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
+		UserId: user.ID,
+		Types:  form.Types,
+		TurnId: form.TurnId,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"comment": comment,
 	}, nil
 }

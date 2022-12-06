@@ -197,7 +197,6 @@ func (srv TopicService) ZAddTopic() {
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
 func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-
 	if param.Order == "recommend" && param.TopicTagId == 0 {
 		list, i, err := srv.GetTopicDetailPageList(param)
 		if err != nil {
@@ -596,6 +595,12 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
 	topicModel := &entity.Topic{}
 
+	//title审核
+	err := validator.CheckMsgWithOpenId(openid, title)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
+	}
+
 	// 文本内容审核
 	if content != "" {
 		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
@@ -831,7 +836,7 @@ func (srv TopicService) UpdateAuthor(userId, passiveUserId int64) error {
 func (srv TopicService) SetWeekTopic() error {
 	// 取导入的文章，更新文章的created_time字段值为现在，并且加精华。
 	// 限制条件为 每个人取一个 一共50篇
-	// 所取的文章的import更新为0 排除下次筛选
+	// 导入的文章的is_essence字段都为0, 更新后为1。筛选该字段为0的导入文章即可
 	topics, err := srv.topicModel.GetImportTopic()
 	if err != nil {
 		return err

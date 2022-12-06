@@ -26,6 +26,7 @@ func (srv QuizDailyResultService) FindTodayResult(openId string, day timeutils.D
 	}
 	return &result, nil
 }
+
 func (srv QuizDailyResultService) CompleteTodayQuiz(openid string, t timeutils.Time) (*entity.QuizDailyResult, error) {
 	todayResult, err := srv.FindTodayResult(openid, t.Date())
 	if err != nil {

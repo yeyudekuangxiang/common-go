@@ -4,16 +4,21 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/userpdr"
+	"mio/internal/pkg/queue/types/message/usermsg"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/common"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/validator"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strings"
 	"time"
@@ -171,8 +176,19 @@ func (ctr UserController) BindMobileByCode(c *gin.Context) (gin.H, error) {
 	//绑定后
 	err := service.DefaultUserService.BindPhoneByCode(user.ID, form.Code, c.ClientIP(), form.InvitedBy)
 	if err == nil {
+		//活动
+		err = userpdr.BindMobileForActivity(usermsg.BindMobile{
+			UserId:    user.ID,
+			OpenId:    user.OpenId,
+			ChannelId: user.ChannelId,
+		})
+		if err != nil {
+			app.Logger.Errorf("BindMobileForActivity error: %s", err.Error())
+		}
+		//发券
 		ctr.sendCoupon(user)
 	}
+
 	return nil, err
 }
 
@@ -219,6 +235,13 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		gender = (*entity.UserGender)(form.Gender)
 	}
 
+	if strings.Trim(form.Nickname, " ") != "" {
+		err := validator.CheckMsgWithOpenId(user.OpenId, form.Nickname)
+		if err != nil {
+			return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
+		}
+	}
+
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
@@ -252,7 +275,9 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	}
 
 	//归属地
-	location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
+	//location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
+	location, err := baidu.IpToCity(c.ClientIP())
+
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +289,7 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 	shortUser := user.ShortUser()
 	result := make(map[string]interface{}, 0)
 	_ = util.MapTo(&shortUser, &result)
-	result["ipLocation"] = location.Name
+	result["ipLocation"] = location.Content.AddressDetail.Province
 	return result, nil
 }
 
@@ -281,7 +306,12 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("内容不可以为空")
 	}
 
-	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	err := validator.CheckMsgWithOpenId(user.OpenId, strings.Trim(form.Introduction, " "))
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+
+	err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:       user.ID,
 		Introduction: form.Introduction,
 	})
@@ -319,6 +349,15 @@ func (ctr UserController) sendCoupon(user entity.User) {
 				app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
 				return
 			}
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["发放日期"] = time.Now().Format("2006-01-02 15:04:05")
+			zhuGeAttr["发放奖励名称"] = "新人亿通行地铁红包"
+			zhuGeAttr["活动名称"] = "喵出行，亿起来"
+			zhuGeAttr["渠道名称"] = "亿通行App落地页"
+			zhuGeAttr["用户Id"] = user.ID
+			zhuGeAttr["用户openId"] = user.OpenId
+			zhuGeAttr["用户mobile"] = user.PhoneNumber
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.YTXReward, user.OpenId, zhuGeAttr)
 			app.Logger.Info("亿通行发红包结束")
 		}()
 	}

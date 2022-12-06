@@ -35,7 +35,6 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/check-yzm", apiutil.Format(api.DefaultUserController.CheckYZM))      //校验验证码
 			userRouter.GET("/get-yzm-2b", apiutil.Format(api.DefaultUserController.GetYZM2B))     //获取验证码2b
 			userRouter.GET("/check-yzm-2b", apiutil.Format(api.DefaultUserController.CheckYZM2B)) //校验验证码2b
-
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
 
@@ -130,7 +129,7 @@ func apiRouter(router *gin.Engine) {
 			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
 		}
 
-		//小程序订阅消息
+		//消息相关路由
 		messageRouter := mustAuthRouter.Group("/message")
 		{
 			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
@@ -138,6 +137,9 @@ func apiRouter(router *gin.Engine) {
 			messageRouter.POST("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
 			messageRouter.POST("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
 			messageRouter.POST("/web-message-haveread", apiutil.Format(message.DefaultMessageController.SetHaveReadWebMessage))
+			messageRouter.POST("/im-message-send", apiutil.Format(message.DefaultIMMessageController.Send))
+			messageRouter.POST("/im-message-get", apiutil.Format(message.DefaultIMMessageController.GetByFriend))
+			messageRouter.POST("/im-message-bind", apiutil.Format(message.DefaultIMMessageController.BindFriend))
 		}
 
 		//用户相关路由
@@ -224,6 +226,7 @@ func apiRouter(router *gin.Engine) {
 			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
 			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
 			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
+			commentRouter.POST("/turn-comment", apiutil.Format(api.DefaultCommentController.TurnComment))
 		}
 
 		//积分相关路由
@@ -299,6 +302,7 @@ func apiRouter(router *gin.Engine) {
 			platformRouter.GET("/jhx/ticket-status", apiutil.Format(open.DefaultJhxController.TicketStatus))  //金华行-查询券码状态
 			platformRouter.POST("/all-receive", apiutil.Format(open.DefaultYtxController.AllReceive))         //一键领取
 			platformRouter.POST("/pre-point", apiutil.Format(open.DefaultYtxController.PrePointList))         //预加积分列表
+
 		}
 
 		//碳成就相关路由
@@ -312,7 +316,6 @@ func apiRouter(router *gin.Engine) {
 			carbonRouter.GET("/classify", apiutil.Format(api.DefaultCarbonController.Classify))
 			carbonRouter.GET("/history", apiutil.Format(api.DefaultCarbonController.History))
 		}
-
 	}
 
 	mqAuthRouter := router.Group("/api/mp2c")

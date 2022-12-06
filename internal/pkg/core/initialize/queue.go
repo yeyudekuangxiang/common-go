@@ -2,14 +2,13 @@ package initialize
 
 import (
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/pkg/logger/zap"
 )
 
 func initQueueProducer() {
-
 	log.Println("初始化amqp生产者...")
 	pub, err := rabbitmq.NewPublisher(config.Config.AMQP.Url, rabbitmq.Config{}, rabbitmq.WithPublisherOptionsLogger(zap.NewRabbitmqLogger(app.Logger)))
 	if err != nil {
@@ -18,9 +17,8 @@ func initQueueProducer() {
 		} else {
 			log.Println("初始化amqp生产者失败", err)
 		}
-
 	} else {
-		*app.QueueProduct = *pub
+		app.QueueProduct = pub
 		log.Println("初始化amqp生产者成功")
 	}
 

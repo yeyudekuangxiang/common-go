@@ -11,8 +11,10 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -29,22 +31,30 @@ type (
 		DelCommentSoft(userId, commentId int64) error
 		Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error)
 		AddCommentLikeCount(commentId int64, num int) error
+		TurnComment(params TurnCommentReq) (*APICommentResp, error)
+		//TurnObj(params TurnCommentReq) (*APICommentResp, int64, error)
 	}
 )
 
 type defaultCommentService struct {
-	ctx              *context.MioContext
-	commentModel     repository.CommentModel
-	commentLikeModel repository.CommentLikeModel
-	topicModel       repository.TopicModel
+	ctx                            *context.MioContext
+	commentModel                   repository.CommentModel
+	commentLikeModel               repository.CommentLikeModel
+	topicModel                     repository.TopicModel
+	carbonCommentModel             repository.CarbonCommentModel
+	carbonCommentLikeModel         repository.CarbonCommentLikeModel
+	carbonSecondHandCommodityModel repository.CarbonSecondHandCommodityModel
 }
 
 func NewCommentService(ctx *context.MioContext) CommentService {
 	return &defaultCommentService{
-		ctx:              ctx,
-		commentModel:     repository.NewCommentModel(ctx),
-		commentLikeModel: repository.NewCommentLikeRepository(ctx),
-		topicModel:       repository.NewTopicModel(ctx),
+		ctx:                            ctx,
+		commentModel:                   repository.NewCommentModel(ctx),
+		commentLikeModel:               repository.NewCommentLikeRepository(ctx),
+		topicModel:                     repository.NewTopicModel(ctx),
+		carbonCommentModel:             repository.NewCarbonCommentModel(ctx),
+		carbonCommentLikeModel:         repository.NewCarbonCommentLikeRepository(ctx),
+		carbonSecondHandCommodityModel: repository.NewCarbonSecondHandCommodityModel(ctx),
 	}
 }
 
@@ -209,8 +219,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		MemberId:      userId,
 		RootCommentId: RootCommentId,
 		ToCommentId:   ToCommentId,
-		CreatedAt:     time.Time{},
-		UpdatedAt:     time.Time{},
 	}
 	if topic.UserId == userId {
 		comment.IsAuthor = 1
@@ -340,4 +348,170 @@ func (srv *defaultCommentService) AddCommentLikeCount(commentId int64, num int) 
 		return err
 	}
 	return nil
+}
+
+func (srv *defaultCommentService) TurnComment(params TurnCommentReq) (*APICommentResp, error) {
+	kuMio, _ := util.InArray(params.Types, []int{1, 2, 3})
+	mall, _ := util.InArray(params.Types, []int{10, 11, 12})
+	var err error
+	comment := &APICommentResp{}
+
+	if kuMio {
+		comment, err = srv.kuMioComment(params.TurnId, params.UserId)
+
+	} else if mall {
+		comment, err = srv.mallComment(params.TurnId, params.UserId)
+	}
+
+	if err != nil {
+		return comment, err
+	}
+
+	return comment, nil
+}
+
+func (srv *defaultCommentService) kuMioComment(turnId string, userId int64) (*APICommentResp, error) {
+	childList := make([]*APIComment, 0)
+	comment := &APIComment{}
+	commentResp := &APICommentResp{}
+	commentRespChild := make([]*APICommentResp, 0)
+	//root
+
+	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", turnId).First(&comment).Error
+	if err != nil {
+		return commentResp, err
+	}
+
+	if comment.Id == "" {
+		return commentResp, errno.ErrRecordNotFound
+	}
+
+	if comment.RootCommentId != 0 {
+		turnId = strconv.FormatInt(comment.RootCommentId, 10)
+	}
+
+	//root
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).Where("id = ?", turnId).Preload("Member").First(&comment).Error
+	if err != nil {
+		return commentResp, err
+	}
+
+	// child
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CommentIndex{}).
+		Preload("Member").
+		Where("root_comment_id = ?", turnId).
+		Where("state = ?", 0).
+		Find(&childList).Error
+	if err != nil {
+		return commentResp, err
+	}
+
+	commentResp = comment.ApiComment()
+	//like
+	likeMap := make(map[string]int, 0)
+	commentLike := srv.commentLikeModel.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
+	if len(commentLike) > 0 {
+		for _, item := range commentLike {
+			likeMap[strconv.FormatInt(item.CommentId, 10)] = int(item.Status)
+		}
+	}
+
+	if _, ok := likeMap[comment.Id]; ok {
+		commentResp.IsLike = 1
+	}
+
+	for _, item := range childList {
+		res := item.ApiComment()
+		if _, ok := likeMap[comment.Id]; ok {
+			res.IsLike = 1
+		}
+		commentRespChild = append(commentRespChild, res)
+	}
+	commentResp.RootChild = commentRespChild
+	// obj
+	parseInt, _ := strconv.ParseInt(comment.ObjId, 10, 64)
+	obj := srv.topicModel.FindById(parseInt)
+	if obj.Id != 0 {
+		detail := Detail{
+			ObjId:       comment.ObjId,
+			ObjType:     0,
+			ImageList:   obj.ImageList,
+			Description: obj.Title,
+		}
+		commentResp.Detail = detail
+	}
+	return commentResp, nil
+}
+
+func (srv *defaultCommentService) mallComment(turnId string, userId int64) (*APICommentResp, error) {
+	childList := make([]*APIComment, 0)
+	comment := &APIComment{}
+	commentResp := &APICommentResp{}
+	commentRespChild := make([]*APICommentResp, 0)
+	//root
+	err := srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", turnId).First(&comment).Error
+	if err != nil {
+		return commentResp, err
+	}
+
+	if comment.Id == "" {
+		return commentResp, errno.ErrRecordNotFound
+	}
+
+	if comment.RootCommentId != 0 {
+		turnId = strconv.FormatInt(comment.RootCommentId, 10)
+	}
+
+	//root
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).Where("id = ?", turnId).Preload("Member").First(&comment).Error
+	if err != nil {
+		return commentResp, err
+	}
+
+	// child
+	err = srv.ctx.DB.WithContext(srv.ctx.Context).Model(&entity.CarbonCommentIndex{}).
+		Preload("Member").
+		Where("root_comment_id = ?", turnId).
+		Where("state = ?", 0).
+		Find(&childList).Error
+	if err != nil {
+		return commentResp, err
+	}
+
+	commentResp = comment.ApiComment()
+	//like
+	likeMap := make(map[string]int, 0)
+	commentLike := srv.carbonCommentLikeModel.GetListBy(repository.GetCommentLikeListBy{UserId: userId})
+	if len(commentLike) > 0 {
+		for _, item := range commentLike {
+			likeMap[strconv.FormatInt(item.CommentId, 10)] = int(item.Status)
+		}
+	}
+
+	if _, ok := likeMap[comment.Id]; ok {
+		commentResp.IsLike = 1
+	}
+
+	for _, item := range childList {
+		res := item.ApiComment()
+		if _, ok := likeMap[comment.Id]; ok {
+			res.IsLike = 1
+		}
+		commentRespChild = append(commentRespChild, res)
+	}
+	commentResp.RootChild = commentRespChild
+	//obj
+	objId, _ := strconv.ParseInt(comment.ObjId, 10, 64)
+	obj, err := srv.carbonSecondHandCommodityModel.FindOne(objId)
+	if err == nil {
+		detail := Detail{
+			ObjId:       comment.ObjId,
+			ObjType:     1,
+			ImageList:   obj.ImageList,
+			Description: obj.Description,
+		}
+		commentResp.Detail = detail
+	}
+
+	return commentResp, nil
 }

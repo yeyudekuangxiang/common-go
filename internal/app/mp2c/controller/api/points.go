@@ -44,43 +44,11 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 	isVolunteer, _ := zyhService.CheckIsVolunteer(user.OpenId)
 	recordInfoList := make([]api_types.PointRecordInfo, 0)
 	for _, pt := range list {
-		zyhTip := ""
 		recordInfo := api_types.PointRecordInfo{}
 		if err := util.MapTo(pt, &recordInfo); err != nil {
 			return nil, err
 		}
-		if isVolunteer {
-			//2022-10-13 12:05:58 之前不提醒
-			if recordInfo.CreateTime.Unix() > 1665633958 && recordInfo.Value > 0 {
-				//查看type是否推送到志愿汇
-				typeZyh := map[entity.PointTransactionType]string{
-					entity.POINT_STEP:                    "步行",
-					entity.POINT_COFFEE_CUP:              "自带咖啡杯",
-					entity.POINT_BIKE_RIDE:               "骑行",
-					entity.POINT_ECAR:                    "答题活动",
-					entity.POINT_QUIZ:                    "答题活动",
-					entity.POINT_JHX:                     "金华行",
-					entity.POINT_POWER_REPLACE:           "电车换电",
-					entity.POINT_DUIBA_INTEGRAL_RECHARGE: "兑吧虚拟商品充值积分",
-					entity.POINT_RECYCLING_CLOTHING:      "旧物回收 oola衣物鞋帽",
-					entity.POINT_RECYCLING_DIGITAL:       "旧物回收 oola数码",
-					entity.POINT_RECYCLING_APPLIANCE:     "旧物回收 oola家电",
-					entity.POINT_RECYCLING_BOOK:          "旧物回收 oola书籍",
-					entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
-					entity.POINT_FAST_ELECTRICITY:        "快电",
-					entity.POINT_REDUCE_PLASTIC:          "环保减塑",
-					entity.POINT_CYCLING:                 "骑行",
-				}
-				_, zyhOk := typeZyh[recordInfo.Type]
-				if !zyhOk {
-					zyhTip = "(该场景不转化志愿汇能源)"
-				}
-			}
-			if recordInfo.Type == entity.POINT_QUIZ && recordInfo.Value == 2500 {
-				zyhTip = "(该场景不转化志愿汇能源)"
-			}
-		}
-		recordInfo.TypeText = recordInfo.Type.Text() + zyhTip
+		recordInfo.TypeText = recordInfo.Type.Text() + getZyhTip(isVolunteer, recordInfo)
 		recordInfo.TimeStr = recordInfo.CreateTime.Format("01-02 15:04:05")
 		recordInfoList = append(recordInfoList, recordInfo)
 	}
@@ -89,6 +57,45 @@ func (PointsController) GetPointTransactionList(ctx *gin.Context) (gin.H, error)
 		"list": recordInfoList,
 	}, nil
 }
+
+//志愿汇类型
+
+var ZyhPointCollect = map[entity.PointTransactionType]string{
+	entity.POINT_STEP:                    "步行",
+	entity.POINT_COFFEE_CUP:              "自带咖啡杯",
+	entity.POINT_BIKE_RIDE:               "骑行",
+	entity.POINT_ECAR:                    "答题活动",
+	entity.POINT_QUIZ:                    "答题活动",
+	entity.POINT_JHX:                     "金华行",
+	entity.POINT_POWER_REPLACE:           "电车换电",
+	entity.POINT_DUIBA_INTEGRAL_RECHARGE: "兑吧虚拟商品充值积分",
+	entity.POINT_RECYCLING_CLOTHING:      "旧物回收 oola衣物鞋帽",
+	entity.POINT_RECYCLING_DIGITAL:       "旧物回收 oola数码",
+	entity.POINT_RECYCLING_APPLIANCE:     "旧物回收 oola家电",
+	entity.POINT_RECYCLING_BOOK:          "旧物回收 oola书籍",
+	entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
+	entity.POINT_FAST_ELECTRICITY:        "快电",
+	entity.POINT_REDUCE_PLASTIC:          "环保减塑",
+	entity.POINT_CYCLING:                 "骑行",
+}
+
+func getZyhTip(isVolunteer bool, recordInfo api_types.PointRecordInfo) string {
+	zyhTip := ""
+	if isVolunteer {
+		//2022-10-13 12:05:58 之前不提醒
+		if recordInfo.CreateTime.Unix() > 1665633958 && recordInfo.Value > 0 {
+			_, zyhOk := ZyhPointCollect[recordInfo.Type]
+			if !zyhOk {
+				zyhTip = "(该场景不转化志愿汇能源)"
+			}
+		}
+		if recordInfo.Type == entity.POINT_QUIZ && recordInfo.Value == 2500 {
+			zyhTip = "(该场景不转化志愿汇能源)"
+		}
+	}
+	return zyhTip
+}
+
 func (PointsController) GetPoint(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	pointService := service.NewPointService(context.NewMioContext())

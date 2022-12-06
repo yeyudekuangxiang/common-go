@@ -12,6 +12,7 @@ type (
 	CommentModel interface {
 		Insert(data *entity.CommentIndex) (*entity.CommentIndex, error)
 		FindOne(id int64) (*entity.CommentIndex, error)
+		FindOneAndMember(id int64) (*entity.CommentIndex, error)
 		FindOneQuery(builder *gorm.DB) (*entity.CommentIndex, error)
 		FindCount(builder *gorm.DB) (int64, error)
 		FindSum(builder *gorm.DB) (float64, error)
@@ -35,6 +36,19 @@ type (
 		ctx *mioContext.MioContext
 	}
 )
+
+func (m *defaultCommentModel) FindOneAndMember(id int64) (*entity.CommentIndex, error) {
+	var resp entity.CommentIndex
+	err := m.ctx.DB.Model(&entity.CommentIndex{}).WithContext(m.ctx).Preload("Member").First(&resp, id).Error
+	switch err {
+	case nil:
+		return &resp, nil
+	case gorm.ErrRecordNotFound:
+		return nil, entity.ErrNotFount
+	default:
+		return nil, err
+	}
+}
 
 func (m *defaultCommentModel) FindListByIds(ids []int64) []*entity.CommentIndex {
 	commentList := make([]*entity.CommentIndex, len(ids))

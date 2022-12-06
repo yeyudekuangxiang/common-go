@@ -16,3 +16,8 @@ type WebMessageRequest struct {
 type HaveReadWebMessageRequest struct {
 	MsgIds string `json:"msgIds" default:"" form:"msgIds"`
 }
+
+type TurnWebMessageRequest struct {
+	TurnType int   `json:"turnType" form:"turnType"`
+	TurnId   int64 `json:"turnId" form:"turnId"`
+}

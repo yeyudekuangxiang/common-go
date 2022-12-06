@@ -53,7 +53,7 @@ func (QuizController) AnswerQuestion(ctx *gin.Context) (gin.H, error) {
 }
 func (QuizController) Submit(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	point, err := quiz.DefaultQuizService.Submit(user.OpenId)
+	point, err := quiz.DefaultQuizService.Submit(user.OpenId, user.ID)
 	if err != nil {
 		return nil, err
 	}
