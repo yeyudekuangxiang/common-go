@@ -51,9 +51,9 @@ MaxLifetime=50
 LogLevel=info
 
 [redis]
-Host=r-uf68v1lom3hv3bfksw.redis.rds.aliyuncs.com
+Host=127.0.0.1
 Port=6379
-Password=Mi0tech@1133
+Password=
 DB=0
 
 [log]
