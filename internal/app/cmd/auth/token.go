@@ -6,7 +6,7 @@ package auth
 
 import (
 	"github.com/spf13/cobra"
-	"mio/config"
+	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/util"
@@ -24,7 +24,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Config.App.TokenKey = "Mkh2KY7AoWTvOjJVCosBz8B6mSUnYgpz"
+		initialize.Initialize("./config-dev.ini")
 		err := cmd.Flags().Parse(args)
 		if err != nil {
 			cmd.PrintErrln(err)
