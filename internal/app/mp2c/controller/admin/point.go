@@ -3,6 +3,8 @@ package admin
 import (
 	"github.com/gin-gonic/gin"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/service"
@@ -56,8 +58,18 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	}, nil
 }
 func (ctr PointController) GetPointTypeList(ctx *gin.Context) (gin.H, error) {
-	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
-	list := pointTranService.GetPointTransactionTypeList()
+	pointResp, err := app.RpcService.PointRpcSrv.GetPointTypeList(ctx, &point.GetPointTypeListReq{})
+	if err != nil {
+		return nil, err
+	}
+	list := make([]PointTransactionTypeInfo, 0)
+	for _, item := range pointResp.List {
+		list = append(list, PointTransactionTypeInfo{
+			Type:     item.Type,
+			TypeText: item.RealText,
+		})
+	}
+
 	return gin.H{
 		"list": list,
 	}, nil
