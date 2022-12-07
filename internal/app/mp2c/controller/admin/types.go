@@ -297,4 +297,7 @@ type ShowIndexIconForm struct {
 	Id int64 `json:"id" form:"id" binding:"required" alias:"id"`
 }
 
-//index_icon end 金刚位
+type PointTransactionTypeInfo struct {
+	Type     string `json:"type"`
+	TypeText string `json:"typeText"`
+}
