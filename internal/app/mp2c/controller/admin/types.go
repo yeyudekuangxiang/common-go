@@ -251,8 +251,9 @@ type UpdateUser struct {
 
 //user end
 
-type StarChargeSendCoupon struct {
+type SendCouponReq struct {
 	OpenId string `json:"openId" form:"openId" binding:"required"`
+	Ch     string `json:"ch" form:"ch" binding:"ch"`
 }
 
 type UpdateUserRisk struct {
