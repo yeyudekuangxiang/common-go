@@ -7,12 +7,11 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	platformSrv "mio/internal/pkg/service/platform"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -245,71 +244,17 @@ func (c *defaultClientHandle) findByOpenId() (*entity.Point, error) {
 
 // 增加积分，返回现有积分
 func (c *defaultClientHandle) incPoint(num int64) (int64, error) {
-	c.additional.changeType = "inc"
-	usrPoint, err := c.plugin.pointRepo.FindForUpdate(c.clientHandle.OpenId)
-	if err != nil {
-		return 0, err
-	}
-	if usrPoint.Id == 0 {
-		usrPoint.OpenId = c.clientHandle.OpenId
-		usrPoint.Balance = c.clientHandle.point
-	} else {
-		usrPoint.Balance += c.clientHandle.point
-	}
-	//更新积分
-	point, err := c.savePoint(&usrPoint)
-	failMessage := ""
-	if err != nil {
-		failMessage = err.Error()
-	}
-
-	track.DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
-		OpenId:      c.clientHandle.OpenId,
-		PointType:   c.clientHandle.Type,
-		ChangeType:  util.Ternary(c.clientHandle.point > 0, "inc", "dec").String(),
-		Value:       uint(c.clientHandle.point),
-		IsFail:      util.Ternary(err == nil, false, true).Bool(),
-		FailMessage: failMessage,
+	pointSrv := service.NewPointService(c.ctx)
+	balance, err := pointSrv.IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       c.clientHandle.OpenId,
+		Type:         c.clientHandle.Type,
+		BizId:        c.clientHandle.bizId,
+		ChangePoint:  c.clientHandle.point,
+		AdminId:      int(c.clientHandle.AdminId),
+		Note:         c.clientHandle.identifyImg["orderId"],
+		AdditionInfo: c.clientHandle.additionInfo,
 	})
-	if err != nil {
-		return 0, err
-	}
-
-	//保存积分更新记录
-	_, err = c.saveTransAction()
-	if err != nil {
-		return 0, err
-	}
-
-	//同步到志愿汇
-	if c.clientHandle.point >= 0 {
-		//积分变动提醒
-		typeZyh := map[entity.PointTransactionType]string{
-			entity.POINT_POWER_REPLACE: "电车换电",
-		}
-		_, zyhOk := typeZyh[c.clientHandle.Type]
-		if zyhOk {
-			sendType := "0"
-			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
-			messageCode, messageErr := serviceZyh.SendPoint(sendType, c.clientHandle.OpenId, strconv.FormatInt(c.clientHandle.point, 10))
-			if messageCode != "30000" {
-				//发送结果记录到日志
-				msgErr := ""
-				if messageErr != nil {
-					msgErr = messageErr.Error()
-				}
-				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
-					Openid:         c.clientHandle.OpenId,
-					PointType:      c.clientHandle.Type,
-					Value:          c.clientHandle.point,
-					ResultCode:     messageCode,
-					AdditionalInfo: msgErr,
-					TransactionId:  c.clientHandle.bizId,
-				})
-			}
-		}
-	}
-	return point, nil
+	return balance, err
 }
 
 // 消耗积分，返回现有积分

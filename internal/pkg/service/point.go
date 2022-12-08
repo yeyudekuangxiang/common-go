@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -10,7 +11,6 @@ import (
 	messageSrv "mio/internal/pkg/service/message"
 	platformSrv "mio/internal/pkg/service/platform"
 	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
@@ -54,32 +54,56 @@ func (srv PointService) FindByOpenId(openId string) (*entity.Point, error) {
 
 // IncUserPoint 加积分操作
 func (srv PointService) IncUserPoint(dto srv_types.IncUserPointDTO) (int64, error) {
+	result, err := srv.IncUserPointResult(dto)
+	if err != nil {
+		return 0, err
+	}
+	return result.Balance, nil
+}
+
+// IncUserPointResult 加积分操作
+func (srv PointService) IncUserPointResult(dto srv_types.IncUserPointDTO) (*ChangeResult, error) {
 	changePointDto := srv_types.ChangeUserPointDTO{}
 	if err := util.MapTo(dto, &changePointDto); err != nil {
-		return 0, err
+		return nil, err
 	}
 	return srv.changeUserPoint(changePointDto)
 }
 
 // DecUserPoint 减积分操作
 func (srv PointService) DecUserPoint(dto srv_types.DecUserPointDTO) (int64, error) {
+	result, err := srv.DecUserPointResult(dto)
+	if err != nil {
+		return 0, err
+	}
+	return result.Balance, nil
+}
+
+// DecUserPointResult 减积分操作
+func (srv PointService) DecUserPointResult(dto srv_types.DecUserPointDTO) (*ChangeResult, error) {
 	if dto.ChangePoint < 0 {
-		return 0, errors.New("DecUserPoint Value error")
+		return nil, errors.New("DecUserPoint Value error")
 	}
 	changePointDto := srv_types.ChangeUserPointDTO{}
 	if err := util.MapTo(dto, &changePointDto); err != nil {
-		return 0, err
+		return nil, err
 	}
 	changePointDto.ChangePoint = -changePointDto.ChangePoint
 	return srv.changeUserPoint(changePointDto)
 }
 
+type ChangeResult struct {
+	LogId         int64
+	TransactionId string
+	Balance       int64
+}
+
 //changeUserPoint 变动积分操作
-func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64, error) {
+func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (*ChangeResult, error) {
+
 	lockKey := "changeUserPoint" + dto.OpenId
 	if !util.DefaultLock.Lock(lockKey, time.Second*10) {
-		go srv.trackPoint(dto, "操作频繁")
-		return 0, errno.ErrCommon.WithMessage("操作频繁")
+		return nil, errno.ErrCommon.WithMessage("操作频繁")
 	}
 	defer util.DefaultLock.UnLock(lockKey)
 
@@ -88,208 +112,153 @@ func (srv PointService) changeUserPoint(dto srv_types.ChangeUserPointDTO) (int64
 		limitService := NewPointTransactionCountLimitService(srv.ctx)
 		err := limitService.CheckLimitAndUpdate(dto.Type, dto.OpenId)
 		if err != nil {
-			//积分打点
-			go srv.trackPoint(dto, err.Error())
-			return 0, err
+			return nil, err
 		}
 	}
 
-	//发放或扣减积分
-	var balance int64 = 0
-	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
+	var result ChangeResult
+	var balance int64
 
-		//查询积分账户
-		pointRepo := repository.NewPointRepository(ctx)
-		point, err := pointRepo.FindForUpdate(dto.OpenId)
-		if err != nil {
-			return err
-		}
+	if dto.BizName == "" {
+		dto.BizName = "mp2c-go-" + string(dto.Type)
+	}
 
-		//判读积分余额是否充足
-		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
-			return errno.ErrCommon.WithMessage("积分不足")
-		}
-
-		if point.Id == 0 {
-			//创建积分账户
-			point.OpenId = dto.OpenId
-			point.Balance += dto.ChangePoint
-			if err := pointRepo.Create(&point); err != nil {
-				return err
-			}
-		} else {
-			//更新积分账户
-			point.Balance += dto.ChangePoint
-			if err := pointRepo.Save(&point); err != nil {
-				return err
-			}
-		}
-		balance = point.Balance
-
-		//增加积分变动记录
-		tranService := NewPointTransactionService(ctx)
-		_, err = tranService.CreateTransaction(CreatePointTransactionParam{
+	if dto.ChangePoint > 0 {
+		resp, err := app.RpcService.PointRpcSrv.IncPoint(srv.ctx, &pointclient.IncPointReq{
+			Openid:       dto.OpenId,
+			Type:         string(dto.Type),
 			BizId:        dto.BizId,
-			OpenId:       dto.OpenId,
-			Type:         dto.Type,
-			Value:        dto.ChangePoint,
-			AdminId:      dto.AdminId,
-			Note:         dto.Note,
+			ChangePoint:  uint64(dto.ChangePoint),
+			AdminId:      uint64(dto.AdminId),
+			Node:         dto.Note,
 			AdditionInfo: dto.AdditionInfo,
+			BizName:      dto.BizName,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-
-		//积分变动提醒
-		types := map[entity.PointTransactionType]string{
-			entity.POINT_JHX:                    "金华行",
-			entity.POINT_FAST_ELECTRICITY:       "快电",
-			entity.POINT_ECAR:                   "星星充电",
-			entity.POINT_RECYCLING_CLOTHING:     "旧物回收 oola衣物鞋帽",
-			entity.POINT_RECYCLING_DIGITAL:      "旧物回收 oola数码",
-			entity.POINT_RECYCLING_APPLIANCE:    "旧物回收 oola家电",
-			entity.POINT_RECYCLING_BOOK:         "旧物回收 oola书籍",
-			entity.POINT_FMY_RECYCLING_CLOTHING: "旧物回收 fmy衣物鞋帽",
-			entity.POINT_SYSTEM_ADD:             "系统补发",
-		}
-		_, ok := types[dto.Type]
-		if ok && (dto.ChangePoint > 0) {
-			//发小程序订阅消息
-			message := messageSrv.MiniChangePointTemplate{
-				Point:    dto.ChangePoint,
-				Source:   dto.Type.Text(),
-				Time:     time.Now().Format("2006年01月02日"),
-				AllPoint: point.Balance,
-			}
-			service := messageSrv.MessageService{}
-			_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
-			if messageErr != nil {
-
-			}
-		}
-
-		//同步到志愿汇
-		if dto.ChangePoint >= 0 {
-			//积分变动提醒
-			typeZyh := map[entity.PointTransactionType]string{
-				entity.POINT_STEP:                    "步行",
-				entity.POINT_COFFEE_CUP:              "自带咖啡杯",
-				entity.POINT_BIKE_RIDE:               "骑行",
-				entity.POINT_ECAR:                    "答题活动",
-				entity.POINT_QUIZ:                    "答题活动",
-				entity.POINT_JHX:                     "金华行",
-				entity.POINT_POWER_REPLACE:           "电车换电",
-				entity.POINT_DUIBA_INTEGRAL_RECHARGE: "兑吧虚拟商品充值积分",
-				entity.POINT_RECYCLING_CLOTHING:      "旧物回收 oola衣物鞋帽",
-				entity.POINT_RECYCLING_DIGITAL:       "旧物回收 oola数码",
-				entity.POINT_RECYCLING_APPLIANCE:     "旧物回收 oola家电",
-				entity.POINT_RECYCLING_BOOK:          "旧物回收 oola书籍",
-				entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
-				entity.POINT_FAST_ELECTRICITY:        "快电",
-				entity.POINT_REDUCE_PLASTIC:          "环保减塑",
-			}
-			_, zyhOk := typeZyh[dto.Type]
-			if dto.Type == entity.POINT_QUIZ && dto.ChangePoint == 2500 {
-				zyhOk = false
-			}
-			if zyhOk {
-				sendType := "0"
-				switch dto.Type {
-				case entity.POINT_QUIZ:
-					sendType = "1"
-					break
-				case entity.POINT_STEP:
-					sendType = "2"
-					break
-				}
-				serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
-				messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
-				if messageCode != "30000" {
-					//发送结果记录到日志
-					msgErr := ""
-					if messageErr != nil {
-						msgErr = messageErr.Error()
-					}
-					serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
-						Openid:         dto.OpenId,
-						PointType:      dto.Type,
-						Value:          dto.ChangePoint,
-						ResultCode:     messageCode,
-						AdditionalInfo: msgErr,
-						TransactionId:  dto.BizId,
-					})
-				}
-			}
-		}
-
-		//发完积分，更新邀请表发积分状态
-		if dto.InviteId != 0 && dto.Type == entity.POINT_INVITE {
-			//更新状态
-			err = srv.repoInvite.UpdateIsReward(dto.InviteId)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-
-	//积分打点
-	if err != nil {
-		go srv.trackPoint(dto, err.Error())
+		result.LogId = resp.LogId
+		result.TransactionId = resp.TransactionId
+		result.Balance = resp.Point
 	} else {
-		go srv.trackPoint(dto, "")
-	}
-
-	return balance, err
-}
-
-//ChangeUserPointByOffline 线下发积分
-func (srv PointService) ChangeUserPointByOffline(dto srv_types.ChangeUserPointDTO) (int64, error) {
-	var balance int64 = 0
-	err := srv.ctx.Transaction(func(ctx *context.MioContext) error {
-		//查询积分账户
-		pointRepo := repository.NewPointRepository(ctx)
-		point, err := pointRepo.FindForUpdate(dto.OpenId)
-		if err != nil {
-			return err
-		}
-		//判读积分余额是否充足
-		if dto.ChangePoint < 0 && point.Balance+dto.ChangePoint < 0 {
-			return errno.ErrCommon.WithMessage("积分不足")
-		}
-		if point.Id == 0 {
-			//创建积分账户
-			point.OpenId = dto.OpenId
-			point.Balance += dto.ChangePoint
-			if err := pointRepo.Create(&point); err != nil {
-				return err
-			}
-		} else {
-			//更新积分账户
-			point.Balance += dto.ChangePoint
-			if err := pointRepo.Save(&point); err != nil {
-				return err
-			}
-		}
-		balance = point.Balance
-		//增加积分变动记录
-		tranService := NewPointTransactionService(ctx)
-		_, err = tranService.CreateTransaction(CreatePointTransactionParam{
+		resp, err := app.RpcService.PointRpcSrv.DecPoint(srv.ctx, &pointclient.DecPointReq{
+			Openid:       dto.OpenId,
+			Type:         string(dto.Type),
 			BizId:        dto.BizId,
-			OpenId:       dto.OpenId,
-			Type:         dto.Type,
-			Value:        dto.ChangePoint,
-			AdminId:      dto.AdminId,
-			Note:         dto.Note,
+			ChangePoint:  uint64(-dto.ChangePoint),
+			AdminId:      uint64(dto.AdminId),
+			Node:         dto.Note,
 			AdditionInfo: dto.AdditionInfo,
+			BizName:      dto.BizName,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return nil
-	})
-	return balance, err
+		result.LogId = resp.LogId
+		result.TransactionId = resp.TransactionId
+		result.Balance = resp.Point
+	}
+
+	go srv.afterChangePoint(result.LogId, balance, dto)
+	return &result, nil
+}
+func (srv PointService) afterChangePoint(ptId int64, balance int64, dto srv_types.ChangeUserPointDTO) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			app.Logger.Error("afterChangePoint panic", dto, err)
+		}
+	}()
+	//积分变动提醒
+	types := map[entity.PointTransactionType]string{
+		entity.POINT_JHX:                    "金华行",
+		entity.POINT_FAST_ELECTRICITY:       "快电",
+		entity.POINT_ECAR:                   "星星充电",
+		entity.POINT_RECYCLING_CLOTHING:     "旧物回收 oola衣物鞋帽",
+		entity.POINT_RECYCLING_DIGITAL:      "旧物回收 oola数码",
+		entity.POINT_RECYCLING_APPLIANCE:    "旧物回收 oola家电",
+		entity.POINT_RECYCLING_BOOK:         "旧物回收 oola书籍",
+		entity.POINT_FMY_RECYCLING_CLOTHING: "旧物回收 fmy衣物鞋帽",
+		entity.POINT_SYSTEM_ADD:             "系统补发",
+	}
+	_, ok := types[dto.Type]
+	if ok && (dto.ChangePoint > 0) {
+		//发小程序订阅消息
+		message := messageSrv.MiniChangePointTemplate{
+			Point:    dto.ChangePoint,
+			Source:   dto.Type.Text(),
+			Time:     time.Now().Format("2006年01月02日"),
+			AllPoint: balance,
+		}
+		service := messageSrv.MessageService{}
+		_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
+		if messageErr != nil {
+
+		}
+	}
+
+	//同步到志愿汇
+	if dto.ChangePoint >= 0 {
+		//积分变动提醒
+		typeZyh := map[entity.PointTransactionType]string{
+			entity.POINT_STEP:                    "步行",
+			entity.POINT_COFFEE_CUP:              "自带咖啡杯",
+			entity.POINT_BIKE_RIDE:               "骑行",
+			entity.POINT_ECAR:                    "答题活动",
+			entity.POINT_QUIZ:                    "答题活动",
+			entity.POINT_JHX:                     "金华行",
+			entity.POINT_POWER_REPLACE:           "电车换电",
+			entity.POINT_DUIBA_INTEGRAL_RECHARGE: "兑吧虚拟商品充值积分",
+			entity.POINT_RECYCLING_CLOTHING:      "旧物回收 oola衣物鞋帽",
+			entity.POINT_RECYCLING_DIGITAL:       "旧物回收 oola数码",
+			entity.POINT_RECYCLING_APPLIANCE:     "旧物回收 oola家电",
+			entity.POINT_RECYCLING_BOOK:          "旧物回收 oola书籍",
+			entity.POINT_FMY_RECYCLING_CLOTHING:  "旧物回收 fmy衣物鞋帽",
+			entity.POINT_FAST_ELECTRICITY:        "快电",
+			entity.POINT_REDUCE_PLASTIC:          "环保减塑",
+		}
+		_, zyhOk := typeZyh[dto.Type]
+		if dto.Type == entity.POINT_QUIZ && dto.ChangePoint == 2500 {
+			zyhOk = false
+		}
+		if zyhOk {
+			sendType := "0"
+			switch dto.Type {
+			case entity.POINT_QUIZ:
+				sendType = "1"
+				break
+			case entity.POINT_STEP:
+				sendType = "2"
+				break
+			}
+			serviceZyh := platformSrv.NewZyhService(context.NewMioContext())
+			messageCode, messageErr := serviceZyh.SendPoint(sendType, dto.OpenId, strconv.FormatInt(dto.ChangePoint, 10))
+			if messageCode != "30000" {
+				//发送结果记录到日志
+				msgErr := ""
+				if messageErr != nil {
+					msgErr = messageErr.Error()
+				}
+				serviceZyh.CreateLog(srv_types.GetZyhLogAddDTO{
+					Openid:         dto.OpenId,
+					PointType:      dto.Type,
+					Value:          dto.ChangePoint,
+					ResultCode:     messageCode,
+					AdditionalInfo: msgErr,
+					TransactionId:  dto.BizId,
+				})
+			}
+		}
+	}
+
+	//发完积分，更新邀请表发积分状态
+	if dto.InviteId != 0 && dto.Type == entity.POINT_INVITE {
+		//更新状态
+		err := srv.repoInvite.UpdateIsReward(dto.InviteId)
+		if err != nil {
+			app.Logger.Error("更新邀请状态失败", dto.InviteId, err)
+		}
+	}
 }
 
 //AdminAdjustUserPoint 管理员变动积分
@@ -324,48 +293,4 @@ func (srv PointService) AdminAdjustUserPoint(adminId int, param AdminAdjustUserP
 		BizId:       util.UUID(),
 	})
 	return err
-}
-
-func (srv PointService) trackPoint(dto srv_types.ChangeUserPointDTO, failMessage string) {
-	track.DefaultZhuGeService().TrackPoint(srv_types.TrackPoint{
-		OpenId:      dto.OpenId,
-		PointType:   dto.Type,
-		ChangeType:  util.Ternary(dto.ChangePoint > 0, "inc", "dec").String(),
-		Value:       uint(dto.ChangePoint),
-		IsFail:      util.Ternary(failMessage == "", false, true).Bool(),
-		FailMessage: failMessage,
-	})
-
-	if dto.ChangePoint > 0 {
-		total := srv.repoPointTransaction.FindTotal(repository.FindPointTransactionByValue{
-			OpenId:     dto.OpenId,
-			ChangeType: "inc",
-		})
-		//第一次新增积分，上报
-		if total == 1 {
-			zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
-			zhuGeAttr["openid"] = dto.OpenId
-			zhuGeAttr["积分类型"] = dto.Type
-			zhuGeAttr["变动方式"] = "inc"
-			zhuGeAttr["变动数量"] = uint(dto.ChangePoint)
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.FirstIncPoint, dto.OpenId, zhuGeAttr)
-		}
-	}
-
-	if dto.ChangePoint < 0 {
-		total := srv.repoPointTransaction.FindTotal(repository.FindPointTransactionByValue{
-			OpenId:     dto.OpenId,
-			ChangeType: "dec",
-		})
-		//第一次减积分，上报
-		if total == 1 {
-			zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
-			zhuGeAttr["openid"] = dto.OpenId
-			zhuGeAttr["积分类型"] = dto.Type
-			zhuGeAttr["变动方式"] = "dec"
-			zhuGeAttr["变动数量"] = uint(dto.ChangePoint)
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.FirstDecPoint, dto.OpenId, zhuGeAttr)
-		}
-	}
-
 }

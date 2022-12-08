@@ -2,6 +2,9 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/service"
@@ -25,16 +28,24 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	if !endTime.IsZero() {
 		endTime = form.EndTime.Add(time.Hour*24 - time.Nanosecond)
 	}
+
+	endExpireTime := timetool.MustParse("2006-01-02", form.EndExpireTime)
+	if !endExpireTime.IsZero() {
+		endExpireTime = endExpireTime.EndOfDay()
+	}
+
 	list, total, err := pointTranService.PagePointRecord(service.GetPointTransactionPageListBy{
-		UserId:    form.UserId,
-		Nickname:  form.Nickname,
-		OpenId:    form.OpenId,
-		Phone:     form.Phone,
-		StartTime: model.Time{Time: form.StartTime},
-		EndTime:   model.Time{Time: endTime},
-		Type:      form.Type,
-		Offset:    form.Offset(),
-		Limit:     form.Limit(),
+		UserId:          form.UserId,
+		Nickname:        form.Nickname,
+		OpenId:          form.OpenId,
+		Phone:           form.Phone,
+		StartTime:       model.Time{Time: form.StartTime},
+		EndTime:         model.Time{Time: endTime},
+		StartExpireTime: timetool.MustParse("2006-01-02", form.StartExpireTime).SqlNull(),
+		EndExpireTime:   endExpireTime.SqlNull(),
+		Type:            form.Type,
+		Offset:          form.Offset(),
+		Limit:           form.Limit(),
 	})
 	if err != nil {
 		return nil, err
@@ -47,8 +58,18 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	}, nil
 }
 func (ctr PointController) GetPointTypeList(ctx *gin.Context) (gin.H, error) {
-	pointTranService := service.NewPointTransactionService(context.NewMioContext(context.WithContext(ctx)))
-	list := pointTranService.GetPointTransactionTypeList()
+	pointResp, err := app.RpcService.PointRpcSrv.GetPointTypeList(ctx, &point.GetPointTypeListReq{})
+	if err != nil {
+		return nil, err
+	}
+	list := make([]PointTransactionTypeInfo, 0)
+	for _, item := range pointResp.List {
+		list = append(list, PointTransactionTypeInfo{
+			Type:     item.Type,
+			TypeText: item.RealText,
+		})
+	}
+
 	return gin.H{
 		"list": list,
 	}, nil

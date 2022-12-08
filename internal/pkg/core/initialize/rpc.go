@@ -4,6 +4,7 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
 	"log"
 	"mio/config"
@@ -24,6 +25,12 @@ func InitRpc() {
 			Target:    config.Config.TokenCenterRpc.Target,
 			NonBlock:  config.Config.TokenCenterRpc.NonBlock,
 			Timeout:   config.Config.TokenCenterRpc.Timeout,
+		})),
+		PointRpcSrv: pointclient.NewPoint(zrpc.MustNewClient(zrpc.RpcClientConf{
+			Endpoints: endpoints(config.Config.PointRpc.Endpoints),
+			Target:    config.Config.PointRpc.Target,
+			NonBlock:  config.Config.PointRpc.NonBlock,
+			Timeout:   config.Config.PointRpc.Timeout,
 		})),
 		ActivityRpcSrv: activityclient.NewActivity(zrpc.MustNewClient(zrpc.RpcClientConf{
 			Endpoints: endpoints(config.Config.ActivityRpc.Endpoints),

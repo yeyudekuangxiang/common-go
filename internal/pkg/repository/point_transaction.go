@@ -113,6 +113,12 @@ func (repo PointTransactionRepository) GetPageListBy(by GetPointTransactionPageL
 	if !by.EndTime.IsZero() {
 		db.Where("create_time <= ?", by.EndTime.Time)
 	}
+	if by.StartExpireTime.Valid {
+		db.Where("expire_time >= ? and expire_time is not null", by.StartExpireTime)
+	}
+	if by.EndExpireTime.Valid {
+		db.Where("expire_time <= ? and expire_time is not null", by.EndExpireTime)
+	}
 
 	if by.Type != "" {
 		db.Where("type = ?", by.Type)

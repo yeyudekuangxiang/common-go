@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
+	"google.golang.org/grpc/status"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -111,22 +113,23 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*service.Excha
 
 	pointType := duibaTypeToPointType[form.Type]
 
-	bizId := util.UUID()
-	balance, err := service.NewPointService(context.NewMioContext()).DecUserPoint(srv_types.DecUserPointDTO{
+	result, err := service.NewPointService(context.NewMioContext()).DecUserPointResult(srv_types.DecUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         pointType,
-		BizId:        bizId,
+		BizId:        form.OrderNum,
+		BizName:      "mp2c-go-duiba-exchange",
 		ChangePoint:  form.Credits,
 		AdditionInfo: string(data),
 	})
 	if err != nil {
+		stat := status.Convert(err)
 		app.Logger.Errorf("%+v %v", form, err)
-		return nil, errors.New("系统异常,请联系管理员")
+		return nil, errors.New(stat.Message())
 	}
 
 	return &service.ExchangeCallbackResult{
-		BizId:   bizId,
-		Credits: balance,
+		BizId:   result.TransactionId,
+		Credits: result.Balance,
 	}, nil
 }
 
@@ -151,14 +154,15 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 		return errno.ErrCommon.WithMessage("用户信息不存在")
 	}
 
-	pointTranService := service.NewPointTransactionService(context.NewMioContext())
-	pt, err := pointTranService.FindBy(repository.FindPointTransactionBy{
-		TransactionId: form.BizId,
+	findResp, err := app.RpcService.PointRpcSrv.FindPointTransaction(context.NewMioContext(), &pointclient.FindPointTransactionReq{
+		TransactionId: &form.BizId,
 	})
 	if err != nil {
-		return err
+		stat := status.Convert(err)
+		app.Logger.Errorf("%+v %v", form, err)
+		return errors.New(stat.Message())
 	}
-	if pt.ID == 0 {
+	if !findResp.Exist {
 		return nil
 	}
 
@@ -166,13 +170,14 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 	if err != nil {
 		return err
 	}
-	refundPoint := -pt.Value
 
+	refundPoint := -findResp.PointTransaction.Value
 	pointService := service.NewPointService(context.NewMioContext())
 	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       form.Uid,
 		Type:         entity.POINT_DUIBA_REFUND,
-		BizId:        util.UUID(),
+		BizId:        form.OrderNum,
+		BizName:      "mp2c-go-duiba-exchange-refund",
 		ChangePoint:  refundPoint,
 		AdditionInfo: string(data),
 	})

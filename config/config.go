@@ -51,6 +51,7 @@ type app struct {
 	ActivityZyh      activityZyh             `ini:"activityZyh"`
 	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
 	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
+	PointRpc         rpcSetting              `ini:"pointRpc"`
 	ActivityRpc      rpcSetting              `ini:"activityRpc"`
 	Sms              sms                     `ini:"sms"`
 	SmsMarket        smsMarket               `ini:"smsMarket"`

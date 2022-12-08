@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/jszwec/csvutil"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -68,15 +69,17 @@ func (srv PointTransactionService) PagePointRecord(by GetPointTransactionPageLis
 	}
 
 	pointTranList, total := srv.repo.GetPageListBy(repository.GetPointTransactionPageListBy{
-		AdminId:   by.AdminId,
-		OpenIds:   openIds,
-		StartTime: by.StartTime,
-		EndTime:   by.EndTime,
-		OrderBy:   entity.OrderByList{entity.OrderByPointTranCTDESC},
-		Type:      by.Type,
-		Types:     by.Types,
-		Offset:    by.Offset,
-		Limit:     by.Limit,
+		AdminId:         by.AdminId,
+		OpenIds:         openIds,
+		StartTime:       by.StartTime,
+		EndTime:         by.EndTime,
+		StartExpireTime: by.StartExpireTime,
+		EndExpireTime:   by.EndExpireTime,
+		OrderBy:         entity.OrderByList{entity.OrderByPointTranCTDESC},
+		Type:            by.Type,
+		Types:           by.Types,
+		Offset:          by.Offset,
+		Limit:           by.Limit,
 	})
 
 	pointService := NewPointService(srv.ctx)
@@ -110,6 +113,7 @@ func (srv PointTransactionService) PagePointRecord(by GetPointTransactionPageLis
 			AdditionalInfo: string(point.AdditionalInfo),
 			Note:           point.Note,
 			Admin:          *admin,
+			ExpireTime:     timetool.ToTime(point.ExpireTime.Time).Format("2006/01/02 15:04"),
 		}
 		recordList = append(recordList, pointRecord)
 	}
