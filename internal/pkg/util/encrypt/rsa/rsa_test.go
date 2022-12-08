@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
-	"unicode/utf8"
 )
 
 func assertArrayEqual(t *testing.T, a []byte, b []byte) {
@@ -25,7 +24,7 @@ func assertArrayEqual(t *testing.T, a []byte, b []byte) {
 	}
 }
 
-func byHex(src string) []byte {
+func hexDecode(src string) []byte {
 	decodeString, err := hex.DecodeString(src)
 	if err != nil {
 		fmt.Printf("err:%s", err.Error())
@@ -34,59 +33,31 @@ func byHex(src string) []byte {
 }
 
 func TestRsaCrypt(t *testing.T) {
-	//bs, err := ioutil.ReadFile("2.prikey")
-	//if err != nil {
-	//	t.Fatalf("read private key file failed, err = %s", err.Error())
-	//}
-	//block, _ := pem.Decode(bs)
-	//if block == nil {
-	//	t.Fatalf("decode private key failed")
-	//}
-	//privt, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	////privt := pri.(*rsa.PrivateKey)
-	//if err != nil {
-	//	t.Fatalf("parse private key failed, err=%s", err)
-	//}
-	//testData := "hellow, afsaf, what the fuck ??????,世界还是美好的"
-	//
-	//testEncData, err := PrivateEncrypt(privt, []byte(testData))
-	//if err != nil {
-	//	t.Fatalf("private key encrypt failed, err=%s", err)
-	//}
-	//fmt.Printf("orig data=%s\nenc data=%s\n",
-	//	testData, base64.StdEncoding.EncodeToString(testEncData))
-
-	testData := "5321903be860e50a6568d24fe40572164a6d28b1a417b13120894c12683461e24c576e36715dfdc34f7f841052c4cd78395296500734b0024e4dbf20e4a3cc783d4d4da59d815b734184011797b47027771b4282ab1823e6c94aeb2ba6c1b2c292d2a95138818d6f90ba742029f94da9fdc5de8c1fd99687539f33b1e77f029e8d43d48cdbc77947f8f4eb16e9e3a970ae87a5516805a1aa844d07cfecbae92af4ba8e7972056f8215841e4a4233faaaa1c58e2c2e44e348b6c58b9943b2ded400c0527aaea11eef59206d9096bda1c05d2e649fe7460f0d0b7b7aaf9678a2a254438106ccfacdf2429799b6c7b510bff0c781ad8320ba960c58c2d2a8f16df1"
-	testEncData := byHex(testData)
-
-	bs, err := ioutil.ReadFile("2.pubkey")
+	sign := "652d45759c8a42183bc52be15aad4998b438b40abc6f2a795d3f5d2e9e047f7cc8f4dbeb203de9366ddd6d7be60e04f8d7eced010662eba024a781a3ccb0a102e436fa56b5f32ca18e67933ceb4c29a097394a5139164a28249f6b7005b07ed265ccf8495abf13934a07f8c17e46216d41e962105bef3805c81adf4b35910bb2968d577f13b72a6a89ecb9fee5ad722a80a2bee5c69c89eb33dfd3378ec5caa84ebbc33d9caba2f94a954aa43b71bde0cd4e1071df9cc613fc9291f195572f0dd90e4caf803e33db9d7334d40d887ddda3159674b9d41c3f3c1d90b7377acb506f841ff01887fd4c30ee534fe8deb04e8a39b47d344ab51c6bfd6b743d601574"
+	hexByte := hexDecode(sign)
+	fmt.Printf("hexByte:%v\n", hexByte)
+	//公钥
+	bs, err := ioutil.ReadFile("2.key")
 	if err != nil {
-		t.Fatalf("read certifacte file failed, err = %s", err.Error())
+		fmt.Printf("read certifacte file failed, err = %s", err.Error())
 	}
-
 	block, _ := pem.Decode(bs)
 	if block == nil {
-		t.Fatalf("decode certifacte key failed")
+		fmt.Printf("decode certifacte key failed")
 	}
-	pu, err := x509.ParsePKIXPublicKey(block.Bytes)
-	pub := pu.(*rsa.PublicKey)
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		t.Fatalf("parse certifacte key failed, err=%s", err)
+		fmt.Printf("err:%s", err.Error())
 	}
 
-	//cert, err := x509.ParseCertificate(block.Bytes)
-	//if err != nil {
-	//	t.Fatalf("parse certifacte key failed, err=%s", err)
-	//}
-	//pub := cert.PublicKey.(*rsa.PublicKey)
-	testDecData, err := PublicDecrypt(pub, testEncData)
+	decrypt, err := PublicDecrypt(pub.(*rsa.PublicKey), hexByte)
 	if err != nil {
-		t.Fatalf("public decrypt failed")
+		fmt.Printf("err:%s", err.Error())
 	}
-	r, _ := utf8.DecodeRune(testDecData)
-	fmt.Printf("dec data = %s\n", string(r))
 
-	fmt.Printf("dec data = %s\n", string(testDecData))
+	hexString := hex.EncodeToString(decrypt)
+	fmt.Printf("hexString:%v\n", hexString)
+	fmt.Printf("decryptString: %s\n", string(decrypt))
 }
 
 func TestHex(t *testing.T) {
