@@ -131,6 +131,10 @@ func (p PointTransactionType) RealText() string {
 		return "骑行"
 	case POINT_YTX:
 		return "亿通行"
+	case POINT_RECYCLING_AIHUISHOU:
+		return "爱分类/爱回收"
+	case POINT_RECYCLING:
+		return "旧物回收"
 	}
 	return p.Text()
 }
@@ -170,7 +174,8 @@ const (
 	POINT_DUIBA_INTEGRAL_RECHARGE PointTransactionType = "INTEGRAL_RECHARGE" //兑吧虚拟商品充值积分
 	POINT_YTX                     PointTransactionType = "YTX"               //亿通行
 
-	POINT_RECYCLING              PointTransactionType = "RECYCLING"              //旧物回收
+	POINT_RECYCLING              PointTransactionType = "RECYCLING"
+	POINT_RECYCLING_AIHUISHOU    PointTransactionType = "RECYCLING_AIHUISHOU"    //旧物回收
 	POINT_RECYCLING_CLOTHING     PointTransactionType = "RECYCLING_CLOTHING"     //旧物回收 oola衣物鞋帽
 	POINT_RECYCLING_DIGITAL      PointTransactionType = "RECYCLING_COMPUTER"     //旧物回收 oola数码
 	POINT_RECYCLING_APPLIANCE    PointTransactionType = "RECYCLING_APPLIANCE"    //旧物回收 oola家电
