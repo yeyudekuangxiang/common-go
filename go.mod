@@ -39,8 +39,9 @@ require (
 	github.com/xuri/excelize/v2 v2.6.1
 	github.com/zeromicro/go-zero v1.4.2
 	gitlab.miotech.com/miotech-application/backend/common-go v1.0.7
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.1.4-develop
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.4.0
 	go.uber.org/zap v1.23.0
+	google.golang.org/grpc v1.50.1
 	gopkg.in/ini.v1 v1.62.0
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/driver/postgres v1.4.5
@@ -172,7 +173,6 @@ require (
 	golang.org/x/time v0.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 // indirect
-	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
@@ -187,6 +187,6 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.1.4-develop => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.1.4-develop
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.4.0 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.4.0
 
 replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.7 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.7
