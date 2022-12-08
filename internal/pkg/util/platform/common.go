@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"github.com/golang-module/dongle"
 	"github.com/pkg/errors"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
@@ -37,4 +38,43 @@ func GetSign(params map[string]interface{}, key string, joiner string) string {
 	}
 	//验证签名
 	return encrypt.Md5(key + signStr)
+}
+
+func EncryptByRsa(params map[string]interface{}, key string, joiner string, encryptKey string) string {
+	if _, ok := params["sign"]; ok {
+		delete(params, "sign")
+	}
+
+	if joiner == "" {
+		joiner = ";"
+	}
+
+	var slice []string
+	for k := range params {
+		slice = append(slice, k)
+	}
+
+	sort.Strings(slice)
+
+	var joinStr string
+
+	for _, v := range slice {
+		joinStr += v + "=" + util.InterfaceToString(params[v]) + joiner
+	}
+
+	if joiner != ";" {
+		joinStr = strings.TrimRight(joinStr, joiner)
+	}
+
+	var signStr string
+	switch strings.ToLower(encryptKey) {
+	case "md5":
+		signStr = dongle.Encrypt.FromString(key + signStr).ByMd5().String()
+	case "rsa":
+
+	default:
+		signStr = ""
+	}
+	//验证签名
+	return signStr
 }

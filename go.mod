@@ -18,7 +18,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gogo/protobuf v1.3.2
-	github.com/golang-module/dongle v0.1.5
+	github.com/golang-module/dongle v0.2.0
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
 	github.com/jszwec/csvutil v1.7.1
@@ -39,6 +39,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/wagslane/go-rabbitmq v0.10.0
+	github.com/wenzhenxi/gorsa v0.0.0-20220418014903-15feec0f05a6
 	github.com/xuri/excelize/v2 v2.6.1
 	github.com/zeromicro/go-zero v1.3.4
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.0.8
@@ -168,7 +169,7 @@ require (
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.2.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/term v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.2.0 // indirect
