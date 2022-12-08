@@ -358,9 +358,10 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number)     //本次可得减碳量
 
 	//加积分
+	pt := RecycleService.GetPointType(scene.Ch)
 	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
-		Type:         entity.POINT_RECYCLING,
+		Type:         pt,
 		ChangePoint:  currPoint,
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprint(params),
@@ -372,10 +373,11 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	}
 
 	//发碳量
+	ct := RecycleService.GetCarbonType(scene.Ch)
 	_, err = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
 		OpenId: userInfo.OpenId,
 		UserId: userInfo.ID,
-		Type:   entity.CARBON_RECYCLING,
+		Type:   ct,
 		Value:  currCo2,
 		Info:   fmt.Sprint(params),
 	})

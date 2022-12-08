@@ -333,3 +333,20 @@ func (srv RecycleService) GetCo2V2(tp, number string) (float64, error) {
 
 	return co2, nil
 }
+
+func (srv RecycleService) GetPointType(ch string) entity.PointTransactionType {
+	switch ch {
+	case "loverecycle":
+		return entity.POINT_RECYCLING_AIHUISHOU
+	default:
+		return entity.POINT_RECYCLING
+	}
+}
+func (srv RecycleService) GetCarbonType(ch string) entity.CarbonTransactionType {
+	switch ch {
+	case "loverecycle":
+		return entity.CARBON_RECYCLING_AIHUISHOU
+	default:
+		return entity.CARBON_RECYCLING
+	}
+}

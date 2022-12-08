@@ -117,7 +117,7 @@ type recycleReq struct {
 	Name         string `json:"name" form:"name" binding:"required"`
 	Category     string `json:"category" form:"category" binding:"required"`
 	Number       string `json:"number" form:"number" binding:"required"`
-	CreatedTime  string `json:"createdTime"`
+	CreateTime   string `json:"createTime"`
 	CompleteTime string `json:"completeTime"`
 	T            string `json:"t"`
 	Sign         string `json:"sign" form:"sign" binding:"required"`
