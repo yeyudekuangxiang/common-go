@@ -3,6 +3,7 @@ package recycle
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shopspring/decimal"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -307,7 +308,7 @@ func (srv RecycleService) GetPointV2(tp, number string) (int64, error) {
 
 	//获取point
 	if pointByOne, ok := recyclePointV2[types]; ok {
-		point = pointByOne * int64(math.Floor(num))
+		point = decimal.NewFromFloat(num).Mul(decimal.NewFromInt(pointByOne)).Ceil().IntPart()
 	} else {
 		return point, errno.ErrRecordNotFound.WithMessage("为匹配到对应积分规则")
 	}
@@ -325,7 +326,7 @@ func (srv RecycleService) GetCo2V2(tp, number string) (float64, error) {
 	}
 	//获取co2
 	if co2ByOne, ok := recycleCo2V2[types]; ok {
-		co2 = co2ByOne * math.Floor(num)
+		co2, _ = decimal.NewFromFloat(num).Mul(decimal.NewFromFloat(co2ByOne)).Float64()
 	} else {
 		return co2, errno.ErrRecordNotFound.WithMessage("为匹配到对应减碳规则")
 	}

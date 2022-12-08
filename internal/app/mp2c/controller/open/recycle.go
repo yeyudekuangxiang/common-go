@@ -316,7 +316,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//校验sign
 	delete(params, "sign")
-	if err := platform.CheckSign(form.Sign, params, scene.Key, "&"); err != nil {
+	if sign := platform.EncryptByRsa(params, scene.Key, "&", "md5"); sign != form.Sign {
 		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
 	}
 
