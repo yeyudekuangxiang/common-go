@@ -315,10 +315,10 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	}
 
 	//校验sign
-	delete(params, "sign")
-	if err := platform.CheckSign(form.Sign, params, scene.Key, "&"); err != nil {
-		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
-	}
+	//delete(params, "sign")
+	//if sign := platform.EncryptByRsa(params, scene.Key, "&", "rsa"); sign != form.Sign {
+	//	return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
+	//}
 
 	//校验用户
 	uid, err := strconv.ParseInt(form.MemberId, 10, 64)
