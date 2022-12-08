@@ -59,7 +59,9 @@ func EncryptByRsa(params map[string]interface{}, key string, joiner string, encr
 	var joinStr string
 
 	for _, v := range slice {
-		joinStr += v + "=" + util.InterfaceToString(params[v]) + joiner
+		if val := util.InterfaceToString(params[v]); val != "" {
+			joinStr += v + "=" + val + joiner
+		}
 	}
 
 	if joiner != ";" {
@@ -69,8 +71,10 @@ func EncryptByRsa(params map[string]interface{}, key string, joiner string, encr
 	var signStr string
 	switch strings.ToLower(encryptKey) {
 	case "md5":
-		signStr = dongle.Encrypt.FromString(key + signStr).ByMd5().String()
+		signStr = dongle.Encrypt.FromString(key + joinStr).ByMd5().ToHexString()
 	case "rsa":
+
+	case "aes":
 
 	default:
 		signStr = ""
