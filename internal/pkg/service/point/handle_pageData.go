@@ -136,10 +136,13 @@ func (c *defaultClientHandle) jhxPageData() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	tps := []string{string(entity.CARBON_JHX)}
 	res := make(map[string]interface{}, 0)
 	//返回数据
+
 	res["count"] = count
-	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId)
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId, tps)
 	return res, nil
 }
 
@@ -151,10 +154,11 @@ func (c *defaultClientHandle) ytxPageData() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	tps := []string{string(entity.CARBON_YTX)}
 	res := make(map[string]interface{}, 0)
 	//返回数据
 	res["count"] = count
-	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId)
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId, tps)
 	return res, nil
 }
 
@@ -165,10 +169,11 @@ func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, erro
 	if err != nil {
 		return nil, err
 	}
+	tps := []string{string(entity.CARBON_RECYCLING_AIHUISHOU)}
 	res := make(map[string]interface{}, 0)
 	//返回数据
 	res["count"] = count
-	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId)
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId, tps)
 	return res, nil
 }
 
@@ -179,8 +184,8 @@ func (c *defaultClientHandle) getTodayData(openIds []string, types []entity.Poin
 	})
 }
 
-func (c *defaultClientHandle) getCarbonDayData(openId string) float64 {
-	return service.NewCarbonTransactionService(c.ctx).GetTodayCarbonByType(openId, string(entity.CARBON_YTX))
+func (c *defaultClientHandle) getCarbonDayData(openId string, tps []string) float64 {
+	return service.NewCarbonTransactionService(c.ctx).GetTodayCarbonByType(openId, tps)
 }
 
 func (c *defaultClientHandle) getMonthData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
