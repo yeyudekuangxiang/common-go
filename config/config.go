@@ -28,6 +28,7 @@ var Config = app{
 	DatabaseBusiness: databaseSetting{},
 	Sms:              sms{},
 	SmsMarket:        smsMarket{},
+	Prometheus:       promSetting{},
 }
 
 type app struct {
@@ -55,6 +56,7 @@ type app struct {
 	PointRpc         rpcSetting              `ini:"pointRpc"`
 	Sms              sms                     `ini:"sms"`
 	SmsMarket        smsMarket               `ini:"smsMarket"`
+	Prometheus       promSetting             `ini:"prometheus"`
 }
 
 type appSetting struct {
@@ -160,6 +162,11 @@ type smsMarket struct {
 	Account  string
 	Password string
 	Url      string
+}
+type promSetting struct {
+	Host string
+	Port int
+	Path string
 }
 
 func FindOaSetting(source entity.UserSource) wxSetting {

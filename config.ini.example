@@ -13,6 +13,11 @@ WriteTimeout=10
 #接口调用频率限制(限制ip) S秒 M分钟 H小时 D天
 Throttle = 5-S
 
+[prometheus]
+Host=0.0.0.0
+Port=9091
+Path=/metrics
+
 [database]
 # 数据库类型 mysql postgres
 Type=postgres
