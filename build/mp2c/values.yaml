@@ -10,6 +10,14 @@ image:
 service:
   type: ClusterIP
   port: 80
+  metricsPort: 9091
 
 ingress:
   pathType: ImplementationSpecific
+
+serviceMonitor:
+  # enabled should be set to true to enable prometheus-operator discovery of this service
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 10s
+  path: /metrics

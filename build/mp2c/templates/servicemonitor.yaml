@@ -1,0 +1,21 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-svc
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/vendor: kubesphere
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-svc
+  endpoints:
+      - path: {{ .Values.serviceMonitor.path }}
+        port: metrics
+        interval: {{ .Values.serviceMonitor.interval }}
+        scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+{{- end }}

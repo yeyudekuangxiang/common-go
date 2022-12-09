@@ -4,9 +4,32 @@ import (
 	"bufio"
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/zeromicro/go-zero/core/metric"
 	"go.uber.org/zap"
 	"io/ioutil"
+	"strconv"
 	"time"
+)
+
+const serverNamespace = "http_server"
+
+var (
+	metricServerReqDur = metric.NewHistogramVec(&metric.HistogramVecOpts{
+		Namespace: serverNamespace,
+		Subsystem: "requests",
+		Name:      "duration_ms",
+		Help:      "http server requests duration(ms).",
+		Labels:    []string{"path"},
+		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
+	})
+
+	metricServerReqCodeTotal = metric.NewCounterVec(&metric.CounterVecOpts{
+		Namespace: serverNamespace,
+		Subsystem: "requests",
+		Name:      "code_total",
+		Help:      "http server requests error count.",
+		Labels:    []string{"path", "code"},
+	})
 )
 
 func Access(logger *zap.Logger, timeFormat string, utc bool) gin.HandlerFunc {
@@ -56,5 +79,8 @@ func Access(logger *zap.Logger, timeFormat string, utc bool) gin.HandlerFunc {
 				zap.String("body", bodyStr),
 			)
 		}
+
+		metricServerReqDur.Observe(int64(latency/time.Millisecond), path)
+		metricServerReqCodeTotal.Inc(path, strconv.Itoa(c.Writer.Status()))
 	}
 }
