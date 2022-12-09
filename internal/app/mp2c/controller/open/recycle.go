@@ -340,11 +340,11 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//每日次数限制
 	keyPrefix := fmt.Sprintf("periodLimit:sendPoint:recycle:%s:", form.Ch)
-	PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), scene.Override, app.Redis, keyPrefix, limit.Align())
+	PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), scene.Override, app.Redis, keyPrefix, limit.PeriodAlign())
 	resNumber, err := PeriodLimit.TakeCtx(ctx.Context, form.MemberId)
 
 	if err != nil {
-		return nil, errno.ErrCommon
+		return nil, errno.ErrInternalServer
 	}
 
 	if resNumber != 1 && resNumber != 2 {
@@ -357,12 +357,20 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	currPoint, _ := RecycleService.GetPointV2(form.Category, form.Number) //本次可得积分
 	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number)     //本次可得减碳量
 
+	//每日分数上限
+	keyPrefix = fmt.Sprintf("quantityLimit:sendPoint:recycle:%s:", form.Ch)
+	QuantityLimit := limit.NewQuantityLimit(int(time.Hour.Seconds()*24), scene.PointLimit, app.Redis, keyPrefix, limit.QuantityAlign())
+	current, err := QuantityLimit.TakeCtx(ctx.Context, form.MemberId, int(currPoint))
+	if err != nil {
+		return nil, errno.ErrInternalServer
+	}
+
 	//加积分
 	pt := RecycleService.GetPointType(scene.Ch)
 	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         pt,
-		ChangePoint:  currPoint,
+		ChangePoint:  int64(current),
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprint(params),
 		Note:         scene.Ch + "#" + form.OrderNo,
