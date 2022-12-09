@@ -158,6 +158,20 @@ func (c *defaultClientHandle) ytxPageData() (map[string]interface{}, error) {
 	return res, nil
 }
 
+func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, error) {
+	openIds := []string{c.clientHandle.OpenId}
+	types := []entity.PointTransactionType{entity.POINT_RECYCLING_AIHUISHOU}
+	_, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]interface{}, 0)
+	//返回数据
+	res["count"] = count
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId)
+	return res, nil
+}
+
 func (c *defaultClientHandle) getTodayData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
 	return repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: openIds,
