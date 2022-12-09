@@ -2,11 +2,12 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"os"
 )
 
 func Router(router *gin.Engine) {
 	router.GET("/ping", func(context *gin.Context) {
-		context.String(200, "pong")
+		context.String(200, os.Getenv("HOSTNAME"))
 	})
 	router.GET("/", func(context *gin.Context) {
 		context.String(200, "mio")
