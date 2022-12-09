@@ -121,12 +121,12 @@ func (repo CarbonTransactionRepository) GetPageListBy(by GetPointTransactionPage
 	return list, total
 }
 
-func (repo CarbonTransactionRepository) GetSumTodayCarbonByType(openId, typeStr string) ([]entity.CarbonTransaction, error) {
+func (repo CarbonTransactionRepository) GetSumTodayCarbonByType(openId string, tps []string) ([]entity.CarbonTransaction, error) {
 	var results []entity.CarbonTransaction
 	err := repo.ctx.DB.Model(&entity.CarbonTransaction{}).WithContext(repo.ctx.Context).
 		Where("openid = ?", openId).
-		Where("type = ?", typeStr).
-		Where("created_at = CURRENT_DATE").
+		Where("type in (?)", tps).
+		Where("date(created_at) = CURRENT_DATE").
 		Find(&results).Error
 	if err != nil {
 		return nil, err
