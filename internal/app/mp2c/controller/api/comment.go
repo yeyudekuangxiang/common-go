@@ -163,7 +163,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	}
 
 	keyPrefix := "periodLimit:sendPoint:comment:push:"
-	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 3, app.Redis, keyPrefix, limit.Align())
+	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 3, app.Redis, keyPrefix, limit.PeriodAlign())
 	resNumber, err := periodLimit.TakeCtx(ctx.Context, user.OpenId)
 	if err != nil {
 		return nil, err
