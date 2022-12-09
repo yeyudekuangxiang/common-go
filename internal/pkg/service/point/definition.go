@@ -43,8 +43,9 @@ var pageDataMap = map[string]*commandDescription{
 	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData},    //换电
 	"OOLA_RECYCLE":     {FnPageData: (*defaultClientHandle).oolaRecyclePageData},     //oola旧物回收
 	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData}, //快电
-	"FMY_RECYCLE":      {FnPageData: (*defaultClientHandle).fmyRecyclePageData},
-	"REDUCE_PLASTIC":   {FnPageData: (*defaultClientHandle).reducePlasticPageData},
-	"JHX":              {FnPageData: (*defaultClientHandle).jhxPageData},
-	"YTX":              {FnPageData: (*defaultClientHandle).ytxPageData},
+	"FMY_RECYCLE":      {FnPageData: (*defaultClientHandle).fmyRecyclePageData},      //飞蚂蚁旧物回收
+	"REDUCE_PLASTIC":   {FnPageData: (*defaultClientHandle).reducePlasticPageData},   //环保减塑
+	"JHX":              {FnPageData: (*defaultClientHandle).jhxPageData},             //金华行
+	"YTX":              {FnPageData: (*defaultClientHandle).ytxPageData},             //亿通行
+	"AHS_RECYCLE":      {FnPageData: (*defaultClientHandle).ahsRecyclePageData},      //爱回收旧物回收
 }
