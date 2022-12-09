@@ -113,6 +113,7 @@ deploy-dev:
 deploy-prod:
   image: yeyudekuangxiang/helm:3.8.1
   stage: deploy
+  when: manual
   environment:
     name: production
     url: https://go-api.miotech.com
