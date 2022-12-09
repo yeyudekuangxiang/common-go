@@ -109,3 +109,16 @@ type checkMsg struct {
 type checkMedia struct {
 	MediaUrl string `json:"mediaUrl" form:"mediaUrl" binding:"required"`
 }
+
+type recycleReq struct {
+	Ch           string `json:"ch" form:"ch" binding:"required"`
+	OrderNo      string `json:"orderNo" form:"orderNo" binding:"required"`
+	MemberId     string `json:"memberId" form:"memberId" binding:"required"`
+	Name         string `json:"name" form:"name" binding:"required"`
+	Category     string `json:"category" form:"category" binding:"required"`
+	Number       string `json:"number" form:"number" binding:"required"`
+	CreateTime   string `json:"createTime"`
+	CompleteTime string `json:"completeTime"`
+	T            string `json:"t"`
+	Sign         string `json:"sign" form:"sign" binding:"required"`
+}
