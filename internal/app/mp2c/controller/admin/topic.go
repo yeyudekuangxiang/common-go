@@ -193,7 +193,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 	if topic.Status == 3 {
 		keyPrefix := "periodLimit:sendPoint:article:push:"
-		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.Align())
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.PeriodAlign())
 		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
 
 		if err != nil {
@@ -305,7 +305,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 
 	if topic.IsEssence == 1 {
 		keyPrefix := "periodLimit:sendPoint:article:essence:"
-		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.Align())
+		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.PeriodAlign())
 		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
 
 		if err != nil {

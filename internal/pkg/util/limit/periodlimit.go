@@ -114,7 +114,7 @@ func (h *PeriodLimit) calcExpireSeconds() int {
 	return h.period
 }
 
-func Align() PeriodOption {
+func PeriodAlign() PeriodOption {
 	return func(l *PeriodLimit) {
 		l.align = true
 	}
