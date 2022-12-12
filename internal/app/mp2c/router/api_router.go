@@ -144,7 +144,10 @@ func apiRouter(router *gin.Engine) {
 		//用户相关路由
 		userRouter := mustAuthRouter.Group("/user")
 		{
-			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
+			userRouterCors := userRouter.Use(middleware.CorsToUser())
+			userRouterCors.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
+
+			//userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
 			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
