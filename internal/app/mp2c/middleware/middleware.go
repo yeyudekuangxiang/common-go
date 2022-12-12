@@ -234,9 +234,17 @@ func Throttle() gin.HandlerFunc {
 	}))
 	return middleware
 }
+
 func corsM() gin.HandlerFunc {
 	cfg := cors.DefaultConfig()
 	cfg.AllowAllOrigins = true
+	cfg.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid", "channel")
+	return cors.New(cfg)
+}
+
+func CorsToUser() gin.HandlerFunc {
+	cfg := cors.DefaultConfig()
+	cfg.AllowAllOrigins = false
 	cfg.AddAllowHeaders("x-token", "b-token", "token", "authorization", "openid", "channel")
 	return cors.New(cfg)
 }
