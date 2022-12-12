@@ -119,6 +119,10 @@ type ossSetting struct {
 	AccessKey    string
 	AccessSecret string
 	BasePath     string
+	Bucket       string
+	Region       string
+	//用于分片上传sts授权 https://help.aliyun.com/document_detail/100624.htm?spm=a2c4g.11186623.0.0.5c452cb7TmaQGN#uicontrol-c69-98p-2bv
+	StsRoleArn string
 }
 type amqpSetting struct {
 	Url string

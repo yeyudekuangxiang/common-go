@@ -147,11 +147,10 @@ func (srv UploadService) CreateStsToken(operatorId int64, operatorType int8, sce
 		return nil, err
 	}
 
-	fmt.Println("路径", path.Join("acs:oss:*:*:miotech-resource", uploadScene.OssDir, "*"))
 	cert, err := oss.DefaultOssService.GetSTSToken(srv_types.AssumeRoleParam{
 		Scheme:          "https",
 		Method:          "POST",
-		RoleArn:         "acs:ram::1742387841614768:role/corplinkosscrurole-miotech-resource",
+		RoleArn:         config.Config.OSS.StsRoleArn,
 		RoleSessionName: "OssMultipartUpload",
 		DurationSeconds: time.Minute * 15,
 		Policy: srv_types.StsPolicy{
@@ -170,7 +169,7 @@ func (srv UploadService) CreateStsToken(operatorId int64, operatorType int8, sce
 						"oss:ListMultipartUploads",
 					},
 					Resource: []string{
-						path.Join("acs:oss:*:*:miotech-resource", uploadScene.OssDir, "*"),
+						path.Join("acs:oss:*:*:"+config.Config.OSS.Bucket, uploadScene.OssDir, "*"),
 					},
 				},
 			},
@@ -183,11 +182,11 @@ func (srv UploadService) CreateStsToken(operatorId int64, operatorType int8, sce
 
 	return &srv_types.OssStsInfo{
 		Credentials: *cert,
-		Region:      "oss-cn-hongkong",
+		Region:      config.Config.OSS.Region,
 		/*CallbackBodyUrl:  util.LinkJoin(config.Config.App.Domain, "/api/mp2c/upload/callback?logId="+log.LogId),
 		CallbackBody:     "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}",
 		CallbackBodyType: "application/x-www-form-urlencoded",*/
-		Bucket:    "miotech-resource",
+		Bucket:    config.Config.OSS.Bucket,
 		MimeTypes: uploadScene.MimeTypes,
 		MaxSize:   uploadScene.MaxSize,
 		UploadId:  log.LogId,

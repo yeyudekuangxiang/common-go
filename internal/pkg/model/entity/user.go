@@ -23,7 +23,7 @@ const (
 
 var IconMap = map[UserPosition]string{
 	UserPositionOrdinary: "",
-	UserPositionBlue:     "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/blue.png",
+	UserPositionBlue:     "https://resources.miotech.com/static/mp2c/images/user/blue.png",
 	UserPositionYellow:   "https://resources.miotech.com/static/mp2c/user/positionIcon/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/d7e78457-5136-48ae-b64e-4c260e2a0c3a.png",
 }
 
