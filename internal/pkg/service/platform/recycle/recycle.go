@@ -310,7 +310,7 @@ func (srv RecycleService) GetPointV2(tp, number string) (int64, error) {
 	if pointByOne, ok := recyclePointV2[types]; ok {
 		point = decimal.NewFromFloat(num).Mul(decimal.NewFromInt(pointByOne)).Ceil().IntPart()
 	} else {
-		return point, errno.ErrRecordNotFound.WithMessage("为匹配到对应积分规则")
+		return point, errno.ErrRecordNotFound.WithMessage("未匹配到对应积分规则")
 	}
 
 	return point, nil
@@ -328,7 +328,7 @@ func (srv RecycleService) GetCo2V2(tp, number string) (float64, error) {
 	if co2ByOne, ok := recycleCo2V2[types]; ok {
 		co2, _ = decimal.NewFromFloat(num).Mul(decimal.NewFromFloat(co2ByOne)).Float64()
 	} else {
-		return co2, errno.ErrRecordNotFound.WithMessage("为匹配到对应减碳规则")
+		return co2, errno.ErrRecordNotFound.WithMessage("未匹配到对应减碳规则")
 	}
 
 	return co2, nil

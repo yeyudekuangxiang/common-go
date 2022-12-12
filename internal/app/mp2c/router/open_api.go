@@ -89,6 +89,7 @@ func openRouter(router *gin.Engine) {
 		//外部平台调绿喵 需要登陆
 		openAuthRouter := openRouter.Group("/auth").Use(middleware.MustAuth2(), middleware.Throttle())
 		{
+			openAuthRouter.GET("/platform", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 			openAuthRouter.GET("/platform/bind", apiutil.Format(open.DefaultPlatformController.BindPlatformUser))
 			openAuthRouter.POST("/check/msg", apiutil.Format(open.DefaultPlatformController.CheckMgs))
 			openAuthRouter.POST("/check/media", apiutil.Format(open.DefaultPlatformController.CheckMedia))

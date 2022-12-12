@@ -67,7 +67,7 @@ func v2(db *gorm.DB) {
 			Title:           "公益善心",
 			Active:          true,
 			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_rw.png",
-			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/hc.png",
+			Icon:            "https://resources.miotech.com/static/mp2c/images/event/category/icon/hc.png",
 			Sort:            1,
 		},
 		{
@@ -75,7 +75,7 @@ func v2(db *gorm.DB) {
 			Title:           "生态环保",
 			Active:          true,
 			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_sthb.png",
-			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/eep.png",
+			Icon:            "https://resources.miotech.com/static/mp2c/images/event/category/icon/eep.png",
 			Sort:            2,
 		},
 		{
@@ -83,7 +83,7 @@ func v2(db *gorm.DB) {
 			Title:           "碳减排证书",
 			Active:          true,
 			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_dtjp.png",
-			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/lcaer.png",
+			Icon:            "https://resources.miotech.com/static/mp2c/images/event/category/icon/lcaer.png",
 			Sort:            3,
 		},
 	}
