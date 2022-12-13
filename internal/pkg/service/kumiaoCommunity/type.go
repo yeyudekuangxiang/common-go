@@ -66,9 +66,9 @@ type TopicDetail struct {
 }
 
 type TurnCommentReq struct {
-	UserId int64  `json:"userId"`
-	Types  int    `json:"types"`
-	TurnId string `json:"turnId"`
+	UserId   int64  `json:"userId"`
+	TurnType int    `json:"turnType"`
+	TurnId   string `json:"turnId"`
 }
 
 type APIComment struct {

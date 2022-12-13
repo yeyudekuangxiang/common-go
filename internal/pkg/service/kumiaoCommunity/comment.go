@@ -11,7 +11,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"strconv"
@@ -351,15 +350,12 @@ func (srv *defaultCommentService) AddCommentLikeCount(commentId int64, num int) 
 }
 
 func (srv *defaultCommentService) TurnComment(params TurnCommentReq) (*APICommentResp, error) {
-	kuMio, _ := util.InArray(params.Types, []int{1, 2, 3})
-	mall, _ := util.InArray(params.Types, []int{8, 9, 10, 11, 12})
 	var err error
 	comment := &APICommentResp{}
 
-	if kuMio {
+	if params.TurnType == 2 {
 		comment, err = srv.kuMioComment(params.TurnId, params.UserId)
-
-	} else if mall {
+	} else if params.TurnType == 5 {
 		comment, err = srv.mallComment(params.TurnId, params.UserId)
 	}
 
