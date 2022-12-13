@@ -136,7 +136,7 @@ func (ctr MsgController) GetWebMessageCount(c *gin.Context) (gin.H, error) {
 
 	return gin.H{
 		"total":            resp.Total,
-		"exchangeMsgTotal": resp.ExchangeMsgTotal,
+		"exchangeMsgTotal": resp.InteractiveMsgTotal,
 		"systemMsgTotal":   resp.SystemMsgTotal,
 	}, nil
 }
