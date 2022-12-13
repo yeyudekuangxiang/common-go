@@ -338,6 +338,10 @@ func (srv RecycleService) GetPointType(ch string) entity.PointTransactionType {
 	switch ch {
 	case "loverecycle":
 		return entity.POINT_RECYCLING_AIHUISHOU
+	case "sshs":
+		return entity.POINT_RECYCLING_SHISHANGHUISHOU
+	case "ddyx":
+		return entity.POINT_RECYCLING_DANGDANGYIXIA
 	default:
 		return entity.POINT_RECYCLING
 	}
@@ -346,6 +350,10 @@ func (srv RecycleService) GetCarbonType(ch string) entity.CarbonTransactionType 
 	switch ch {
 	case "loverecycle":
 		return entity.CARBON_RECYCLING_AIHUISHOU
+	case "sshs":
+		return entity.CARBON_RECYCLING_SHISHANGHUISHOU
+	case "ddyx":
+		return entity.CARBON_RECYCLING_DANGDANGYIXIA
 	default:
 		return entity.CARBON_RECYCLING
 	}
