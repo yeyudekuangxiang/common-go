@@ -161,8 +161,8 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 		RecId:        topic.User.ID,
 		Key:          "down_topic",
 		TurnId:       topic.Id,
-		TurnType:     1,
-		Type:         4,
+		TurnType:     message.MsgTurnTypeArticle,
+		Type:         message.MsgTypeSystem,
 		MessageNotes: topic.Title,
 	})
 
@@ -219,9 +219,9 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 				SendId:   0,
 				RecId:    topic.User.ID,
 				Key:      key,
-				Type:     4,
+				Type:     message.MsgTypeSystem,
 				TurnId:   topic.Id,
-				TurnType: 1,
+				TurnType: message.MsgTurnTypeArticle,
 				//MessageNotes: topic.Title,
 			})
 
@@ -236,8 +236,8 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			SendId:   0,
 			RecId:    topic.User.ID,
 			Key:      "down_topic",
-			Type:     4,
-			TurnType: 1,
+			Type:     message.MsgTypeSystem,
+			TurnType: message.MsgTurnTypeArticle,
 			TurnId:   topic.Id,
 		})
 
@@ -287,8 +287,8 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 			SendId:   0,
 			RecId:    topic.UserId,
 			Key:      "top_topic_v2",
-			Type:     5,
-			TurnType: 1,
+			Type:     message.MsgTypeSystem,
+			TurnType: message.MsgTurnTypeArticle,
 			TurnId:   topic.Id,
 		})
 
@@ -350,8 +350,8 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				SendId:   0,
 				RecId:    topic.User.ID,
 				Key:      key,
-				Type:     5,
-				TurnType: 1,
+				Type:     message.MsgTypeSystem,
+				TurnType: message.MsgTurnTypeArticle,
 				TurnId:   topic.Id,
 			})
 

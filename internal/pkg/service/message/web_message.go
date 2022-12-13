@@ -35,9 +35,7 @@ type (
 	}
 
 	webMessageOption struct {
-		SendObjID int64  `json:"sendObjId"` // 发送者 object id
-		RecObjId  int64  `json:"recObjId"`  // 接受者 object id
-		Val       string `json:"val"`
+		Val string `json:"val"`
 	}
 
 	WMOptions func(option *webMessageOption)
@@ -68,22 +66,22 @@ func (d defaultWebMessage) GetMessageCount(params GetWebMessageCount) (GetWebMes
 
 	res.Total = total
 
-	exchangeMsgTotal, err := d.message.CountAll(message.FindMessageParams{
+	interactiveMsgTotal, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
-		Types:  []string{"1", "2", "3"},
+		Types:  []string{"1", "2"},
 	})
 
 	if err != nil {
 		return res, errno.ErrCommon
 	}
 
-	res.ExchangeMsgTotal = exchangeMsgTotal
+	res.InteractiveMsgTotal = interactiveMsgTotal
 
 	systemMsgTotal, err := d.message.CountAll(message.FindMessageParams{
 		RecId:  params.RecId,
 		Status: 1,
-		Types:  []string{"4", "5", "6", "7", "8", "9", "10", "11", "12"},
+		Types:  []string{"3"},
 	})
 	if err != nil {
 		return res, errno.ErrCommon
@@ -152,22 +150,6 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 		} else {
 			item.User = uMap[item.SendId]
 		}
-		////文章组合
-		//if item.TurnType == 1 {
-		//	item.TurnNotes = tMap[item.ShowId]
-		//}
-		////评论组合
-		//if item.TurnType == 2 {
-		//	item.TurnNotes = cMap[item.ShowId]
-		//}
-		////商品组合
-		//if item.TurnType == 3 {
-		//	item.TurnNotes = oMap[item.ShowId]
-		//}
-		////订单组合
-		//if item.TurnType == 4 {
-		//	item.TurnNotes = gMap[item.ShowId]
-		//}
 	}
 
 	return result, total, nil
@@ -227,32 +209,6 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	return nil
 }
 
-func (d defaultWebMessage) replaceTempForComment(content string, recObjID int64) string {
-	var comment, recComment *entity.CommentIndex
-	var message, recMessage string
-
-	if d.options.SendObjID != 0 {
-		comment, _ = d.comment.FindOne(d.options.SendObjID)
-		message = comment.Message
-		messageRune := []rune(message)
-		if len(messageRune) > 5 {
-			message = string(messageRune[0:5]) + "..."
-		}
-		content = strings.ReplaceAll(content, "reComment", message)
-	}
-
-	recComment, _ = d.comment.FindOne(recObjID)
-	recMessage = recComment.Message
-	messageRune := []rune(recMessage)
-	if len(messageRune) > 5 {
-		recMessage = string(messageRune[0:5]) + "..."
-	}
-
-	content = strings.ReplaceAll(content, "comment", recMessage)
-
-	return content
-}
-
 func (d defaultWebMessage) GetTemplate(key string) string {
 	one, err := d.template.FindOne(key)
 	if err != nil {
@@ -274,24 +230,6 @@ func (d defaultWebMessage) GetTemplateInfo(key string) (*GetMessageTemplate, err
 		CreatedAt:   one.CreatedAt,
 		UpdatedAt:   one.UpdatedAt,
 	}, nil
-}
-
-func WithSendObjId(sendObjId int64) WMOptions {
-	return func(option *webMessageOption) {
-		option.SendObjID = sendObjId
-	}
-}
-
-func WithRecObjId(recObjId int64) WMOptions {
-	return func(option *webMessageOption) {
-		option.RecObjId = recObjId
-	}
-}
-
-func WithVal(val string) WMOptions {
-	return func(option *webMessageOption) {
-		option.Val = val
-	}
 }
 
 func NewWebMessageService(ctx *mioContext.MioContext, options ...WMOptions) WebMessage {

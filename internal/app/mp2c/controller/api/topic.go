@@ -142,8 +142,8 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 			SendId:       user.ID,
 			RecId:        resp.TopicUserId,
 			Key:          "like_topic",
-			Type:         1,
-			TurnType:     1,
+			Type:         message.MsgTypeLike,
+			TurnType:     message.MsgTurnTypeArticle,
 			TurnId:       resp.TopicId,
 			MessageNotes: title,
 		})

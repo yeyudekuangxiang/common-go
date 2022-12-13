@@ -185,18 +185,13 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	//发送消息
 	var notes, msgKey string
-	var types int
-	turnType := 2
-	turnId := comment.Id
 
 	if form.Parent == 0 {
-		msgKey = "topic_reply"
-		types = 2
+		msgKey = "reply_topic"
 		topic := topicService.FindById(form.ObjId)
 		notes = topic.Title
 	} else {
-		msgKey = "comment_reply"
-		types = 3
+		msgKey = "reply_comment"
 		toMsg := toComment.Message
 		messagerune = []rune(comment.Message)
 		if len(messagerune) > 8 {
@@ -209,9 +204,9 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		SendId:       user.ID,
 		RecId:        recId,
 		Key:          msgKey,
-		TurnType:     turnType,
-		TurnId:       turnId,
-		Type:         types,
+		TurnType:     message.MsgTurnTypeArticleComment,
+		TurnId:       comment.Id,
+		Type:         message.MsgTypeComment,
 		MessageNotes: notes,
 	})
 
@@ -329,8 +324,8 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 			SendId:       user.ID,
 			RecId:        resp.CommentUserId,
 			Key:          "like_comment",
-			Type:         1,
-			TurnType:     2,
+			Type:         message.MsgTypeLike,
+			TurnType:     message.MsgTurnTypeArticleComment,
 			TurnId:       resp.CommentId,
 			MessageNotes: resp.CommentMessage,
 		})
@@ -358,9 +353,9 @@ func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
 	commentService := kumiaoCommunity.NewCommentService(ctx)
 
 	comment, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
-		UserId: user.ID,
-		Types:  form.Types,
-		TurnId: form.TurnId,
+		UserId:   user.ID,
+		TurnType: form.TurnType,
+		TurnId:   form.TurnId,
 	})
 
 	if err != nil {

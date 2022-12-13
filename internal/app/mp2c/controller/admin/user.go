@@ -87,9 +87,9 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 			SendId:   0,
 			RecId:    form.ID,
 			Key:      "wechat",
-			TurnType: 0,
+			TurnType: message.MsgTurnTypeNone,
 			TurnId:   0,
-			Type:     7,
+			Type:     message.MsgTypeSystem,
 		})
 
 		if err != nil {
