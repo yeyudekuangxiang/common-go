@@ -190,12 +190,12 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	turnId := comment.Id
 
 	if form.Parent == 0 {
-		msgKey = "reply_topic"
+		msgKey = "topic_reply"
 		types = 2
 		topic := topicService.FindById(form.ObjId)
 		notes = topic.Title
 	} else {
-		msgKey = "reply_comment"
+		msgKey = "comment_reply"
 		types = 3
 		toMsg := toComment.Message
 		messagerune = []rune(comment.Message)

@@ -63,3 +63,9 @@ type GetMessageTemplate struct {
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
+
+type jsonObj struct {
+	Title     string `json:"title"`
+	Message   string `json:"message"`
+	DelReason string `json:"delReason"`
+}
