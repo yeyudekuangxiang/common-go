@@ -185,18 +185,13 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	//发送消息
 	var notes, msgKey string
-	var types int
-	turnType := 2
-	turnId := comment.Id
 
 	if form.Parent == 0 {
 		msgKey = "reply_topic"
-		types = 2
 		topic := topicService.FindById(form.ObjId)
 		notes = topic.Title
 	} else {
 		msgKey = "reply_comment"
-		types = 3
 		toMsg := toComment.Message
 		messagerune = []rune(comment.Message)
 		if len(messagerune) > 8 {
@@ -209,9 +204,9 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		SendId:       user.ID,
 		RecId:        recId,
 		Key:          msgKey,
-		TurnType:     turnType,
-		TurnId:       turnId,
-		Type:         types,
+		TurnType:     message.MsgTurnTypeArticleComment,
+		TurnId:       comment.Id,
+		Type:         message.MsgTypeComment,
 		MessageNotes: notes,
 	})
 
@@ -329,8 +324,8 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 			SendId:       user.ID,
 			RecId:        resp.CommentUserId,
 			Key:          "like_comment",
-			Type:         1,
-			TurnType:     2,
+			Type:         message.MsgTypeLike,
+			TurnType:     message.MsgTurnTypeArticleComment,
 			TurnId:       resp.CommentId,
 			MessageNotes: resp.CommentMessage,
 		})
