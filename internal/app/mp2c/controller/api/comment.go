@@ -353,9 +353,9 @@ func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
 	commentService := kumiaoCommunity.NewCommentService(ctx)
 
 	comment, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
-		UserId: user.ID,
-		Types:  form.TurnType,
-		TurnId: form.TurnId,
+		UserId:   user.ID,
+		TurnType: form.TurnType,
+		TurnId:   form.TurnId,
 	})
 
 	if err != nil {
