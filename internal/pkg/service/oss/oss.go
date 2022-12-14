@@ -27,7 +27,7 @@ var DefaultOssService OssService
 func InitDefaultOssService() {
 	DefaultOssService = OssService{
 		client:   app.OssClient,
-		Bucket:   "miotech-resource",
+		Bucket:   config.Config.OSS.Bucket,
 		BasePath: config.Config.OSS.BasePath,
 		Domain:   config.Config.OSS.CdnDomain,
 	}

@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/model"
@@ -66,24 +67,24 @@ func v2(db *gorm.DB) {
 			EventCategoryId: "cbddf0af60ecf9f11676bcbd6482736f",
 			Title:           "公益善心",
 			Active:          true,
-			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_rw.png",
-			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/hc.png",
+			ImageUrl:        config.Config.OSS.CdnDomain + "/static/mp2c/images/event/shouye/sy_rw.png",
+			Icon:            config.Config.OSS.CdnDomain + "/static/mp2c/images/event/category/icon/hc.png",
 			Sort:            1,
 		},
 		{
 			EventCategoryId: "79550af260ecf9df2635751c3273b269",
 			Title:           "生态环保",
 			Active:          true,
-			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_sthb.png",
-			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/eep.png",
+			ImageUrl:        config.Config.OSS.CdnDomain + "/static/mp2c/images/event/shouye/sy_sthb.png",
+			Icon:            config.Config.OSS.CdnDomain + "/static/mp2c/images/event/category/icon/eep.png",
 			Sort:            2,
 		},
 		{
 			EventCategoryId: "79550af260ecfcd4263627ff7c516d0b",
 			Title:           "碳减排证书",
 			Active:          true,
-			ImageUrl:        "https://resources.miotech.com/static/mp2c/images/event/shouye/sy_dtjp.png",
-			Icon:            "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/event/category/icon/lcaer.png",
+			ImageUrl:        config.Config.OSS.CdnDomain + "/static/mp2c/images/event/shouye/sy_dtjp.png",
+			Icon:            config.Config.OSS.CdnDomain + "/static/mp2c/images/event/category/icon/lcaer.png",
 			Sort:            3,
 		},
 	}
@@ -95,7 +96,7 @@ func v2(db *gorm.DB) {
 			Title:                 "守护栖息地任鸟飞",
 			Subtitle:              "守护中国东海濒危水鸟及其栖息地，建立民间候鸟及栖息地保护行动网络、开展候鸟保护行动、推进鸟类保护政策倡导。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shqxdrnf_20220722%20%283%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shqxdrnf_20220722%20%283%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "b00064a760f400a42850b68e1f783c22",
@@ -104,7 +105,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "守护栖息地任鸟飞",
 			Sort:                  10,
 			Tag:                   []string{"候鸟保护", "生态保护", "政策倡导"},
-			TemplateSetting:       "{\"recipient\":\"「守护栖息地任鸟飞」\",\"money\":\"1元\",\"desc\":\"守护鸟儿栖息地，共享美好自然！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_shqxdrnf_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「守护栖息地任鸟飞」\",\"money\":\"1元\",\"desc\":\"守护鸟儿栖息地，共享美好自然！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_shqxdrnf_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -114,7 +115,7 @@ func v2(db *gorm.DB) {
 			Title:                 "保护海洋你我同行",
 			Subtitle:              "修复被侵蚀的海岸线和红树林，防止海洋“荒漠化”，守护300万平方公里蓝色家园。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/bhhynwtx_20220722%20%283%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/bhhynwtx_20220722%20%283%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "cbddf0af60f4017417b047590e2601cf",
@@ -123,7 +124,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "保护海洋你我同行",
 			Sort:                  20,
 			Tag:                   []string{"海洋保护", "生态修复", "红树林保育"},
-			TemplateSetting:       "{\"recipient\":\"「保护海洋你我同行」\",\"money\":\"1元\",\"desc\":\"修复滨海湿地，守护蓝色家园！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_%20bhhynwtx_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「保护海洋你我同行」\",\"money\":\"1元\",\"desc\":\"修复滨海湿地，守护蓝色家园！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_%20bhhynwtx_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -133,7 +134,7 @@ func v2(db *gorm.DB) {
 			Title:                 "一亿棵梭梭",
 			Subtitle:              "恢复阿拉善关键生态区域200万亩以梭梭为代表的荒漠植被，防止荒漠蔓延。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yykss_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yykss_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "b00064a760f3ff8e28507ac777424d10",
@@ -142,7 +143,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "一亿棵梭梭",
 			Sort:                  30,
 			Tag:                   []string{"荒漠防治", "生态保护", "经济增收"},
-			TemplateSetting:       "{\"recipient\":\"「一亿棵梭梭」\",\"money\":\"1元\",\"desc\":\"每棵拯救10m²，让荒漠不再蔓延！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_yykss_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「一亿棵梭梭」\",\"money\":\"1元\",\"desc\":\"每棵拯救10m²，让荒漠不再蔓延！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_yykss_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -152,7 +153,7 @@ func v2(db *gorm.DB) {
 			Title:                 "留住长江的微笑——江豚",
 			Subtitle:              "保护极度濒危的哺乳动物长江江豚，留住长江的微笑。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/lzcjdwx_20220722%20%282%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/lzcjdwx_20220722%20%282%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "79550af260f4003f278f20ea1b87024e",
@@ -161,7 +162,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "留住长江的微笑——江豚",
 			Sort:                  40,
 			Tag:                   []string{"江豚保护", "生物多样性", "繁育研究"},
-			TemplateSetting:       "{\"recipient\":\"「留住江豚的微笑」\",\"money\":\"1元\",\"desc\":\"每棵拯救10m²，让荒漠不再蔓延！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_lzcjdwx_20220722.png\",\"organization\":\"保护濒危物种，关注生物多样性、共筑永续家园！\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「留住江豚的微笑」\",\"money\":\"1元\",\"desc\":\"每棵拯救10m²，让荒漠不再蔓延！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_lzcjdwx_20220722.png\",\"organization\":\"保护濒危物种，关注生物多样性、共筑永续家园！\"}"),
 		},
 
 		{
@@ -171,7 +172,7 @@ func v2(db *gorm.DB) {
 			Title:                 "远方书声图书角——云南施甸县",
 			Subtitle:              "为云南施甸县老麦乡杨柳小学提供“远方书声”图书角，通过配备优质适龄的书籍让孩子们共享阅读、收获知识。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yfssynsmx_20220722%20%284%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yfssynsmx_20220722%20%284%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "79550af260f40281278f9c3e2372ac00",
@@ -180,7 +181,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "远方书声图书角——云南施甸县",
 			Sort:                  50,
 			Tag:                   []string{"人文关怀", "教育支持", ""},
-			TemplateSetting:       "{\"project\":\"云南施甸县老麦乡杨柳小学\",\"money\":\"1元\",\"desc\":\"让图书启迪边远学校孩子们,共同助力儿童快乐成长\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_yfssynsmx_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"云南施甸县老麦乡杨柳小学\",\"money\":\"1元\",\"desc\":\"让图书启迪边远学校孩子们,共同助力儿童快乐成长\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_yfssynsmx_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -190,7 +191,7 @@ func v2(db *gorm.DB) {
 			Title:                 "远方书声图书馆——新疆喀什",
 			Subtitle:              "在新疆喀什泽普县阿依库勒乡中心小学开展“远方书声”项目，通过配备优质适龄的书籍让孩子们共享阅读、收获知识。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yfshxjks_20220722%20%284%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yfshxjks_20220722%20%284%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "28ee4e3e60f403512b79968b11d86c15",
@@ -199,7 +200,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "远方书声图书馆——新疆喀什",
 			Sort:                  60,
 			Tag:                   []string{"人文关怀", "教育支持", ""},
-			TemplateSetting:       "{\"project\":\"新疆阿依库勒中心小学\",\"money\":\"1元\",\"desc\":\"让图书启迪边远学校孩子们,共同助力儿童快乐成长\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_yfshxjks_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"新疆阿依库勒中心小学\",\"money\":\"1元\",\"desc\":\"让图书启迪边远学校孩子们,共同助力儿童快乐成长\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_yfshxjks_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -209,7 +210,7 @@ func v2(db *gorm.DB) {
 			Title:                 "远方书声图书角——云南老麦乡幼儿园",
 			Subtitle:              "为云南施甸县老麦乡幼儿园提供“远方书声”图书角，通过配备优质适龄的书籍让孩子们共享阅读、收获知识。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yfssynlmx_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yfssynlmx_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "cbddf0af60f402f717b0987b79709209",
@@ -218,7 +219,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "远方书声图书角——云南老麦乡幼儿园",
 			Sort:                  70,
 			Tag:                   []string{"人文关怀", "教育支持", ""},
-			TemplateSetting:       "{\"project\":\"云南施甸县老麦乡幼儿园\",\"money\":\"1元\",\"desc\":\"让图书启迪边远学校孩子们,共同助力儿童快乐成长\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_yfssynlmx_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"云南施甸县老麦乡幼儿园\",\"money\":\"1元\",\"desc\":\"让图书启迪边远学校孩子们,共同助力儿童快乐成长\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_yfssynlmx_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -228,7 +229,7 @@ func v2(db *gorm.DB) {
 			Title:                 "郑州快速公交项目——联合国认证碳减排",
 			Subtitle:              "郑州快速公交（BRT）项目利用油电混合动力减少碳排放，并作为认证减排项目可用于抵消温室气体排放量。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/zzksgj_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/zzksgj_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "5fbaf3bc-b5d8-4710-8fc4-d04245fe1a24",
@@ -237,7 +238,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "郑州快速公交项目——联合国认证碳减排",
 			Sort:                  80,
 			Tag:                   []string{"环境提升", "公共福祉", "经济发展"},
-			TemplateSetting:       "{\"project\":\"郑州电动公交车项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_zzksgj_20220722.png\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"郑州电动公交车项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_zzksgj_20220722.png\"}"),
 		},
 
 		{
@@ -247,7 +248,7 @@ func v2(db *gorm.DB) {
 			Title:                 "青海曲格二级水电站项目——联合国认证碳减排",
 			Subtitle:              "青海玛沁格曲二级水电站通过零碳排放形式提供清洁能源，并作为认证减排项目可用于抵消温室气体排放量。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/qhqgejsdz_20220722%20%283%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/qhqgejsdz_20220722%20%283%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "708ce50c87cd689a28ad524dae37f8e8",
@@ -256,7 +257,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "青海曲格二级水电站项目——联合国认证碳减排",
 			Sort:                  90,
 			Tag:                   []string{"清洁能源", "岗位提供", "经济发展"},
-			TemplateSetting:       "{\"project\":\"青海曲格二级水电站项目\",\"money\":\"30千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_qhqgejsdz_20220722.png\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"青海曲格二级水电站项目\",\"money\":\"30千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_qhqgejsdz_20220722.png\"}"),
 		},
 
 		{
@@ -266,7 +267,7 @@ func v2(db *gorm.DB) {
 			Title:                 "四川九节滩水电项目——联合国认证碳减排",
 			Subtitle:              "四川九节滩水电项目为当地提供可再生能源电力，并作为认证减排项目可用于抵消温室气体排放量。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/scjjtsd_20220722%20%283%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/scjjtsd_20220722%20%283%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "54c2561e6a6f2ea090f082dca36135d2",
@@ -275,7 +276,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "四川九节滩水电项目——联合国认证碳减排",
 			Sort:                  100,
 			Tag:                   []string{"清洁能源", "岗位提供", "技术发展"},
-			TemplateSetting:       "{\"project\":\"四川九节滩水电项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_scjjtsd_20220722.png\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"四川九节滩水电项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_scjjtsd_20220722.png\"}"),
 		},
 
 		{
@@ -285,7 +286,7 @@ func v2(db *gorm.DB) {
 			Title:                 "新疆阿勒泰华宁水电项目——联合国认证碳减排",
 			Subtitle:              "新疆阿勒泰华宁水电项目通过水力发电实现净零排放，并作为认证减排项目可用于抵消温室气体排放量。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/xjalthnsd_20220722%20%282%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/xjalthnsd_20220722%20%282%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "6104c497e29c1bc0628cffa67c97e171",
@@ -294,7 +295,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "新疆阿勒泰华宁水电项目——联合国认证碳减排",
 			Sort:                  110,
 			Tag:                   []string{"清洁能源", "岗位提供", "经济发展"},
-			TemplateSetting:       "{\"project\":\"新疆阿勒泰华宁水电项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_xjalthnsd_20220722.png\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"新疆阿勒泰华宁水电项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_xjalthnsd_20220722.png\"}"),
 		},
 
 		{
@@ -304,7 +305,7 @@ func v2(db *gorm.DB) {
 			Title:                 "四川沐川火谷水电站项目——联合国认证碳减排",
 			Subtitle:              "四川沐川县火谷水电项目通过水力发电实现净零排放，并作为认证减排项目可用于抵消温室气体排放量。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/scmchgsdz_20220722%20%282%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/scmchgsdz_20220722%20%282%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "ace42fb85a02640ea95aecc1cbc4e078",
@@ -313,7 +314,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "四川沐川火谷水电站项目——联合国认证碳减排",
 			Sort:                  120,
 			Tag:                   []string{"清洁能源", "岗位提供", "经济发展"},
-			TemplateSetting:       "{\"project\":\"四川沐川火谷水电站项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_scmchgsdz_20220722.png\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"四川沐川火谷水电站项目\",\"money\":\"50千克\",\"desc\":\"守护蓝色地球，全球气候中和行动有您的一份力量！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_scmchgsdz_20220722.png\"}"),
 		},
 
 		{
@@ -323,7 +324,7 @@ func v2(db *gorm.DB) {
 			Title:                 "守三江水护万物源",
 			Subtitle:              "守护三江源，让七亿人水源重回清澈。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/ssjshwwy_20220722%20%282%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/ssjshwwy_20220722%20%282%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "7c5af0e0035248ee3f50bfd3880fc377",
@@ -332,7 +333,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "守三江水护万物源",
 			Sort:                  130,
 			Tag:                   []string{"水源保护", "生物多样性", "生态保护"},
-			TemplateSetting:       "{\"recipient\":\"「守三江水护万物源」\",\"money\":\"1元\",\"desc\":\"守护三江源，让七亿人水源重回清澈！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_ssjshwwy_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「守三江水护万物源」\",\"money\":\"1元\",\"desc\":\"守护三江源，让七亿人水源重回清澈！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_ssjshwwy_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -342,7 +343,7 @@ func v2(db *gorm.DB) {
 			Title:                 "守护勺嘴鹬",
 			Subtitle:              "守护湿地，为勺嘴鹬漫漫迁飞路保驾护航！",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shszh_20220722%20%283%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shszh_20220722%20%283%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "e05ed9cbfee9e8dddb176d7e33aebdb3",
@@ -351,7 +352,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "守护勺嘴鹬",
 			Sort:                  140,
 			Tag:                   []string{"物种保护", "生物多样性", "湿地保护"},
-			TemplateSetting:       "{\"recipient\":\"「守护勺嘴鹬」\",\"money\":\"1元\",\"desc\":\"拯救极危勺嘴鹬，为它们保驾护航！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_shszh_20220722.png\",\"organization\":\"深圳市红树林湿地保护基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「守护勺嘴鹬」\",\"money\":\"1元\",\"desc\":\"拯救极危勺嘴鹬，为它们保驾护航！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_shszh_20220722.png\",\"organization\":\"深圳市红树林湿地保护基金会\"}"),
 		},
 
 		{
@@ -361,7 +362,7 @@ func v2(db *gorm.DB) {
 			Title:                 "守护地球之肾",
 			Subtitle:              "守护“地球之肾”湿地，让地球远离“肾衰竭”！",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shdqzs_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shdqzs_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "ae4096de38e12b8b6847dd0bf40b7be7",
@@ -370,7 +371,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "守护地球之肾",
 			Sort:                  150,
 			Tag:                   []string{"生态保护", "自然教育", "湿地保护"},
-			TemplateSetting:       "{\"recipient\":\"「守护地球之肾」\",\"money\":\"1元\",\"desc\":\"保护滨海湿地,共筑永续家园！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_shdqzs_20220722.png\",\"organization\":\"深圳市红树林湿地保护基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「守护地球之肾」\",\"money\":\"1元\",\"desc\":\"保护滨海湿地,共筑永续家园！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_shdqzs_20220722.png\",\"organization\":\"深圳市红树林湿地保护基金会\"}"),
 		},
 
 		{
@@ -380,7 +381,7 @@ func v2(db *gorm.DB) {
 			Title:                 "守护藏地每一个生命",
 			Subtitle:              "支持当地野生动物救助，培训三江源地区本地乡镇兽医",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shzdmygsm_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shzdmygsm_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "a236a10054c1efb2e6b489506694d959",
@@ -389,7 +390,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "守护藏地每一个生命",
 			Sort:                  160,
 			Tag:                   []string{"野生动物救助", "生物多样性", "兽医培训"},
-			TemplateSetting:       "{\"recipient\":\"「守护藏地每一个生命」\",\"money\":\"1元\",\"desc\":\"助力野生动物救助，守护藏地生物多样性！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_shzdmygsm_20220722.png\",\"organization\":\"浙江省微笑明天慈善基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「守护藏地每一个生命」\",\"money\":\"1元\",\"desc\":\"助力野生动物救助，守护藏地生物多样性！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_shzdmygsm_20220722.png\",\"organization\":\"浙江省微笑明天慈善基金会\"}"),
 		},
 
 		{
@@ -399,7 +400,7 @@ func v2(db *gorm.DB) {
 			Title:                 "蒙新河狸方舟计划",
 			Subtitle:              "建立中国首个专业的河狸救助中心",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/mxhlfzjh_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/mxhlfzjh_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "ee5e9cc109201da8ffb626a0279490ac",
@@ -408,7 +409,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "蒙新河狸方舟计划",
 			Sort:                  170,
 			Tag:                   []string{"生物保护", "生物多样性", "河狸救助"},
-			TemplateSetting:       "{\"recipient\":\"「蒙新河狸方舟计划」\",\"money\":\"1元\",\"desc\":\"为濒危河狸筑起生存的方舟！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_%20mxhlfzjh_20220722.png\",\"organization\":\"爱德基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"recipient\":\"「蒙新河狸方舟计划」\",\"money\":\"1元\",\"desc\":\"为濒危河狸筑起生存的方舟！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_%20mxhlfzjh_20220722.png\",\"organization\":\"爱德基金会\"}"),
 		},
 
 		{
@@ -418,7 +419,7 @@ func v2(db *gorm.DB) {
 			Title:                 "乡村孩子的创新课",
 			Subtitle:              "让乡村孩子们在家乡享有属于他们的好教育。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/xchzdcxk_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/xchzdcxk_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "5e3e607260a8ee5817451c2c6f5c4262",
@@ -427,7 +428,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "乡村孩子的创新课",
 			Sort:                  180,
 			Tag:                   []string{"人文关怀", "教育支持", "乡村教师赋能"},
-			TemplateSetting:       "{\"project\":\"乡村孩子的创新课\",\"money\":\"1元\",\"desc\":\"让更多的孩子在家乡享有属于他们的好教育！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_xchzdcxk_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"乡村孩子的创新课\",\"money\":\"1元\",\"desc\":\"让更多的孩子在家乡享有属于他们的好教育！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_xchzdcxk_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -437,7 +438,7 @@ func v2(db *gorm.DB) {
 			Title:                 "流浪动物温饱计划",
 			Subtitle:              "支持流浪动物救助站，让流浪动物得到妥善安置",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/lldwwbjh_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/lldwwbjh_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "3f7f1ff6670b2144b192809af3e84c76",
@@ -446,7 +447,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "流浪动物温饱计划",
 			Sort:                  190,
 			Tag:                   []string{"流浪动物保护", "城市文明建设", "可持续发展"},
-			TemplateSetting:       "{\"project\":\"流浪动物温饱计划\",\"money\":\"1元\",\"desc\":\"让流浪小动物不再挨饿！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_lldwwbjh_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"流浪动物温饱计划\",\"money\":\"1元\",\"desc\":\"让流浪小动物不再挨饿！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_lldwwbjh_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -456,7 +457,7 @@ func v2(db *gorm.DB) {
 			Title:                 "长棘海星大作战",
 			Subtitle:              "支持潜水员清理长棘海星，保护珊瑚礁生态。",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/cjhxdzz_20220722%20%282%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/cjhxdzz_20220722%20%282%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "81aea0d228f0e7673815b00055948f25",
@@ -465,7 +466,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "长棘海星大作战",
 			Sort:                  200,
 			Tag:                   []string{"人文关怀", "潜水员支持", "生态保护"},
-			TemplateSetting:       "{\"project\":\"长棘海星大作战\",\"money\":\"1元\",\"desc\":\"清理长棘海星，拯救珊瑚生态！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_%20cjhxdzz_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"长棘海星大作战\",\"money\":\"1元\",\"desc\":\"清理长棘海星，拯救珊瑚生态！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_%20cjhxdzz_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 
 		{
@@ -475,7 +476,7 @@ func v2(db *gorm.DB) {
 			Title:                 "让动物不再受到伤害",
 			Subtitle:              "促进《反虐待动物法》立法工作的推动，捍卫动物福利",
 			Active:                true,
-			CoverImageUrl:         "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/rdwbzsdsh_20220722%20%281%29.png",
+			CoverImageUrl:         config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/rdwbzsdsh_20220722%20%281%29.png",
 			StartTime:             panicTime("2022-03-01 00:00:00+08"),
 			EndTime:               panicTime("2022-12-31 00:00:00+08"),
 			ProductItemId:         "8539c7f021f1bee18d7c6c73da6cc8a4",
@@ -484,7 +485,7 @@ func v2(db *gorm.DB) {
 			ParticipationSubtitle: "让动物不再受到伤害",
 			Sort:                  210,
 			Tag:                   []string{"动物福祉", "政策推进", "行业建设"},
-			TemplateSetting:       "{\"project\":\"让动物不再受到伤害\",\"money\":\"1元\",\"desc\":\"共同捍卫所有动物的尊严和福利！\",\"image\":\"https://resources.miotech.com/static/mp2c/images/event/gyzs/gyzs_rdwbzsdsh_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}",
+			TemplateSetting:       event.EventTemplateSetting("{\"project\":\"让动物不再受到伤害\",\"money\":\"1元\",\"desc\":\"共同捍卫所有动物的尊严和福利！\",\"image\":\"" + config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyzs/gyzs_rdwbzsdsh_20220722.png\",\"organization\":\"北京市企业家环保基金会\"}"),
 		},
 	}
 	eventDetailList := []event.EventDetail{{
@@ -495,7 +496,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%282%29.png",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
 		Content: "",
@@ -507,13 +508,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%281%29.png",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
 		Content: "",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%285%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%285%29.png",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
 		Content: "",
@@ -531,7 +532,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shqxdrnf_20220722%20%284%29.png",
 	}, {
 		EventId: "b00064a760ecfeac26f5a3f512c493aa",
 		Content: "",
@@ -549,7 +550,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ecff352636b0b4531bae00",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/bhhynwtx_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/bhhynwtx_20220722%20%281%29.png",
 	}, {
 		EventId: "79550af260ecff352636b0b4531bae00",
 		Content: "",
@@ -561,7 +562,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ecff352636b0b4531bae00",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/bhhynwtx_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/bhhynwtx_20220722%20%282%29.png",
 	}, {
 		EventId: "79550af260ecff352636b0b4531bae00",
 		Content: "",
@@ -573,7 +574,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ecff352636b0b4531bae00",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/bhhynwtx_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/bhhynwtx_20220722%20%284%29.png",
 	}, {
 		EventId: "79550af260ecff352636b0b4531bae00",
 		Content: "",
@@ -597,7 +598,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ecfde52636644875e06696",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yykss_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yykss_20220722%20%283%29.png",
 	}, {
 		EventId: "79550af260ecfde52636644875e06696",
 		Content: "",
@@ -609,7 +610,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ecfde52636644875e06696",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yykss_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yykss_20220722%20%284%29.png",
 	}, {
 		EventId: "79550af260ecfde52636644875e06696",
 		Content: "",
@@ -621,7 +622,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ecfde52636644875e06696",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yykss_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yykss_20220722%20%282%29.png",
 	}, {
 		EventId: "79550af260ecfde52636644875e06696",
 		Content: "",
@@ -639,7 +640,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ecfe6c1677b1f5468ee936",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/lzcjdwx_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/lzcjdwx_20220722%20%284%29.png",
 	}, {
 		EventId: "cbddf0af60ecfe6c1677b1f5468ee936",
 		Content: "",
@@ -651,7 +652,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ecfe6c1677b1f5468ee936",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/lzcjdwx_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/lzcjdwx_20220722%20%281%29.png",
 	}, {
 		EventId: "cbddf0af60ecfe6c1677b1f5468ee936",
 		Content: "",
@@ -663,7 +664,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ecfe6c1677b1f5468ee936",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/lzcjdwx_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/lzcjdwx_20220722%20%283%29.png",
 	}, {
 		EventId: "cbddf0af60ecfe6c1677b1f5468ee936",
 		Content: "",
@@ -681,7 +682,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%283%29.png",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
 		Content: "",
@@ -693,19 +694,19 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%285%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%285%29.png",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
 		Content: "",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%281%29.png",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
 		Content: "",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynsmx_20220722%20%282%29.png",
 	}, {
 		EventId: "b00064a760ed001b26f5f61a47ed7c2b",
 		Content: "",
@@ -717,7 +718,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%283%29.png",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
 		Content: "",
@@ -735,19 +736,19 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%281%29.png",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%285%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%285%29.png",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
 		Content: "",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfshxjks%E2%80%94%E2%80%9420220722%20%282%29.png",
 	}, {
 		EventId: "cbddf0af60ed266416807a0b6838a821",
 		Content: "",
@@ -759,7 +760,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ed25d12640112b4b2e41a8",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynlmx%E2%80%94%E2%80%9420220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynlmx%E2%80%94%E2%80%9420220722%20%284%29.png",
 	}, {
 		EventId: "79550af260ed25d12640112b4b2e41a8",
 		Content: "",
@@ -771,13 +772,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "79550af260ed25d12640112b4b2e41a8",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynlmx%E2%80%94%E2%80%9420220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynlmx%E2%80%94%E2%80%9420220722%20%282%29.png",
 	}, {
 		EventId: "79550af260ed25d12640112b4b2e41a8",
 		Content: "",
 	}, {
 		EventId: "79550af260ed25d12640112b4b2e41a8",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/yfssynlmx%E2%80%94%E2%80%9420220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/yfssynlmx%E2%80%94%E2%80%9420220722%20%283%29.png",
 	}, {
 		EventId: "79550af260ed25d12640112b4b2e41a8",
 		Content: "",
@@ -795,7 +796,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "8d8f78fc-0b76-4d1d-a88d-c86cf9191449",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/zzksgj20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/zzksgj20220722%20%283%29.png",
 	}, {
 		EventId: "8d8f78fc-0b76-4d1d-a88d-c86cf9191449",
 		Content: "",
@@ -807,7 +808,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "8d8f78fc-0b76-4d1d-a88d-c86cf9191449",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/zzksgj20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/zzksgj20220722%20%282%29.png",
 	}, {
 		EventId: "8d8f78fc-0b76-4d1d-a88d-c86cf9191449",
 		Content: "",
@@ -825,7 +826,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "d7c133f20c782a75480e96493aa7de3e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/qhqgejsdz_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/qhqgejsdz_20220722%20%282%29.png",
 	}, {
 		EventId: "d7c133f20c782a75480e96493aa7de3e",
 		Content: "",
@@ -837,7 +838,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "d7c133f20c782a75480e96493aa7de3e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/qhqgejsdz_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/qhqgejsdz_20220722%20%281%29.png",
 	}, {
 		EventId: "d7c133f20c782a75480e96493aa7de3e",
 		Content: "",
@@ -855,7 +856,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "3f37194e271cbd177b3830120fa631f9",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/scjjtsd_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/scjjtsd_20220722%20%282%29.png",
 	}, {
 		EventId: "3f37194e271cbd177b3830120fa631f9",
 		Content: "",
@@ -867,7 +868,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "3f37194e271cbd177b3830120fa631f9",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/scjjtsd_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/scjjtsd_20220722%20%281%29.png",
 	}, {
 		EventId: "3f37194e271cbd177b3830120fa631f9",
 		Content: "",
@@ -885,7 +886,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "903acf9cc687e85dc9de0bb0f054ad2f",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/xjalthnsd_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/xjalthnsd_20220722%20%281%29.png",
 	}, {
 		EventId: "903acf9cc687e85dc9de0bb0f054ad2f",
 		Content: "",
@@ -897,7 +898,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "903acf9cc687e85dc9de0bb0f054ad2f",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/xjalthnsd_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/xjalthnsd_20220722%20%283%29.png",
 	}, {
 		EventId: "903acf9cc687e85dc9de0bb0f054ad2f",
 		Content: "",
@@ -915,7 +916,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "5bd4792be982c6cd64c7b0de67a6ce34",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/scmchgsdz_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/scmchgsdz_20220722%20%281%29.png",
 	}, {
 		EventId: "5bd4792be982c6cd64c7b0de67a6ce34",
 		Content: "",
@@ -927,7 +928,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "5bd4792be982c6cd64c7b0de67a6ce34",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/scmchgsdz_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/scmchgsdz_20220722%20%283%29.png",
 	}, {
 		EventId: "5bd4792be982c6cd64c7b0de67a6ce34",
 		Content: "",
@@ -939,7 +940,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "f706818efa576bd56629765e840f5e62",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/ssjshwwy_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/ssjshwwy_20220722%20%284%29.png",
 	}, {
 		EventId: "f706818efa576bd56629765e840f5e62",
 		Content: "",
@@ -951,13 +952,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "f706818efa576bd56629765e840f5e62",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/ssjshwwy_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/ssjshwwy_20220722%20%281%29.png",
 	}, {
 		EventId: "f706818efa576bd56629765e840f5e62",
 		Content: "",
 	}, {
 		EventId: "f706818efa576bd56629765e840f5e62",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/ssjshwwy_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/ssjshwwy_20220722%20%283%29.png",
 	}, {
 		EventId: "f706818efa576bd56629765e840f5e62",
 		Content: "",
@@ -981,7 +982,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "02d3b3452aa82f364a487a77f152775e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shszh20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shszh20220722%20%284%29.png",
 	}, {
 		EventId: "02d3b3452aa82f364a487a77f152775e",
 		Content: "",
@@ -993,7 +994,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "02d3b3452aa82f364a487a77f152775e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shszh20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shszh20220722%20%281%29.png",
 	}, {
 		EventId: "02d3b3452aa82f364a487a77f152775e",
 		Content: "",
@@ -1005,7 +1006,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "02d3b3452aa82f364a487a77f152775e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shszh20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shszh20220722%20%282%29.png",
 	}, {
 		EventId: "02d3b3452aa82f364a487a77f152775e",
 		Content: "",
@@ -1023,7 +1024,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "73dd769e56993d84bfdb95f39b22d7de",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shdqzs20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shdqzs20220722%20%284%29.png",
 	}, {
 		EventId: "73dd769e56993d84bfdb95f39b22d7de",
 		Content: "",
@@ -1035,7 +1036,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "73dd769e56993d84bfdb95f39b22d7de",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shdqzs20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shdqzs20220722%20%283%29.png",
 	}, {
 		EventId: "73dd769e56993d84bfdb95f39b22d7de",
 		Content: "",
@@ -1047,7 +1048,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "73dd769e56993d84bfdb95f39b22d7de",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shdqzs20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shdqzs20220722%20%282%29.png",
 	}, {
 		EventId: "73dd769e56993d84bfdb95f39b22d7de",
 		Content: "",
@@ -1065,7 +1066,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "6bc0ffb20c2f1032314ee2dc9aa75e64",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shzdmygsm_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shzdmygsm_20220722%20%284%29.png",
 	}, {
 		EventId: "6bc0ffb20c2f1032314ee2dc9aa75e64",
 		Content: "",
@@ -1077,7 +1078,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "6bc0ffb20c2f1032314ee2dc9aa75e64",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shzdmygsm_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shzdmygsm_20220722%20%283%29.png",
 	}, {
 		EventId: "6bc0ffb20c2f1032314ee2dc9aa75e64",
 		Content: "",
@@ -1089,7 +1090,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "6bc0ffb20c2f1032314ee2dc9aa75e64",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/shzdmygsm_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/shzdmygsm_20220722%20%282%29.png",
 	}, {
 		EventId: "6bc0ffb20c2f1032314ee2dc9aa75e64",
 		Content: "",
@@ -1113,7 +1114,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "02af181705e54d1b0bbc392973b9a029",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/mxhlfzjh_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/mxhlfzjh_20220722%20%284%29.png",
 	}, {
 		EventId: "02af181705e54d1b0bbc392973b9a029",
 		Content: "",
@@ -1125,7 +1126,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "02af181705e54d1b0bbc392973b9a029",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/mxhlfzjh_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/mxhlfzjh_20220722%20%283%29.png",
 	}, {
 		EventId: "02af181705e54d1b0bbc392973b9a029",
 		Content: "",
@@ -1137,7 +1138,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "02af181705e54d1b0bbc392973b9a029",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/mxhlfzjh_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/mxhlfzjh_20220722%20%282%29.png",
 	}, {
 		EventId: "02af181705e54d1b0bbc392973b9a029",
 		Content: "",
@@ -1155,7 +1156,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "0f2cacf4f89046681957f1cad276f64b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/xchzdcxk_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/xchzdcxk_20220722%20%284%29.png",
 	}, {
 		EventId: "0f2cacf4f89046681957f1cad276f64b",
 		Content: "",
@@ -1167,13 +1168,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "0f2cacf4f89046681957f1cad276f64b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/xchzdcxk_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/xchzdcxk_20220722%20%283%29.png",
 	}, {
 		EventId: "0f2cacf4f89046681957f1cad276f64b",
 		Content: "",
 	}, {
 		EventId: "0f2cacf4f89046681957f1cad276f64b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/xchzdcxk_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/xchzdcxk_20220722%20%282%29.png",
 	}, {
 		EventId: "0f2cacf4f89046681957f1cad276f64b",
 		Content: "",
@@ -1197,7 +1198,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "181aa44452c1d4869d138977502d573b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/lldwwbjh20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/lldwwbjh20220722%20%284%29.png",
 	}, {
 		EventId: "181aa44452c1d4869d138977502d573b",
 		Content: "",
@@ -1209,13 +1210,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "181aa44452c1d4869d138977502d573b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/lldwwbjh20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/lldwwbjh20220722%20%283%29.png",
 	}, {
 		EventId: "181aa44452c1d4869d138977502d573b",
 		Content: "",
 	}, {
 		EventId: "181aa44452c1d4869d138977502d573b",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/lldwwbjh20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/lldwwbjh20220722%20%282%29.png",
 	}, {
 		EventId: "181aa44452c1d4869d138977502d573b",
 		Content: "",
@@ -1239,7 +1240,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "1153583a3af4843cb82f8a67dc293a4e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/cjhxdzz_20220722%20%281%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/cjhxdzz_20220722%20%281%29.png",
 	}, {
 		EventId: "1153583a3af4843cb82f8a67dc293a4e",
 		Content: "",
@@ -1251,13 +1252,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "1153583a3af4843cb82f8a67dc293a4e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/cjhxdzz_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/cjhxdzz_20220722%20%284%29.png",
 	}, {
 		EventId: "1153583a3af4843cb82f8a67dc293a4e",
 		Content: "",
 	}, {
 		EventId: "1153583a3af4843cb82f8a67dc293a4e",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/cjhxdzz_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/cjhxdzz_20220722%20%283%29.png",
 	}, {
 		EventId: "1153583a3af4843cb82f8a67dc293a4e",
 		Content: "",
@@ -1287,7 +1288,7 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "d8a3e5d8fd0dbe72b5918df2bc87dc8c",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/rdwbzsdsh_20220722%20%284%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/rdwbzsdsh_20220722%20%284%29.png",
 	}, {
 		EventId: "d8a3e5d8fd0dbe72b5918df2bc87dc8c",
 		Content: "",
@@ -1299,13 +1300,13 @@ func v2(db *gorm.DB) {
 		Content: "",
 	}, {
 		EventId: "d8a3e5d8fd0dbe72b5918df2bc87dc8c",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/rdwbzsdsh_20220722%20%283%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/rdwbzsdsh_20220722%20%283%29.png",
 	}, {
 		EventId: "d8a3e5d8fd0dbe72b5918df2bc87dc8c",
 		Content: "",
 	}, {
 		EventId: "d8a3e5d8fd0dbe72b5918df2bc87dc8c",
-		Content: "https://resources.miotech.com/static/mp2c/images/event/gyxq/rdwbzsdsh_20220722%20%282%29.png",
+		Content: config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxq/rdwbzsdsh_20220722%20%282%29.png",
 	}, {
 		EventId: "d8a3e5d8fd0dbe72b5918df2bc87dc8c",
 		Content: "",
@@ -1792,7 +1793,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "守护栖息地任鸟飞",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shqxdrnf_20220722%20%283%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shqxdrnf_20220722%20%283%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1803,7 +1804,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "保护海洋你我同行",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/bhhynwtx_20220722%20%283%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/bhhynwtx_20220722%20%283%29.png",
 		RemainingCount:         300,
 		SalesCount:             290,
 		Active:                 true,
@@ -1814,7 +1815,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "一亿棵梭梭",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yykss_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yykss_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1825,7 +1826,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "留住长江的微笑——江豚",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/lzcjdwx_20220722%20%282%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/lzcjdwx_20220722%20%282%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1836,7 +1837,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "远方书声图书角——云南施甸县",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yfssynsmx_20220722%20%284%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yfssynsmx_20220722%20%284%29.png",
 		RemainingCount:         300,
 		SalesCount:             290,
 		Active:                 true,
@@ -1847,7 +1848,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "远方书声图书馆——新疆喀什",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yfshxjks_20220722%20%284%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yfshxjks_20220722%20%284%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1858,7 +1859,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "远方书声图书角——云南老麦乡幼儿园",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/yfssynlmx_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/yfssynlmx_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1869,7 +1870,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "郑州快速公交项目——联合国认证碳减排",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/zzksgj_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/zzksgj_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             290,
 		Active:                 true,
@@ -1880,7 +1881,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "青海曲格二级水电站项目——联合国认证碳减排",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/qhqgejsdz_20220722%20%283%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/qhqgejsdz_20220722%20%283%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1891,7 +1892,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "四川九节滩水电项目——联合国认证碳减排",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/scjjtsd_20220722%20%283%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/scjjtsd_20220722%20%283%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1902,7 +1903,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "新疆阿勒泰华宁水电项目——联合国认证碳减排",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/xjalthnsd_20220722%20%282%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/xjalthnsd_20220722%20%282%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1913,7 +1914,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "四川沐川火谷水电站项目——联合国认证碳减排",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/scmchgsdz_20220722%20%282%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/scmchgsdz_20220722%20%282%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1924,7 +1925,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "守三江水护万物源",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/ssjshwwy_20220722%20%282%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/ssjshwwy_20220722%20%282%29.png",
 		RemainingCount:         300,
 		SalesCount:             290,
 		Active:                 true,
@@ -1935,7 +1936,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "守护勺嘴鹬",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shszh_20220722%20%283%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shszh_20220722%20%283%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1946,7 +1947,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "守护地球之肾",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shdqzs_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shdqzs_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1957,7 +1958,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "守护藏地每一个生命",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/shzdmygsm_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/shzdmygsm_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1968,7 +1969,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "蒙新河狸方舟计划",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/mxhlfzjh_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/mxhlfzjh_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1979,7 +1980,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "乡村孩子的创新课",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/xchzdcxk_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/xchzdcxk_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -1990,7 +1991,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "流浪动物温饱计划",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/lldwwbjh_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/lldwwbjh_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -2001,7 +2002,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "长棘海星大作战",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/cjhxdzz_20220722%20%282%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/cjhxdzz_20220722%20%282%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
@@ -2012,7 +2013,7 @@ func v2(db *gorm.DB) {
 		Virtual:                true,
 		Title:                  "让动物不再受到伤害",
 		Cost:                   500,
-		ImageUrl:               "https://resources.miotech.com/static/mp2c/images/event/gyxmzt/rdwbzsdsh_20220722%20%281%29.png",
+		ImageUrl:               config.Config.OSS.CdnDomain + "/static/mp2c/images/event/gyxmzt/rdwbzsdsh_20220722%20%281%29.png",
 		RemainingCount:         300,
 		SalesCount:             0,
 		Active:                 true,
