@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"mio/config"
 	"time"
 )
 
@@ -49,33 +50,33 @@ func (p CarbonTransactionType) Text() string {
 func (p CarbonTransactionType) Cover() string {
 	switch p {
 	case CARBON_STEP:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_foot.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_foot.png"
 	case CARBON_COFFEE_CUP:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_cup.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_cup.png"
 	case CARBON_BIKE_RIDE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	case CARBON_ECAR:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	case CARBON_YTX:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_metro.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_metro.png"
 	case CARBON_JHX:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_bus.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_bus.png"
 	case CARBON_RECYCLING_CLOTHING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_RECYCLING_DIGITAL:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_RECYCLING_APPLIANCE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_RECYCLING_BOOK:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_FMY_RECYCLING_CLOTHING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_RECYCLING:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_POWER_REPLACE:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	case CARBON_REDUCE_PLASTIC:
-		return "https://resources.miotech.com/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	}
 	return ""
 }

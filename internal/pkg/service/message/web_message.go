@@ -2,6 +2,7 @@ package message
 
 import (
 	"errors"
+	"mio/config"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -147,7 +148,7 @@ func (d defaultWebMessage) GetMessage(params GetWebMessage) ([]*GetWebMessageRes
 	for _, item := range result {
 		if item.SendId == 0 {
 			item.User.Nickname = "酷喵圈"
-			item.User.AvatarUrl = "https://resources.miotech.com/static/mp2c/user/avatar/oy_BA5Jod6_ItzG6bvmPAX2kRYz8/21a36ea8-b252-406e-881c-1ee97334a594.png"
+			item.User.AvatarUrl = config.Config.OSS.CdnDomain + "/static/mp2c/user/avatar/oy_BA5Jod6_ItzG6bvmPAX2kRYz8/21a36ea8-b252-406e-881c-1ee97334a594.png"
 		} else {
 			item.User = uMap[item.SendId]
 		}
