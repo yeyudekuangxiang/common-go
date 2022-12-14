@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -154,7 +155,10 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if topic.Status == 2 || topic.Status == 4 {
+		key := config.RedisKey.TopicRank
+		app.Redis.ZRem(ctx.Context, key, topic.Id)
+	}
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:       0,
@@ -190,6 +194,11 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 	pointService := service.NewPointService(ctx)
 	messageService := message.NewWebMessageService(ctx)
+	//redis 做处理
+	if topic.Status == 2 || topic.Status == 4 {
+		key := config.RedisKey.TopicRank
+		app.Redis.ZRem(ctx.Context, key, topic.Id)
+	}
 
 	if topic.Status == 3 {
 		keyPrefix := "periodLimit:sendPoint:article:push:"
