@@ -32,7 +32,7 @@ type OaService struct {
 }
 
 func (srv OaService) LoginByCode(code string, cid int64) (string, string, error) {
-	setting := config.FindOaSetting(srv.Platform)
+	setting := config.FindOaSetting(string(srv.Platform))
 
 	oauth2Client := oauth2.Client{
 		Endpoint: mpoauth2.NewEndpoint(setting.AppId, setting.Secret),
@@ -75,7 +75,7 @@ func (srv OaService) CheckAuthWhiteList(platform entity.UserSource, u string) bo
 		app.Logger.Error(err)
 		return false
 	}
-	setting := config.FindOaSetting(platform)
+	setting := config.FindOaSetting(string(platform))
 
 	white, err := DefaultOaAuthWhiteService.FindBy(FindOaAuthWhiteBy{
 		AppId:  setting.AppId,
@@ -134,7 +134,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 		return "", errno.ErrCommon.WithMessage("跳转地址未在白名单内")
 	}
 
-	setting := config.FindOaSetting(srv.Platform)
+	setting := config.FindOaSetting(string(srv.Platform))
 
 	data := map[string]string{
 		"RedirectUri": redirectUri,
@@ -166,7 +166,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 	return loginUrl, nil
 }
 func (srv OaService) Sign(url string) (*OaSignResult, error) {
-	setting := config.FindOaSetting(srv.Platform)
+	setting := config.FindOaSetting(string(srv.Platform))
 
 	tickerServer := wxoa2.TicketServer{
 		TokenServer: &wxoa2.AccessTokenServer{
