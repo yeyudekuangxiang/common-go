@@ -1,7 +1,9 @@
 package message
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -162,25 +164,47 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	}
 
 	keys := strings.Split(param.Key, "_")
-	if len(keys) > 1 {
-		if keys[0] == "reply" {
-			obj, _ := d.comment.FindOne(param.TurnId)
-			content = strings.ReplaceAll(content, "{0}", obj.Message)
-		} else {
-			if keys[1] == "topic" {
-				obj := d.topic.FindById(param.TurnId)
-				content = strings.ReplaceAll(content, "{0}", obj.Title)
-			}
 
-			if keys[1] == "comment" {
-				obj, _ := d.comment.FindOne(param.TurnId)
-				content = strings.ReplaceAll(content, "{0}", obj.Message)
-			}
+	var newObj jsonObj
+	var obj []byte
+	var err error
+	//特殊情况处理
+	if keys[0] == "reply" {
+		keys[1] = "comment"
+	}
+
+	switch keys[1] {
+	case "topic":
+		topicObj := d.topic.FindById(param.TurnId)
+		obj, err = json.Marshal(topicObj)
+		if err != nil {
+			return errno.ErrInternalServer
+		}
+	case "comment":
+		commentObj, _ := d.comment.FindOne(param.TurnId)
+		obj, err = json.Marshal(commentObj)
+		if err != nil {
+			return errno.ErrInternalServer
 		}
 	}
 
+	err = json.Unmarshal(obj, &newObj)
+	if err != nil {
+		return errno.ErrInternalServer
+	}
+
+	switch keys[0] {
+	case "reply", "down", "essence", "like", "push", "top":
+		content = strings.ReplaceAll(content, "{0}", fmt.Sprintf("%s%s", newObj.Title, newObj.Message))
+	case "fail":
+		content = strings.ReplaceAll(content, "{0}", fmt.Sprintf("%s%s", newObj.Title, newObj.Message))
+		content = strings.ReplaceAll(content, "{1}", newObj.DelReason)
+	case "wechat":
+
+	}
+
 	//入库
-	err := d.message.SendMessage(message.SendMessage{
+	err = d.message.SendMessage(message.SendMessage{
 		SendId:       param.SendId,
 		RecId:        param.RecId,
 		Type:         param.Type,
