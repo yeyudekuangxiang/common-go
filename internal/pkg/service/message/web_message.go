@@ -3,6 +3,7 @@ package message
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mio/config"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -164,20 +165,24 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	}
 
 	keys := strings.Split(param.Key, "_")
+
 	var newObj jsonObj
 	var obj []byte
 	var err error
+	//特殊情况处理
+	if keys[0] == "reply" {
+		keys[1] = "comment"
+	}
+
 	switch keys[1] {
 	case "topic":
 		topicObj := d.topic.FindById(param.TurnId)
-		content = strings.ReplaceAll(content, "{0}", topicObj.Title)
 		obj, err = json.Marshal(topicObj)
 		if err != nil {
 			return errno.ErrInternalServer
 		}
-	case "comment", "reply":
+	case "comment":
 		commentObj, _ := d.comment.FindOne(param.TurnId)
-		content = strings.ReplaceAll(content, "{0}", commentObj.Message)
 		obj, err = json.Marshal(commentObj)
 		if err != nil {
 			return errno.ErrInternalServer
@@ -189,8 +194,14 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 		return errno.ErrInternalServer
 	}
 
-	if keys[0] == "fail" {
+	switch keys[0] {
+	case "reply", "down", "essence", "like", "push", "top":
+		content = strings.ReplaceAll(content, "{0}", fmt.Sprintf("%s%s", newObj.Title, newObj.Message))
+	case "fail":
+		content = strings.ReplaceAll(content, "{0}", fmt.Sprintf("%s%s", newObj.Title, newObj.Message))
 		content = strings.ReplaceAll(content, "{1}", newObj.DelReason)
+	case "wechat":
+
 	}
 
 	//入库
