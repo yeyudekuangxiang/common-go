@@ -48,4 +48,6 @@ var pageDataMap = map[string]*commandDescription{
 	"JHX":              {FnPageData: (*defaultClientHandle).jhxPageData},             //金华行
 	"YTX":              {FnPageData: (*defaultClientHandle).ytxPageData},             //亿通行
 	"AHS_RECYCLE":      {FnPageData: (*defaultClientHandle).ahsRecyclePageData},      //爱回收旧物回收
+	"SSHS_RECYCLE":     {FnPageData: (*defaultClientHandle).sshsRecyclePageData},     //爱回收旧物回收
+	"DDYX_RECYCLE":     {FnPageData: (*defaultClientHandle).ddyxRecyclePageData},     //爱回收旧物回收
 }

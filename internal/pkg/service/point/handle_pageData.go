@@ -177,6 +177,36 @@ func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, erro
 	return res, nil
 }
 
+func (c *defaultClientHandle) sshsRecyclePageData() (map[string]interface{}, error) {
+	openIds := []string{c.clientHandle.OpenId}
+	types := []entity.PointTransactionType{entity.POINT_RECYCLING_SHISHANGHUISHOU}
+	_, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	tps := []string{string(entity.CARBON_RECYCLING_SHISHANGHUISHOU)}
+	res := make(map[string]interface{}, 0)
+	//返回数据
+	res["count"] = count
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId, tps)
+	return res, nil
+}
+
+func (c *defaultClientHandle) ddyxRecyclePageData() (map[string]interface{}, error) {
+	openIds := []string{c.clientHandle.OpenId}
+	types := []entity.PointTransactionType{entity.POINT_RECYCLING_DANGDANGYIXIA}
+	_, count, err := c.getTodayData(openIds, types)
+	if err != nil {
+		return nil, err
+	}
+	tps := []string{string(entity.CARBON_RECYCLING_DANGDANGYIXIA)}
+	res := make(map[string]interface{}, 0)
+	//返回数据
+	res["count"] = count
+	res["co2"] = c.getCarbonDayData(c.clientHandle.OpenId, tps)
+	return res, nil
+}
+
 func (c *defaultClientHandle) getTodayData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
 	return repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: openIds,
