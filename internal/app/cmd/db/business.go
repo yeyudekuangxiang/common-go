@@ -7,6 +7,7 @@ package db
 import (
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/model"
@@ -98,7 +99,7 @@ func business(db *gorm.DB) {
 			Mobile:        "13000000000",
 			TelephoneCode: "86",
 			Realname:      "绿喵",
-			Avatar:        "https://resources.miotech.com/static/mp2c/images/topic/mio-kol/mio-avatar.jpg",
+			Avatar:        config.Config.OSS.CdnDomain + "/static/mp2c/images/topic/mio-kol/mio-avatar.jpg",
 			Status:        1,
 		},
 	})
@@ -119,7 +120,7 @@ func business(db *gorm.DB) {
 			MaxCount: 10,
 			Title:    "线上会议",
 			Desc:     "线上会议描述",
-			Icon:     "https://resources.miotech.com/static/mp2c/business/carbon/icon/meeting.png",
+			Icon:     config.Config.OSS.CdnDomain + "/static/mp2c/business/carbon/icon/meeting.png",
 		},
 		{
 			ID:   2,
@@ -137,7 +138,7 @@ func business(db *gorm.DB) {
 			MaxCount: 10,
 			Title:    "公共交通",
 			Desc:     "公共交通描述",
-			Icon:     "https://resources.miotech.com/static/mp2c/business/carbon/icon/transport.png",
+			Icon:     config.Config.OSS.CdnDomain + "/static/mp2c/business/carbon/icon/transport.png",
 		},
 		{
 			ID:   3,
@@ -149,7 +150,7 @@ func business(db *gorm.DB) {
 			MaxCount: 10,
 			Title:    "电车充电",
 			Desc:     "电车充电描述",
-			Icon:     "https://resources.miotech.com/static/mp2c/business/carbon/icon/evcar.png",
+			Icon:     config.Config.OSS.CdnDomain + "/static/mp2c/business/carbon/icon/evcar.png",
 		},
 		{
 			ID:   4,
@@ -167,7 +168,7 @@ func business(db *gorm.DB) {
 			MaxCount: 10,
 			Title:    "节水节电",
 			Desc:     "节水节电描述",
-			Icon:     "https://resources.miotech.com/static/mp2c/business/carbon/icon/water.png",
+			Icon:     config.Config.OSS.CdnDomain + "/static/mp2c/business/carbon/icon/water.png",
 		},
 	})
 	db.Create(&ebusiness.Company{

@@ -811,7 +811,7 @@ func (srv TopicService) getTopicImage(importId int, p string) ([]string, error) 
 	}
 	list := make([]string, 0)
 	for _, f := range files {
-		list = append(list, fmt.Sprintf("https://resources.miotech.com/static/mp2c/images/topic/info/%d/%s", importId, f.Name()))
+		list = append(list, fmt.Sprintf(config.Config.OSS.CdnDomain+"/static/mp2c/images/topic/info/%d/%s", importId, f.Name()))
 	}
 	return list, nil
 }

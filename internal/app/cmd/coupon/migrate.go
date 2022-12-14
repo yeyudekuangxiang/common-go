@@ -13,6 +13,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	"log"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/model/entity"
@@ -65,7 +66,7 @@ func lvmiao666() {
 			UserId:             item.ID,
 			ExchangeSetting:    "300",
 			ExchangeTitle:      "关注公众号得积分",
-			ExchangeImage:      "https://resources.miotech.com/static/mp2c/exchange/icon/1667531583963.png",
+			ExchangeImage:      config.Config.OSS.CdnDomain + "/static/mp2c/exchange/icon/1667531583963.png",
 			CreatedAt:          time.Now(),
 			ExchangeBizId:      "",
 		})
