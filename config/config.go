@@ -1,9 +1,5 @@
 package config
 
-import (
-	"mio/internal/pkg/model/entity"
-)
-
 var Config = app{
 	App:              appSetting{},
 	Http:             httpSetting{},
@@ -173,11 +169,11 @@ type promSetting struct {
 	Path string
 }
 
-func FindOaSetting(source entity.UserSource) wxSetting {
+func FindOaSetting(source string) wxSetting {
 	switch source {
-	case entity.UserSourceMioSrvOA:
+	case "mio-srv-oa":
 		return Config.MioSrvOA
-	case entity.UserSourceMioSubOA:
+	case "mio-sub-oa":
 		return Config.MioSubOA
 	}
 	return wxSetting{}
