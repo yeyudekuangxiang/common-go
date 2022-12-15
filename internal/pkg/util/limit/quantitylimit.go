@@ -26,7 +26,7 @@ else
 	currentScore = score
 end
 local current = redis.call("INCRBY", KEYS[1], currentScore)
-if current == score then
+if current == score or score > current then
     redis.call("expire", KEYS[1], window)
 end
 return currentScore
