@@ -303,9 +303,9 @@ func (srv RecycleService) GetPointV2(tp, number, name string) (int64, error) {
 			}
 			floatP = v.MapIndex(reflect.ValueOf("默认")).Float()
 		}
-		floatP = forName.(float64)
+		floatP = float64(forName.(int))
 	}
-	return decimal.NewFromFloat(floatP).IntPart(), nil
+	return decimal.NewFromFloat(floatP).Mul(decimal.NewFromFloat(num)).IntPart(), nil
 }
 
 func (srv RecycleService) GetCo2V2(tp, number, name string) (float64, error) {
@@ -330,6 +330,7 @@ func (srv RecycleService) GetCo2V2(tp, number, name string) (float64, error) {
 		}
 		co2 = forName.(float64)
 	}
+	co2, _ = decimal.NewFromFloat(co2).Mul(decimal.NewFromFloat(num)).Float64()
 	return co2, errno.ErrCommon.WithMessage("未查询到匹配类型")
 
 }
