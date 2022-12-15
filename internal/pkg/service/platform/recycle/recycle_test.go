@@ -3,6 +3,7 @@ package recycle
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -13,4 +14,18 @@ func TestKind(t *testing.T) {
 	s1 := "hello"
 	kind := reflect.ValueOf(s1).Kind()
 	fmt.Println(kind)
+}
+
+func TestRune(t *testing.T) {
+	if forName, ok := recyclePointForName[5]; ok {
+		v := reflect.ValueOf(forName)
+		if v.Kind() == reflect.Map {
+			it := v.MapRange()
+			for it.Next() {
+				if strings.ContainsAny(it.Key().String(), "沙发") {
+					fmt.Println(it.Key().String(), it.Value().Float())
+				}
+			}
+		}
+	}
 }
