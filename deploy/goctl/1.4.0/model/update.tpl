@@ -39,9 +39,9 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Contex
 	{{end}}
 
 	if len(skipHook)>0 && skipHook[0] {
-		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumn(column, val).Error
+		err = m.db.WithContext(ctx).Model({{.upperStartCamelObject}}{}).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumn(column, val).Error
 	} else {
-		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Update(column, val).Error
+		err = m.db.WithContext(ctx).Model({{.upperStartCamelObject}}{}).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Update(column, val).Error
 	}
 	if err != nil {
 		return err
@@ -72,9 +72,9 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumns(ctx context.Conte
 	{{end}}
 
 	if len(skipHook)>0 && skipHook[0] {
-		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumns(values).Error
+		err = m.db.WithContext(ctx).Model({{.upperStartCamelObject}}{}).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumns(values).Error
 	} else {
-		err = m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Updates(values).Error
+		err = m.db.WithContext(ctx).Model({{.upperStartCamelObject}}{}).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Updates(values).Error
 	}
 	if err != nil {
 		return err

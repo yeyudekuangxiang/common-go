@@ -93,25 +93,28 @@ func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param 
 }
 
 type {{.upperStartCamelObject}}OrderByList []{{.upperStartCamelObject}}OrderBy
-type {{.upperStartCamelObject}}OrderBy string
+type {{.upperStartCamelObject}}OrderBy struct {
+	OrderBy string
+}
 
-//在此处定义 {{.upperStartCamelObject}}OrderBy 枚举变量
-const (
-    /** 排序定义实例
-    {{.upperStartCamelObject}}OrderByIdDesc = "{{.lowerStartCamelObject}}OrderByIdDesc"
-    **/
+var (
+    {{.upperStartCamelObject}}OrderBy{{.upperStartCamelPrimaryKey}}Desc = {{.upperStartCamelObject}}OrderBy{OrderBy: "{{.originPrimaryKey}} desc"}
+    {{.upperStartCamelObject}}OrderBy{{.upperStartCamelPrimaryKey}}Asc = {{.upperStartCamelObject}}OrderBy{OrderBy: "{{.originPrimaryKey}} asc"}
+    {{if .hasCreatedAt}}
+     {{.upperStartCamelObject}}OrderByCreatedAtDesc = {{.upperStartCamelObject}}OrderBy{OrderBy: "created_at desc"}
+        {{.upperStartCamelObject}}OrderByCreatedAtAsc = {{.upperStartCamelObject}}OrderBy{OrderBy: "created_at asc"}
+    {{end}}
+    {{if .hasUpdatedAt}}
+         {{.upperStartCamelObject}}OrderByUpdatedAtDesc = {{.upperStartCamelObject}}OrderBy{OrderBy: "updated_at desc"}
+         {{.upperStartCamelObject}}OrderByUpdatedAtAsc = {{.upperStartCamelObject}}OrderBy{OrderBy: "updated_at asc"}
+    {{end}}
 )
 
-// init{{.upperStartCamelObject}}OrderBy 在此处理排序
-func init{{.upperStartCamelObject}}OrderBy(db *gorm.DB, orderByList []{{.upperStartCamelObject}}OrderBy) *gorm.DB {
-    for _,orderBy:= range orderByList{
-        switch orderBy {
-            /** 排序实例
-            case {{.upperStartCamelObject}}OrderByIdDesc:
-                db = db.Order("id desc")
-            **/
-    	}
-    }
+// init{{.upperStartCamelObject}}OrderBy
+func init{{.upperStartCamelObject}}OrderBy(db *gorm.DB, orderByList SystemAdminOrderByList) *gorm.DB {
+	for _, item := range orderByList {
+		db = db.Order(item.OrderBy)
+	}
 	return db
 }
 
