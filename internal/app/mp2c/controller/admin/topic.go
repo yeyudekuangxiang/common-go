@@ -255,6 +255,21 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		}
 	}
 
+	if topic.Status == 2 {
+		err = messageService.SendMessage(message.SendWebMessage{
+			SendId:   0,
+			RecId:    topic.User.ID,
+			Key:      "fail_topic",
+			Type:     message.MsgTypeSystem,
+			TurnType: message.MsgTurnTypeArticle,
+			TurnId:   topic.Id,
+		})
+
+		if err != nil {
+			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+		}
+	}
+
 	return nil, nil
 }
 
