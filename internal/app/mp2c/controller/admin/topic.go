@@ -260,8 +260,8 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			SendId:   0,
 			RecId:    topic.User.ID,
 			Key:      "fail_topic",
-			Type:     4,
-			TurnType: 1,
+			Type:     message.MsgTypeSystem,
+			TurnType: message.MsgTurnTypeArticle,
 			TurnId:   topic.Id,
 		})
 
