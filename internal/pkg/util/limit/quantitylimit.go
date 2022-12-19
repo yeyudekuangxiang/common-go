@@ -26,7 +26,7 @@ else
 	currentScore = score
 end
 local current = redis.call("INCRBY", KEYS[1], currentScore)
-if current == score then
+if current == score or score > current then
     redis.call("expire", KEYS[1], window)
 end
 return currentScore
@@ -38,7 +38,7 @@ type (
 
 	// A QuantityLimit is used to limit requests during a Quantity of time.
 	QuantityLimit struct {
-		Quantity   int           // 窗口大小 单位 秒
+		period     int           // 窗口大小 单位 秒
 		quota      int           // 单位时间内分数上限
 		limitStore *redis.Client // redis
 		keyPrefix  string        // redis key 前缀
@@ -46,10 +46,10 @@ type (
 	}
 )
 
-func NewQuantityLimit(Quantity, quota int, limitStore *redis.Client, keyPrefix string,
+func NewQuantityLimit(period, quota int, limitStore *redis.Client, keyPrefix string,
 	opts ...QuantityOption) *QuantityLimit {
 	limiter := &QuantityLimit{
-		Quantity:   Quantity,
+		period:     period,
 		quota:      quota,
 		limitStore: limitStore,
 		keyPrefix:  keyPrefix,
@@ -91,10 +91,10 @@ func (h *QuantityLimit) calcExpireSeconds() int {
 		now := time.Now()
 		_, offset := now.Zone()
 		unix := now.Unix() + int64(offset)
-		return h.Quantity - int(unix%int64(h.Quantity))
+		return h.period - int(unix%int64(h.period))
 	}
 
-	return h.Quantity
+	return h.period
 }
 
 func QuantityAlign() QuantityOption {

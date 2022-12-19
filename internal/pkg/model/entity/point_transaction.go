@@ -136,6 +136,10 @@ func (p PointTransactionType) RealText() string {
 		return "爱分类/爱回收"
 	case POINT_RECYCLING:
 		return "旧物回收"
+	case POINT_RECYCLING_SHISHANGHUISHOU:
+		return "拾尚回收"
+	case POINT_RECYCLING_DANGDANGYIXIA:
+		return "铛铛一下"
 	}
 	return p.Text()
 }
@@ -175,13 +179,15 @@ const (
 	POINT_DUIBA_INTEGRAL_RECHARGE PointTransactionType = "INTEGRAL_RECHARGE" //兑吧虚拟商品充值积分
 	POINT_YTX                     PointTransactionType = "YTX"               //亿通行
 
-	POINT_RECYCLING              PointTransactionType = "RECYCLING"              //旧物回收
-	POINT_RECYCLING_AIHUISHOU    PointTransactionType = "RECYCLING_AIHUISHOU"    //旧物回收 爱分类爱回收
-	POINT_RECYCLING_CLOTHING     PointTransactionType = "RECYCLING_CLOTHING"     //旧物回收 oola衣物鞋帽
-	POINT_RECYCLING_DIGITAL      PointTransactionType = "RECYCLING_COMPUTER"     //旧物回收 oola数码
-	POINT_RECYCLING_APPLIANCE    PointTransactionType = "RECYCLING_APPLIANCE"    //旧物回收 oola家电
-	POINT_RECYCLING_BOOK         PointTransactionType = "RECYCLING_BOOK"         //旧物回收 oola书籍
-	POINT_FMY_RECYCLING_CLOTHING PointTransactionType = "RECYCLING_FMY_CLOTHING" //旧物回收 fmy衣物鞋帽
+	POINT_RECYCLING                 PointTransactionType = "RECYCLING"                 //旧物回收
+	POINT_RECYCLING_AIHUISHOU       PointTransactionType = "RECYCLING_AIHUISHOU"       //旧物回收 爱分类爱回收
+	POINT_RECYCLING_CLOTHING        PointTransactionType = "RECYCLING_CLOTHING"        //旧物回收 oola衣物鞋帽
+	POINT_RECYCLING_DIGITAL         PointTransactionType = "RECYCLING_COMPUTER"        //旧物回收 oola数码
+	POINT_RECYCLING_APPLIANCE       PointTransactionType = "RECYCLING_APPLIANCE"       //旧物回收 oola家电
+	POINT_RECYCLING_BOOK            PointTransactionType = "RECYCLING_BOOK"            //旧物回收 oola书籍
+	POINT_FMY_RECYCLING_CLOTHING    PointTransactionType = "RECYCLING_FMY_CLOTHING"    //旧物回收 fmy衣物鞋帽
+	POINT_RECYCLING_SHISHANGHUISHOU PointTransactionType = "RECYCLING_SHISHANGHUISHOU" //旧物回收 拾尚回收
+	POINT_RECYCLING_DANGDANGYIXIA   PointTransactionType = "RECYCLING_DANGDANGYIXIA"   //旧物回收 铛铛一下
 
 	POINT_FAST_ELECTRICITY PointTransactionType = "FAST_ELECTRICITY" //快电
 

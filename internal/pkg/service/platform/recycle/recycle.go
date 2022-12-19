@@ -12,8 +12,10 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
+	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -73,24 +75,6 @@ var recycleCo2ByNum = map[string]float64{
 	"衣帽鞋包":  4500, //1000g : 4500g
 	"书籍课本":  1400, //1000g : 1400g
 	"旧物回收":  4500,
-}
-
-// 回收 台 单位对应积分 比如 电视机 1台 获得 69积分
-var recyclePointV2 = map[int]int64{
-	1:   21, //1000g : 21 积分
-	2:   6,  //1000g : 6 积分
-	3:   113,
-	4:   384,
-	100: 100,
-}
-
-// 回收 台/重量 单位对应减碳量 比如 电视机 1台 获得 15000g 减碳量
-var recycleCo2V2 = map[int]float64{
-	1:   4500, //1000g : 4500g
-	2:   1400, //1000g : 1400g
-	3:   25000,
-	4:   83000,
-	100: 8966.8,
 }
 
 //每个类型对应次数
@@ -298,46 +282,67 @@ func (srv RecycleService) getPointType(typeText string) entity.PointTransactionT
 	}
 }
 
-func (srv RecycleService) GetPointV2(tp, number string) (int64, error) {
+func (srv RecycleService) GetPointV2(tp, number, name string) (int64, error) {
 	num, _ := strconv.ParseFloat(number, 64)
 	types, _ := strconv.Atoi(tp)
+	var floatP float64
 	var point int64
 	if types == 0 || num == 0 {
 		return point, nil
 	}
 
 	//获取point
-	if pointByOne, ok := recyclePointV2[types]; ok {
-		point = decimal.NewFromFloat(num).Mul(decimal.NewFromInt(pointByOne)).Ceil().IntPart()
-	} else {
-		return point, errno.ErrRecordNotFound.WithMessage("未匹配到对应积分规则")
+	if d, ok := recyclePointForName[types]; ok {
+		v := reflect.ValueOf(d)
+		if v.Kind() == reflect.Map {
+			it := v.MapRange()
+			for it.Next() {
+				if strings.ContainsAny(it.Key().String(), name) {
+					floatP = it.Value().Float()
+				}
+			}
+			floatP = v.MapIndex(reflect.ValueOf("默认")).Float()
+		}
+		floatP = srv.interface2float(d)
 	}
-
-	return point, nil
+	return decimal.NewFromFloat(floatP).Mul(decimal.NewFromFloat(num)).IntPart(), nil
 }
 
-func (srv RecycleService) GetCo2V2(tp, number string) (float64, error) {
+func (srv RecycleService) GetCo2V2(tp, number, name string) (float64, error) {
 	num, _ := strconv.ParseFloat(number, 64)
 	types, _ := strconv.Atoi(tp)
 
 	var co2 float64
 	if types == 0 || num == 0 {
-		return co2, nil
+		return co2, errno.ErrCommon.WithMessage("未查询到匹配类型")
 	}
 	//获取co2
-	if co2ByOne, ok := recycleCo2V2[types]; ok {
-		co2, _ = decimal.NewFromFloat(num).Mul(decimal.NewFromFloat(co2ByOne)).Float64()
-	} else {
-		return co2, errno.ErrRecordNotFound.WithMessage("未匹配到对应减碳规则")
+	if d, ok := recycleCo2ForName[types]; ok {
+		v := reflect.ValueOf(d)
+		if v.Kind() == reflect.Map {
+			it := v.MapRange()
+			for it.Next() {
+				if strings.ContainsAny(it.Key().String(), name) {
+					co2 = it.Value().Float()
+				}
+			}
+			co2 = v.MapIndex(reflect.ValueOf("默认")).Float()
+		}
+		co2 = srv.interface2float(d)
 	}
+	co2, _ = decimal.NewFromFloat(co2).Mul(decimal.NewFromFloat(num)).Float64()
+	return co2, errno.ErrCommon.WithMessage("未查询到匹配类型")
 
-	return co2, nil
 }
 
 func (srv RecycleService) GetPointType(ch string) entity.PointTransactionType {
 	switch ch {
 	case "loverecycle":
 		return entity.POINT_RECYCLING_AIHUISHOU
+	case "sshs":
+		return entity.POINT_RECYCLING_SHISHANGHUISHOU
+	case "ddyx":
+		return entity.POINT_RECYCLING_DANGDANGYIXIA
 	default:
 		return entity.POINT_RECYCLING
 	}
@@ -346,7 +351,28 @@ func (srv RecycleService) GetCarbonType(ch string) entity.CarbonTransactionType 
 	switch ch {
 	case "loverecycle":
 		return entity.CARBON_RECYCLING_AIHUISHOU
+	case "sshs":
+		return entity.CARBON_RECYCLING_SHISHANGHUISHOU
+	case "ddyx":
+		return entity.CARBON_RECYCLING_DANGDANGYIXIA
 	default:
 		return entity.CARBON_RECYCLING
 	}
+}
+
+func (srv RecycleService) interface2float(data interface{}) float64 {
+	var val float64
+	switch data.(type) {
+	case int:
+		val = float64(data.(int))
+	case float64:
+		val = data.(float64)
+	case string:
+		float, err := strconv.ParseFloat(data.(string), 64)
+		if err != nil {
+			return 0
+		}
+		val = float
+	}
+	return val
 }

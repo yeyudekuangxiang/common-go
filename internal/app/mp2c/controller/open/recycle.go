@@ -354,8 +354,8 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//计算积分
 	PointService := service.NewPointService(ctx)
-	currPoint, _ := RecycleService.GetPointV2(form.Category, form.Number) //本次可得积分
-	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number)     //本次可得减碳量
+	currPoint, _ := RecycleService.GetPointV2(form.Category, form.Number, form.Name) //本次可得积分
+	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number, form.Name)     //本次可得减碳量
 
 	//每日分数上限
 	keyPrefix = fmt.Sprintf("quantityLimit:sendPoint:recycle:%s:", form.Ch)
