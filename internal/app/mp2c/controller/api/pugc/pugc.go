@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -37,6 +38,21 @@ type PugcController struct {
 }
 
 func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
+
+	pointService := service.NewDuiBaActivityService(context.NewMioContext())
+	activity, err := pointService.FindActivity("/etc/passwd")
+
+	log, err := app.RpcService.CarbonPkRpcSrv.DetailCarbonPkRewardLog(context.NewMioContext(), &carbonpk.DetailCarbonPkRewardReq{
+		RewardUrl: activity.ActivityUrl,
+		UserId:    1,
+	})
+	if err != nil {
+
+	}
+
+	if !log.Exist {
+
+	}
 
 	service := messageSrv.MessageService{}
 	service.SendMessageToCarbonPk()
