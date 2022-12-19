@@ -28,8 +28,8 @@ func NewDefaultImageClient() *baidu.ImageClient {
 		AccessToken: baidu.NewAccessToken(baidu.AccessTokenConfig{
 			RedisClient: app.Redis,
 			Prefix:      config.RedisKey.BaiDu,
-			AppKey:      config.Config.BaiDu.AppKey,
-			AppSecret:   config.Config.BaiDu.AppSecret,
+			AppKey:      config.Config.BaiDuOCR.AppKey,
+			AppSecret:   config.Config.BaiDuOCR.AppSecret,
 		}),
 	}
 }

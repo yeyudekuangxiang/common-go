@@ -1,58 +1,60 @@
 package config
 
 var Config = app{
-	App:              appSetting{},
-	Http:             httpSetting{},
-	Database:         databaseSetting{},
-	Log:              logSetting{},
-	AliLog:           aliLogSetting{},
-	Weapp:            wxSetting{},
-	MioSubOA:         wxSetting{},
-	MioSrvOA:         wxSetting{},
-	Redis:            redisSetting{},
-	DuiBa:            duiBaSetting{},
-	OSS:              ossSetting{},
-	BaiDu:            baiDuSetting{},
-	Java:             javaConfig{},
-	Zhuge:            zhugeConfig{},
-	AMQP:             amqpSetting{},
-	CouponRpc:        rpcSetting{},
-	ActivityZyh:      activityZyh{},
-	BaiDuImageSearch: baiDuImageSearchSetting{},
-	TokenCenterRpc:   rpcSetting{},
-	ActivityRpc:      rpcSetting{},
-	DatabaseBusiness: databaseSetting{},
-	Sms:              sms{},
-	SmsMarket:        smsMarket{},
-	Prometheus:       promSetting{},
+	App:                appSetting{},
+	Http:               httpSetting{},
+	Database:           databaseSetting{},
+	Log:                logSetting{},
+	AliLog:             aliLogSetting{},
+	Weapp:              wxSetting{},
+	MioSubOA:           wxSetting{},
+	MioSrvOA:           wxSetting{},
+	Redis:              redisSetting{},
+	DuiBa:              duiBaSetting{},
+	OSS:                ossSetting{},
+	BaiDuOCR:           baiDuOCRSetting{},
+	BaiDuReviewSetting: baiDuReviewSetting{},
+	Java:               javaConfig{},
+	Zhuge:              zhugeConfig{},
+	AMQP:               amqpSetting{},
+	CouponRpc:          rpcSetting{},
+	ActivityZyh:        activityZyh{},
+	BaiDuImageSearch:   baiDuImageSearchSetting{},
+	TokenCenterRpc:     rpcSetting{},
+	ActivityRpc:        rpcSetting{},
+	DatabaseBusiness:   databaseSetting{},
+	Sms:                sms{},
+	SmsMarket:          smsMarket{},
+	Prometheus:         promSetting{},
 }
 
 type app struct {
-	App              appSetting              `ini:"app"`
-	Http             httpSetting             `ini:"http"`
-	Database         databaseSetting         `ini:"database"`
-	DatabaseBusiness databaseSetting         `ini:"databaseBusiness"`
-	Log              logSetting              `ini:"log"`
-	AliLog           aliLogSetting           `ini:"aliLog"`
-	Weapp            wxSetting               `ini:"weapp"`
-	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis            redisSetting            `ini:"redis"`
-	DuiBa            duiBaSetting            `ini:"duiba"`
-	OSS              ossSetting              `ini:"oss"`
-	AMQP             amqpSetting             `ini:"amqp"`
-	BaiDu            baiDuSetting            `ini:"baidu"`
-	Java             javaConfig              `ini:"java"`
-	Zhuge            zhugeConfig             `ini:"zhuge"`
-	CouponRpc        rpcSetting              `ini:"couponRpc"`
-	ActivityZyh      activityZyh             `ini:"activityZyh"`
-	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
-	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
-	PointRpc         rpcSetting              `ini:"pointRpc"`
-	ActivityRpc      rpcSetting              `ini:"activityRpc"`
-	Sms              sms                     `ini:"sms"`
-	SmsMarket        smsMarket               `ini:"smsMarket"`
-	Prometheus       promSetting             `ini:"prometheus"`
+	App                appSetting              `ini:"app"`
+	Http               httpSetting             `ini:"http"`
+	Database           databaseSetting         `ini:"database"`
+	DatabaseBusiness   databaseSetting         `ini:"databaseBusiness"`
+	Log                logSetting              `ini:"log"`
+	AliLog             aliLogSetting           `ini:"aliLog"`
+	Weapp              wxSetting               `ini:"weapp"`
+	MioSubOA           wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
+	MioSrvOA           wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
+	Redis              redisSetting            `ini:"redis"`
+	DuiBa              duiBaSetting            `ini:"duiba"`
+	OSS                ossSetting              `ini:"oss"`
+	AMQP               amqpSetting             `ini:"amqp"`
+	BaiDuOCR           baiDuOCRSetting         `ini:"baiduOCR"`
+	BaiDuReviewSetting baiDuReviewSetting      `ini:"baiduReview"`
+	Java               javaConfig              `ini:"java"`
+	Zhuge              zhugeConfig             `ini:"zhuge"`
+	CouponRpc          rpcSetting              `ini:"couponRpc"`
+	ActivityZyh        activityZyh             `ini:"activityZyh"`
+	BaiDuImageSearch   baiDuImageSearchSetting `ini:"baiduImageSearch"`
+	TokenCenterRpc     rpcSetting              `ini:"tokenCenterRpc"`
+	ActivityRpc        rpcSetting              `ini:"activityRpc"`
+	PointRpc           rpcSetting              `ini:"pointRpc"`
+	Sms                sms                     `ini:"sms"`
+	SmsMarket          smsMarket               `ini:"smsMarket"`
+	Prometheus         promSetting             `ini:"prometheus"`
 }
 
 type appSetting struct {
@@ -123,10 +125,16 @@ type ossSetting struct {
 type amqpSetting struct {
 	Url string
 }
-type baiDuSetting struct {
+type baiDuOCRSetting struct {
 	AppKey    string
 	AppSecret string
 }
+
+type baiDuReviewSetting struct {
+	AppKey    string
+	AppSecret string
+}
+
 type baiDuImageSearchSetting struct {
 	AppKey    string
 	AppSecret string
