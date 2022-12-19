@@ -73,7 +73,7 @@ var recyclePointForName = map[int]interface{}{
 
 var recycleCo2ForName = map[int]interface{}{
 	1: 4500.0, //1000g : 4500g
-	2: 1400.0,
+	2: 140.0,
 	3: map[string]float64{
 		"默认":  25000,
 		"手机":  25000,
