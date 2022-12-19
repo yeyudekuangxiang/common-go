@@ -98,10 +98,14 @@ AppSecret=
 
 [oss]
 CdnDomain=https://resources.miotech.com
-Endpoint=oss-cn-hongkong.aliyuncs.com
+Region=oss-cn-shanghai
+Endpoint=oss-cn-shanghai.aliyuncs.com
 AccessKey=
 AccessSecret=
 BasePath=static/mp2c/test
+Bucket=miotech-mio
+#用于分片上传sts授权
+StsRoleArn=
 
 [baidu]
 AppKey=

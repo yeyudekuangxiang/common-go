@@ -14,6 +14,8 @@ import (
 var (
 	coffeeCupRuleOne = []string{
 		"自带杯",
+		"cup discount",
+		"cup",
 	}
 	coffeeCupRuleTwo = []string{
 		"订单",

@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"mio/config"
 	"mio/internal/pkg/model"
 )
 
@@ -23,8 +24,8 @@ const (
 
 var IconMap = map[UserPosition]string{
 	UserPositionOrdinary: "",
-	UserPositionBlue:     "https://miotech-resource.oss-cn-hongkong.aliyuncs.com/static/mp2c/images/user/blue.png",
-	UserPositionYellow:   "https://resources.miotech.com/static/mp2c/user/positionIcon/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/d7e78457-5136-48ae-b64e-4c260e2a0c3a.png",
+	UserPositionBlue:     config.Config.OSS.CdnDomain + "/static/mp2c/images/user/blue.png",
+	UserPositionYellow:   config.Config.OSS.CdnDomain + "/static/mp2c/user/positionIcon/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/d7e78457-5136-48ae-b64e-4c260e2a0c3a.png",
 }
 
 // https://resources.miotech.com/static/mp2c/event/cert/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/275cd192-6d9f-46e1-8023-ca8b16bd48fa.png
@@ -43,7 +44,7 @@ const (
 )
 
 var IconPartnerMap = map[Partner]string{
-	PartnerLoHoJa: "https://resources.miotech.com/static/mp2c/event/cert/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/275cd192-6d9f-46e1-8023-ca8b16bd48fa.png",
+	PartnerLoHoJa: config.Config.OSS.CdnDomain + "/static/mp2c/event/cert/oy_BA5ESvDiKAaKJ4GdrCOxkqP_4/275cd192-6d9f-46e1-8023-ca8b16bd48fa.png",
 }
 
 type User struct {
