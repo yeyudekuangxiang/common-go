@@ -28,4 +28,5 @@ func mp2cCron() {
 		service := messageSrv.MessageService{}
 		service.SendMessageToSignUser()
 	})
+
 }

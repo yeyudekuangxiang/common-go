@@ -28,31 +28,33 @@ var Config = app{
 }
 
 type app struct {
-	App              appSetting              `ini:"app"`
-	Http             httpSetting             `ini:"http"`
-	Database         databaseSetting         `ini:"database"`
-	DatabaseBusiness databaseSetting         `ini:"databaseBusiness"`
-	Log              logSetting              `ini:"log"`
-	AliLog           aliLogSetting           `ini:"aliLog"`
-	Weapp            wxSetting               `ini:"weapp"`
-	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis            redisSetting            `ini:"redis"`
-	DuiBa            duiBaSetting            `ini:"duiba"`
-	OSS              ossSetting              `ini:"oss"`
-	AMQP             amqpSetting             `ini:"amqp"`
-	BaiDu            baiDuSetting            `ini:"baidu"`
-	Java             javaConfig              `ini:"java"`
-	Zhuge            zhugeConfig             `ini:"zhuge"`
-	CouponRpc        rpcSetting              `ini:"couponRpc"`
-	ActivityZyh      activityZyh             `ini:"activityZyh"`
-	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
-	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
-	PointRpc         rpcSetting              `ini:"pointRpc"`
-	ActivityRpc      rpcSetting              `ini:"activityRpc"`
-	Sms              sms                     `ini:"sms"`
-	SmsMarket        smsMarket               `ini:"smsMarket"`
-	Prometheus       promSetting             `ini:"prometheus"`
+	App                 appSetting              `ini:"app"`
+	Http                httpSetting             `ini:"http"`
+	Database            databaseSetting         `ini:"database"`
+	DatabaseBusiness    databaseSetting         `ini:"databaseBusiness"`
+	Log                 logSetting              `ini:"log"`
+	AliLog              aliLogSetting           `ini:"aliLog"`
+	Weapp               wxSetting               `ini:"weapp"`
+	MioSubOA            wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
+	MioSrvOA            wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
+	Redis               redisSetting            `ini:"redis"`
+	DuiBa               duiBaSetting            `ini:"duiba"`
+	OSS                 ossSetting              `ini:"oss"`
+	AMQP                amqpSetting             `ini:"amqp"`
+	BaiDu               baiDuSetting            `ini:"baidu"`
+	Java                javaConfig              `ini:"java"`
+	Zhuge               zhugeConfig             `ini:"zhuge"`
+	CouponRpc           rpcSetting              `ini:"couponRpc"`
+	ActivityZyh         activityZyh             `ini:"activityZyh"`
+	BaiDuImageSearch    baiDuImageSearchSetting `ini:"baiduImageSearch"`
+	TokenCenterRpc      rpcSetting              `ini:"tokenCenterRpc"`
+	PointRpc            rpcSetting              `ini:"pointRpc"`
+	ActivityRpc         rpcSetting              `ini:"activityRpc"`
+	Sms                 sms                     `ini:"sms"`
+	SmsMarket           smsMarket               `ini:"smsMarket"`
+	Prometheus          promSetting             `ini:"prometheus"`
+	UserRpc             rpcSetting              `ini:"userRpc"`
+	ActivityCarbonPkRpc rpcSetting              `ini:"activitycarbonpkRpc"`
 }
 
 type appSetting struct {
