@@ -292,8 +292,8 @@ func (srv RecycleService) GetPointV2(tp, number, name string) (int64, error) {
 	}
 
 	//获取point
-	if forName, ok := recyclePointForName[types]; ok {
-		v := reflect.ValueOf(forName)
+	if d, ok := recyclePointForName[types]; ok {
+		v := reflect.ValueOf(d)
 		if v.Kind() == reflect.Map {
 			it := v.MapRange()
 			for it.Next() {
@@ -303,7 +303,7 @@ func (srv RecycleService) GetPointV2(tp, number, name string) (int64, error) {
 			}
 			floatP = v.MapIndex(reflect.ValueOf("默认")).Float()
 		}
-		floatP = float64(forName.(int))
+		floatP = srv.interface2float(d)
 	}
 	return decimal.NewFromFloat(floatP).Mul(decimal.NewFromFloat(num)).IntPart(), nil
 }
@@ -317,8 +317,8 @@ func (srv RecycleService) GetCo2V2(tp, number, name string) (float64, error) {
 		return co2, errno.ErrCommon.WithMessage("未查询到匹配类型")
 	}
 	//获取co2
-	if forName, ok := recycleCo2ForName[types]; ok {
-		v := reflect.ValueOf(forName)
+	if d, ok := recycleCo2ForName[types]; ok {
+		v := reflect.ValueOf(d)
 		if v.Kind() == reflect.Map {
 			it := v.MapRange()
 			for it.Next() {
@@ -328,7 +328,7 @@ func (srv RecycleService) GetCo2V2(tp, number, name string) (float64, error) {
 			}
 			co2 = v.MapIndex(reflect.ValueOf("默认")).Float()
 		}
-		co2 = forName.(float64)
+		co2 = srv.interface2float(d)
 	}
 	co2, _ = decimal.NewFromFloat(co2).Mul(decimal.NewFromFloat(num)).Float64()
 	return co2, errno.ErrCommon.WithMessage("未查询到匹配类型")
@@ -358,4 +358,21 @@ func (srv RecycleService) GetCarbonType(ch string) entity.CarbonTransactionType 
 	default:
 		return entity.CARBON_RECYCLING
 	}
+}
+
+func (srv RecycleService) interface2float(data interface{}) float64 {
+	var val float64
+	switch data.(type) {
+	case int:
+		val = float64(data.(int))
+	case float64:
+		val = data.(float64)
+	case string:
+		float, err := strconv.ParseFloat(data.(string), 64)
+		if err != nil {
+			return 0
+		}
+		val = float
+	}
+	return val
 }
