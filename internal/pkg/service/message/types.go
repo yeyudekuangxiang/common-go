@@ -5,6 +5,22 @@ import (
 	"time"
 )
 
+const (
+	MsgTypeNone    = iota
+	MsgTypeLike    //点赞
+	MsgTypeComment //评论||回复
+	MsgTypeSystem  //系统消息
+)
+
+const (
+	MsgTurnTypeNone           = iota
+	MsgTurnTypeArticle        //跳转文章
+	MsgTurnTypeArticleComment //跳转文章评论
+	MsgTurnTypeOrder          //跳转订单
+	MsgTurnTypeGoods          //跳转商品
+	MsgTurnTypeGoodsComment   //跳转商品评论
+)
+
 type SendWebMessage struct {
 	SendId       int64  `json:"sendId"`
 	RecId        int64  `json:"recId"`
@@ -50,9 +66,9 @@ type GetWebMessageCount struct {
 }
 
 type GetWebMessageCountResp struct {
-	Total            int64 `json:"total"`
-	ExchangeMsgTotal int64 `json:"exchangeMsgTotal"`
-	SystemMsgTotal   int64 `json:"systemMsgTotal"`
+	Total               int64 `json:"total"`
+	InteractiveMsgTotal int64 `json:"exchangeMsgTotal"`
+	SystemMsgTotal      int64 `json:"systemMsgTotal"`
 }
 
 type GetMessageTemplate struct {
@@ -62,4 +78,10 @@ type GetMessageTemplate struct {
 	TempContent string    `json:"tempContent"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
+}
+
+type jsonObj struct {
+	Title     string `json:"title"`
+	Message   string `json:"message"`
+	DelReason string `json:"delReason"`
 }
