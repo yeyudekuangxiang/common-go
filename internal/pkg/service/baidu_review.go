@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
@@ -37,10 +38,10 @@ func DefaultReviewService() *ReviewService {
 func (srv ReviewService) ImageReview(param baidu.ImageReviewParam) error {
 	review, err := srv.reviewClient.ImageReview(param)
 	if err != nil {
-		return errno.ErrCheckErr.WithMessage("网络错误，请稍后重试")
+		return errno.ErrCheckErr.WithMessage(fmt.Sprintf("网络错误: %s", err.Error()))
 	}
 	if review.ErrorMsg != "" {
-		return errno.ErrCheckErr.WithMessage("系统错误，请稍后重试")
+		return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", review.ErrorMsg))
 	}
 	if review.ConclusionType == 1 {
 		return nil

@@ -508,7 +508,7 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 	if form.MediaUrl != "" {
-		err := service.DefaultReviewService().ImageReview(baidu.ImageReviewParam{ImageUrl: form.MediaUrl})
+		err := service.DefaultReviewService().ImageReview(baidu.ImageReviewParam{ImgUrl: form.MediaUrl})
 		if err != nil {
 			app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)

@@ -15,12 +15,8 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/oss"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/validator"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"os"
@@ -597,39 +593,6 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
 	topicModel := &entity.Topic{}
 
-	//title审核
-	err := validator.CheckMsgWithOpenId(openid, title)
-	if err != nil {
-		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
-	}
-
-	// 文本内容审核
-	if content != "" {
-		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发帖-文本内容审核"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-			return topicModel, errno.ErrCommon.WithMessage(err.Error())
-		}
-	}
-
-	// 图片内容审核
-	if len(images) > 1 {
-		reviewSrv := service.DefaultReviewService()
-		for i, imgUrl := range images {
-			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImageUrl: imgUrl}); err != nil {
-				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-				zhuGeAttr := make(map[string]interface{}, 0)
-				zhuGeAttr["场景"] = "发帖-图片内容审核"
-				zhuGeAttr["失败原因"] = err.Error()
-				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-				return topicModel, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
-			}
-		}
-	}
-
 	//处理images
 	imageStr := strings.Join(images, ",")
 
@@ -669,7 +632,7 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid string, topicId int64, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
+func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topicId int64, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
 
 	//查询记录是否存在
 	topicModel := srv.topicModel.FindById(topicId)
@@ -679,31 +642,6 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	}
 	if topicModel.UserId != userId {
 		return topicModel, errno.ErrCommon.WithMessage("无权限修改")
-	}
-	if content != "" {
-		//检查内容
-		if err := validator.CheckMsgWithOpenId(openid, content); err != nil {
-			app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "更新帖子"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-			return topicModel, errno.ErrCommon.WithMessage(err.Error())
-		}
-	}
-
-	if len(images) > 1 {
-		reviewSrv := service.DefaultReviewService()
-		for i, imgUrl := range images {
-			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImageUrl: imgUrl}); err != nil {
-				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-				zhuGeAttr := make(map[string]interface{}, 0)
-				zhuGeAttr["场景"] = "发帖-图片内容审核"
-				zhuGeAttr["失败原因"] = err.Error()
-				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openid, zhuGeAttr)
-				return topicModel, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
-			}
-		}
 	}
 
 	//处理images

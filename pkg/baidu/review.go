@@ -18,8 +18,8 @@ type ReviewClient struct {
 
 // ImageReviewParam 入参
 type ImageReviewParam struct {
-	Image    string `json:"image,omitempty"`
-	ImageUrl string `json:"imageUrl,omitempty"`
+	Image  string `json:"image,omitempty"`
+	ImgUrl string `json:"imgUrl,omitempty"`
 }
 
 // ReviewResp 出参
