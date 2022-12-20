@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestKind(t *testing.T) {
@@ -17,7 +18,7 @@ func TestKind(t *testing.T) {
 }
 
 func TestRune(t *testing.T) {
-	if forName, ok := recyclePointForName[5]; ok {
+	if forName, ok := recyclePointOfName[5]; ok {
 		v := reflect.ValueOf(forName)
 		if v.Kind() == reflect.Map {
 			it := v.MapRange()
@@ -28,4 +29,11 @@ func TestRune(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestMonth(t *testing.T) {
+	month := time.Now().Format("01")
+	days := time.Now().AddDate(0, 1, -time.Now().Day()).Day()
+	fmt.Println(month)
+	fmt.Println(days)
 }

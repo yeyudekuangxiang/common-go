@@ -30,6 +30,10 @@ type redisKey struct {
 	MessageLimitPlatformShow string
 	TopicRank                string
 	YZM2B                    string
+	GitlabHook               string
+	PointDayLimit            string
+	PointMonthLimit          string
+	NumberLimit              string
 }
 
 var RedisKey = redisKey{
@@ -62,4 +66,8 @@ var RedisKey = redisKey{
 	MessageLimitPlatformShow: "mp2c:message_limit_platform_show:%s",  //订阅消息每天弹出限制 平台普通
 	MessageLimitTopicShow:    "mp2c:message_limit_topic_show:%s",     //订阅消息每天弹出限制 帖子
 	TopicRank:                "mp2c:topic:rank",
+	GitlabHook:               "mp2c:gitlab:hook:",
+	PointDayLimit:            "mp2c:point_limit:day:",
+	PointMonthLimit:          "mp2c:point_limit:month:",
+	NumberLimit:              "mp2c:point_limit:number:",
 }
