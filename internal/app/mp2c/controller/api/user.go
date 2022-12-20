@@ -242,6 +242,13 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		}
 	}
 
+	if form.Avatar != "" {
+		err := service.DefaultReviewService().ImageReview(baidu.ImageReviewParam{ImageUrl: form.Avatar})
+		if err != nil {
+			return nil, errno.ErrCommon.WithMessage("头像审核未通过")
+		}
+	}
+
 	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,

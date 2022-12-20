@@ -18,8 +18,8 @@ type ReviewClient struct {
 
 // ImageReviewParam 入参
 type ImageReviewParam struct {
-	Image    string `json:"image"`
-	ImageUrl string `json:"imageUrl"`
+	Image    string `json:"image,omitempty"`
+	ImageUrl string `json:"imageUrl,omitempty"`
 }
 
 // ReviewResp 出参
@@ -47,10 +47,36 @@ func (l *ReviewClient) ImageReview(param ImageReviewParam) (ReviewResp, error) {
 
 	u := fmt.Sprintf("%s?access_token=%s", imageReviewUrl, token)
 
-	body, err := httputil.PostMapFrom(u, map[string]string{
-		"imgUrl": param.ImageUrl,
-		"image":  param.Image,
-	})
+	b, _ := json.Marshal(&param)
+	var m map[string]string
+	_ = json.Unmarshal(b, &m)
+
+	body, err := httputil.PostMapFrom(u, m)
+
+	if err != nil {
+		logx.Errorf("image review err: %s", err.Error())
+		return resp, err
+	}
+
+	if err = json.Unmarshal(body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+type TextReviewParam struct {
+	Text string `json:"text"`
+}
+
+// TextReview 文字审核
+func (l *ReviewClient) TextReview(param TextReviewParam) (ReviewResp, error) {
+	resp := ReviewResp{}
+	token, _ := l.AccessToken.GetToken()
+
+	u := fmt.Sprintf("%s?access_token=%s", textReviewUrl, token)
+
+	b, _ := json.Marshal(&param)
+	body, err := httputil.PostJson(u, b)
 
 	if err != nil {
 		logx.Errorf("image review err: %s", err.Error())

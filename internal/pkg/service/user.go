@@ -20,7 +20,6 @@ import (
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
-	"mio/internal/pkg/util/validator"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
@@ -652,13 +651,6 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
-	}
-
-	if param.Avatar != "" {
-		err := validator.CheckMediaWithOpenId(user.OpenId, param.Avatar)
-		if err != nil {
-			return errno.ErrCommon.WithMessage(err.Error())
-		}
 	}
 
 	if param.PhoneNumber != nil {
