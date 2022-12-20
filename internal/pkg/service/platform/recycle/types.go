@@ -33,7 +33,7 @@ type oolaSignParams struct {
 	//Sign                string `json:"sign" form:"sign" binding:"required"`                     //加密串
 }
 
-var recyclePointForName = map[int]interface{}{
+var recyclePointOfName = map[int]interface{}{
 	1: 21.0, //1000g : 21 积分
 	2: 6.0,
 	3: map[string]float64{
@@ -46,9 +46,9 @@ var recyclePointForName = map[int]interface{}{
 
 	4: map[string]float64{
 		"默认":  69.0,
-		"电视":  69.0,
+		"电视":  205,
 		"冰箱":  384.0,
-		"空调":  205.0,
+		"空调":  69.0,
 		"洗衣机": 690.0,
 	},
 	5: map[string]float64{
@@ -57,23 +57,23 @@ var recyclePointForName = map[int]interface{}{
 		"桌椅":   104.88,
 		"健身器材": 376.28,
 		"床":    692.3,
-		"沙发":   1863,
-		"茶几":   230,
+		"沙发":   230,
+		"茶几":   1863,
 		"床垫":   532.8,
-		"综合式":  300, //柜子
-		"架":    300,
-		"台":    22800, //桌椅
-		"机":    8180,
-		"车":    8180,
+		"综合式":  13.8, //柜子
+		"架":    13.8,
+		"台":    104.88, //桌椅
+		"机":    376.28,
+		"车":    376.28,
 	},
 	6:   1000.0,
 	7:   10.0,
 	100: 100.0,
 }
 
-var recycleCo2ForName = map[int]interface{}{
+var recycleCo2OfName = map[int]interface{}{
 	1: 4500.0, //1000g : 4500g
-	2: 140.0,
+	2: 2709,
 	3: map[string]float64{
 		"默认":  25000,
 		"手机":  25000,
@@ -83,9 +83,9 @@ var recycleCo2ForName = map[int]interface{}{
 	},
 	4: map[string]float64{
 		"默认":  15000,
-		"电视":  15000,
+		"电视":  45000,
 		"冰箱":  83000,
-		"空调":  45000,
+		"空调":  15000,
 		"洗衣机": 150000,
 	},
 	5: map[string]float64{
@@ -97,8 +97,24 @@ var recycleCo2ForName = map[int]interface{}{
 		"沙发":   100000,
 		"茶几":   810000,
 		"床垫":   236000,
+		"综合式":  300, //柜子
+		"架":    300,
+		"台":    22800, //桌椅
+		"机":    8180,
+		"车":    8180,
 	},
 	6:   0.0,
 	7:   2420.0,
 	100: 8966.8,
+}
+
+var recycleMaxPoint = map[int]int{
+	1:   2709, //1000g : 21 积分
+	2:   322,
+	3:   1911,
+	4:   920,
+	5:   1863,
+	6:   1000,
+	7:   969,
+	100: 7500,
 }

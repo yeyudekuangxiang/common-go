@@ -3,6 +3,7 @@ package open
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -334,12 +335,12 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//校验重复订单
 	RecycleService := recycle.NewRecycleService(ctx)
-	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
-		return nil, errno.ErrExisting.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
-	}
+	//if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
+	//	return nil, errno.ErrExisting.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
+	//}
 
 	//每日次数限制
-	keyPrefix := fmt.Sprintf("periodLimit:sendPoint:recycle:%s:", form.Ch)
+	keyPrefix := fmt.Sprintf("%s:%s:", config.RedisKey.NumberLimit, form.Ch)
 	PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), scene.Override, app.Redis, keyPrefix, limit.PeriodAlign())
 	resNumber, err := PeriodLimit.TakeCtx(ctx.Context, form.MemberId)
 
@@ -357,12 +358,32 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	currPoint, _ := RecycleService.GetPointV2(form.Category, form.Number, form.Name) //本次可得积分
 	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number, form.Name)     //本次可得减碳量
 
-	//每日分数上限
-	keyPrefix = fmt.Sprintf("quantityLimit:sendPoint:recycle:%s:", form.Ch)
-	QuantityLimit := limit.NewQuantityLimit(int(time.Hour.Seconds()*24), scene.PointLimit, app.Redis, keyPrefix, limit.QuantityAlign())
-	current, err := QuantityLimit.TakeCtx(ctx.Context, form.MemberId, int(currPoint))
+	//每日分数上限 每月分数上限
+	maxPoint, err := RecycleService.GetMaxPoint(form.Category)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+	dayPoint := maxPoint
+	if form.Category == "100" {
+		dayPoint = scene.PointLimit
+	}
+	keyPrefix = fmt.Sprintf("%s:%s:", config.RedisKey.PointDayLimit, form.Ch)
+	dayLimit := limit.NewQuantityLimit(int(time.Hour.Seconds()*24), dayPoint, app.Redis, keyPrefix, limit.QuantityAlign())
+	current, err := dayLimit.TakeCtx(ctx.Context, form.MemberId, int(currPoint))
 	if err != nil {
 		return nil, errno.ErrInternalServer
+	}
+
+	keyPrefix = fmt.Sprintf("%s:%s:", config.RedisKey.PointMonthLimit, form.Ch)
+	n := time.Now().AddDate(0, 1, -time.Now().Day()).Day()
+	monthLimit := limit.NewQuantityLimit(int(time.Hour.Seconds()*24)*n, maxPoint, app.Redis, keyPrefix, limit.QuantityAlign())
+	monthPoint, err := monthLimit.TakeCtx(ctx.Context, form.MemberId, int(currPoint))
+	if err != nil {
+		return nil, err
+	}
+
+	if monthPoint == 0 {
+		current = 0
 	}
 
 	//加积分
@@ -370,7 +391,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         pt,
-		ChangePoint:  int64(current),
+		ChangePoint:  current,
 		BizId:        util.UUID(),
 		AdditionInfo: fmt.Sprint(params),
 		Note:         scene.Ch + "#" + form.OrderNo,
