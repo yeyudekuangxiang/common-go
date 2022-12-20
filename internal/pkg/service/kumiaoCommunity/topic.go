@@ -15,10 +15,12 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"os"
@@ -615,8 +617,9 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 
 	// 图片内容审核
 	if len(images) > 1 {
+		reviewSrv := service.DefaultReviewService()
 		for i, imgUrl := range images {
-			if err := validator.CheckMediaWithOpenId(openid, imgUrl); err != nil {
+			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImageUrl: imgUrl}); err != nil {
 				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
 				zhuGeAttr := make(map[string]interface{}, 0)
 				zhuGeAttr["场景"] = "发帖-图片内容审核"
@@ -690,8 +693,9 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName, openid st
 	}
 
 	if len(images) > 1 {
+		reviewSrv := service.DefaultReviewService()
 		for i, imgUrl := range images {
-			if err := validator.CheckMediaWithOpenId(openid, imgUrl); err != nil {
+			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImageUrl: imgUrl}); err != nil {
 				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
 				zhuGeAttr := make(map[string]interface{}, 0)
 				zhuGeAttr["场景"] = "发帖-图片内容审核"
