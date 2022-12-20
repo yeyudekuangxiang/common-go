@@ -299,11 +299,15 @@ func (srv RecycleService) GetPointV2(tp, number, name string) (int64, error) {
 			for it.Next() {
 				if strings.ContainsAny(it.Key().String(), name) {
 					floatP = it.Value().Float()
+					break
 				}
 			}
-			floatP = v.MapIndex(reflect.ValueOf("默认")).Float()
+			if floatP == 0 {
+				floatP = v.MapIndex(reflect.ValueOf("默认")).Float()
+			}
+		} else {
+			floatP = srv.interface2float(d)
 		}
-		floatP = srv.interface2float(d)
 	}
 	return decimal.NewFromFloat(floatP).Mul(decimal.NewFromFloat(num)).IntPart(), nil
 }
@@ -324,11 +328,15 @@ func (srv RecycleService) GetCo2V2(tp, number, name string) (float64, error) {
 			for it.Next() {
 				if strings.ContainsAny(it.Key().String(), name) {
 					co2 = it.Value().Float()
+					break
 				}
 			}
-			co2 = v.MapIndex(reflect.ValueOf("默认")).Float()
+			if co2 == 0 {
+				co2 = v.MapIndex(reflect.ValueOf("默认")).Float()
+			}
+		} else {
+			co2 = srv.interface2float(d)
 		}
-		co2 = srv.interface2float(d)
 	}
 	co2, _ = decimal.NewFromFloat(co2).Mul(decimal.NewFromFloat(num)).Float64()
 	return co2, errno.ErrCommon.WithMessage("未查询到匹配类型")
