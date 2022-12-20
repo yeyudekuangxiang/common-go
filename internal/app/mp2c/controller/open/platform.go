@@ -20,6 +20,7 @@ import (
 	"mio/internal/pkg/util/apiutil"
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/internal/pkg/util/validator"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strconv"
 	"strings"
@@ -507,7 +508,7 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(c)
 	if form.MediaUrl != "" {
-		err := validator.CheckMediaWithOpenId(user.OpenId, form.MediaUrl)
+		err := service.DefaultReviewService().ImageReview(baidu.ImageReviewParam{ImgUrl: form.MediaUrl})
 		if err != nil {
 			app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)

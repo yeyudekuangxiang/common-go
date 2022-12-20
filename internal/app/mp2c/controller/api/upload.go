@@ -1,11 +1,14 @@
 package api
 
 import (
+	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"net/http"
 	"path"
@@ -138,7 +141,6 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 	if fileHeader.Size > 5*1024*1024 {
 		return nil, errno.ErrCommon.WithMessage("文件大小不能超过5M")
 	}
-
 	fileExt := path.Ext(fileHeader.Filename)
 	if fileExt != ".png" && fileExt != ".jpg" && fileExt != ".jpeg" {
 		return nil, errno.ErrCommon.WithMessage("仅支持png、jpg格式的图片")
@@ -149,6 +151,16 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	defer file.Close()
+
+	reviewSrv := service.DefaultReviewService()
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	if err = reviewSrv.ImageReview(baidu.ImageReviewParam{Image: base64.StdEncoding.EncodeToString(data)}); err != nil {
+		return nil, err
+	}
+
 	user := apiutil.GetAuthUser(ctx)
 	imgUrl, err := service.DefaultUploadService.UploadImage(user.OpenId, file, fileHeader.Filename, uploadScene.OssDir)
 	return gin.H{

@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -11,8 +12,11 @@ import (
 	"mio/internal/pkg/service/kumiaoCommunity"
 	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/validator"
+	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strconv"
 )
@@ -244,6 +248,39 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	//审核
+	//title审核
+	err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
+	}
+
+	// 文本内容审核
+	if form.Content != "" {
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "发帖-文本内容审核"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+
+	// 图片内容审核
+	if len(form.Images) > 1 {
+		reviewSrv := service.DefaultReviewService()
+		for i, imgUrl := range form.Images {
+			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+				zhuGeAttr := make(map[string]interface{}, 0)
+				zhuGeAttr["场景"] = "发帖-图片内容审核"
+				zhuGeAttr["失败原因"] = err.Error()
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+				return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+			}
+		}
+	}
 	//创建帖子
 	topic, err := kumiaoCommunity.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
@@ -266,9 +303,34 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	//审核
+	if form.Content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+			app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "更新帖子"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
 
+	if len(form.Images) > 1 {
+		reviewSrv := service.DefaultReviewService()
+		for i, imgUrl := range form.Images {
+			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+				zhuGeAttr := make(map[string]interface{}, 0)
+				zhuGeAttr["场景"] = "发帖-图片内容审核"
+				zhuGeAttr["失败原因"] = err.Error()
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+				return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+			}
+		}
+	}
 	//更新帖子
-	topic, err := kumiaoCommunity.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	topic, err := kumiaoCommunity.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, form.ID, form.Title, form.Content, form.TagIds, form.Images)
 	if err != nil {
 		return nil, err
 	}
