@@ -33,7 +33,7 @@ type oolaSignParams struct {
 	//Sign                string `json:"sign" form:"sign" binding:"required"`                     //加密串
 }
 
-var recyclePointForName = map[int]interface{}{
+var recyclePointOfName = map[int]interface{}{
 	1: 21.0, //1000g : 21 积分
 	2: 6.0,
 	3: map[string]float64{
@@ -71,9 +71,9 @@ var recyclePointForName = map[int]interface{}{
 	100: 100.0,
 }
 
-var recycleCo2ForName = map[int]interface{}{
+var recycleCo2OfName = map[int]interface{}{
 	1: 4500.0, //1000g : 4500g
-	2: 140.0,
+	2: 2709,
 	3: map[string]float64{
 		"默认":  25000,
 		"手机":  25000,
@@ -106,4 +106,15 @@ var recycleCo2ForName = map[int]interface{}{
 	6:   0.0,
 	7:   2420.0,
 	100: 8966.8,
+}
+
+var recycleMaxPoint = map[int]int{
+	1:   2709, //1000g : 21 积分
+	2:   322,
+	3:   1911,
+	4:   920,
+	5:   1863,
+	6:   1000,
+	7:   969,
+	100: 7500,
 }
