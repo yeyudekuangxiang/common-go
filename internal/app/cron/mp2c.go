@@ -29,4 +29,9 @@ func mp2cCron() {
 		service.SendMessageToSignUser()
 	})
 
+	//打卡挑战提醒
+	AddFunc("18 * * ?", func() {
+		service := messageSrv.MessageService{}
+		service.SendMessageToCarbonPk()
+	})
 }

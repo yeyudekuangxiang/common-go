@@ -2,7 +2,6 @@ package message
 
 import (
 	contextRedis "context"
-	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/request"
@@ -176,7 +175,7 @@ func (srv MessageService) SendMessageToSignUser() {
 
 func (srv MessageService) SendMessageToCarbonPk() {
 	if !util.DefaultLock.Lock("sendMessageToCarbonPk", time.Minute*5) {
-		return
+		//return
 	}
 	defer util.DefaultLock.UnLock("sendMessageToCarbonPk")
 	redisKey := config.RedisKey.CarbonPkRemindUser
@@ -190,44 +189,41 @@ func (srv MessageService) SendMessageToCarbonPk() {
 	}
 
 	for s, _ := range list.Val() {
-		if b, err := json.Marshal(s); err == nil {
+		uid, err := strconv.ParseInt(s, 10, 64)
+		getUserById, err := app.RpcService.UserRpcSrv.FindUserByID(context.Background(), &user.FindUserByIDReq{
+			UserId: uid,
+		})
+		if err != nil {
+			return
+		}
+		if !getUserById.Exist {
+			continue
+		}
+		days, err := app.RpcService.CarbonPkRpcSrv.TotalCarbonPkDays(context.Background(), &carbonpk.TotalCarbonPkDaysReq{
+			UserId: uid,
+		})
+		if err != nil {
+			continue
+		}
+		template.Date = strconv.FormatInt(days.Total, 10) + "天"
 
-			uid, err := strconv.ParseInt(string(b), 10, 64)
-			getUserById, err := app.RpcService.UserRpcSrv.FindUserByID(context.Background(), &user.FindUserByIDReq{
-				UserId: uid,
+		openid := getUserById.UserInfo.Openid
+		var ret *request.CommonError
+		err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+			ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
+				ToUser:           openid,
+				TemplateID:       template.TemplateId(),
+				Page:             "", //页面跳转
+				MiniprogramState: subscribemessage.MiniprogramStateDeveloper,
+				Data:             template.ToData(),
 			})
 			if err != nil {
-				return
+				return false, err
 			}
-			if !getUserById.Exist {
-				continue
-			}
-			days, err := app.RpcService.CarbonPkRpcSrv.TotalCarbonPkDays(context.Background(), &carbonpk.TotalCarbonPkDaysReq{
-				UserId: uid,
-			})
-			if err != nil {
-				continue
-			}
-			template.Date = strconv.FormatInt(days.Total, 10) + "天"
-
-			openid := getUserById.UserInfo.Openid
-			var ret *request.CommonError
-			err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
-				ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
-					ToUser:           openid,
-					TemplateID:       template.TemplateId(),
-					Page:             "", //页面跳转
-					MiniprogramState: subscribemessage.MiniprogramStateFormal,
-					Data:             template.ToData(),
-				})
-				if err != nil {
-					return false, err
-				}
-				return app.Weapp.IsExpireAccessToken(ret.ErrCode)
-			}, 1)
-			if err != nil {
-				app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
-			}
+			return app.Weapp.IsExpireAccessToken(ret.ErrCode)
+		}, 1)
+		if err != nil {
+			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
 		}
 	}
 }
