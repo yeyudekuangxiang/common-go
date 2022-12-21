@@ -13,6 +13,7 @@ var Config = app{
 	DuiBa:            duiBaSetting{},
 	OSS:              ossSetting{},
 	BaiDu:            baiDuSetting{},
+	BaiDuReview:      baiDuReviewSetting{},
 	Java:             javaConfig{},
 	Zhuge:            zhugeConfig{},
 	AMQP:             amqpSetting{},
@@ -42,14 +43,15 @@ type app struct {
 	OSS              ossSetting              `ini:"oss"`
 	AMQP             amqpSetting             `ini:"amqp"`
 	BaiDu            baiDuSetting            `ini:"baidu"`
+	BaiDuReview      baiDuReviewSetting      `ini:"baiduReview"`
 	Java             javaConfig              `ini:"java"`
 	Zhuge            zhugeConfig             `ini:"zhuge"`
 	CouponRpc        rpcSetting              `ini:"couponRpc"`
 	ActivityZyh      activityZyh             `ini:"activityZyh"`
 	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
 	TokenCenterRpc   rpcSetting              `ini:"tokenCenterRpc"`
-	PointRpc         rpcSetting              `ini:"pointRpc"`
 	ActivityRpc      rpcSetting              `ini:"activityRpc"`
+	PointRpc         rpcSetting              `ini:"pointRpc"`
 	Sms              sms                     `ini:"sms"`
 	SmsMarket        smsMarket               `ini:"smsMarket"`
 	Prometheus       promSetting             `ini:"prometheus"`
@@ -127,6 +129,12 @@ type baiDuSetting struct {
 	AppKey    string
 	AppSecret string
 }
+
+type baiDuReviewSetting struct {
+	AppKey    string
+	AppSecret string
+}
+
 type baiDuImageSearchSetting struct {
 	AppKey    string
 	AppSecret string
