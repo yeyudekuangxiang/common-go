@@ -6,11 +6,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/request"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/user"
+	"golang.org/x/net/context"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+
 	"strconv"
 	"time"
 )
@@ -93,6 +97,10 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitPlatformShow, time.Now().Format("20060102"))
 		srv.ExtensionSignTime(openid)
 		break
+	case "carbonpk":
+		templateIds = append(templateIds, config.MessageTemplateIds.PunchClockRemind)
+		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitCarbonPkShow, time.Now().Format("20060102"))
+		break
 	default:
 		break
 	}
@@ -163,4 +171,59 @@ func (srv MessageService) SendMessageToSignUser() {
 		}
 	}
 	app.Logger.Infof("签到消息发送，总条数%d,成功%d,失败%d,拒绝%d", len(list), successCount, failCount, refuseCount)
+}
+
+func (srv MessageService) SendMessageToCarbonPk() {
+	if !util.DefaultLock.Lock("sendMessageToCarbonPk", time.Minute*5) {
+		//return
+	}
+	defer util.DefaultLock.UnLock("sendMessageToCarbonPk")
+	redisKey := config.RedisKey.CarbonPkRemindUser
+	list := app.Redis.SMembersMap(contextRedis.Background(), redisKey)
+	template := MiniClockRemindTemplate{
+		Title:   "低碳打卡挑战赛",
+		Name:    "打卡提醒",
+		Date:    "",
+		Content: "快来完成今天打卡吧！惊喜离你越来越近了哦",
+		Tip:     "",
+	}
+
+	for s, _ := range list.Val() {
+		uid, err := strconv.ParseInt(s, 10, 64)
+		getUserById, err := app.RpcService.UserRpcSrv.FindUserByID(context.Background(), &user.FindUserByIDReq{
+			UserId: uid,
+		})
+		if err != nil {
+			return
+		}
+		if !getUserById.Exist {
+			continue
+		}
+		days, err := app.RpcService.CarbonPkRpcSrv.TotalCarbonPkDays(context.Background(), &carbonpk.TotalCarbonPkDaysReq{
+			UserId: uid,
+		})
+		if err != nil {
+			continue
+		}
+		template.Date = strconv.FormatInt(days.Total, 10) + "天"
+
+		openid := getUserById.UserInfo.Openid
+		var ret *request.CommonError
+		err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+			ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
+				ToUser:           openid,
+				TemplateID:       template.TemplateId(),
+				Page:             "", //页面跳转
+				MiniprogramState: subscribemessage.MiniprogramStateDeveloper,
+				Data:             template.ToData(),
+			})
+			if err != nil {
+				return false, err
+			}
+			return app.Weapp.IsExpireAccessToken(ret.ErrCode)
+		}, 1)
+		if err != nil {
+			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
+		}
+	}
 }

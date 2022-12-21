@@ -28,12 +28,14 @@ type redisKey struct {
 	MessageSignUser          string
 	MessageLimitTopicShow    string
 	MessageLimitPlatformShow string
+	MessageLimitCarbonPkShow string
 	TopicRank                string
 	YZM2B                    string
 	GitlabHook               string
 	PointDayLimit            string
 	PointMonthLimit          string
 	NumberLimit              string
+	CarbonPkRemindUser       string
 }
 
 var RedisKey = redisKey{
@@ -70,4 +72,6 @@ var RedisKey = redisKey{
 	PointDayLimit:            "mp2c:point_limit:day:",
 	PointMonthLimit:          "mp2c:point_limit:month:",
 	NumberLimit:              "mp2c:point_limit:number:",
+	MessageLimitCarbonPkShow: "mp2c:message_limit_carbon_pk_show:%s", //订阅消息每天弹出限制 打卡挑战
+	CarbonPkRemindUser: "mp2c:carbon_pk_remind_user", //提醒用户池
 }

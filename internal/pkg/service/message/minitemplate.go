@@ -50,6 +50,47 @@ func (m MiniChangePointTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 }
 
 /**
+详细内容
+打卡主题  {{thing1.DATA}}
+打卡名称   {{thing2.DATA}}
+已打卡天数  {{thing7.DATA}}
+提醒内容  {{thing5.DATA}}
+备注  {{thing4.DATA}}
+*/
+
+//MiniClockRemindTemplate 打卡提醒
+
+type MiniClockRemindTemplate struct {
+	Title   string `json:"title"`
+	Name    string `json:"name"`
+	Date    string `json:"date"`
+	Content string `json:"content"`
+	Tip     string `json:"tip"`
+}
+
+func (m MiniClockRemindTemplate) ToData() map[string]subscribemessage.SendValue {
+	return map[string]subscribemessage.SendValue{
+		"thing1": {Value: m.Title},
+		"thing2": {Value: m.Name},
+		"thing7": {Value: m.Date},
+		"thing5": {Value: m.Content},
+		"thing4": {Value: m.Tip},
+	}
+}
+
+func (m MiniClockRemindTemplate) TemplateId() string {
+	return config.MessageTemplateIds.PunchClockRemind
+}
+
+func (m MiniClockRemindTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.PunchClockRemind
+}
+
+func (m MiniClockRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+	return
+}
+
+/**
 "订单号 {{character_string1.DATA}}
 物流单号 {{character_string3.DATA}}
 物流公司 {{thing4.DATA}}
