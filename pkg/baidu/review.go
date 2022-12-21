@@ -41,25 +41,34 @@ type DataRes struct {
 }
 
 // ImageReview  图片审核
-func (l *ReviewClient) ImageReview(param ImageReviewParam) (ReviewResp, error) {
-	resp := ReviewResp{}
-	token, _ := l.AccessToken.GetToken()
+func (l *ReviewClient) ImageReview(param ImageReviewParam) (*ReviewResp, error) {
+	token, err := l.AccessToken.GetToken()
+
+	if err != nil {
+		return nil, err
+	}
 
 	u := fmt.Sprintf("%s?access_token=%s", imageReviewUrl, token)
 
-	b, _ := json.Marshal(&param)
+	b, err := json.Marshal(&param)
+	if err != nil {
+		return nil, err
+	}
+
 	var m map[string]string
-	_ = json.Unmarshal(b, &m)
+	err = json.Unmarshal(b, &m)
+	if err != nil {
+		return nil, err
+	}
 
 	body, err := httputil.PostMapFrom(u, m)
 
 	if err != nil {
-		logx.Errorf("image review err: %s", err.Error())
-		return resp, err
+		return nil, err
 	}
-
-	if err = json.Unmarshal(body, &resp); err != nil {
-		return resp, err
+	resp := &ReviewResp{}
+	if err = json.Unmarshal(body, resp); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
