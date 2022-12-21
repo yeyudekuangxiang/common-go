@@ -41,6 +41,7 @@ func (srv ReviewService) ImageReview(param baidu.ImageReviewParam) error {
 		return errno.ErrCheckErr.WithMessage(fmt.Sprintf("网络错误: %s", err.Error()))
 	}
 	if review.ErrorMsg != "" {
+		app.Logger.Infof("review err : image_review param is %s", param)
 		return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", review.ErrorMsg))
 	}
 	if review.ConclusionType == 1 {
