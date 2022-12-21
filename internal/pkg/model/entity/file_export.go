@@ -10,15 +10,17 @@ type FileExportType interface {
 }
 
 var (
-	FileExportTypePoint    FileExportType = enum.NewEnumIntStatus(1, "积分明细", "积分明细")
-	FileExportTypeCoupon   FileExportType = enum.NewEnumIntStatus(2, "优惠券码", "优惠券码")
-	FileExportTypeExchange FileExportType = enum.NewEnumIntStatus(3, "兑换券码", "兑换券码")
+	FileExportTypePoint        FileExportType = enum.NewEnumIntStatus(1, "积分明细", "积分明细")
+	FileExportTypeCoupon       FileExportType = enum.NewEnumIntStatus(2, "优惠券码", "优惠券码")
+	FileExportTypeExchange     FileExportType = enum.NewEnumIntStatus(3, "兑换券码", "兑换券码")
+	FileExportPointBatchFailed FileExportType = enum.NewEnumIntStatus(4, "批量积分失败明细", "批量积分失败明细")
 )
 
 var FileExportTypeList = enum.EnumIntStatusList{
 	FileExportTypePoint,
 	FileExportTypeCoupon,
 	FileExportTypeExchange,
+	FileExportPointBatchFailed,
 }
 
 type FileExportStatus int
