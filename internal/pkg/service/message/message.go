@@ -105,8 +105,10 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		break
 	}
 	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
-	if showCount >= 1 {
-		return []string{}
+	if config.Config.App.Env == "prod" {
+		if showCount >= 1 {
+			return []string{}
+		}
 	}
 	if redisTemplateKey != "" {
 		app.Redis.ZIncrBy(contextRedis.Background(), redisTemplateKey, 1, openid) //同一模板每人每天最多接收1条消息
