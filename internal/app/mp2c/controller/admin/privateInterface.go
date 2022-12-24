@@ -38,7 +38,7 @@ func (c PrivateController) SendCouponForStarCharge(ctx *gin.Context) (gin.H, err
 	}
 	mio := context.NewMioContext()
 	switch form.Ch {
-	case "starCharge":
+	case "lvmiao":
 		err = c.sendCouponForStarCharge(mio, user)
 		if err != nil {
 			return nil, err
