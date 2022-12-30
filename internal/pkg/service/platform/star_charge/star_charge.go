@@ -185,7 +185,7 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 	}
 
 	keyPrefix2 := "periodLimit:sendCoupon:star_charge:"
-	periodLimit2 := limit.NewPeriodLimit(int(endTime.Sub(time.Now()).Seconds()), 2, app.Redis, keyPrefix2, limit.PeriodAlign())
+	periodLimit2 := limit.NewPeriodLimit(int(endTime.Sub(time.Now()).Seconds()), 2, app.Redis, keyPrefix2)
 	res2, err := periodLimit2.TakeCtx(srv.ctx.Context, openId)
 	if err != nil {
 		return err
