@@ -46,9 +46,22 @@ func (ma *MovingAverage) Next(val int) float64 {
 }
 
 func Test_Demo(t *testing.T) {
-	ma := Constructor(3)
-	fmt.Println(ma.Next(1))  // 返回 1.0 = 1 / 1
-	fmt.Println(ma.Next(10)) // 返回 5.5 = (1 + 10) / 2
-	fmt.Println(ma.Next(3))  // 返回 4.66667 = (1 + 10 + 3) / 3
-	fmt.Println(ma.Next(5))  // 返回 6.0 = (10 + 3 + 5) / 3
+	//ma := Constructor(3)
+	//fmt.Println(ma.Next(1))  // 返回 1.0 = 1 / 1
+	//fmt.Println(ma.Next(10)) // 返回 5.5 = (1 + 10) / 2
+	//fmt.Println(ma.Next(3))  // 返回 4.66667 = (1 + 10 + 3) / 3
+	//fmt.Println(ma.Next(5))  // 返回 6.0 = (10 + 3 + 5) / 3
+	d := time.Now().AddDate(0, 1, -time.Now().Day()).Day()
+	fmt.Println(d) // 返回 6.0 = (10 + 3 + 5) / 3
+	d2 := time.Now().AddDate(0, 0, 0)
+
+	fmt.Println(d2)
+	fmt.Println(time.Now().Day())
+	now := time.Now()
+	firstDay := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+	fmt.Println(firstDay)
+	fmt.Println(now)
+	lastDay := firstDay.AddDate(0, 1, 0).Add(-time.Nanosecond)
+	fmt.Println(lastDay.Unix() - time.Now().Unix())
+	fmt.Println(lastDay.Day())
 }
