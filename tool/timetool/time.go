@@ -9,14 +9,16 @@ import (
 	"time"
 )
 
+var DefaultTimeZone = time.FixedZone("CST", 8*60*60)
+
 const TimeFormat = "2006-01-02 15:04:05"
 
 func ToTime(t time.Time) Time {
-	return Time{Time: t}
+	return Time{Time: t.In(DefaultTimeZone)}
 }
 
 func Now() Time {
-	return Time{Time: time.Now()}
+	return Time{Time: time.Now().In(DefaultTimeZone)}
 }
 
 type Time struct {
@@ -69,7 +71,7 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 	if string(data) == "\"\"" {
 		return nil
 	}
-	ti, err := time.Parse(TimeFormat, strings.Trim(string(data), "\""))
+	ti, err := time.ParseInLocation(TimeFormat, strings.Trim(string(data), "\""), DefaultTimeZone)
 	if err != nil {
 		return err
 	}
@@ -94,7 +96,7 @@ func (t *Time) Scan(value interface{}) error {
 	if !ok {
 		return errors.New("Time type error")
 	}
-	t.Time = ti
+	t.Time = ti.In(DefaultTimeZone)
 	return nil
 }
 func (t Time) Date() Date {
@@ -130,9 +132,9 @@ func (t Time) UnixPointer() *int64 {
 //Parse 将时间字符串按照layout解析成 Time 如果val为空字符串 则解析为空 Time
 func Parse(layout string, val string) (Time, error) {
 	if val == "" {
-		return Time{}, nil
+		return Time{time.Time{}.In(DefaultTimeZone)}, nil
 	}
-	t, err := time.Parse(layout, val)
+	t, err := time.ParseInLocation(layout, val, DefaultTimeZone)
 	return Time{
 		Time: t,
 	}, err
@@ -141,9 +143,9 @@ func Parse(layout string, val string) (Time, error) {
 //MustParse 将时间字符串按照layout解析成 Time 如果val为空字符串 则解析为空 Time 如果出现错误则抛出异常
 func MustParse(layout string, val string) Time {
 	if val == "" {
-		return Time{}
+		return Time{time.Time{}.In(DefaultTimeZone)}
 	}
-	t, err := time.Parse(layout, val)
+	t, err := time.ParseInLocation(layout, val, DefaultTimeZone)
 	if err != nil {
 		panic(err)
 	}
@@ -155,25 +157,25 @@ func MustParse(layout string, val string) Time {
 //UnixMilli 将毫秒时间戳 Time 时间戳小于或者等于0则解析为空 Time
 func UnixMilli(msec int64) Time {
 	if msec <= 0 {
-		return Time{}
+		return Time{time.Time{}.In(DefaultTimeZone)}
 	}
-	return Time{Time: time.UnixMilli(msec)}
+	return Time{Time: time.UnixMilli(msec).In(DefaultTimeZone)}
 }
 
 //ParseUnixMilli 将毫秒时间戳 Time 时间戳小于或者等于0则解析为空 Time
 func ParseUnixMilli(msec int64) Time {
 	if msec <= 0 {
-		return Time{}
+		return Time{time.Time{}.In(DefaultTimeZone)}
 	}
-	return Time{Time: time.UnixMilli(msec)}
+	return Time{Time: time.UnixMilli(msec).In(DefaultTimeZone)}
 }
 
 //ParsePointUnixMilli 将指针类型的毫秒时间戳转换成 Time
 func ParsePointUnixMilli(msec *int64) Time {
 	if msec == nil {
-		return Time{}
+		return Time{time.Time{}.In(DefaultTimeZone)}
 	}
 	return Time{
-		Time: time.UnixMilli(*msec),
+		Time: time.UnixMilli(*msec).In(DefaultTimeZone),
 	}
 }

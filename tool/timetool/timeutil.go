@@ -5,11 +5,11 @@ import (
 )
 
 func StartOfDay(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 func EndOfDay(t time.Time) time.Time {
 	t = t.AddDate(0, 0, 1)
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, -1, time.Local)
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, -1, t.Location())
 }
 func StartOfWeek(t time.Time) time.Time {
 	day := t.Weekday() - 1
@@ -24,7 +24,7 @@ func EndOfWeek(t time.Time) time.Time {
 }
 func StartOfMonth(t time.Time) time.Time {
 	y, m, _ := t.Date()
-	return time.Date(y, m, 1, 0, 0, 0, 0, time.Local)
+	return time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
 }
 func EndOfMonth(t time.Time) time.Time {
 	return StartOfMonth(t).AddDate(0, 1, 0).Add(-1)

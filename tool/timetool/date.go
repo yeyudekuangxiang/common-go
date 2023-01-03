@@ -13,10 +13,10 @@ const DateFormat = "2006-01-02"
 const FullDateFormat = "2006-01-02 15:04:05"
 
 func ToDate(t time.Time) Date {
-	return Date{Time: StartOfDay(t)}
+	return Date{Time: StartOfDay(t.In(DefaultTimeZone))}
 }
 func NowDate() Date {
-	return Date{Time: StartOfDay(time.Now())}
+	return Date{Time: StartOfDay(time.Now().In(DefaultTimeZone))}
 }
 
 type Date struct {
@@ -40,7 +40,7 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	ti, err := time.Parse(DateFormat, strings.Trim(string(data), "\""))
+	ti, err := time.ParseInLocation(DateFormat, strings.Trim(string(data), "\""), DefaultTimeZone)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (d *Date) Scan(value interface{}) error {
 	if !ok {
 		return errors.New("Date type error")
 	}
-	d.Time = t
+	d.Time = t.In(DefaultTimeZone)
 	return nil
 }
 func (d Date) StartOfWeek() Date {
