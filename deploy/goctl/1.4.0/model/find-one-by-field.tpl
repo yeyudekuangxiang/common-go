@@ -50,7 +50,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
     db,_:= initOptions(m.db.WithContext(ctx),&m.options,opts)
     err := db.Model(&resp).Where("{{.originalField}}", {{.lowerStartCamelField}}).First(&resp).Error
     if err==nil{
-        return &resp,false,nil
+        return &resp,true,nil
     }
     if err == gorm.ErrRecordNotFound {
         return nil,false,nil
