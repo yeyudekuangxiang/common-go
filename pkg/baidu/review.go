@@ -21,7 +21,7 @@ type ReviewClient struct {
 
 // ImageReviewParam 入参
 type ImageReviewParam struct {
-	//Image  string `json:"image,omitempty"`
+	Image  string `json:"image,omitempty"`
 	ImgUrl string `json:"imgUrl,omitempty"`
 }
 
@@ -52,17 +52,40 @@ func (l *ReviewClient) ImageReview(param ImageReviewParam) error {
 	}
 
 	u := fmt.Sprintf("%s?access_token=%s", imageReviewUrl, token)
+	var images []string
+	var tp int
+	if param.ImgUrl != "" {
+		tp = 1
+		images = strings.Split(strings.Trim(param.ImgUrl, ","), ",")
+	} else {
+		tp = 2
+		images = strings.Split(strings.Trim(param.Image, ","), ",")
+	}
+	if len(images) == 0 {
+		return nil
+	}
 
-	imageUrls := strings.Split(strings.Trim(param.ImgUrl, ","), ",")
-	for _, url := range imageUrls {
-		m := map[string]string{
-			"imgUrl": url,
+	var m map[string]string
+	for _, url := range images {
+
+		if tp == 1 {
+			m = map[string]string{
+				"imgUrl": url,
+			}
 		}
+
+		if tp == 2 {
+			m = map[string]string{
+				"image": url,
+			}
+		}
+
 		body, err := httputil.PostMapFrom(u, m)
 
 		if err != nil {
 			return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", err.Error()))
 		}
+
 		resp := &ReviewResp{}
 		if err = json.Unmarshal(body, resp); err != nil {
 			return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", err.Error()))
