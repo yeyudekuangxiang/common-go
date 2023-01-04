@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util/httputil"
+	"mio/pkg/errno"
+	"strings"
 )
 
 const (
@@ -18,7 +21,7 @@ type ReviewClient struct {
 
 // ImageReviewParam 入参
 type ImageReviewParam struct {
-	Image  string `json:"image,omitempty"`
+	//Image  string `json:"image,omitempty"`
 	ImgUrl string `json:"imgUrl,omitempty"`
 }
 
@@ -41,36 +44,45 @@ type DataRes struct {
 }
 
 // ImageReview  图片审核
-func (l *ReviewClient) ImageReview(param ImageReviewParam) (*ReviewResp, error) {
+func (l *ReviewClient) ImageReview(param ImageReviewParam) error {
 	token, err := l.AccessToken.GetToken()
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	u := fmt.Sprintf("%s?access_token=%s", imageReviewUrl, token)
 
-	b, err := json.Marshal(&param)
-	if err != nil {
-		return nil, err
+	imageUrls := strings.Split(strings.Trim(param.ImgUrl, ","), ",")
+	for _, url := range imageUrls {
+		m := map[string]string{
+			"imgUrl": url,
+		}
+		body, err := httputil.PostMapFrom(u, m)
+
+		if err != nil {
+			return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", err.Error()))
+		}
+		resp := &ReviewResp{}
+		if err = json.Unmarshal(body, resp); err != nil {
+			return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", err.Error()))
+		}
+
+		if resp.ErrorMsg != "" {
+			app.Logger.Infof("review err : image_review param is %s, resp is %v", param, resp)
+			return errno.ErrCheckErr.WithMessage(fmt.Sprintf("系统错误: %s", resp.ErrorMsg))
+		}
+
+		if resp.ConclusionType == 4 {
+			return errno.ErrCheckErr.WithMessage("审核失败")
+		}
+
+		if resp.ConclusionType != 1 {
+			return errno.ErrCheckErr.WithMessage(resp.Data[0].Msg)
+		}
 	}
 
-	var m map[string]string
-	err = json.Unmarshal(b, &m)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := httputil.PostMapFrom(u, m)
-
-	if err != nil {
-		return nil, err
-	}
-	resp := &ReviewResp{}
-	if err = json.Unmarshal(body, resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
+	return nil
 }
 
 type TextReviewParam struct {
