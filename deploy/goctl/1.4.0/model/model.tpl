@@ -111,7 +111,7 @@ var (
 )
 
 // init{{.upperStartCamelObject}}OrderBy
-func init{{.upperStartCamelObject}}OrderBy(db *gorm.DB, orderByList SystemAdminOrderByList) *gorm.DB {
+func init{{.upperStartCamelObject}}OrderBy(db *gorm.DB, orderByList {{.upperStartCamelObject}}OrderByList) *gorm.DB {
 	for _, item := range orderByList {
 		db = db.Order(item.OrderBy)
 	}
