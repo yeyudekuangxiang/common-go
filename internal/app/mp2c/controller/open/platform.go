@@ -250,15 +250,17 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
-	eventName := config.ZhuGeEventName.YTXOrder
-	if form.PlatformKey == "yitongxing" {
-		eventName = config.ZhuGeEventName.YTXOrder
-	}
+	if openId != "" {
+		eventName := config.ZhuGeEventName.YTXOrder
+		if form.PlatformKey == "yitongxing" {
+			eventName = config.ZhuGeEventName.YTXOrder
+		}
 
-	zhuGeAttr := make(map[string]interface{}, 0)
-	zhuGeAttr["用户openId"] = mobile
-	zhuGeAttr["用户mobile"] = openId
-	track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
+		zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["用户openId"] = mobile
+		zhuGeAttr["用户mobile"] = openId
+		track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
+	}
 
 	return gin.H{}, nil
 }
@@ -382,7 +384,6 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
-		OpenId:         sceneUser.OpenId,
 		Id:             id,
 		Status:         1,
 	})
