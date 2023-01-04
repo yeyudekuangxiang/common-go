@@ -61,6 +61,7 @@ const (
 	DuiBaActivityRecyclingPublicWelfareWeekActivity DuiBaActivityVipType = 3
 	DuiBaActivityInviteActivity                     DuiBaActivityVipType = 4
 	DuiBaActivityYtxLuckyDrawActivity               DuiBaActivityVipType = 5
+	DuiBaActivityCaronPkLuckyDrawActivity           DuiBaActivityVipType = 6
 )
 
 const (

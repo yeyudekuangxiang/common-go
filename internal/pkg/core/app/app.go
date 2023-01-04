@@ -6,9 +6,11 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/wagslane/go-rabbitmq"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpkclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/userclient"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"mio/pkg/wxapp"
@@ -40,6 +42,8 @@ var (
 )
 
 type RpcClient struct {
+	CarbonPkRpcSrv    carbonpkclient.Carbonpk
+	UserRpcSrv        userclient.User
 	CouponRpcSrv      couponclient.Coupon
 	TokenCenterRpcSrv tokencenterclient.TokenCenter
 	PointRpcSrv       pointclient.Point

@@ -18,6 +18,7 @@ import (
 	"mio/internal/pkg/queue/types/message/zhugemsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/common"
+	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/platform"
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
@@ -36,6 +37,26 @@ type PugcController struct {
 }
 
 func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
+
+	service := messageSrv.MessageService{}
+	service.SendMessageToCarbonPk()
+
+	return gin.H{}, nil /*
+		pointService := service.NewDuiBaActivityService(context.NewMioContext())
+		activity, err := pointService.FindActivity("/etc/passwd")
+
+		log, err := app.RpcService.CarbonPkRpcSrv.DetailCarbonPkRewardLog(context.NewMioContext(), &carbonpk.DetailCarbonPkRewardReq{
+			RewardUrl: activity.ActivityUrl,
+			UserId:    1,
+		})
+		if err != nil {
+
+		}
+
+		if !log.Exist {
+
+		}*/
+
 	commonParams := make(map[string]interface{}, 0)
 	commonParams["mobile"] = 15797705451
 	sign := strings.ToUpper(platformUtil.GetSign(commonParams, "0tlrEVZtRE", "&"))

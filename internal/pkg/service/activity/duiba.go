@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
@@ -315,6 +316,19 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			return "", err
 		}
 		if !user.Exist {
+			return "", errno.ErrMisMatchCondition
+		}
+		break
+
+	case entity.DuiBaActivityCaronPkLuckyDrawActivity:
+		log, err := app.RpcService.CarbonPkRpcSrv.DetailCarbonPkRewardLog(mioContext.NewMioContext(), &carbonpk.DetailCarbonPkRewardReq{
+			RewardUrl: activity.ActivityUrl,
+			UserId:    userId,
+		})
+		if err != nil {
+			return "", errno.ErrMisMatchCondition
+		}
+		if !log.Exist {
 			return "", errno.ErrMisMatchCondition
 		}
 		break
