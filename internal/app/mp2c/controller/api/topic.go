@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/config"
@@ -250,39 +251,50 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	}
 	//审核
 	//title审核
-	err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
-	if err != nil {
-		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
-	}
+	//err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
+	//if err != nil {
+	//	return nil, errno.ErrCommon.WithMessage("标题审核未通过")
+	//}
+	//
+	//// 文本内容审核
+	//if form.Content != "" {
+	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+	//		app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+	//		zhuGeAttr := make(map[string]interface{}, 0)
+	//		zhuGeAttr["场景"] = "发帖-文本内容审核"
+	//		zhuGeAttr["失败原因"] = err.Error()
+	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+	//		return nil, errno.ErrCommon.WithMessage(err.Error())
+	//	}
+	//}
+	//
+	//// 图片内容审核
+	//if len(form.Images) > 1 {
+	//	reviewSrv := service.DefaultReviewService()
+	//	for i, imgUrl := range form.Images {
+	//		if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+	//			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+	//			zhuGeAttr := make(map[string]interface{}, 0)
+	//			zhuGeAttr["场景"] = "发帖-图片内容审核"
+	//			zhuGeAttr["失败原因"] = err.Error()
+	//			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+	//			return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+	//		}
+	//	}
+	//}
 
-	// 文本内容审核
-	if form.Content != "" {
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发帖-文本内容审核"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-			return nil, errno.ErrCommon.WithMessage(err.Error())
-		}
-	}
-
-	// 图片内容审核
-	if len(form.Images) > 1 {
-		reviewSrv := service.DefaultReviewService()
-		for i, imgUrl := range form.Images {
-			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
-				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-				zhuGeAttr := make(map[string]interface{}, 0)
-				zhuGeAttr["场景"] = "发帖-图片内容审核"
-				zhuGeAttr["失败原因"] = err.Error()
-				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-				return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
-			}
-		}
-	}
 	//创建帖子
-	topic, err := kumiaoCommunity.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
+	marshal, err := json.Marshal(form)
+	if err != nil {
+		return nil, err
+	}
+	var params kumiaoCommunity.CreateTopicParams
+	err = json.Unmarshal(marshal, &params)
+	if err != nil {
+		return nil, err
+	}
+
+	topic, err := kumiaoCommunity.DefaultTopicService.CreateTopic(user.ID, params)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +342,16 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		}
 	}
 	//更新帖子
-	topic, err := kumiaoCommunity.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	marshal, err := json.Marshal(form)
+	if err != nil {
+		return nil, err
+	}
+	var params kumiaoCommunity.UpdateTopicParams
+	err = json.Unmarshal(marshal, &params)
+	if err != nil {
+		return nil, err
+	}
+	topic, err := kumiaoCommunity.DefaultTopicService.UpdateTopic(user.ID, params)
 	if err != nil {
 		return nil, err
 	}

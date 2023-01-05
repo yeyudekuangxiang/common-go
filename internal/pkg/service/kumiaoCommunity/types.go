@@ -136,3 +136,30 @@ func (a APIComment) ApiComment() *APICommentResp {
 		IsAuthor:  a.IsAuthor,
 	}
 }
+
+type CreateTopicParams struct {
+	Title         string        `json:"title" `
+	Content       string        `json:"content"`
+	Images        []string      `json:"images" `
+	TagIds        []int64       `json:"tagIds"`
+	Type          int           `json:"type"`
+	TopicActivity TopicActivity `json:"topicActivity"`
+}
+
+type TopicActivity struct {
+	Address        string `json:"address" `
+	ActivityTagIds string `json:"activityTagIds"`
+	Remarks        string `json:"remarks"`
+	Qrcode         string `json:"qrcode"`
+	MeetingLink    string `json:"meetingLink"`
+	Contacts       string `json:"contacts"`
+	StartTime      int64  `json:"startTime"`
+	EndTime        int64  `json:"endTime"`
+	SignupDeadline int64  `json:"signupDeadline"`
+	ActivityType   int    `json:"activityType"`
+}
+
+type UpdateTopicParams struct {
+	ID int64 `json:"id"`
+	CreateTopicParams
+}

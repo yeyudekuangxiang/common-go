@@ -15,6 +15,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/kumiaoCommunity"
 	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -39,12 +40,14 @@ func NewTopicService(ctx *mioContext.MioContext) TopicService {
 }
 
 type TopicService struct {
-	ctx            *mioContext.MioContext
-	topicModel     repository.TopicModel
-	topicLikeModel repository.TopicLikeModel
-	tagModel       repository.TagModel
-	tokenServer    *wxoa.AccessTokenServer
-	userModel      repository.UserRepository
+	ctx              *mioContext.MioContext
+	topicModel       repository.TopicModel
+	topicLikeModel   repository.TopicLikeModel
+	tagModel         repository.TagModel
+	tokenServer      *wxoa.AccessTokenServer
+	userModel        repository.UserRepository
+	activityModel    kumiaoCommunity.CommunityActivitiesModel
+	activityTagModel kumiaoCommunity.CommunityActivitiesTagModel
 }
 
 //将 entity.Topic 列表填充为 TopicDetail 列表
@@ -590,38 +593,52 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
+func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*entity.Topic, error) {
 	topicModel := &entity.Topic{}
 
 	//处理images
-	imageStr := strings.Join(images, ",")
+	imageStr := strings.Join(params.Images, ",")
 
 	//topic
 	topicModel = &entity.Topic{
 		UserId:    userId,
-		Title:     title,
-		Content:   content,
+		Title:     params.Title,
+		Content:   params.Content,
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
-		Avatar:    avatarUrl,
-		Nickname:  nikeName,
+		Type:      params.Type,
 		CreatedAt: model.Time{Time: time.Now()},
 		UpdatedAt: model.Time{Time: time.Now()},
 	}
 
-	if len(tagIds) > 0 {
+	if len(params.TagIds) > 0 {
 		//tag
 		tagModel := make([]entity.Tag, 0)
-		for _, tagId := range tagIds {
+		for _, tagId := range params.TagIds {
 			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
 			})
 		}
 
-		tag := srv.tagModel.GetById(tagIds[0])
+		tag := srv.tagModel.GetById(params.TagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
+	}
+
+	if params.Type == 2 {
+		topicModel.Activity = entity.CommunityActivities{
+			Type:           params.TopicActivity.ActivityType,
+			Address:        params.TopicActivity.Address,
+			TagIds:         params.TopicActivity.ActivityTagIds,
+			Remarks:        params.TopicActivity.Remarks,
+			Qrcode:         params.TopicActivity.Qrcode,
+			MeetingLink:    params.TopicActivity.MeetingLink,
+			Contacts:       params.TopicActivity.Contacts,
+			StartTime:      model.Time{Time: time.Unix(params.TopicActivity.StartTime, 0)},
+			EndTime:        model.Time{Time: time.Unix(params.TopicActivity.EndTime, 0)},
+			SignupDeadline: model.Time{Time: time.Unix(params.TopicActivity.SignupDeadline, 0)},
+		}
 	}
 
 	if err := srv.topicModel.Save(topicModel); err != nil {
@@ -632,10 +649,10 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topicId int64, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
+func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*entity.Topic, error) {
 
 	//查询记录是否存在
-	topicModel := srv.topicModel.FindById(topicId)
+	topicModel := srv.topicModel.FindById(params.ID)
 
 	if topicModel.Id == 0 {
 		return topicModel, errno.ErrCommon.WithMessage("该帖子不存在")
@@ -645,27 +662,25 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, to
 	}
 
 	//处理images
-	imageStr := strings.Join(images, ",")
+	imageStr := strings.Join(params.Images, ",")
 
 	//更新帖子
-	topicModel.Title = title
-	topicModel.Avatar = avatarUrl
-	topicModel.Nickname = nikeName
+	topicModel.Title = params.Title
 	topicModel.ImageList = imageStr
-	topicModel.Content = content
+	topicModel.Content = params.Content
 
 	if topicModel.Status != 3 {
 		topicModel.Status = 1
 	}
 	//tag
-	if len(tagIds) > 0 {
+	if len(params.TagIds) > 0 {
 		tagModel := make([]entity.Tag, 0)
-		for _, tagId := range tagIds {
+		for _, tagId := range params.TagIds {
 			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
 			})
 		}
-		tag := srv.tagModel.GetById(tagIds[0])
+		tag := srv.tagModel.GetById(params.TagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
@@ -678,6 +693,21 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, to
 		err := app.DB.Model(&topicModel).Association("Tags").Clear()
 		if err != nil {
 			return topicModel, errno.ErrCommon.WithMessage("Tag更新失败")
+		}
+	}
+
+	if params.Type == 2 {
+		topicModel.Activity = entity.CommunityActivities{
+			Type:           params.TopicActivity.ActivityType,
+			Address:        params.TopicActivity.Address,
+			TagIds:         params.TopicActivity.ActivityTagIds,
+			Remarks:        params.TopicActivity.Remarks,
+			Qrcode:         params.TopicActivity.Qrcode,
+			MeetingLink:    params.TopicActivity.MeetingLink,
+			Contacts:       params.TopicActivity.Contacts,
+			StartTime:      model.Time{Time: time.Unix(params.TopicActivity.StartTime, 0)},
+			EndTime:        model.Time{Time: time.Unix(params.TopicActivity.EndTime, 0)},
+			SignupDeadline: model.Time{Time: time.Unix(params.TopicActivity.SignupDeadline, 0)},
 		}
 	}
 

@@ -164,10 +164,25 @@ type DuiBaNoLoginH5Form struct {
 }
 
 type CreateTopicForm struct {
-	Title   string   `json:"title" form:"title" alias:"标题" binding:"required,min=2,max=64"`
-	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
-	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
-	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"min=0,max=2"`
+	Title         string        `json:"title" form:"title" alias:"标题" binding:"required,min=2,max=64"`
+	Content       string        `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
+	Images        []string      `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
+	TagIds        []int64       `json:"tagIds" form:"tagIds" alias:"话题" binding:"min=0,max=2"`
+	Type          int           `json:"type" form:"type" alias:"类型" binding:"min=1"`
+	TopicActivity TopicActivity `json:"topicActivity"`
+}
+
+type TopicActivity struct {
+	Address        string `json:"address" form:"address"`
+	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds"`
+	Remarks        string `json:"remarks" form:"remarks"`
+	Qrcode         string `json:"qrcode" form:"qrcode"`
+	MeetingLink    string `json:"meetingLink" form:"meetingLink"`
+	Contacts       string `json:"contacts" form:"contacts"`
+	StartTime      int64  `json:"startTime" form:"startTime"`
+	EndTime        int64  `json:"endTime" form:"endTime"`
+	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline"`
+	ActivityType   int    `json:"activityType" form:"activityType"`
 }
 
 type UpdateTopicForm struct {
