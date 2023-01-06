@@ -43,7 +43,6 @@ func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, membe
 	sceneUser := srv.FindOne(repository.GetSceneUserOne{
 		PlatformKey:    scene.Ch,
 		PlatformUserId: memberId,
-		OpenId:         user.OpenId,
 	})
 
 	if sceneUser.ID != 0 {
