@@ -56,6 +56,7 @@ func (d defaultTopicModel) GetTopList() ([]*entity.Topic, error) {
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -94,6 +95,7 @@ func (d defaultTopicModel) GetTopicNotes(topicIds []int64) []*entity.Topic {
 	err := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Where("topic.id in ?", topicIds).
 		Where("topic.status = ?", entity.TopicStatusPublished).
 		Group("topic.id").
@@ -119,6 +121,7 @@ func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, i
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -153,6 +156,7 @@ func (d defaultTopicModel) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic,
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -210,6 +214,7 @@ func (d defaultTopicModel) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topi
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -263,6 +268,7 @@ func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
 	err := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Where("id = ?", topicId).
 		First(&resp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {

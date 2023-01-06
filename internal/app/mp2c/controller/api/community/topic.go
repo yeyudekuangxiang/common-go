@@ -1,6 +1,7 @@
-package api
+package community
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/config"
@@ -8,8 +9,9 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	community2 "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/kumiaoCommunity"
+	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
@@ -19,6 +21,7 @@ import (
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strconv"
+	"time"
 )
 
 var DefaultTopicController = TopicController{}
@@ -28,12 +31,12 @@ type TopicController struct {
 
 //List 获取文章列表
 func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
-	form := GetTopicPageListForm{}
+	form := GetTopicPageListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
-	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
+	list, total, err := community.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
 		Offset: form.Page,
 		Limit:  form.PageSize,
 	})
@@ -51,14 +54,14 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 }
 
 //func (ctr *TopicController) ListFlow(c *gin.Context) (gin.H, error) {
-//	form := GetTopicPageListForm{}
+//	form := GetTopicPageListRequest{}
 //	if err := apiutil.BindForm(c, &form); err != nil {
 //		return nil, err
 //	}
 //
 //	user := apiutil.GetAuthUser(c)
 //
-//	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
+//	list, total, err := community.DefaultTopicService.GetTopicDetailPageListByFlow(repository.GetTopicPageListBy{
 //		ID:         form.ID,
 //		TopicTagId: form.TopicTagId,
 //		Offset:     form.Offset(),
@@ -84,7 +87,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 
 //GetShareWeappQrCode 获取分享二维码
 func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
-	form := GetWeappQrCodeFrom{}
+	form := GetWeappQrCodeRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -104,14 +107,14 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 
 //ChangeTopicLike 点赞 / 取消点赞
 func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
-	form := ChangeTopicLikeForm{}
+	form := ChangeTopicLikeRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
 	user := apiutil.GetAuthUser(c)
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
+	topicLikeService := community.NewTopicLikeService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
 	resp, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
@@ -165,7 +168,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 //ListTopic 帖子列表+顶级评论+顶级评论下子评论3条
 func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
-	form := GetTopicPageListForm{}
+	form := GetTopicPageListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -184,14 +187,14 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		params.Offset = form.Page
 	}
 
-	list, total, err := kumiaoCommunity.DefaultTopicService.GetTopicList(params)
+	list, total, err := community.DefaultTopicService.GetTopicList(params)
 	if err != nil {
 		return nil, err
 	}
 	resList := make([]*entity.TopicItemRes, 0)
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
-	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
+	topicLikeService := community.NewTopicLikeService(ctx)
 	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
@@ -200,7 +203,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}
 	//收藏数据
 	collectionMap := make(map[int64]struct{}, 0)
-	collectionService := kumiaoCommunity.NewCollectionService(ctx)
+	collectionService := community.NewCollectionService(ctx)
 	collectionIds := collectionService.Collections(user.OpenId, 0, 0, 0)
 	for _, collectionId := range collectionIds {
 		collectionMap[collectionId] = struct{}{}
@@ -212,7 +215,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		ids = append(ids, item.Id)
 	}
 
-	rootCommentCount := kumiaoCommunity.DefaultTopicService.GetRootCommentCount(ids)
+	rootCommentCount := community.DefaultTopicService.GetRootCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
@@ -244,45 +247,56 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if user.Auth != 1 {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
-	form := CreateTopicForm{}
+	form := CreateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	//审核
 	//title审核
-	err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
-	if err != nil {
-		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
-	}
+	//err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
+	//if err != nil {
+	//	return nil, errno.ErrCommon.WithMessage("标题审核未通过")
+	//}
+	//
+	//// 文本内容审核
+	//if form.Content != "" {
+	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+	//		app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+	//		zhuGeAttr := make(map[string]interface{}, 0)
+	//		zhuGeAttr["场景"] = "发帖-文本内容审核"
+	//		zhuGeAttr["失败原因"] = err.Error()
+	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+	//		return nil, errno.ErrCommon.WithMessage(err.Error())
+	//	}
+	//}
+	//
+	//// 图片内容审核
+	//if len(form.Images) > 1 {
+	//	reviewSrv := service.DefaultReviewService()
+	//	for i, imgUrl := range form.Images {
+	//		if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+	//			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+	//			zhuGeAttr := make(map[string]interface{}, 0)
+	//			zhuGeAttr["场景"] = "发帖-图片内容审核"
+	//			zhuGeAttr["失败原因"] = err.Error()
+	//			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+	//			return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+	//		}
+	//	}
+	//}
 
-	// 文本内容审核
-	if form.Content != "" {
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发帖-文本内容审核"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-			return nil, errno.ErrCommon.WithMessage(err.Error())
-		}
-	}
-
-	// 图片内容审核
-	if len(form.Images) > 1 {
-		reviewSrv := service.DefaultReviewService()
-		for i, imgUrl := range form.Images {
-			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
-				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-				zhuGeAttr := make(map[string]interface{}, 0)
-				zhuGeAttr["场景"] = "发帖-图片内容审核"
-				zhuGeAttr["失败原因"] = err.Error()
-				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-				return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
-			}
-		}
-	}
 	//创建帖子
-	topic, err := kumiaoCommunity.DefaultTopicService.CreateTopic(user.ID, user.AvatarUrl, user.Nickname, user.OpenId, form.Title, form.Content, form.TagIds, form.Images)
+	marshal, err := json.Marshal(form)
+	if err != nil {
+		return nil, err
+	}
+	var params community.CreateTopicParams
+	err = json.Unmarshal(marshal, &params)
+	if err != nil {
+		return nil, err
+	}
+
+	topic, err := community.DefaultTopicService.CreateTopic(user.ID, params)
 	if err != nil {
 		return nil, err
 	}
@@ -299,7 +313,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 
-	form := UpdateTopicForm{}
+	form := UpdateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -330,7 +344,16 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		}
 	}
 	//更新帖子
-	topic, err := kumiaoCommunity.DefaultTopicService.UpdateTopic(user.ID, user.AvatarUrl, user.Nickname, form.ID, form.Title, form.Content, form.TagIds, form.Images)
+	marshal, err := json.Marshal(form)
+	if err != nil {
+		return nil, err
+	}
+	var params community.UpdateTopicParams
+	err = json.Unmarshal(marshal, &params)
+	if err != nil {
+		return nil, err
+	}
+	topic, err := community.DefaultTopicService.UpdateTopic(user.ID, params)
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +363,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -350,7 +373,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 	//更新帖子
-	err := kumiaoCommunity.DefaultTopicService.DelTopic(user.ID, form.ID)
+	err := community.DefaultTopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +381,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -366,9 +389,9 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	topicService := kumiaoCommunity.NewTopicService(ctx)
-	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
-	collectService := kumiaoCommunity.NewCollectionService(ctx)
+	topicService := community.NewTopicService(ctx)
+	topicLikeService := community.NewTopicLikeService(ctx)
+	collectService := community.NewCollectionService(ctx)
 
 	//获取帖子
 	topic, err := topicService.DetailTopic(form.ID)
@@ -422,7 +445,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		status = 3
 	}
 
-	list, total, err := kumiaoCommunity.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
+	list, total, err := community.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
 		UserId: user.ID,
 		Status: status,
 		Limit:  form.Limit(),
@@ -437,7 +460,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
-	topicLikeService := kumiaoCommunity.NewTopicLikeService(ctx)
+	topicLikeService := community.NewTopicLikeService(ctx)
 	likeList, _ := topicLikeService.GetLikeInfoByUser(user.ID)
 	if len(likeList) > 0 {
 		for _, item := range likeList {
@@ -453,13 +476,13 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 
 	//收藏数据
 	collectionMap := make(map[int64]struct{}, 0)
-	collectionService := kumiaoCommunity.NewCollectionService(ctx)
+	collectionService := community.NewCollectionService(ctx)
 	collectionIds := collectionService.Collections(user.OpenId, 0, 0, 0)
 	for _, collectionId := range collectionIds {
 		collectionMap[collectionId] = struct{}{}
 	}
 
-	rootCommentCount := kumiaoCommunity.DefaultTopicService.GetRootCommentCount(ids)
+	rootCommentCount := community.DefaultTopicService.GetRootCommentCount(ids)
 	// 组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
 	for _, item := range rootCommentCount {
@@ -484,4 +507,108 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		"page":     form.Page,
 		"pageSize": form.PageSize,
 	}, err
+}
+
+func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
+	form := SignupTopicRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	params := community.SignupParams{
+		TopicId:      form.TopicId,
+		UserId:       user.ID,
+		RealName:     form.RealName,
+		Phone:        form.Phone,
+		Gender:       form.Gender,
+		Age:          form.Age,
+		Wechat:       form.Wechat,
+		City:         form.City,
+		Remarks:      form.Remarks,
+		SignupTime:   time.Now(),
+		SignupStatus: 1,
+	}
+	err := signupService.Signup(params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr *TopicController) CancelSignupTopic(c *gin.Context) (gin.H, error) {
+	form := IdRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+	user := apiutil.GetAuthUser(c)
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	err := signupService.CancelSignup(form.ID, user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (ctr *TopicController) MySignup(c *gin.Context) (gin.H, error) {
+	form := MySignupRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	list, total, err := signupService.GetPageList(community2.FindAllActivitiesSignupParams{
+		UserId: user.ID,
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
+//报名数据
+func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
+	form := IdRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	topicService := community.NewTopicService(ctx)
+	topic := topicService.FindById(form.ID)
+	//仅发起人可查看
+	if topic.UserId != user.ID {
+		return nil, nil
+	}
+
+	signupList, total, err := signupService.FindSignupList(community2.FindAllActivitiesSignupParams{
+		TopicId: topic.Id,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"seeCount":    topic.SeeCount,
+		"signupCount": total,
+		"signupList":  signupList,
+	}, nil
 }

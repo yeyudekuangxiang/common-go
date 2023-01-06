@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	mioContext "mio/internal/pkg/core/context"
