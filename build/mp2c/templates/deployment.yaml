@@ -63,6 +63,18 @@ spec:
           volumeMounts:
             - name: mp2c-go-config
               mountPath: "/app/config"
+          readinessProbe:
+            httpGet:
+              httpHeaders:
+                - name: KEY
+                  value: lvmio666
+              path: /ping
+              port: 80
+            initialDelaySeconds: 2
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
       volumes:
         - name: mp2c-go-config
           secret:
