@@ -73,27 +73,27 @@ func Ping(ctx context.Context) error {
 	if err := checkNil(ctx, *RpcService); err != nil {
 		return err
 	}
-	_, err := RpcService.PointRpcSrv.Ping(ctx, nil)
+	_, err := RpcService.PointRpcSrv.Ping(ctx, &pointclient.Request{})
 	if err != nil {
 		return err
 	}
-	_, err = RpcService.CouponRpcSrv.Ping(ctx, nil)
+	_, err = RpcService.CouponRpcSrv.Ping(ctx, &couponclient.Request{})
 	if err != nil {
 		return err
 	}
-	_, err = RpcService.UserRpcSrv.Ping(ctx, nil)
+	_, err = RpcService.UserRpcSrv.Ping(ctx, &userclient.Request{})
 	if err != nil {
 		return err
 	}
-	_, err = RpcService.ActivityRpcSrv.Ping(ctx, nil)
+	_, err = RpcService.ActivityRpcSrv.Ping(ctx, &activityclient.Request{})
 	if err != nil {
 		return err
 	}
-	_, err = RpcService.CarbonPkRpcSrv.Ping(ctx, nil)
+	_, err = RpcService.CarbonPkRpcSrv.Ping(ctx, &carbonpkclient.Request{})
 	if err != nil {
 		return err
 	}
-	_, err = RpcService.TokenCenterRpcSrv.Ping(ctx, nil)
+	_, err = RpcService.TokenCenterRpcSrv.Ping(ctx, &tokencenterclient.Request{})
 	if err != nil {
 		return err
 	}
