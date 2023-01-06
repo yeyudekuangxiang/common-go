@@ -2,12 +2,24 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"mio/internal/pkg/core/app"
+	"net/http"
 )
 
 func Router(router *gin.Engine) {
 	router.GET("/ping", func(context *gin.Context) {
-		context.String(200, "pong")
+		if context.GetHeader("KEY") != "lvmio666" {
+			context.Status(http.StatusServiceUnavailable)
+			return
+		}
+		err := app.Ping(context)
+		if err != nil {
+			context.Status(http.StatusServiceUnavailable)
+			return
+		}
+		context.String(http.StatusOK, "pong")
 	})
+
 	router.GET("/", func(context *gin.Context) {
 		context.String(200, "mio")
 	})
