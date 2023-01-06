@@ -184,7 +184,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	if activity.RiskLimit < 4 {
 		//判断用户手机号,警告:必须是非首页
 		if userInfo.PhoneNumber == "" {
-			return "", errno.ErrNotBindMobile
+			return "", errno.ErrMisMatchCondition
 		}
 		userRiskRankParam.MobileNo = userInfo.PhoneNumber
 	}
