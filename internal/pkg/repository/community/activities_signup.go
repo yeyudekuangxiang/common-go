@@ -12,7 +12,9 @@ type (
 	ActivitiesSignupModel interface {
 		FindAllAPISignup(params FindAllActivitiesSignupParams) ([]entity.APIActivitiesSignup, int64, error)
 		FindOneAPISignup(params FindOneActivitiesSignupParams) (entity.APIActivitiesSignup, error)
+		FindSignupList(params FindAllActivitiesSignupParams) ([]entity.APISignupList, int64, error)
 		FindOne(params FindOneActivitiesSignupParams) (entity.CommunityActivitiesSignup, error)
+		FindAll(params FindAllActivitiesSignupParams) ([]entity.CommunityActivitiesSignup, int64, error)
 		CancelSignup(signup *entity.CommunityActivitiesSignup) error
 		Delete(id int64) error
 		Update(signup *entity.CommunityActivitiesSignup) error
@@ -24,6 +26,83 @@ type (
 	}
 )
 
+func (d defaultCommunityActivitiesSignupModel) FindSignupList(params FindAllActivitiesSignupParams) ([]entity.APISignupList, int64, error) {
+	list := make([]entity.APISignupList, 0)
+	var total int64
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
+		Preload("User")
+
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.City != "" {
+		db.Where("city = ?", params.City)
+	}
+	if params.Age != 0 {
+		db.Where("age = ?", params.Age)
+	}
+	if params.Gender != 0 {
+		db.Where("gender = ?", params.Gender)
+	}
+	if params.Phone != "" {
+		db.Where("phone = ?", params.Phone)
+	}
+	if params.RealName != "" {
+		db.Where("real_name = ?", params.RealName)
+	}
+	if params.Wechat != "" {
+		db.Where("wechat = ?", params.Wechat)
+	}
+
+	err := db.Count(&total).Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return list, total, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindAll(params FindAllActivitiesSignupParams) ([]entity.CommunityActivitiesSignup, int64, error) {
+	list := make([]entity.CommunityActivitiesSignup, 0)
+	var total int64
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
+
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.City != "" {
+		db.Where("city = ?", params.City)
+	}
+	if params.Age != 0 {
+		db.Where("age = ?", params.Age)
+	}
+	if params.Gender != 0 {
+		db.Where("gender = ?", params.Gender)
+	}
+	if params.Phone != "" {
+		db.Where("phone = ?", params.Phone)
+	}
+	if params.RealName != "" {
+		db.Where("real_name = ?", params.RealName)
+	}
+	if params.Wechat != "" {
+		db.Where("wechat = ?", params.Wechat)
+	}
+
+	err := db.Count(&total).Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return list, total, nil
+}
+
 func (d defaultCommunityActivitiesSignupModel) CancelSignup(signup *entity.CommunityActivitiesSignup) error {
 	err := d.ctx.DB.Model(signup).Updates(&entity.CommunityActivitiesSignup{SignupStatus: 2, CancelTime: time.Now()}).Error
 	if err != nil {
@@ -34,7 +113,7 @@ func (d defaultCommunityActivitiesSignupModel) CancelSignup(signup *entity.Commu
 
 func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesSignupParams) (entity.CommunityActivitiesSignup, error) {
 	var resp entity.CommunityActivitiesSignup
-	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).WithContext(d.ctx.Context)
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
 	if params.Id != 0 {
 		db.Where("id = ?", params.Id)
 	}
@@ -59,7 +138,7 @@ func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesS
 
 func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneActivitiesSignupParams) (entity.APIActivitiesSignup, error) {
 	var resp entity.APIActivitiesSignup
-	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).WithContext(d.ctx.Context)
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
 	if params.Id != 0 {
 		db.Where("id = ?", params.Id)
 	}
@@ -120,7 +199,7 @@ func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllAc
 
 func (d defaultCommunityActivitiesSignupModel) FindOneAPISignupById(id int64) (entity.APIActivitiesSignup, error) {
 	var resp entity.APIActivitiesSignup
-	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).WithContext(d.ctx.Context).First(&resp, id).Error
+	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).First(&resp, id).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return entity.APIActivitiesSignup{}, nil
@@ -131,14 +210,14 @@ func (d defaultCommunityActivitiesSignupModel) FindOneAPISignupById(id int64) (e
 }
 
 func (d defaultCommunityActivitiesSignupModel) Delete(id int64) error {
-	if err := d.ctx.DB.WithContext(d.ctx.Context).Delete(&entity.CommunityActivitiesSignup{}, id).Error; err != nil {
+	if err := d.ctx.DB.Delete(&entity.CommunityActivitiesSignup{}, id).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (d defaultCommunityActivitiesSignupModel) Update(signup *entity.CommunityActivitiesSignup) error {
-	err := d.ctx.DB.WithContext(d.ctx.Context).Save(signup).Error
+	err := d.ctx.DB.Save(signup).Error
 	if err != nil {
 		return err
 	}
@@ -149,6 +228,7 @@ func (d defaultCommunityActivitiesSignupModel) Create(signup *entity.CommunityAc
 	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
 		WithContext(d.ctx.Context).
 		Omit(clause.Associations).
+		Omit("cancel_time").
 		Create(signup).Error
 	if err != nil {
 		return err

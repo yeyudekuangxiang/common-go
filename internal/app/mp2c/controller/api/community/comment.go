@@ -253,7 +253,7 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 
 func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
@@ -269,7 +269,7 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *CommentController) Detail(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, nil
 	}

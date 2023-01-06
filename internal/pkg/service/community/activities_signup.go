@@ -1,6 +1,7 @@
 package community
 
 import (
+	"encoding/json"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository/community"
@@ -11,6 +12,8 @@ type (
 	ActivitiesSignupService interface {
 		GetPageList(params community.FindAllActivitiesSignupParams) ([]entity.APIActivitiesSignup, int64, error)
 		GetOne(id int64) (entity.CommunityActivitiesSignup, error)
+		FindAll(params community.FindAllActivitiesSignupParams) ([]entity.CommunityActivitiesSignup, int64, error)
+		FindSignupList(params community.FindAllActivitiesSignupParams) ([]entity.APISignupList, int64, error)
 		Signup(params SignupParams) error    //报名
 		CancelSignup(Id, userId int64) error //取消报名
 	}
@@ -20,6 +23,22 @@ type (
 		signupModel community.ActivitiesSignupModel
 	}
 )
+
+func (srv defaultCommunityActivitiesSignupService) FindSignupList(params community.FindAllActivitiesSignupParams) ([]entity.APISignupList, int64, error) {
+	list, total, err := srv.signupModel.FindSignupList(params)
+	if err != nil {
+		return nil, 0, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+	return list, total, nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) FindAll(params community.FindAllActivitiesSignupParams) ([]entity.CommunityActivitiesSignup, int64, error) {
+	list, total, err := srv.signupModel.FindAll(params)
+	if err != nil {
+		return nil, 0, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+	return list, total, nil
+}
 
 func NewCommunityActivitiesSignupService(ctx *mioContext.MioContext) ActivitiesSignupService {
 	return defaultCommunityActivitiesSignupService{
@@ -60,29 +79,16 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		return nil
 	}
 
-	signupModel := &entity.CommunityActivitiesSignup{
-		TopicId:      params.TopicId,
-		UserId:       params.UserId,
-		RealName:     params.RealName,
-		Phone:        params.Phone,
-		Gender:       params.Gender,
-		Age:          params.Age,
-		Wechat:       params.Wechat,
-		City:         params.City,
-		Remarks:      params.Remarks,
-		SignupTime:   params.SignupTime,
-		SignupStatus: params.SignupStatus,
+	signupModel := &entity.CommunityActivitiesSignup{}
+	marshal, err := json.Marshal(params)
+	if err != nil {
+		return err
 	}
-	//
-	//marshal, err := json.Marshal(params)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//err = json.Unmarshal(marshal, signupModel)
-	//if err != nil {
-	//	return err
-	//}
+
+	err = json.Unmarshal(marshal, signupModel)
+	if err != nil {
+		return err
+	}
 	err = srv.signupModel.Create(signupModel)
 	if err != nil {
 		return err

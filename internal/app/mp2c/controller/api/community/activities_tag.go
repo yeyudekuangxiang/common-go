@@ -15,7 +15,7 @@ type ActivitiesTagController struct {
 
 // List 获取话题列表
 func (ActivitiesTagController) List(c *gin.Context) (gin.H, error) {
-	form := ActivitiesTagPageForm{}
+	form := ActivitiesTagPageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (ActivitiesTagController) List(c *gin.Context) (gin.H, error) {
 }
 
 func (ActivitiesTagController) DetailTag(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}

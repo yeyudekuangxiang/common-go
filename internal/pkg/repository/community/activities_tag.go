@@ -58,7 +58,7 @@ func (d defaultCommunityActivitiesTagModel) GetPageList(params FindAllActivities
 
 func (d defaultCommunityActivitiesTagModel) GetById(id int64) (entity.CommunityActivitiesTag, error) {
 	var resp entity.CommunityActivitiesTag
-	err := d.ctx.DB.Model(&resp).WithContext(d.ctx.Context).First(&resp, id).Error
+	err := d.ctx.DB.Model(&resp).First(&resp, id).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return entity.CommunityActivitiesTag{}, nil
@@ -69,21 +69,21 @@ func (d defaultCommunityActivitiesTagModel) GetById(id int64) (entity.CommunityA
 }
 
 func (d defaultCommunityActivitiesTagModel) Delete(id int64) error {
-	if err := d.ctx.DB.WithContext(d.ctx.Context).Delete(&entity.CommunityActivitiesTag{}, id).Error; err != nil {
+	if err := d.ctx.DB.Delete(&entity.CommunityActivitiesTag{}, id).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (d defaultCommunityActivitiesTagModel) Update(tag *entity.CommunityActivitiesTag) error {
-	if err := d.ctx.DB.Model(&entity.CommunityActivitiesTag{}).WithContext(d.ctx.Context).Save(tag).Error; err != nil {
+	if err := d.ctx.DB.Model(&entity.CommunityActivitiesTag{}).Save(tag).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (d defaultCommunityActivitiesTagModel) Create(tag *entity.CommunityActivitiesTag) error {
-	if err := d.ctx.DB.Model(&entity.CommunityActivitiesTag{}).WithContext(d.ctx.Context).Save(tag).Error; err != nil {
+	if err := d.ctx.DB.Model(&entity.CommunityActivitiesTag{}).Save(tag).Error; err != nil {
 		return err
 	}
 	return nil

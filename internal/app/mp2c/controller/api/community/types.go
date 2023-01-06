@@ -1,39 +1,42 @@
 package community
 
-import "mio/internal/app/mp2c/controller"
+import (
+	"mio/internal/app/mp2c/controller"
+	"time"
+)
 
-type topicCountReq struct {
+type topicCountRequest struct {
 	TopicId int64 `json:"topicId"`
 	Status  int   `json:"status"`
 }
 
-type ActivitiesTagPageForm struct {
+type ActivitiesTagPageRequest struct {
 	controller.PageFrom
 }
 
-type ActivitiesTagListForm struct {
+type ActivitiesTagListRequest struct {
 }
 
-type IdForm struct {
+type IdRequest struct {
 	ID int64 `json:"id" form:"id"`
 }
 
-type GetTopicPageListForm struct {
+type GetTopicPageListRequest struct {
 	ID         int64  `json:"id" form:"id" binding:"gte=0" alias:"文章id"`
 	TopicTagId int64  `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
 	Order      string `json:"order" form:"order" alias:"排序"`
 	controller.PageFrom
 }
 
-type GetWeappQrCodeFrom struct {
+type GetWeappQrCodeRequest struct {
 	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 
-type ChangeTopicLikeForm struct {
+type ChangeTopicLikeRequest struct {
 	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
 }
 
-type CreateTopicForm struct {
+type CreateTopicRequest struct {
 	Title         string        `json:"title" form:"title" alias:"标题" binding:"required,min=2,max=64"`
 	Content       string        `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
 	Images        []string      `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
@@ -55,9 +58,9 @@ type TopicActivity struct {
 	ActivityType   int    `json:"activityType" form:"activityType"`
 }
 
-type UpdateTopicForm struct {
+type UpdateTopicRequest struct {
 	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
-	CreateTopicForm
+	CreateTopicRequest
 }
 
 type MyTopicRequest struct {
@@ -122,4 +125,25 @@ type SignupTopicRequest struct {
 
 type MySignupRequest struct {
 	controller.PageFrom
+}
+
+type SignupListResponse struct {
+	SeeCount    int64    `json:"seeCount"`
+	SignupCount int64    `json:"signupCount"`
+	SignupList  []Signup `json:"signupList"`
+}
+type Signup struct {
+	Id           int64     `gorm:"primaryKey;autoIncrement" json:"id"`
+	TopicId      int64     `json:"topicId"`
+	UserId       int64     `json:"userId"`
+	RealName     string    `json:"realName"`
+	Phone        string    `json:"phone"`
+	Gender       int       `json:"gender"`
+	Age          int       `json:"age"`
+	Wechat       string    `json:"wechat"`
+	City         string    `json:"city"`
+	Remarks      string    `json:"remarks"`
+	SignupTime   time.Time `json:"signupTime"`
+	CancelTime   time.Time `json:"cancelTime,omitempty"`
+	SignupStatus int       `json:"signupStatus"`
 }

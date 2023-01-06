@@ -31,7 +31,7 @@ type TopicController struct {
 
 //List 获取文章列表
 func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
-	form := GetTopicPageListForm{}
+	form := GetTopicPageListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 }
 
 //func (ctr *TopicController) ListFlow(c *gin.Context) (gin.H, error) {
-//	form := GetTopicPageListForm{}
+//	form := GetTopicPageListRequest{}
 //	if err := apiutil.BindForm(c, &form); err != nil {
 //		return nil, err
 //	}
@@ -87,7 +87,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 
 //GetShareWeappQrCode 获取分享二维码
 func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
-	form := GetWeappQrCodeFrom{}
+	form := GetWeappQrCodeRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 
 //ChangeTopicLike 点赞 / 取消点赞
 func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
-	form := ChangeTopicLikeForm{}
+	form := ChangeTopicLikeRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 
 //ListTopic 帖子列表+顶级评论+顶级评论下子评论3条
 func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
-	form := GetTopicPageListForm{}
+	form := GetTopicPageListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if user.Auth != 1 {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
-	form := CreateTopicForm{}
+	form := CreateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
 
-	form := UpdateTopicForm{}
+	form := UpdateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -363,7 +363,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -381,7 +381,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -540,7 +540,7 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *TopicController) CancelSignupTopic(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
@@ -578,5 +578,37 @@ func (ctr *TopicController) MySignup(c *gin.Context) (gin.H, error) {
 		"total":    total,
 		"page":     form.Page,
 		"pageSize": form.PageSize,
+	}, nil
+}
+
+//报名数据
+func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
+	form := IdRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	topicService := community.NewTopicService(ctx)
+	topic := topicService.FindById(form.ID)
+	//仅发起人可查看
+	if topic.UserId != user.ID {
+		return nil, nil
+	}
+
+	signupList, total, err := signupService.FindSignupList(community2.FindAllActivitiesSignupParams{
+		TopicId: topic.Id,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"seeCount":    topic.SeeCount,
+		"signupCount": total,
+		"signupList":  signupList,
 	}, nil
 }
