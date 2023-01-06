@@ -9,7 +9,7 @@ import (
 	"log"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/core/initialize"
-	"mio/internal/pkg/service/kumiaoCommunity"
+	"mio/internal/pkg/service/community"
 )
 
 // importCmd represents the import command
@@ -37,7 +37,7 @@ to quickly create a Cobra application.`,
 		//	log.Fatal("config path is required")
 		//}
 
-		err := kumiaoCommunity.NewTopicService(context.NewMioContext()).SetWeekTopic()
+		err := community.NewTopicService(context.NewMioContext()).SetWeekTopic()
 		if err != nil {
 			log.Fatal(err)
 		}

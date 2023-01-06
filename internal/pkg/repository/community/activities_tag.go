@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"gorm.io/gorm"
@@ -7,9 +7,9 @@ import (
 )
 
 type (
-	CommunityActivitiesTagModel interface {
-		List(params GetActivitiesTagListParams) ([]entity.CommunityActivitiesTag, error)
-		GetPageList(params GetActivitiesTagPageListParams) ([]entity.CommunityActivitiesTag, int64, error)
+	ActivitiesTagModel interface {
+		List() ([]entity.CommunityActivitiesTag, error)
+		GetPageList(params FindAllActivitiesTagParams) ([]entity.CommunityActivitiesTag, int64, error)
 		GetById(id int64) (entity.CommunityActivitiesTag, error)
 		Delete(id int64) error
 		Update(tag *entity.CommunityActivitiesTag) error
@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func (d defaultCommunityActivitiesTagModel) List(params GetActivitiesTagListParams) ([]entity.CommunityActivitiesTag, error) {
+func (d defaultCommunityActivitiesTagModel) List() ([]entity.CommunityActivitiesTag, error) {
 	var list []entity.CommunityActivitiesTag
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesTag{})
 	err := db.Find(&list).Error
@@ -31,7 +31,7 @@ func (d defaultCommunityActivitiesTagModel) List(params GetActivitiesTagListPara
 	return list, nil
 }
 
-func (d defaultCommunityActivitiesTagModel) GetPageList(params GetActivitiesTagPageListParams) ([]entity.CommunityActivitiesTag, int64, error) {
+func (d defaultCommunityActivitiesTagModel) GetPageList(params FindAllActivitiesTagParams) ([]entity.CommunityActivitiesTag, int64, error) {
 	list := make([]entity.CommunityActivitiesTag, 0)
 	var total int64
 	db := d.ctx.DB.Model(entity.CommunityActivitiesTag{})
@@ -89,7 +89,7 @@ func (d defaultCommunityActivitiesTagModel) Create(tag *entity.CommunityActiviti
 	return nil
 }
 
-func NewCommunityActivitiesTagModel(ctx *mioContext.MioContext) CommunityActivitiesTagModel {
+func NewCommunityActivitiesTagModel(ctx *mioContext.MioContext) ActivitiesTagModel {
 	return defaultCommunityActivitiesTagModel{
 		ctx: ctx,
 	}

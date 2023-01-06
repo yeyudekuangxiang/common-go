@@ -1,33 +1,30 @@
-package api
+package community
 
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/context"
-	entity2 "mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
-	"mio/internal/pkg/service/kumiaoCommunity"
+	communityRepository "mio/internal/pkg/repository/community"
+	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/util/apiutil"
 )
 
-var DefaultTagController = TagController{}
+var DefaultCommunityActivitiesTagController = ActivitiesTagController{}
 
-type TagController struct {
+type ActivitiesTagController struct {
 }
 
 // List 获取话题列表
-func (TagController) List(c *gin.Context) (gin.H, error) {
-	form := GetTagForm{}
+func (ActivitiesTagController) List(c *gin.Context) (gin.H, error) {
+	form := ActivitiesTagPageForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagService := kumiaoCommunity.NewTagService(ctx)
+	tagService := community.NewCommunityActivitiesTagService(ctx)
 
-	list, total, err := tagService.GetTagPageList(repository.GetTagPageListBy{
-		ID:      form.ID,
-		Offset:  form.Offset(),
-		Limit:   form.Limit(),
-		OrderBy: entity2.OrderByList{entity2.OrderByTagSortDesc},
+	list, total, err := tagService.GetPageList(communityRepository.FindAllActivitiesTagParams{
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
 	})
 	if err != nil {
 		return nil, err
@@ -40,20 +37,20 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (TagController) DetailTag(c *gin.Context) (gin.H, error) {
+func (ActivitiesTagController) DetailTag(c *gin.Context) (gin.H, error) {
 	form := IdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	tagService := kumiaoCommunity.NewTagService(ctx)
+	tagService := community.NewCommunityActivitiesTagService(ctx)
 
 	tag, err := tagService.GetOne(form.ID)
 	if err != nil {
 		return nil, err
 	}
 	return gin.H{
-		"topic": tag,
+		"tag": tag,
 	}, nil
 }

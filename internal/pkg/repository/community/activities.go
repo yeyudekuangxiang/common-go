@@ -1,11 +1,11 @@
-package kumiaoCommunity
+package community
 
 import (
 	mioContext "mio/internal/pkg/core/context"
 )
 
 type (
-	CommunityActivitiesModel interface {
+	ActivitiesModel interface {
 	}
 
 	defaultCommunityActivitiesModel struct {
@@ -13,7 +13,7 @@ type (
 	}
 )
 
-func NewCommunityActivitiesModel(ctx *mioContext.MioContext) CommunityActivitiesModel {
+func NewCommunityActivitiesModel(ctx *mioContext.MioContext) ActivitiesModel {
 	return defaultCommunityActivitiesModel{
 		ctx: ctx,
 	}

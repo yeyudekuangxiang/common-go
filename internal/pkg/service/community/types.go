@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"mio/internal/pkg/model"
@@ -162,4 +162,18 @@ type TopicActivity struct {
 type UpdateTopicParams struct {
 	ID int64 `json:"id"`
 	CreateTopicParams
+}
+
+type SignupParams struct {
+	TopicId      int64     `json:"topicId"`
+	UserId       int64     `json:"userId"`
+	RealName     string    `json:"realName"`
+	Phone        string    `json:"phone"`
+	Gender       int       `json:"gender"`
+	Age          int       `json:"age"`
+	Wechat       string    `json:"wechat"`
+	City         string    `json:"city"`
+	Remarks      string    `json:"remarks"`
+	SignupTime   time.Time `json:"signupTime"`
+	SignupStatus int       `json:"signupStatus"`
 }

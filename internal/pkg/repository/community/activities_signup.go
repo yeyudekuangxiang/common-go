@@ -1,0 +1,163 @@
+package community
+
+import (
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	mioContext "mio/internal/pkg/core/context"
+	"mio/internal/pkg/model/entity"
+	"time"
+)
+
+type (
+	ActivitiesSignupModel interface {
+		FindAllAPISignup(params FindAllActivitiesSignupParams) ([]entity.APIActivitiesSignup, int64, error)
+		FindOneAPISignup(params FindOneActivitiesSignupParams) (entity.APIActivitiesSignup, error)
+		FindOne(params FindOneActivitiesSignupParams) (entity.CommunityActivitiesSignup, error)
+		CancelSignup(signup *entity.CommunityActivitiesSignup) error
+		Delete(id int64) error
+		Update(signup *entity.CommunityActivitiesSignup) error
+		Create(signup *entity.CommunityActivitiesSignup) error
+	}
+
+	defaultCommunityActivitiesSignupModel struct {
+		ctx *mioContext.MioContext
+	}
+)
+
+func (d defaultCommunityActivitiesSignupModel) CancelSignup(signup *entity.CommunityActivitiesSignup) error {
+	err := d.ctx.DB.Model(signup).Updates(&entity.CommunityActivitiesSignup{SignupStatus: 2, CancelTime: time.Now()}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesSignupParams) (entity.CommunityActivitiesSignup, error) {
+	var resp entity.CommunityActivitiesSignup
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).WithContext(d.ctx.Context)
+	if params.Id != 0 {
+		db.Where("id = ?", params.Id)
+	}
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.SignupStatus != 0 {
+		db.Where("signup_status = ?", params.SignupStatus)
+	}
+	err := db.First(&resp).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return entity.CommunityActivitiesSignup{}, nil
+		}
+		return entity.CommunityActivitiesSignup{}, err
+	}
+	return resp, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneActivitiesSignupParams) (entity.APIActivitiesSignup, error) {
+	var resp entity.APIActivitiesSignup
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).WithContext(d.ctx.Context)
+	if params.Id != 0 {
+		db.Where("id = ?", params.Id)
+	}
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	err := db.First(&resp).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return entity.APIActivitiesSignup{}, nil
+		}
+		return entity.APIActivitiesSignup{}, err
+	}
+	return resp, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllActivitiesSignupParams) ([]entity.APIActivitiesSignup, int64, error) {
+	list := make([]entity.APIActivitiesSignup, 0)
+	var total int64
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
+		Preload("Topic").Preload("Topic.User").Preload("Topic.Activity")
+
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.City != "" {
+		db.Where("city = ?", params.City)
+	}
+	if params.Age != 0 {
+		db.Where("age = ?", params.Age)
+	}
+	if params.Gender != 0 {
+		db.Where("gender = ?", params.Gender)
+	}
+	if params.Phone != "" {
+		db.Where("phone = ?", params.Phone)
+	}
+	if params.RealName != "" {
+		db.Where("real_name = ?", params.RealName)
+	}
+	if params.Wechat != "" {
+		db.Where("wechat = ?", params.Wechat)
+	}
+
+	err := db.Count(&total).Offset(params.Offset).Limit(params.Limit).Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return list, total, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindOneAPISignupById(id int64) (entity.APIActivitiesSignup, error) {
+	var resp entity.APIActivitiesSignup
+	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).WithContext(d.ctx.Context).First(&resp, id).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return entity.APIActivitiesSignup{}, nil
+		}
+		return entity.APIActivitiesSignup{}, err
+	}
+	return resp, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) Delete(id int64) error {
+	if err := d.ctx.DB.WithContext(d.ctx.Context).Delete(&entity.CommunityActivitiesSignup{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) Update(signup *entity.CommunityActivitiesSignup) error {
+	err := d.ctx.DB.WithContext(d.ctx.Context).Save(signup).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) Create(signup *entity.CommunityActivitiesSignup) error {
+	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
+		WithContext(d.ctx.Context).
+		Omit(clause.Associations).
+		Create(signup).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewCommunityActivitiesSignupModel(ctx *mioContext.MioContext) ActivitiesSignupModel {
+	return defaultCommunityActivitiesSignupModel{
+		ctx: ctx,
+	}
+}

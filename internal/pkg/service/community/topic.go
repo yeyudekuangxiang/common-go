@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/repository/kumiaoCommunity"
+	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -46,8 +46,8 @@ type TopicService struct {
 	tagModel         repository.TagModel
 	tokenServer      *wxoa.AccessTokenServer
 	userModel        repository.UserRepository
-	activityModel    kumiaoCommunity.CommunityActivitiesModel
-	activityTagModel kumiaoCommunity.CommunityActivitiesTagModel
+	activityModel    community.ActivitiesModel
+	activityTagModel community.ActivitiesTagModel
 }
 
 //将 entity.Topic 列表填充为 TopicDetail 列表
@@ -635,9 +635,9 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 			Qrcode:         params.TopicActivity.Qrcode,
 			MeetingLink:    params.TopicActivity.MeetingLink,
 			Contacts:       params.TopicActivity.Contacts,
-			StartTime:      model.Time{Time: time.Unix(params.TopicActivity.StartTime, 0)},
-			EndTime:        model.Time{Time: time.Unix(params.TopicActivity.EndTime, 0)},
-			SignupDeadline: model.Time{Time: time.Unix(params.TopicActivity.SignupDeadline, 0)},
+			StartTime:      time.Unix(params.TopicActivity.StartTime, 0),
+			EndTime:        time.Unix(params.TopicActivity.EndTime, 0),
+			SignupDeadline: time.Unix(params.TopicActivity.SignupDeadline, 0),
 		}
 	}
 
@@ -705,9 +705,9 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 			Qrcode:         params.TopicActivity.Qrcode,
 			MeetingLink:    params.TopicActivity.MeetingLink,
 			Contacts:       params.TopicActivity.Contacts,
-			StartTime:      model.Time{Time: time.Unix(params.TopicActivity.StartTime, 0)},
-			EndTime:        model.Time{Time: time.Unix(params.TopicActivity.EndTime, 0)},
-			SignupDeadline: model.Time{Time: time.Unix(params.TopicActivity.SignupDeadline, 0)},
+			StartTime:      time.Unix(params.TopicActivity.StartTime, 0),
+			EndTime:        time.Unix(params.TopicActivity.EndTime, 0),
+			SignupDeadline: time.Unix(params.TopicActivity.SignupDeadline, 0),
 		}
 	}
 

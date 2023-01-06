@@ -122,3 +122,15 @@ func (t Topic) TopicItemRes() *TopicItemRes {
 		Activity:        t.Activity,
 	}
 }
+
+type APITopic struct {
+	Id       int64               `json:"id" form:"id"`
+	Title    string              `gorm:"size:128" json:"title" form:"title"`                            // 标题
+	UserId   int64               `gorm:"not null;index:idx_topic_user_id;" json:"userId" form:"userId"` // 用户
+	User     ShortUser           `json:"user"  gorm:"foreignKey:UserId"`
+	Activity CommunityActivities `json:"activity" gorm:"foreignKey:Id"`
+}
+
+func (APITopic) TableName() string {
+	return "topic"
+}

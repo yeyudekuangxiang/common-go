@@ -8,6 +8,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/badge"
 	"mio/internal/app/mp2c/controller/api/business"
 	"mio/internal/app/mp2c/controller/api/common"
+	"mio/internal/app/mp2c/controller/api/community"
 	"mio/internal/app/mp2c/controller/api/coupon"
 	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/message"
@@ -43,23 +44,26 @@ func apiRouter(router *gin.Engine) {
 		//tag
 		tagRouter := authRouter.Group("/tag")
 		{
-			tagRouter.GET("/list", apiutil.Format(api.DefaultTagController.List))
-			tagRouter.GET("/detail", apiutil.Format(api.DefaultTagController.DetailTag))
+			tagRouter.GET("/list", apiutil.Format(community.DefaultTagController.List))
+			tagRouter.GET("/detail", apiutil.Format(community.DefaultTagController.DetailTag))
 		}
 
 		//社区文章列表
 		topicRouter := authRouter.Group("/topic")
 		{
-			topicRouter.POST("/list", apiutil.Format(api.DefaultTopicController.List))
-			topicRouter.GET("/list-topic", apiutil.Format(api.DefaultTopicController.ListTopic))
-			topicRouter.GET("/detail", apiutil.Format(api.DefaultTopicController.DetailTopic)) //帖子详情
+			topicRouter.POST("/list", apiutil.Format(community.DefaultTopicController.List))
+			topicRouter.GET("/list-topic", apiutil.Format(community.DefaultTopicController.ListTopic))
+			topicRouter.GET("/detail", apiutil.Format(community.DefaultTopicController.DetailTopic)) //帖子详情
+			topicRouter.POST("/activities/tag/list", apiutil.Format(community.DefaultCommunityActivitiesTagController.List))
+			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
+			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
 		}
 
 		//文章评论列表
 		commentRouter := authRouter.Group("/topic/comment")
 		{
-			commentRouter.GET("/list", apiutil.Format(api.DefaultCommentController.RootList)) //评论列表
-			commentRouter.GET("/sub-list", apiutil.Format(api.DefaultCommentController.SubList))
+			commentRouter.GET("/list", apiutil.Format(community.DefaultCommentController.RootList)) //评论列表
+			commentRouter.GET("/sub-list", apiutil.Format(community.DefaultCommentController.SubList))
 		}
 
 		//统计计数接口
@@ -150,12 +154,13 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
 			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
 			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM)) //绑定手机
-			userRouter.GET("/my-topic", apiutil.Format(api.DefaultTopicController.MyTopic))                  //我的帖子列表
+			userRouter.GET("/my-topic", apiutil.Format(community.DefaultTopicController.MyTopic))            //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                //我的奖励
+			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignup))          //我的报名
 
-			userRouter.GET("/topic-collection", apiutil.Format(api.DefaultCollectionController.TopicCollection))    //我的收藏(文章)
-			userRouter.POST("/collection", apiutil.Format(api.DefaultCollectionController.Collection))              //收藏(文章)
-			userRouter.POST("/cancel-collection", apiutil.Format(api.DefaultCollectionController.CancelCollection)) //取消收藏
+			userRouter.GET("/topic-collection", apiutil.Format(community.DefaultCollectionController.TopicCollection))    //我的收藏(文章)
+			userRouter.POST("/collection", apiutil.Format(community.DefaultCollectionController.Collection))              //收藏(文章)
+			userRouter.POST("/cancel-collection", apiutil.Format(community.DefaultCollectionController.CancelCollection)) //取消收藏
 
 			//社区2.0 用户相关
 			userRouter.GET("/home-page", apiutil.Format(api.DefaultUserController.HomePage))                      //主页
@@ -210,22 +215,22 @@ func apiRouter(router *gin.Engine) {
 		//社区2.0 文章相关路由
 		topicRouter := mustAuthRouter.Group("/topic")
 		{
-			topicRouter.GET("/share-qrcode", apiutil.Format(api.DefaultTopicController.GetShareWeappQrCode))
-			topicRouter.POST("/like/change", apiutil.Format(api.DefaultTopicController.ChangeTopicLike))
-			topicRouter.POST("/create", apiutil.Format(api.DefaultTopicController.CreateTopic))
-			topicRouter.POST("/update", apiutil.Format(api.DefaultTopicController.UpdateTopic))
-			topicRouter.POST("/delete", apiutil.Format(api.DefaultTopicController.DelTopic))
+			topicRouter.GET("/share-qrcode", apiutil.Format(community.DefaultTopicController.GetShareWeappQrCode))
+			topicRouter.POST("/like/change", apiutil.Format(community.DefaultTopicController.ChangeTopicLike))
+			topicRouter.POST("/create", apiutil.Format(community.DefaultTopicController.CreateTopic))
+			topicRouter.POST("/update", apiutil.Format(community.DefaultTopicController.UpdateTopic))
+			topicRouter.POST("/delete", apiutil.Format(community.DefaultTopicController.DelTopic))
 		}
 
 		//社区2.0 评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
 		{
-			commentRouter.POST("/create", apiutil.Format(api.DefaultCommentController.Create))
-			commentRouter.POST("/update", apiutil.Format(api.DefaultCommentController.Update))
-			commentRouter.POST("/delete", apiutil.Format(api.DefaultCommentController.Delete))
-			commentRouter.POST("/like", apiutil.Format(api.DefaultCommentController.Like))
-			commentRouter.GET("/detail", apiutil.Format(api.DefaultCommentController.Detail))
-			commentRouter.POST("/turn-comment", apiutil.Format(api.DefaultCommentController.TurnComment))
+			commentRouter.POST("/create", apiutil.Format(community.DefaultCommentController.Create))
+			commentRouter.POST("/update", apiutil.Format(community.DefaultCommentController.Update))
+			commentRouter.POST("/delete", apiutil.Format(community.DefaultCommentController.Delete))
+			commentRouter.POST("/like", apiutil.Format(community.DefaultCommentController.Like))
+			commentRouter.GET("/detail", apiutil.Format(community.DefaultCommentController.Detail))
+			commentRouter.POST("/turn-comment", apiutil.Format(community.DefaultCommentController.TurnComment))
 		}
 
 		//积分相关路由

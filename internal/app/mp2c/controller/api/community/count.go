@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"github.com/gin-gonic/gin"
