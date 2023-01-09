@@ -628,16 +628,16 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 
 	if params.Type == 2 {
 		topicModel.Activity = entity.CommunityActivities{
-			Type:           params.TopicActivity.ActivityType,
-			Address:        params.TopicActivity.Address,
-			TagIds:         params.TopicActivity.ActivityTagIds,
-			Remarks:        params.TopicActivity.Remarks,
-			Qrcode:         params.TopicActivity.Qrcode,
-			MeetingLink:    params.TopicActivity.MeetingLink,
-			Contacts:       params.TopicActivity.Contacts,
-			StartTime:      time.Unix(params.TopicActivity.StartTime, 0),
-			EndTime:        time.Unix(params.TopicActivity.EndTime, 0),
-			SignupDeadline: time.Unix(params.TopicActivity.SignupDeadline, 0),
+			Type:           params.ActivityType,
+			Address:        params.Address,
+			TagIds:         params.ActivityTagIds,
+			Remarks:        params.Remarks,
+			Qrcode:         params.Qrcode,
+			MeetingLink:    params.MeetingLink,
+			Contacts:       params.Contacts,
+			StartTime:      time.Unix(params.StartTime, 0),
+			EndTime:        time.Unix(params.EndTime, 0),
+			SignupDeadline: time.Unix(params.SignupDeadline, 0),
 		}
 	}
 
@@ -698,16 +698,16 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 
 	if params.Type == 2 {
 		topicModel.Activity = entity.CommunityActivities{
-			Type:           params.TopicActivity.ActivityType,
-			Address:        params.TopicActivity.Address,
-			TagIds:         params.TopicActivity.ActivityTagIds,
-			Remarks:        params.TopicActivity.Remarks,
-			Qrcode:         params.TopicActivity.Qrcode,
-			MeetingLink:    params.TopicActivity.MeetingLink,
-			Contacts:       params.TopicActivity.Contacts,
-			StartTime:      time.Unix(params.TopicActivity.StartTime, 0),
-			EndTime:        time.Unix(params.TopicActivity.EndTime, 0),
-			SignupDeadline: time.Unix(params.TopicActivity.SignupDeadline, 0),
+			Type:           params.ActivityType,
+			Address:        params.Address,
+			TagIds:         params.ActivityTagIds,
+			Remarks:        params.Remarks,
+			Qrcode:         params.Qrcode,
+			MeetingLink:    params.MeetingLink,
+			Contacts:       params.Contacts,
+			StartTime:      time.Unix(params.StartTime, 0),
+			EndTime:        time.Unix(params.EndTime, 0),
+			SignupDeadline: time.Unix(params.SignupDeadline, 0),
 		}
 	}
 
