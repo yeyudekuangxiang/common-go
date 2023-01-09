@@ -635,9 +635,9 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
 			Contacts:       params.Contacts,
-			StartTime:      time.Unix(params.StartTime, 0),
-			EndTime:        time.Unix(params.EndTime, 0),
-			SignupDeadline: time.Unix(params.SignupDeadline, 0),
+			StartTime:      time.UnixMilli(params.StartTime),
+			EndTime:        time.UnixMilli(params.EndTime),
+			SignupDeadline: time.UnixMilli(params.SignupDeadline),
 		}
 	}
 
