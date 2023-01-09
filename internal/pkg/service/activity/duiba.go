@@ -346,6 +346,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		if !isExit {
 			return "", errno.ErrMisMatchCondition
 		}
+		vip = activity.VipId
 		break
 	default:
 		break
