@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"mio/internal/pkg/model"
 	"time"
 )
 
@@ -26,26 +27,26 @@ func (CommunityActivitiesSignup) TableName() string {
 }
 
 type APIActivitiesSignup struct {
-	Id           int64     `json:"id"`
-	UserId       int64     `json:"userId"`
-	RealName     string    `json:"realName"`
-	Phone        string    `json:"phone"`
-	Gender       int       `json:"gender"`
-	Age          int       `json:"age"`
-	Wechat       string    `json:"wechat"`
-	City         string    `json:"city"`
-	Remarks      string    `json:"remarks"`
-	SignupTime   time.Time `json:"signupTime"`
-	CancelTime   time.Time `json:"cancelTime"`
-	SignupStatus int       `json:"signupStatus"`
-	TopicId      int64     `json:"topicId"`
-	Topic        APITopic  `json:"topic" gorm:"foreignKey:TopicId"`
+	Id           int64      `json:"id"`
+	UserId       int64      `json:"userId"`
+	RealName     string     `json:"realName"`
+	Phone        string     `json:"phone"`
+	Gender       int        `json:"gender"`
+	Age          int        `json:"age"`
+	Wechat       string     `json:"wechat"`
+	City         string     `json:"city"`
+	Remarks      string     `json:"remarks"`
+	SignupTime   model.Time `json:"signupTime"`
+	CancelTime   model.Time `json:"cancelTime"`
+	SignupStatus int        `json:"signupStatus"`
+	TopicId      int64      `json:"topicId"`
+	Topic        APITopic   `json:"topic" gorm:"foreignKey:TopicId"`
 }
 
 type APISignupList struct {
-	Id           int64     `json:"id"`
-	UserId       int64     `json:"userId"`
-	User         ShortUser `json:"user"`
-	SignupTime   time.Time `json:"signupTime"`
-	SignupStatus int       `json:"signupStatus"`
+	Id           int64      `json:"id"`
+	UserId       int64      `json:"userId"`
+	User         ShortUser  `json:"user"`
+	SignupTime   model.Time `json:"signupTime"`
+	SignupStatus int        `json:"signupStatus"`
 }
