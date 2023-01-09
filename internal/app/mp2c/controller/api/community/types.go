@@ -43,11 +43,11 @@ type CreateTopicRequest struct {
 	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"required_if=Type 1,min=0,max=2"`
 	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型" binding:"required,min=1"`
 	//报名活动字段
-	Address        string `json:"address" form:"address" binding:"required_if=Type 2"`
+	Address        string `json:"address" form:"address" binding:"required_if=Type 2 ActivityType 1"`
 	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds" binding:"required_if=Type 2"`
 	Remarks        string `json:"remarks" form:"remarks"`
-	Qrcode         string `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2,required_without=MeetingLink"`
-	MeetingLink    string `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2,required_without=Qrcode"`
+	Qrcode         string `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2 MeetingLink ''"`
+	MeetingLink    string `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2 Qrcode ''"`
 	Contacts       string `json:"contacts" form:"contacts" binding:"required_if=Type 2"`
 	StartTime      int64  `json:"startTime" form:"startTime" binding:"required_if=Type 2"`
 	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 2"`
