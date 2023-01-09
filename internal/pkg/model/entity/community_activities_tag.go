@@ -8,6 +8,7 @@ import (
 type CommunityActivitiesTag struct {
 	Id        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	Title     string    `json:"title"`
+	Type      int       `json:"type"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }

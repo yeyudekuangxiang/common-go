@@ -55,7 +55,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/list", apiutil.Format(community.DefaultTopicController.List))
 			topicRouter.GET("/list-topic", apiutil.Format(community.DefaultTopicController.ListTopic))
 			topicRouter.GET("/detail", apiutil.Format(community.DefaultTopicController.DetailTopic)) //帖子详情
-			topicRouter.POST("/activities/tag/list", apiutil.Format(community.DefaultCommunityActivitiesTagController.List))
+			topicRouter.GET("/activities/tag-list", apiutil.Format(community.DefaultCommunityActivitiesTagController.List))
 			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
 			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
 			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
