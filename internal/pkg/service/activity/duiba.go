@@ -18,6 +18,7 @@ import (
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
+	"strings"
 	"time"
 )
 
@@ -329,6 +330,20 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			return "", errno.ErrMisMatchCondition
 		}
 		if !log.Exist {
+			return "", errno.ErrMisMatchCondition
+		}
+		break
+
+	case entity.DuiBaActivityRedBlackRankActivity:
+		isExit := false
+		VipOpenidArr := strings.Split(activity.VipOpenid, ",")
+		for _, s := range VipOpenidArr {
+			if s == userInfo.OpenId {
+				isExit = true
+				break
+			}
+		}
+		if !isExit {
 			return "", errno.ErrMisMatchCondition
 		}
 		break
