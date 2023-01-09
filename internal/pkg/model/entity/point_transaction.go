@@ -87,6 +87,10 @@ func (p PointTransactionType) Text() string {
 		return "二手交易奖励"
 	case POINT_NEW_TASK_PUBLISH_COMMODITY:
 		return "发布二手奖励"
+	case POINT_RECYCLING_SHISHANGHUISHOU:
+		return "拾尚回收"
+	case POINT_RECYCLING_DANGDANGYIXIA:
+		return "铛铛一下"
 	}
 	return "未知积分"
 }

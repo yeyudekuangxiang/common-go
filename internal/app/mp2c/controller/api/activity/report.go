@@ -39,10 +39,10 @@ var orderV2Sql = ` select order_item_list   from duiba_order where   user_id = ?
 `
 var communityCommentSql = `select  count(*)    from comment_index where   member_id  = ? and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
 `
-var communityLikeSql = `select  count(*)    from topic_like where   user_id  = 828463 and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
+var communityLikeSql = `select  count(*)    from topic_like where   user_id  = ? and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
 `
 
-var communityTopicSql = `select  count(*)    from topic where   user_id  = 828463 and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
+var communityTopicSql = `select  count(*)    from topic where   user_id  = ? and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
 `
 
 //我的碳排
@@ -96,11 +96,11 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	userId := user.ID
 	openId := user.OpenId
 
-	userId = 921216
-	openId = "oy_BA5IGl1JgkJKbD14wq_-Yorqw"
+	//userId = 921206
+	//openId = "oy_BA5EsE0mPQvll8eAqPCkBvI8Q"
 
 	//用户基本信息
-	userPage := make(map[string]string)
+	userPage := make(map[string]interface{})
 	userPage["register_time"] = user.Time.Format("2006-01-02")
 	userPage["register_days"] = fmt.Sprint(timeutils.Now().GetDiffDays(time.Now(), user.Time.Time))
 
@@ -125,12 +125,15 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		carbonFavouriteDec := decimal.NewFromFloat(carbonFavourite)
 		overPer = carbonFavouriteDec.Div(carbonTotalDec).Round(2).Mul(decimal.NewFromInt(100)).String() + "%"
 	}
-	carbonPage := make(map[string]string)
+	carbonPage := make(map[string]interface{})
 	carbonPage["favourite_type"] = carbonFavouriteType.Text()
 	carbonPage["favourite_carbon"] = util.CarbonToRate(carbonFavourite)
 	carbonPage["favourite_ratio"] = overPer
+	if carbonTotal == 0 {
+		carbonPage["no_date"] = true
+	}
 
-	/*公益开始*/
+	/*证书开始*/
 	badge := make([]badgeList, 0)
 	err = app.DB.Raw(badgeSqlV2, openId).Scan(&badge).Error
 	if err != nil {
@@ -234,7 +237,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 
 	//我的碳排
 	var questionTotal int64
-	err = app.DB.Raw(questionSql, userId).Scan(&questionTotal).Error
+	err = app.DB.Raw(questionSql, openId).Scan(&questionTotal).Error
 	if err != nil {
 		app.Logger.Error("个人减碳成就报告:获取我的碳排数据异常", err)
 	}
@@ -277,11 +280,11 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 
 	newModuleExperiencePage := make(map[string]interface{})
 	if questionTotal != 0 && !experienceHand {
-		newModuleExperiencePage["desc"] = "热爱探索绿喵新功能的你\n是“我的碳排”的种子用户\n你的碳排放等级是几级？"
+		newModuleExperiencePage["desc"] = "我的碳排"
 	} else if questionTotal == 0 && experienceHand {
-		newModuleExperiencePage["desc"] = "热爱探索绿喵新功能的你\n是“二手市集”的种子用户\n你成功交换了闲置物品吗？"
+		newModuleExperiencePage["desc"] = "二手市集"
 	} else if questionTotal != 0 && experienceHand {
-		newModuleExperiencePage["desc"] = "热爱探索绿喵新功能的你\n重大功能更新可都没错过\n你最喜欢的新功能是哪些？"
+		newModuleExperiencePage["desc"] = "重大功能更新可都没错过"
 	} else {
 		newModuleExperiencePage["no_date"] = true
 	}
