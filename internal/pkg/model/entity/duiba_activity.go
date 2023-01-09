@@ -24,6 +24,7 @@ type DuiBaActivity struct {
 	IsPhone             DuiBaActivityIsPhone
 	VipType             DuiBaActivityVipType
 	VipOpenid           string
+	VipId               int
 }
 
 type DuiBaActivityType int8
