@@ -107,7 +107,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	if ret.Val() != "" {
 		redisRet := gin.H{}
 		err := json.Unmarshal([]byte(ret.Val()), &redisRet)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		redisRet["user_page"] = userPage
