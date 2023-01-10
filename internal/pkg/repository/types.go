@@ -50,6 +50,14 @@ type GetTopicPageListBy struct {
 	Limit       int                `json:"limit"` // limit为0时不限制数量
 }
 
+type MyTopicListParams struct {
+	UserId int64 `json:"userId"`
+	Status int   `json:"status"`
+	Type   int   `json:"type"`
+	Limit  int   `json:"limit"`
+	Offset int   `json:"offset"`
+}
+
 type GetTopicCountBy struct {
 	TopicTagId int64  `json:"topicTagId"`
 	Status     int    `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架

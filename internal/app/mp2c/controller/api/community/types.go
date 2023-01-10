@@ -66,6 +66,7 @@ type UpdateTopicRequest struct {
 type MyTopicRequest struct {
 	HomePageRequest
 	Status int `json:"status" form:"status"`
+	Type   int `json:"type" form:"type"`
 	controller.PageFrom
 }
 

@@ -8,7 +8,6 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
 	community2 "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -449,7 +448,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		status = 3
 	}
 
-	list, total, err := community.DefaultTopicService.GetMyTopicList(repository.GetTopicPageListBy{
+	list, total, err := community.DefaultTopicService.GetMyTopicList(community.MyTopicListParams{
 		UserId: user.ID,
 		Status: status,
 		Limit:  form.Limit(),
