@@ -83,8 +83,6 @@ func apiRouter(router *gin.Engine) {
 		//广东小学图书馆公益捐书活动
 		authRouter.POST("/activity/answer/homepage", apiutil.Format(activityApi.DefaultAnswerController.HomePage))
 
-		authRouter.GET("/activity/report/index", apiutil.Format(activityApi.DefaultReportController.Index))
-
 		eventRouter := authRouter.Group("/event")
 		{
 			eventRouter.GET("category/list", apiutil.Format(event.DefaultEventController.GetEventCategoryList))
@@ -207,6 +205,10 @@ func apiRouter(router *gin.Engine) {
 			activityRouter.POST("/answer/put-file", apiutil.Format(activityApi.DefaultAnswerController.PutFile))
 			activityRouter.GET("/answer/get-user-school", apiutil.Format(activityApi.DefaultAnswerController.GetUserSchool))
 			activityRouter.POST("/answer/close-late-tips", apiutil.Format(activityApi.DefaultAnswerController.CloseLateTips))
+
+			//年终报告
+			activityRouter.GET("/report/index", apiutil.Format(activityApi.DefaultReportController.Index))
+
 		}
 
 		//社区2.0 文章相关路由
