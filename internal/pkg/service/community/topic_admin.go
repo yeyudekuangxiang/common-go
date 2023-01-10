@@ -306,7 +306,7 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topi
 	return topic, isFirst, nil
 }
 
-func (srv TopicAdminService) GetCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicAdminService) GetCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Group("obj_id").

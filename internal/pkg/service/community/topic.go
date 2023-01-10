@@ -50,8 +50,8 @@ type TopicService struct {
 	activityTagModel community.ActivitiesTagModel
 }
 
-//将 entity.Topic 列表填充为 TopicDetail 列表
-func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
+//将 entity.Topic 列表填充为 TopicDetailResp 列表
+func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetailResp, error) {
 	//查询点赞信息
 	topicIds := make([]int64, 0)
 	for _, topic := range topicList {
@@ -69,7 +69,7 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	}
 
 	//整理数据
-	detailList := make([]TopicDetail, 0)
+	detailList := make([]TopicDetailResp, 0)
 	uidsMap := make(map[int64]struct{}, len(topicList))
 	uids := make([]int64, 0)
 	uinfoMap := make(map[int64]entity.ShortUser, 0)
@@ -91,7 +91,7 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	}
 
 	for _, topic := range topicList {
-		detailList = append(detailList, TopicDetail{
+		detailList = append(detailList, TopicDetailResp{
 			Topic:         topic,
 			IsLike:        topicLikeMap[topic.Id],
 			UpdatedAtDate: topic.UpdatedAt.Format("01-02"),
@@ -102,8 +102,8 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	return detailList, nil
 }
 
-// GetTopicDetailPageList 通过topic表直接查询获取内容列表
-func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+// 推荐list
+func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic, int64, error) {
 	// page = page-1, pagesize = 10-1
 	// page = 1, pageSize = 10; page = 0, pagesize = 9
 	// page = 2, pageSize = 10; page = 10, pagesize = 19
@@ -197,16 +197,20 @@ func (srv TopicService) ZAddTopic() {
 }
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
-func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	if param.Order == "recommend" && param.TopicTagId == 0 {
-		list, i, err := srv.GetTopicDetailPageList(param)
+func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, int64, error) {
+	if params.Label == "recommend" && params.TopicTagId == 0 {
+		list, i, err := srv.GetRecommendList(params)
 		if err != nil {
 			return nil, 0, err
 		}
 		return list, i, nil
 	}
-
-	list, i, err := srv.topicModel.GetTopicList(param)
+	cond := repository.GetTopicPageListBy{}
+	err := util.MapTo(&params, &cond)
+	if err != nil {
+		return nil, 0, err
+	}
+	list, i, err := srv.topicModel.GetTopicList(cond)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -221,8 +225,8 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 	return topic, i, nil
 }
 
-// GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
-//func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+// GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetRecommendList 方法返回数据
+//func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetailResp, int64, error) {
 //
 //	topicList, total := srv.topicModel.GetFlowPageList(repository.GetTopicFlowPageListBy{
 //		Offset:     param.Offset,
@@ -234,7 +238,7 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 //	})
 //	if total == 0 {
 //		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
-//		return srv.GetTopicDetailPageList(param)
+//		return srv.GetRecommendList(param)
 //	}
 //
 //	//更新曝光和查看次数
@@ -747,7 +751,7 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 	return nil
 }
 
-func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).
 		Select("root_comment_id as total_id, count(*) as total").
 		Where("state = ?", 0).
@@ -757,7 +761,7 @@ func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) 
 	return result
 }
 
-func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("to_comment_id = 0").
@@ -767,7 +771,7 @@ func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount)
 	return result
 }
 
-func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("state = ?", 0).

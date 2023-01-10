@@ -45,7 +45,7 @@ type GetTopicPageListBy struct {
 	UserId      int64              `json:"userId"` // 用于查询用户对帖子是否点赞
 	OrderByList entity.OrderByList `json:"orderByList"`
 	OrderBy     entity.OrderBy     `json:"orderBy"`
-	Order       string             `json:"order"`
+	Label       string             `json:"label"`
 	Offset      int                `json:"offset"`
 	Limit       int                `json:"limit"` // limit为0时不限制数量
 }

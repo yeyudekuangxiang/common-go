@@ -36,7 +36,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	list, total, err := community.DefaultTopicService.GetTopicDetailPageList(repository.GetTopicPageListBy{
+	list, total, err := community.DefaultTopicService.GetRecommendList(community.TopicListParams{
 		Offset: form.Page,
 		Limit:  form.PageSize,
 	})
@@ -175,14 +175,14 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 
-	params := repository.GetTopicPageListBy{
+	params := community.TopicListParams{
 		TopicTagId: form.TopicTagId,
 		Offset:     form.Offset(),
 		Limit:      form.Limit(),
-		Order:      form.Order,
+		Label:      form.Order,
 	}
 
-	if form.Order == "recommend" && form.TopicTagId == 0 {
+	if params.Label == "recommend" && params.TopicTagId == 0 {
 		params.Limit = form.PageSize
 		params.Offset = form.Page
 	}
