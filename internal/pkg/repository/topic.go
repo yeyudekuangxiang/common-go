@@ -150,7 +150,7 @@ func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, i
 	return topList, total, nil
 }
 
-func (d defaultTopicModel) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
@@ -168,37 +168,38 @@ func (d defaultTopicModel) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic,
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
 
-	if by.ID != 0 {
-		query.Where("topic.id = ?", by.ID)
-	} else if len(by.Ids) > 0 {
-		query.Where("topic.id in ?", by.Ids)
+	if params.ID != 0 {
+		query.Where("topic.id = ?", params.ID)
+	} else if len(params.Ids) > 0 {
+		query.Where("topic.id in ?", params.Ids)
 	}
 
-	if by.TopicTagId != 0 {
-		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", by.TopicTagId)
+	if params.TopicTagId != 0 {
+		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
 	}
-	if by.UserId != 0 {
-		query.Where("topic.user_id = ?", by.UserId)
+	if params.UserId != 0 {
+		query.Where("topic.user_id = ?", params.UserId)
 	}
-	if by.Status != 0 {
-		query.Where("topic.status = ?", by.Status)
+	if params.Status != 0 {
+		query.Where("topic.status = ?", params.Status)
 	} else {
 		query.Where("topic.status = ?", entity.TopicStatusPublished)
 	}
+
+	if params.Label == "activity" {
+		query.Where("topic.type = ?", 2)
+	}
+
 	query = query.Count(&total).
-		Group("topic.id")
-	if by.Order == "time" {
-		query.Order("topic.created_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
-	} else {
-		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
+		Group("topic.id").
+		Order("id desc")
+
+	if params.Limit != 0 {
+		query.Limit(params.Limit)
 	}
 
-	if by.Limit != 0 {
-		query.Limit(by.Limit)
-	}
-
-	if by.Offset != 0 {
-		query.Offset(by.Offset)
+	if params.Offset != 0 {
+		query.Offset(params.Offset)
 	}
 
 	err := query.Find(&topList).Error

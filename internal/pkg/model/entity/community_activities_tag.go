@@ -7,6 +7,8 @@ type CommunityActivitiesTag struct {
 	Id        int64      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Title     string     `json:"title"`
 	Type      int        `json:"type"`
+	Code      string     `json:"code"`
+	Category  int        `json:"category"`
 	CreatedAt model.Time `json:"createdAt"`
 	UpdatedAt model.Time `json:"updatedAt"`
 }
