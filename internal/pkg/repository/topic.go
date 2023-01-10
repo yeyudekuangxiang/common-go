@@ -19,7 +19,7 @@ type (
 		AddTopicSeeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
 		UpdateColumn(id int64, key string, value interface{}) error
-		GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
+		GetMyTopic(params MyTopicListParams) ([]*entity.Topic, int64, error)
 		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
@@ -115,7 +115,7 @@ func (d defaultTopicModel) ChangeTopicCollectionCount(id int64, column string, i
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(column, gorm.Expr(column+"+?", incr)).Error
 }
 
-func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
@@ -132,9 +132,11 @@ func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, i
 		}).
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
+
 	if by.Status != 0 {
 		query.Where("topic.status = ?", by.Status)
 	}
+
 	err := query.Where("topic.user_id = ?", by.UserId).
 		Count(&total).
 		Group("topic.id").

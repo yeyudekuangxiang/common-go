@@ -217,8 +217,14 @@ func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, i
 	return list, i, nil
 }
 
-func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	topic, i, err := srv.topicModel.GetMyTopic(param)
+func (srv TopicService) GetMyTopicList(params MyTopicListParams) ([]*entity.Topic, int64, error) {
+	topic, i, err := srv.topicModel.GetMyTopic(repository.MyTopicListParams{
+		UserId: params.UserId,
+		Status: params.Status,
+		Type:   params.Type,
+		Offset: params.Offset,
+		Limit:  params.Limit,
+	})
 	if err != nil {
 		return nil, 0, err
 	}

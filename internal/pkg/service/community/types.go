@@ -31,6 +31,14 @@ type TopicListParams struct {
 	Limit       int                `json:"limit"` // limit为0时不限制数量
 }
 
+type MyTopicListParams struct {
+	UserId int64 `json:"userId"`
+	Status int   `json:"status"`
+	Type   int   `json:"type"`
+	Offset int   `json:"offset"`
+	Limit  int   `json:"limit"`
+}
+
 type TopicDetailResp struct {
 	entity.Topic
 	IsLike        bool             `json:"isLike"`
