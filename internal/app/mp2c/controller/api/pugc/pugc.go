@@ -36,7 +36,7 @@ var DefaultPugcController = PugcController{}
 type PugcController struct {
 }
 
-func (receiver PugcController) TestMqV2(c *gin.Context) (gin.H, error) {
+func (receiver PugcController) TestMqV3(c *gin.Context) (gin.H, error) {
 
 	service := messageSrv.MessageService{}
 	service.SendMessageToCarbonPk()
