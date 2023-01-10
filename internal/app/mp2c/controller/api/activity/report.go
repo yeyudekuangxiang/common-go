@@ -1,10 +1,12 @@
 package activity
 
 import (
+	contextRedis "context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util"
@@ -18,7 +20,7 @@ var DefaultReportController = ReportController{}
 type ReportController struct {
 }
 
-var carbonSql = `select type,sum(value) from carbon_transaction where   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' and  openid = ?  group by "type"`
+var carbonSql = `select type,sum(value) from carbon_transaction where     openid = ?  and  created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01'  group by "type"`
 
 var badgeSql = `SELECT event.event_category_id  FROM badge LEFT JOIN event on  event.product_item_id = badge.product_item_id  where  create_time >= '2022-01-01 00:00:01' and create_time <= '2023-01-01 00:00:01' and  openid = ?  
 `
@@ -96,14 +98,21 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	userId := user.ID
 	openId := user.OpenId
 
-	//userId = 921206
-	//openId = "oy_BA5EsE0mPQvll8eAqPCkBvI8Q"
-
 	//用户基本信息
 	userPage := make(map[string]interface{})
 	userPage["register_time"] = user.Time.Format("2006-01-02")
 	userPage["register_days"] = fmt.Sprint(timeutils.Now().GetDiffDays(time.Now(), user.Time.Time))
-
+	//缓存有数据，走缓存
+	ret := app.Redis.HGet(contextRedis.Background(), config.RedisKey.ReportYear, openId)
+	if ret.Val() != "" {
+		redisRet := gin.H{}
+		err := json.Unmarshal([]byte(ret.Val()), &redisRet)
+		if err == nil {
+			return nil, err
+		}
+		redisRet["user_page"] = userPage
+		return redisRet, nil
+	}
 	//碳量
 	carbon := make([]carbonList, 0)
 	err := app.DB.Raw(carbonSql, openId).Scan(&carbon).Error
@@ -126,11 +135,12 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		overPer = carbonFavouriteDec.Div(carbonTotalDec).Round(2).Mul(decimal.NewFromInt(100)).String() + "%"
 	}
 	carbonPage := make(map[string]interface{})
-	carbonPage["favourite_type"] = carbonFavouriteType.Text()
-	carbonPage["favourite_carbon"] = util.CarbonToRate(carbonFavourite)
-	carbonPage["favourite_ratio"] = overPer
 	if carbonTotal == 0 {
 		carbonPage["no_date"] = true
+	} else {
+		carbonPage["favourite_type"] = carbonFavouriteType.Text()
+		carbonPage["favourite_carbon"] = util.CarbonToRate(carbonFavourite)
+		carbonPage["favourite_ratio"] = overPer
 	}
 
 	/*证书开始*/
@@ -182,7 +192,6 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Error("个人减碳成就报告:获取订单数据异常", err)
 	}
-	orderPage["order_total"] = orderTotal
 
 	var orderItemStr string
 	err = app.DB.Raw(orderV2Sql, userId).Scan(&orderItemStr).Error
@@ -200,10 +209,12 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 			maxPointGoods = maxPointGoods + item.Title + " "
 		}
 	}
-	orderPage["max_point_goods"] = maxPointGoods
 
 	if orderTotal == 0 {
 		orderPage["no_date"] = true
+	} else {
+		orderPage["max_point_goods"] = maxPointGoods
+		orderPage["order_total"] = orderTotal
 	}
 	communityPage := make(map[string]interface{})
 
@@ -213,7 +224,6 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Error("个人减碳成就报告:获取酷喵圈评论数据异常", err)
 	}
-	communityPage["comment_topic"] = communityCommentTotal
 
 	//点赞
 	var communityFavouriteTotal int64
@@ -221,7 +231,6 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Error("个人减碳成就报告:获取酷喵圈帖子点赞数据异常", err)
 	}
-	communityPage["favourite_topic"] = communityFavouriteTotal
 
 	//发帖
 	var communityTopicTotal int64
@@ -229,10 +238,13 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Error("个人减碳成就报告:获取酷喵圈发帖数据异常", err)
 	}
-	communityPage["total_topic"] = communityTopicTotal
 
 	if communityCommentTotal == 0 && communityFavouriteTotal == 0 && communityTopicTotal == 0 {
 		communityPage["no_date"] = true
+	} else {
+		communityPage["comment_topic"] = communityCommentTotal
+		communityPage["favourite_topic"] = communityFavouriteTotal
+		communityPage["total_topic"] = communityTopicTotal
 	}
 
 	//我的碳排
@@ -307,7 +319,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	lastPage["topic"] = communityTopicTotal
 	lastPage["identity"] = identity
 
-	return gin.H{
+	returnRet := gin.H{
 		"user_page":                  userPage,
 		"carbon_page":                carbonPage,
 		"badge_page":                 badgePage,
@@ -316,6 +328,11 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		"community_page":             communityPage,
 		"new_module_experience_page": newModuleExperiencePage,
 		"last_page":                  lastPage,
-	}, nil
-
+	}
+	marshal, err := json.Marshal(returnRet)
+	if err != nil {
+		return nil, err
+	}
+	app.Redis.HSet(contextRedis.Background(), config.RedisKey.ReportYear, openId, string(marshal))
+	return returnRet, nil
 }
