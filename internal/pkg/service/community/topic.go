@@ -152,9 +152,6 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 			if topic.Activity.SignupDeadline.Before(time.Now()) {
 				topic.Activity.Status = 2
 			}
-			if topic.Status != 3 {
-				topic.Activity.Status = 3
-			}
 		}
 		topicMap[topic.Id] = topic
 	}
@@ -224,9 +221,6 @@ func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, i
 			topic.Activity.Status = 1
 			if topic.Activity.SignupDeadline.Before(time.Now()) {
 				topic.Activity.Status = 2
-			}
-			if topic.Status != 3 {
-				topic.Activity.Status = 3
 			}
 		}
 	}
