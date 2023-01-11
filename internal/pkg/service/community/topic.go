@@ -639,7 +639,6 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 		Type:      params.Type,
 		CreatedAt: model.Time{Time: time.Now()},
 		UpdatedAt: model.Time{},
-		DeletedAt: model.Time{},
 	}
 
 	if len(params.TagIds) > 0 {

@@ -53,11 +53,12 @@ func (d defaultCommunityActivitiesSignupModel) FindSignupList(params FindAllActi
 	if params.RealName != "" {
 		db.Where("real_name = ?", params.RealName)
 	}
+
 	if params.Wechat != "" {
 		db.Where("wechat = ?", params.Wechat)
 	}
 
-	err := db.Count(&total).Find(&list).Error
+	err := db.Where("signup_status = 1").Count(&total).Find(&list).Error
 	if err != nil {
 		return nil, 0, err
 	}
