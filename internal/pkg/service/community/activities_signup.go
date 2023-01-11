@@ -51,9 +51,6 @@ func (srv defaultCommunityActivitiesSignupService) GetPageList(params community.
 		if item.Topic.Activity.SignupDeadline.Before(time.Now()) {
 			item.Topic.Activity.Status = 2
 		}
-		if item.Topic.Activity.Status != 3 {
-			item.Topic.Activity.Status = 3
-		}
 	}
 	return list, total, nil
 }

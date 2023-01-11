@@ -509,9 +509,6 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		if item.Activity.SignupDeadline.Before(time.Now()) {
 			item.Activity.Status = 2
 		}
-		if item.Status != 3 {
-			item.Activity.Status = 3
-		}
 		resList = append(resList, item)
 	}
 
