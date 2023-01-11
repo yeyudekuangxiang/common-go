@@ -109,9 +109,9 @@ func (srv TopicAdminService) CreateTopic(userId int64, title, content string, ta
 
 	//tag
 	if len(tagIds) > 0 {
-		tagModel := make([]*entity.Tag, 0)
+		tagModel := make([]entity.Tag, 0)
 		for _, tagId := range tagIds {
-			tagModel = append(tagModel, &entity.Tag{
+			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
 			})
 		}
@@ -286,7 +286,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (*
 // Top 置顶
 func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.AdminFindById(topicId)
+	topic := srv.topicModel.FindById(topicId)
 
 	var isFirst bool
 
@@ -315,7 +315,7 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool,
 // Essence 精华
 func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.AdminFindById(topicId)
+	topic := srv.topicModel.FindById(topicId)
 	var isFirst bool
 	if topic.Id == 0 {
 		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")

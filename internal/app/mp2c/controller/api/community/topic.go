@@ -455,6 +455,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	list, total, err := community.DefaultTopicService.GetMyTopicList(community.MyTopicListParams{
 		UserId: user.ID,
 		Status: status,
+		Type:   form.Type,
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
 	})

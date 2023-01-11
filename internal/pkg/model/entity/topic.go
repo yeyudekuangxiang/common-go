@@ -49,7 +49,7 @@ type Topic struct {
 	UpdatedAt       model.Time          `json:"updatedAt"`
 	DeletedAt       model.Time          `json:"deletedAt"`
 	Type            int                 `json:"type"` // 1 文章 2 活动
-	Tags            []*Tag              `json:"tags" gorm:"many2many:topic_tag;foreignKey:Id"`
+	Tags            []Tag               `json:"tags" gorm:"many2many:topic_tag"`
 	Comment         []CommentIndex      `json:"comment" gorm:"foreignKey:ObjId"`
 	Activity        CommunityActivities `json:"activity" gorm:"foreignKey:Id"`
 	//表里没有的字段
@@ -57,7 +57,7 @@ type Topic struct {
 	IsCollection int `json:"isCollection,omitempty" gorm:"-"`
 }
 
-func (t Topic) TableName() string {
+func (Topic) TableName() string {
 	return "topic"
 }
 
