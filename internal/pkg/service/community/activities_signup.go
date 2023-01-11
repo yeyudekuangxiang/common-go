@@ -79,7 +79,7 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		return err
 	}
 	if signup.Id != 0 {
-		return nil
+		return errno.ErrCommon.WithMessage("不能重复报名哦")
 	}
 
 	signupModel := &entity.CommunityActivitiesSignup{}

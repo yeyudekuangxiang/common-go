@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"gorm.io/gorm"
 	"mio/internal/pkg/model"
 )
 
@@ -47,7 +48,7 @@ type Topic struct {
 	DownTime        model.Time          `json:"downTime"`    //下架时间
 	CreatedAt       model.Time          `json:"createdAt"`
 	UpdatedAt       model.Time          `json:"updatedAt"`
-	DeletedAt       model.Time          `json:"deletedAt"`
+	DeletedAt       gorm.DeletedAt      `json:"deletedAt"`
 	Type            int                 `json:"type"` // 1 文章 2 活动
 	Tags            []Tag               `json:"tags" gorm:"many2many:topic_tag"`
 	Comment         []CommentIndex      `json:"comment" gorm:"foreignKey:ObjId"`
@@ -62,11 +63,12 @@ func (Topic) TableName() string {
 }
 
 type APITopicActivities struct {
-	Id       int64               `json:"id" form:"id"`
-	Title    string              `gorm:"size:128" json:"title" form:"title"`                            // 标题
-	UserId   int64               `gorm:"not null;index:idx_topic_user_id;" json:"userId" form:"userId"` // 用户
-	User     ShortUser           `json:"user"  gorm:"foreignKey:UserId"`
-	Activity CommunityActivities `json:"activity" gorm:"foreignKey:Id"`
+	Id        int64               `json:"id" form:"id"`
+	Title     string              `gorm:"size:128" json:"title" form:"title"` // 标题
+	DeletedAt model.Time          `json:"deletedAt"`
+	UserId    int64               `gorm:"not null;index:idx_topic_user_id;" json:"userId" form:"userId"` // 用户
+	User      ShortUser           `json:"user"  gorm:"foreignKey:UserId"`
+	Activity  CommunityActivities `json:"activity" gorm:"foreignKey:Id"`
 }
 
 func (APITopicActivities) TableName() string {
