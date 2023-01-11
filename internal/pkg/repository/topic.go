@@ -26,6 +26,7 @@ type (
 		GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error)
 		GetTopList() ([]*entity.Topic, error)
 		GetImportTopic() ([]*entity.Topic, error)
+		SoftDelete(topic *entity.Topic) error
 		Updates(topic *entity.Topic) error
 		UpdateColumn(id int64, key string, value interface{}) error
 		UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error
@@ -35,6 +36,13 @@ type (
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicModel) SoftDelete(topic *entity.Topic) error {
+	if err := d.ctx.DB.Delete(topic).Error; err != nil {
+		return err
+	}
+	return nil
+}
 
 func (d defaultTopicModel) Updates(topic *entity.Topic) error {
 	db := d.ctx.DB
@@ -174,6 +182,7 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
+		Preload("Tags").
 		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
@@ -192,12 +201,16 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 		query.Where("topic.id in ?", params.Ids)
 	}
 
-	if params.TopicTagId != 0 {
-		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
+	if params.Label == "recommend" && len(params.Rids) > 0 {
+		query.Where("topic.id in ?", params.Rids)
 	}
 
 	if params.UserId != 0 {
 		query.Where("topic.user_id = ?", params.UserId)
+	}
+
+	if params.Label == "activity" {
+		query.Where("topic.type = ?", 2)
 	}
 
 	if params.Status != 0 {
@@ -206,16 +219,11 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 		query.Where("topic.status = ?", 3)
 	}
 
-	if params.Label == "activity" {
-		query.Where("topic.type = ?", 2)
-	}
-
-	if params.Label == "recommend" && len(params.Rids) > 0 {
-		query.Where("topic.id in ?", params.Rids)
+	if params.TopicTagId != 0 {
+		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
 	}
 
 	query = query.Count(&total).
-		Preload("Tags").
 		Group("topic.id").
 		Order("id desc")
 
