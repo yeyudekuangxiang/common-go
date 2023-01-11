@@ -12,7 +12,7 @@ import (
 type (
 	ActivitiesSignupService interface {
 		GetPageList(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignup, int64, error)
-		GetOne(id int64) (*entity.CommunityActivitiesSignup, error)
+		GetSignupInfo(id int64) (*entity.APIActivitiesSignup, error)
 		FindAll(params community.FindAllActivitiesSignupParams) ([]*entity.CommunityActivitiesSignup, int64, error)
 		FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error)
 		Signup(params SignupParams) error    //报名
@@ -58,13 +58,13 @@ func (srv defaultCommunityActivitiesSignupService) GetPageList(params community.
 	return list, total, nil
 }
 
-func (srv defaultCommunityActivitiesSignupService) GetOne(id int64) (*entity.CommunityActivitiesSignup, error) {
-	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{Id: id})
+func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(id int64) (*entity.APIActivitiesSignup, error) {
+	signup, err := srv.signupModel.FindOneAPISignup(community.FindOneActivitiesSignupParams{Id: id})
 	if err != nil {
-		return &entity.CommunityActivitiesSignup{}, errno.ErrInternalServer.WithMessage(err.Error())
+		return &entity.APIActivitiesSignup{}, errno.ErrInternalServer.WithMessage(err.Error())
 	}
 	if signup.Id == 0 {
-		return &entity.CommunityActivitiesSignup{}, errno.ErrCommon.WithMessage("未找到该标签")
+		return &entity.APIActivitiesSignup{}, errno.ErrCommon.WithMessage("未找到该标签")
 	}
 	return signup, nil
 }

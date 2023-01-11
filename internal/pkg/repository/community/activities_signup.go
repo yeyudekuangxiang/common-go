@@ -148,7 +148,7 @@ func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneAc
 	if params.UserId != 0 {
 		db.Where("user_id = ?", params.UserId)
 	}
-	err := db.First(&resp).Error
+	err := db.Unscoped().First(&resp).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return &entity.APIActivitiesSignup{}, nil
@@ -189,7 +189,7 @@ func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllAc
 		db.Where("wechat = ?", params.Wechat)
 	}
 
-	err := db.Count(&total).Offset(params.Offset).Limit(params.Limit).Find(&list).Error
+	err := db.Count(&total).Offset(params.Offset).Limit(params.Limit).Unscoped().Find(&list).Error
 	if err != nil {
 		return nil, 0, err
 	}

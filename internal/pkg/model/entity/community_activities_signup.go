@@ -40,7 +40,7 @@ type APIActivitiesSignup struct {
 	CancelTime   model.Time         `json:"cancelTime"`
 	SignupStatus int                `json:"signupStatus"`
 	TopicId      int64              `json:"topicId"`
-	Topic        APITopicActivities `json:"topic" gorm:"foreignKey:TopicId"`
+	Topic        APITopicActivities `json:"topic,omitempty" gorm:"foreignKey:TopicId"`
 }
 
 type APISignupList struct {

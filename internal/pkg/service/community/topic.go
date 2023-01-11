@@ -773,9 +773,9 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 		return errno.ErrCommon.WithMessage("无权限删除")
 	}
 
-	//if err := srv.topicModel.UpdateColumn(topicModel.Id, "status", ); err != nil {
-	//	return errno.ErrInternalServer.WithMessage(err.Error())
-	//}
+	if err := srv.topicModel.SoftDelete(topicModel); err != nil {
+		return errno.ErrInternalServer.WithMessage(err.Error())
+	}
 	return nil
 }
 

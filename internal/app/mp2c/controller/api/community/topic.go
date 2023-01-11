@@ -595,6 +595,25 @@ func (ctr *TopicController) MySignup(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
+	form := IdRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	//user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	signInfo, err := signupService.GetSignupInfo(form.ID)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"data": signInfo,
+	}, nil
+}
+
 //报名数据
 func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
