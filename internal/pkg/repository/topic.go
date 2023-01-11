@@ -13,12 +13,12 @@ type (
 	TopicModel interface {
 		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
+		AdminFindById(topicId int64) *entity.Topic
 		FindOneTopic(topicId int64) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		AddTopicSeeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
-		UpdateColumn(id int64, key string, value interface{}) error
 		GetMyTopic(params MyTopicListParams) ([]*entity.Topic, int64, error)
 		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
@@ -27,13 +27,27 @@ type (
 		GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error)
 		GetTopList() ([]*entity.Topic, error)
 		GetImportTopic() ([]*entity.Topic, error)
-		Updates(cond UpdatesTopicCond, upColumns map[string]interface{}) error
+		Updates(topic *entity.Topic) error
+		UpdateColumn(id int64, key string, value interface{}) error
+		UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error
 	}
 
 	defaultTopicModel struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicModel) Updates(topic *entity.Topic) error {
+	db := d.ctx.DB
+	if topic.Type == 2 {
+		db.Session(&gorm.Session{FullSaveAssociations: true})
+	}
+	err := db.Updates(topic).Error
+	if err == nil {
+		return nil
+	}
+	return err
+}
 
 func (d defaultTopicModel) GetImportTopic() ([]*entity.Topic, error) {
 	var resp []*entity.Topic
@@ -185,11 +199,15 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 	if params.Status != 0 {
 		query.Where("topic.status = ?", params.Status)
 	} else {
-		query.Where("topic.status = ?", entity.TopicStatusPublished)
+		query.Where("topic.status = ?", 3)
 	}
 
 	if params.Label == "activity" {
 		query.Where("topic.type = ?", 2)
+	}
+
+	if params.Label == "recommend" {
+		query.Where("topic.id in ?", params.Rids)
 	}
 
 	query = query.Count(&total).
@@ -281,6 +299,21 @@ func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
 	return &resp
 }
 
+func (d defaultTopicModel) AdminFindById(topicId int64) *entity.Topic {
+	var resp entity.Topic
+	err := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Preload("Activity").
+		Where("id = ?", topicId).
+		First(&resp).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+
+	return &resp
+}
+
 func (d defaultTopicModel) Save(topic *entity.Topic) error {
 	return d.ctx.DB.Save(topic).Error
 }
@@ -340,7 +373,7 @@ func (d defaultTopicModel) UpdateColumn(id int64, key string, value interface{})
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(key, value).Error
 }
 
-func (d defaultTopicModel) Updates(cond UpdatesTopicCond, upColumns map[string]interface{}) error {
+func (d defaultTopicModel) UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error {
 	query := d.ctx.DB.Model(&entity.Topic{})
 	if cond.Id != 0 {
 		query.Where("id = ?", cond.Id)

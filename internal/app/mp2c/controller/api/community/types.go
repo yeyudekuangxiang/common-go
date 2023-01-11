@@ -43,6 +43,7 @@ type CreateTopicRequest struct {
 	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"required_if=Type 1,min=0,max=2"`
 	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型" binding:"required,min=1"`
 	//报名活动字段
+	Region         string `json:"region" form:"region" binding:"required_if=Type 2 ActivityType 1"`
 	Address        string `json:"address" form:"address" binding:"required_if=Type 2 ActivityType 1"`
 	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds" binding:"required_if=Type 2"`
 	Remarks        string `json:"remarks" form:"remarks"`

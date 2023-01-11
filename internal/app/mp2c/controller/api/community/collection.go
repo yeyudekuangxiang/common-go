@@ -32,7 +32,7 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	resList := make([]*entity.TopicItemRes, 0)
+	resList := make([]*entity.Topic, 0)
 
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
@@ -60,16 +60,16 @@ func (ctr CollectionController) TopicCollection(c *gin.Context) (gin.H, error) {
 
 	//组装数据---点赞数据 收藏数据
 	for _, item := range collections {
-		res := item.TopicItemRes()
+		//res := item.TopicItemRes()
 		//评论数量
-		res.CommentCount = topic2comment[res.Id]
+		item.CommentCount = topic2comment[item.Id]
 		//是否点赞
-		if _, ok := likeMap[res.Id]; ok {
-			res.IsLike = 1
+		if _, ok := likeMap[item.Id]; ok {
+			item.IsLike = 1
 		}
 		//是否收藏
-		res.IsCollection = 1
-		resList = append(resList, res)
+		item.IsCollection = 1
+		resList = append(resList, item)
 	}
 
 	return gin.H{

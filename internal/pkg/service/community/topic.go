@@ -123,21 +123,15 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 
 	total := app.Redis.ZCard(srv.ctx.Context, config.RedisKey.TopicRank).Val()
 
-	topicList, err := srv.topicModel.GetTopicListV2(repository.GetTopicPageListBy{
+	topicList, _, err := srv.topicModel.GetTopicList(repository.GetTopicPageListBy{
 		Rids: ids,
 	})
 
 	if err != nil {
 		return nil, 0, err
 	}
-
-	//按ids顺序排序
-	topicMap := make(map[int64]*entity.Topic, len(topicList))
+	//response
 	resultList := make([]*entity.Topic, 0)
-
-	for _, topic := range topicList {
-		topicMap[topic.Id] = topic
-	}
 
 	//组装置顶数据
 	if param.Offset == 1 {
@@ -150,6 +144,19 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 		}
 	}
 
+	//按ids顺序排序;处理activity
+	topicMap := make(map[int64]*entity.Topic, len(topicList))
+	for _, topic := range topicList {
+		if topic.Type == 2 {
+			if topic.Activity.SignupDeadline.Before(time.Now()) {
+				topic.Activity.Status = 2
+			}
+			if topic.Status != 3 {
+				topic.Activity.Status = 3
+			}
+		}
+		topicMap[topic.Id] = topic
+	}
 	for _, id := range ids {
 		int64Id, _ := strconv.ParseInt(id, 10, 64)
 		if _, ok := topicMap[int64Id]; ok {
@@ -211,6 +218,18 @@ func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, i
 		return nil, 0, err
 	}
 	list, i, err := srv.topicModel.GetTopicList(cond)
+	for _, topic := range list {
+		if topic.Type == 2 {
+			topic.Activity.Status = 1
+			if topic.Activity.SignupDeadline.Before(time.Now()) {
+				topic.Activity.Status = 2
+			}
+			if topic.Status != 3 {
+				topic.Activity.Status = 3
+			}
+		}
+	}
+
 	if err != nil {
 		return nil, 0, err
 	}
@@ -618,14 +637,15 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 		Status:    entity.TopicStatusNeedVerify,
 		Type:      params.Type,
 		CreatedAt: model.Time{Time: time.Now()},
-		UpdatedAt: model.Time{Time: time.Now()},
+		UpdatedAt: model.Time{},
+		DeletedAt: model.Time{},
 	}
 
 	if len(params.TagIds) > 0 {
 		//tag
-		tagModel := make([]entity.Tag, 0)
+		tagModel := make([]*entity.Tag, 0)
 		for _, tagId := range params.TagIds {
-			tagModel = append(tagModel, entity.Tag{
+			tagModel = append(tagModel, &entity.Tag{
 				Id: tagId,
 			})
 		}
@@ -640,6 +660,7 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 		topicModel.Activity = entity.CommunityActivities{
 			Type:           params.ActivityType,
 			Address:        params.Address,
+			Region:         params.Region,
 			TagIds:         params.ActivityTagIds,
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
@@ -721,7 +742,7 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 		}
 	}
 
-	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
+	if err := srv.topicModel.Updates(topicModel).Error; err != nil {
 		return topicModel, errno.ErrCommon.WithMessage("帖子更新失败")
 	}
 	return topicModel, nil
@@ -751,9 +772,9 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 		return errno.ErrCommon.WithMessage("无权限删除")
 	}
 
-	if err := app.DB.Delete(&topicModel).Error; err != nil {
-		return errno.ErrInternalServer
-	}
+	//if err := srv.topicModel.UpdateColumn(topicModel.Id, "status", ); err != nil {
+	//	return errno.ErrInternalServer.WithMessage(err.Error())
+	//}
 	return nil
 }
 
@@ -845,7 +866,7 @@ func (srv TopicService) SetWeekTopic() error {
 	//更新uMapToTopic中的50篇文章
 	cond := repository.UpdatesTopicCond{Ids: uSliceToTopic, IsEssence: -1}
 	upColumns := map[string]interface{}{"created_at": time.Now(), "is_essence": 1}
-	err = srv.topicModel.Updates(cond, upColumns)
+	err = srv.topicModel.UpdatesColumn(cond, upColumns)
 	if err != nil {
 		return err
 	}

@@ -150,7 +150,45 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	adminTopicService := community.NewTopicAdminService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	topic, err := adminTopicService.DeleteTopic(form.ID, form.Reason)
+	topic, err := adminTopicService.SoftDeleteTopic(form.ID, form.Reason)
+
+	if err != nil {
+		return nil, err
+	}
+	if topic.Status == 2 || topic.Status == 4 {
+		key := config.RedisKey.TopicRank
+		app.Redis.ZRem(ctx.Context, key, topic.Id)
+	}
+	//发消息
+	err = messageService.SendMessage(message.SendWebMessage{
+		SendId:       0,
+		RecId:        topic.User.ID,
+		Key:          "down_topic",
+		TurnId:       topic.Id,
+		TurnType:     message.MsgTurnTypeArticle,
+		Type:         message.MsgTypeSystem,
+		MessageNotes: topic.Title,
+	})
+
+	if err != nil {
+		app.Logger.Errorf("【文章下架】站内信发送失败:%s", err.Error())
+	}
+
+	return nil, nil
+}
+
+func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
+	form := ChangeTopicStatus{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	//更新帖子
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	adminTopicService := community.NewTopicAdminService(ctx)
+	messageService := message.NewWebMessageService(ctx)
+
+	topic, err := adminTopicService.DownTopic(form.ID, form.Reason)
 
 	if err != nil {
 		return nil, err
