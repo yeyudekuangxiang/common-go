@@ -124,7 +124,8 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 	total := app.Redis.ZCard(srv.ctx.Context, config.RedisKey.TopicRank).Val()
 
 	topicList, _, err := srv.topicModel.GetTopicList(repository.GetTopicPageListBy{
-		Rids: ids,
+		Label: "recommend",
+		Rids:  ids,
 	})
 
 	if err != nil {
@@ -643,9 +644,9 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 
 	if len(params.TagIds) > 0 {
 		//tag
-		tagModel := make([]*entity.Tag, 0)
+		tagModel := make([]entity.Tag, 0)
 		for _, tagId := range params.TagIds {
-			tagModel = append(tagModel, &entity.Tag{
+			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
 			})
 		}

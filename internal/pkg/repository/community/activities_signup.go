@@ -162,7 +162,7 @@ func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllAc
 	list := make([]*entity.APIActivitiesSignup, 0)
 	var total int64
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
-		Preload("APITopic").Preload("APITopic.User").Preload("APITopic.Activity")
+		Preload("Topic").Preload("Topic.User").Preload("Topic.Activity")
 
 	if params.TopicId != 0 {
 		db.Where("topic_id = ?", params.TopicId)

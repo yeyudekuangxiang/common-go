@@ -13,7 +13,6 @@ type (
 	TopicModel interface {
 		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
-		AdminFindById(topicId int64) *entity.Topic
 		FindOneTopic(topicId int64) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
@@ -151,6 +150,10 @@ func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, in
 		query.Where("topic.status = ?", by.Status)
 	}
 
+	if by.Type != 0 {
+		query.Where("topic.type = ?", by.Type)
+	}
+
 	err := query.Where("topic.user_id = ?", by.UserId).
 		Count(&total).
 		Group("topic.id").
@@ -171,7 +174,6 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
-		Preload("Tags").
 		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
@@ -193,9 +195,11 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 	if params.TopicTagId != 0 {
 		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
 	}
+
 	if params.UserId != 0 {
 		query.Where("topic.user_id = ?", params.UserId)
 	}
+
 	if params.Status != 0 {
 		query.Where("topic.status = ?", params.Status)
 	} else {
@@ -206,11 +210,12 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 		query.Where("topic.type = ?", 2)
 	}
 
-	if params.Label == "recommend" {
+	if params.Label == "recommend" && len(params.Rids) > 0 {
 		query.Where("topic.id in ?", params.Rids)
 	}
 
 	query = query.Count(&total).
+		Preload("Tags").
 		Group("topic.id").
 		Order("id desc")
 
@@ -285,21 +290,6 @@ func (d defaultTopicModel) GetTopicPageList(by GetTopicPageListBy) (list []entit
 }
 
 func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
-	var resp entity.Topic
-	err := d.ctx.DB.Model(&entity.Topic{}).
-		Preload("User").
-		Preload("Tags").
-		Preload("Activity").
-		Where("id = ?", topicId).
-		First(&resp).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		panic(err)
-	}
-
-	return &resp
-}
-
-func (d defaultTopicModel) AdminFindById(topicId int64) *entity.Topic {
 	var resp entity.Topic
 	err := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
