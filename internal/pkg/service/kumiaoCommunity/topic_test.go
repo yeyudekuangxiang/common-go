@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/repository"
+	"strings"
 	"testing"
 )
 
@@ -63,4 +64,9 @@ func TestSetHotTopic(t *testing.T) {
 	}
 
 	fmt.Printf("uSliceToTopic: %v", uSliceToTopic)
+}
+
+func TestSplit(t *testing.T) {
+	keys := strings.Split("wechat", "_")
+	fmt.Println(keys)
 }
