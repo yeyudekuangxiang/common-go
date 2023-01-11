@@ -18,6 +18,7 @@ import (
 	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"mio/pkg/wxapp"
+	"strings"
 	"time"
 )
 
@@ -184,7 +185,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	if activity.RiskLimit < 4 {
 		//判断用户手机号,警告:必须是非首页
 		if userInfo.PhoneNumber == "" {
-			return "", errno.ErrNotBindMobile
+			return "", errno.ErrMisMatchCondition
 		}
 		userRiskRankParam.MobileNo = userInfo.PhoneNumber
 	}
@@ -331,6 +332,21 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		if !log.Exist {
 			return "", errno.ErrMisMatchCondition
 		}
+		break
+
+	case entity.DuiBaActivityRedBlackRankActivity:
+		isExit := false
+		VipOpenidArr := strings.Split(activity.VipOpenid, ",")
+		for _, s := range VipOpenidArr {
+			if s == userInfo.OpenId {
+				isExit = true
+				break
+			}
+		}
+		if !isExit {
+			return "", errno.ErrMisMatchCondition
+		}
+		vip = activity.VipId
 		break
 	default:
 		break

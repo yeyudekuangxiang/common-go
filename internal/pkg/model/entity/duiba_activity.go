@@ -23,6 +23,8 @@ type DuiBaActivity struct {
 	Status              DuiBaActivityStatus
 	IsPhone             DuiBaActivityIsPhone
 	VipType             DuiBaActivityVipType
+	VipOpenid           string
+	VipId               int
 }
 
 type DuiBaActivityType int8
@@ -62,6 +64,7 @@ const (
 	DuiBaActivityInviteActivity                     DuiBaActivityVipType = 4
 	DuiBaActivityYtxLuckyDrawActivity               DuiBaActivityVipType = 5
 	DuiBaActivityCaronPkLuckyDrawActivity           DuiBaActivityVipType = 6
+	DuiBaActivityRedBlackRankActivity               DuiBaActivityVipType = 7
 )
 
 const (
