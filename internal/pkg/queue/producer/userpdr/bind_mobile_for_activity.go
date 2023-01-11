@@ -9,7 +9,6 @@ import (
 )
 
 func BindMobileForActivity(msg usermsg.BindMobile) error {
-	return nil
 	marshal, err := json.Marshal(msg)
 	if err != nil {
 		return err

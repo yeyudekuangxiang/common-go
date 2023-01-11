@@ -18,8 +18,7 @@ type (
 		AddTopicLikeCount(topicId int64, num int) error
 		AddTopicSeeCount(topicId int64, num int) error
 		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
-		UpdateColumn(id int64, key string, value interface{}) error
-		GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
+		GetMyTopic(params MyTopicListParams) ([]*entity.Topic, int64, error)
 		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
@@ -27,13 +26,35 @@ type (
 		GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error)
 		GetTopList() ([]*entity.Topic, error)
 		GetImportTopic() ([]*entity.Topic, error)
-		Updates(cond UpdatesTopicCond, upColumns map[string]interface{}) error
+		SoftDelete(topic *entity.Topic) error
+		Updates(topic *entity.Topic) error
+		UpdateColumn(id int64, key string, value interface{}) error
+		UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error
 	}
 
 	defaultTopicModel struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultTopicModel) SoftDelete(topic *entity.Topic) error {
+	if err := d.ctx.DB.Delete(topic).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d defaultTopicModel) Updates(topic *entity.Topic) error {
+	db := d.ctx.DB
+	if topic.Type == 2 {
+		db.Session(&gorm.Session{FullSaveAssociations: true})
+	}
+	err := db.Updates(topic).Error
+	if err == nil {
+		return nil
+	}
+	return err
+}
 
 func (d defaultTopicModel) GetImportTopic() ([]*entity.Topic, error) {
 	var resp []*entity.Topic
@@ -56,6 +77,7 @@ func (d defaultTopicModel) GetTopList() ([]*entity.Topic, error) {
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -94,6 +116,7 @@ func (d defaultTopicModel) GetTopicNotes(topicIds []int64) []*entity.Topic {
 	err := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Where("topic.id in ?", topicIds).
 		Where("topic.status = ?", entity.TopicStatusPublished).
 		Group("topic.id").
@@ -113,12 +136,13 @@ func (d defaultTopicModel) ChangeTopicCollectionCount(id int64, column string, i
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(column, gorm.Expr(column+"+?", incr)).Error
 }
 
-func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -129,9 +153,15 @@ func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, i
 		}).
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
+
 	if by.Status != 0 {
 		query.Where("topic.status = ?", by.Status)
 	}
+
+	if by.Type != 0 {
+		query.Where("topic.type = ?", by.Type)
+	}
+
 	err := query.Where("topic.user_id = ?", by.UserId).
 		Count(&total).
 		Group("topic.id").
@@ -147,12 +177,13 @@ func (d defaultTopicModel) GetMyTopic(by GetTopicPageListBy) ([]*entity.Topic, i
 	return topList, total, nil
 }
 
-func (d defaultTopicModel) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -164,37 +195,44 @@ func (d defaultTopicModel) GetTopicList(by GetTopicPageListBy) ([]*entity.Topic,
 		Preload("Comment.RootChild.Member").
 		Preload("Comment.Member")
 
-	if by.ID != 0 {
-		query.Where("topic.id = ?", by.ID)
-	} else if len(by.Ids) > 0 {
-		query.Where("topic.id in ?", by.Ids)
+	if params.ID != 0 {
+		query.Where("topic.id = ?", params.ID)
+	} else if len(params.Ids) > 0 {
+		query.Where("topic.id in ?", params.Ids)
 	}
 
-	if by.TopicTagId != 0 {
-		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", by.TopicTagId)
+	if params.Label == "recommend" && len(params.Rids) > 0 {
+		query.Where("topic.id in ?", params.Rids)
 	}
-	if by.UserId != 0 {
-		query.Where("topic.user_id = ?", by.UserId)
+
+	if params.UserId != 0 {
+		query.Where("topic.user_id = ?", params.UserId)
 	}
-	if by.Status != 0 {
-		query.Where("topic.status = ?", by.Status)
+
+	if params.Label == "activity" {
+		query.Where("topic.type = ?", 2)
+	}
+
+	if params.Status != 0 {
+		query.Where("topic.status = ?", params.Status)
 	} else {
-		query.Where("topic.status = ?", entity.TopicStatusPublished)
+		query.Where("topic.status = ?", 3)
 	}
+
+	if params.TopicTagId != 0 {
+		query.Joins("inner join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", params.TopicTagId)
+	}
+
 	query = query.Count(&total).
-		Group("topic.id")
-	if by.Order == "time" {
-		query.Order("topic.created_at desc, topic.like_count desc, topic.see_count desc, topic.id desc")
-	} else {
-		query.Order("topic.is_top desc, topic.is_essence desc,topic.see_count desc, topic.updated_at desc, topic.like_count desc,  topic.id desc")
+		Group("topic.id").
+		Order("id desc")
+
+	if params.Limit != 0 {
+		query.Limit(params.Limit)
 	}
 
-	if by.Limit != 0 {
-		query.Limit(by.Limit)
-	}
-
-	if by.Offset != 0 {
-		query.Offset(by.Offset)
+	if params.Offset != 0 {
+		query.Offset(params.Offset)
 	}
 
 	err := query.Find(&topList).Error
@@ -210,6 +248,7 @@ func (d defaultTopicModel) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topi
 	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Preload("Comment", func(db *gorm.DB) *gorm.DB {
 			return db.Where("comment_index.to_comment_id = ?", 0).
 				Order("like_count desc").Limit(10)
@@ -263,6 +302,7 @@ func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
 	err := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
+		Preload("Activity").
 		Where("id = ?", topicId).
 		First(&resp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -331,7 +371,7 @@ func (d defaultTopicModel) UpdateColumn(id int64, key string, value interface{})
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(key, value).Error
 }
 
-func (d defaultTopicModel) Updates(cond UpdatesTopicCond, upColumns map[string]interface{}) error {
+func (d defaultTopicModel) UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error {
 	query := d.ctx.DB.Model(&entity.Topic{})
 	if cond.Id != 0 {
 		query.Where("id = ?", cond.Id)

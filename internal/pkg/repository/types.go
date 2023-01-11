@@ -45,9 +45,17 @@ type GetTopicPageListBy struct {
 	UserId      int64              `json:"userId"` // 用于查询用户对帖子是否点赞
 	OrderByList entity.OrderByList `json:"orderByList"`
 	OrderBy     entity.OrderBy     `json:"orderBy"`
-	Order       string             `json:"order"`
+	Label       string             `json:"label"`
 	Offset      int                `json:"offset"`
 	Limit       int                `json:"limit"` // limit为0时不限制数量
+}
+
+type MyTopicListParams struct {
+	UserId int64 `json:"userId"`
+	Status int   `json:"status"`
+	Type   int   `json:"type"`
+	Limit  int   `json:"limit"`
+	Offset int   `json:"offset"`
 }
 
 type GetTopicCountBy struct {
@@ -82,6 +90,8 @@ type GetTagPageListBy struct {
 	Offset      int                `json:"offset"`
 	Limit       int                `json:"limit"` //limit为0时不限制数量
 	OrderBy     entity.OrderByList `json:"orderBy"`
+	// 1启用 0未启用
+	Status *int
 }
 
 type CreateTag struct {

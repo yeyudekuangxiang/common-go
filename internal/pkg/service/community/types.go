@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"mio/internal/pkg/model"
@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// topic
 type TopicChangeLikeResp struct {
 	TopicTitle  string `json:"topic"`
 	TopicId     int64  `json:"topicId"`
@@ -14,61 +15,92 @@ type TopicChangeLikeResp struct {
 	IsFirst     bool   `json:"isFirst"`
 }
 
-type CommentChangeLikeResp struct {
-	CommentMessage string `json:"topic"`
-	CommentId      int64  `json:"topicId"`
-	CommentUserId  int64  `json:"TopicUserId"`
-	LikeStatus     int    `json:"likeStatus"`
-	IsFirst        bool   `json:"isFirst"`
+type TopicListParams struct {
+	ID          int64              `json:"id"`
+	Ids         []int64            `json:"ids"`
+	Rids        []string           `json:"rids"`
+	TopicTagId  int64              `json:"topicTagId"`
+	Status      int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop       int                `json:"isTop"`
+	IsEssence   int                `json:"isEssence"`
+	UserId      int64              `json:"userId"` // 用于查询用户对帖子是否点赞
+	OrderByList entity.OrderByList `json:"orderByList"`
+	OrderBy     entity.OrderBy     `json:"orderBy"`
+	Label       string             `json:"label"`
+	Offset      int                `json:"offset"`
+	Limit       int                `json:"limit"` // limit为0时不限制数量
 }
 
-type ChangeUserPosition struct {
-	UserId       int64  `json:"userId"`
-	Position     string `json:"position"`
-	PositionIcon string `json:"positionIcon"`
-}
-
-type ChangeUserPartner struct {
-	UserId  int64 `json:"userId"`
-	Partner int   `json:"partner"`
-}
-
-type CommentCount struct {
-	Date    time.Time
-	TopicId int64
-	Total   int64
-}
-
-type ChangeUserState struct {
+type MyTopicListParams struct {
 	UserId int64 `json:"userId"`
-	Status int   `json:"state"`
+	Status int   `json:"status"`
+	Type   int   `json:"type"`
+	Offset int   `json:"offset"`
+	Limit  int   `json:"limit"`
 }
 
-type TrackOrderZhuGe struct {
-	OpenId        string
-	CertificateId string
-	ProductItemId string
-	OrderId       string
-	Partnership   entity.PartnershipType
-	Title         string
-	CateTitle     string
-}
-
-type TrackLoginZhuGe struct {
-	CateTitle string
-}
-
-type TopicDetail struct {
+type TopicDetailResp struct {
 	entity.Topic
 	IsLike        bool             `json:"isLike"`
 	UpdatedAtDate string           `json:"updatedAtDate"` //03-01
 	User          entity.ShortUser `json:"user"`
 }
 
-type TurnCommentReq struct {
-	UserId   int64  `json:"userId"`
-	TurnType int    `json:"turnType"`
-	TurnId   string `json:"turnId"`
+type CreateTopicParams struct {
+	Title          string   `json:"title" `
+	Content        string   `json:"content"`
+	Images         []string `json:"images" `
+	TagIds         []int64  `json:"tagIds"`
+	Type           int      `json:"type"`
+	Region         string   `json:"region"`
+	Address        string   `json:"address" `
+	ActivityTagIds string   `json:"activityTagIds"`
+	Remarks        string   `json:"remarks"`
+	Qrcode         string   `json:"qrcode"`
+	MeetingLink    string   `json:"meetingLink"`
+	Contacts       string   `json:"contacts"`
+	StartTime      int64    `json:"startTime"`
+	EndTime        int64    `json:"endTime"`
+	SignupDeadline int64    `json:"signupDeadline"`
+	ActivityType   int      `json:"activityType"`
+}
+
+type UpdateTopicParams struct {
+	ID int64 `json:"id"`
+	CreateTopicParams
+}
+
+// activity
+type SignupParams struct {
+	TopicId      int64     `json:"topicId"`
+	UserId       int64     `json:"userId"`
+	RealName     string    `json:"realName"`
+	Phone        string    `json:"phone"`
+	Gender       int       `json:"gender"`
+	Age          int       `json:"age"`
+	Wechat       string    `json:"wechat"`
+	City         string    `json:"city"`
+	Remarks      string    `json:"remarks"`
+	SignupTime   time.Time `json:"signupTime"`
+	SignupStatus int       `json:"signupStatus"`
+}
+
+//comment
+func (a APIComment) ApiComment() *APICommentResp {
+	return &APICommentResp{
+		Id:        a.Id,
+		Message:   a.Message,
+		MemberId:  a.MemberId,
+		Floor:     a.Floor,
+		Count:     a.Count,
+		RootCount: a.RootCount,
+		LikeCount: a.LikeCount,
+		HateCount: a.HateCount,
+		CreatedAt: a.CreatedAt,
+		UpdatedAt: a.UpdatedAt,
+		Member:    a.Member,
+		IsAuthor:  a.IsAuthor,
+	}
 }
 
 type APIComment struct {
@@ -120,19 +152,22 @@ type Detail struct {
 	Description string `json:"description"`
 }
 
-func (a APIComment) ApiComment() *APICommentResp {
-	return &APICommentResp{
-		Id:        a.Id,
-		Message:   a.Message,
-		MemberId:  a.MemberId,
-		Floor:     a.Floor,
-		Count:     a.Count,
-		RootCount: a.RootCount,
-		LikeCount: a.LikeCount,
-		HateCount: a.HateCount,
-		CreatedAt: a.CreatedAt,
-		UpdatedAt: a.UpdatedAt,
-		Member:    a.Member,
-		IsAuthor:  a.IsAuthor,
-	}
+type TurnCommentReq struct {
+	UserId   int64  `json:"userId"`
+	TurnType int    `json:"turnType"`
+	TurnId   string `json:"turnId"`
+}
+
+type CommentCountResp struct {
+	Date    time.Time
+	TopicId int64
+	Total   int64
+}
+
+type CommentChangeLikeResp struct {
+	CommentMessage string `json:"topic"`
+	CommentId      int64  `json:"topicId"`
+	CommentUserId  int64  `json:"TopicUserId"`
+	LikeStatus     int    `json:"likeStatus"`
+	IsFirst        bool   `json:"isFirst"`
 }

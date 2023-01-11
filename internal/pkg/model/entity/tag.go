@@ -14,7 +14,7 @@ type Tag struct {
 	Sort         int     `gorm:"index:idx_sort_" json:"sort" form:"sort"`           // 排序编号
 	Icon         string  `gorm:"size:1024" json:"icon" form:"icon"`                 // icon
 	ImgWithCover string  `gorm:"size:1024" json:"imgWithCover" form:"imgWithCover"` // 图片加遮罩
-	Topics       []Topic `gorm:"many2many:topic_tag;"`
+	Topics       []Topic `gorm:"many2many:topic_tag"`
 }
 
 func (Tag) TableName() string {

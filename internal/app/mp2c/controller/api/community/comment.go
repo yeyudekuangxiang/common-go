@@ -1,4 +1,4 @@
-package api
+package community
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/kumiaoCommunity"
+	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
@@ -38,8 +38,8 @@ func (ctr *CommentController) RootList(c *gin.Context) (gin.H, error) {
 		ObjId: form.ID,
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
-	commentLikeService := kumiaoCommunity.NewCommentLikeService(ctx)
+	commentService := community.NewCommentService(ctx)
+	commentLikeService := community.NewCommentLikeService(ctx)
 
 	list, total, err := commentService.FindListAndChild(&req, form.Offset(), form.Limit())
 	if err != nil {
@@ -89,8 +89,8 @@ func (ctr *CommentController) SubList(c *gin.Context) (gin.H, error) {
 
 	user := apiutil.GetAuthUser(c)
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentLikeService := kumiaoCommunity.NewCommentLikeService(ctx)
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentLikeService := community.NewCommentLikeService(ctx)
+	commentService := community.NewCommentService(ctx)
 
 	data := &entity.CommentIndex{
 		RootCommentId: form.ID,
@@ -146,9 +146,9 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentService := community.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
-	topicService := kumiaoCommunity.NewTopicService(ctx)
+	topicService := community.NewTopicService(ctx)
 
 	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
 	if err != nil {
@@ -242,7 +242,7 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentService := community.NewCommentService(ctx)
 
 	err := commentService.UpdateComment(user.ID, form.CommentId, form.Message)
 	if err != nil {
@@ -253,13 +253,13 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 
 func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentService := community.NewCommentService(ctx)
 
 	err := commentService.DelCommentSoft(user.ID, form.ID)
 	if err != nil {
@@ -269,13 +269,13 @@ func (ctr *CommentController) Delete(c *gin.Context) (gin.H, error) {
 }
 
 func (ctr *CommentController) Detail(c *gin.Context) (gin.H, error) {
-	form := IdForm{}
+	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, nil
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentService := community.NewCommentService(ctx)
 
 	one, err := commentService.FindOne(form.ID)
 	if err != nil {
@@ -295,7 +295,7 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentService := community.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
 	resp, err := commentService.Like(user.ID, form.CommentId, user.OpenId)
@@ -350,9 +350,9 @@ func (ctr *CommentController) TurnComment(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
-	commentService := kumiaoCommunity.NewCommentService(ctx)
+	commentService := community.NewCommentService(ctx)
 
-	comment, err := commentService.TurnComment(kumiaoCommunity.TurnCommentReq{
+	comment, err := commentService.TurnComment(community.TurnCommentReq{
 		UserId:   user.ID,
 		TurnType: form.TurnType,
 		TurnId:   form.TurnId,

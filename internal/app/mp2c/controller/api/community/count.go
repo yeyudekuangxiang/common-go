@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ type CountController struct {
 }
 
 func (ctr CountController) topicViews(c *gin.Context) (gin.H, error) {
-	form := topicCountReq{}
+	form := topicCountRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}

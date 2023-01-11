@@ -1,4 +1,4 @@
-package kumiaoCommunity
+package community
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
@@ -39,16 +40,18 @@ func NewTopicService(ctx *mioContext.MioContext) TopicService {
 }
 
 type TopicService struct {
-	ctx            *mioContext.MioContext
-	topicModel     repository.TopicModel
-	topicLikeModel repository.TopicLikeModel
-	tagModel       repository.TagModel
-	tokenServer    *wxoa.AccessTokenServer
-	userModel      repository.UserRepository
+	ctx              *mioContext.MioContext
+	topicModel       repository.TopicModel
+	topicLikeModel   repository.TopicLikeModel
+	tagModel         repository.TagModel
+	tokenServer      *wxoa.AccessTokenServer
+	userModel        repository.UserRepository
+	activityModel    community.ActivitiesModel
+	activityTagModel community.ActivitiesTagModel
 }
 
-//将 entity.Topic 列表填充为 TopicDetail 列表
-func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetail, error) {
+//将 entity.Topic 列表填充为 TopicDetailResp 列表
+func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetailResp, error) {
 	//查询点赞信息
 	topicIds := make([]int64, 0)
 	for _, topic := range topicList {
@@ -66,7 +69,7 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	}
 
 	//整理数据
-	detailList := make([]TopicDetail, 0)
+	detailList := make([]TopicDetailResp, 0)
 	uidsMap := make(map[int64]struct{}, len(topicList))
 	uids := make([]int64, 0)
 	uinfoMap := make(map[int64]entity.ShortUser, 0)
@@ -88,7 +91,7 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	}
 
 	for _, topic := range topicList {
-		detailList = append(detailList, TopicDetail{
+		detailList = append(detailList, TopicDetailResp{
 			Topic:         topic,
 			IsLike:        topicLikeMap[topic.Id],
 			UpdatedAtDate: topic.UpdatedAt.Format("01-02"),
@@ -99,8 +102,8 @@ func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([
 	return detailList, nil
 }
 
-// GetTopicDetailPageList 通过topic表直接查询获取内容列表
-func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+// 推荐list
+func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic, int64, error) {
 	// page = page-1, pagesize = 10-1
 	// page = 1, pageSize = 10; page = 0, pagesize = 9
 	// page = 2, pageSize = 10; page = 10, pagesize = 19
@@ -120,21 +123,16 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 
 	total := app.Redis.ZCard(srv.ctx.Context, config.RedisKey.TopicRank).Val()
 
-	topicList, err := srv.topicModel.GetTopicListV2(repository.GetTopicPageListBy{
-		Rids: ids,
+	topicList, _, err := srv.topicModel.GetTopicList(repository.GetTopicPageListBy{
+		Label: "recommend",
+		Rids:  ids,
 	})
 
 	if err != nil {
 		return nil, 0, err
 	}
-
-	//按ids顺序排序
-	topicMap := make(map[int64]*entity.Topic, len(topicList))
+	//response
 	resultList := make([]*entity.Topic, 0)
-
-	for _, topic := range topicList {
-		topicMap[topic.Id] = topic
-	}
 
 	//组装置顶数据
 	if param.Offset == 1 {
@@ -147,6 +145,19 @@ func (srv TopicService) GetTopicDetailPageList(param repository.GetTopicPageList
 		}
 	}
 
+	//按ids顺序排序;处理activity
+	topicMap := make(map[int64]*entity.Topic, len(topicList))
+	for _, topic := range topicList {
+		if topic.Type == 2 {
+			if topic.Activity.SignupDeadline.Before(time.Now()) {
+				topic.Activity.Status = 2
+			}
+			if topic.Status != 3 {
+				topic.Activity.Status = 3
+			}
+		}
+		topicMap[topic.Id] = topic
+	}
 	for _, id := range ids {
 		int64Id, _ := strconv.ParseInt(id, 10, 64)
 		if _, ok := topicMap[int64Id]; ok {
@@ -194,32 +205,54 @@ func (srv TopicService) ZAddTopic() {
 }
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
-func (srv TopicService) GetTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	if param.Order == "recommend" && param.TopicTagId == 0 {
-		list, i, err := srv.GetTopicDetailPageList(param)
+func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, int64, error) {
+	if params.Label == "recommend" && params.TopicTagId == 0 {
+		list, i, err := srv.GetRecommendList(params)
 		if err != nil {
 			return nil, 0, err
 		}
 		return list, i, nil
 	}
+	cond := repository.GetTopicPageListBy{}
+	err := util.MapTo(&params, &cond)
+	if err != nil {
+		return nil, 0, err
+	}
+	list, i, err := srv.topicModel.GetTopicList(cond)
+	for _, topic := range list {
+		if topic.Type == 2 {
+			topic.Activity.Status = 1
+			if topic.Activity.SignupDeadline.Before(time.Now()) {
+				topic.Activity.Status = 2
+			}
+			if topic.Status != 3 {
+				topic.Activity.Status = 3
+			}
+		}
+	}
 
-	list, i, err := srv.topicModel.GetTopicList(param)
 	if err != nil {
 		return nil, 0, err
 	}
 	return list, i, nil
 }
 
-func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
-	topic, i, err := srv.topicModel.GetMyTopic(param)
+func (srv TopicService) GetMyTopicList(params MyTopicListParams) ([]*entity.Topic, int64, error) {
+	topic, i, err := srv.topicModel.GetMyTopic(repository.MyTopicListParams{
+		UserId: params.UserId,
+		Status: params.Status,
+		Type:   params.Type,
+		Offset: params.Offset,
+		Limit:  params.Limit,
+	})
 	if err != nil {
 		return nil, 0, err
 	}
 	return topic, i, nil
 }
 
-// GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetTopicDetailPageList 方法返回数据
-//func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetail, int64, error) {
+// GetTopicDetailPageListByFlow 通过topic_flow内容流表获取内容列表 当topic_flow数据不存在时 会后台任务进行初始化并且调用 GetRecommendList 方法返回数据
+//func (srv TopicService) GetTopicDetailPageListByFlow(param repository.GetTopicPageListBy) ([]TopicDetailResp, int64, error) {
 //
 //	topicList, total := srv.topicModel.GetFlowPageList(repository.GetTopicFlowPageListBy{
 //		Offset:     param.Offset,
@@ -231,7 +264,7 @@ func (srv TopicService) GetMyTopicList(param repository.GetTopicPageListBy) ([]*
 //	})
 //	if total == 0 {
 //		DefaultTopicFlowService.InitUserFlowByMq(param.UserId)
-//		return srv.GetTopicDetailPageList(param)
+//		return srv.GetRecommendList(param)
 //	}
 //
 //	//更新曝光和查看次数
@@ -590,38 +623,53 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 }
 
 //CreateTopic 创建文章
-func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid string, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
+func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*entity.Topic, error) {
 	topicModel := &entity.Topic{}
 
 	//处理images
-	imageStr := strings.Join(images, ",")
+	imageStr := strings.Join(params.Images, ",")
 
 	//topic
 	topicModel = &entity.Topic{
 		UserId:    userId,
-		Title:     title,
-		Content:   content,
+		Title:     params.Title,
+		Content:   params.Content,
 		ImageList: imageStr,
 		Status:    entity.TopicStatusNeedVerify,
-		Avatar:    avatarUrl,
-		Nickname:  nikeName,
+		Type:      params.Type,
 		CreatedAt: model.Time{Time: time.Now()},
-		UpdatedAt: model.Time{Time: time.Now()},
+		UpdatedAt: model.Time{},
 	}
 
-	if len(tagIds) > 0 {
+	if len(params.TagIds) > 0 {
 		//tag
 		tagModel := make([]entity.Tag, 0)
-		for _, tagId := range tagIds {
+		for _, tagId := range params.TagIds {
 			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
 			})
 		}
 
-		tag := srv.tagModel.GetById(tagIds[0])
+		tag := srv.tagModel.GetById(params.TagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		topicModel.Tags = tagModel
+	}
+
+	if params.Type == 2 {
+		topicModel.Activity = entity.CommunityActivities{
+			Type:           params.ActivityType,
+			Address:        params.Address,
+			Region:         params.Region,
+			TagIds:         params.ActivityTagIds,
+			Remarks:        params.Remarks,
+			Qrcode:         params.Qrcode,
+			MeetingLink:    params.MeetingLink,
+			Contacts:       params.Contacts,
+			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
+			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
+			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
+		}
 	}
 
 	if err := srv.topicModel.Save(topicModel); err != nil {
@@ -632,10 +680,10 @@ func (srv TopicService) CreateTopic(userId int64, avatarUrl, nikeName, openid st
 }
 
 // UpdateTopic 更新帖子
-func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, topicId int64, title, content string, tagIds []int64, images []string) (*entity.Topic, error) {
+func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*entity.Topic, error) {
 
 	//查询记录是否存在
-	topicModel := srv.topicModel.FindById(topicId)
+	topicModel := srv.topicModel.FindById(params.ID)
 
 	if topicModel.Id == 0 {
 		return topicModel, errno.ErrCommon.WithMessage("该帖子不存在")
@@ -645,27 +693,25 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, to
 	}
 
 	//处理images
-	imageStr := strings.Join(images, ",")
+	imageStr := strings.Join(params.Images, ",")
 
 	//更新帖子
-	topicModel.Title = title
-	topicModel.Avatar = avatarUrl
-	topicModel.Nickname = nikeName
+	topicModel.Title = params.Title
 	topicModel.ImageList = imageStr
-	topicModel.Content = content
+	topicModel.Content = params.Content
 
 	if topicModel.Status != 3 {
 		topicModel.Status = 1
 	}
 	//tag
-	if len(tagIds) > 0 {
+	if len(params.TagIds) > 0 {
 		tagModel := make([]entity.Tag, 0)
-		for _, tagId := range tagIds {
+		for _, tagId := range params.TagIds {
 			tagModel = append(tagModel, entity.Tag{
 				Id: tagId,
 			})
 		}
-		tag := srv.tagModel.GetById(tagIds[0])
+		tag := srv.tagModel.GetById(params.TagIds[0])
 		topicModel.TopicTag = tag.Name
 		topicModel.TopicTagId = strconv.FormatInt(tag.Id, 10)
 		if err := app.DB.Model(&topicModel).Association("Tags").Replace(tagModel); err != nil {
@@ -681,7 +727,22 @@ func (srv TopicService) UpdateTopic(userId int64, avatarUrl, nikeName string, to
 		}
 	}
 
-	if err := app.DB.Model(&topicModel).Updates(&topicModel).Error; err != nil {
+	if params.Type == 2 {
+		topicModel.Activity = entity.CommunityActivities{
+			Type:           params.ActivityType,
+			Address:        params.Address,
+			TagIds:         params.ActivityTagIds,
+			Remarks:        params.Remarks,
+			Qrcode:         params.Qrcode,
+			MeetingLink:    params.MeetingLink,
+			Contacts:       params.Contacts,
+			StartTime:      model.Time{Time: time.Unix(params.StartTime, 0)},
+			EndTime:        model.Time{Time: time.Unix(params.EndTime, 0)},
+			SignupDeadline: model.Time{Time: time.Unix(params.SignupDeadline, 0)},
+		}
+	}
+
+	if err := srv.topicModel.Updates(topicModel).Error; err != nil {
 		return topicModel, errno.ErrCommon.WithMessage("帖子更新失败")
 	}
 	return topicModel, nil
@@ -711,13 +772,13 @@ func (srv TopicService) DelTopic(userId, topicId int64) error {
 		return errno.ErrCommon.WithMessage("无权限删除")
 	}
 
-	if err := app.DB.Delete(&topicModel).Error; err != nil {
-		return errno.ErrInternalServer
+	if err := srv.topicModel.SoftDelete(topicModel); err != nil {
+		return errno.ErrInternalServer.WithMessage(err.Error())
 	}
 	return nil
 }
 
-func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).
 		Select("root_comment_id as total_id, count(*) as total").
 		Where("state = ?", 0).
@@ -727,7 +788,7 @@ func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCount) 
 	return result
 }
 
-func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("to_comment_id = 0").
@@ -737,7 +798,7 @@ func (srv TopicService) GetRootCommentCount(ids []int64) (result []CommentCount)
 	return result
 }
 
-func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCount) {
+func (srv TopicService) GetCommentCount(ids []int64) (result []CommentCountResp) {
 	app.DB.Model(&entity.CommentIndex{}).Select("obj_id as topic_id, count(*) as total").
 		Where("obj_id in ?", ids).
 		Where("state = ?", 0).
@@ -805,7 +866,7 @@ func (srv TopicService) SetWeekTopic() error {
 	//更新uMapToTopic中的50篇文章
 	cond := repository.UpdatesTopicCond{Ids: uSliceToTopic, IsEssence: -1}
 	upColumns := map[string]interface{}{"created_at": time.Now(), "is_essence": 1}
-	err = srv.topicModel.Updates(cond, upColumns)
+	err = srv.topicModel.UpdatesColumn(cond, upColumns)
 	if err != nil {
 		return err
 	}
