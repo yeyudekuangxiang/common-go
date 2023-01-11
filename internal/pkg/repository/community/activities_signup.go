@@ -10,11 +10,11 @@ import (
 
 type (
 	ActivitiesSignupModel interface {
-		FindAllAPISignup(params FindAllActivitiesSignupParams) ([]entity.APIActivitiesSignup, int64, error)
-		FindOneAPISignup(params FindOneActivitiesSignupParams) (entity.APIActivitiesSignup, error)
-		FindSignupList(params FindAllActivitiesSignupParams) ([]entity.APISignupList, int64, error)
-		FindOne(params FindOneActivitiesSignupParams) (entity.CommunityActivitiesSignup, error)
-		FindAll(params FindAllActivitiesSignupParams) ([]entity.CommunityActivitiesSignup, int64, error)
+		FindAllAPISignup(params FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignup, int64, error)
+		FindOneAPISignup(params FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, error)
+		FindSignupList(params FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error)
+		FindOne(params FindOneActivitiesSignupParams) (*entity.CommunityActivitiesSignup, error)
+		FindAll(params FindAllActivitiesSignupParams) ([]*entity.CommunityActivitiesSignup, int64, error)
 		CancelSignup(signup *entity.CommunityActivitiesSignup) error
 		Delete(id int64) error
 		Update(signup *entity.CommunityActivitiesSignup) error
@@ -26,8 +26,8 @@ type (
 	}
 )
 
-func (d defaultCommunityActivitiesSignupModel) FindSignupList(params FindAllActivitiesSignupParams) ([]entity.APISignupList, int64, error) {
-	list := make([]entity.APISignupList, 0)
+func (d defaultCommunityActivitiesSignupModel) FindSignupList(params FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error) {
+	list := make([]*entity.APISignupList, 0)
 	var total int64
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
 		Preload("User")
@@ -65,8 +65,8 @@ func (d defaultCommunityActivitiesSignupModel) FindSignupList(params FindAllActi
 	return list, total, nil
 }
 
-func (d defaultCommunityActivitiesSignupModel) FindAll(params FindAllActivitiesSignupParams) ([]entity.CommunityActivitiesSignup, int64, error) {
-	list := make([]entity.CommunityActivitiesSignup, 0)
+func (d defaultCommunityActivitiesSignupModel) FindAll(params FindAllActivitiesSignupParams) ([]*entity.CommunityActivitiesSignup, int64, error) {
+	list := make([]*entity.CommunityActivitiesSignup, 0)
 	var total int64
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
 
@@ -111,8 +111,8 @@ func (d defaultCommunityActivitiesSignupModel) CancelSignup(signup *entity.Commu
 	return nil
 }
 
-func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesSignupParams) (entity.CommunityActivitiesSignup, error) {
-	var resp entity.CommunityActivitiesSignup
+func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesSignupParams) (*entity.CommunityActivitiesSignup, error) {
+	var resp *entity.CommunityActivitiesSignup
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
 	if params.Id != 0 {
 		db.Where("id = ?", params.Id)
@@ -129,15 +129,15 @@ func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesS
 	err := db.First(&resp).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return entity.CommunityActivitiesSignup{}, nil
+			return &entity.CommunityActivitiesSignup{}, nil
 		}
-		return entity.CommunityActivitiesSignup{}, err
+		return &entity.CommunityActivitiesSignup{}, err
 	}
 	return resp, nil
 }
 
-func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneActivitiesSignupParams) (entity.APIActivitiesSignup, error) {
-	var resp entity.APIActivitiesSignup
+func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, error) {
+	var resp *entity.APIActivitiesSignup
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
 	if params.Id != 0 {
 		db.Where("id = ?", params.Id)
@@ -151,18 +151,18 @@ func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneAc
 	err := db.First(&resp).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return entity.APIActivitiesSignup{}, nil
+			return &entity.APIActivitiesSignup{}, nil
 		}
-		return entity.APIActivitiesSignup{}, err
+		return &entity.APIActivitiesSignup{}, err
 	}
 	return resp, nil
 }
 
-func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllActivitiesSignupParams) ([]entity.APIActivitiesSignup, int64, error) {
-	list := make([]entity.APIActivitiesSignup, 0)
+func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignup, int64, error) {
+	list := make([]*entity.APIActivitiesSignup, 0)
 	var total int64
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
-		Preload("Topic").Preload("Topic.User").Preload("Topic.Activity")
+		Preload("APITopic").Preload("APITopic.User").Preload("APITopic.Activity")
 
 	if params.TopicId != 0 {
 		db.Where("topic_id = ?", params.TopicId)
@@ -197,14 +197,14 @@ func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllAc
 	return list, total, nil
 }
 
-func (d defaultCommunityActivitiesSignupModel) FindOneAPISignupById(id int64) (entity.APIActivitiesSignup, error) {
-	var resp entity.APIActivitiesSignup
+func (d defaultCommunityActivitiesSignupModel) FindOneAPISignupById(id int64) (*entity.APIActivitiesSignup, error) {
+	var resp *entity.APIActivitiesSignup
 	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).First(&resp, id).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return entity.APIActivitiesSignup{}, nil
+			return &entity.APIActivitiesSignup{}, nil
 		}
-		return entity.APIActivitiesSignup{}, err
+		return &entity.APIActivitiesSignup{}, err
 	}
 	return resp, nil
 }

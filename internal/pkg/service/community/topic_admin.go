@@ -10,6 +10,7 @@ import (
 	"mio/pkg/wxoa"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func NewTopicAdminService(ctx *context.MioContext) TopicAdminService {
@@ -108,9 +109,9 @@ func (srv TopicAdminService) CreateTopic(userId int64, title, content string, ta
 
 	//tag
 	if len(tagIds) > 0 {
-		tagModel := make([]entity.Tag, 0)
+		tagModel := make([]*entity.Tag, 0)
 		for _, tagId := range tagIds {
-			tagModel = append(tagModel, entity.Tag{
+			tagModel = append(tagModel, &entity.Tag{
 				Id: tagId,
 			})
 		}
@@ -182,10 +183,14 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 	return topic, nil
 }
 
-// DeleteTopic 删除（下架）
-func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) (*entity.Topic, error) {
+// SoftDeleteTopic 软删除
+func (srv TopicAdminService) SoftDeleteTopic(topicId int64, reason string) (*entity.Topic, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.FindById(topicId)
+	topic, err := srv.topicModel.FindOneTopic(topicId)
+	if err != nil {
+		return nil, err
+	}
+
 	if topic.Id == 0 {
 		return nil, errno.ErrCommon.WithMessage("数据不存在")
 	}
@@ -197,7 +202,33 @@ func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) (*entity.
 	topic.Status = 4
 	topic.DelReason = reason
 
-	err := srv.topicModel.Save(topic)
+	err = srv.topicModel.Save(topic)
+	if err != nil {
+		return nil, err
+	}
+
+	return topic, nil
+}
+
+func (srv TopicAdminService) DownTopic(topicId int64, reason string) (*entity.Topic, error) {
+	//查询数据是否存在
+	topic, err := srv.topicModel.FindOneTopic(topicId)
+	if err != nil {
+		return nil, err
+	}
+
+	if topic.Id == 0 {
+		return nil, errno.ErrCommon.WithMessage("数据不存在")
+	}
+
+	if topic.Status == 4 {
+		return nil, nil
+	}
+
+	topic.Status = 4
+	topic.DelReason = reason
+
+	err = srv.topicModel.Save(topic)
 	if err != nil {
 		return nil, err
 	}
@@ -206,13 +237,17 @@ func (srv TopicAdminService) DeleteTopic(topicId int64, reason string) (*entity.
 }
 
 // Review 审核
-func (srv TopicAdminService) Review(topicId int64, status int, reason string) (entity.Topic, bool, error) {
+func (srv TopicAdminService) Review(topicId int64, status int, reason string) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.FindById(topicId)
+	topic, err := srv.topicModel.FindOneTopic(topicId)
 	var isFirst bool
 
+	if err != nil {
+		return &entity.Topic{}, isFirst, err
+	}
+
 	if topic.Id == 0 {
-		return entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
+		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
 	if status == entity.TopicStatusPublished {
@@ -220,7 +255,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 			isFirst = true
 		}
 		topic.Status = entity.TopicStatusPublished
-		topic.PushTime = model.NewTime()
+		topic.PushTime = model.Time{Time: time.Now()}
 		topic.DelReason = ""
 	}
 
@@ -229,7 +264,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 			isFirst = true
 		}
 		topic.Status = entity.TopicStatusHidden
-		topic.DownTime = model.NewTime()
+		topic.DownTime = model.Time{Time: time.Now()}
 		topic.DelReason = reason
 	}
 
@@ -239,19 +274,19 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (e
 	}
 
 	//更新帖子
-	err := srv.topicModel.Save(topic)
+	err = srv.topicModel.Save(topic)
 
 	if err != nil {
-		return entity.Topic{}, isFirst, err
+		return &entity.Topic{}, isFirst, err
 	}
 
-	return *topic, isFirst, nil
+	return topic, isFirst, nil
 }
 
 // Top 置顶
 func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.FindById(topicId)
+	topic := srv.topicModel.AdminFindById(topicId)
 
 	var isFirst bool
 
@@ -280,7 +315,7 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool,
 // Essence 精华
 func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.FindById(topicId)
+	topic := srv.topicModel.AdminFindById(topicId)
 	var isFirst bool
 	if topic.Id == 0 {
 		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")

@@ -52,6 +52,7 @@ type CreateTopicParams struct {
 	Images         []string `json:"images" `
 	TagIds         []int64  `json:"tagIds"`
 	Type           int      `json:"type"`
+	Region         string   `json:"region"`
 	Address        string   `json:"address" `
 	ActivityTagIds string   `json:"activityTagIds"`
 	Remarks        string   `json:"remarks"`

@@ -190,7 +190,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	resList := make([]*entity.TopicItemRes, 0)
+	resList := make([]*entity.Topic, 0)
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
 	topicLikeService := community.NewTopicLikeService(ctx)
@@ -221,15 +221,15 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		topic2comment[item.TopicId] = item.Total
 	}
 	for _, item := range list {
-		res := item.TopicItemRes()
-		res.CommentCount = topic2comment[res.Id]
-		if _, ok := likeMap[res.Id]; ok {
-			res.IsLike = 1
+		//res := item.TopicItemRes()
+		item.CommentCount = topic2comment[item.Id]
+		if _, ok := likeMap[item.Id]; ok {
+			item.IsLike = 1
 		}
-		if _, ok := collectionMap[res.Id]; ok {
-			res.IsCollection = 1
+		if _, ok := collectionMap[item.Id]; ok {
+			item.IsCollection = 1
 		}
-		resList = append(resList, res)
+		resList = append(resList, item)
 	}
 	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
 	return gin.H{
@@ -250,8 +250,8 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if form.Type == 1 && len(form.TagIds) < 2 {
-		return nil, errno.ErrCommon.WithMessage("话题数量最少选2个哦")
+	if form.Type == 1 && len(form.TagIds) >= 2 {
+		return nil, errno.ErrCommon.WithMessage("话题数量最多选2个哦")
 	}
 
 	//审核
@@ -320,6 +320,11 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
+	if form.Type == 1 && len(form.TagIds) >= 2 {
+		return nil, errno.ErrCommon.WithMessage("话题数量最多选2个哦")
+	}
+
 	//审核
 	if form.Content != "" {
 		//检查内容
@@ -401,30 +406,29 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	topicRes := topic.TopicItemRes()
 	//获取评论数量
 
-	CommentCount := topicService.GetCommentCount([]int64{topicRes.Id})
+	CommentCount := topicService.GetCommentCount([]int64{topic.Id})
 	// 组装数据
 	// 评论
 	if len(CommentCount) > 0 {
-		topicRes.CommentCount = CommentCount[0].Total
+		topic.CommentCount = CommentCount[0].Total
 	}
 
 	// 点赞
 	like, err := topicLikeService.GetOneByTopic(topic.Id, user.ID)
 	if err == nil {
-		topicRes.IsLike = int(like.Status)
+		topic.IsLike = int(like.Status)
 	}
 	// 收藏
 	collection, err := collectService.FindOneByTopic(topic.Id, user.OpenId)
 
 	if err == nil {
-		topicRes.IsCollection = collection.Status
+		topic.IsCollection = collection.Status
 	}
 
 	return gin.H{
-		"topic": topicRes,
+		"topic": topic,
 	}, nil
 }
 
@@ -459,7 +463,7 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	resList := make([]*entity.TopicItemRes, 0)
+	resList := make([]*entity.Topic, 0)
 
 	//点赞数据
 	likeMap := make(map[int64]struct{}, 0)
@@ -491,17 +495,23 @@ func (ctr *TopicController) MyTopic(c *gin.Context) (gin.H, error) {
 	for _, item := range rootCommentCount {
 		topic2comment[item.TopicId] = item.Total
 	}
-	// 组装数据---点赞数据 收藏数据
+	//组装数据---点赞数据 收藏数据
 	for _, item := range list {
-		res := item.TopicItemRes()
-		res.CommentCount = topic2comment[res.Id]
-		if _, ok := likeMap[res.Id]; ok {
-			res.IsLike = 1
+		item.CommentCount = topic2comment[item.Id]
+		if _, ok := likeMap[item.Id]; ok {
+			item.IsLike = 1
 		}
-		if _, ok := collectionMap[res.Id]; ok {
-			res.IsCollection = 1
+		if _, ok := collectionMap[item.Id]; ok {
+			item.IsCollection = 1
 		}
-		resList = append(resList, res)
+		item.Activity.Status = 1
+		if item.Activity.SignupDeadline.Before(time.Now()) {
+			item.Activity.Status = 2
+		}
+		if item.Status != 3 {
+			item.Activity.Status = 3
+		}
+		resList = append(resList, item)
 	}
 
 	return gin.H{

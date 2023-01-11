@@ -55,9 +55,6 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.GET("/list-topic", apiutil.Format(community.DefaultTopicController.ListTopic))
 			topicRouter.GET("/detail", apiutil.Format(community.DefaultTopicController.DetailTopic)) //帖子详情
 			topicRouter.GET("/activities/tag-list", apiutil.Format(community.DefaultCommunityActivitiesTagController.List))
-			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
-			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
-			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
 		}
 
 		//文章评论列表
@@ -225,6 +222,9 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(community.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(community.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(community.DefaultTopicController.DelTopic))
+			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
+			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
+			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
 		}
 
 		//社区2.0 评论相关
