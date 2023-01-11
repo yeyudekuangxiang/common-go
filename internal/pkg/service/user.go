@@ -645,17 +645,17 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, error) {
 	return u.r.GetUserListBy(by), nil
 }
-func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
+func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) (*entity.User, error) {
 	//图片审核
 	user := u.r.GetUserById(param.UserId)
 
 	if user.ID == 0 {
-		return errno.ErrUserNotFound
+		return &entity.User{}, errno.ErrUserNotFound
 	}
 
 	if param.PhoneNumber != nil {
 		if u.CheckMobileBound(entity.UserSourceMio, user.ID, *param.PhoneNumber) {
-			return errno.ErrCommon.WithMessage("该手机号已被其他账号绑定")
+			return &entity.User{}, errno.ErrCommon.WithMessage("该手机号已被其他账号绑定")
 		}
 		user.PhoneNumber = *param.PhoneNumber
 	}
@@ -686,7 +686,11 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) error {
 	if param.Introduction != "" {
 		user.Introduction = param.Introduction
 	}
-	return u.r.Save(&user)
+	err := u.r.Save(&user)
+	if err == nil {
+		return &user, nil
+	}
+	return &entity.User{}, err
 }
 func (u UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
 	return u.r.GetUserPageListBy(by)

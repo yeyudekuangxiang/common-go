@@ -69,7 +69,7 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	messageService := message.NewWebMessageService(ctx)
 
-	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	userInfo, err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:   form.ID,
 		Status:   form.Status,
 		Position: form.Position,
@@ -82,7 +82,7 @@ func (ctr UserController) Update(c *gin.Context) (gin.H, error) {
 	}
 
 	//发消息 partners == 1
-	if form.Partners == 1 {
+	if userInfo.Partners != 1 && form.Partners == 1 {
 		err = messageService.SendMessage(message.SendWebMessage{
 			SendId:   0,
 			RecId:    form.ID,

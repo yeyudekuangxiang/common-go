@@ -173,7 +173,9 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	if keys[0] == "reply" {
 		keys[1] = "comment"
 	}
-
+	if len(keys) < 2 {
+		keys[1] = keys[0]
+	}
 	switch keys[1] {
 	case "topic":
 		topicObj := d.topic.FindById(param.TurnId)

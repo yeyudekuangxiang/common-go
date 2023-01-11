@@ -249,7 +249,7 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	_, err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
@@ -318,7 +318,7 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	_, err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:       user.ID,
 		Introduction: form.Introduction,
 	})
