@@ -46,10 +46,7 @@ func (d defaultTopicModel) SoftDelete(topic *entity.Topic) error {
 
 func (d defaultTopicModel) Updates(topic *entity.Topic) error {
 	db := d.ctx.DB
-	if topic.Type == 2 {
-		db.Session(&gorm.Session{FullSaveAssociations: true})
-	}
-	err := db.Updates(topic).Error
+	err := db.Omit("User").Omit("Tags").Omit("Comment").Updates(topic).Error
 	if err == nil {
 		return nil
 	}

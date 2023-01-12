@@ -680,10 +680,10 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 	topicModel := srv.topicModel.FindById(params.ID)
 
 	if topicModel.Id == 0 {
-		return topicModel, errno.ErrCommon.WithMessage("该帖子不存在")
+		return &entity.Topic{}, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 	if topicModel.UserId != userId {
-		return topicModel, errno.ErrCommon.WithMessage("无权限修改")
+		return &entity.Topic{}, errno.ErrCommon.WithMessage("无权限修改")
 	}
 
 	//处理images
@@ -730,14 +730,14 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
 			Contacts:       params.Contacts,
-			StartTime:      model.Time{Time: time.Unix(params.StartTime, 0)},
-			EndTime:        model.Time{Time: time.Unix(params.EndTime, 0)},
-			SignupDeadline: model.Time{Time: time.Unix(params.SignupDeadline, 0)},
+			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
+			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
+			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
 		}
 	}
 
-	if err := srv.topicModel.Updates(topicModel).Error; err != nil {
-		return topicModel, errno.ErrCommon.WithMessage("帖子更新失败")
+	if err := srv.topicModel.Updates(topicModel); err != nil {
+		return &entity.Topic{}, errno.ErrCommon.WithMessage("帖子更新失败")
 	}
 	return topicModel, nil
 }
