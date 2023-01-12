@@ -634,7 +634,10 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
 	topicService := community.NewTopicService(ctx)
-	topic := topicService.FindById(form.ID)
+	topic := topicService.FindTopic(community.FindTopicParams{
+		TopicId: form.ID,
+		UserId:  user.ID,
+	})
 	//仅发起人可查看
 	if topic.UserId != user.ID {
 		return nil, nil
@@ -653,4 +656,26 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 		"signupCount": total,
 		"signupList":  signupList,
 	}, nil
+}
+
+//导出报名数据excel文件路径
+func (ctr *TopicController) ExportSignupList(c *gin.Context) {
+	form := IdRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	user := apiutil.GetAuthUser(c)
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	topicService := community.NewTopicService(ctx)
+	topic := topicService.FindTopic(community.FindTopicParams{
+		TopicId: form.ID,
+		UserId:  user.ID,
+	})
+	//仅发起人可查看
+	if topic.UserId != user.ID {
+		fmt.Println("err.Error()")
+	}
+	signupService.Export(c.Writer, c.Request, topic.Id)
 }

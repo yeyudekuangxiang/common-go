@@ -322,6 +322,14 @@ func (srv TopicService) FindById(topicId int64) *entity.Topic {
 	return srv.topicModel.FindById(topicId)
 }
 
+func (srv TopicService) FindTopic(params FindTopicParams) *entity.Topic {
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams(params))
+	if err != nil {
+		return nil
+	}
+	return topic
+}
+
 // UpdateTopicSort 更新内容的排序权重
 func (srv TopicService) UpdateTopicSort(topicId int64, sort int) error {
 	topic := srv.topicModel.FindById(topicId)

@@ -27,24 +27,33 @@ func (CommunityActivitiesSignup) TableName() string {
 }
 
 type APIActivitiesSignup struct {
-	Id           int64              `json:"id"`
-	UserId       int64              `json:"userId"`
-	RealName     string             `json:"realName"`
-	Phone        string             `json:"phone"`
-	Gender       int                `json:"gender"`
-	Age          int                `json:"age"`
-	Wechat       string             `json:"wechat"`
-	City         string             `json:"city"`
-	Remarks      string             `json:"remarks"`
-	SignupTime   model.Time         `json:"signupTime"`
-	CancelTime   model.Time         `json:"cancelTime"`
-	SignupStatus int                `json:"signupStatus"`
-	TopicId      int64              `json:"topicId"`
-	Topic        APITopicActivities `json:"topic,omitempty" gorm:"foreignKey:TopicId"`
+	Id           int64      `json:"id"`
+	RealName     string     `json:"realName"`
+	Phone        string     `json:"phone"`
+	Gender       int        `json:"gender"`
+	Age          int        `json:"age"`
+	Wechat       string     `json:"wechat"`
+	City         string     `json:"city"`
+	Remarks      string     `json:"remarks"`
+	SignupTime   model.Time `json:"signupTime"`
+	CancelTime   model.Time `json:"cancelTime"`
+	SignupStatus int        `json:"signupStatus"`
+	UserId       int64      `json:"userId"`
+	//User         ShortUser          `json:"user" gorm:"foreignKey:UserId"`
+	TopicId int64              `json:"topicId"`
+	Topic   APITopicActivities `json:"topic,omitempty" gorm:"foreignKey:TopicId"`
 }
 
 type APISignupList struct {
-	Id           int64      `json:"id"`
+	Id       int64  `json:"id"`
+	RealName string `json:"realName"`
+	Phone    string `json:"phone"`
+	Gender   int    `json:"gender"`
+	Age      int    `json:"age"`
+	Wechat   string `json:"wechat"`
+	City     string `json:"city"`
+	Remarks  string `json:"remarks"`
+	//关联数据
 	UserId       int64      `json:"userId"`
 	User         ShortUser  `json:"user"`
 	SignupTime   model.Time `json:"signupTime"`

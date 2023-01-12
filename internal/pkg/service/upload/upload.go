@@ -1,4 +1,4 @@
-package service
+package upload
 
 import (
 	"fmt"
@@ -19,8 +19,8 @@ var DefaultUploadService = UploadService{}
 type UploadService struct {
 }
 
-func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filename string, collectType PointCollectType) (string, error) {
-	key := fmt.Sprintf("ocr/%s/%s/%s%s", strings.ToLower(string(collectType)), openid, util.UUID(), path.Ext(filename))
+func (srv UploadService) UploadOcrImage(openid string, reader io.Reader, filename string, collectType string) (string, error) {
+	key := fmt.Sprintf("ocr/%s/%s/%s%s", strings.ToLower(collectType), openid, util.UUID(), path.Ext(filename))
 	ocrPath, err := oss.DefaultOssService.PutObject(key, reader)
 	if err != nil {
 		return "", err

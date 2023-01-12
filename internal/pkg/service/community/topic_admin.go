@@ -186,7 +186,9 @@ func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 // SoftDeleteTopic 软删除
 func (srv TopicAdminService) SoftDeleteTopic(topicId int64, reason string) (*entity.Topic, error) {
 	//查询数据是否存在
-	topic, err := srv.topicModel.FindOneTopic(topicId)
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: topicId,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +214,9 @@ func (srv TopicAdminService) SoftDeleteTopic(topicId int64, reason string) (*ent
 
 func (srv TopicAdminService) DownTopic(topicId int64, reason string) (*entity.Topic, error) {
 	//查询数据是否存在
-	topic, err := srv.topicModel.FindOneTopic(topicId)
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: topicId,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +243,9 @@ func (srv TopicAdminService) DownTopic(topicId int64, reason string) (*entity.To
 // Review 审核
 func (srv TopicAdminService) Review(topicId int64, status int, reason string) (*entity.Topic, bool, error) {
 	//查询数据是否存在
-	topic, err := srv.topicModel.FindOneTopic(topicId)
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: topicId,
+	})
 	var isFirst bool
 
 	if err != nil {

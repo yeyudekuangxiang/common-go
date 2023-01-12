@@ -70,6 +70,13 @@ type UpdateTopicParams struct {
 	CreateTopicParams
 }
 
+type FindTopicParams struct {
+	TopicId int64 `json:"topicId"`
+	UserId  int64 `json:"userId"`
+	Type    int   `json:"type"`
+	Status  int   `json:"status"`
+}
+
 // activity
 type SignupParams struct {
 	TopicId      int64     `json:"topicId"`

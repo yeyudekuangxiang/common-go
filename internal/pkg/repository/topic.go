@@ -14,7 +14,7 @@ type (
 	TopicModel interface {
 		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
-		FindOneTopic(topicId int64) (*entity.Topic, error)
+		FindOneTopic(params FindTopicParams) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		AddTopicSeeCount(topicId int64, num int) error
@@ -103,10 +103,22 @@ func (d defaultTopicModel) GetTopList() ([]*entity.Topic, error) {
 	return topList, nil
 }
 
-func (d defaultTopicModel) FindOneTopic(topicId int64) (*entity.Topic, error) {
+func (d defaultTopicModel) FindOneTopic(params FindTopicParams) (*entity.Topic, error) {
 	var resp entity.Topic
-	err := d.ctx.DB.Model(&entity.Topic{}).WithContext(d.ctx.Context).
-		Where("id = ?", topicId).First(&resp).Error
+	db := d.ctx.DB.Model(&entity.Topic{})
+	if params.TopicId != 0 {
+		db.Where("id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.Type != 0 {
+		db.Where("type = ?", params.Type)
+	}
+	if params.Status != 0 {
+		db.Where("status = ?", params.Status)
+	}
+	err := db.First(&resp).Error
 	switch err {
 	case nil:
 		return &resp, nil

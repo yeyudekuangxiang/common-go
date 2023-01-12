@@ -3,7 +3,7 @@ package business
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api/business/businesstypes"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/upload"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -20,7 +20,7 @@ func (UploadController) GetUploadTokenInfo(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthBusinessUser(ctx)
 
-	info, err := service.DefaultUploadService.CreateUploadToken(user.ID, 3, form.Scene)
+	info, err := upload.DefaultUploadService.CreateUploadToken(user.ID, 3, form.Scene)
 	if err != nil {
 		return nil, err
 	}
