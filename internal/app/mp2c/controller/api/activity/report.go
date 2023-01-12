@@ -39,9 +39,9 @@ var orderSql = `select count(*) as total    from duiba_order where   user_id = ?
 `
 var orderV2Sql = ` select order_item_list   from duiba_order where   user_id = ? and   source = '普通兑换' and total_credits != 0  and  create_time >= 1640966401000 and   create_time <= 1672502401000    order by total_credits desc  limit 1 
 `
-var communityCommentSql = `select  count(*)    from comment_index where   member_id  = ? and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
+var communityCommentSql = `select  count(*)    from comment_index where   member_id  = ?  and state = 0  and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
 `
-var communityLikeSql = `select  count(*)    from topic_like where   user_id  = ? and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
+var communityLikeSql = ` select count(*) from (select DISTINCT topic_id  from topic_like where user_id = ?  and status = 1 and    created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01'  ) ll 
 `
 
 var communityTopicSql = `select  count(*)    from topic where   user_id  = ? and   created_at >= '2022-01-01 00:00:01' and created_at <= '2023-01-01 00:00:01' 
@@ -143,6 +143,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		carbonPage["favourite_type"] = carbonFavouriteType.Text()
 		carbonPage["favourite_carbon"] = util.CarbonToRate(carbonFavourite)
 		carbonPage["favourite_ratio"] = overPer
+		carbonPage["no_date"] = false
 	}
 
 	/*证书开始*/
@@ -160,6 +161,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		}
 		badgePage["badge_total"] = badgeTotal
 		badgePage["favourite_type"] = firstBadge.Title
+		badgePage["no_date"] = false
 	} else {
 		badgePage["no_date"] = true
 	}
@@ -183,6 +185,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		correctRate = correctNum.Div(answerTotal).Round(2).Mul(decimal.NewFromInt(100)).String() + "%"
 		answerPage["answer_total"] = answerTotal
 		answerPage["correct_rate"] = correctRate //正确率
+		answerPage["no_date"] = false
 	}
 
 	/*答题结束*/
@@ -217,6 +220,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	} else {
 		orderPage["max_point_goods"] = maxPointGoods
 		orderPage["order_total"] = orderTotal
+		orderPage["no_date"] = false
 	}
 	communityPage := make(map[string]interface{})
 
@@ -247,6 +251,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 		communityPage["comment_topic"] = communityCommentTotal
 		communityPage["favourite_topic"] = communityFavouriteTotal
 		communityPage["total_topic"] = communityTopicTotal
+		communityPage["no_date"] = false
 	}
 
 	//我的碳排
@@ -293,12 +298,13 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	}
 
 	newModuleExperiencePage := make(map[string]interface{})
+	newModuleExperiencePage["no_date"] = false
 	if questionTotal != 0 && !experienceHand {
-		newModuleExperiencePage["desc"] = "我的碳排"
+		newModuleExperiencePage["type"] = "carbon"
 	} else if questionTotal == 0 && experienceHand {
-		newModuleExperiencePage["desc"] = "二手市集"
+		newModuleExperiencePage["type"] = "hand_second"
 	} else if questionTotal != 0 && experienceHand {
-		newModuleExperiencePage["desc"] = "重大功能更新可都没错过"
+		newModuleExperiencePage["type"] = "all"
 	} else {
 		newModuleExperiencePage["no_date"] = true
 	}
