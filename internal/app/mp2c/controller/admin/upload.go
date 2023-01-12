@@ -3,7 +3,7 @@ package admin
 import (
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/admin/admtypes"
-	"mio/internal/pkg/service"
+	"mio/internal/pkg/service/upload"
 	"mio/internal/pkg/util/apiutil"
 )
 
@@ -19,7 +19,7 @@ func (UploadController) GetUploadTokenInfo(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthAdmin(ctx)
 
-	info, err := service.DefaultUploadService.CreateUploadToken(int64(user.ID), 2, form.Scene)
+	info, err := upload.DefaultUploadService.CreateUploadToken(int64(user.ID), 2, form.Scene)
 	if err != nil {
 		return nil, err
 	}

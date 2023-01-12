@@ -18,7 +18,7 @@ type ActivitiesTagListRequest struct {
 }
 
 type IdRequest struct {
-	ID int64 `json:"id" form:"id"`
+	ID int64 `json:"id" form:"id" binding:"required"`
 }
 
 type GetTopicPageListRequest struct {

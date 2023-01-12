@@ -15,6 +15,13 @@ func Format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
 		ctx.JSON(FormatErr(err, data))
 	}
 }
+
+func FormatContent(f func(*gin.Context)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		f(ctx)
+	}
+}
+
 func FormatErr(err error, data interface{}) (int, gin.H) {
 	if err != nil && config.Config.App.Debug {
 		app.Logger.Debugf("response err:%+v\n", err)

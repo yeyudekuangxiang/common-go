@@ -216,14 +216,6 @@ func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, i
 		return nil, 0, err
 	}
 	list, i, err := srv.topicModel.GetTopicList(cond)
-	for _, topic := range list {
-		if topic.Type == 2 {
-			topic.Activity.Status = 1
-			if topic.Activity.SignupDeadline.Before(time.Now()) {
-				topic.Activity.Status = 2
-			}
-		}
-	}
 
 	if err != nil {
 		return nil, 0, err
@@ -328,6 +320,14 @@ func (srv TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []e
 // FindById 根据id查询 entity.Topic
 func (srv TopicService) FindById(topicId int64) *entity.Topic {
 	return srv.topicModel.FindById(topicId)
+}
+
+func (srv TopicService) FindTopic(params FindTopicParams) *entity.Topic {
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams(params))
+	if err != nil {
+		return nil
+	}
+	return topic
 }
 
 // UpdateTopicSort 更新内容的排序权重
