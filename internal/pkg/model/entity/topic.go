@@ -54,8 +54,8 @@ type Topic struct {
 	Comment         []CommentIndex      `json:"comment" gorm:"foreignKey:ObjId"`
 	Activity        CommunityActivities `json:"activity" gorm:"foreignKey:Id"`
 	//表里没有的字段
-	IsLike       int `json:"isLike,omitempty" gorm:"-"`
-	IsCollection int `json:"isCollection,omitempty" gorm:"-"`
+	IsLike       int `json:"isLike" gorm:"-"`       //是否点赞 0否 1是
+	IsCollection int `json:"isCollection" gorm:"-"` //是否收藏 0否 1是
 }
 
 func (Topic) TableName() string {

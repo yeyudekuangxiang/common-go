@@ -16,7 +16,6 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"mio/internal/pkg/util/validator"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strconv"
@@ -326,17 +325,17 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	}
 
 	//审核
-	if form.Content != "" {
-		//检查内容
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-			app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "更新帖子"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-			return nil, errno.ErrCommon.WithMessage(err.Error())
-		}
-	}
+	//if form.Content != "" {
+	//	//检查内容
+	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+	//		app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
+	//		zhuGeAttr := make(map[string]interface{}, 0)
+	//		zhuGeAttr["场景"] = "更新帖子"
+	//		zhuGeAttr["失败原因"] = err.Error()
+	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+	//		return nil, errno.ErrCommon.WithMessage(err.Error())
+	//	}
+	//}
 
 	if len(form.Images) > 1 {
 		reviewSrv := service.DefaultReviewService()
