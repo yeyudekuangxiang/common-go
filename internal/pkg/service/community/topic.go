@@ -216,14 +216,6 @@ func (srv TopicService) GetTopicList(params TopicListParams) ([]*entity.Topic, i
 		return nil, 0, err
 	}
 	list, i, err := srv.topicModel.GetTopicList(cond)
-	for _, topic := range list {
-		if topic.Type == 2 {
-			topic.Activity.Status = 1
-			if topic.Activity.SignupDeadline.Before(time.Now()) {
-				topic.Activity.Status = 2
-			}
-		}
-	}
 
 	if err != nil {
 		return nil, 0, err

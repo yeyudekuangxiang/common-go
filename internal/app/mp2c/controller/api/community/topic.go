@@ -16,6 +16,7 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/validator"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strconv"
@@ -228,6 +229,12 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		if _, ok := collectionMap[item.Id]; ok {
 			item.IsCollection = 1
 		}
+		if item.Type == 2 {
+			item.Activity.Status = 1
+			if item.Activity.SignupDeadline.Before(time.Now()) {
+				item.Activity.Status = 2
+			}
+		}
 		resList = append(resList, item)
 	}
 	app.Logger.Infof("GetTopicDetailPageListByFlow user:%d form:%+v ids:%+v", user.ID, form, ids)
@@ -255,37 +262,37 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 
 	//审核
 	//title审核
-	//err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
-	//if err != nil {
-	//	return nil, errno.ErrCommon.WithMessage("标题审核未通过")
-	//}
-	//
-	//// 文本内容审核
-	//if form.Content != "" {
-	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-	//		app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-	//		zhuGeAttr := make(map[string]interface{}, 0)
-	//		zhuGeAttr["场景"] = "发帖-文本内容审核"
-	//		zhuGeAttr["失败原因"] = err.Error()
-	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-	//		return nil, errno.ErrCommon.WithMessage(err.Error())
-	//	}
-	//}
-	//
-	//// 图片内容审核
-	//if len(form.Images) > 1 {
-	//	reviewSrv := service.DefaultReviewService()
-	//	for i, imgUrl := range form.Images {
-	//		if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
-	//			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-	//			zhuGeAttr := make(map[string]interface{}, 0)
-	//			zhuGeAttr["场景"] = "发帖-图片内容审核"
-	//			zhuGeAttr["失败原因"] = err.Error()
-	//			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-	//			return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
-	//		}
-	//	}
-	//}
+	err := validator.CheckMsgWithOpenId(user.OpenId, form.Title)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage("标题审核未通过")
+	}
+
+	// 文本内容审核
+	if form.Content != "" {
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+			app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "发帖-文本内容审核"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
+
+	// 图片内容审核
+	if len(form.Images) > 1 {
+		reviewSrv := service.DefaultReviewService()
+		for i, imgUrl := range form.Images {
+			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
+				zhuGeAttr := make(map[string]interface{}, 0)
+				zhuGeAttr["场景"] = "发帖-图片内容审核"
+				zhuGeAttr["失败原因"] = err.Error()
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+				return nil, errno.ErrCommon.WithMessage("图片: " + strconv.Itoa(i) + " " + err.Error())
+			}
+		}
+	}
 
 	//创建帖子
 	marshal, err := json.Marshal(form)
@@ -325,17 +332,17 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	}
 
 	//审核
-	//if form.Content != "" {
-	//	//检查内容
-	//	if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
-	//		app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
-	//		zhuGeAttr := make(map[string]interface{}, 0)
-	//		zhuGeAttr["场景"] = "更新帖子"
-	//		zhuGeAttr["失败原因"] = err.Error()
-	//		track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-	//		return nil, errno.ErrCommon.WithMessage(err.Error())
-	//	}
-	//}
+	if form.Content != "" {
+		//检查内容
+		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+			app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
+			zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["场景"] = "更新帖子"
+			zhuGeAttr["失败原因"] = err.Error()
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
+	}
 
 	if len(form.Images) > 1 {
 		reviewSrv := service.DefaultReviewService()
@@ -424,6 +431,12 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 
 	if err == nil {
 		topic.IsCollection = collection.Status
+	}
+	if topic.Type == 2 {
+		topic.Activity.Status = 1
+		if topic.Activity.SignupDeadline.Before(time.Now()) {
+			topic.Activity.Status = 2
+		}
 	}
 
 	return gin.H{
