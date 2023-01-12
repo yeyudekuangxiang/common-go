@@ -97,6 +97,8 @@ type GetTagPageListBy struct {
 	Offset      int                `json:"offset"`
 	Limit       int                `json:"limit"` //limit为0时不限制数量
 	OrderBy     entity.OrderByList `json:"orderBy"`
+	// 1启用 0未启用
+	Status *int
 }
 
 type CreateTag struct {

@@ -209,6 +209,10 @@ func apiRouter(router *gin.Engine) {
 			activityRouter.POST("/answer/put-file", apiutil.Format(activityApi.DefaultAnswerController.PutFile))
 			activityRouter.GET("/answer/get-user-school", apiutil.Format(activityApi.DefaultAnswerController.GetUserSchool))
 			activityRouter.POST("/answer/close-late-tips", apiutil.Format(activityApi.DefaultAnswerController.CloseLateTips))
+
+			//年终报告
+			activityRouter.GET("/report/index", apiutil.Format(activityApi.DefaultReportController.Index))
+
 		}
 
 		//社区2.0 文章相关路由

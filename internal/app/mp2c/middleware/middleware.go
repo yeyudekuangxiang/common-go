@@ -234,6 +234,7 @@ func Throttle() gin.HandlerFunc {
 	}))
 	return middleware
 }
+
 func corsM() gin.HandlerFunc {
 	cfg := cors.DefaultConfig()
 	cfg.AllowAllOrigins = true

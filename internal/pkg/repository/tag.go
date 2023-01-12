@@ -71,6 +71,9 @@ func (m defaultTagModel) GetTagPageList(by GetTagPageListBy) (list []entity.Tag,
 	if by.Name != "" {
 		db.Where("name = ?", by.Name)
 	}
+	if by.Status != nil {
+		db.Where("status = ?", by.Status)
+	}
 
 	for _, orderBy := range by.OrderBy {
 		switch orderBy {

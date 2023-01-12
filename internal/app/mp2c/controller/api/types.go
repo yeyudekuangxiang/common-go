@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-type GetTagForm struct {
-	ID int64 `json:"id" form:"id" binding:"gte=0" alias:"tag id"`
-	controller.PageFrom
-}
 type GetYZMForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
 	Code   string `json:"code" form:"code"  alias:"验证码"`

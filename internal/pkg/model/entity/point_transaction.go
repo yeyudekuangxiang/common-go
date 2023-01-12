@@ -63,7 +63,8 @@ func (p PointTransactionType) Text() string {
 		return "活动奖励"
 	case POINT_POWER_REPLACE:
 		return "新能源换电" //oola
-	case POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK, POINT_FMY_RECYCLING_CLOTHING:
+
+	case POINT_RECYCLING, POINT_RECYCLING_CLOTHING, POINT_RECYCLING_DIGITAL, POINT_RECYCLING_APPLIANCE, POINT_RECYCLING_BOOK, POINT_FMY_RECYCLING_CLOTHING:
 		return "旧物回收"
 	case POINT_ARTICLE:
 		return "发帖"
@@ -87,6 +88,10 @@ func (p PointTransactionType) Text() string {
 		return "二手交易奖励"
 	case POINT_NEW_TASK_PUBLISH_COMMODITY:
 		return "发布二手奖励"
+	case POINT_RECYCLING_SHISHANGHUISHOU:
+		return "拾尚回收"
+	case POINT_RECYCLING_DANGDANGYIXIA:
+		return "铛铛一下"
 	}
 	return "未知积分"
 }

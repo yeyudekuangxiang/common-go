@@ -39,6 +39,10 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	if form.MemberId == "undefined" {
+		return nil, errno.ErrCommon.WithMessage("参数错误")
+	}
+
 	user := apiutil.GetAuthUser(c)
 	//查询渠道号
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
@@ -59,7 +63,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 			app.Logger.Errorf("第三方绑定 绑定失败:%s; platformId:%s; openId:%s", err.Error(), form.MemberId, user.OpenId)
 			return nil, errno.ErrCommon.WithMessage(scene.Ch + "用户绑定失败")
 		}
-
+		app.Logger.Errorf("第三方绑定 重复绑定: platformId:%s; openId:%s", form.MemberId, user.OpenId)
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
 			"lvmiaoUserId": sceneUser.OpenId,

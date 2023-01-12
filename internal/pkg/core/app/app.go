@@ -1,6 +1,9 @@
 package app
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-redis/redis/v8"
@@ -15,6 +18,7 @@ import (
 	"gorm.io/gorm"
 	"mio/pkg/wxapp"
 	"mio/pkg/wxoa"
+	"reflect"
 )
 
 var (
@@ -48,4 +52,70 @@ type RpcClient struct {
 	TokenCenterRpcSrv tokencenterclient.TokenCenter
 	PointRpcSrv       pointclient.Point
 	ActivityRpcSrv    activityclient.Activity
+}
+
+func Ping(ctx context.Context) error {
+	//db
+	if err := pingDb(ctx, DB); err != nil {
+		return err
+	}
+
+	//business db
+	if err := pingDb(ctx, BusinessDB); err != nil {
+		return err
+	}
+
+	//redis
+	if err := Redis.Ping(ctx).Err(); err != nil {
+		return err
+	}
+
+	if err := checkNil(ctx, *RpcService); err != nil {
+		return err
+	}
+	_, err := RpcService.PointRpcSrv.Ping(ctx, &pointclient.Request{})
+	if err != nil {
+		return err
+	}
+	_, err = RpcService.CouponRpcSrv.Ping(ctx, &couponclient.Request{})
+	if err != nil {
+		return err
+	}
+	_, err = RpcService.UserRpcSrv.Ping(ctx, &userclient.Request{})
+	if err != nil {
+		return err
+	}
+	_, err = RpcService.ActivityRpcSrv.Ping(ctx, &activityclient.Request{})
+	if err != nil {
+		return err
+	}
+	_, err = RpcService.CarbonPkRpcSrv.Ping(ctx, &carbonpkclient.Request{})
+	if err != nil {
+		return err
+	}
+	_, err = RpcService.TokenCenterRpcSrv.Ping(ctx, &tokencenterclient.Request{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func pingDb(ctx context.Context, db *gorm.DB) error {
+	if db == nil {
+		return errors.New("db not init")
+	}
+	realDb, err := db.DB()
+	if err != nil {
+		return err
+	}
+	return realDb.PingContext(ctx)
+}
+func checkNil(ctx context.Context, client RpcClient) error {
+	v := reflect.ValueOf(client)
+	vt := reflect.TypeOf(client)
+	for i := 0; i < v.NumField(); i++ {
+		if v.Field(i).IsNil() {
+			return fmt.Errorf("%s not init", vt.Field(i).Name)
+		}
+	}
+	return nil
 }

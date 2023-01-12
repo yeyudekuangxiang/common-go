@@ -77,6 +77,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	params["pointValue"] = form.PointValue
 	params["uid"] = form.Uid
 	params["time"] = form.Time
+	params["info"] = form.Info
 	params["privateKey"] = "mio2022"
 	params["info"] = form.Info
 

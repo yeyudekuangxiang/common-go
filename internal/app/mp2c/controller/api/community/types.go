@@ -149,3 +149,8 @@ type Signup struct {
 	CancelTime   time.Time `json:"cancelTime,omitempty"`
 	SignupStatus int       `json:"signupStatus"`
 }
+
+type GetTagForm struct {
+	ID int64 `json:"id" form:"id" binding:"gte=0" alias:"tag id"`
+	controller.PageFrom
+}

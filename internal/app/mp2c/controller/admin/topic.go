@@ -308,21 +308,6 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	if topic.Status == 2 {
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:   0,
-			RecId:    topic.User.ID,
-			Key:      "fail_topic",
-			Type:     4,
-			TurnType: 1,
-			TurnId:   topic.Id,
-		})
-
-		if err != nil {
-			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
-		}
-	}
-
 	return nil, nil
 }
 
@@ -391,7 +376,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 
 		key := "essence_topic_v2"
 		if resNumber == 1 || resNumber == 2 {
-			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_RECOMMEND,
 				BizId:        util.UUID(),
@@ -400,6 +385,9 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				Note:         "笔记 \"" + topic.Title + "...\" 被设为精华",
 				AdditionInfo: strconv.FormatInt(topic.Id, 10),
 			})
+			if err != nil {
+				app.Logger.Errorf("积分增加失败:%s", err.Error())
+			}
 			key = "essence_topic"
 		}
 
