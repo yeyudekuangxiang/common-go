@@ -662,7 +662,7 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		fmt.Println(err.Error())
+		app.Logger.Errorf("参数错误")
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
@@ -675,7 +675,7 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	})
 	//仅发起人可查看
 	if topic.UserId != user.ID {
-		fmt.Println("err.Error()")
+		app.Logger.Errorf("非创建者本人查看")
 	}
 	signupService.Export(c.Writer, c.Request, topic.Id)
 }

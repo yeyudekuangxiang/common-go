@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
+	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository/community"
@@ -39,7 +40,7 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	// 创建一个工作表
 	index, err := f.NewSheet("Sheet1")
 	if err != nil {
-		fmt.Println(err.Error())
+		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
 	}
 
 	// 设置单元格的值
@@ -74,32 +75,29 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	f.SetActiveSheet(index)
 	// 根据指定路径保存文件
 	fileName := fmt.Sprintf("export_data_%d-%d.xlsx", time.Now().Unix(), topicId)
-	if err = f.SaveAs(fileName); err != nil {
-		fmt.Println(err.Error())
-	}
 
 	file, err := os.OpenFile(filepath.Clean(fileName), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		fmt.Println(err.Error())
+		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
 	}
 	_ = f.Write(file)
 
 	defer func() {
 		if err := file.Close(); err != nil {
-			fmt.Println(err)
+			app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
 		}
 		if err := f.Close(); err != nil {
-			fmt.Println(err)
+			app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
 		}
 	}()
 	if err != nil {
-		fmt.Println(err.Error())
+		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
 	}
 	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 	w.Header().Add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 	//var buffer bytes.Buffer
-	buf, err := f.WriteToBuffer()
+	buf, _ := f.WriteToBuffer()
 	content := bytes.NewReader(buf.Bytes())
 	http.ServeContent(w, r, fileName, time.Now(), content)
 }
