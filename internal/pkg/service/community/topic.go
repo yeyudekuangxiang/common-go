@@ -723,6 +723,7 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 
 	if params.Type == 2 {
 		topicModel.Activity = entity.CommunityActivities{
+			Id:             topicModel.Id,
 			Type:           params.ActivityType,
 			Address:        params.Address,
 			TagIds:         params.ActivityTagIds,

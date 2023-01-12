@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -46,10 +47,18 @@ func (d defaultTopicModel) SoftDelete(topic *entity.Topic) error {
 
 func (d defaultTopicModel) Updates(topic *entity.Topic) error {
 	db := d.ctx.DB
-	err := db.Omit("User").Omit("Tags").Omit("Comment").Updates(topic).Error
-	if err == nil {
-		return nil
+	if topic.Type == 2 {
+		activity := topic.Activity
+		err := db.Updates(&activity).Error
+		if err != nil {
+			return err
+		}
 	}
+	err := db.Omit(clause.Associations).Updates(topic).Error
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 
