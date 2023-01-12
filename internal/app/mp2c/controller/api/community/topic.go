@@ -406,6 +406,7 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	topicService := community.NewTopicService(ctx)
 	topicLikeService := community.NewTopicLikeService(ctx)
 	collectService := community.NewCollectionService(ctx)
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
 
 	//获取帖子
 	topic, err := topicService.DetailTopic(form.ID)
@@ -433,10 +434,15 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 		topic.IsCollection = collection.Status
 	}
 	if topic.Type == 2 {
+		info, err := signupService.GetSignupInfo(topic.Activity.Id)
+		if err != nil {
+			return nil, err
+		}
 		topic.Activity.Status = 1
 		if topic.Activity.SignupDeadline.Before(time.Now()) {
 			topic.Activity.Status = 2
 		}
+		topic.Activity.SignupStatus = info.SignupStatus
 	}
 
 	return gin.H{
