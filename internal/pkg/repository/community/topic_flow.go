@@ -1,9 +1,10 @@
-package repository
+package community
 
 import (
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 )
 
 var DefaultTopicFlowRepository = NewTopicFlowRepository(app.DB)
@@ -16,7 +17,7 @@ type TopicFlowRepository struct {
 	DB *gorm.DB
 }
 
-func (repo TopicFlowRepository) FindBy(by FindTopicFlowBy) entity.TopicFlow {
+func (repo TopicFlowRepository) FindBy(by repository.FindTopicFlowBy) entity.TopicFlow {
 
 	flow := entity.TopicFlow{}
 

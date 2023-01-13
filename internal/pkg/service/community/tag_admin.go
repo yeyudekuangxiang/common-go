@@ -5,6 +5,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 )
 
 type (
@@ -19,14 +20,14 @@ type (
 
 	defaultTagAdminService struct {
 		ctx      *mioContext.MioContext
-		tagModel repository.TagModel
+		tagModel community.TagModel
 	}
 )
 
 func NewTagAdminService(ctx *mioContext.MioContext) TagAdminService {
 	return defaultTagAdminService{
 		ctx:      ctx,
-		tagModel: repository.NewTagModel(ctx),
+		tagModel: community.NewTagModel(ctx),
 	}
 }
 

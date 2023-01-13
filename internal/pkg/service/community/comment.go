@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
@@ -39,7 +40,7 @@ type defaultCommentService struct {
 	ctx                            *context.MioContext
 	commentModel                   repository.CommentModel
 	commentLikeModel               repository.CommentLikeModel
-	topicModel                     repository.TopicModel
+	topicModel                     community.TopicModel
 	carbonCommentModel             repository.CarbonCommentModel
 	carbonCommentLikeModel         repository.CarbonCommentLikeModel
 	carbonSecondHandCommodityModel repository.CarbonSecondHandCommodityModel
@@ -50,7 +51,7 @@ func NewCommentService(ctx *context.MioContext) CommentService {
 		ctx:                            ctx,
 		commentModel:                   repository.NewCommentModel(ctx),
 		commentLikeModel:               repository.NewCommentLikeRepository(ctx),
-		topicModel:                     repository.NewTopicModel(ctx),
+		topicModel:                     community.NewTopicModel(ctx),
 		carbonCommentModel:             repository.NewCarbonCommentModel(ctx),
 		carbonCommentLikeModel:         repository.NewCarbonCommentLikeRepository(ctx),
 		carbonSecondHandCommodityModel: repository.NewCarbonSecondHandCommodityModel(ctx),

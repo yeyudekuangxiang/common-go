@@ -8,7 +8,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	community2 "mio/internal/pkg/repository/community"
+	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/message"
@@ -593,7 +593,7 @@ func (ctr *TopicController) MySignup(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	list, total, err := signupService.GetPageList(community2.FindAllActivitiesSignupParams{
+	list, total, err := signupService.GetPageList(communityModel.FindAllActivitiesSignupParams{
 		UserId: user.ID,
 		Offset: form.Offset(),
 		Limit:  form.Limit(),
@@ -643,7 +643,7 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	topic := topicService.FindTopic(community.FindTopicParams{
 		TopicId: form.ID,
 		UserId:  user.ID,
-		Type:    1,
+		Type:    communityModel.TopicTypeActivity,
 	})
 	//仅发起人可查看
 	if topic.Id == 0 {
@@ -653,7 +653,7 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 		return nil, nil
 	}
 
-	signupList, total, err := signupService.FindSignupList(community2.FindAllActivitiesSignupParams{
+	signupList, total, err := signupService.FindSignupList(communityModel.FindAllActivitiesSignupParams{
 		TopicId: topic.Id,
 	})
 
@@ -682,7 +682,7 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	topic := topicService.FindTopic(community.FindTopicParams{
 		TopicId: form.ID,
 		UserId:  user.ID,
-		Type:    1,
+		Type:    communityModel.TopicTypeActivity,
 	})
 	//仅发起人可查看
 	if topic.UserId != user.ID {

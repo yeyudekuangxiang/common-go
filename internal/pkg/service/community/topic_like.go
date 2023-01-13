@@ -5,20 +5,21 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"mio/pkg/errno"
 	"time"
 )
 
 func NewTopicLikeService(ctx *context.MioContext) TopicLikeService {
 	return TopicLikeService{
-		topicLikeModel: repository.NewTopicLikeRepository(ctx),
-		topicModel:     repository.NewTopicModel(ctx),
+		topicLikeModel: community.NewTopicLikeRepository(ctx),
+		topicModel:     community.NewTopicModel(ctx),
 	}
 }
 
 type TopicLikeService struct {
-	topicLikeModel repository.TopicLikeModel
-	topicModel     repository.TopicModel
+	topicLikeModel community.TopicLikeModel
+	topicModel     community.TopicModel
 }
 
 func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (TopicChangeLikeResp, error) {

@@ -1,4 +1,4 @@
-package repository
+package community
 
 import (
 	"database/sql"
@@ -8,29 +8,30 @@ import (
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 )
 
 type (
 	TopicModel interface {
-		GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64)
+		GetTopicPageList(by repository.GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
-		FindOneTopic(params FindTopicParams) (*entity.Topic, error)
+		FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error)
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		AddTopicSeeCount(topicId int64, num int) error
-		GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64)
-		GetMyTopic(params MyTopicListParams) ([]*entity.Topic, int64, error)
-		GetTopicList(by GetTopicPageListBy) ([]*entity.Topic, int64, error)
+		GetFlowPageList(by repository.GetTopicFlowPageListBy) (list []entity.Topic, total int64)
+		GetMyTopic(params repository.MyTopicListParams) ([]*entity.Topic, int64, error)
+		GetTopicList(by repository.GetTopicPageListBy) ([]*entity.Topic, int64, error)
 		ChangeTopicCollectionCount(id int64, column string, incr int) error
 		Trans(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error
 		GetTopicNotes(topicIds []int64) []*entity.Topic
-		GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error)
+		GetTopicListV2(by repository.GetTopicPageListBy) ([]*entity.Topic, error)
 		GetTopList() ([]*entity.Topic, error)
 		GetImportTopic() ([]*entity.Topic, error)
 		SoftDelete(topic *entity.Topic) error
 		Updates(topic *entity.Topic) error
 		UpdateColumn(id int64, key string, value interface{}) error
-		UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error
+		UpdatesColumn(cond repository.UpdatesTopicCond, upColumns map[string]interface{}) error
 	}
 
 	defaultTopicModel struct {
@@ -47,7 +48,7 @@ func (d defaultTopicModel) SoftDelete(topic *entity.Topic) error {
 
 func (d defaultTopicModel) Updates(topic *entity.Topic) error {
 	db := d.ctx.DB
-	if topic.Type == 1 {
+	if topic.Type == TopicTypeActivity {
 		activity := topic.Activity
 		err := db.Updates(&activity).Error
 		if err != nil {
@@ -103,7 +104,7 @@ func (d defaultTopicModel) GetTopList() ([]*entity.Topic, error) {
 	return topList, nil
 }
 
-func (d defaultTopicModel) FindOneTopic(params FindTopicParams) (*entity.Topic, error) {
+func (d defaultTopicModel) FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error) {
 	var resp entity.Topic
 	db := d.ctx.DB.Model(&entity.Topic{})
 	if params.TopicId != 0 {
@@ -154,7 +155,7 @@ func (d defaultTopicModel) ChangeTopicCollectionCount(id int64, column string, i
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(column, gorm.Expr(column+"+?", incr)).Error
 }
 
-func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, int64, error) {
+func (d defaultTopicModel) GetMyTopic(by repository.MyTopicListParams) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
@@ -195,7 +196,7 @@ func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, in
 	return topList, total, nil
 }
 
-func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.Topic, int64, error) {
+func (d defaultTopicModel) GetTopicList(params repository.GetTopicPageListBy) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := d.ctx.DB.Model(&entity.Topic{}).
@@ -260,7 +261,7 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 	return topList, total, nil
 }
 
-func (d defaultTopicModel) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topic, error) {
+func (d defaultTopicModel) GetTopicListV2(by repository.GetTopicPageListBy) ([]*entity.Topic, error) {
 	topList := make([]*entity.Topic, 0)
 
 	query := d.ctx.DB.Model(&entity.Topic{}).
@@ -288,7 +289,7 @@ func (d defaultTopicModel) GetTopicListV2(by GetTopicPageListBy) ([]*entity.Topi
 	return topList, nil
 }
 
-func (d defaultTopicModel) GetTopicPageList(by GetTopicPageListBy) (list []entity.Topic, total int64) {
+func (d defaultTopicModel) GetTopicPageList(by repository.GetTopicPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
 
 	query := d.ctx.DB.Model(&entity.Topic{})
@@ -354,7 +355,7 @@ func (d defaultTopicModel) AddTopicSeeCount(topicId int64, num int) error {
 	return db.Update("see_count", gorm.Expr("see_count + ?", num)).Error
 }
 
-func (d defaultTopicModel) GetFlowPageList(by GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
+func (d defaultTopicModel) GetFlowPageList(by repository.GetTopicFlowPageListBy) (list []entity.Topic, total int64) {
 	list = make([]entity.Topic, 0)
 	db := d.ctx.DB.Table(fmt.Sprintf("%s as flow", entity.TopicFlow{}.TableName())).
 		Joins(fmt.Sprintf("inner join %s as topic on flow.topic_id = topic.id", entity.Topic{}.TableName())).
@@ -389,7 +390,7 @@ func (d defaultTopicModel) UpdateColumn(id int64, key string, value interface{})
 	return d.ctx.DB.Model(&entity.Topic{}).Where("id = ?", id).Update(key, value).Error
 }
 
-func (d defaultTopicModel) UpdatesColumn(cond UpdatesTopicCond, upColumns map[string]interface{}) error {
+func (d defaultTopicModel) UpdatesColumn(cond repository.UpdatesTopicCond, upColumns map[string]interface{}) error {
 	query := d.ctx.DB.Model(&entity.Topic{})
 	if cond.Id != 0 {
 		query.Where("id = ?", cond.Id)
