@@ -41,19 +41,19 @@ type CreateTopicRequest struct {
 	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
 	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
 	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"required_if=Type 1,min=0,max=2"`
-	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型" binding:"required,min=1"`
+	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型"`
 	//报名活动字段
-	Region         string `json:"region" form:"region" binding:"required_if=Type 2 ActivityType 1"`
-	Address        string `json:"address" form:"address" binding:"required_if=Type 2 ActivityType 1"`
-	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds" binding:"required_if=Type 2"`
+	Region         string `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
+	Address        string `json:"address" form:"address" binding:"required_if=Type 1 ActivityType 1"`
+	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds" binding:"required_if=Type 1"`
 	Remarks        string `json:"remarks" form:"remarks"`
 	Qrcode         string `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2 MeetingLink ''"`
 	MeetingLink    string `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2 Qrcode ''"`
-	Contacts       string `json:"contacts" form:"contacts" binding:"required_if=Type 2"`
-	StartTime      int64  `json:"startTime" form:"startTime" binding:"required_if=Type 2"`
-	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 2"`
-	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 2"`
-	ActivityType   int    `json:"activityType" form:"activityType" binding:"required_if=Type 2"`
+	Contacts       string `json:"contacts" form:"contacts" binding:"required_if=Type 1"`
+	StartTime      int64  `json:"startTime" form:"startTime" binding:"required_if=Type 1"`
+	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 1"`
+	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 1"`
+	ActivityType   int    `json:"activityType" form:"activityType" binding:"required_if=Type 1"`
 }
 
 type TopicActivity struct {
