@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
+	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -140,11 +141,12 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 		SignupStatus: params.SignupStatus,
 	})
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &entity.APIActivitiesSignup{}, errno.ErrRecordNotFound
+		}
 		return &entity.APIActivitiesSignup{}, errno.ErrInternalServer.WithMessage(err.Error())
 	}
-	if signup.Id == 0 {
-		return &entity.APIActivitiesSignup{}, errno.ErrCommon.WithMessage("未找到该标签")
-	}
+
 	return signup, nil
 }
 
