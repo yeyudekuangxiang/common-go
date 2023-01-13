@@ -40,7 +40,7 @@ type CreateTopicRequest struct {
 	Title   string   `json:"title" form:"title" alias:"标题" binding:"required,min=2,max=64"`
 	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
 	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
-	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"required_if=Type 1,min=0,max=2"`
+	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"max=2"`
 	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型"`
 	//报名活动字段
 	Region         string `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
