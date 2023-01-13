@@ -643,8 +643,12 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	topic := topicService.FindTopic(community.FindTopicParams{
 		TopicId: form.ID,
 		UserId:  user.ID,
+		Type:    1,
 	})
 	//仅发起人可查看
+	if topic.Id == 0 {
+		return nil, errno.ErrRecordNotFound
+	}
 	if topic.UserId != user.ID {
 		return nil, nil
 	}
@@ -678,6 +682,7 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	topic := topicService.FindTopic(community.FindTopicParams{
 		TopicId: form.ID,
 		UserId:  user.ID,
+		Type:    1,
 	})
 	//仅发起人可查看
 	if topic.UserId != user.ID {
