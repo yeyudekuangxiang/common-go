@@ -151,9 +151,6 @@ func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneAc
 	}
 	err := db.Unscoped().First(&resp).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return &entity.APIActivitiesSignup{}, nil
-		}
 		return &entity.APIActivitiesSignup{}, err
 	}
 	return resp, nil

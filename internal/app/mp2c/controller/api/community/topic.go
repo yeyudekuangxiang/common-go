@@ -435,18 +435,17 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	}
 	if topic.Type == communityModel.TopicTypeActivity {
 		info, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{
-			TopicId:      topic.Activity.Id,
+			TopicId:      topic.Id,
 			UserId:       user.ID,
 			SignupStatus: communityModel.SignupStatusTrue,
 		})
-		if err != nil {
-			return nil, err
+		if err == nil {
+			topic.Activity.SignupStatus = info.SignupStatus
 		}
 		topic.Activity.Status = 1
 		if topic.Activity.SignupDeadline.Before(time.Now()) {
 			topic.Activity.Status = 2
 		}
-		topic.Activity.SignupStatus = info.SignupStatus
 	}
 
 	return gin.H{
