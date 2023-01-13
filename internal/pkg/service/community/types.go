@@ -73,7 +73,7 @@ type UpdateTopicParams struct {
 type FindTopicParams struct {
 	TopicId int64 `json:"topicId"`
 	UserId  int64 `json:"userId"`
-	Type    int   `json:"type"`
+	Type    int   `json:"type,omitempty"`
 	Status  int   `json:"status"`
 }
 
