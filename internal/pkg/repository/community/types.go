@@ -8,6 +8,11 @@ const (
 	TopicTypeActivity = 1
 )
 
+const (
+	SignupStatusTrue  = 1
+	SignupStatusFalse = 2
+)
+
 type FindAllActivitiesTagParams struct {
 	ID          int64              `json:"id"`
 	Name        string             `json:"name"`

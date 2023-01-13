@@ -433,8 +433,12 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err == nil {
 		topic.IsCollection = collection.Status
 	}
-	if topic.Type == 1 {
-		info, err := signupService.GetSignupInfo(topic.Activity.Id)
+	if topic.Type == communityModel.TopicTypeActivity {
+		info, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{
+			TopicId:      topic.Activity.Id,
+			UserId:       user.ID,
+			SignupStatus: communityModel.SignupStatusTrue,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -620,7 +624,7 @@ func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	signInfo, err := signupService.GetSignupInfo(form.ID)
+	signInfo, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -652,9 +656,7 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 		}
 		return nil, errno.ErrInternalServer
 	}
-	if topic.Id == 0 {
-		return nil, errno.ErrRecordNotFound
-	}
+
 	if topic.UserId != user.ID {
 		return nil, nil
 	}
@@ -698,5 +700,6 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	if topic.UserId != user.ID {
 		app.Logger.Errorf("非创建者本人查看")
 	}
+
 	signupService.Export(c.Writer, c.Request, topic.Id)
 }
