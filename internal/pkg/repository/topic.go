@@ -47,7 +47,7 @@ func (d defaultTopicModel) SoftDelete(topic *entity.Topic) error {
 
 func (d defaultTopicModel) Updates(topic *entity.Topic) error {
 	db := d.ctx.DB
-	if topic.Type == 2 {
+	if topic.Type == 1 {
 		activity := topic.Activity
 		err := db.Updates(&activity).Error
 		if err != nil {
@@ -112,7 +112,7 @@ func (d defaultTopicModel) FindOneTopic(params FindTopicParams) (*entity.Topic, 
 	if params.UserId != 0 {
 		db.Where("user_id = ?", params.UserId)
 	}
-	if params.Type != 0 {
+	if params.Type >= 0 {
 		db.Where("type = ?", params.Type)
 	}
 	if params.Status != 0 {
@@ -176,7 +176,7 @@ func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, in
 		query.Where("topic.status = ?", by.Status)
 	}
 
-	if by.Type != 0 {
+	if by.Type >= 0 {
 		query.Where("topic.type = ?", by.Type)
 	}
 
@@ -228,7 +228,7 @@ func (d defaultTopicModel) GetTopicList(params GetTopicPageListBy) ([]*entity.To
 	}
 
 	if params.Label == "activity" {
-		query.Where("topic.type = ?", 2)
+		query.Where("topic.type = ?", 1)
 	}
 
 	if params.Status != 0 {

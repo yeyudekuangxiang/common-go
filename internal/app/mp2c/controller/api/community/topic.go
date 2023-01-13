@@ -229,7 +229,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 		if _, ok := collectionMap[item.Id]; ok {
 			item.IsCollection = 1
 		}
-		if item.Type == 2 {
+		if item.Type == 1 {
 			item.Activity.Status = 1
 			if item.Activity.SignupDeadline.Before(time.Now()) {
 				item.Activity.Status = 2
@@ -256,7 +256,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if form.Type == 1 && len(form.TagIds) >= 2 {
+	if form.Type == 0 && len(form.TagIds) >= 2 {
 		return nil, errno.ErrCommon.WithMessage("话题数量最多选2个哦")
 	}
 
@@ -327,7 +327,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	if form.Type == 1 && len(form.TagIds) >= 2 {
+	if form.Type == 0 && len(form.TagIds) >= 2 {
 		return nil, errno.ErrCommon.WithMessage("话题数量最多选2个哦")
 	}
 
@@ -433,7 +433,7 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	if err == nil {
 		topic.IsCollection = collection.Status
 	}
-	if topic.Type == 2 {
+	if topic.Type == 1 {
 		info, err := signupService.GetSignupInfo(topic.Activity.Id)
 		if err != nil {
 			return nil, err

@@ -148,7 +148,7 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 	//按ids顺序排序;处理activity
 	topicMap := make(map[int64]*entity.Topic, len(topicList))
 	for _, topic := range topicList {
-		if topic.Type == 2 {
+		if topic.Type == 1 {
 			if topic.Activity.SignupDeadline.Before(time.Now()) {
 				topic.Activity.Status = 2
 			}
@@ -650,7 +650,7 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 		topicModel.Tags = tagModel
 	}
 
-	if params.Type == 2 {
+	if params.Type == 1 {
 		topicModel.Activity = entity.CommunityActivities{
 			Type:           params.ActivityType,
 			Address:        params.Address,
@@ -721,7 +721,7 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 		}
 	}
 
-	if params.Type == 2 {
+	if params.Type == 1 {
 		topicModel.Activity = entity.CommunityActivities{
 			Id:             topicModel.Id,
 			Type:           params.ActivityType,
