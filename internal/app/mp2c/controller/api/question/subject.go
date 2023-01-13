@@ -7,7 +7,6 @@ import (
 	qnrService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/errno"
 )
 
 var DefaultSubjectController = SubjectController{}
@@ -28,7 +27,7 @@ func (SubjectController) Create(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 	if user.PhoneNumber == "" {
-		return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
+		//return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
 	}
 	err := answerServer.Add(srv_types.AddQuestionAnswerDTO{
 		OpenId:     user.OpenId, //"oy_BA5EwNEwvfhNKHxucDBNOGDwY", //user.OpenId
@@ -44,7 +43,7 @@ func (SubjectController) Create(ctx *gin.Context) (gin.H, error) {
 func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	if user.PhoneNumber == "" {
-		return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
+		//	return gin.H{}, errno.ErrCommon.WithMessage("请您先绑定手机号")
 	}
 	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
 	ret, err := subjectServer.GetList(user.OpenId, 1)
