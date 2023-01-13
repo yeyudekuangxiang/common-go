@@ -10,19 +10,20 @@ import (
 	context2 "mio/internal/pkg/core/context"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"time"
 )
 
 var initUserFlowPool, _ = ants.NewPool(50)
 
 var DefaultTopicFlowService = TopicFlowService{
-	repo:       repository.DefaultTopicFlowRepository,
-	topicModel: repository.NewTopicModel(context2.NewMioContext()),
+	repo:       community.DefaultTopicFlowRepository,
+	topicModel: community.NewTopicModel(context2.NewMioContext()),
 }
 
 type TopicFlowService struct {
-	repo       repository.TopicFlowRepository
-	topicModel repository.TopicModel
+	repo       community.TopicFlowRepository
+	topicModel community.TopicModel
 }
 
 // CalculateSort 计算内容流排序 创建时间和更新时间未计算在内

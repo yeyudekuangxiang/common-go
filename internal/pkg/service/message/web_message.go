@@ -8,6 +8,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/repository/message"
 	"mio/pkg/errno"
 	"strconv"
@@ -31,7 +32,7 @@ type (
 		messageContent  message.MessageContentModel
 		template        message.MessageTemplateModel
 		user            repository.UserRepository
-		topic           repository.TopicModel
+		topic           community.TopicModel
 		comment         repository.CommentModel
 		options         *webMessageOption
 	}
@@ -257,7 +258,7 @@ func NewWebMessageService(ctx *mioContext.MioContext, options ...WMOptions) WebM
 		messageContent:  message.NewMessageContentModel(ctx),
 		template:        message.NewMessageTemplateModel(ctx),
 		user:            repository.NewUserRepository(),
-		topic:           repository.NewTopicModel(ctx),
+		topic:           community.NewTopicModel(ctx),
 		comment:         repository.NewCommentModel(ctx),
 		options:         option,
 	}

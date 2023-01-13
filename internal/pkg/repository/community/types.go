@@ -2,6 +2,12 @@ package community
 
 import "mio/internal/pkg/model/entity"
 
+const (
+	TopicTypeAll      = -1
+	TopicTypeArticle  = 0
+	TopicTypeActivity = 1
+)
+
 type FindAllActivitiesTagParams struct {
 	ID          int64              `json:"id"`
 	Name        string             `json:"name"`

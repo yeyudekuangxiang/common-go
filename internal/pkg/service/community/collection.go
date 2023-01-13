@@ -4,6 +4,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"time"
 )
 
@@ -24,7 +25,7 @@ type (
 	defaultCollectionService struct {
 		ctx             *mioContext.MioContext
 		collectionModel repository.CollectionModel
-		topicModel      repository.TopicModel
+		topicModel      community.TopicModel
 	}
 )
 
@@ -106,7 +107,7 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 	var isFirst bool
 	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
 		collectionModel := repository.NewCollectionRepository(ctx)
-		topicModel := repository.NewTopicModel(ctx)
+		topicModel := community.NewTopicModel(ctx)
 
 		result, err := collectionModel.FindOneByObj(objId, objType, openId)
 
@@ -158,7 +159,7 @@ func (d defaultCollectionService) CollectionV2(objId int64, objType int, openId 
 func (d defaultCollectionService) CancelCollection(objId int64, objType int, openId string) error {
 	err := d.ctx.Transaction(func(ctx *mioContext.MioContext) error {
 		collectionModel := repository.NewCollectionRepository(ctx)
-		topicModel := repository.NewTopicModel(ctx)
+		topicModel := community.NewTopicModel(ctx)
 
 		result, err := collectionModel.FindOneByObj(objId, objType, openId)
 		if err != nil {
@@ -214,6 +215,6 @@ func NewCollectionService(ctx *mioContext.MioContext) CollectionService {
 	return &defaultCollectionService{
 		ctx:             ctx,
 		collectionModel: repository.NewCollectionRepository(ctx),
-		topicModel:      repository.NewTopicModel(ctx),
+		topicModel:      community.NewTopicModel(ctx),
 	}
 }

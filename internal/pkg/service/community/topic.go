@@ -32,18 +32,18 @@ var DefaultTopicService = NewTopicService(mioContext.NewMioContext())
 func NewTopicService(ctx *mioContext.MioContext) TopicService {
 	return TopicService{
 		ctx:            ctx,
-		topicModel:     repository.NewTopicModel(ctx),
-		topicLikeModel: repository.NewTopicLikeRepository(ctx),
-		tagModel:       repository.NewTagModel(ctx),
+		topicModel:     community.NewTopicModel(ctx),
+		topicLikeModel: community.NewTopicLikeRepository(ctx),
+		tagModel:       community.NewTagModel(ctx),
 		userModel:      repository.NewUserRepository(),
 	}
 }
 
 type TopicService struct {
 	ctx              *mioContext.MioContext
-	topicModel       repository.TopicModel
-	topicLikeModel   repository.TopicLikeModel
-	tagModel         repository.TagModel
+	topicModel       community.TopicModel
+	topicLikeModel   community.TopicLikeModel
+	tagModel         community.TagModel
 	tokenServer      *wxoa.AccessTokenServer
 	userModel        repository.UserRepository
 	activityModel    community.ActivitiesModel

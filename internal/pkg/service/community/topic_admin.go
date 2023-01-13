@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"mio/pkg/errno"
 	"mio/pkg/wxoa"
 	"strconv"
@@ -16,15 +17,15 @@ import (
 func NewTopicAdminService(ctx *context.MioContext) TopicAdminService {
 	return TopicAdminService{
 		ctx:        ctx,
-		topicModel: repository.NewTopicModel(ctx),
-		tag:        repository.NewTagModel(ctx),
+		topicModel: community.NewTopicModel(ctx),
+		tag:        community.NewTagModel(ctx),
 	}
 }
 
 type TopicAdminService struct {
 	ctx         *context.MioContext
-	topicModel  repository.TopicModel
-	tag         repository.TagModel
+	topicModel  community.TopicModel
+	tag         community.TagModel
 	TokenServer *wxoa.AccessTokenServer
 }
 

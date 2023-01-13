@@ -5,6 +5,7 @@ import (
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
+	"mio/internal/pkg/repository/community"
 	"mio/pkg/errno"
 )
 
@@ -17,14 +18,14 @@ type (
 
 	defaultTagService struct {
 		ctx      *mioContext.MioContext
-		tagModel repository.TagModel
+		tagModel community.TagModel
 	}
 )
 
 func NewTagService(ctx *mioContext.MioContext) TagService {
 	return defaultTagService{
 		ctx:      ctx,
-		tagModel: repository.NewTagModel(ctx),
+		tagModel: community.NewTagModel(ctx),
 	}
 }
 

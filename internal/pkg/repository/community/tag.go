@@ -1,4 +1,4 @@
-package repository
+package community
 
 import (
 	"github.com/mlogclub/simple"
@@ -6,12 +6,13 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 )
 
 type (
 	TagModel interface {
 		List(cnd *simple.SqlCnd) (list []entity.Tag)
-		GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64)
+		GetTagPageList(by repository.GetTagPageListBy) (list []entity.Tag, total int64)
 		GetById(id int64) entity.Tag
 		Delete(id int64) error
 		Update(tag *entity.Tag) error
@@ -55,7 +56,7 @@ func (m defaultTagModel) List(cnd *simple.SqlCnd) (list []entity.Tag) {
 	return
 }
 
-func (m defaultTagModel) GetTagPageList(by GetTagPageListBy) (list []entity.Tag, total int64) {
+func (m defaultTagModel) GetTagPageList(by repository.GetTagPageListBy) (list []entity.Tag, total int64) {
 	list = make([]entity.Tag, 0)
 	db := m.ctx.DB.Model(entity.Tag{})
 	if by.ID != 0 {
