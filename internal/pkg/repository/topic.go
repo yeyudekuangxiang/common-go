@@ -112,7 +112,7 @@ func (d defaultTopicModel) FindOneTopic(params FindTopicParams) (*entity.Topic, 
 	if params.UserId != 0 {
 		db.Where("user_id = ?", params.UserId)
 	}
-	if params.Type != 0 {
+	if params.Type >= 0 {
 		db.Where("type = ?", params.Type)
 	}
 	if params.Status != 0 {
@@ -176,7 +176,7 @@ func (d defaultTopicModel) GetMyTopic(by MyTopicListParams) ([]*entity.Topic, in
 		query.Where("topic.status = ?", by.Status)
 	}
 
-	if by.Type != 0 {
+	if by.Type >= 0 {
 		query.Where("topic.type = ?", by.Type)
 	}
 
