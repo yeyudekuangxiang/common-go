@@ -640,12 +640,18 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
 	topicService := community.NewTopicService(ctx)
-	topic := topicService.FindTopic(community.FindTopicParams{
+	topic, err := topicService.FindTopic(community.FindTopicParams{
 		TopicId: form.ID,
 		UserId:  user.ID,
 		Type:    communityModel.TopicTypeActivity,
 	})
 	//仅发起人可查看
+	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil, errno.ErrRecordNotFound
+		}
+		return nil, errno.ErrInternalServer
+	}
 	if topic.Id == 0 {
 		return nil, errno.ErrRecordNotFound
 	}
@@ -679,12 +685,16 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	user := apiutil.GetAuthUser(c)
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
 	topicService := community.NewTopicService(ctx)
-	topic := topicService.FindTopic(community.FindTopicParams{
+	topic, err := topicService.FindTopic(community.FindTopicParams{
 		TopicId: form.ID,
 		UserId:  user.ID,
 		Type:    communityModel.TopicTypeActivity,
 	})
 	//仅发起人可查看
+	if err != nil {
+		app.Logger.Errorf(err.Error())
+	}
+
 	if topic.UserId != user.ID {
 		app.Logger.Errorf("非创建者本人查看")
 	}
