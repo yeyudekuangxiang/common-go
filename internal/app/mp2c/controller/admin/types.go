@@ -252,8 +252,9 @@ type UpdateUser struct {
 //user end
 
 type SendCouponReq struct {
-	OpenId string `json:"openId" form:"openId" binding:"required"`
-	Ch     string `json:"ch" form:"ch"`
+	OpenId string  `json:"openId" form:"openId" binding:"required"`
+	Ch     string  `json:"ch" form:"ch"`
+	Amount float64 `json:"amount" form:"amount"`
 }
 
 type UpdateUserRisk struct {
