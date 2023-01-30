@@ -184,12 +184,12 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 		return errno.ErrCommon.WithMessage("每日上限1次")
 	}
 
-	whitelist, err := srv.whitelist(openId)
+	isWhitelist, err := srv.whitelist(openId)
 	if err != nil {
 		return err
 	}
 
-	if whitelist {
+	if isWhitelist {
 		return nil
 	}
 
@@ -243,7 +243,7 @@ func (srv StarChargeService) whitelist(openId string) (bool, error) {
 	}
 
 	if total >= 2 {
-		return false, nil
+		return false, errno.ErrMisMatchCondition
 	}
 
 	return true, nil
