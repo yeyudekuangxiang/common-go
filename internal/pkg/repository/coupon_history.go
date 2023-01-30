@@ -23,24 +23,25 @@ type (
 func (m *defaultCouponHistoryRepository) FindAll(params FindCouponHistoryParams) ([]*entity.CouponHistory, int64, error) {
 	var resp []*entity.CouponHistory
 	var total int64
-	query := m.ctx.DB.Model(resp)
+
+	query := m.ctx.DB.Model(&entity.CouponHistory{})
 	if params.OpenId != "" {
 		query = query.Where("open_id = ?", params.OpenId)
 	}
 
 	if params.Types != "" {
-		query = query.Where("type = ?", params.Types)
+		query = query.Where("coupon_type = ?", params.Types)
 	}
 
 	if !params.StartTime.IsZero() {
-		query = query.Where("created_at > ?", params.StartTime)
+		query = query.Where("create_time > ?", params.StartTime)
 	}
 
 	if !params.EndTime.IsZero() {
-		query = query.Where("created_at < ?", params.EndTime)
+		query = query.Where("create_time < ?", params.EndTime)
 	}
 
-	err := query.Count(&total).Find(resp).Error
+	err := query.Count(&total).Find(&resp).Error
 
 	if err != nil {
 		return resp, 0, err
@@ -90,15 +91,15 @@ func (m *defaultCouponHistoryRepository) FindOne(params FindCouponHistoryParams)
 	}
 
 	if params.Types != "" {
-		query = query.Where("type = ?", params.Types)
+		query = query.Where("coupon_type = ?", params.Types)
 	}
 
 	if !params.StartTime.IsZero() {
-		query = query.Where("created_at > ?", params.StartTime)
+		query = query.Where("create_time > ?", params.StartTime)
 	}
 
 	if !params.EndTime.IsZero() {
-		query = query.Where("created_at < ?", params.EndTime)
+		query = query.Where("create_time < ?", params.EndTime)
 	}
 
 	err := query.First(&resp).Error

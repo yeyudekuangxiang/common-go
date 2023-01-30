@@ -182,8 +182,6 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 		endTime, _ := time.ParseInLocation("2006-01-02", "2023-02-01", time.Local)
 		//在时间范围内
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
-			//白名单用户直接发券
-
 			starChargeService := star_charge.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
@@ -192,7 +190,7 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 				return
 			}
 
-			//限制一次
+			//次数检查
 			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, endTime); err != nil {
 				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
