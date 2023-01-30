@@ -127,7 +127,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if sceneUser.PlatformUserId == "" {
-		app.Logger.Errorf("亿通行 未找到绑定关系 : %s", user.OpenId)
+		app.Logger.Errorf("亿通行 未找到绑定关系 : %s; 红包金额:%f", user.OpenId, amount)
 		return "", errno.ErrBindRecordNotFound
 	}
 
