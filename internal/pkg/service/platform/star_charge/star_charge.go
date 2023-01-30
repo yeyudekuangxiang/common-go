@@ -184,6 +184,15 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 		return errno.ErrCommon.WithMessage("每日上限1次")
 	}
 
+	whitelist, err := srv.whitelist(openId)
+	if err != nil {
+		return err
+	}
+
+	if whitelist {
+		return nil
+	}
+
 	keyPrefix2 := "periodLimit:sendCoupon:star_charge:"
 	periodLimit2 := limit.NewPeriodLimit(int(endTime.Sub(time.Now()).Seconds()), 2, app.Redis, keyPrefix2)
 	res2, err := periodLimit2.TakeCtx(srv.ctx.Context, openId)
@@ -196,4 +205,46 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 	}
 
 	return nil
+}
+
+// 补发白名单 1月活动
+func (srv StarChargeService) whitelist(openId string) (bool, error) {
+
+	whitelistStarTime, _ := time.ParseInLocation("2006-01-02", "2023-01-13", time.Local)
+	whitelistEndTime, _ := time.ParseInLocation("2006-01-02", "2023-01-24", time.Local)
+
+	_, total, err := srv.history.FindAll(repository.FindCouponHistoryParams{
+		OpenId:    openId,
+		Types:     "star_charge",
+		StartTime: whitelistStarTime,
+		EndTime:   whitelistEndTime,
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	if total == 0 {
+		return false, nil
+	}
+
+	//查24号～31号
+	StarTime, _ := time.ParseInLocation("2006-01-02", "2023-01-24", time.Local)
+	EndTime, _ := time.ParseInLocation("2006-01-02", "2023-02-01", time.Local)
+	_, total, err = srv.history.FindAll(repository.FindCouponHistoryParams{
+		OpenId:    openId,
+		Types:     "star_charge",
+		StartTime: StarTime,
+		EndTime:   EndTime,
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	if total >= 2 {
+		return false, nil
+	}
+
+	return true, nil
 }

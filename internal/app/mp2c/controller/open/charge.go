@@ -66,12 +66,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("未找到用户")
 	}
 
-	//风险登记验证
-	if userInfo.Risk >= 2 {
-		fmt.Println("用户风险等级过高 ", form)
-		return nil, errno.ErrCommon.WithMessage("账户风险等级过高")
-	}
-
 	//查重
 	transService := service.NewPointTransactionService(ctx)
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
@@ -81,6 +75,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		Type:   string(typeString),
 		Note:   form.Ch + "#" + form.OutTradeNo,
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -90,12 +85,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		app.Logger.Info("charge 重复提交订单", form)
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
-
-	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
-	//	fmt.Println("charge 重复提交订单", form)
-	//	app.Logger.Info("charge 重复提交订单", form)
-	//	return nil, errors.New("重复提交订单")
-	//}
 
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
@@ -113,7 +102,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
 		return nil, nil
-		//return nil, errors.New("充电获取积分已达到上限")
 	}
 
 	if totalPoint > scene.PointLimit {
@@ -192,7 +180,10 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 		fmt.Println("星星充电 发券start")
 		startTime, _ := time.ParseInLocation("2006-01-02", "2022-01-23", time.Local)
 		endTime, _ := time.ParseInLocation("2006-01-02", "2023-02-01", time.Local)
+		//在时间范围内
 		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
+			//白名单用户直接发券
+
 			starChargeService := star_charge.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
@@ -200,12 +191,14 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
+
 			//限制一次
 			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, endTime); err != nil {
 				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
+
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
 				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
