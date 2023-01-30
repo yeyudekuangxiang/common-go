@@ -81,7 +81,13 @@ func (c PrivateController) sendCouponForJhx(ctx *context.MioContext, user entity
 }
 
 func (c PrivateController) sendCouponForYtx(ctx *context.MioContext, amount float64, user entity.User) error {
-	ytxService := ytx.NewYtxService(ctx)
+	bdscene := service.DefaultBdSceneService.FindByCh("yitongxing")
+	var options []ytx.Options
+	options = append(options, ytx.WithPoolCode(bdscene.AppId2))
+	options = append(options, ytx.WithSecret(bdscene.Secret))
+	options = append(options, ytx.WithAppId(bdscene.AppId))
+	options = append(options, ytx.WithDomain(bdscene.Domain))
+	ytxService := ytx.NewYtxService(ctx, options...)
 	if amount == 0 {
 		amount = 1.00
 	}
