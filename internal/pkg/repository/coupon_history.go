@@ -11,8 +11,8 @@ var DefaultCouponHistoryRepository = NewCouponHistoryModel(mioContext.NewMioCont
 type (
 	CouponHistoryModel interface {
 		Insert(data *entity.CouponHistory) (*entity.CouponHistory, error)
-		FindOne(id int64) (*entity.CouponHistory, error)
-		FindAll(params FindCouponHistoryParams) (*entity.CouponHistory, int64, error)
+		FindOne(params FindCouponHistoryParams) (*entity.CouponHistory, error)
+		FindAll(params FindCouponHistoryParams) ([]*entity.CouponHistory, int64, error)
 	}
 
 	defaultCouponHistoryRepository struct {
@@ -20,10 +20,10 @@ type (
 	}
 )
 
-func (m *defaultCouponHistoryRepository) FindAll(params FindCouponHistoryParams) (*entity.CouponHistory, int64, error) {
-	resp := &entity.CouponHistory{}
+func (m *defaultCouponHistoryRepository) FindAll(params FindCouponHistoryParams) ([]*entity.CouponHistory, int64, error) {
+	var resp []*entity.CouponHistory
 	var total int64
-	query := m.ctx.DB.Model(resp).WithContext(m.ctx.Context)
+	query := m.ctx.DB.Model(resp)
 	if params.OpenId != "" {
 		query = query.Where("open_id = ?", params.OpenId)
 	}
@@ -40,7 +40,7 @@ func (m *defaultCouponHistoryRepository) FindAll(params FindCouponHistoryParams)
 		query = query.Where("created_at < ?", params.EndTime)
 	}
 
-	err := query.Count(&total).First(resp).Error
+	err := query.Count(&total).Find(resp).Error
 
 	if err != nil {
 		return resp, 0, err
@@ -80,12 +80,31 @@ func (m *defaultCouponHistoryRepository) Insert(data *entity.CouponHistory) (*en
 	}
 }
 
-func (m *defaultCouponHistoryRepository) FindOne(id int64) (*entity.CouponHistory, error) {
-	var resp entity.CouponHistory
-	err := m.ctx.DB.First(&resp, id).Error
+func (m *defaultCouponHistoryRepository) FindOne(params FindCouponHistoryParams) (*entity.CouponHistory, error) {
+	var resp *entity.CouponHistory
+
+	query := m.ctx.DB.Model(resp)
+
+	if params.OpenId != "" {
+		query = query.Where("open_id = ?", params.OpenId)
+	}
+
+	if params.Types != "" {
+		query = query.Where("type = ?", params.Types)
+	}
+
+	if !params.StartTime.IsZero() {
+		query = query.Where("created_at > ?", params.StartTime)
+	}
+
+	if !params.EndTime.IsZero() {
+		query = query.Where("created_at < ?", params.EndTime)
+	}
+
+	err := query.First(&resp).Error
 	switch err {
 	case nil:
-		return &resp, nil
+		return resp, nil
 	case gorm.ErrRecordNotFound:
 		return nil, entity.ErrNotFount
 	default:
