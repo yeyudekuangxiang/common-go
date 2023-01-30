@@ -16,7 +16,7 @@ func adminRouter(router *gin.Engine) {
 		adminRouter.GET("/info/list", apiutil.Format(admin.DefaultAdminController.GetAdminList))
 		adminRouter.GET("/login/info", apiutil.Format(admin.DefaultAdminController.GetLoginAdminInfo))
 		adminRouter.GET("/constant", apiutil.Format(admin.DefaultConstantController.List))
-		adminRouter.POST("/coupon/star-charge", apiutil.Format(admin.DefaultPrivateController.SendCouponForStarCharge))
+		adminRouter.POST("/coupon/send", apiutil.Format(admin.DefaultPrivateController.SendCoupon))
 
 		pointRouter := adminRouter.Group("/point")
 		{
