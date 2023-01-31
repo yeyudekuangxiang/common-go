@@ -240,6 +240,10 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 	if topic.Status == 3 {
 		keyPrefix := "periodLimit:sendPoint:article:push:"
+		if topic.CreatedAt.Time.Day() != time.Now().Day() {
+			timeKey := topic.CreatedAt.Time.Format("2006-01-02")
+			keyPrefix = "periodLimit:sendPoint:article:push:" + timeKey
+		}
 		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.PeriodAlign())
 		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
 
