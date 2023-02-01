@@ -67,7 +67,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//风险登记验证
-	if userInfo.Risk >= 4 {
+	if userInfo.Risk >= 2 {
 		fmt.Println("用户风险等级过高 ", form)
 		return nil, errno.ErrCommon.WithMessage("账户风险等级过高")
 	}
