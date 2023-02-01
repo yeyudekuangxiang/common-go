@@ -256,7 +256,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if form.Type == 0 && len(form.TagIds) >= 2 {
+	if form.Type == 0 && len(form.TagIds) > 2 {
 		return nil, errno.ErrCommon.WithMessage("话题数量最多选2个哦")
 	}
 
@@ -280,10 +280,11 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	}
 
 	// 图片内容审核
-	if len(form.Images) > 1 {
-		reviewSrv := service.DefaultReviewService()
+	if len(form.Images) >= 1 {
+		//reviewSrv := service.DefaultReviewService()
 		for i, imgUrl := range form.Images {
-			if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+			if err := validator.CheckMediaWithOpenId(user.OpenId, imgUrl); err != nil {
+				//if err := reviewSrv.ImageReview(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
 				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
 				zhuGeAttr := make(map[string]interface{}, 0)
 				zhuGeAttr["场景"] = "发帖-图片内容审核"
