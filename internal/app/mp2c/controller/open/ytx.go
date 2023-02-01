@@ -1,7 +1,6 @@
 package open
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -45,8 +44,7 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 
 	//风险登记验证
-	if user.Risk >= 2 {
-		fmt.Println("用户风险等级过高 ", form)
+	if user.Risk >= 4 {
 		return nil, errno.ErrCommon.WithMessage("账户风险等级过高")
 	}
 

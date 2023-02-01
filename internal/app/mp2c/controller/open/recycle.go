@@ -193,7 +193,6 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	})
 
 	if userInfo.ID == 0 {
-		fmt.Println("charge 未找到用户 ", form)
 		return nil, errno.ErrUserNotFound.WithCaller()
 	}
 
