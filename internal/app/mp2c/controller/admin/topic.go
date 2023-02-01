@@ -7,7 +7,7 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
+	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/message"
@@ -31,25 +31,27 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	cond := repository.TopicListRequest{
-		ID:         form.ID,
-		Title:      form.Title,
-		UserId:     form.UserId,
-		UserName:   form.UserName,
-		Status:     form.Status,
-		IsTop:      form.IsTop,
-		IsEssence:  form.IsEssence,
-		IsPartners: form.IsPartners,
-		Position:   form.Position,
-		Offset:     form.Offset(),
-		Limit:      form.Limit(),
+	cond := community.AdminTopicListParams{
+		ID:           form.ID,
+		Title:        form.Title,
+		UserId:       form.UserId,
+		UserName:     form.UserName,
+		Status:       form.Status,
+		IsTop:        form.IsTop,
+		IsEssence:    form.IsEssence,
+		IsPartners:   form.IsPartners,
+		Position:     form.Position,
+		Type:         form.Type,
+		ActivityType: form.ActivityType,
+		Offset:       form.Offset(),
+		Limit:        form.Limit(),
 	}
 
 	tagIds := strings.Split(form.TagId, ",")
 
 	if len(tagIds) == 1 {
-		float, _ := strconv.ParseInt(tagIds[0], 10, 64)
-		cond.TagId = float
+		i64, _ := strconv.ParseInt(tagIds[0], 10, 64)
+		cond.TagId = i64
 	} else if len(tagIds) > 1 {
 		cond.TagIds = tagIds
 	}
@@ -99,6 +101,13 @@ func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
 	topic, err := adminTopicService.DetailTopic(form.ID)
 	if err != nil {
 		return nil, err
+	}
+
+	if topic.Type == communityModel.TopicTypeActivity {
+		topic.Activity.Status = 1
+		if topic.Activity.SignupDeadline.Before(time.Now()) {
+			topic.Activity.Status = 2
+		}
 	}
 	return gin.H{
 		"topic": topic,

@@ -29,7 +29,7 @@ type TopicAdminService struct {
 	TokenServer *wxoa.AccessTokenServer
 }
 
-func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]*entity.Topic, int64, error) {
+func (srv TopicAdminService) GetTopicList(param AdminTopicListParams) ([]*entity.Topic, int64, error) {
 	topList := make([]*entity.Topic, 0)
 	var total int64
 	query := app.DB.Model(&entity.Topic{})
@@ -79,7 +79,15 @@ func (srv TopicAdminService) GetTopicList(param repository.TopicListRequest) ([]
 
 	}
 
-	query.Preload("Tags").Preload("User")
+	if param.Type != 0 {
+		query.Where("topic.type = ?", param.Type)
+	}
+
+	if param.ActivityType != 0 {
+		query.Joins("left join community_activities on topic.id = community_activities.id").Where("community_activities.type = ?", param.ActivityType)
+	}
+
+	query.Preload("Tags").Preload("User").Preload("Activity")
 	err := query.
 		Count(&total).
 		Group("topic.id").
@@ -177,10 +185,11 @@ func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, t
 func (srv TopicAdminService) DetailTopic(topicId int64) (entity.Topic, error) {
 	//查询数据是否存在
 	var topic entity.Topic
-	app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User").Where("id = ?", topicId).Find(&topic)
+	app.DB.Model(&entity.Topic{}).Preload("Tags").Preload("User").Preload("Activity").Where("id = ?", topicId).Find(&topic)
 	if topic.Id == 0 {
 		return entity.Topic{}, errno.ErrCommon.WithMessage("数据不存在")
 	}
+
 	return topic, nil
 }
 

@@ -16,19 +16,21 @@ type TopicChangeLikeResp struct {
 }
 
 type TopicListParams struct {
-	ID          int64              `json:"id"`
-	Ids         []int64            `json:"ids"`
-	Rids        []string           `json:"rids"`
-	TopicTagId  int64              `json:"topicTagId"`
-	Status      int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
-	IsTop       int                `json:"isTop"`
-	IsEssence   int                `json:"isEssence"`
-	UserId      int64              `json:"userId"` // 用于查询用户对帖子是否点赞
-	OrderByList entity.OrderByList `json:"orderByList"`
-	OrderBy     entity.OrderBy     `json:"orderBy"`
-	Label       string             `json:"label"`
-	Offset      int                `json:"offset"`
-	Limit       int                `json:"limit"` // limit为0时不限制数量
+	ID           int64              `json:"id"`
+	Ids          []int64            `json:"ids"`
+	Rids         []string           `json:"rids"`
+	TopicTagId   int64              `json:"topicTagId"`
+	Status       int                `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
+	IsTop        int                `json:"isTop"`
+	IsEssence    int                `json:"isEssence"`
+	UserId       int64              `json:"userId"` // 用于查询用户对帖子是否点赞
+	OrderByList  entity.OrderByList `json:"orderByList"`
+	OrderBy      entity.OrderBy     `json:"orderBy"`
+	Label        string             `json:"label"`
+	Type         int                `json:"type"`
+	ActivityType int                `json:"activityType"`
+	Offset       int                `json:"offset"`
+	Limit        int                `json:"limit"` // limit为0时不限制数量
 }
 
 type MyTopicListParams struct {
@@ -75,6 +77,24 @@ type FindTopicParams struct {
 	UserId  int64 `json:"userId"`
 	Type    int   `json:"type,omitempty"`
 	Status  int   `json:"status"`
+}
+
+type AdminTopicListParams struct {
+	ID           int64    `json:"id"`
+	Title        string   `json:"title"`
+	TagId        int64    `json:"tagId"`
+	TagIds       []string `json:"tagIds"`
+	UserId       int64    `json:"userId"`
+	UserName     string   `json:"userName"`
+	Status       int      `json:"status"`
+	IsTop        int      `json:"isTop"`
+	IsEssence    int      `json:"isEssence"`
+	IsPartners   int      `json:"isPartners"`
+	Position     string   `json:"position"`
+	Type         int      `json:"type"`
+	ActivityType int      `json:"activityType"`
+	Offset       int      `json:"offset"`
+	Limit        int      `json:"limit"`
 }
 
 // activity
