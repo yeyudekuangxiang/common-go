@@ -106,7 +106,7 @@ func (d defaultTopicModel) GetTopList() ([]*entity.Topic, error) {
 
 func (d defaultTopicModel) FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error) {
 	var resp entity.Topic
-	db := d.ctx.DB.Model(&entity.Topic{})
+	db := d.ctx.DB.Model(&entity.Topic{}).Preload("User")
 	if params.TopicId != 0 {
 		db.Where("id = ?", params.TopicId)
 	}
