@@ -286,11 +286,11 @@ var PointTypesMap = map[string]PointTransactionType{
 
 //每天获取 （多少）次积分
 var PointCollectLimitMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:     2, //	次
-	POINT_BIKE_RIDE:      2, //	次
-	POINT_INVITE:         5, //	次
-	POINT_POWER_REPLACE:  1, //	次
-	POINT_ARTICLE:        2, //	次
+	POINT_COFFEE_CUP:    2, //	次
+	POINT_BIKE_RIDE:     2, //	次
+	POINT_INVITE:        5, //	次
+	POINT_POWER_REPLACE: 1, //	次
+	//POINT_ARTICLE:        2, //	次
 	POINT_COMMENT:        3, // 次
 	POINT_LIKE:           6, // 次
 	POINT_REDUCE_PLASTIC: 2, // 次

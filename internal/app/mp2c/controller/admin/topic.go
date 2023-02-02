@@ -180,7 +180,7 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	})
 
 	if err != nil {
-		app.Logger.Errorf("【文章下架】站内信发送失败:%s", err.Error())
+		app.Logger.Errorf("【帖子下架】站内信发送失败:%s", err.Error())
 	}
 
 	return nil, nil
@@ -218,7 +218,7 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	})
 
 	if err != nil {
-		app.Logger.Errorf("【文章下架】站内信发送失败:%s", err.Error())
+		app.Logger.Errorf("【帖子下架】站内信发送失败:%s", err.Error())
 	}
 
 	return nil, nil
@@ -262,22 +262,25 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 		key := "push_topic_v2"
 		if resNumber == 1 || resNumber == 2 {
-			_, _ = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
 				Type:         entity.POINT_ARTICLE,
 				BizId:        util.UUID(),
 				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_ARTICLE]),
 				AdminId:      0,
-				Note:         fmt.Sprintf("审核笔记:%s；审核状态:%d", topic.Title, topic.Status),
+				Note:         fmt.Sprintf("审核帖子:%s；审核状态:%d", topic.Title, topic.Status),
 				AdditionInfo: strconv.FormatInt(topic.Id, 10),
 			})
+			if err != nil {
+				app.Logger.Errorf("【帖子审核】积分发放失败:%s; 帖子ID:%v; 用户ID:%v", err.Error(), topic.Id, topic.User.ID)
+			}
 			key = "push_topic"
 		}
 
 		if isFirst {
 			err = messageService.SendMessage(message.SendWebMessage{
 				SendId:   0,
-				RecId:    topic.User.ID,
+				RecId:    topic.UserId,
 				Key:      key,
 				Type:     message.MsgTypeSystem,
 				TurnId:   topic.Id,
@@ -286,7 +289,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			})
 
 			if err != nil {
-				app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+				app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
 			}
 		}
 	}
@@ -302,7 +305,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		})
 
 		if err != nil {
-			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+			app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
 		}
 	}
 
@@ -317,22 +320,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		})
 
 		if err != nil {
-			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
-		}
-	}
-
-	if topic.Status == 2 {
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:   0,
-			RecId:    topic.User.ID,
-			Key:      "fail_topic",
-			Type:     4,
-			TurnType: 1,
-			TurnId:   topic.Id,
-		})
-
-		if err != nil {
-			app.Logger.Errorf("【文章审核】站内信发送失败:%s", err.Error())
+			app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
 		}
 	}
 
@@ -368,7 +356,7 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 		})
 
 		if err != nil {
-			app.Logger.Errorf("【文章置顶】站内信发送失败:%s", err.Error())
+			app.Logger.Errorf("【帖子置顶】站内信发送失败:%s", err.Error())
 		}
 
 	}
@@ -410,7 +398,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				BizId:        util.UUID(),
 				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_RECOMMEND]),
 				AdminId:      0,
-				Note:         "笔记 \"" + topic.Title + "...\" 被设为精华",
+				Note:         "帖子 \"" + topic.Title + "...\" 被设为精华",
 				AdditionInfo: strconv.FormatInt(topic.Id, 10),
 			})
 			key = "essence_topic"
@@ -428,7 +416,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 			})
 
 			if err != nil {
-				app.Logger.Errorf("【精华文章】站内信发送失败:%s", err.Error())
+				app.Logger.Errorf("【精华帖子】站内信发送失败:%s", err.Error())
 			}
 		}
 	}

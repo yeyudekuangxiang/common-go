@@ -20,6 +20,7 @@ import (
 var (
 	// DB 数据库连接
 	DB         = new(gorm.DB)
+	ActivityDB = new(gorm.DB)
 	BusinessDB = new(gorm.DB)
 	// Logger 日志
 	Logger = new(zap.SugaredLogger)
