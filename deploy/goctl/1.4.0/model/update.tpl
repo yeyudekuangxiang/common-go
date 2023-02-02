@@ -9,7 +9,7 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
 	}
 
 {{end}}	{{.keys}}
-    {{if .containsIndexCache}}err{{else}}err:{{end}}= m.db.WithContext(ctx).Save(data).Error
+    {{if .containsIndexCache}}err{{else}}err:{{end}}= m.db.WithContext(ctx).Save({{if .containsIndexCache}}newData{{else}}data{{end}}).Error
     if err != nil {
         return err
     }
