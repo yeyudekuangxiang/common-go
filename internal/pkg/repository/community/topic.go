@@ -323,6 +323,7 @@ func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
 		Preload("Tags").
 		Preload("Activity").
 		Where("id = ?", topicId).
+		Where("status = ?", 3).
 		First(&resp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)

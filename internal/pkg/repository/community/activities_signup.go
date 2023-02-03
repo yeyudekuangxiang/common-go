@@ -190,7 +190,7 @@ func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllAc
 		db.Where("wechat = ?", params.Wechat)
 	}
 
-	err := db.Count(&total).Offset(params.Offset).Limit(params.Limit).Unscoped().Find(&list).Error
+	err := db.Count(&total).Offset(params.Offset).Limit(params.Limit).Order("signup_time desc").Unscoped().Find(&list).Error
 	if err != nil {
 		return nil, 0, err
 	}

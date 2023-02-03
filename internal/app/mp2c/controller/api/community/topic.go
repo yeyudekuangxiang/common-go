@@ -555,6 +555,7 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 	params := community.SignupParams{
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
+		OpenId:       user.OpenId,
 		RealName:     form.RealName,
 		Phone:        form.Phone,
 		Gender:       form.Gender,
@@ -569,6 +570,7 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return nil, nil
 }
 

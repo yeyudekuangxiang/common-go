@@ -12,6 +12,7 @@ import (
 	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/limit"
@@ -291,7 +292,15 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			if err != nil {
 				app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
 			}
+
 		}
+
+		//诸葛打点
+		zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["场景"] = "发布帖子"
+		zhuGeAttr["审核状态"] = "审核已通过"
+		zhuGeAttr["帖子id"] = topic.Id
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostAccess, topic.User.OpenId, zhuGeAttr)
 	}
 
 	if topic.Status == 4 {
@@ -322,6 +331,12 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		if err != nil {
 			app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
 		}
+		//诸葛打点
+		zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["场景"] = "发布帖子"
+		zhuGeAttr["审核状态"] = "审核未通过"
+		zhuGeAttr["帖子id"] = topic.Id
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostFail, topic.User.OpenId, zhuGeAttr)
 	}
 
 	return nil, nil

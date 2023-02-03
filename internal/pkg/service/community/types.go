@@ -110,6 +110,8 @@ type SignupParams struct {
 	Remarks      string    `json:"remarks"`
 	SignupTime   time.Time `json:"signupTime"`
 	SignupStatus int       `json:"signupStatus"`
+	//附加
+	OpenId string `json:"openId"`
 }
 
 //comment
