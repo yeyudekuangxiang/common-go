@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/community"
+	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
 	"net/http"
 	"os"
@@ -31,6 +34,7 @@ type (
 	defaultCommunityActivitiesSignupService struct {
 		ctx         *mioContext.MioContext
 		signupModel community.ActivitiesSignupModel
+		topicModel  community.TopicModel
 	}
 )
 
@@ -151,6 +155,18 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 }
 
 func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) error {
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: params.TopicId,
+		Type:    1,
+		Status:  3,
+	})
+	if err != nil {
+		return err
+	}
+	if topic.Id == 0 {
+		return errno.ErrCommon.WithMessage("活动不存在")
+	}
+
 	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{
 		TopicId:      params.TopicId,
 		UserId:       params.UserId,
@@ -177,6 +193,14 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 	if err != nil {
 		return err
 	}
+	//诸葛打点
+	zhuGeAttr := make(map[string]interface{}, 0)
+	zhuGeAttr["活动id"] = params.TopicId
+	zhuGeAttr["活动名称"] = topic.Title
+	zhuGeAttr["作者名称"] = topic.User.Nickname
+	zhuGeAttr["报名者id"] = params.UserId
+	zhuGeAttr["报名时间"] = params.SignupTime
+	track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostSignUp, params.OpenId, zhuGeAttr)
 	return nil
 }
 

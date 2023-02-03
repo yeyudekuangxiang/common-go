@@ -18,6 +18,9 @@ type zhuGeEventName struct {
 	YTXOrder               string
 	YTXCollectPoint        string
 	YTXReward              string
+	PostAccess             string
+	PostFail               string
+	PostSignUp             string
 }
 
 var ZhuGeEventName = zhuGeEventName{
@@ -37,4 +40,7 @@ var ZhuGeEventName = zhuGeEventName{
 	YTXReward:              "亿通行-发放奖励",
 	YTXOrder:               "亿通行-完成乘车",
 	YTXCollectPoint:        "亿通行-收取气泡",
+	PostAccess:             "发布帖子-审核通过",
+	PostFail:               "发布帖子-审核失败",
+	PostSignUp:             "报名活动-提交报名",
 }
