@@ -54,7 +54,8 @@ type app struct {
 	Sms              sms                     `ini:"sms"`
 	SmsMarket        smsMarket               `ini:"smsMarket"`
 	Prometheus       promSetting             `ini:"prometheus"`
-
+	//mq自调
+	MqArgs mqArgs `ini:"mqArgs"`
 	//rpc
 	CouponRpc           rpcSetting `ini:"couponRpc"`
 	TokenCenterRpc      rpcSetting `ini:"tokenCenterRpc"`
@@ -182,6 +183,9 @@ type promSetting struct {
 	Host string
 	Port int
 	Path string
+}
+type mqArgs struct {
+	SmsUrl string
 }
 
 func FindOaSetting(source string) wxSetting {

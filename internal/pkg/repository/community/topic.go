@@ -16,6 +16,7 @@ type (
 		GetTopicPageList(by repository.GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
 		FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error)
+		FindOneUnscoped(topicId int64) *entity.Topic
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		AddTopicSeeCount(topicId int64, num int) error
@@ -322,6 +323,23 @@ func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
 		Preload("User").
 		Preload("Tags").
 		Preload("Activity").
+		Where("id = ?", topicId).
+		Where("status = ?", 3).
+		First(&resp).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+
+	return &resp
+}
+
+func (d defaultTopicModel) FindOneUnscoped(topicId int64) *entity.Topic {
+	var resp entity.Topic
+	err := d.ctx.DB.Model(&entity.Topic{}).
+		Preload("User").
+		Preload("Tags").
+		Preload("Activity").
+		Unscoped().
 		Where("id = ?", topicId).
 		Where("status = ?", 3).
 		First(&resp).Error

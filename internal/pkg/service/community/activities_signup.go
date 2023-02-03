@@ -20,6 +20,8 @@ import (
 	"time"
 )
 
+var DefaultActivitiesSignupService = NewCommunityActivitiesSignupService(mioContext.NewMioContext())
+
 type (
 	ActivitiesSignupService interface {
 		GetPageList(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignup, int64, error)

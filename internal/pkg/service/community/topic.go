@@ -746,9 +746,15 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 // DetailTopic 获取topic详情
 func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.FindById(topicId)
+	topic := srv.topicModel.FindOneUnscoped(topicId)
 	if topic.Id == 0 {
-		return topic, errno.ErrCommon.WithMessage("数据不存在")
+		return topic, errno.ErrCommon.WithMessage("未找到该帖子")
+	}
+	if !topic.DeletedAt.Valid && topic.Type == 1 {
+		return topic, errno.ErrCommon.WithMessage("活动已被删除")
+	}
+	if !topic.DeletedAt.Valid && topic.Type == 0 {
+		return topic, errno.ErrCommon.WithMessage("文章已被删除")
 	}
 	//views+1
 	if err := srv.topicModel.AddTopicSeeCount(topic.Id, 1); err != nil {
@@ -758,19 +764,20 @@ func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 }
 
 // DelTopic 软删除
-func (srv TopicService) DelTopic(userId, topicId int64) error {
+func (srv TopicService) DelTopic(userId, topicId int64) (*entity.Topic, error) {
 	topicModel := srv.topicModel.FindById(topicId)
 	if topicModel.Id == 0 {
-		return errno.ErrCommon.WithMessage("该帖子不存在")
+		return nil, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
+
 	if topicModel.UserId != userId {
-		return errno.ErrCommon.WithMessage("无权限删除")
+		return nil, errno.ErrCommon.WithMessage("无权限删除")
 	}
 
 	if err := srv.topicModel.SoftDelete(topicModel); err != nil {
-		return errno.ErrInternalServer.WithMessage(err.Error())
+		return nil, errno.ErrInternalServer.WithMessage(err.Error())
 	}
-	return nil
+	return topicModel, nil
 }
 
 func (srv TopicService) GetSubCommentCount(ids []int64) (result []CommentCountResp) {
