@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/common"
+	"mio/internal/pkg/queue/types/message/smsmsg"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -387,11 +389,37 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	if user.Auth != 1 {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
+
 	//更新帖子
-	err := community.DefaultTopicService.DelTopic(user.ID, form.ID)
+	topic, err := community.DefaultTopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
 		return nil, err
 	}
+	// 报名活动删除的话 通知报名者
+	if topic.Type == 1 {
+		signupList, count, err := community.DefaultActivitiesSignupService.FindAll(communityModel.FindAllActivitiesSignupParams{
+			TopicId: topic.Id,
+		})
+		if err != nil {
+			app.Logger.Errorf("【短信发送失败】取消报名活动通知短信发送失败: %s", err.Error())
+		}
+		if count == 0 {
+			return nil, nil
+		}
+		for _, item := range signupList {
+			//发送短信
+			err := common.SendSms(smsmsg.SmsMessage{
+				TemplateKey: message.SmsActivityCancel,
+				Phone:       item.Phone,
+				Args:        []string{topic.Title},
+			})
+			if err != nil {
+				app.Logger.Error("【短信发送失败】取消报名活动通知短信发送失败: %s", err.Error())
+				break
+			}
+		}
+	}
+
 	return nil, nil
 }
 
