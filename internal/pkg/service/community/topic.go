@@ -753,7 +753,7 @@ func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	if topic.DeletedAt.Valid && topic.Type == 1 {
 		return topic, errno.ErrCommon.WithMessage("活动已被删除")
 	}
-	if !topic.DeletedAt.Valid && topic.Type == 0 {
+	if topic.DeletedAt.Valid && topic.Type == 0 {
 		return topic, errno.ErrCommon.WithMessage("文章已被删除")
 	}
 	//views+1
