@@ -62,7 +62,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	adminTopicService := community.NewTopicAdminService(ctx)
-
+	activitiesSignupService := community.NewCommunityActivitiesSignupService(ctx)
 	//get topic by params
 	list, total, err := adminTopicService.GetTopicList(cond)
 
@@ -77,6 +77,14 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	for _, item := range list {
 		ids = append(ids, item.Id)
 	}
+	countList, err := activitiesSignupService.FindListCount(community.FindListCountReq{TopicIds: ids})
+	if err != nil {
+		return nil, err
+	}
+	signupCountMap := make(map[int64]int64, 0)
+	for _, item := range countList {
+		signupCountMap[item.TopicId] = item.NumOfSignup
+	}
 	rootCommentCount := adminTopicService.GetCommentCount(ids)
 	//组装数据---帖子的顶级评论数量
 	topic2comment := make(map[int64]int64, 0)
@@ -85,7 +93,9 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 	for _, item := range list {
 		item.CommentCount = topic2comment[item.Id]
+		item.Activity.NumOfSignup = int(signupCountMap[item.Id])
 	}
+
 	return gin.H{
 		"list":     list,
 		"total":    total,

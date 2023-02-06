@@ -59,3 +59,8 @@ type APISignupList struct {
 	SignupTime   model.Time `json:"signupTime"`
 	SignupStatus int        `json:"signupStatus"`
 }
+
+type APIListCount struct {
+	TopicId     int64 `json:"topicId"`
+	NumOfSignup int64 `json:"numOfSignup"`
+}

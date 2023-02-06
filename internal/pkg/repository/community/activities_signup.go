@@ -19,12 +19,29 @@ type (
 		Delete(id int64) error
 		Update(signup *entity.CommunityActivitiesSignup) error
 		Create(signup *entity.CommunityActivitiesSignup) error
+		FindListCount(params FindListCountParams) ([]*entity.APIListCount, error)
 	}
 
 	defaultCommunityActivitiesSignupModel struct {
 		ctx *mioContext.MioContext
 	}
 )
+
+func (d defaultCommunityActivitiesSignupModel) FindListCount(params FindListCountParams) ([]*entity.APIListCount, error) {
+	var resp []*entity.APIListCount
+
+	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
+		Select([]string{"topic_id", "COUNT(id) as num_of_signup"}).
+		Where("topic_id in ?", params.TopicIds).
+		Where("signup_status = 1").
+		Group("topic_id").
+		Find(&resp).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
 
 func (d defaultCommunityActivitiesSignupModel) FindSignupList(params FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error) {
 	list := make([]*entity.APISignupList, 0)
