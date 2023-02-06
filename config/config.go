@@ -28,6 +28,8 @@ var Config = app{
 	CouponRpc:      rpcSetting{},
 	TokenCenterRpc: rpcSetting{},
 	ActivityRpc:    rpcSetting{},
+	//args
+	MqArgs: mqArgs{},
 }
 
 type app struct {
