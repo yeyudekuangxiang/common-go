@@ -29,5 +29,6 @@ func SendSms(message smsmsg.SmsMessage) error {
 	if err != nil {
 		return err
 	}
+	app.Logger.Infof("删除活动发送短信")
 	return app.QueueProduct.Publish(sendBody, []string{routerkey.HttpRouterKeys}, rabbitmq.WithPublishOptionsExchange("httpExchange"))
 }

@@ -66,12 +66,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("未找到用户")
 	}
 
-	//风险登记验证
-	if userInfo.Risk >= 2 {
-		fmt.Println("用户风险等级过高 ", form)
-		return nil, errno.ErrCommon.WithMessage("账户风险等级过高")
-	}
-
 	//查重
 	transService := service.NewPointTransactionService(ctx)
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
@@ -90,12 +84,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		app.Logger.Info("charge 重复提交订单", form)
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
-
-	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
-	//	fmt.Println("charge 重复提交订单", form)
-	//	app.Logger.Info("charge 重复提交订单", form)
-	//	return nil, errors.New("重复提交订单")
-	//}
 
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
@@ -159,6 +147,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//发券
+	
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
 }
