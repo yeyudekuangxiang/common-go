@@ -226,5 +226,6 @@ func NewCommunityActivitiesSignupService(ctx *mioContext.MioContext) ActivitiesS
 	return defaultCommunityActivitiesSignupService{
 		ctx:         ctx,
 		signupModel: community.NewCommunityActivitiesSignupModel(ctx),
+		topicModel:  community.NewTopicModel(ctx),
 	}
 }

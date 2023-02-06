@@ -107,20 +107,20 @@ func (d defaultTopicModel) GetTopList() ([]*entity.Topic, error) {
 
 func (d defaultTopicModel) FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error) {
 	var resp entity.Topic
-	db := d.ctx.DB.Model(&entity.Topic{}).Preload("User")
+	query := d.ctx.DB.Model(&entity.Topic{}).Preload("User")
 	if params.TopicId != 0 {
-		db.Where("id = ?", params.TopicId)
+		query = query.Where("id = ?", params.TopicId)
 	}
 	if params.UserId != 0 {
-		db.Where("user_id = ?", params.UserId)
+		query = query.Where("user_id = ?", params.UserId)
 	}
 	if params.Type >= 0 {
-		db.Where("type = ?", params.Type)
+		query = query.Where("type = ?", params.Type)
 	}
 	if params.Status != 0 {
-		db.Where("status = ?", params.Status)
+		query = query.Where("status = ?", params.Status)
 	}
-	err := db.First(&resp).Error
+	err := query.First(&resp).Error
 	switch err {
 	case nil:
 		return &resp, nil
