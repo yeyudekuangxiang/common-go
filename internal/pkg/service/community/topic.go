@@ -750,7 +750,7 @@ func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	if topic.Id == 0 {
 		return topic, errno.ErrCommon.WithMessage("未找到该帖子")
 	}
-	if !topic.DeletedAt.Valid && topic.Type == 1 {
+	if topic.DeletedAt.Valid && topic.Type == 1 {
 		return topic, errno.ErrCommon.WithMessage("活动已被删除")
 	}
 	if !topic.DeletedAt.Valid && topic.Type == 0 {
