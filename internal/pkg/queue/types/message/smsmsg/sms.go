@@ -13,7 +13,7 @@ type MsgMessage struct {
 type SmsMessage struct {
 	TemplateKey string `json:"templateKey"`
 	Phone       string `json:"phone"`
-	Args        Args   `json:"msg"`
+	Args        string `json:"msg"`
 }
 
 func (h SmsMessage) Byte() ([]byte, error) {
