@@ -19,6 +19,7 @@ type CommunityActivities struct {
 	//数据库没有的字段
 	Status       int `json:"status,omitempty" gorm:"-"`
 	SignupStatus int `json:"signupStatus" gorm:"-"`
+	NumOfSignup  int `json:"numOfSignup" gorm:"-"`
 }
 
 func (CommunityActivities) TableName() string {

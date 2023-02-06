@@ -202,3 +202,7 @@ type CommentChangeLikeResp struct {
 	LikeStatus     int    `json:"likeStatus"`
 	IsFirst        bool   `json:"isFirst"`
 }
+
+type FindListCountReq struct {
+	TopicIds []int64 `json:"topicIds"`
+}

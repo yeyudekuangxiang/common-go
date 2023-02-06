@@ -31,6 +31,7 @@ type (
 		Signup(params SignupParams) error    //报名
 		CancelSignup(Id, userId int64) error //取消报名
 		Export(w http.ResponseWriter, r *http.Request, topicId int64)
+		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
 	}
 
 	defaultCommunityActivitiesSignupService struct {
@@ -220,6 +221,14 @@ func (srv defaultCommunityActivitiesSignupService) CancelSignup(id, userId int64
 		return err
 	}
 	return nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) FindListCount(params FindListCountReq) ([]*entity.APIListCount, error) {
+	list, err := srv.signupModel.FindListCount(community.FindListCountParams{TopicIds: params.TopicIds})
+	if err != nil {
+		return nil, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+	return list, nil
 }
 
 func NewCommunityActivitiesSignupService(ctx *mioContext.MioContext) ActivitiesSignupService {
