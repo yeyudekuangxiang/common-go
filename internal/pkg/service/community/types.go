@@ -80,21 +80,23 @@ type FindTopicParams struct {
 }
 
 type AdminTopicListParams struct {
-	ID           int64    `json:"id"`
-	Title        string   `json:"title"`
-	TagId        int64    `json:"tagId"`
-	TagIds       []string `json:"tagIds"`
-	UserId       int64    `json:"userId"`
-	UserName     string   `json:"userName"`
-	Status       int      `json:"status"`
-	IsTop        int      `json:"isTop"`
-	IsEssence    int      `json:"isEssence"`
-	IsPartners   int      `json:"isPartners"`
-	Position     string   `json:"position"`
-	Type         int      `json:"type"`
-	ActivityType int      `json:"activityType"`
-	Offset       int      `json:"offset"`
-	Limit        int      `json:"limit"`
+	ID            int64     `json:"id"`
+	Title         string    `json:"title"`
+	TagId         int64     `json:"tagId"`
+	TagIds        []string  `json:"tagIds"`
+	UserId        int64     `json:"userId"`
+	UserName      string    `json:"userName"`
+	Status        int       `json:"status"`
+	IsTop         int       `json:"isTop"`
+	IsEssence     int       `json:"isEssence"`
+	IsPartners    int       `json:"isPartners"`
+	Position      string    `json:"position"`
+	Type          int       `json:"type"`
+	ActivityType  int       `json:"activityType"`
+	PushStartTime time.Time `json:"pushStartTime"`
+	PushEndTime   time.Time `json:"pushEndTime"`
+	Offset        int       `json:"offset"`
+	Limit         int       `json:"limit"`
 }
 
 // activity

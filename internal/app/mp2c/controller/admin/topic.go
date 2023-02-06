@@ -33,19 +33,22 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	}
 
 	cond := community.AdminTopicListParams{
-		ID:           form.ID,
-		Title:        form.Title,
-		UserId:       form.UserId,
-		UserName:     form.UserName,
-		Status:       form.Status,
-		IsTop:        form.IsTop,
-		IsEssence:    form.IsEssence,
-		IsPartners:   form.IsPartners,
-		Position:     form.Position,
-		Type:         form.Type,
-		ActivityType: form.ActivityType,
-		Offset:       form.Offset(),
-		Limit:        form.Limit(),
+		ID:            form.ID,
+		Title:         form.Title,
+		UserId:        form.UserId,
+		UserName:      form.UserName,
+		Status:        form.Status,
+		IsTop:         form.IsTop,
+		IsEssence:     form.IsEssence,
+		IsPartners:    form.IsPartners,
+		Position:      form.Position,
+		PushStartTime: form.PushEndTime,
+		PushEndTime:   form.PushEndTime,
+		Type:          form.Type,
+		ActivityType:  form.ActivityType,
+
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
 	}
 
 	tagIds := strings.Split(form.TagId, ",")

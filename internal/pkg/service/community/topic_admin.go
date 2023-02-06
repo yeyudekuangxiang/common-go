@@ -34,57 +34,64 @@ func (srv TopicAdminService) GetTopicList(param AdminTopicListParams) ([]*entity
 	var total int64
 	query := app.DB.Model(&entity.Topic{})
 	if param.ID != 0 {
-		query.Where("topic.id = ?", param.ID)
+		query = query.Where("topic.id = ?", param.ID)
 	}
 
 	if param.Title != "" {
-		query.Where("topic.title like ?", "%"+param.Title+"%")
+		query = query.Where("topic.title like ?", "%"+param.Title+"%")
 	}
 
 	if param.UserId != 0 {
-		query.Where("topic.user_id = ?", param.UserId)
+		query = query.Where("topic.user_id = ?", param.UserId)
 	}
 
 	if param.Status > 0 {
-		query.Where("topic.status = ?", param.Status)
+		query = query.Where("topic.status = ?", param.Status)
 	}
 
 	if param.IsTop > 0 {
-		query.Where("topic.is_top = ?", param.IsTop)
+		query = query.Where("topic.is_top = ?", param.IsTop)
 	}
 
 	if param.IsEssence > 0 {
-		query.Where("topic.is_essence = ?", param.IsEssence)
+		query = query.Where("topic.is_essence = ?", param.IsEssence)
 	}
 
 	if param.TagId != 0 {
-		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
+		query = query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id = ?", param.TagId)
 	} else if len(param.TagIds) > 0 {
-		query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id in (?)", param.TagIds)
+		query = query.Joins("left join topic_tag on topic.id = topic_tag.topic_id").Where("topic_tag.tag_id in (?)", param.TagIds)
 	}
 
 	if param.UserName != "" || param.IsPartners != 0 || param.Position != "" {
-		query.Joins("left join \"user\" on \"user\".id = topic.user_id")
+		query = query.Joins("left join \"user\" on \"user\".id = topic.user_id")
 		if param.UserName != "" {
-			query.Where("\"user\".nick_name = ?", param.UserName)
+			query = query.Where("\"user\".nick_name = ?", param.UserName)
 		}
 
 		if param.IsPartners != 0 {
-			query.Where("\"user\".partners = ?", param.IsPartners)
+			query = query.Where("\"user\".partners = ?", param.IsPartners)
 		}
 
 		if param.Position != "" {
-			query.Where("\"user\".position = ?", param.Position)
+			query = query.Where("\"user\".position = ?", param.Position)
 		}
 
 	}
 
 	if param.Type != 0 {
-		query.Where("topic.type = ?", param.Type)
+		query = query.Where("topic.type = ?", param.Type)
 	}
 
 	if param.ActivityType != 0 {
-		query.Joins("left join community_activities on topic.id = community_activities.id").Where("community_activities.type = ?", param.ActivityType)
+		query = query.Joins("left join community_activities on topic.id = community_activities.id").Where("community_activities.type = ?", param.ActivityType)
+	}
+
+	if !param.PushStartTime.IsZero() {
+		query = query.Where("created_at > ?", param.PushStartTime)
+	}
+	if !param.PushEndTime.IsZero() {
+		query = query.Where("created_at < ?", param.PushEndTime)
 	}
 
 	query.Preload("Tags").Preload("User").Preload("Activity")
