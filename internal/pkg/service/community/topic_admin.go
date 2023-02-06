@@ -49,11 +49,11 @@ func (srv TopicAdminService) GetTopicList(param AdminTopicListParams) ([]*entity
 		query = query.Where("topic.status = ?", param.Status)
 	}
 
-	if param.IsTop > 0 {
+	if param.IsTop >= 0 {
 		query = query.Where("topic.is_top = ?", param.IsTop)
 	}
 
-	if param.IsEssence > 0 {
+	if param.IsEssence >= 0 {
 		query = query.Where("topic.is_essence = ?", param.IsEssence)
 	}
 
