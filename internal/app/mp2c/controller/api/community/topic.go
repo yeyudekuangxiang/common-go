@@ -416,9 +416,9 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		for _, item := range signupList {
 			//发送短信
 			err := common.SendSms(smsmsg.SmsMessage{
-				TemplateKey: message.SmsActivityCancel,
 				Phone:       item.Phone,
 				Args:        topic.Title,
+				TemplateKey: message.SmsActivityCancel,
 			})
 			if err != nil {
 				app.Logger.Error("【短信发送失败】取消报名活动通知短信发送失败: %s", err.Error())
