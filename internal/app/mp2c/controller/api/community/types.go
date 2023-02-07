@@ -150,7 +150,7 @@ type Signup struct {
 	SignupStatus int       `json:"signupStatus"`
 }
 
-type GetTagForm struct {
+type GetTagRequest struct {
 	ID int64 `json:"id" form:"id" binding:"gte=0" alias:"tag id"`
 	controller.PageFrom
 }

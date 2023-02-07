@@ -15,6 +15,7 @@ type Tag struct {
 	Icon         string  `gorm:"size:1024" json:"icon" form:"icon"`                 // icon
 	ImgWithCover string  `gorm:"size:1024" json:"imgWithCover" form:"imgWithCover"` // 图片加遮罩
 	Topics       []Topic `gorm:"many2many:topic_tag"`
+	Status       int     `json:"status" form:"status"`
 }
 
 func (Tag) TableName() string {

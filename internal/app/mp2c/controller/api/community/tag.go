@@ -2,6 +2,7 @@ package community
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"mio/internal/pkg/core/context"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -16,23 +17,21 @@ type TagController struct {
 
 // List 获取话题列表
 func (TagController) List(c *gin.Context) (gin.H, error) {
-	form := GetTagForm{}
+	form := GetTagRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	tagService := community.NewTagService(ctx)
-	
-	status := 1 // will be of type int
-	statusPtr := &status
 
 	list, total, err := tagService.GetTagPageList(repository.GetTagPageListBy{
 		ID:      form.ID,
 		Offset:  form.Offset(),
 		Limit:   form.Limit(),
 		OrderBy: entity2.OrderByList{entity2.OrderByTagSortDesc},
-		Status:  statusPtr,
+		Status:  converttool.PointerInt(1),
 	})
+
 	if err != nil {
 		return nil, err
 	}
