@@ -46,7 +46,7 @@ func (ctr PointCollectController) CallCollect(ctx *gin.Context) (gin.H, error) {
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
 		ImgUrl: form.ImgUrl,
-		Type:   entity.PointTransactionType(form.PointCollectType),
+		Type:   entity.PointTransactionType(strings.ToUpper(form.PointCollectType)),
 	})
 	result, err := client.HandlePageDataCommand()
 	if err != nil {
@@ -65,7 +65,7 @@ func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
-		Type:   entity.PointTransactionType(form.PointCollectType),
+		Type:   entity.PointTransactionType(strings.ToUpper(form.PointCollectType)),
 	})
 
 	res, err := client.HandlePageDataCommand()
