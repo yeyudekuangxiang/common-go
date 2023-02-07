@@ -42,6 +42,7 @@ func InitDB() {
 		log.Panic(err)
 	}
 	*app.DB = *gormDb
+
 	log.Println("初始化数据库连接成功")
 }
 
@@ -70,4 +71,31 @@ func InitBusinessDB() {
 	}
 	*app.BusinessDB = *gormDb
 	log.Println("初始化企业版数据库连接成功")
+}
+
+func InitActivityDB() {
+	log.Println("初始化活动数据库连接...")
+	dbc := config.Config.DatabaseActivity
+
+	zlogger := app.OriginLogger.With(mzap.LogDatabase)
+	conf := db.Config{
+		Type:         dbc.Type,
+		Host:         dbc.Host,
+		UserName:     dbc.UserName,
+		Password:     dbc.Password,
+		Database:     dbc.Database,
+		Port:         dbc.Port,
+		TablePrefix:  dbc.TablePrefix,
+		MaxOpenConns: dbc.MaxOpenConns,
+		MaxIdleConns: dbc.MaxIdleConns,
+		MaxLifetime:  dbc.MaxLifetime,
+		Logger:       mzap.NewGormLogger(zlogger.Sugar()).LogMode(gormLevelMap[dbc.LogLevel]),
+	}
+
+	gormDb, err := db.NewDB(conf)
+	if err != nil {
+		log.Panic(err)
+	}
+	*app.ActivityDB = *gormDb
+	log.Println("初始化活动数据库连接成功")
 }

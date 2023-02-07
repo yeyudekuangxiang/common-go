@@ -1,10 +1,12 @@
 package mq
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"log"
 	"mio/internal/app/mp2c/controller/api/api_types"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/track"
@@ -30,6 +32,7 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	messageService := messageSrv.NewWebMessageService(ctxMio)
 	templateContentInfo, err := messageService.GetTemplateInfo(form.TemplateKey)
 	if err != nil {
+		fmt.Printf("获取模版配置有误:%s", form.TemplateKey)
 		return nil, errno.ErrCommon.WithMessage(form.TemplateKey + "获取模版配置有误")
 	}
 	templateContent := templateContentInfo.TempContent
@@ -40,7 +43,8 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	if templateContentInfo.Type == 3 {
 		body, err := message.SendCommonSms(form.Phone, templateContent)
 		if err != nil {
-			log.Println("发普通短信失败", err, form.Phone, form.Msg)
+			fmt.Printf("发普通短信失败:%s, phone:%s, msg: %s", err.Error(), form.Phone, form.Msg)
+			app.Logger.Errorf("发普通短信失败:%s, phone:%s, msg: %s", err.Error(), form.Phone, form.Msg)
 			return nil, err
 		}
 		//发送短信
@@ -53,7 +57,8 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 		//发模版短信
 		body, err := message.SendMarketSms(templateContent, form.Phone, form.Msg)
 		if err != nil {
-			log.Println("发模版短信失败", err, form.Phone, form.Msg)
+			fmt.Printf("发普通短信失败:%s, phone:%s, msg: %s", err.Error(), form.Phone, form.Msg)
+			app.Logger.Errorf("发普通短信失败:%s, phone:%s, msg: %s", err.Error(), form.Phone, form.Msg)
 			return nil, err
 		}
 		//发送短信

@@ -45,9 +45,24 @@ type GetTopicPageListBy struct {
 	UserId      int64              `json:"userId"` // 用于查询用户对帖子是否点赞
 	OrderByList entity.OrderByList `json:"orderByList"`
 	OrderBy     entity.OrderBy     `json:"orderBy"`
-	Order       string             `json:"order"`
+	Label       string             `json:"label"`
 	Offset      int                `json:"offset"`
 	Limit       int                `json:"limit"` // limit为0时不限制数量
+}
+
+type FindTopicParams struct {
+	TopicId int64 `json:"topicId"`
+	UserId  int64 `json:"userId"`
+	Type    int   `json:"type"`
+	Status  int   `json:"status"`
+}
+
+type MyTopicListParams struct {
+	UserId int64 `json:"userId"`
+	Status int   `json:"status"`
+	Type   int   `json:"type"`
+	Limit  int   `json:"limit"`
+	Offset int   `json:"offset"`
 }
 
 type GetTopicCountBy struct {
@@ -282,11 +297,6 @@ type GetUserChannelPageListBy struct {
 	Offset   int                `json:"offset"`
 	Limit    int                `json:"limit"` //limit为0时不限制数量
 	OrderBy  entity.OrderByList `json:"orderBy"`
-}
-
-type FindTopicBy struct {
-	TopicIds []int64
-	Status   int `json:"status"` //0全部 1待审核 2审核失败 3已发布 4已下架
 }
 
 type GetPointTransactionListByQun struct {

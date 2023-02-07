@@ -5,22 +5,6 @@ import (
 	"time"
 )
 
-type GetWeappQrCodeFrom struct {
-	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
-}
-type GetTopicPageListForm struct {
-	ID         int64  `json:"id" form:"id" binding:"gte=0" alias:"文章id"`
-	TopicTagId int64  `json:"topicTagId" form:"topicTagId" binding:"gte=0" alias:"标签id"`
-	Order      string `json:"order" form:"order" alias:"排序"`
-	controller.PageFrom
-}
-type ChangeTopicLikeForm struct {
-	TopicId int64 `json:"topicId" form:"topicId" binding:"required" alias:"文章id"`
-}
-type GetTagForm struct {
-	ID int64 `json:"id" form:"id" binding:"gte=0" alias:"tag id"`
-	controller.PageFrom
-}
 type GetYZMForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required" alias:"手机号码"`
 	Code   string `json:"code" form:"code"  alias:"验证码"`
@@ -163,18 +147,6 @@ type DuiBaNoLoginH5Form struct {
 	ActivityId string `json:"activityId" form:"activityId" `
 }
 
-type CreateTopicForm struct {
-	Title   string   `json:"title" form:"title" alias:"标题" binding:"required,min=2,max=64"`
-	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
-	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
-	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"min=0,max=2"`
-}
-
-type UpdateTopicForm struct {
-	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
-	CreateTopicForm
-}
-
 type IdForm struct {
 	ID int64 `json:"id" form:"id" alias:"id" binding:"required,gte=1"`
 }
@@ -190,27 +162,6 @@ type ListFormByLastId struct {
 	PageSize int   `json:"pageSize" form:"pageSize" binding:"gt=0" alias:"每页数量"`
 }
 
-type CommentCreateForm struct {
-	Message string `json:"message" form:"message" alias:"评论内容" binding:"required,min=1"`
-	Root    int64  `json:"root" form:"root" alias:"rootId" binding:"min=0"`
-	Parent  int64  `json:"parent" form:"parent" alias:"parentId" binding:"min=0"`
-	ObjId   int64  `json:"objId" form:"objId" alias:"objId" binding:"required,min=1"`
-}
-
-type CommentEditForm struct {
-	CommentId int64  `json:"commentId" form:"commentId" alias:"commentId" binding:"required,min=1"`
-	Message   string `json:"message" form:"message" alias:"评论内容" binding:"required,min=1"`
-}
-
-type ChangeCommentLikeForm struct {
-	CommentId int64 `json:"commentId" form:"commentId" binding:"required" alias:"评论id"`
-}
-
-type TurnCommentRequest struct {
-	TurnType int    `json:"turnType" form:"turnType" binding:"required"`
-	TurnId   string `json:"turnId" form:"turnId" binding:"required"`
-}
-
 type JinHuaXingForm struct {
 	Mobile string `json:"mobile" form:"mobile" binding:"required"`
 }
@@ -220,25 +171,10 @@ type GetZyhForm struct {
 	VolId  string `json:"volId" form:"volId" binding:"" alias:"志愿者id"`
 }
 
-type MyTopicRequest struct {
-	HomePageRequest
-	Status int `json:"status" form:"status"`
-	controller.PageFrom
+type UpdateIntroductionRequest struct {
+	Introduction string `json:"introduction" form:"introduction" binding:"required"`
 }
 
 type HomePageRequest struct {
 	UserId int64 `json:"userId" form:"userId"`
-}
-
-type MyCollectionRequest struct {
-	controller.PageFrom
-}
-
-type CollectionRequest struct {
-	ObjId   int64 `json:"objId" form:"objId" binding:"required"`
-	ObjType int   `json:"objType" form:"objType"`
-}
-
-type UpdateIntroductionRequest struct {
-	Introduction string `json:"introduction" form:"introduction" binding:"required"`
 }

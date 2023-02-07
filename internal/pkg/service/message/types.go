@@ -5,6 +5,56 @@ import (
 	"time"
 )
 
+//消息模板
+const (
+	//二手市场
+	SecondHandGetPoint                 = "secondHand-get_point"
+	SecondHandGetPointCommodityPublish = "secondHand-commodity_publish"
+	SecondHandGetPointLikeComment      = "secondHand-like_comment"
+	SecondHandGetPointReplyComment     = "secondHand-reply_comment"
+	SecondHandLikeCommodity            = "secondHand-like_commodity"
+	SecondHandCommentCommodity         = "secondHand-comment_commodity"
+	SecondHandDeliverTimeOut           = "secondHand-deliver-time-out"
+	SecondHandOrderPayed               = "secondHand-order-payed"
+	SecondHandOrderCancel              = "secondHand-order-cancel"
+	SecondHandReceiveTimeOut           = "secondHand-receive-time-out"
+	SecondHandOrderReceive             = "secondHand-order-receive"
+	SecondHandOrderDeliver             = "secondHand-order-deliver"
+	SecondHandOrderAward               = "secondHand-order-award"
+	SecondHandAuditReject              = "secondHand-audit_reject"
+	SecondHandSellerDeliverTimeOut     = "secondHand-seller-deliver-time-out"
+	FailGoods                          = "fail_goods"
+
+	//社区
+	BanCommunity   = "ban_community"
+	ListTopic      = "like_topic"
+	PushTopic      = "push_topic"
+	PushTopicV2    = "push_topic_v2"
+	DownComment    = "down_comment"
+	FailTopic      = "fail_topic"
+	Wechat         = "wechat"
+	LikeComment    = "like_comment"
+	ReplyTopic     = "reply_topic"
+	TopTopic       = "top_topic"
+	TopTopicV2     = "top_topic_v2"
+	DownTopic      = "down_topic"
+	ReplyComment   = "reply_comment"
+	EssenceTopic   = "essence_topic"
+	EssenceTopicV2 = "essence_topic_v2"
+
+	//短信
+	SmsSecondHandOrderPayed           = "sms-secondHand-order-payed"
+	SmsSecondHandOrderCancel          = "sms-secondHand-order-cancel"
+	SmsSecondHandDeliverTimeOut       = "sms-secondHand-deliver-time-out"
+	SmsSecondHandOrderDeliver         = "sms-secondHand-order-deliver"
+	SmsSecondHandOrderReceive         = "sms-secondHand-order-receive"
+	SmsSecondHandSellerDeliverTimeOut = "sms-secondHand-seller-deliver-time-out"
+	SmsSuiShenXingLuckydraw           = "sms-suishenxing-luckydraw"
+	SmsPointTimeExpireQuickly         = "sms-point-time-expire-quickly"
+	SmsPointTimeExpire                = "sms-point-time-expire"
+	SmsActivityCancel                 = "sms-activity-cancel"
+)
+
 const (
 	MsgTypeNone    = iota
 	MsgTypeLike    //点赞

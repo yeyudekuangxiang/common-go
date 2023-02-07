@@ -1,6 +1,9 @@
 package activity
 
-import "mio/internal/pkg/model/entity/activity"
+import (
+	"mio/internal/pkg/model/entity/activity"
+	"time"
+)
 
 type FindRecordBy struct {
 	UserId int64
@@ -56,4 +59,27 @@ type FindSchoolBy struct {
 type FindZyhById struct {
 	Openid string `json:"openid"`
 	VolId  string `json:"volId"`
+}
+
+type FindOneActiveSubjectParams struct {
+	Title         string
+	ActivityId    int64
+	StartTime     time.Time
+	EndTime       time.Time
+	Status        int
+	Creator       string
+	Updater       string
+	UperRiskLimit int
+}
+
+type FindOneActiveActivityParams struct {
+	Id               int64
+	Title            string
+	Status           int
+	Code             string
+	SubjectStatus    int
+	SubjectStartTime time.Time
+	SubjectEndTime   time.Time
+	SubjectCreator   string
+	SubjectUpdater   string
 }

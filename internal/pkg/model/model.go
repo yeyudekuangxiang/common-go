@@ -13,10 +13,6 @@ import (
 const timeFormat = "2006-01-02 15:04:05"
 const dateFormat = "2006-01-02"
 
-type Model struct {
-	Id int64 `gorm:"primaryKey;autoIncrement" json:"id" form:"id"`
-}
-
 func NewTime() Time {
 	return Time{
 		time.Now(),
@@ -29,7 +25,7 @@ type Time struct {
 }
 
 func (t *Time) UnmarshalJSON(data []byte) error {
-	if string(data) == "\"\"" {
+	if string(data) == "null" || string(data) == "\"\"" {
 		return nil
 	}
 	ti, err := time.Parse(timeFormat, strings.Trim(string(data), "\""))
@@ -90,7 +86,7 @@ type Date struct {
 }
 
 func (d *Date) UnmarshalJSON(data []byte) error {
-	if string(data) == "\"\"" {
+	if string(data) == "null" || string(data) == "\"\"" {
 		return nil
 	}
 
@@ -127,73 +123,6 @@ func (d Date) String() string {
 }
 func (d Date) FullString() string {
 	return d.Time.Format(dateFormat) + " 00:00:00"
-}
-
-//json时格式化日期为2016-01-02 15:04:05的格式 并且获取值时如果为初始时间则赋值当前时间
-type CreatedTime struct {
-	time.Time
-}
-
-func (ct *CreatedTime) UnmarshalJSON(data []byte) error {
-	if string(data) == "\"\"" {
-		return nil
-	}
-	ti, err := time.Parse(timeFormat, strings.Trim(string(data), "\""))
-	if err != nil {
-		return err
-	}
-	ct.Time = ti
-	return nil
-}
-func (ct CreatedTime) MarshalJSON() ([]byte, error) {
-	var stamp = fmt.Sprintf("\"%s\"", ct.Format(timeFormat))
-	return []byte(stamp), nil
-}
-func (ct CreatedTime) Value() (driver.Value, error) {
-	if ct.IsZero() {
-		return time.Now().Format(timeFormat), nil
-	}
-	return ct.Format(timeFormat), nil
-}
-func (ct *CreatedTime) Scan(value interface{}) error {
-	t, ok := value.(time.Time)
-	if !ok {
-		return errors.New("CreatedTime type error")
-	}
-	ct.Time = t
-	return nil
-}
-
-//json时格式化日期为2016-01-02 15:04:05的格式 并且获取值时如果为初始时间则赋值当前时间
-type UpdatedTime struct {
-	time.Time
-}
-
-func (ut *UpdatedTime) UnmarshalJSON(data []byte) error {
-	if string(data) == "\"\"" {
-		return nil
-	}
-	ti, err := time.Parse(timeFormat, strings.Trim(string(data), "\""))
-	if err != nil {
-		return err
-	}
-	ut.Time = ti
-	return nil
-}
-func (ut UpdatedTime) MarshalJSON() ([]byte, error) {
-	var stamp = fmt.Sprintf("\"%s\"", ut.Format(timeFormat))
-	return []byte(stamp), nil
-}
-func (ut UpdatedTime) Value() (driver.Value, error) {
-	return time.Now().Format(timeFormat), nil
-}
-func (ut *UpdatedTime) Scan(value interface{}) error {
-	t, ok := value.(time.Time)
-	if !ok {
-		return errors.New("CreatedTime type error")
-	}
-	ut.Time = t
-	return nil
 }
 
 //存入数据库时转换成字符串形式,以英文逗号隔开
@@ -247,15 +176,6 @@ func (s *StrToInt) Scan(value interface{}) error {
 }
 func (s StrToInt) Int() int {
 	return int(s)
-}
-
-// 用户点赞
-type UserLike struct {
-	Model
-	UserId     int64  `gorm:"not null;uniqueIndex:idx_user_like_unique;" json:"userId" form:"userId"`                                            // 用户
-	EntityType string `gorm:"not null;size:32;uniqueIndex:idx_user_like_unique;index:idx_user_like_entity;" json:"entityType" form:"entityType"` // 实体类型
-	EntityId   int64  `gorm:"not null;uniqueIndex:idx_user_like_unique;index:idx_user_like_entity;" json:"topicId" form:"topicId"`               // 实体编号
-	CreateTime int64  `json:"createTime" form:"createTime"`                                                                                      // 创建时间
 }
 
 type NullString string

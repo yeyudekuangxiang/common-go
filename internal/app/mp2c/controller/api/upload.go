@@ -7,6 +7,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
+	"mio/internal/pkg/service/upload"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/baidu"
 	"mio/pkg/errno"
@@ -49,7 +50,7 @@ func (UploadController) UploadPointCollectImage(ctx *gin.Context) (gin.H, error)
 	}
 	defer file.Close()
 	user := apiutil.GetAuthUser(ctx)
-	imgUrl, err := service.DefaultUploadService.UploadOcrImage(user.OpenId, file, fileHeader.Filename, service.PointCollectType(form.PointCollectType))
+	imgUrl, err := upload.DefaultUploadService.UploadOcrImage(user.OpenId, file, fileHeader.Filename, form.PointCollectType)
 	return gin.H{
 		"imgUrl": imgUrl,
 	}, err
@@ -74,7 +75,7 @@ func (UploadController) MultipartUploadImage(ctx *gin.Context) (gin.H, error) {
 	}
 	defer file.Close()
 	user := apiutil.GetAuthUser(ctx)
-	imgUrl, err := service.DefaultUploadService.MultipartUploadOcrImage(user.OpenId, file, fileHeader.Filename)
+	imgUrl, err := upload.DefaultUploadService.MultipartUploadOcrImage(user.OpenId, file, fileHeader.Filename)
 	return gin.H{
 		"imgUrl": imgUrl,
 	}, err
@@ -88,7 +89,7 @@ func (UploadController) GetUploadTokenInfo(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 
-	info, err := service.DefaultUploadService.CreateUploadToken(user.ID, 1, form.Scene)
+	info, err := upload.DefaultUploadService.CreateUploadToken(user.ID, 1, form.Scene)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,7 @@ func (UploadController) UploadCallback(ctx *gin.Context) (gin.H, error) {
 		return nil, errno.ErrBind.WithCaller()
 	}
 
-	err := service.DefaultUploadService.UploadCallback(srv_types.UploadCallbackParam{
+	err := upload.DefaultUploadService.UploadCallback(srv_types.UploadCallbackParam{
 		LogId:    logId,
 		Filename: form.Filename,
 		Size:     form.Size,
@@ -131,7 +132,7 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 		}
 		return nil, err
 	}
-	uploadScene, err := service.DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
+	uploadScene, err := upload.DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
 		Scene: strings.ToLower(form.ImageScene),
 	})
 	if err != nil || uploadScene.ID == 0 {
@@ -162,7 +163,7 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 	}
 
 	user := apiutil.GetAuthUser(ctx)
-	imgUrl, err := service.DefaultUploadService.UploadImage(user.OpenId, file, fileHeader.Filename, uploadScene.OssDir)
+	imgUrl, err := upload.DefaultUploadService.UploadImage(user.OpenId, file, fileHeader.Filename, uploadScene.OssDir)
 	return gin.H{
 		"imgUrl": imgUrl,
 	}, err
@@ -175,7 +176,7 @@ func (UploadController) GetUploadSTSTokenInfo(ctx *gin.Context) (gin.H, error) {
 	}
 	user := apiutil.GetAuthUser(ctx)
 
-	info, err := service.DefaultUploadService.CreateStsToken(user.ID, 1, form.Scene)
+	info, err := upload.DefaultUploadService.CreateStsToken(user.ID, 1, form.Scene)
 	if err != nil {
 		return nil, err
 	}

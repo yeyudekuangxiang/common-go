@@ -91,12 +91,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
-	//if !util.DefaultLock.Lock(form.Ch+form.OutTradeNo, 24*3600*30*time.Second) {
-	//	fmt.Println("charge 重复提交订单", form)
-	//	app.Logger.Info("charge 重复提交订单", form)
-	//	return nil, errors.New("重复提交订单")
-	//}
-
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
@@ -159,6 +153,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//发券
+
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
 }
