@@ -2,6 +2,7 @@ package community
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"mio/internal/pkg/core/context"
 	entity2 "mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -28,7 +29,9 @@ func (TagController) List(c *gin.Context) (gin.H, error) {
 		Offset:  form.Offset(),
 		Limit:   form.Limit(),
 		OrderBy: entity2.OrderByList{entity2.OrderByTagSortDesc},
+		Status:  converttool.PointerInt(1),
 	})
+
 	if err != nil {
 		return nil, err
 	}
