@@ -389,15 +389,22 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	if user.Auth != 1 {
 		return nil, errno.ErrCommon.WithMessage("无权限")
 	}
+	ctx := context.NewMioContext()
+	ActivitiesSignupService := community.NewCommunityActivitiesSignupService(ctx)
+	TopicService := community.NewTopicService(ctx)
 
 	//更新帖子
-	topic, err := community.DefaultTopicService.DelTopic(user.ID, form.ID)
+	topic, err := TopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
 		return nil, err
 	}
+	if topic.DeletedAt.Valid {
+		key := config.RedisKey.TopicRank
+		app.Redis.ZRem(ctx.Context, key, topic.Id)
+	}
 	// 报名活动删除的话 通知报名者
 	if topic.Type == 1 {
-		signupList, count, err := community.DefaultActivitiesSignupService.FindAll(communityModel.FindAllActivitiesSignupParams{
+		signupList, count, err := ActivitiesSignupService.FindAll(communityModel.FindAllActivitiesSignupParams{
 			TopicId: topic.Id,
 		})
 		if err != nil {
