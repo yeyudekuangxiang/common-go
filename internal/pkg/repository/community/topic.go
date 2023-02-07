@@ -16,7 +16,7 @@ type (
 		GetTopicPageList(by repository.GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
 		FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error)
-		FindOneUnscoped(topicId int64) *entity.Topic
+		FindOneUnscoped(params repository.FindTopicParams) *entity.Topic
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
 		AddTopicSeeCount(topicId int64, num int) error
@@ -333,16 +333,26 @@ func (d defaultTopicModel) FindById(topicId int64) *entity.Topic {
 	return &resp
 }
 
-func (d defaultTopicModel) FindOneUnscoped(topicId int64) *entity.Topic {
+func (d defaultTopicModel) FindOneUnscoped(params repository.FindTopicParams) *entity.Topic {
 	var resp entity.Topic
-	err := d.ctx.DB.Model(&entity.Topic{}).
+	query := d.ctx.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Preload("Tags").
 		Preload("Activity").
-		Unscoped().
-		Where("id = ?", topicId).
-		Where("status = ?", 3).
-		First(&resp).Error
+		Unscoped()
+	if params.TopicId != 0 {
+		query.Where("id = ?", params.TopicId)
+	}
+	if params.Status != 0 {
+		query.Where("status = ?", params.Status)
+	}
+	if params.Type != 0 {
+		query.Where("type = ?", params.Type)
+	}
+	if params.UserId != 0 {
+		query.Where("user_id = ?", params.UserId)
+	}
+	err := query.First(&resp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}

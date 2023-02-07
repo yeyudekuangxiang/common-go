@@ -744,9 +744,12 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 }
 
 // DetailTopic 获取topic详情
-func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
+func (srv TopicService) DetailTopic(params FindTopicParams) (*entity.Topic, error) {
 	//查询数据是否存在
-	topic := srv.topicModel.FindOneUnscoped(topicId)
+	topic := srv.topicModel.FindOneUnscoped(repository.FindTopicParams{
+		TopicId: params.TopicId,
+	})
+
 	if topic.Id == 0 {
 		return topic, errno.ErrCommon.WithMessage("未找到该帖子")
 	}
@@ -756,7 +759,9 @@ func (srv TopicService) DetailTopic(topicId int64) (*entity.Topic, error) {
 	if topic.DeletedAt.Valid && topic.Type == 0 {
 		return topic, errno.ErrCommon.WithMessage("文章已被删除")
 	}
-	//views+1
+	if topic.Status != 3 && topic.UserId != params.UserId {
+		return topic, errno.ErrCommon.WithMessage("未找到该帖子")
+	}
 	if err := srv.topicModel.AddTopicSeeCount(topic.Id, 1); err != nil {
 		app.Logger.Errorf("更新topic查看次数失败 : %s", err.Error())
 	}
