@@ -11,9 +11,9 @@ type MsgMessage struct {
 }
 
 type SmsMessage struct {
-	TemplateKey string `json:"templateKey"`
 	Phone       string `json:"phone"`
 	Args        string `json:"msg"`
+	TemplateKey string `json:"templateKey"`
 }
 
 func (h SmsMessage) Byte() ([]byte, error) {
