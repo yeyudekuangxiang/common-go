@@ -438,7 +438,10 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
 
 	//获取帖子
-	topic, err := topicService.DetailTopic(form.ID)
+	topic, err := topicService.DetailTopic(community.FindTopicParams{
+		TopicId: form.ID,
+		UserId:  user.ID,
+	})
 	if err != nil {
 		return nil, err
 	}
