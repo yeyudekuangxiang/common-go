@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/point"
 	"mio/internal/pkg/util/apiutil"
+	"strings"
 )
 
 var DefaultPointsCollectController = PointCollectController{}
@@ -24,7 +25,7 @@ func (ctr PointCollectController) ImageCollect(ctx *gin.Context) (gin.H, error) 
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
 		ImgUrl: form.ImgUrl,
-		Type:   entity.PointTransactionType(form.PointCollectType),
+		Type:   entity.PointTransactionType(strings.ToUpper(form.PointCollectType)),
 	})
 	result, err := client.HandleImageCollectCommand()
 	if err != nil {
@@ -60,6 +61,7 @@ func (ctr PointCollectController) GetPageData(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
+
 	user := apiutil.GetAuthUser(ctx)
 	client := point.NewClientHandle(context.NewMioContext(), &point.ClientHandle{
 		OpenId: user.OpenId,
