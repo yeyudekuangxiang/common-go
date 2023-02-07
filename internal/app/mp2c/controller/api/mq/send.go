@@ -23,9 +23,10 @@ type SmsSendController struct {
 //发送营销短信
 
 func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
-	app.Logger.Error("进来发短信了")
+	app.Logger.Errorf("进来发短信了")
 	form := api_types.GetSendSmsForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
+		app.Logger.Errorf("SendSms 短信入参错误:%s", err.Error())
 		return nil, err
 	}
 	app.Logger.Errorf("进来发全新了:%s, phone:%s, msg: %s", form.Phone, form.TemplateKey, form.Msg)
@@ -34,7 +35,7 @@ func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
 	messageService := messageSrv.NewWebMessageService(ctxMio)
 	templateContentInfo, err := messageService.GetTemplateInfo(form.TemplateKey)
 	if err != nil {
-		fmt.Printf("获取模版配置有误:%s", form.TemplateKey)
+		app.Logger.Errorf("获取模版配置有误:%s", form.TemplateKey)
 		return nil, errno.ErrCommon.WithMessage(form.TemplateKey + "获取模版配置有误")
 	}
 	templateContent := templateContentInfo.TempContent
