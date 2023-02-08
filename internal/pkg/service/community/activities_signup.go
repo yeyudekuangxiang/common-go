@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -160,7 +161,7 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) error {
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
 		TopicId: params.TopicId,
-		Type:    1,
+		Type:    converttool.PointerInt(1),
 		Status:  3,
 	})
 	if err != nil {
