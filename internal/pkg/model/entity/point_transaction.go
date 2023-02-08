@@ -145,6 +145,8 @@ func (p PointTransactionType) RealText() string {
 		return "拾尚回收"
 	case POINT_RECYCLING_DANGDANGYIXIA:
 		return "铛铛一下"
+	case Point_YKC:
+		return "云快充"
 	}
 	return p.Text()
 }
