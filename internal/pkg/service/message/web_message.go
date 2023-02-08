@@ -179,7 +179,10 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	}
 	switch keys[1] {
 	case "topic":
-		topicObj := d.topic.FindById(param.TurnId)
+		topicObj, err := d.topic.FindOneTopic(repository.FindTopicParams{TopicId: param.TurnId})
+		if err != nil {
+			return errno.ErrInternalServer
+		}
 		obj, err = json.Marshal(topicObj)
 		if err != nil {
 			return errno.ErrInternalServer

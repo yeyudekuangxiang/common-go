@@ -165,7 +165,7 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		Status:  3,
 	})
 	if err != nil {
-		return err
+		return errno.ErrCommon
 	}
 	if topic.Id == 0 {
 		return errno.ErrCommon.WithMessage("活动不存在")

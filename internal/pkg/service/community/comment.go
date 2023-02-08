@@ -195,8 +195,10 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 }
 
 func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
-	topic := srv.topicModel.FindById(topicId)
-
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
+	if err != nil {
+		return entity.CommentIndex{}, nil, 0, errno.ErrCommon
+	}
 	if topic.Id == 0 {
 		return entity.CommentIndex{}, &entity.CommentIndex{}, 0, errno.ErrRecordNotFound
 	}
@@ -224,7 +226,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		comment.IsAuthor = 1
 	}
 
-	_, err := srv.commentModel.Insert(&comment)
+	_, err = srv.commentModel.Insert(&comment)
 	if err != nil {
 		return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
 	}
@@ -427,7 +429,7 @@ func (srv *defaultCommentService) kuMioComment(turnId string, userId int64) (*AP
 	commentResp.RootChild = commentRespChild
 	// obj
 	parseInt, _ := strconv.ParseInt(comment.ObjId, 10, 64)
-	obj := srv.topicModel.FindById(parseInt)
+	obj, _ := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: parseInt})
 	if obj.Id != 0 {
 		detail := Detail{
 			ObjId:       comment.ObjId,

@@ -23,9 +23,15 @@ type TopicLikeService struct {
 }
 
 func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (TopicChangeLikeResp, error) {
-	topic := srv.topicModel.FindById(topicId)
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
+	if err != nil {
+		return TopicChangeLikeResp{}, errno.ErrCommon
+	}
 	if topic.Id == 0 {
 		return TopicChangeLikeResp{}, errno.ErrCommon.WithMessage("帖子不存在")
+	}
+	if topic.Id != 3 && topic.UserId != userId {
+		return TopicChangeLikeResp{}, errno.ErrCommon
 	}
 
 	like := srv.topicLikeModel.FindBy(repository.FindTopicLikeBy{
@@ -51,7 +57,7 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		_ = srv.topicModel.AddTopicLikeCount(topicId, -1)
 	}
 
-	err := srv.topicLikeModel.Save(&like)
+	err = srv.topicLikeModel.Save(&like)
 	if err != nil {
 		return TopicChangeLikeResp{}, err
 	}

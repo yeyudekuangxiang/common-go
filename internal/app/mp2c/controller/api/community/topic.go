@@ -691,7 +691,7 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 		if err == entity.ErrNotFount {
 			return nil, errno.ErrRecordNotFound
 		}
-		return nil, errno.ErrInternalServer
+		return nil, errno.ErrCommon
 	}
 
 	if topic.UserId != user.ID {
