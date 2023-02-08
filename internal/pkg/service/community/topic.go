@@ -168,12 +168,12 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 func (srv TopicService) ZAddTopic() {
 	var results []entity.Topic
 
-	query := app.DB.Model(&entity.Topic{}).
+	result := app.DB.Model(&entity.Topic{}).
 		Preload("User").
 		Where("status = ?", 3).
-		Where("is_top = ?", 0)
-	//Where("created_at > ?", time.Now().AddDate(-2, 0, 0)).
-	query.Order("id desc").
+		Where("is_top = ?", 0).
+		Where("deleted_at IS NULL").
+		Order("id desc").
 		FindInBatches(&results, 1000, func(tx *gorm.DB, batch int) error {
 			var topics []redis.Z
 
@@ -198,6 +198,9 @@ func (srv TopicService) ZAddTopic() {
 			app.Redis.ZAddArgs(srv.ctx.Context, config.RedisKey.TopicRank, zaddArgs)
 			return nil
 		})
+	if result.Error != nil {
+		app.Logger.Errorf("ZAddTopic 错误:%s", result.Error)
+	}
 }
 
 // GetTopicList 分页获取帖子，且分页获取顶级评论，且获取顶级评论下3条子评论。
