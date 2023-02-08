@@ -206,7 +206,6 @@ func (srv TopicAdminService) SoftDeleteTopic(topicId int64, reason string) (*ent
 	//查询数据是否存在
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
 		TopicId: topicId,
-		Type:    -1,
 	})
 	if err != nil {
 		return nil, err
@@ -235,7 +234,6 @@ func (srv TopicAdminService) DownTopic(topicId int64, reason string) (*entity.To
 	//查询数据是否存在
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
 		TopicId: topicId,
-		Type:    -1,
 	})
 	if err != nil {
 		return nil, err
@@ -265,7 +263,6 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (*
 	//查询数据是否存在
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
 		TopicId: topicId,
-		Type:    -1,
 	})
 	var isFirst bool
 
