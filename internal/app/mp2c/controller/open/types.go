@@ -122,3 +122,17 @@ type recycleReq struct {
 	T            string `json:"t"`
 	Sign         string `json:"sign" form:"sign" binding:"required"`
 }
+type YkcReq struct {
+	ExternalUserId      string  `json:"externalUserId" form:"externalUserId" binding:"required"`
+	TradeSeq            string  `json:"tradeSeq" form:"tradeSeq" binding:"required"`
+	GunName             string  `json:"gunName" form:"gunName" binding:"required"`
+	StationName         string  `json:"stationName" form:"stationName" binding:"required"`
+	ChargedActualAmount float64 `json:"chargedActualAmount" form:"chargedActualAmount"`
+	ServiceActualAmount float64 `json:"serviceActualAmount" form:"serviceActualAmount"`
+	ActualTotalAmount   float64 `json:"actualTotalAmount" form:"actualTotalAmount"`
+	ChargedPower        float64 `json:"chargedPower" form:"chargedPower" binding:"required"`
+	StartTime           string  `json:"startTime" form:"startTime" binding:"required"`
+	EndTime             string  `json:"endTime" form:"endTime"`
+	TradeStatus         string  `json:"tradeStatus" form:"tradeStatus"  binding:"required"`
+	PaymentWallet       string  `json:"paymentWallet" form:"paymentWallet" binding:"required"`
+}
