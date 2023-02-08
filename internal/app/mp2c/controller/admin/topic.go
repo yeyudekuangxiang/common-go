@@ -174,18 +174,13 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	messageService := message.NewWebMessageService(ctx)
 
 	topic, err := adminTopicService.SoftDeleteTopic(form.ID, form.Reason)
-
 	if err != nil {
 		return nil, err
-	}
-	if topic.Status == 2 || topic.Status == 4 {
-		key := config.RedisKey.TopicRank
-		app.Redis.ZRem(ctx.Context, key, topic.Id)
 	}
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:       0,
-		RecId:        topic.User.ID,
+		RecId:        topic.UserId,
 		Key:          "down_topic",
 		TurnId:       topic.Id,
 		TurnType:     message.MsgTurnTypeArticle,
@@ -216,14 +211,10 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	if topic.Status == 2 || topic.Status == 4 {
-		key := config.RedisKey.TopicRank
-		app.Redis.ZRem(ctx.Context, key, topic.Id)
-	}
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:       0,
-		RecId:        topic.User.ID,
+		RecId:        topic.UserId,
 		Key:          "down_topic",
 		TurnId:       topic.Id,
 		TurnType:     message.MsgTurnTypeArticle,
@@ -255,11 +246,6 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 	pointService := service.NewPointService(ctx)
 	messageService := message.NewWebMessageService(ctx)
-	//redis 做处理
-	if topic.Status == 2 || topic.Status == 4 {
-		key := config.RedisKey.TopicRank
-		app.Redis.ZRem(ctx.Context, key, topic.Id)
-	}
 
 	if topic.Status == 3 {
 		keyPrefix := "periodLimit:sendPoint:article:push:"
@@ -286,7 +272,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 				AdditionInfo: strconv.FormatInt(topic.Id, 10),
 			})
 			if err != nil {
-				app.Logger.Errorf("【帖子审核】积分发放失败:%s; 帖子ID:%v; 用户ID:%v", err.Error(), topic.Id, topic.User.ID)
+				app.Logger.Errorf("【帖子审核】积分发放失败:%s; 帖子ID:%v; 用户ID:%v", err.Error(), topic.Id, topic.UserId)
 			}
 			key = "push_topic"
 		}
@@ -319,7 +305,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if topic.Status == 4 {
 		err = messageService.SendMessage(message.SendWebMessage{
 			SendId:   0,
-			RecId:    topic.User.ID,
+			RecId:    topic.UserId,
 			Key:      "down_topic",
 			Type:     message.MsgTypeSystem,
 			TurnType: message.MsgTurnTypeArticle,
@@ -334,7 +320,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if topic.Status == 2 {
 		err = messageService.SendMessage(message.SendWebMessage{
 			SendId:   0,
-			RecId:    topic.User.ID,
+			RecId:    topic.UserId,
 			Key:      "fail_topic",
 			Type:     message.MsgTypeSystem,
 			TurnType: message.MsgTurnTypeArticle,
@@ -439,7 +425,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 		if isFirst {
 			err = messageService.SendMessage(message.SendWebMessage{
 				SendId:   0,
-				RecId:    topic.User.ID,
+				RecId:    topic.UserId,
 				Key:      key,
 				Type:     message.MsgTypeSystem,
 				TurnType: message.MsgTurnTypeArticle,

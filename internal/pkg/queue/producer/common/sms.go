@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/json"
 	"github.com/wagslane/go-rabbitmq"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -13,7 +14,7 @@ const (
 )
 
 func SendSms(message smsmsg.SmsMessage) error {
-	msg, err := message.Byte()
+	marshal, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
@@ -22,7 +23,7 @@ func SendSms(message smsmsg.SmsMessage) error {
 		Token:            smsToken,
 		Method:           "post",
 		ContentType:      "application/json",
-		Body:             string(msg),
+		Body:             string(marshal),
 		SuccessHttpCodes: []int{200},
 	}
 	sendBody, err := send.Byte()

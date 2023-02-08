@@ -166,7 +166,6 @@ func (srv TopicService) GetRecommendList(param TopicListParams) ([]*entity.Topic
 }
 
 func (srv TopicService) ZAddTopic() {
-
 	var results []entity.Topic
 
 	query := app.DB.Model(&entity.Topic{}).
@@ -782,6 +781,8 @@ func (srv TopicService) DelTopic(userId, topicId int64) (*entity.Topic, error) {
 	if err := srv.topicModel.SoftDelete(topicModel); err != nil {
 		return nil, errno.ErrInternalServer.WithMessage(err.Error())
 	}
+	//删除redis中的数据
+	srv.delTopicForRedis(*topicModel)
 	return topicModel, nil
 }
 
@@ -880,4 +881,16 @@ func (srv TopicService) SetWeekTopic() error {
 
 	fmt.Printf("uSliceToTopic:%v", uSliceToTopic)
 	return nil
+}
+
+func (srv TopicService) delTopicForRedis(topic entity.Topic) {
+	if topic.Status != 3 || topic.DeletedAt.Valid {
+		key := config.RedisKey.TopicRank
+		err := app.Redis.ZRem(srv.ctx.Context, key, topic.Id).Err()
+		if err != nil {
+			app.Logger.Errorf("topic 缓存删除失败:%s", err.Error())
+		}
+		return
+	}
+	return
 }

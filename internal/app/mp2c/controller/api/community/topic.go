@@ -398,10 +398,6 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	if topic.DeletedAt.Valid {
-		key := config.RedisKey.TopicRank
-		app.Redis.ZRem(ctx.Context, key, topic.Id)
-	}
 	// 报名活动删除的话 通知报名者
 	if topic.Type == 1 {
 		signupList, count, err := ActivitiesSignupService.FindAll(communityModel.FindAllActivitiesSignupParams{
@@ -416,9 +412,9 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		for _, item := range signupList {
 			//发送短信
 			err := common.SendSms(smsmsg.SmsMessage{
-				TemplateKey: message.SmsActivityCancel,
 				Phone:       item.Phone,
 				Args:        topic.Title,
+				TemplateKey: message.SmsActivityCancel,
 			})
 			if err != nil {
 				app.Logger.Error("【短信发送失败】取消报名活动通知短信发送失败: %s", err.Error())
