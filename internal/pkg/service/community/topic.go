@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"math"
@@ -325,7 +326,12 @@ func (srv TopicService) FindById(topicId int64) *entity.Topic {
 }
 
 func (srv TopicService) FindTopic(params FindTopicParams) (*entity.Topic, error) {
-	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams(params))
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: params.TopicId,
+		UserId:  params.UserId,
+		Type:    converttool.PointerInt(params.Type),
+		Status:  params.Type,
+	})
 	if err != nil {
 		return &entity.Topic{}, err
 	}
