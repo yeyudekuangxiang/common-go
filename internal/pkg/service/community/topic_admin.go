@@ -80,7 +80,7 @@ func (srv TopicAdminService) GetTopicList(param AdminTopicListParams) ([]*entity
 
 	}
 
-	if param.Type != 0 {
+	if param.Type >= 0 {
 		query = query.Where("topic.type = ?", param.Type)
 	}
 
