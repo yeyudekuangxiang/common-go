@@ -677,15 +677,16 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 
 // UpdateTopic 更新帖子
 func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*entity.Topic, error) {
-
 	//查询记录是否存在
-	topicModel := srv.topicModel.FindById(params.ID)
-
+	topicModel, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: params.ID,
+		UserId:  userId,
+	})
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
 	if topicModel.Id == 0 {
 		return &entity.Topic{}, errno.ErrCommon.WithMessage("该帖子不存在")
-	}
-	if topicModel.UserId != userId {
-		return &entity.Topic{}, errno.ErrCommon.WithMessage("无权限修改")
 	}
 
 	//处理images
@@ -772,13 +773,17 @@ func (srv TopicService) DetailTopic(params FindTopicParams) (*entity.Topic, erro
 
 // DelTopic 软删除
 func (srv TopicService) DelTopic(userId, topicId int64) (*entity.Topic, error) {
-	topicModel := srv.topicModel.FindById(topicId)
-	if topicModel.Id == 0 {
-		return nil, errno.ErrCommon.WithMessage("该帖子不存在")
+	topicModel, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: topicId,
+		UserId:  userId,
+	})
+
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	if topicModel.UserId != userId {
-		return nil, errno.ErrCommon.WithMessage("无权限删除")
+	if topicModel.Id == 0 {
+		return nil, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 
 	if err := srv.topicModel.SoftDelete(topicModel); err != nil {

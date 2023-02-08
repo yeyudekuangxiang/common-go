@@ -330,7 +330,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	if form.Type == 0 && len(form.TagIds) >= 2 {
+	if form.Type == 0 && len(form.TagIds) > 2 {
 		return nil, errno.ErrCommon.WithMessage("话题数量最多选2个哦")
 	}
 
@@ -360,6 +360,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 			}
 		}
 	}
+
 	//更新帖子
 	marshal, err := json.Marshal(form)
 	if err != nil {
