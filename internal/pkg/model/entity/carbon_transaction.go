@@ -120,6 +120,8 @@ func (p CarbonTransactionType) RealText() string {
 		return "拾尚回收"
 	case CARBON_RECYCLING_DANGDANGYIXIA:
 		return "铛铛一下"
+	case CARBON_YKC:
+		return "云快充"
 	}
 	return p.Text()
 }
@@ -143,6 +145,8 @@ const (
 	CARBON_RECYCLING_DANGDANGYIXIA   CarbonTransactionType = "RECYCLING_DANGDANGYIXIA"
 	CARBON_YTX                       CarbonTransactionType = "YTX"     //亿通行
 	CARBON_CYCLING                   CarbonTransactionType = "CYCLING" //java 骑行
+	CARBON_YKC                       CarbonTransactionType = "YKC"     //云快充
+
 )
 
 type CarbonTransaction struct {
