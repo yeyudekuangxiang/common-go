@@ -1,6 +1,7 @@
 package community
 
 import (
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -226,7 +227,7 @@ func (srv TopicAdminService) SoftDeleteTopic(topicId int64, reason string) (*ent
 	if err != nil {
 		return nil, err
 	}
-
+	srv.delTopicForRedis(topic)
 	return topic, nil
 }
 
@@ -255,7 +256,7 @@ func (srv TopicAdminService) DownTopic(topicId int64, reason string) (*entity.To
 	if err != nil {
 		return nil, err
 	}
-
+	srv.delTopicForRedis(topic)
 	return topic, nil
 }
 
@@ -305,7 +306,7 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (*
 	if err != nil {
 		return &entity.Topic{}, isFirst, err
 	}
-
+	srv.delTopicForRedis(topic)
 	return topic, isFirst, nil
 }
 
@@ -373,4 +374,16 @@ func (srv TopicAdminService) GetCommentCount(ids []int64) (result []CommentCount
 		Group("obj_id").
 		Find(&result)
 	return result
+}
+
+func (srv TopicAdminService) delTopicForRedis(topic *entity.Topic) {
+	if topic.Status != 3 || topic.DeletedAt.Valid {
+		key := config.RedisKey.TopicRank
+		err := app.Redis.ZRem(srv.ctx.Context, key, topic.Id).Err()
+		if err != nil {
+			app.Logger.Errorf("topic 缓存删除失败:%s", err.Error())
+		}
+		return
+	}
+	return
 }

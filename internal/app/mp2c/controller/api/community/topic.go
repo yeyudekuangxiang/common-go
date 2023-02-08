@@ -398,10 +398,6 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	if topic.DeletedAt.Valid {
-		key := config.RedisKey.TopicRank
-		app.Redis.ZRem(ctx.Context, key, topic.Id)
-	}
 	// 报名活动删除的话 通知报名者
 	if topic.Type == 1 {
 		signupList, count, err := ActivitiesSignupService.FindAll(communityModel.FindAllActivitiesSignupParams{
