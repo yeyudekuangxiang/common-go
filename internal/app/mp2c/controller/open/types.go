@@ -130,7 +130,7 @@ type YkcReq struct {
 	StationName         string  `json:"stationName" binding:"required"`
 	ChargedActualAmount float64 `json:"chargedActualAmount"`
 	ServiceActualAmount float64 `json:"serviceActualAmount"`
-	ActualTotalAmount   string  `json:"actualTotalAmount"`
+	ActualTotalAmount   float64 `json:"actualTotalAmount"`
 	ChargedPower        float64 `json:"chargedPower" binding:"required"`
 	StartTime           string  `json:"startTime" binding:"required"`
 	EndTime             string  `json:"endTime"`
