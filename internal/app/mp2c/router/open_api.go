@@ -113,6 +113,8 @@ func openRouter(router *gin.Engine) {
 			//第三方
 			openPlatformRouter.POST("/syncusr", apiutil.Format(open.DefaultPlatformController.Syncusr)) //注册回调
 			openPlatformRouter.POST("/recycle", apiutil.Format(open.DefaultRecycleController.Recycle))  //旧物回收
+			//
+			openPlatformRouter.POST("/charge/ykc", apiutil.Format(open.DefaultChargeController.Ykc))
 		}
 	}
 }

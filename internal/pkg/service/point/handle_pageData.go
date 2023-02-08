@@ -11,7 +11,7 @@ import (
 
 //电池换电 奥动 before 弹框数据
 func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, error) {
-	types := []entity.PointTransactionType{c.clientHandle.Type}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	openIds := []string{c.clientHandle.OpenId}
 	result, count, err := c.getTodayData(openIds, types)
 	if err != nil {
@@ -32,7 +32,6 @@ func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, er
 		kwhTotal = fromString.Add(kwhTotal)
 	}
 	//返回数据
-	//res["total"] = kwhTotal.String()
 	res["count"] = count
 	res["co2"] = kwhTotal.Mul(decimal.NewFromFloat(511)).String()
 	return res, nil
@@ -68,9 +67,7 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 
 //飞蚂蚁
 func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, error) {
-	types := []entity.PointTransactionType{
-		entity.POINT_FMY_RECYCLING_CLOTHING,
-	}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	openIds := []string{c.clientHandle.OpenId}
 	result, count, err := c.getTodayData(openIds, types)
 	if err != nil {
@@ -93,7 +90,7 @@ func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, erro
 
 //环保减塑
 func (c *defaultClientHandle) reducePlasticPageData() (map[string]interface{}, error) {
-	types := []entity.PointTransactionType{c.clientHandle.Type}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	openIds := []string{c.clientHandle.OpenId}
 	_, count, err := c.getTodayData(openIds, types)
 	if err != nil {
@@ -106,10 +103,10 @@ func (c *defaultClientHandle) reducePlasticPageData() (map[string]interface{}, e
 	return res, nil
 }
 
-//快电
-func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{}, error) {
+//toCharge 快电、云快充
+func (c *defaultClientHandle) toChargePageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}
-	types := []entity.PointTransactionType{entity.POINT_FAST_ELECTRICITY}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	result, count, err := c.getTodayData(openIds, types)
 	if err != nil {
 		return nil, err
@@ -122,7 +119,6 @@ func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{},
 		kwhTotal += item["value"].(int64) / 10
 	}
 	//返回数据
-	//res["total"] = kwhTotal.String()
 	res["count"] = count
 	res["co2"] = kwhTotal * 511
 	return res, nil
@@ -131,7 +127,7 @@ func (c *defaultClientHandle) fastElectricityPageData() (map[string]interface{},
 //金华行
 func (c *defaultClientHandle) jhxPageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}
-	types := []entity.PointTransactionType{entity.POINT_JHX}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	_, count, err := c.getTodayData(openIds, types)
 	if err != nil {
 		return nil, err
@@ -149,7 +145,7 @@ func (c *defaultClientHandle) jhxPageData() (map[string]interface{}, error) {
 //亿通行
 func (c *defaultClientHandle) ytxPageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}
-	types := []entity.PointTransactionType{entity.POINT_YTX}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	_, count, err := c.getTodayData(openIds, types)
 	if err != nil {
 		return nil, err
@@ -164,7 +160,7 @@ func (c *defaultClientHandle) ytxPageData() (map[string]interface{}, error) {
 
 func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}
-	types := []entity.PointTransactionType{entity.POINT_RECYCLING_AIHUISHOU}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	_, count, err := c.getTodayData(openIds, types)
 	if err != nil {
 		return nil, err
@@ -179,7 +175,7 @@ func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, erro
 
 func (c *defaultClientHandle) sshsRecyclePageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}
-	types := []entity.PointTransactionType{entity.POINT_RECYCLING_SHISHANGHUISHOU}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	_, count, err := c.getTodayData(openIds, types)
 	if err != nil {
 		return nil, err
@@ -194,7 +190,7 @@ func (c *defaultClientHandle) sshsRecyclePageData() (map[string]interface{}, err
 
 func (c *defaultClientHandle) ddyxRecyclePageData() (map[string]interface{}, error) {
 	openIds := []string{c.clientHandle.OpenId}
-	types := []entity.PointTransactionType{entity.POINT_RECYCLING_DANGDANGYIXIA}
+	types := []entity.PointTransactionType{c.getPointType(string(c.clientHandle.Type))}
 	_, count, err := c.getTodayData(openIds, types)
 	if err != nil {
 		return nil, err
@@ -223,4 +219,32 @@ func (c *defaultClientHandle) getMonthData(openIds []string, types []entity.Poin
 		OpenIds: openIds,
 		Types:   types,
 	})
+}
+
+func (c *defaultClientHandle) getPointType(tp string) entity.PointTransactionType {
+	switch tp {
+	case "POWER_REPLACE":
+		return entity.POINT_POWER_REPLACE //换电
+	case "FAST_ELECTRICITY":
+		return entity.POINT_FAST_ELECTRICITY //快电
+	case "YKC":
+		return entity.Point_YKC //云快充
+	case "REDUCE_PLASTIC":
+		return entity.POINT_REDUCE_PLASTIC
+	case "JHX":
+		return entity.POINT_JHX
+	case "YTX":
+		return entity.POINT_YTX
+	case "OOLA_RECYCLE":
+		return entity.POINT_RECYCLING_CLOTHING
+	case "FMY_RECYCLE":
+		return entity.POINT_FMY_RECYCLING_CLOTHING
+	case "AHS_RECYCLE":
+		return entity.POINT_RECYCLING_AIHUISHOU //爱回收旧物回收
+	case "SSHS_RECYCLE":
+		return entity.POINT_RECYCLING_SHISHANGHUISHOU
+	case "DDYX_RECYCLE":
+		return entity.POINT_RECYCLING_DANGDANGYIXIA
+	}
+	return ""
 }

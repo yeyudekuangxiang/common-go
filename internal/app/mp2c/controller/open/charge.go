@@ -1,9 +1,11 @@
 package open
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	point2 "gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -181,7 +183,7 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-//调用星星充电
+//调用星星充电发券
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
 	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 {
 		fmt.Println("星星充电 发券start")
@@ -213,7 +215,6 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 	}
 }
 
-//回调的回调
 func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeForm) {
 	sceneUser := repository.DefaultBdSceneUserRepository.FindPlatformUser(user.OpenId, "ccring")
 	if sceneUser.ID != 0 && sceneUser.PlatformKey == "ccring" {
@@ -252,4 +253,109 @@ func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeFo
 			}
 		}
 	}
+}
+
+//充电
+func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
+	form := YkcReq{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	params, _ := json.Marshal(form)
+	app.Logger.Infof("云快充 参数:%s", params)
+
+	ch := "ykc"
+	ctx := context.NewMioContext()
+
+	//查询 渠道信息
+	scene := service.DefaultBdSceneService.FindByCh(ch)
+	if scene.Key == "" || scene.Key == "e" {
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
+	}
+
+	//查询用户
+	userId, err := strconv.ParseInt(form.ExternalUserId, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	userInfo, b, err := service.DefaultUserService.GetUserByID(userId)
+	if err != nil {
+		return nil, err
+	}
+	if !b {
+		return nil, errno.ErrUserNotFound
+	}
+
+	//查重
+	var bizId, tp string
+	bizId = form.TradeSeq
+	tp = "ykc"
+	by, err := app.RpcService.PointRpcSrv.FindPointTransaction(ctx.Context, &point2.FindPointTransactionReq{
+		BizId: &bizId,
+		Type:  &tp,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if by.Exist {
+		app.Logger.Info("云快充 订单重复", form)
+		return nil, errno.ErrCommon.WithMessage("重复订单")
+	}
+
+	//查询今日积分总量
+	timeStr := time.Now().Format("2006-01-02")
+	key := timeStr + scene.Ch + form.ExternalUserId
+	cmd := app.Redis.Get(ctx, key)
+
+	lastPoint, _ := strconv.Atoi(cmd.Val())
+	thisPoint0 := form.ChargedPower
+
+	thisPoint := int(thisPoint0 * float64(scene.Override))
+	totalPoint := lastPoint + thisPoint
+	if lastPoint >= scene.PointLimit {
+		return nil, nil
+	}
+
+	if totalPoint > scene.PointLimit {
+		fmt.Printf("%s 充电量限制修正 thisPoint:%d, lastPoint:%d", ch, thisPoint, lastPoint)
+		thisPoint = scene.PointLimit - lastPoint
+		totalPoint = scene.PointLimit
+	}
+
+	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
+
+	//加积分
+	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point2.IncPointReq{
+		Openid:       userInfo.OpenId,
+		Type:         string(entity.Point_YKC),
+		BizId:        form.TradeSeq,
+		BizName:      "云快充订单同步",
+		ChangePoint:  uint64(thisPoint),
+		AdditionInfo: string(params),
+	})
+	if err != nil {
+		app.Logger.Errorf("云快充 加积分失败:%s", err.Error())
+	}
+
+	//加碳量
+
+	pointDec := decimal.NewFromInt(int64(thisPoint))
+	electric := pointDec.Div(decimal.NewFromInt(10))
+	f, _ := electric.Float64()
+	_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		OpenId:  userInfo.OpenId,
+		UserId:  userInfo.ID,
+		Type:    entity.CARBON_ECAR,
+		Value:   f,
+		Info:    string(params),
+		AdminId: 0,
+		Ip:      "",
+	})
+	if errCarbon != nil {
+		app.Logger.Errorf("云快充 加碳失败:%s", err.Error())
+	}
+
+	return gin.H{}, nil
 }

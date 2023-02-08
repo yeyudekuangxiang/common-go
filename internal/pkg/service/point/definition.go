@@ -40,14 +40,18 @@ var commandMap = map[string]*commandDescription{
 
 //before弹框页面获取数据
 var pageDataMap = map[string]*commandDescription{
-	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData},    //换电
-	"OOLA_RECYCLE":     {FnPageData: (*defaultClientHandle).oolaRecyclePageData},     //oola旧物回收
-	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).fastElectricityPageData}, //快电
-	"FMY_RECYCLE":      {FnPageData: (*defaultClientHandle).fmyRecyclePageData},      //飞蚂蚁旧物回收
-	"REDUCE_PLASTIC":   {FnPageData: (*defaultClientHandle).reducePlasticPageData},   //环保减塑
-	"JHX":              {FnPageData: (*defaultClientHandle).jhxPageData},             //金华行
-	"YTX":              {FnPageData: (*defaultClientHandle).ytxPageData},             //亿通行
-	"AHS_RECYCLE":      {FnPageData: (*defaultClientHandle).ahsRecyclePageData},      //爱回收旧物回收
-	"SSHS_RECYCLE":     {FnPageData: (*defaultClientHandle).sshsRecyclePageData},     //爱回收旧物回收
-	"DDYX_RECYCLE":     {FnPageData: (*defaultClientHandle).ddyxRecyclePageData},     //爱回收旧物回收
+	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData}, //换电
+	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).toChargePageData},     //快电
+	"YKC":              {FnPageData: (*defaultClientHandle).toChargePageData},     //云快充
+
+	"REDUCE_PLASTIC": {FnPageData: (*defaultClientHandle).reducePlasticPageData}, //环保减塑
+
+	"JHX": {FnPageData: (*defaultClientHandle).jhxPageData}, //金华行
+	"YTX": {FnPageData: (*defaultClientHandle).ytxPageData}, //亿通行
+
+	"OOLA_RECYCLE": {FnPageData: (*defaultClientHandle).oolaRecyclePageData}, //oola旧物回收
+	"FMY_RECYCLE":  {FnPageData: (*defaultClientHandle).fmyRecyclePageData},  //飞蚂蚁旧物回收
+	"AHS_RECYCLE":  {FnPageData: (*defaultClientHandle).ahsRecyclePageData},  //爱回收旧物回收
+	"SSHS_RECYCLE": {FnPageData: (*defaultClientHandle).sshsRecyclePageData}, //时尚回收
+	"DDYX_RECYCLE": {FnPageData: (*defaultClientHandle).ddyxRecyclePageData}, //铛铛一下
 }

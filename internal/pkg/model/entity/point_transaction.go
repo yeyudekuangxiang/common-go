@@ -145,6 +145,8 @@ func (p PointTransactionType) RealText() string {
 		return "拾尚回收"
 	case POINT_RECYCLING_DANGDANGYIXIA:
 		return "铛铛一下"
+	case Point_YKC:
+		return "云快充"
 	}
 	return p.Text()
 }
@@ -183,6 +185,7 @@ const (
 	POINT_POWER_REPLACE           PointTransactionType = "POWER_REPLACE"     //电车换电
 	POINT_DUIBA_INTEGRAL_RECHARGE PointTransactionType = "INTEGRAL_RECHARGE" //兑吧虚拟商品充值积分
 	POINT_YTX                     PointTransactionType = "YTX"               //亿通行
+	Point_YKC                     PointTransactionType = "YKC"
 
 	POINT_RECYCLING                 PointTransactionType = "RECYCLING"                 //旧物回收
 	POINT_RECYCLING_AIHUISHOU       PointTransactionType = "RECYCLING_AIHUISHOU"       //旧物回收 爱分类爱回收
