@@ -115,7 +115,7 @@ func (d defaultTopicModel) FindOneTopic(params repository.FindTopicParams) (*ent
 		query = query.Where("user_id = ?", params.UserId)
 	}
 	if params.Type != nil {
-		query = query.Where("type = ?", params.Type)
+		query = query.Where("type = ?", *params.Type)
 	}
 	if params.Status != 0 {
 		query = query.Where("status = ?", params.Status)
@@ -347,7 +347,7 @@ func (d defaultTopicModel) FindOneUnscoped(params repository.FindTopicParams) *e
 		query.Where("status = ?", params.Status)
 	}
 	if params.Type != nil {
-		query.Where("type = ?", params.Type)
+		query.Where("type = ?", *params.Type)
 	}
 	if params.UserId != 0 {
 		query.Where("user_id = ?", params.UserId)
