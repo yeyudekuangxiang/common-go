@@ -97,7 +97,7 @@ func checkMsg(params *security.MsgSecCheckRequest) error {
 
 func CheckMediaWithOpenId(openid, mediaUrl string) error {
 	req := &security.MediaCheckAsyncRequest{
-		MediaUrl:  mediaUrl,
+		MediaUrl:  mediaUrl + "?x-oss-process=image/resize,m_fixed,h_100,w_100",
 		MediaType: 2,
 		Version:   2,
 		Openid:    openid,
