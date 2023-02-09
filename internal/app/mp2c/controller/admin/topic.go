@@ -298,7 +298,6 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		zhuGeAttr := make(map[string]interface{}, 0)
 		zhuGeAttr["场景"] = "发布帖子"
 		zhuGeAttr["审核状态"] = "审核已通过"
-		zhuGeAttr["帖子id/活动id"] = topic.Id
 		eventName := config.ZhuGeEventName.PostArticle
 		if topic.Type == 1 {
 			zhuGeAttr["场景"] = "发布活动"
@@ -339,7 +338,6 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		zhuGeAttr := make(map[string]interface{}, 0)
 		zhuGeAttr["场景"] = "发布帖子"
 		zhuGeAttr["审核状态"] = "审核未通过"
-		zhuGeAttr["帖子id/活动id"] = topic.Id
 		eventName := config.ZhuGeEventName.PostArticle
 		if topic.Type == 1 {
 			zhuGeAttr["场景"] = "发布活动"
