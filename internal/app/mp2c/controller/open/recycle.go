@@ -374,19 +374,6 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrInternalServer
 	}
-
-	//keyPrefix = fmt.Sprintf("%s:%s:%s:", config.RedisKey.PointMonthLimit, form.Ch, form.Category)
-	//n := time.Now().AddDate(0, 1, -time.Now().Day()).Day()
-	//monthLimit := limit.NewQuantityLimit(int(time.Hour.Seconds()*24)*n, maxPoint, app.Redis, keyPrefix, limit.QuantityAlign())
-	//monthPoint, err := monthLimit.TakeCtx(ctx.Context, form.MemberId, int(currPoint))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if monthPoint == 0 {
-	//	current = 0
-	//}
-
 	//加积分
 	pt := RecycleService.GetPointType(scene.Ch)
 	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
@@ -399,7 +386,6 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	})
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("%s 增加积分失败: err:%s; form:%s", form.Ch, err.Error(), fmt.Sprint(params)))
-		//return nil, errno.ErrSave.WithMessage(fmt.Sprintf("增加积分失败:%s", err.Error()))
 	}
 
 	//发碳量
@@ -414,8 +400,11 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
-		//return nil, errno.ErrSave.WithMessage(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
 	}
 
 	return gin.H{}, nil
+}
+
+func (ctr RecycleController) incPointForActivity(params incPointForActivityParams) {
+	//检查活动
 }
