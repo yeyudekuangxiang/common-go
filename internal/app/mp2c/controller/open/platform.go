@@ -20,7 +20,6 @@ import (
 	"mio/internal/pkg/util/apiutil"
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/internal/pkg/util/validator"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strconv"
 	"strings"
@@ -508,15 +507,18 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-	if form.MediaUrl != "" {
-		err := service.DefaultReviewService().ImageReview(baidu.ImageReviewParam{ImgUrl: form.MediaUrl})
-		if err != nil {
-			app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "图片校验"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
-			return nil, errno.ErrCommon.WithMessage(err.Error())
+	images := strings.Split(strings.Trim(form.MediaUrl, ","), ",")
+	if len(images) > 0 {
+		for _, imageUrl := range images {
+			err := validator.CheckMediaWithOpenId(user.OpenId, imageUrl)
+			if err != nil {
+				app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
+				zhuGeAttr := make(map[string]interface{}, 0)
+				zhuGeAttr["场景"] = "图片校验"
+				zhuGeAttr["失败原因"] = err.Error()
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+				return nil, errno.ErrCommon.WithMessage(err.Error())
+			}
 		}
 	}
 	return nil, nil
