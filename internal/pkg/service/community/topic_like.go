@@ -25,11 +25,12 @@ type TopicLikeService struct {
 func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (TopicChangeLikeResp, error) {
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
-		return TopicChangeLikeResp{}, errno.ErrCommon
+		if err == entity.ErrNotFount {
+			return TopicChangeLikeResp{}, errno.ErrCommon.WithMessage("帖子不存在")
+		}
+		return TopicChangeLikeResp{}, errno.ErrCommon.WithMessage(err.Error())
 	}
-	if topic.Id == 0 {
-		return TopicChangeLikeResp{}, errno.ErrCommon.WithMessage("帖子不存在")
-	}
+
 	if topic.Id != 3 && topic.UserId != userId {
 		return TopicChangeLikeResp{}, errno.ErrCommon
 	}

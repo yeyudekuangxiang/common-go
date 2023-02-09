@@ -137,3 +137,9 @@ type YkcReq struct {
 	TradeStatus         string  `json:"tradeStatus" binding:"required"`
 	PaymentWallet       string  `json:"paymentWallet" binding:"required"`
 }
+
+type incPointForActivityParams struct {
+	Point        int64  `json:"point"`
+	OpenId       string `json:"openId"`
+	AdditionInfo string `json:"additionInfo"`
+}
