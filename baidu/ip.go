@@ -3,12 +3,33 @@ package baidu
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	"io/ioutil"
-	"net/http"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 )
 
-type CityResult struct {
+type MapClient struct {
+	ak string
+}
+
+func NewMapClient(ak string) *MapClient {
+	return &MapClient{ak: ak}
+}
+
+func (c *MapClient) LocationIp(ip string) (*LocationIpResult, error) {
+	url := fmt.Sprintf("https://api.map.baidu.com/location/ip?ak=%s&ip=%s", c.ak, ip)
+	body, err := httptool.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var o LocationIpResult
+	err = json.Unmarshal(body, &o)
+	if err != err {
+		return nil, err
+	}
+	return &o, nil
+}
+
+type LocationIpResult struct {
 	Address string `json:"address"`
 	Content struct {
 		AddressDetail struct {
@@ -27,39 +48,4 @@ type CityResult struct {
 		Address string `json:"address"`
 	} `json:"content"`
 	Status int `json:"status"`
-}
-
-//参考地址 https://www.cnblogs.com/finger-ghost/p/14303291.html
-//根据ip获取城市
-
-func IpToCity(ip string) (*CityResult, error) {
-	if ip == "" {
-		return nil, errors.New("ip地址为空")
-	}
-	url := "https://api.map.baidu.com/location/ip?ak=bHCEP8afEnhnFFbx1z6NwXpeChsPx8Aj&ip=" + ip
-	method := "GET"
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	req.Header.Add("Cookie", "")
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	var o CityResult
-	err = json.Unmarshal([]byte(string(body)), &o)
-	if err != err {
-		return nil, err
-	}
-	return &o, nil
 }
