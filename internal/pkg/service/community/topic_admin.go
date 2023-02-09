@@ -147,10 +147,14 @@ func (srv TopicAdminService) CreateTopic(userId int64, title, content string, ta
 // UpdateTopic 更新帖子
 func (srv TopicAdminService) UpdateTopic(topicId int64, title, content string, tagIds []int64, images []string) error {
 	//查询记录是否存在
-	topicModel, _ := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
-	if topicModel.Id == 0 {
-		return errno.ErrCommon.WithMessage("该帖子不存在")
+	topicModel, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
+	if err != nil {
+		if err == entity.ErrNotFount {
+			return errno.ErrCommon.WithMessage("该帖子不存在")
+		}
+		return errno.ErrInternalServer
 	}
+
 	//处理images
 	imageStr := strings.Join(images, ",")
 
@@ -208,11 +212,10 @@ func (srv TopicAdminService) SoftDeleteTopic(topicId int64, reason string) (*ent
 		TopicId: topicId,
 	})
 	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil, errno.ErrCommon.WithMessage("帖子不存在")
+		}
 		return nil, err
-	}
-
-	if topic.Id == 0 {
-		return nil, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
 	if topic.Status == 4 {
@@ -236,11 +239,10 @@ func (srv TopicAdminService) DownTopic(topicId int64, reason string) (*entity.To
 		TopicId: topicId,
 	})
 	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil, errno.ErrCommon.WithMessage("帖子不存在")
+		}
 		return nil, err
-	}
-
-	if topic.Id == 0 {
-		return nil, errno.ErrCommon.WithMessage("数据不存在")
 	}
 
 	if topic.Status == 4 {
@@ -264,15 +266,15 @@ func (srv TopicAdminService) Review(topicId int64, status int, reason string) (*
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
 		TopicId: topicId,
 	})
-	var isFirst bool
 
 	if err != nil {
-		return &entity.Topic{}, isFirst, err
+		if err == entity.ErrNotFount {
+			return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
+		}
+		return &entity.Topic{}, false, err
 	}
 
-	if topic.Id == 0 {
-		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
-	}
+	var isFirst bool
 
 	if status == entity.TopicStatusPublished {
 		if topic.PushTime.IsZero() {
@@ -312,14 +314,14 @@ func (srv TopicAdminService) Top(topicId int64, isTop int) (*entity.Topic, bool,
 	//查询数据是否存在
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
+		if err == entity.ErrNotFount {
+			return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
+		}
 		return nil, false, errno.ErrInternalServer
 	}
 
 	var isFirst bool
 
-	if topic.Id == 0 {
-		return &entity.Topic{}, isFirst, errno.ErrCommon.WithMessage("数据不存在")
-	}
 	update := map[string]interface{}{"is_top": isTop}
 	if isTop == 1 {
 		if topic.TopTime.IsZero() {
@@ -344,12 +346,12 @@ func (srv TopicAdminService) Essence(topicId int64, isEssence int) (*entity.Topi
 	//查询数据是否存在
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
+		if err == entity.ErrNotFount {
+			return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
+		}
 		return nil, false, errno.ErrInternalServer
 	}
 	var isFirst bool
-	if topic.Id == 0 {
-		return &entity.Topic{}, false, errno.ErrCommon.WithMessage("数据不存在")
-	}
 
 	update := map[string]interface{}{"is_essence": isEssence}
 

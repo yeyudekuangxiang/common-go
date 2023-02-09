@@ -333,7 +333,10 @@ func (srv TopicService) FindTopic(params FindTopicParams) (*entity.Topic, error)
 		Status:  params.Status,
 	})
 	if err != nil {
-		return &entity.Topic{}, err
+		if err == entity.ErrNotFount {
+			return nil, errno.ErrCommon.WithMessage("该帖子不存在")
+		}
+		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 	return topic, nil
 }
@@ -689,10 +692,10 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 		UserId:  userId,
 	})
 	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil, errno.ErrCommon.WithMessage("该帖子不存在")
+		}
 		return nil, errno.ErrCommon.WithMessage(err.Error())
-	}
-	if topicModel.Id == 0 {
-		return &entity.Topic{}, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 
 	//处理images
@@ -785,11 +788,10 @@ func (srv TopicService) DelTopic(userId, topicId int64) (*entity.Topic, error) {
 	})
 
 	if err != nil {
+		if err == entity.ErrNotFount {
+			return nil, errno.ErrCommon.WithMessage("该帖子不存在")
+		}
 		return nil, errno.ErrCommon.WithMessage(err.Error())
-	}
-
-	if topicModel.Id == 0 {
-		return nil, errno.ErrCommon.WithMessage("该帖子不存在")
 	}
 
 	if err := srv.topicModel.SoftDelete(topicModel); err != nil {

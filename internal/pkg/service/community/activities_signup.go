@@ -165,10 +165,10 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		Status:  3,
 	})
 	if err != nil {
-		return errno.ErrCommon
-	}
-	if topic.Id == 0 {
-		return errno.ErrCommon.WithMessage("活动不存在")
+		if err == entity.ErrNotFount {
+			return errno.ErrCommon.WithMessage("活动不存在")
+		}
+		return errno.ErrCommon.WithMessage(err.Error())
 	}
 
 	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{

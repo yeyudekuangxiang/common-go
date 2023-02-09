@@ -181,6 +181,9 @@ func (d defaultWebMessage) SendMessage(param SendWebMessage) error {
 	case "topic":
 		topicObj, err := d.topic.FindOneTopic(repository.FindTopicParams{TopicId: param.TurnId})
 		if err != nil {
+			if err == entity.ErrNotFount {
+				return errno.ErrRecordNotFound
+			}
 			return errno.ErrInternalServer
 		}
 		obj, err = json.Marshal(topicObj)
