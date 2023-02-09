@@ -330,7 +330,7 @@ func (srv TopicService) FindTopic(params FindTopicParams) (*entity.Topic, error)
 		TopicId: params.TopicId,
 		UserId:  params.UserId,
 		Type:    converttool.PointerInt(params.Type),
-		Status:  params.Type,
+		Status:  params.Status,
 	})
 	if err != nil {
 		return &entity.Topic{}, err
