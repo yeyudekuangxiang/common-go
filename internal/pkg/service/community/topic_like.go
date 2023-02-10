@@ -31,7 +31,7 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		return TopicChangeLikeResp{}, errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	if topic.Id != 3 && topic.UserId != userId {
+	if topic.Status != 3 && topic.UserId != userId {
 		return TopicChangeLikeResp{}, errno.ErrCommon
 	}
 
