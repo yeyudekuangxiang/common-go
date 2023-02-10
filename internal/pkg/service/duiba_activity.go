@@ -192,10 +192,14 @@ func (srv DuiBaActivityService) GetActivityH5(activityId string, cid int64) stri
 func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	link := ""
 	checkPhoneParam := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "", "&bind=bind").String()
-	if needShare == entity.DuiBaActivityIsShareYes {
+	checkNeedShareParam := util.Ternary(needShare == entity.DuiBaActivityIsShareYes, "", "&bind=bind").String()
+
+	link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%d&bind=%s&hideShare=%s", activityId, cid, checkPhoneParam, checkNeedShareParam)
+
+	/*if needShare == entity.DuiBaActivityIsShareYes {
 		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
 	} else {
 		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_not_share_v2.html?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
-	}
+	}*/
 	return link
 }
