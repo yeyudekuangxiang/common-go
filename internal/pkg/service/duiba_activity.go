@@ -153,11 +153,13 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	path := ""
 	isCheckPhone := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "true", "false").String()
-	if needShare == entity.DuiBaActivityIsShareYes {
+	isNeedShare := util.Ternary(needShare == entity.DuiBaActivityIsShareYes, "true", "false").String()
+	path = fmt.Sprintf("/pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s&hideShare%s", activityId, cid, isCheckPhone, isNeedShare)
+	/*if needShare == entity.DuiBaActivityIsShareYes {
 		path = fmt.Sprintf("/pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
 	} else {
 		path = fmt.Sprintf("/pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
-	}
+	}*/
 	return path
 }
 
