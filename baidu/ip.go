@@ -31,6 +31,7 @@ func (c *MapClient) LocationIp(ip string) (*LocationIpResult, error) {
 
 type LocationIpResult struct {
 	Address string `json:"address"`
+	Message string `json:"message"`
 	Content struct {
 		AddressDetail struct {
 			Province     string `json:"province"`
