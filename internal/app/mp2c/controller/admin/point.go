@@ -58,7 +58,7 @@ func (ctr PointController) GetPointRecordPageList(ctx *gin.Context) (gin.H, erro
 	}, nil
 }
 func (ctr PointController) GetPointTypeList(ctx *gin.Context) (gin.H, error) {
-	pointResp, err := app.RpcService.PointRpcSrv.GetPointTypeList(ctx, &point.GetPointTypeListReq{})
+	pointResp, err := app.RpcService.PointRpcSrv.GetPointTypeList(ctx.Request.Context(), &point.GetPointTypeListReq{})
 	if err != nil {
 		return nil, err
 	}

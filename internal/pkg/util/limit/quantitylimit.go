@@ -71,7 +71,7 @@ func (h *QuantityLimit) TakeCtx(ctx context.Context, key string, score int) (int
 	cmd := h.limitStore.Eval(ctx, quantityScript, []string{h.keyPrefix + key}, []string{
 		strconv.Itoa(h.quota),               //上限
 		strconv.Itoa(h.calcExpireSeconds()), //限时
-		strconv.Itoa(score),                 //分数
+		strconv.Itoa(score),                 //新增分数
 	})
 	resp, err := cmd.Result()
 

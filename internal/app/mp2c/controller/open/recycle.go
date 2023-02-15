@@ -1,8 +1,11 @@
 package open
 
 import (
+	context2 "context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -316,7 +319,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//校验sign
 	delete(params, "sign")
-	if sign := platform.EncryptByRsa(params, scene.Key, "&", "md5"); sign != form.Sign {
+	if sign := platform.Encrypt(params, scene.Key, "&", "md5"); sign != form.Sign {
 		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
 	}
 
@@ -325,8 +328,12 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
-	userInfo, _ := service.DefaultUserService.GetUserById(uid)
-	if userInfo.ID == 0 {
+	userInfo, b, err := service.DefaultUserService.GetUserByID(uid)
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+
+	if !b {
 		return nil, errno.ErrUserNotFound
 	}
 
@@ -334,6 +341,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 
 	//校验重复订单
 	RecycleService := recycle.NewRecycleService(ctx)
+
 	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
 		return nil, errno.ErrExisting.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
 	}
@@ -405,6 +413,67 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-func (ctr RecycleController) incPointForActivity(params incPointForActivityParams) {
+func (ctr RecycleController) incPointForActivity(ctx context2.Context, params incPointForActivityParams) {
 	//检查活动
+	result, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
+		ActivityCode: params.ActivityCode,
+	})
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, err.Error())
+		return
+	}
+	if !result.GetExist() {
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "未查询到有效活动规则")
+		return
+	}
+	rule := result.GetActivityRule()
+	//查看用户是否参与过活动并且是否已经领取过积分
+	membres, err := app.RpcService.ActivityRpcSrv.Members(ctx, &activity.MembersReq{
+		ActivityId: rule.ActivityId,
+		UserId:     params.UserId,
+	})
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, err.Error())
+		return
+	}
+	if membres.GetMember().GetStatus() == 1 {
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "已经参加过活动并且奖励已经领取")
+		return
+	}
+	//记录次数
+	expired := (rule.GetEndTime() - rule.GetStartTime()) / 1000 //秒级
+	QuantityLimit := limit.NewQuantityLimit(int(expired), int(rule.GetNumLimit()), app.Redis, config.RedisKey.NumberLimit)
+	current, err := QuantityLimit.TakeCtx(ctx, rule.GetCode(), 1)
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 次数记录失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+	}
+	if current == 0 {
+		//达到上限 不再赠送积分
+		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 活动奖励发放次数达到上限", params.OpenId, params.ActivityCode, rule.GetTitle())
+		return
+	}
+	//发放积分
+	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx, &point.IncPointReq{
+		Openid:      params.OpenId,
+		Type:        string(entity.POINT_PLATFORM),
+		BizId:       params.BizId,
+		BizName:     params.BizName,
+		ChangePoint: uint64(rule.NumPoint),
+		Node:        "活动赠送积分",
+	})
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 积分发放失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+		return
+	}
+
+	//更新用户参与记录
+	_, err = app.RpcService.ActivityRpcSrv.MemberUpdate(ctx, &activity.MemberUpdateReq{
+		ActivityId: rule.GetActivityId(),
+		UserId:     params.UserId,
+		Status:     1,
+	})
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新用户活动状态失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+		return
+	}
 }

@@ -139,7 +139,10 @@ type YkcReq struct {
 }
 
 type incPointForActivityParams struct {
-	Point        int64  `json:"point"`
 	OpenId       string `json:"openId"`
-	AdditionInfo string `json:"additionInfo"`
+	UserId       int64  `json:"userId"`
+	ActivityCode string `json:"activityCode"`
+	//幂等字段
+	BizId   string `json:"bizId"`
+	BizName string `json:"bizName"`
 }

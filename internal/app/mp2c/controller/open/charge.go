@@ -296,7 +296,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	//查重
 	var bizId, tp string
 	bizId = form.TradeSeq
-	tp = "ykc"
+	tp = string(entity.Point_YKC)
 	by, err := app.RpcService.PointRpcSrv.FindPointTransaction(ctx.Context, &point2.FindPointTransactionReq{
 		BizId: &bizId,
 		Type:  &tp,
