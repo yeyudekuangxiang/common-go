@@ -111,16 +111,16 @@ type checkMedia struct {
 }
 
 type recycleReq struct {
-	Ch           string `json:"ch" form:"ch" binding:"required"`
-	OrderNo      string `json:"orderNo" form:"orderNo" binding:"required"`
-	MemberId     string `json:"memberId" form:"memberId" binding:"required"`
-	Name         string `json:"name" form:"name" binding:"required"`
-	Category     string `json:"category" form:"category" binding:"required"`
-	Number       string `json:"number" form:"number" binding:"required"`
-	CreateTime   string `json:"createTime"`
-	CompleteTime string `json:"completeTime"`
-	T            string `json:"t"`
-	Sign         string `json:"sign" form:"sign" binding:"required"`
+	Ch           string `json:"ch" form:"ch" binding:"required"`             //渠道号
+	OrderNo      string `json:"orderNo" form:"orderNo" binding:"required"`   //订单号
+	MemberId     string `json:"memberId" form:"memberId" binding:"required"` //用户id
+	Name         string `json:"name" form:"name" binding:"required"`         //物品具体分类
+	Category     string `json:"category" form:"category" binding:"required"` //大分类
+	Number       string `json:"number" form:"number" binding:"required"`     //数量/重量
+	CreateTime   string `json:"createTime"`                                  //创建时间
+	CompleteTime string `json:"completeTime"`                                //完成时间
+	T            string `json:"t"`                                           //时间戳
+	Sign         string `json:"sign" form:"sign" binding:"required"`         //签名
 }
 
 type YkcReq struct {

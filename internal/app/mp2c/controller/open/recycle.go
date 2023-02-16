@@ -388,7 +388,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		OpenId:       userInfo.OpenId,
 		Type:         pt,
 		ChangePoint:  current,
-		BizId:        util.UUID(),
+		BizId:        form.OrderNo,
 		AdditionInfo: fmt.Sprint(params),
 		Note:         scene.Ch + "#" + form.OrderNo,
 	})
@@ -409,14 +409,28 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
 	}
-
+	//活动
+	go func(userId int64, openId, Ch, orderNo, memberId string) {
+		defer func() {
+			if err := recover(); err != nil {
+				app.Logger.Errorf("旧物回收活动失败:%v", err)
+			}
+		}()
+		ctr.incPointForActivity(ctx, incPointForActivityParams{
+			OpenId:       openId,
+			UserId:       userId,
+			ActivityCode: Ch,
+			BizId:        orderNo,
+			BizName:      memberId,
+		})
+	}(userInfo.ID, userInfo.OpenId, scene.Ch, form.OrderNo, form.MemberId)
 	return gin.H{}, nil
 }
 
 func (ctr RecycleController) incPointForActivity(ctx context2.Context, params incPointForActivityParams) {
 	//检查活动
 	result, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
-		ActivityCode: params.ActivityCode,
+		Code: params.ActivityCode,
 	})
 	if err != nil {
 		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, err.Error())
@@ -427,6 +441,9 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 		return
 	}
 	rule := result.GetActivityRule()
+	if rule.GetNumPoint() == 0 {
+		return
+	}
 	//查看用户是否参与过活动并且是否已经领取过积分
 	membres, err := app.RpcService.ActivityRpcSrv.Members(ctx, &activity.MembersReq{
 		ActivityId: rule.ActivityId,
@@ -443,7 +460,7 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 	//记录次数
 	expired := (rule.GetEndTime() - rule.GetStartTime()) / 1000 //秒级
 	QuantityLimit := limit.NewQuantityLimit(int(expired), int(rule.GetNumLimit()), app.Redis, config.RedisKey.NumberLimit)
-	current, err := QuantityLimit.TakeCtx(ctx, rule.GetCode(), 1)
+	current, err := QuantityLimit.TakeCtx(ctx, rule.GetActivityCode(), 1)
 	if err != nil {
 		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 次数记录失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
 	}
@@ -463,9 +480,10 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 	})
 	if err != nil {
 		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 积分发放失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+		//加积分失败次数-1
+		app.Redis.DecrBy(ctx, config.RedisKey.NumberLimit+rule.GetActivityCode(), 1)
 		return
 	}
-
 	//更新用户参与记录
 	_, err = app.RpcService.ActivityRpcSrv.MemberUpdate(ctx, &activity.MemberUpdateReq{
 		ActivityId: rule.GetActivityId(),
@@ -476,4 +494,11 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新用户活动状态失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
 		return
 	}
+	//更新发放次数
+	_, err = app.RpcService.ActivityRpcSrv.IncNumSended(ctx, &activity.IncNumSendedReq{Id: rule.GetId()})
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新发放次数失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+		return
+	}
+	return
 }
