@@ -40,7 +40,7 @@ func GetSign(params map[string]interface{}, key string, joiner string) string {
 	return encrypt.Md5(key + signStr)
 }
 
-func EncryptByRsa(params map[string]interface{}, key string, joiner string, encryptKey string) string {
+func Encrypt(params map[string]interface{}, key string, joiner string, encryptKey string) string {
 	if _, ok := params["sign"]; ok {
 		delete(params, "sign")
 	}

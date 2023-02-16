@@ -58,7 +58,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", form.MemberId, user.OpenId)
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil {
-		app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%s", form.MemberId, user.OpenId, err.Error())
+		app.Logger.Infof("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%s", form.MemberId, user.OpenId, err.Error())
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
 			"lvmiaoUserId": sceneUser.OpenId,
@@ -90,7 +90,8 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 			}
 			return err
 		},
-		retry.Attempts(3),
+		retry.Attempts(1),
+		retry.MaxDelay(3*time.Second),
 	)
 
 	if err != nil {

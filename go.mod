@@ -21,7 +21,7 @@ require (
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/schema v0.0.6
 	github.com/jszwec/csvutil v1.7.1
-	github.com/medivhzhan/weapp/v3 v3.6.13
+	github.com/medivhzhan/weapp/v3 v3.6.15
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/mlogclub/simple v1.1.14
 	github.com/panjf2000/ants/v2 v2.4.8
@@ -39,8 +39,8 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.0.9
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.7.0
+	gitlab.miotech.com/miotech-application/backend/common-go v1.0.13
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.2.2-develop
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.5.0
 	google.golang.org/grpc v1.50.1
@@ -189,6 +189,6 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.7.0 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.7.0
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.2.2-develop => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.2.2-develop
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.9 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.9
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.13 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.13
