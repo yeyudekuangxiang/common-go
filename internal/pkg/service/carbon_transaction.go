@@ -470,6 +470,62 @@ func (srv CarbonTransactionService) AddClassify() {
 	}
 }
 
+func (srv CarbonTransactionService) GetClassifyToday(uid int64) ([]api_types.CarbonTransactionClassifyList, error) {
+	var list = srv.repo.GetListBy(repotypes.GetCarbonTransactionListByDO{
+		Uid:       uid,
+		StartTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
+		EndTime:   time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
+	})
+	dateMap := make(map[entity.CarbonTransactionType]float64)
+	for _, by := range list {
+		dateMap[by.Type] = by.Sum
+	}
+
+	//map转化成切片,方便排序
+	tmpList := make([]KVPair, 0)
+
+	recyling := KVPair{
+		Key: entity.CARBON_RECYCLING,
+	}
+	for k, v := range dateMap {
+		if find := strings.Contains(string(k), "RECYCLING_"); find {
+			recyling.Val = recyling.Val + v
+			continue
+		}
+		tmpList = append(tmpList, KVPair{Key: k, Val: v})
+	}
+
+	if recyling.Val != 0 {
+		tmpList = append(tmpList, recyling)
+	}
+	//排序
+	sort.Slice(tmpList, func(i, j int) bool {
+		return tmpList[i].Val < tmpList[j].Val // 升序
+	})
+	//整理
+	ret := make([]api_types.CarbonTransactionClassifyList, 0)
+	other := 0.00 //其他碳量
+	total := 0.00 //总碳量
+	for i := range tmpList {
+		n := tmpList[len(tmpList)-1-i]
+		total += n.Val
+		if i == 0 {
+			ret = append(ret, api_types.CarbonTransactionClassifyList{
+				Val: n.Val,
+				Key: n.Key.Text(),
+			})
+		} else if i == 1 || i == 2 {
+			ret = append(ret, api_types.CarbonTransactionClassifyList{
+				Val: n.Val,
+				Key: n.Key.Text(),
+			})
+		} else {
+			other += n.Val
+		}
+	}
+	return append(ret, api_types.CarbonTransactionClassifyList{Key: "其他", Val: other}), nil
+}
+
 //每天总结碳量
 func (srv CarbonTransactionService) AddHistory() {
 	list := srv.repo.GetListByDay(repotypes.GetCarbonTransactionListByDO{

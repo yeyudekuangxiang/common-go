@@ -128,6 +128,8 @@ func apiRouter(router *gin.Engine) {
 			questRouter.GET("/subject", apiutil.Format(question.DefaultSubjectController.GetList))
 			questRouter.POST("/create", apiutil.Format(question.DefaultSubjectController.Create))
 			questRouter.POST("/getUserYearCarbon", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbon))
+			questRouter.POST("/getUserYearCarbonV2", apiutil.Format(question.DefaultSubjectController.GetUserYearCarbonV2))
+
 		}
 
 		//消息相关路由
