@@ -7,11 +7,11 @@ package quiz
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"io/ioutil"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/service/quiz"
-	"mio/internal/pkg/util/timeutils"
 	"strings"
 	"time"
 )
@@ -55,7 +55,7 @@ to quickly create a Cobra application.`,
 				continue
 			}
 
-			todayResult, err := quiz.DefaultQuizDailyResultService.CompleteTodayQuiz(item.Openid, timeutils.ToTime(day))
+			todayResult, err := quiz.DefaultQuizDailyResultService.CompleteTodayQuiz(item.Openid, timetool.ToTime(day))
 			if err != nil {
 				dealList = append(dealList, fmt.Sprintf("提交失败 %s %s", item.Openid, item.Tdate))
 				continue

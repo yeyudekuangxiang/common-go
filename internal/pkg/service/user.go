@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/medivhzhan/weapp/v3/phonenumber"
+	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"math/rand"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -20,9 +23,7 @@ import (
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
-	"mio/pkg/wxapp"
 	"strconv"
 	"strings"
 	"time"
@@ -74,7 +75,7 @@ func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.User
 		if err := util2.MapTo(param, &userExtend); err != nil {
 			return nil, err
 		}
-		city, errCity := baidu.IpToCity(param.Ip)
+		city, errCity := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(param.Ip)
 		if errCity != nil {
 			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
 		}
@@ -413,9 +414,9 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 	}
 
 	//获取用户地址  todo 加入队列
-	city, err := baidu.IpToCity(cip)
-	if err != nil {
-		app.Logger.Errorf("BindPhoneByCode ip地址查询失败 %s", err.Error())
+	city, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(cip)
+	if err != nil || !city.IsSuccess() {
+		app.Logger.Errorf("BindPhoneByCode ip地址查询失败 %+v %+v", err, city)
 	} else {
 		userInfo.CityCode = city.Content.AddressDetail.Adcode
 		userInfo.Ip = cip
@@ -613,10 +614,10 @@ func (u UserService) computePendingHistoryStep(history entity.StepHistory, step 
 		}
 	}
 
-	currentStep := util2.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
+	currentStep := commontool.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
 	result := currentStep - lastCheckedSteps + lastCheckedSteps%StepToScoreConvertRatio
 
-	return util2.Ternary(result > 0, result, 0).Int()
+	return commontool.Ternary(result > 0, result, 0).Int()
 }
 
 //比昨天减少

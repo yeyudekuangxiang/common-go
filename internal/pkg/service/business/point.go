@@ -2,6 +2,7 @@ package business
 
 import (
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
@@ -330,7 +331,7 @@ func (srv PointService) trackPointChange(userId int64, value int) {
 		track.DefaultZhuGeService().TrackBusinessPoints(srv_types.TrackBusinessPoints{
 			Uid:        userInfo.Uid,
 			Value:      value,
-			ChangeType: util.Ternary(value > 0, "inc", "dec").String(),
+			ChangeType: commontool.Ternary(value > 0, "inc", "dec").String(),
 			Nickname:   userInfo.Nickname,
 			Username:   userInfo.Realname,
 			Department: department.Title,

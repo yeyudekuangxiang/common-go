@@ -3,12 +3,12 @@ package star_charge
 import (
 	"encoding/json"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
 	"mio/internal/pkg/util/limit"
 	"mio/pkg/errno"
 	"time"
@@ -74,10 +74,10 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 		return "", err
 	}
 	//内容加密
-	encryptData := encrypt.AesEncrypt(string(marshal), srv.DataSecret, srv.DataSecretIV)
+	encryptData := encrypttool.AesEncrypt(string(marshal), srv.DataSecret, srv.DataSecretIV)
 	//签名加密
 	encStr := srv.OperatorID + encryptData + timeStr + "0001"
-	encryptSig := encrypt.HMacMd5(encStr, srv.SigSecret)
+	encryptSig := encrypttool.HMacMd5(encStr, srv.SigSecret)
 	queryParams := getToken{
 		OperatorID: srv.OperatorID,
 		Sig:        encryptSig,
@@ -87,7 +87,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 	}
 
 	url := srv.Domain + "/query_token"
-	body, err := httputil.PostJson(url, queryParams)
+	body, err := httptool.PostJson(url, queryParams)
 	if err != nil {
 		return "", err
 	}
@@ -102,7 +102,7 @@ func (srv StarChargeService) GetAccessToken() (string, error) {
 	}
 	//result.data解密
 	accessResult := starChargeAccessResult{}
-	encryptStr, _ := encrypt.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
+	encryptStr, _ := encrypttool.AesDecrypt(signResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	//存redis
 	app.Redis.Set(srv.ctx, "token:"+srv.OperatorID, accessResult.AccessToken, time.Second*time.Duration(accessResult.TokenAvailableTime))
@@ -119,11 +119,11 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	}
 	//data加密
 	marshal, _ := json.Marshal(r)
-	encryptData := encrypt.AesEncrypt(string(marshal), srv.DataSecret, srv.DataSecretIV)
+	encryptData := encrypttool.AesEncrypt(string(marshal), srv.DataSecret, srv.DataSecretIV)
 	//sign加密
 	timeStr := time.Now().Format("20060102150405")
 	signStr := srv.OperatorID + encryptData + timeStr + "0001"
-	encryptSig := encrypt.HMacMd5(signStr, srv.SigSecret)
+	encryptSig := encrypttool.HMacMd5(signStr, srv.SigSecret)
 	queryParams := queryRequest{
 		Sig:        encryptSig,
 		Data:       encryptData,
@@ -132,8 +132,8 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 		Seq:        "0001",
 	}
 	url := srv.Domain + "/query_delivery_provide"
-	authToken := httputil.HttpWithHeader("Authorization", "Bearer "+token)
-	body, err := httputil.PostJson(url, queryParams, authToken)
+	authToken := httptool.HttpWithHeader("Authorization", "Bearer "+token)
+	body, err := httptool.PostJson(url, queryParams, authToken)
 	fmt.Printf("%s\n", body)
 	if err != nil {
 		return err
@@ -149,7 +149,7 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	}
 	// result.data解密
 	provideResult := starChargeProvideResult{}
-	encryptStr, _ := encrypt.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
+	encryptStr, _ := encrypttool.AesDecrypt(provideResponse.Data, srv.DataSecret, srv.DataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
 	if provideResult.SuccStat != 0 {
 		return errno.ErrCommon.WithMessage(provideResult.FailReasonMsg)

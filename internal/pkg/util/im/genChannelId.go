@@ -1,7 +1,7 @@
 package im
 
 import (
-	"mio/internal/pkg/util/encrypt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"strconv"
 )
 
@@ -11,9 +11,9 @@ func GenChannelIdByFriend(userId, friendId int64) string {
 }
 
 func GenChannelIdByGroup(groupName string) string {
-	return encrypt.Md5(groupName)
+	return encrypttool.Md5(groupName)
 }
 
 func genChannelId(key string) string {
-	return encrypt.Md5(key)
+	return encrypttool.Md5(key)
 }

@@ -11,7 +11,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"mio/internal/pkg/util/timeutils"
 	"time"
 )
 
@@ -101,7 +100,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 	//用户基本信息
 	userPage := make(map[string]interface{})
 	userPage["register_time"] = user.Time.Format("2006-01-02")
-	userPage["register_days"] = fmt.Sprint(timeutils.Now().GetDiffDays(time.Now(), user.Time.Time))
+	userPage["register_days"] = fmt.Sprint(int(time.Now().Sub(user.Time.Time).Hours() / 24))
 	//缓存有数据，走缓存
 	ret := app.Redis.HGet(contextRedis.Background(), config.RedisKey.ReportYear, openId)
 	if ret.Val() != "" {

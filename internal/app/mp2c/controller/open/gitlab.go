@@ -2,9 +2,9 @@ package open
 
 import (
 	"github.com/gin-gonic/gin"
+	glbtyp "gitlab.miotech.com/miotech-application/backend/common-go/gitlab/types"
 	"io/ioutil"
 	"mio/internal/pkg/service/system"
-	glbtyp "mio/pkg/gitlab/types"
 )
 
 var DefaultGitlabController = GitlabController{}

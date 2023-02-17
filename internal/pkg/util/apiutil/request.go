@@ -2,10 +2,10 @@ package apiutil
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/validator"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/business"
 	"mio/pkg/errno"
-	"mio/pkg/validator"
 )
 
 func BindForm(c *gin.Context, data interface{}) error {

@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
 	"mio/config"
@@ -14,10 +17,7 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/duiba"
-	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
-	"mio/pkg/wxapp"
 	"strings"
 	"time"
 )
@@ -77,7 +77,7 @@ func (srv ZeroService) AutoLogin(userId int64, short string) (string, error) {
 	})
 }
 func (srv ZeroService) StoreUrl(url string) (string, error) {
-	key := encrypt.Md5(url)
+	key := encrypttool.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
@@ -107,7 +107,7 @@ func (srv ZeroService) IsNewUser(userId int64, createTime time.Time) (int, error
 	if err != nil && err != redis.Nil {
 		return 0, err
 	}
-	return util.Ternary(result, 1, 0).Int(), nil
+	return commontool.Ternary(result, 1, 0).Int(), nil
 }
 
 type DuiBaActivity struct {
@@ -120,7 +120,7 @@ type DuiBaActivity struct {
 const DUIBAIndex = "https://88543.activity-12.m.duiba.com.cn/chw/visual-editor/skins?id=239935"
 
 func (srv ZeroService) DuiBaStoreUrl(activityId string, url string) (string, error) {
-	key := activityId + "_" + encrypt.Md5(url)
+	key := activityId + "_" + encrypttool.Md5(url)
 	redisKey := fmt.Sprintf(config.RedisKey.DuiBaShortUrl, key)
 	err := app.Redis.Set(context.Background(), redisKey, url, time.Hour*10*24).Err()
 	if err != nil {
@@ -358,7 +358,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		messageService.ExtensionSignTime(userInfo.OpenId)
 	}*/
 
-	isNewUserInt := util.Ternary(isNewUser, 1, 0).Int()
+	isNewUserInt := commontool.Ternary(isNewUser, 1, 0).Int()
 	return duiba.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{
 		UserId:  userId,
 		OpenId:  userInfo.OpenId,

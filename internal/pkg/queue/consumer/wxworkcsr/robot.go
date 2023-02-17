@@ -3,9 +3,9 @@ package wxworkcsr
 import (
 	"encoding/json"
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"log"
 	"mio/internal/pkg/queue/types/message/wxworkmsg"
-	"mio/pkg/wxwork"
 )
 
 func DealWxWorkRobot(delivery rabbitmq.Delivery) rabbitmq.Action {

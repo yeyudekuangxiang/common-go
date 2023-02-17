@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -11,7 +12,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
-	"mio/internal/pkg/util/encrypt"
 	"sort"
 	"strconv"
 	"time"
@@ -40,7 +40,7 @@ func GetSignToJava(params map[string]string) string {
 	for _, v := range slice {
 		signStr += v + "=" + params[v]
 	}
-	return encrypt.Md5(signStr)
+	return encrypttool.Md5(signStr)
 }
 
 //Create 测试用

@@ -6,3 +6,5 @@ docker:
 	cd ./scripts && sh docker-run.sh
 lint:
 	gofmt -w -s -l .
+vet:.
+	go vet ./cmd/mp2c ./cmd/consumer ./cmd/command

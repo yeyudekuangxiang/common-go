@@ -7,13 +7,13 @@ package user
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
-	"mio/pkg/wxapp"
 	"time"
 )
 

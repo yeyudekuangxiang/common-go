@@ -2,6 +2,7 @@ package quiz
 
 import (
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -11,7 +12,6 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"time"
 )
@@ -31,7 +31,7 @@ func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestion, err
 
 // Availability 是否可以答题 true可以 false不可以
 func (srv QuizService) Availability(openid string) (bool, error) {
-	isAnsweredToday, err := DefaultQuizDailyResultService.IsAnsweredToday(openid, timeutils.NowDate())
+	isAnsweredToday, err := DefaultQuizDailyResultService.IsAnsweredToday(openid, timetool.NowDate())
 	if err != nil {
 		return false, err
 	}
@@ -44,7 +44,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 	}
 	defer util.DefaultLock.UnLock("QuizAnswerQuestion" + openid)
 
-	if err := DefaultQuizSingleRecordService.IsAnswered(openid, questionId, timeutils.NowDate()); err != nil {
+	if err := DefaultQuizSingleRecordService.IsAnswered(openid, questionId, timetool.NowDate()); err != nil {
 		return nil, err
 	}
 
@@ -85,7 +85,7 @@ func (srv QuizService) Submit(openId string, uid int64) (int, error) {
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
 
-	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timeutils.Now())
+	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timetool.Now())
 	if err != nil {
 		return 0, err
 	}
@@ -126,7 +126,7 @@ func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, erro
 	return point, err
 }
 func (srv QuizService) DailyResult(openId string) (*srv_types.QuizDailyResult, error) {
-	result, err := DefaultQuizDailyResultService.FindTodayResult(openId, timeutils.NowDate())
+	result, err := DefaultQuizDailyResultService.FindTodayResult(openId, timetool.NowDate())
 	if err != nil {
 		return nil, err
 	}

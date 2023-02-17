@@ -1,9 +1,9 @@
 package duiba
 
 import (
+	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
 	rduiba "mio/internal/pkg/repository/duiba"
 	"mio/internal/pkg/util"
-	duibaApi "mio/pkg/duiba/api/model"
 )
 import eduiba "mio/internal/pkg/model/entity/duiba"
 

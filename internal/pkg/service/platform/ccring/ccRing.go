@@ -2,8 +2,8 @@ package ccring
 
 import (
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/util/httputil"
 )
 
 type ccRingService struct {
@@ -73,8 +73,8 @@ func WithCCRingQua(qua string) CcRingOptions {
 //回调ccring
 func (srv ccRingService) CallBack() (string, error) {
 	//回调
-	authToken := httputil.HttpWithHeader("Authorization", srv.Authorization)
-	body, err := httputil.PostJson(srv.Domain+srv.Url, srv.Option, authToken)
+	authToken := httptool.HttpWithHeader("Authorization", srv.Authorization)
+	body, err := httptool.PostJson(srv.Domain+srv.Url, srv.Option, authToken)
 	if err != nil {
 		app.Logger.Errorf("回调光环错误: post error %s", err.Error())
 		return fmt.Sprintf("%s", body), err

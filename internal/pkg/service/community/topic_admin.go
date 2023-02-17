@@ -1,6 +1,7 @@
 package community
 
 import (
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxoa"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -9,7 +10,6 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/community"
 	"mio/pkg/errno"
-	"mio/pkg/wxoa"
 	"strconv"
 	"strings"
 	"time"

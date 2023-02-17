@@ -8,6 +8,8 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-redis/redis/v8"
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxoa"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpkclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
@@ -16,8 +18,6 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/userclient"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"mio/pkg/wxapp"
-	"mio/pkg/wxoa"
 	"reflect"
 )
 

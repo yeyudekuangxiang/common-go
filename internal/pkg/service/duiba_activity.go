@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -152,8 +153,8 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 // 返回值 pages/duiba_v2/duiba/duiba-share/index?activityId=001&cid=12&bind=bind
 func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	path := ""
-	isCheckPhone := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "true", "false").String()
-	isNeedShare := util.Ternary(needShare == entity.DuiBaActivityIsShareYes, "true", "false").String()
+	isCheckPhone := commontool.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "true", "false").String()
+	isNeedShare := commontool.Ternary(needShare == entity.DuiBaActivityIsShareYes, "true", "false").String()
 	path = fmt.Sprintf("/pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s&hideShare=%s", activityId, cid, isCheckPhone, isNeedShare)
 	/*if needShare == entity.DuiBaActivityIsShareYes {
 		path = fmt.Sprintf("/pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
@@ -191,7 +192,7 @@ func (srv DuiBaActivityService) GetActivityH5(activityId string, cid int64) stri
 // return https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=index&cid=12&bind=true
 func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
 	link := ""
-	checkPhoneParam := util.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "", "&bind=bind").String()
+	checkPhoneParam := commontool.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "", "&bind=bind").String()
 	if needShare == entity.DuiBaActivityIsShareYes {
 		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)
 	} else {

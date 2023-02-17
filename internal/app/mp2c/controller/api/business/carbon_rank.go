@@ -2,9 +2,9 @@ package business
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/service/business"
-	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
 )
@@ -70,7 +70,7 @@ func (CarbonRankController) GetDepartmentRankList(ctx *gin.Context) (gin.H, erro
 	myDepartment, err := business.DefaultDepartmentService.GetBusinessDepartmentById(user.BDepartmentId)
 	myDepartmentRank, err := business.DefaultCarbonRankService.FindDepartmentRank(business.FindDepartmentRankParam{
 		UserId:       user.ID,
-		DepartmentId: util.Ternary(myDepartment.TopId > 0, myDepartment.TopId, myDepartment.ID).Int(),
+		DepartmentId: commontool.Ternary(myDepartment.TopId > 0, myDepartment.TopId, myDepartment.ID).Int(),
 		DateType:     ebusiness.RankDateType(form.DateType),
 	})
 	if err != nil {

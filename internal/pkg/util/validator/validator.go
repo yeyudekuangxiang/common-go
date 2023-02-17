@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"mio/pkg/validator"
+	"gitlab.miotech.com/miotech-application/backend/common-go/validator"
 )
 
 func ValidatorStruct(v interface{}) error {

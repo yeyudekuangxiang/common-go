@@ -3,10 +3,10 @@ package open
 import (
 	"encoding/json"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
-	"mio/internal/pkg/util/encrypt"
 	"testing"
 	"time"
 )
@@ -55,7 +55,7 @@ func TestMakeSign(t *testing.T) {
 	fmt.Println(jsonData)
 
 	verifyData := rand1 + appId + jsonData + appSecret + rand2
-	md5Data := encrypt.Md5(verifyData)
+	md5Data := encrypttool.Md5(verifyData)
 	sign := rand1 + string([]rune(md5Data)[7:21]) + rand2
 	fmt.Println(sign)
 

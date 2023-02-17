@@ -2,11 +2,11 @@ package service
 
 import (
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"time"
 )
@@ -51,7 +51,7 @@ func (srv CheckinService) GetCheckInfo(openId string) (*CheckinInfo, error) {
 	return &checkinInfo, nil
 }
 func (srv CheckinService) isCheckToday(lastCheckTime time.Time) bool {
-	return timeutils.StartOfDay(lastCheckTime).Equal(timeutils.StartOfDay(time.Now()))
+	return timetool.StartOfDay(lastCheckTime).Equal(timetool.StartOfDay(time.Now()))
 }
 func (srv CheckinService) nextCheckinDay(lastCheckNum int) int {
 	return lastCheckNum%7 + 1

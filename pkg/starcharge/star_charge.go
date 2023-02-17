@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
 	"time"
 )
 
@@ -85,7 +85,7 @@ func (s StarCharge) GetAccessToken() (string, error) {
 		Seq:       "0001",
 	}
 	url := s.domain + "/query_token"
-	body, err := httputil.PostJson(url, getTokenRequestParams)
+	body, err := httptool.PostJson(url, getTokenRequestParams)
 	if err != nil {
 		return "", err
 	}
@@ -117,7 +117,7 @@ func (s StarCharge) decodeResponse(body []byte) (starChargeResponse, error) {
 
 func (s StarCharge) decodeData(data string) (starChargeGetTokenResponse, error) {
 	accessResult := starChargeGetTokenResponse{}
-	encryptStr, _ := encrypt.AesDecrypt(data, s.dataSecret, s.dataSecretIV)
+	encryptStr, _ := encrypttool.AesDecrypt(data, s.dataSecret, s.dataSecretIV)
 	_ = json.Unmarshal([]byte(encryptStr), &accessResult)
 	if accessResult.SucStat == 1 {
 		return accessResult, errors.New("获取token错误")
@@ -132,11 +132,11 @@ func (s StarCharge) encodeData() (string, error) {
 		return "", err
 	}
 	//内容加密
-	return encrypt.AesEncrypt(string(marshal), s.dataSecret, s.dataSecretIV), nil
+	return encrypttool.AesEncrypt(string(marshal), s.dataSecret, s.dataSecretIV), nil
 }
 
 func (s StarCharge) encodeSign(encryptData, timeStr string) string {
 	//签名加密
 	encStr := s.OperatorID + encryptData + timeStr + "0001"
-	return encrypt.HMacMd5(encStr, s.sigSecret)
+	return encrypttool.HMacMd5(encStr, s.sigSecret)
 }

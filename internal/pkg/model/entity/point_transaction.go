@@ -2,8 +2,8 @@ package entity
 
 import (
 	"database/sql"
+	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
 	"mio/internal/pkg/model"
-	duibaApi "mio/pkg/duiba/api/model"
 )
 
 type PointTransactionType string

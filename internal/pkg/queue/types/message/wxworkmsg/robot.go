@@ -1,6 +1,6 @@
 package wxworkmsg
 
-import "mio/pkg/wxwork"
+import "gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 
 type RobotMessage struct {
 	Key     string

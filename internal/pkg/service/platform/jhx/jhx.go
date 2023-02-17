@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"
 	"mio/internal/pkg/core/app"
@@ -12,7 +13,6 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/httputil"
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
 	"strconv"
@@ -101,7 +101,7 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 	commonParams["sign"] = strings.ToUpper(platformUtil.GetSign(commonParams, "", "&"))
 
 	url := srv.option.Domain + "/busticket/ticket_create"
-	body, err := httputil.PostJson(url, commonParams)
+	body, err := httptool.PostJson(url, commonParams)
 
 	fmt.Printf("ticket_create response body: %s\n", body)
 	if err != nil {
@@ -216,7 +216,7 @@ func (srv Service) TicketStatus(tradeno string) (*JhxTicketStatusResponse, error
 
 	url := srv.option.Domain + "/busticket/ticket_status"
 
-	body, err := httputil.PostJson(url, commonParams)
+	body, err := httptool.PostJson(url, commonParams)
 	fmt.Printf("%s\n", body)
 	if err != nil {
 		return &JhxTicketStatusResponse{}, err
@@ -245,7 +245,7 @@ func (srv Service) BindSuccess(params map[string]interface{}) error {
 	commonParams["mobile"] = params["mobile"]
 	commonParams["sign"] = strings.ToUpper(platformUtil.GetSign(commonParams, "", "&"))
 	url := srv.option.Domain + "/busticket/bind_success"
-	body, err := httputil.PostJson(url, commonParams)
+	body, err := httptool.PostJson(url, commonParams)
 	fmt.Printf("bind_success response body: %s\n", body)
 	if err != nil {
 		return err
