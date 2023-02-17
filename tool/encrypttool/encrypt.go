@@ -7,6 +7,7 @@ import (
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -93,4 +94,12 @@ func HMacSha1(orig, key string) string {
 	h := hmac.New(sha1.New, []byte(key))
 	h.Write([]byte(orig))
 	return hex.EncodeToString(h.Sum([]byte("")))
+}
+
+func Sha256Byte(data []byte) string {
+	encrypt := sha256.Sum256(data)
+	return hex.EncodeToString(encrypt[:])
+}
+func Sha256(str string) string {
+	return Sha256Byte([]byte(str))
 }

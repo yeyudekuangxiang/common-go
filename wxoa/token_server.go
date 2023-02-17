@@ -17,7 +17,7 @@ type AccessTokenServer struct {
 }
 
 func (srv *AccessTokenServer) cacheKey() string {
-	return srv.Prefix + srv.Secret
+	return srv.Prefix + srv.AppId
 }
 func (srv *AccessTokenServer) getToken() (*AccessToken, error) {
 	url := "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + srv.AppId +

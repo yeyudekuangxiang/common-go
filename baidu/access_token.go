@@ -12,15 +12,43 @@ import (
 const TokenUrl = "https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=%s&client_secret=%s"
 
 type AccessTokenConfig struct {
+	Cache     ICache
+	AppKey    string
+	AppSecret string
+}
+
+func NewAccessToken(config AccessTokenConfig) *AccessToken {
+	return &AccessToken{
+		cache:     config.Cache,
+		AppKey:    config.AppKey,
+		AppSecret: config.AppSecret,
+	}
+}
+
+type RedisAccessTokenConfig struct {
 	RedisClient *redis.Client
 	Prefix      string
 	AppKey      string
 	AppSecret   string
 }
 
-func NewAccessToken(config AccessTokenConfig) *AccessToken {
+func NewRedisAccessToken(config RedisAccessTokenConfig) *AccessToken {
 	return &AccessToken{
-		cache:     NewRedisCache(config.RedisClient, config.Prefix+"cache:"),
+		cache:     NewRedisCache(config.RedisClient, config.Prefix+config.AppKey+":"),
+		AppKey:    config.AppKey,
+		AppSecret: config.AppSecret,
+	}
+}
+
+type MemoryAccessTokenConfig struct {
+	Prefix    string
+	AppKey    string
+	AppSecret string
+}
+
+func NewMemoryAccessToken(config MemoryAccessTokenConfig) *AccessToken {
+	return &AccessToken{
+		cache:     NewMemoryCache(config.Prefix + config.AppKey + ":"),
 		AppKey:    config.AppKey,
 		AppSecret: config.AppSecret,
 	}

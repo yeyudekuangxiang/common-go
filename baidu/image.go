@@ -17,17 +17,9 @@ type ImageClient struct {
 type WebImageParam struct {
 	ImageUrl string
 }
-type ImageRespCode struct {
-	ErrorCode int    `json:"error_code"`
-	ErrorMsg  string `json:"error_msg"`
-}
-
-func (result ImageRespCode) IsSuccess() bool {
-	return result.ErrorCode == 0
-}
 
 type WebImageResult struct {
-	ImageRespCode
+	CommonRespCode
 	LogId          int64 `json:"log_id"`
 	WordsResultNum int   `json:"words_result_num"`
 	WordsResult    []struct {
@@ -60,7 +52,7 @@ type AccurateBasicParam struct {
 }
 
 type AccurateBasicResult struct {
-	ImageRespCode
+	CommonRespCode
 	LogId          int64 `json:"log_id"`
 	WordsResultNum int   `json:"words_result_num"`
 	WordsResult    []struct {
