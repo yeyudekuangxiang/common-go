@@ -20,6 +20,9 @@ var LogTopicOperation = logx.Field("__topic__", "operation_log")
 // LogTopicAccess 访问日志
 var LogTopicAccess = logx.Field("__topic__", "access_log")
 
+// LogTopicDatabase 数据库日志
+var LogTopicDatabase = logx.Field("__topic__", "database")
+
 func LogCaller(skip int) logx.LogField {
 	_, file, line, _ := runtime.Caller(skip)
 	return logx.Field("__caller", fmt.Sprintf("file:%s:%d", file, line))

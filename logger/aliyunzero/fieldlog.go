@@ -29,9 +29,9 @@ func (f FiledLog) Errorv(i interface{}) {
 	f.Errorw(fmt.Sprintf("%v", i))
 }
 
-func (f FiledLog) Errorw(s string, field ...logx.LogField) {
-	field = append(field, f.fields...)
-	f.Logger.Errorw(s, field...)
+func (f FiledLog) Errorw(s string, fields ...logx.LogField) {
+	fields = append(fields, f.fields...)
+	f.Logger.Errorw(s, fields...)
 }
 
 func (f FiledLog) Info(i ...interface{}) {
@@ -46,9 +46,9 @@ func (f FiledLog) Infov(i interface{}) {
 	f.Infow(fmt.Sprintf("%v", i))
 }
 
-func (f FiledLog) Infow(s string, field ...logx.LogField) {
-	field = append(field, f.fields...)
-	f.Logger.Infow(s, field...)
+func (f FiledLog) Infow(s string, fields ...logx.LogField) {
+	fields = append(fields, f.fields...)
+	f.Logger.Infow(s, fields...)
 }
 
 func (f FiledLog) Slow(i ...interface{}) {
@@ -63,15 +63,21 @@ func (f FiledLog) Slowv(i interface{}) {
 	f.Sloww(fmt.Sprintf("%v", i))
 }
 
-func (f FiledLog) Sloww(s string, field ...logx.LogField) {
-	field = append(field, f.fields...)
-	f.Logger.Sloww(s, field...)
+func (f FiledLog) Sloww(s string, fields ...logx.LogField) {
+	fields = append(fields, f.fields...)
+	f.Logger.Sloww(s, fields...)
 }
 
 func (f FiledLog) WithContext(ctx context.Context) logx.Logger {
-	return f.Logger.WithContext(ctx)
+	return &FiledLog{
+		Logger: f.Logger.WithContext(ctx),
+		fields: f.fields,
+	}
 }
 
 func (f FiledLog) WithDuration(duration time.Duration) logx.Logger {
-	return f.Logger.WithDuration(duration)
+	return &FiledLog{
+		Logger: f.Logger.WithDuration(duration),
+		fields: f.fields,
+	}
 }
