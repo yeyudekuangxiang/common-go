@@ -42,13 +42,12 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 		IsEssence:     form.IsEssence,
 		IsPartners:    form.IsPartners,
 		Position:      form.Position,
-		PushStartTime: form.PushEndTime,
+		PushStartTime: form.PushStartTime,
 		PushEndTime:   form.PushEndTime,
 		Type:          form.Type,
 		ActivityType:  form.ActivityType,
-
-		Offset: form.Offset(),
-		Limit:  form.Limit(),
+		Offset:        form.Offset(),
+		Limit:         form.Limit(),
 	}
 
 	tagIds := strings.Split(form.TagId, ",")
