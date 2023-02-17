@@ -4,6 +4,7 @@ import (
 	context2 "context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/config"
@@ -410,20 +411,22 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		app.Logger.Errorf(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
 	}
 	//活动
-	go func(userId int64, openId, Ch, orderNo, memberId string) {
+	go func(userId int64, openId, Ch, orderNo, memberId, orderCreateTime, orderCompleteTime string) {
 		defer func() {
 			if err := recover(); err != nil {
 				app.Logger.Errorf("旧物回收活动失败:%v", err)
 			}
 		}()
 		ctr.incPointForActivity(ctx, incPointForActivityParams{
-			OpenId:       openId,
-			UserId:       userId,
-			ActivityCode: Ch,
-			BizId:        orderNo,
-			BizName:      memberId,
+			OpenId:            openId,
+			UserId:            userId,
+			ActivityCode:      Ch,
+			BizId:             orderNo,
+			BizName:           memberId,
+			OrderCompleteTime: orderCompleteTime,
+			OrderCreateTime:   orderCreateTime,
 		})
-	}(userInfo.ID, userInfo.OpenId, scene.Ch, form.OrderNo, form.MemberId)
+	}(userInfo.ID, userInfo.OpenId, scene.Ch, form.OrderNo, form.MemberId, form.CreateTime, form.CompleteTime)
 	return gin.H{}, nil
 }
 
@@ -455,6 +458,16 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 	}
 	if membres.GetMember().GetStatus() == 1 {
 		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "已经参加过活动并且奖励已经领取")
+		return
+	}
+	//三天限制
+	orderCreateTime, err := time.ParseInLocation(timetool.FullDateFormat, params.OrderCreateTime, time.Local)
+	if err != nil {
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "解析时间错误")
+		return
+	}
+	if orderCreateTime.Sub(time.UnixMilli(membres.GetMember().GetCreatedAt())).Hours() > 72.0 {
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "超出3天时间限制")
 		return
 	}
 	//记录次数
