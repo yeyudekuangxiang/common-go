@@ -860,17 +860,18 @@ func (srv TopicService) UpdateAuthor(userId, passiveUserId int64) error {
 	return app.DB.Model(&entity.Topic{}).Where("topic.user_id = ?", passiveUserId).Update("user_id", userId).Error
 }
 
-func (srv TopicService) SetWeekTopic() error {
+func (srv TopicService) SetWeekTopic() {
 	// 取导入的文章，更新文章的created_time字段值为现在，并且加精华。
 	// 限制条件为 每个人取一个 一共50篇
 	// 导入的文章的is_essence字段都为0, 更新后为1。筛选该字段为0的导入文章即可
 	topics, err := srv.topicModel.GetImportTopic()
 	if err != nil {
-		return err
+		app.Logger.Errorf("每周设置导入贴失败:SetWeekTopic:%s", err.Error())
+		return
 	}
 
 	if len(topics) == 0 {
-		return nil
+		return
 	}
 
 	uMapToTopic := make(map[int64]struct{}, 0) // 每个用户一篇文章
@@ -892,11 +893,9 @@ func (srv TopicService) SetWeekTopic() error {
 	upColumns := map[string]interface{}{"created_at": time.Now(), "is_essence": 1}
 	err = srv.topicModel.UpdatesColumn(cond, upColumns)
 	if err != nil {
-		return err
+		app.Logger.Errorf("每周设置导入贴失败:SetWeekTopic:%s", err.Error())
 	}
-
-	fmt.Printf("uSliceToTopic:%v", uSliceToTopic)
-	return nil
+	return
 }
 
 func (srv TopicService) delTopicForRedis(topic entity.Topic) {
