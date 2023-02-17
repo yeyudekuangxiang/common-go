@@ -161,7 +161,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//发券
-
 	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
 	return gin.H{}, nil
 }

@@ -2,10 +2,9 @@ package service
 
 import (
 	"fmt"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/common/tool/encrypt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	util2 "mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"sort"
 	"strings"
@@ -32,7 +31,7 @@ func (srv BdSceneService) SceneToCarbonType(ch string) entity.CarbonTransactionT
 func (srv BdSceneService) CheckSign(mobile string, outTradeNo string, total string, sign string, scene *entity.BdScene) bool {
 	str := scene.Ch + "#" + mobile + "#" + outTradeNo + "#" + total + "#" + scene.Key
 	fmt.Println("localSignStr", str)
-	localSign := util2.Md5(str)
+	localSign := encrypttool.Md5(str)
 	fmt.Println("CheckSign", localSign, sign)
 	return localSign == sign
 }
@@ -48,8 +47,7 @@ func (srv BdSceneService) CheckPreSign(key, sign string, params map[string]strin
 		signStr += v + "=" + params[v] + "&"
 	}
 	signStr = strings.TrimRight(signStr, "&")
-	fmt.Println(encrypt.Md5(key + signStr))
-	return encrypt.Md5(key+signStr) == sign
+	return encrypttool.Md5(key+signStr) == sign
 }
 
 func (srv BdSceneService) CheckWhiteList(ip, ch string) error {
