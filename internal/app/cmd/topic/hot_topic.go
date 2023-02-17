@@ -6,7 +6,6 @@ package topic
 
 import (
 	"github.com/spf13/cobra"
-	"log"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/service/community"
@@ -36,11 +35,7 @@ to quickly create a Cobra application.`,
 		//if configPath == "" {
 		//	log.Fatal("config path is required")
 		//}
-
-		err := community.NewTopicService(context.NewMioContext()).SetWeekTopic()
-		if err != nil {
-			log.Fatal(err)
-		}
+		community.NewTopicService(context.NewMioContext()).SetWeekTopic()
 	},
 }
 
