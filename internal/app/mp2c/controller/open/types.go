@@ -145,4 +145,7 @@ type incPointForActivityParams struct {
 	//幂等字段
 	BizId   string `json:"bizId"`
 	BizName string `json:"bizName"`
+	//订单时间
+	OrderCreateTime   string `json:"orderCreateTime"`
+	OrderCompleteTime string `json:"orderCompleteTime"`
 }

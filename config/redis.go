@@ -70,9 +70,9 @@ var RedisKey = redisKey{
 	MessageLimitTopicShow:    "mp2c:message_limit_topic_show:%s",     //订阅消息每天弹出限制 帖子
 	TopicRank:                "mp2c:topic:rank",
 	GitlabHook:               "mp2c:gitlab:hook:",
-	PointDayLimit:            "mp2c:point_limit:day:",
-	PointMonthLimit:          "mp2c:point_limit:month:",
-	NumberLimit:              "mp2c:point_limit:number:",
+	PointDayLimit:            "mp2c:point_limit:day",
+	PointMonthLimit:          "mp2c:point_limit:month",
+	NumberLimit:              "mp2c:point_limit:number",
 	MessageLimitCarbonPkShow: "mp2c:message_limit_carbon_pk_show:%s", //订阅消息每天弹出限制 打卡挑战
 	CarbonPkRemindUser:       "mp2c:carbon_pk_remind_user",           //提醒用户池
 	ReportYear:               "mp2c:report_year_v1",                  //年终报告
