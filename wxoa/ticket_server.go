@@ -18,7 +18,7 @@ type TicketServer struct {
 }
 
 func (srv *TicketServer) cacheKey() string {
-	return fmt.Sprintf(srv.Prefix, srv.AppId)
+	return srv.Prefix + srv.AppId
 }
 func (srv *TicketServer) getTicket() (*Ticket, error) {
 	accessToken, err := srv.TokenServer.Token()
