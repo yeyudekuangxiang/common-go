@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
 	point2 "gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -190,27 +191,34 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 
 //调用星星充电发券
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
-	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 {
-		fmt.Println("星星充电 发券start")
-		startTime, _ := time.ParseInLocation("2006-01-02", "2022-12-24", time.Local)
-		endTime, _ := time.ParseInLocation("2006-01-02", "2023-01-01", time.Local)
-		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
+	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 && platformKey == "lvmiao" {
+		rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx.Context, &activity.ActiveRuleReq{
+			Code: platformKey,
+		})
+		if err != nil {
+			app.Logger.Info(fmt.Printf("星星充电 openId:[%s]发券失败:%s\n", userInfo.OpenId, err.Error()))
+			return
+		}
+		if !rule.GetExist() {
+			app.Logger.Info(fmt.Printf("星星充电 openId:[%s]发券失败:%s\n", userInfo.OpenId, "无有效规则"))
+			return
+		}
+		startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
+		endTime := time.UnixMilli(rule.GetActivityRule().GetEndTime())
+		if time.Now().After(startTime) && time.Now().Before(endTime) {
 			starChargeService := star_charge.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
-				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
 			//限制一次
 			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, endTime); err != nil {
-				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
-				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
