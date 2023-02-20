@@ -60,6 +60,8 @@ type AddUserCarbonInfoV2DTO struct {
 	CarbonCompletion    []CarbonCompletion                        `json:"carbonCompletion"`
 	CarbonGroup         []CarbonGroup                             `json:"carbonGroup"`
 	TodayCarbonClassify []api_types.CarbonTransactionClassifyList `json:"todayCarbonClassify"`
+	CarbonCountry       float64                                   `json:"carbonCountry"`
+	CarbonGlobal        float64                                   `json:"carbonGlobal"`
 }
 
 type CarbonGroup struct {
