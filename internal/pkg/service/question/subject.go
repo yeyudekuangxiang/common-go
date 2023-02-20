@@ -280,39 +280,41 @@ func (srv SubjectService) GetUserQuestionV2(dto srv_types.GetQuestionUserDTO) (*
 	carbonDayFloat, _ := carbonDay.Float64()
 
 	return &srv_types.AddUserCarbonInfoV2DTO{
-		User: srv_types.User{
-			Nickname: dto.Nickname,
-			Uid:      dto.UserId,
-		},
-		CarbonCompletion: carbonCompletion,
+		CarbonYear:     util.CarbonToRate(carbon),         //总碳量
+		CarbonToday:    util.CarbonToRate(carbonToday),    //今日碳量
+		CarbonDay:      util.CarbonToRate(carbonDayFloat), //日均排放
+		CarbonClassify: userCarbonClassify,                //用户碳量分类汇总
 		UserGroup: srv_types.UserGroup{
 			Group:     userGroup.Group,
 			GroupTips: userGroup.GroupTips,
 			Level:     userGroup.Level,
 		}, //属于用户群里
-		CarbonYear:          util.CarbonToRate(carbon),         //总碳量
-		CarbonToday:         util.CarbonToRate(carbonToday),    //今日碳量
-		CarbonClassify:      userCarbonClassify,                //用户碳量分类汇总
-		CarbonDay:           util.CarbonToRate(carbonDayFloat), //日均排放
+		User: srv_types.User{
+			Nickname: dto.Nickname,
+			Uid:      dto.UserId,
+		},
+		CarbonCompletion:    carbonCompletion,
 		CarbonGroup:         srv.group(),
 		TodayCarbonClassify: todayCarbonClassify,
+		CarbonCountry:       6800,
+		CarbonGlobal:        4400,
 	}, nil
 }
 
 func (srv SubjectService) group() []srv_types.CarbonGroup {
 	carbonGroup := make([]srv_types.CarbonGroup, 0)
 	carbonGroup = append(carbonGroup, srv_types.CarbonGroup{
-		Key:   "低排放",
-		Value: 16000,
+		Key:   "绿色",
+		Value: 2000,
 	}, srv_types.CarbonGroup{
-		Key:   "全球人均",
-		Value: 8000,
+		Key:   "蓝色",
+		Value: 6000,
 	}, srv_types.CarbonGroup{
-		Key:   "全国人均",
-		Value: 4000,
+		Key:   "黄色",
+		Value: 12000,
 	}, srv_types.CarbonGroup{
-		Key:   "低排放",
-		Value: 1500,
+		Key:   "红色",
+		Value: 24000,
 	})
 	return carbonGroup
 }

@@ -177,7 +177,7 @@ func (srv MessageService) SendMessageToSignUser() {
 
 func (srv MessageService) SendMessageToCarbonPk() {
 	if !util.DefaultLock.Lock("sendMessageToCarbonPk", time.Minute*5) {
-		//return
+		return
 	}
 	defer util.DefaultLock.UnLock("sendMessageToCarbonPk")
 	redisKey := config.RedisKey.CarbonPkRemindUser
@@ -187,7 +187,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 		Name:    "打卡提醒",
 		Date:    "",
 		Content: "快来完成今天打卡吧！惊喜离你越来越近了哦",
-		Tip:     "",
+		Tip:     "低碳生活挑战，一起每天打卡吧",
 	}
 
 	for s := range list.Val() {
@@ -207,19 +207,18 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			UserId: uid,
 		})
 		if err != nil {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,获取打卡天数失败，模版%s，uid%s，错误信息%s", template.TemplateId(), uid, err.Error())
+			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,获取打卡天数失败，模版%v，uid%d，错误信息%v", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		template.Date = strconv.FormatInt(days.Total, 10) + "天"
-
 		openid := getUserById.UserInfo.Openid
 		var ret *request.CommonError
 		err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 			ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
-				ToUser:           openid,
+				ToUser:           openid, //oy_BA5IGl1JgkJKbD14wq_-Yorqw
 				TemplateID:       template.TemplateId(),
-				Page:             "", //页面跳转
-				MiniprogramState: subscribemessage.MiniprogramStateDeveloper,
+				Page:             "/pages/activity/punch/start/index", //页面跳转
+				MiniprogramState: subscribemessage.MiniprogramStateFormal,
 				Data:             template.ToData(),
 			})
 			if err != nil {
