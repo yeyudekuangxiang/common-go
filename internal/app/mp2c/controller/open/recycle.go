@@ -4,7 +4,6 @@ import (
 	context2 "context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/config"
@@ -461,12 +460,11 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 		return
 	}
 	//三天限制
-	orderCreateTime, err := time.ParseInLocation(timetool.FullDateFormat, params.OrderCreateTime, time.Local)
+	parseInt, err := strconv.ParseInt(params.OrderCreateTime, 10, 64)
 	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "解析时间错误")
-		return
+		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "时间解析失败")
 	}
-	if orderCreateTime.Sub(time.UnixMilli(membres.GetMember().GetCreatedAt())).Hours() > 72.0 {
+	if time.UnixMilli(parseInt).Sub(time.UnixMilli(membres.GetMember().GetCreatedAt())).Hours() > 72.0 {
 		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "超出3天时间限制")
 		return
 	}
