@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -15,8 +16,6 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/timeutils"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"sort"
 	"strconv"
@@ -118,9 +117,9 @@ func (srv CarbonTransactionService) PointToCarbon() {
 func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (float64, error) {
 	//获取ip地址
 	cityCode := ""
-	cityInfo, cityErr := baidu.IpToCity(dto.Ip)
-	if cityErr == nil {
-		cityCode = cityInfo.Content.AddressDetail.Adcode
+	cityInfoResp, cityErr := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(dto.Ip)
+	if cityErr == nil && cityInfoResp.IsSuccess() {
+		cityCode = cityInfoResp.Content.AddressDetail.Adcode
 	}
 	//查询场景配置
 	scene := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: dto.Type})
@@ -407,7 +406,7 @@ func (srv CarbonTransactionService) Info(dto api_types.GetCarbonTransactionInfoD
 	TreeNum, TreeNumMsg := util.CarbonToTree(carbonInfo.Carbon)
 	carbonToday := srv.GetTodayCarbon(dto.UserId) //今日碳量
 	info := api_types.CarbonTransactionInfo{
-		RegisterDayNum: timeutils.Now().GetDiffDays(time.Now(), user.Time.Time),
+		RegisterDayNum: int(time.Now().Sub(user.Time.Time).Hours() / 24),
 		Carbon:         util.CarbonToRate(carbonInfo.Carbon),
 		CarbonToday:    util.CarbonToRate(carbonToday),
 		TreeNum:        TreeNum,

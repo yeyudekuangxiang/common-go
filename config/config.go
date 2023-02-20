@@ -29,9 +29,13 @@ var Config = app{
 	TokenCenterRpc: rpcSetting{},
 	ActivityRpc:    rpcSetting{},
 	//args
-	MqArgs: mqArgs{},
+	MqArgs:   mqArgs{},
+	BaiDuMap: baiDuMap{},
 }
 
+type baiDuMap struct {
+	AccessKey string
+}
 type app struct {
 	App              appSetting              `ini:"app"`
 	Http             httpSetting             `ini:"http"`
@@ -65,6 +69,7 @@ type app struct {
 	PointRpc            rpcSetting `ini:"pointRpc"`
 	UserRpc             rpcSetting `ini:"userRpc"`
 	ActivityCarbonPkRpc rpcSetting `ini:"activityCarbonPkRpc"`
+	BaiDuMap            baiDuMap   `ini:"baiduMap"`
 }
 
 type appSetting struct {

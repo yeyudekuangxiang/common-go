@@ -3,6 +3,7 @@ package activity
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
@@ -167,7 +168,7 @@ func (srv GMService) AddInvitationRecord(userId, InviteeUserId int64) error {
 		record = activity.GMInvitationRecord{
 			UserId:           userId,
 			InviteeUserId:    InviteeUserId,
-			InviteeIsNewUser: util.Ternary(isNewUser, 1, 2).Int(),
+			InviteeIsNewUser: commontool.Ternary(isNewUser, 1, 2).Int(),
 			CreatedAt:        model.NewTime(),
 			UpdatedAt:        model.NewTime(),
 		}

@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
 	"net/url"
 	"sort"
 	"time"
@@ -76,7 +76,7 @@ func (o *Oola) getSign(key string, params url.Values) (sign string, err error) {
 	for _, v := range slice {
 		signStr += v + "=" + util.InterfaceToString(params[v][0]) + ";"
 	}
-	return encrypt.Md5(key + signStr), nil
+	return encrypttool.Md5(key + signStr), nil
 }
 
 func (o *Oola) GetToken(key string) (string, string, error) {
@@ -108,7 +108,7 @@ func (o *Oola) register(key string) (string, string, error) {
 	}
 	params.Set("sign", sign)
 	u := o.domain + "/api/user/register"
-	body, err := httputil.PostFrom(u, params)
+	body, err := httptool.PostFrom(u, params)
 	if err != nil {
 		return "", "", err
 	}
@@ -140,7 +140,7 @@ func (o *Oola) getUserAutoLoginKey(key string) (string, string, error) {
 	}
 	params.Set("sign", sign)
 	u := o.domain + "/api/user/getUserAutoLoginKey"
-	body, err := httputil.PostFrom(u, params)
+	body, err := httptool.PostFrom(u, params)
 	if err != nil {
 		return "", "", err
 	}

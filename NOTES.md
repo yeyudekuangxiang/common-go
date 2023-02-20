@@ -9,7 +9,7 @@ StartTime time.Time `form:"startTime"  time_format:"2006-01-02" time_utc:"false"
 如果传参方式为json 则可使用下面方式绑定 默认接受格式为2006-01-02 15:04:05
 ```
 type TestForm struct {
-StartTime timeutils.Time `json:"startTime"`
+StartTime timetool.Time `json:"startTime"`
 }
 ```
 如果想要兼容form和json 则只能使用string类型接收

@@ -8,20 +8,19 @@ import (
 	"github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
-	"mio/internal/pkg/queue/types/message/wxworkmsg"
-	"mio/internal/pkg/util/encrypt"
-
 	mzap "gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
+	"mio/internal/pkg/queue/types/message/wxworkmsg"
 	service2 "mio/internal/pkg/service"
 	"mio/internal/pkg/service/business"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"mio/pkg/wxwork"
 	"os"
 	"runtime"
 	"strings"
@@ -230,7 +229,7 @@ func Throttle() gin.HandlerFunc {
 	}
 
 	middleware := mgin.NewMiddleware(limiter.New(store, rate), mgin.WithKeyGetter(func(c *gin.Context) string {
-		return encrypt.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
+		return encrypttool.Md5(c.ClientIP() + c.Request.Method + c.FullPath())
 	}))
 	return middleware
 }

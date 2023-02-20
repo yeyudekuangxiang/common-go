@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxoa"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
-	wxoa2 "mio/pkg/wxoa"
 	"net/url"
 	"strconv"
 	"strings"
@@ -147,7 +147,7 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 		return "", err
 	}
 
-	key := encrypt.Md5(fmt.Sprintf("%s%s", setting.AppId, util.UUID()))
+	key := encrypttool.Md5(fmt.Sprintf("%s%s", setting.AppId, util.UUID()))
 
 	redisKey := fmt.Sprintf(config.RedisKey.OaAuth, key)
 
@@ -168,11 +168,12 @@ func (srv OaService) AutoLogin(redirectUri string, state string) (string, error)
 func (srv OaService) Sign(url string) (*OaSignResult, error) {
 	setting := config.FindOaSetting(string(srv.Platform))
 
-	tickerServer := wxoa2.TicketServer{
-		TokenServer: &wxoa2.AccessTokenServer{
+	tickerServer := wxoa.TicketServer{
+		TokenServer: &wxoa.AccessTokenServer{
+			Redis:  app.Redis,
 			AppId:  setting.AppId,
 			Secret: setting.Secret,
-			Redis:  app.Redis,
+			Prefix: config.RedisKey.AccessToken + ":oaticket:",
 		},
 		AppId: setting.AppId,
 		Redis: app.Redis,
@@ -184,7 +185,7 @@ func (srv OaService) Sign(url string) (*OaSignResult, error) {
 		return nil, errno.ErrInternalServer
 	}
 
-	nonceStr := encrypt.Md5(time.Now().String())
+	nonceStr := encrypttool.Md5(time.Now().String())
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	sign := jssdk.WXConfigSign(ticker, nonceStr, timestamp, url)
 	return &OaSignResult{

@@ -13,7 +13,7 @@ type redisKey struct {
 	DuiBaShortUrl            string
 	ActivityZeroIsNewUser    string
 	OaAuth                   string
-	BaiDu                    string
+	BaiDuAccessToken         string
 	BaiDuImageSearch         string
 	BadgeImageCode           string
 	CheckBusinessUser        string
@@ -41,7 +41,7 @@ type redisKey struct {
 
 var RedisKey = redisKey{
 	UserInfo:                 "mp2c:userinfo:%d",                // 变量1:用户id 使用 fmt.Sprintf(RedisKey.UserInfo,"1")
-	AccessToken:              "mp2c:access_token:%s:%s",         // 变量1:应用平台 变量2:应用id
+	AccessToken:              "mp2c:wxoa",                       // 变量1:应用平台
 	YZM:                      "yzm:",                            // 拼接用户id
 	YZM2B:                    "yzm2b:",                          //验证码给b端，拼接用户id
 	UniDian:                  "unidian:",                        // 拼接手机号
@@ -53,7 +53,7 @@ var RedisKey = redisKey{
 	DuiBaShortUrl:            "mp2c:duiba:shorturl:%s",          // 将对吧长链接存到redis中
 	ActivityZeroIsNewUser:    "mp2c:activity:zero:isnewuser:%d", //0元拿活动记录是否新用户
 	OaAuth:                   "mp2c:oaauth:%s",                  //微信网页授权
-	BaiDu:                    "mp2c:baidu:",                     //用于百度接口
+	BaiDuAccessToken:         "mp2c:baidu:accesstoken:",         //用于百度accesstoken
 	BaiDuImageSearch:         "mp2c:baiduImageSearch",
 	BadgeImageCode:           "mp2c:updateBadgeImage:",               //上传证书图片凭证
 	CheckBusinessUser:        "mp2c:checkBusinessUser:%s",            //检测用户token是否有更新

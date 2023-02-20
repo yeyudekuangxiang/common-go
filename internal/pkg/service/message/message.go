@@ -190,7 +190,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 		Tip:     "",
 	}
 
-	for s, _ := range list.Val() {
+	for s := range list.Val() {
 		uid, err := strconv.ParseInt(s, 10, 64)
 		getUserById, err := app.RpcService.UserRpcSrv.FindUserByID(context.Background(), &user.FindUserByIDReq{
 			UserId: uid,

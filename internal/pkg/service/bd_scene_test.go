@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"mio/pkg/duiba/util"
+	"gitlab.miotech.com/miotech-application/backend/common-go/duiba/util"
 	"testing"
 	"time"
 )

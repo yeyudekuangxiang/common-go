@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	glbtyp "gitlab.miotech.com/miotech-application/backend/common-go/gitlab/types"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"math/rand"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/producer/wxworkpdr"
 	"mio/internal/pkg/queue/types/message/wxworkmsg"
-	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
-	glbtyp "mio/pkg/gitlab/types"
-	"mio/pkg/wxwork"
 	"regexp"
 	"strconv"
 	"strings"
@@ -57,7 +57,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 		target,
 		"系统自动合并：" + source + " -> " + target,
 	}
-	body, err := httputil.PostJson(url, req)
+	body, err := httptool.PostJson(url, req)
 	if err != nil {
 		app.Logger.Error(err)
 		return err
@@ -82,7 +82,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 		res.Iid,
 	}
 	url2 := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests/" + strconv.Itoa(res.Iid) + "/merge?private_token=" + private_token
-	mergeBody, err := httputil.PutJson(url2, req2)
+	mergeBody, err := httptool.PutJson(url2, req2)
 	if err != nil {
 		app.Logger.Error(err)
 		return err
@@ -106,7 +106,7 @@ func (srv GitlabService) MergeBranch(projectId int, source, target string) error
 func (srv GitlabService) MergeState(projectId, mergeRequestIId int) (string, error) {
 	url := base_url + "/projects/" + strconv.Itoa(projectId) + "/merge_requests/" + strconv.Itoa(mergeRequestIId) + "?private_token=" + private_token
 
-	body, err := httputil.Get(url)
+	body, err := httptool.Get(url)
 	if err != nil {
 		return "", err
 	}

@@ -2,14 +2,14 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/duiba"
+	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/service"
 	duiba2 "mio/internal/pkg/service/duiba"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/duiba"
-	duibaApi "mio/pkg/duiba/api/model"
 	"net/http"
 )
 

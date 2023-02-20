@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -11,7 +12,6 @@ import (
 	revent "mio/internal/pkg/repository/event"
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/product"
-	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"strconv"
 	"strings"
@@ -71,7 +71,7 @@ func (srv EventService) GetEventFullInfo(eventId string) (*EventFullInfo, error)
 	for _, participation := range participationList {
 		timeStr := ""
 
-		if timeutils.StartOfDay(time.Now()).Before(participation.Time) {
+		if timetool.StartOfDay(time.Now()).Before(participation.Time) {
 			timeStr = "今天"
 		} else {
 			day := int(math.Ceil(time.Now().Sub(participation.Time).Hours() / 24))

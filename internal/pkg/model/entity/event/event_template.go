@@ -3,7 +3,7 @@ package event
 import (
 	"encoding/json"
 	"github.com/pkg/errors"
-	"mio/internal/pkg/util"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"reflect"
 	"strings"
 )
@@ -122,9 +122,9 @@ func Parse(v interface{}) ([]Field, error) {
 		list = append(list, Field{
 			Key:   field.Name,
 			Value: val.Field(i).Interface(),
-			Label: util.Ternary(tagMap["label"] != "", tagMap["label"], field.Name).String(),
-			Desc:  util.Ternary(tagMap["desc"] != "", tagMap["desc"], field.Name).String(),
-			Type:  util.Ternary(tagMap["type"] != "", tagMap["type"], "string").String(),
+			Label: commontool.Ternary(tagMap["label"] != "", tagMap["label"], field.Name).String(),
+			Desc:  commontool.Ternary(tagMap["desc"] != "", tagMap["desc"], field.Name).String(),
+			Type:  commontool.Ternary(tagMap["type"] != "", tagMap["type"], "string").String(),
 		})
 	}
 	return list, nil

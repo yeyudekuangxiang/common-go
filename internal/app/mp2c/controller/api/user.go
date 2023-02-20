@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -18,7 +19,6 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"mio/internal/pkg/util/validator"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"strings"
 	"time"
@@ -243,7 +243,7 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 
 	if form.Avatar != "" {
-		err := service.DefaultReviewService().ImageReview(baidu.ImageReviewParam{ImgUrl: form.Avatar})
+		err := service.DefaultReviewService().ReviewImage(baidu.ImageReviewParam{ImgUrl: form.Avatar})
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage("头像审核未通过")
 		}
@@ -283,7 +283,7 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 
 	//归属地
 	//location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
-	location, err := baidu.IpToCity(c.ClientIP())
+	location, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(c.ClientIP())
 
 	if err != nil {
 		return nil, err

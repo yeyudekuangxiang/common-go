@@ -3,6 +3,9 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/randomtool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -12,8 +15,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/httputil"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"time"
 
@@ -31,7 +32,7 @@ type WeappService struct {
 
 func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWith entity.PartnershipType, cid int64, thirdId string, ip string) (*entity.User, string, bool, error) {
 	//调用java那边登陆接口
-	result, err := httputil.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
+	result, err := httptool.OriginJson(config.Config.Java.JavaLoginUrl, "POST", []byte(fmt.Sprintf(`{"code":"%s"}`, code)))
 	if err != nil {
 		return nil, "", false, err
 	}
@@ -40,7 +41,7 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	cookie := result.Response.Header.Get("Set-Cookie")
 
 	app.Logger.Debug("cookie", cookie, invitedBy, partnershipWith)
-	whoAmiResult, err := httputil.OriginGet(config.Config.Java.JavaWhoAmi, httputil.HttpWithHeader("Cookie", cookie))
+	whoAmiResult, err := httptool.OriginGet(config.Config.Java.JavaWhoAmi, httptool.HttpWithHeader("Cookie", cookie))
 	if err != nil {
 		return nil, "", false, err
 	}
@@ -90,15 +91,15 @@ func (srv WeappService) LoginByCode(code string, invitedBy string, partnershipWi
 	}
 
 	if user.ID == 0 {
-		city, errCity := baidu.IpToCity(ip)
-		if errCity != nil {
-			app.Logger.Info("BindPhoneByCode ip地址查询失败", err.Error())
+		city, errCity := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(ip)
+		if errCity != nil || !city.IsSuccess() {
+			app.Logger.Info("BindPhoneByCode ip地址查询失败 ", err, city)
 		}
 		isNewUser = true
 		user, err = service.DefaultUserService.CreateUser(service.CreateUserParam{
 			OpenId:      whoAmiResp.Data.Openid,
 			AvatarUrl:   config.Config.OSS.CdnDomain + "/static/mp2c/images/user/default.png",
-			Nickname:    "绿喵用户" + util.RandomStr(6, util.RandomStrNumber, util.RandomStrLower),
+			Nickname:    "绿喵用户" + randomtool.RandomStr(6, randomtool.RandomStrNumber, randomtool.RandomStrLower),
 			PhoneNumber: "",
 			Source:      entity.UserSourceMio,
 			UnionId:     session.WxUnionId,

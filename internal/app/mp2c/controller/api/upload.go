@@ -3,13 +3,13 @@ package api
 import (
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
 	"io/ioutil"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/upload"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"net/http"
 	"path"
@@ -158,7 +158,7 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = reviewSrv.ImageReview(baidu.ImageReviewParam{Image: base64.StdEncoding.EncodeToString(data)}); err != nil {
+	if err = reviewSrv.ReviewImage(baidu.ImageReviewParam{Image: base64.StdEncoding.EncodeToString(data)}); err != nil {
 		return nil, err
 	}
 

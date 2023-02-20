@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"math/rand"
 	"mio/internal/pkg/core/app"
@@ -13,8 +15,6 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/activity"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
 	"strconv"
@@ -99,7 +99,7 @@ func (srv *Service) BindSuccess(params map[string]interface{}) error {
 	synchroRequest.Signature = platformUtil.GetSign(requestParams, "", "&")
 
 	url := srv.option.Domain + "/markting_activity/network/lvmiao/synchro"
-	body, err := httputil.PostJson(url, synchroRequest)
+	body, err := httptool.PostJson(url, synchroRequest)
 	app.Logger.Infof("亿通行 注册回调 返回 : %s", body)
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	url := srv.option.Domain + "/markting_redenvelopegateway/redenvelope/grantV2"
-	body, err := httputil.PostJson(url, grantV2Request)
+	body, err := httptool.PostJson(url, grantV2Request)
 	app.Logger.Infof("亿通行 grantV2 返回 : %s", body)
 	if err != nil {
 		return "", err
@@ -200,5 +200,5 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 func (srv *Service) getAppSecret() string {
 	t := time.Now().Unix()
-	return encrypt.Md5(srv.option.AppId + encrypt.Md5(srv.option.Secret) + strconv.FormatInt(t, 10))
+	return encrypttool.Md5(srv.option.AppId + encrypttool.Md5(srv.option.Secret) + strconv.FormatInt(t, 10))
 }

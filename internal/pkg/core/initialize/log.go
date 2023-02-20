@@ -7,13 +7,13 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/logger/aliyunzap"
 	"gitlab.miotech.com/miotech-application/backend/common-go/logger/aliyunzero"
 	mzap "gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util"
-	"mio/pkg/wxwork"
 	"os"
 )
 
