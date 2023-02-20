@@ -176,8 +176,7 @@ func (srv MessageService) SendMessageToSignUser() {
 }
 
 func (srv MessageService) SendMessageToCarbonPk() {
-	//util.DefaultLock.UnLock("sendMessageToCarbonPk")
-	if !util.DefaultLock.Lock("sendMessageToCarbonPk", time.Minute*1) {
+	if !util.DefaultLock.Lock("sendMessageToCarbonPk", time.Minute*5) {
 		return
 	}
 	defer util.DefaultLock.UnLock("sendMessageToCarbonPk")
