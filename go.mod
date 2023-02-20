@@ -33,7 +33,7 @@ require (
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
 	gitlab.miotech.com/miotech-application/backend/common-go v1.0.15
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.1
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.2
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.5.0
 	google.golang.org/grpc v1.50.1
@@ -139,7 +139,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/tdewolff/minify/v2 v2.9.4 // indirect
 	github.com/tdewolff/parse/v2 v2.5.2 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
@@ -189,6 +188,6 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.1 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.8.1
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.2 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.8.2
 
 replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.15 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.15
