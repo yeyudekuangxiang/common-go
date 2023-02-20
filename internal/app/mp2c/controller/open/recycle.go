@@ -12,6 +12,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/recyclepdr"
+	"mio/internal/pkg/queue/types/message/recyclemsg"
+	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/ccring"
@@ -65,6 +68,10 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
+
+	//推送回收订单到消息队列
+	defer trackOola(form)
+
 	//通过openid查询用户
 	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
 	if userInfo.ID == 0 {
@@ -162,32 +169,35 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
-	if strings.ToUpper(form.Data.Status) != "COMPLETE" {
-		return nil, errno.ErrCommon.WithMessage("订单未完成")
-	}
+
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh("fmy")
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
 		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
-
 	dst := recycle.FmySignParams{}
 	err := util.MapTo(&form, &dst)
 	if err != nil {
 		return nil, err
 	}
 
-	//new RecycleService
 	ctx := context.NewMioContext()
 	RecycleService := recycle.NewRecycleService(ctx)
-	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
-	PointService := service.NewPointService(ctx)
 	//校验sign
 	if err := RecycleService.CheckFmySign(dst, scene.AppId, scene.Key); err != nil {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
+
+	defer trackFmy(form)
+
+	if strings.ToUpper(form.Data.Status) != "COMPLETE" {
+		return nil, errno.ErrCommon.WithMessage("订单未完成")
+	}
+
+	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
+	PointService := service.NewPointService(ctx)
 
 	//通过phone_number查询用户
 	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
@@ -323,6 +333,8 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
 	}
 
+	defer trackRecycle(form)
+
 	//校验用户
 	uid, err := strconv.ParseInt(form.MemberId, 10, 64)
 	if err != nil {
@@ -427,6 +439,65 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		})
 	}(userInfo.ID, userInfo.OpenId, scene.Ch, form.OrderNo, form.MemberId, form.CreateTime, form.CompleteTime)
 	return gin.H{}, nil
+}
+func trackRecycle(req recycleReq) {
+	var rk routerkey.RecycleRouterKey
+	switch req.Ch {
+	case "loverecycle":
+		rk = routerkey.RecycleAHS
+	case "sshs":
+		rk = routerkey.RecycleSSHS
+	case "ddyx":
+		rk = routerkey.RecycleDDYX
+	default:
+		return
+	}
+	_ = recyclepdr.Recycle(rk, recyclemsg.RecycleInfo{
+		Ch:           req.Ch,
+		OrderNo:      req.OrderNo,
+		MemberId:     req.MemberId,
+		Name:         req.Name,
+		Category:     req.Category,
+		Number:       req.Number,
+		CreateTime:   req.CreateTime,
+		CompleteTime: req.CompleteTime,
+		T:            req.T,
+		Sign:         req.Sign,
+	})
+}
+func trackFmy(form api.RecycleFmyForm) {
+	_ = recyclepdr.Recycle(routerkey.RecycleFMY, recyclemsg.RecycleFmyInfo{
+		AppId:          form.AppId,
+		NotificationAt: form.NotificationAt,
+		Data: recyclemsg.RecycleFmyData{
+			OrderSn:          form.Data.OrderSn,
+			Status:           form.Data.Status,
+			Weight:           form.Data.Weight,
+			Reason:           form.Data.Reason,
+			CourierRealName:  form.Data.CourierRealName,
+			CourierPhone:     form.Data.CourierPhone,
+			CourierJobNumber: form.Data.CourierJobNumber,
+			Waybill:          form.Data.Waybill,
+			Phone:            form.Data.Phone,
+		},
+		Sign: form.Sign,
+	})
+}
+func trackOola(form api.RecyclePushForm) {
+	_ = recyclepdr.Recycle(routerkey.RecycleOOLA, recyclemsg.RecycleOolaInfo{
+		Type:                form.Type,
+		OrderNo:             form.OrderNo,
+		Name:                form.Name,
+		OolaUserId:          form.OolaUserId,
+		ClientId:            form.ClientId,
+		CreateTime:          form.CreateTime,
+		CompletionTime:      form.CompletionTime,
+		BeanNum:             form.BeanNum,
+		Sign:                form.Sign,
+		ProductCategoryName: form.ProductCategoryName,
+		Qua:                 form.Qua,
+		Unit:                form.Unit,
+	})
 }
 
 func (ctr RecycleController) incPointForActivity(ctx context2.Context, params incPointForActivityParams) {
