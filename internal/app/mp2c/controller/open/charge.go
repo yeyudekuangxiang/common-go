@@ -199,11 +199,11 @@ func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey stri
 			Code: platformKey,
 		})
 		if err != nil {
-			app.Logger.Info(fmt.Printf("星星充电 openId:[%s]发券失败:%s\n", userInfo.OpenId, err.Error()))
+			app.Logger.Info(fmt.Printf("[%s]用户[%s]发券失败:%s\n", platformKey, userInfo.OpenId, err.Error()))
 			return
 		}
 		if !rule.GetExist() {
-			app.Logger.Info(fmt.Printf("星星充电 openId:[%s]发券失败:%s\n", userInfo.OpenId, "无有效规则"))
+			app.Logger.Info(fmt.Printf("[%s]用户[%s]发券失败:%s\n", platformKey, userInfo.OpenId, "无有效规则"))
 			return
 		}
 		startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
