@@ -2,7 +2,6 @@ package recycle
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/shopspring/decimal"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"math"
@@ -134,7 +133,6 @@ func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secre
 	rand1 := string([]rune(sign)[0:4])
 	rand2 := string([]rune(sign)[len(sign)-4:])
 	marshal, _ := json.Marshal(params)
-	fmt.Printf("marshal:%s\n", marshal)
 	verifyData := rand1 + appId + string(marshal) + secret + rand2
 	md5Str := encrypttool.Md5(verifyData)
 	signMd5 := rand1 + md5Str[7:28] + rand2

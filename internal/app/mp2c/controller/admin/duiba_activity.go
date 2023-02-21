@@ -22,7 +22,7 @@ func NewDuiBaActivityController() DuiBaActivityController {
 type DuiBaActivityController struct {
 }
 
-//Create 创建兑吧链接
+//Save 创建兑吧链接
 func (ctl DuiBaActivityController) Create(c *gin.Context) (gin.H, error) {
 	var form CreateDuiBaActivityForm
 	if err := apiutil.BindForm(c, &form); err != nil {

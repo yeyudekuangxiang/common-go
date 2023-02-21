@@ -1,6 +1,7 @@
 package open
 
 import (
+	"encoding/json"
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
@@ -10,6 +11,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/userpdr"
+	"mio/internal/pkg/queue/types/message/usermsg"
+	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
@@ -215,13 +219,19 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	})
 
 	if err != nil {
-		return nil, errno.ErrCommon.WithErr(err)
+		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
 	if by.ID != 0 {
-		app.Logger.Errorf("重复提交订单: %v", form)
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   string(typeString),
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
 
 	var openId, mobile string
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
@@ -366,6 +376,9 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
+	ctx := context.NewMioContext()
+
+	tp := entity.PointTypesMap[form.PlatformKey]
 
 	sceneUser := service.DefaultBdSceneUserService.FindPlatformUserByPlatformUserId(form.MemberId, form.PlatformKey)
 
@@ -393,8 +406,6 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	}
 
 	//检查上限
-	ctx := context.NewMioContext()
-
 	var isHalf bool
 	var halfPoint int64
 
@@ -421,10 +432,9 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
 	pointService := service.NewPointService(ctx)
 	//积分
-	types := entity.PointTypesMap[form.PlatformKey]
 	point, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
-		Type:        types,
+		Type:        tp,
 		BizId:       util.UUID(),
 		ChangePoint: incPoint,
 		AdminId:     0,
@@ -548,4 +558,23 @@ func (receiver PlatformController) bindCallback(scene entity.BdScene, sceneUser 
 	}
 
 	return err
+}
+
+func trackBehaviorInteraction(form trackInteractionParam) {
+	data, err := json.Marshal(form.Data)
+	if err != nil {
+		app.Logger.Errorf("trackBehaviorInteraction:%s", err.Error())
+		return
+	}
+	err = userpdr.Interaction(routerkey.BehaviorInteraction, usermsg.Interaction{
+		Tp:         form.Tp,
+		Data:       string(data),
+		Ip:         form.Ip,
+		Result:     form.Result,
+		ResultCode: form.ResultCode,
+	})
+	if err != nil {
+		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())
+		return
+	}
 }

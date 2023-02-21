@@ -502,3 +502,11 @@ type CommentChangeLikeResp struct {
 	LikeStatus     int    `json:"likeStatus"`
 	IsFirst        bool   `json:"isFirst"`
 }
+
+type UserBehaviorLogParam struct {
+	Tp         string `json:"tp"`
+	Data       string `json:"data"`
+	Ip         string `json:"ip"`
+	Result     string `json:"result"`
+	ResultCode string `json:"resultCode"`
+}

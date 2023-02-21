@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
@@ -12,6 +13,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/userpdr"
 	"mio/internal/pkg/queue/types/message/usermsg"
+	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
 	"mio/internal/pkg/service/platform/ytx"
@@ -367,5 +369,24 @@ func (ctr UserController) sendCoupon(user entity.User) {
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.YTXReward, user.OpenId, zhuGeAttr)
 			app.Logger.Info("亿通行发红包结束")
 		}()
+	}
+}
+
+func trackBehaviorInteraction(form trackInteractionParam) {
+	data, err := json.Marshal(form.Data)
+	if err != nil {
+		app.Logger.Errorf("trackBehaviorInteraction:%s", err.Error())
+		return
+	}
+	err = userpdr.Interaction(routerkey.BehaviorInteraction, usermsg.Interaction{
+		Tp:         form.Tp,
+		Data:       string(data),
+		Ip:         form.Ip,
+		Result:     form.Result,
+		ResultCode: form.ResultCode,
+	})
+	if err != nil {
+		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())
+		return
 	}
 }

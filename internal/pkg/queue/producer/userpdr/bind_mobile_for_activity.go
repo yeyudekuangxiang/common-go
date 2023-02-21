@@ -9,12 +9,11 @@ import (
 )
 
 func BindMobileForActivity(msg usermsg.BindMobile) error {
-	return nil
 	marshal, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
 	return app.QueueProduct.Publish(marshal,
-		[]string{routerkey.BindMobileForActivity},
+		[]string{string(routerkey.BindMobile)},
 		rabbitmq.WithPublishOptionsExchange("userExchange"))
 }

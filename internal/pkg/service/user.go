@@ -732,7 +732,7 @@ func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRi
 		RiskRank: rest.RiskRank,
 	})
 	if err2 != nil {
-		app.Logger.Error("DefaultUserRiskLogService.Create 异常", rest)
+		app.Logger.Error("DefaultUserRiskLogService.Save 异常", rest)
 	}
 	return rest, err
 }
