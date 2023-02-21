@@ -280,10 +280,13 @@ func (srv SubjectService) GetUserQuestionV2(dto srv_types.GetQuestionUserDTO) (*
 	carbonDayFloat, _ := carbonDay.Float64()
 
 	return &srv_types.AddUserCarbonInfoV2DTO{
-		CarbonYear:     util.CarbonToRate(carbon),         //总碳量
-		CarbonToday:    util.CarbonToRate(carbonToday),    //今日碳量
-		CarbonDay:      util.CarbonToRate(carbonDayFloat), //日均排放
-		CarbonClassify: userCarbonClassify,                //用户碳量分类汇总
+		CarbonYear:       util.CarbonToRate(carbon),         //总碳量
+		CarbonToday:      util.CarbonToRate(carbonToday),    //今日碳量
+		CarbonDay:        util.CarbonToRate(carbonDayFloat), //日均排放
+		CarbonYearValue:  carbon,
+		CarbonTodayValue: carbonToday,
+		CarbonDayValue:   carbonDayFloat,
+		CarbonClassify:   userCarbonClassify, //用户碳量分类汇总
 		UserGroup: srv_types.UserGroup{
 			Group:     userGroup.Group,
 			GroupTips: userGroup.GroupTips,

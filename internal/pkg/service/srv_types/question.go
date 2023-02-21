@@ -54,6 +54,9 @@ type AddUserCarbonInfoV2DTO struct {
 	CarbonYear          string                                    `json:"carbonYear"`
 	CarbonToday         string                                    `json:"carbonToday"`
 	CarbonDay           string                                    `json:"carbonDay"`
+	CarbonYearValue     float64                                   `json:"carbonYearValue"`
+	CarbonTodayValue    float64                                   `json:"carbonTodayValue"`
+	CarbonDayValue      float64                                   `json:"carbonDayValue"`
 	CarbonClassify      []UserCarbonClassify                      `json:"carbonClassify"`
 	UserGroup           UserGroup                                 `json:"userGroup"`
 	User                User                                      `json:"user"`
