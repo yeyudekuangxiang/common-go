@@ -14,6 +14,6 @@ func BindMobileForActivity(msg usermsg.BindMobile) error {
 		return err
 	}
 	return app.QueueProduct.Publish(marshal,
-		[]string{routerkey.BindMobileForActivity},
+		[]string{string(routerkey.BindMobile)},
 		rabbitmq.WithPublishOptionsExchange("userExchange"))
 }

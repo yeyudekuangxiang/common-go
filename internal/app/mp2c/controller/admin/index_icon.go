@@ -19,7 +19,7 @@ func NewIndexIconController() IndexIconController {
 type IndexIconController struct {
 }
 
-//Create 创建icon
+//Save 创建icon
 func (ctl IndexIconController) Create(c *gin.Context) (gin.H, error) {
 	var form CreateIndexIconForm
 	if err := apiutil.BindForm(c, &form); err != nil {

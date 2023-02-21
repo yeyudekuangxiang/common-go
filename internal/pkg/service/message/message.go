@@ -196,18 +196,18 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			UserId: uid,
 		})
 		if err != nil {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败，模版%s，uid%s，错误信息%s", template.TemplateId(), uid, err.Error())
+			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		if !getUserById.Exist {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,用户不存在，模版%s，uid%s，错误信息%s", template.TemplateId(), uid, err.Error())
+			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,用户不存在，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		days, err := app.RpcService.CarbonPkRpcSrv.TotalCarbonPkDays(context.Background(), &carbonpk.TotalCarbonPkDaysReq{
 			UserId: uid,
 		})
 		if err != nil {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,获取打卡天数失败，模版%v，uid%d，错误信息%v", template.TemplateId(), uid, err.Error())
+			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,获取打卡天数失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		template.Date = strconv.FormatInt(days.Total, 10) + "天"

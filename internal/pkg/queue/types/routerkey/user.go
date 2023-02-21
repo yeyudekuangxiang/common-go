@@ -1,5 +1,8 @@
 package routerkey
 
+type BehaviorRouterKey string
+
 const (
-	BindMobileForActivity = "user.bind_mobile"
+	BindMobile          BehaviorRouterKey = "user.behavior.bindmobile"
+	BehaviorInteraction BehaviorRouterKey = "user.behavior.interaction"
 )

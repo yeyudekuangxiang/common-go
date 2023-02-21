@@ -142,7 +142,7 @@ func DecodeErr(e error) (httpStatus int, code int, message string) {
 	return status(ErrInternalServer.status), ErrInternalServer.Code(), ErrInternalServer.Error()
 
 	//后面系统错误全面替换后使用下面的方式
-	//return ErrInternalServer.Code(), ErrInternalServer.Message()
+	//return ErrInternalServer.Tp(), ErrInternalServer.Message()
 }
 func logerr(err error, callers string) {
 	if config.Config.App.Env != "prod" {
