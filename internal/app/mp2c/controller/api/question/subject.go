@@ -50,11 +50,24 @@ func (SubjectController) GetList(ctx *gin.Context) (gin.H, error) {
 	return ret, err
 }
 
+//弃用，已有v2版本
+
 func (SubjectController) GetUserYearCarbon(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
 	//获取问卷碳量
 	ret, err := subjectServer.GetUserQuestion(srv_types.GetQuestionUserDTO{QuestionId: 1, OpenId: user.OpenId, UserId: user.ID})
+	if err != nil {
+		return gin.H{}, err
+	}
+	return gin.H{"userYearCarbon": ret}, err
+}
+
+func (SubjectController) GetUserYearCarbonV2(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
+	subjectServer := qnrService.NewSubjectService(context.NewMioContext(context.WithContext(ctx)))
+	//获取问卷碳量
+	ret, err := subjectServer.GetUserQuestionV2(srv_types.GetQuestionUserDTO{QuestionId: 1, OpenId: user.OpenId, UserId: user.ID, Nickname: user.Nickname})
 	if err != nil {
 		return gin.H{}, err
 	}
