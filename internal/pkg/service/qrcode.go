@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/skip2/go-qrcode"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/oss"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
-	"mio/pkg/wxapp"
 	"strings"
 	"time"
 )
@@ -382,5 +382,5 @@ func (srv QRCodeService) GetTextQrCodeRaw(content string, width int) ([]byte, er
 
 func (srv QRCodeService) QrCodeKey(scene entity.QrCodeScene, content string, others ...string) string {
 	keyStr := string(scene) + content + strings.Join(others, "")
-	return encrypt.Md5(keyStr)
+	return encrypttool.Md5(keyStr)
 }

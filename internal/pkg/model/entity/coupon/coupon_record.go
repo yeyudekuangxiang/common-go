@@ -1,13 +1,11 @@
 package coupon
 
-import (
-	"mio/internal/pkg/util/timeutils"
-)
+import "gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 
 type CouponRecord struct {
 	ID               int64
 	Openid           string
-	UpdateTime       timeutils.Time
+	UpdateTime       timetool.Time
 	Name             string
 	CouponId         string
 	CouponTypeId     string

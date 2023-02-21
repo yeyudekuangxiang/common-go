@@ -2,10 +2,10 @@ package service
 
 import (
 	"database/sql"
+	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/util/timeutils"
-	duibaApi "mio/pkg/duiba/api/model"
 	"time"
 )
 
@@ -298,11 +298,11 @@ type FilterPointRecordOpenIds struct {
 }
 
 type InviteInfo struct {
-	OpenId    string         `json:"openId"`
-	Nickname  string         `json:"nickname"`
-	AvatarUrl string         `json:"avatarUrl"`
-	Time      timeutils.Time `json:"time"`
-	Point     int            `json:"point"`
+	OpenId    string        `json:"openId"`
+	Nickname  string        `json:"nickname"`
+	AvatarUrl string        `json:"avatarUrl"`
+	Time      timetool.Time `json:"time"`
+	Point     int           `json:"point"`
 }
 type GetPartnershipPromotionListBy struct {
 	Partnership  entity.PartnershipType

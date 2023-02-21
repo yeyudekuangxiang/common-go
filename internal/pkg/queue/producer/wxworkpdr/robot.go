@@ -3,10 +3,10 @@ package wxworkpdr
 import (
 	"encoding/json"
 	"github.com/wagslane/go-rabbitmq"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/queue/types/message/wxworkmsg"
 	"mio/internal/pkg/queue/types/routerkey"
-	"mio/pkg/wxwork"
 )
 
 func SendRobotMessage(message wxworkmsg.RobotMessage) error {

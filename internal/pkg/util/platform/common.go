@@ -3,8 +3,8 @@ package platform
 import (
 	"github.com/golang-module/dongle"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
 	"sort"
 	"strings"
 )
@@ -37,7 +37,7 @@ func GetSign(params map[string]interface{}, key string, joiner string) string {
 		signStr = strings.TrimRight(signStr, joiner)
 	}
 	//验证签名
-	return encrypt.Md5(key + signStr)
+	return encrypttool.Md5(key + signStr)
 }
 
 func Encrypt(params map[string]interface{}, key string, joiner string, encryptKey string) string {

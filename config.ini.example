@@ -129,3 +129,6 @@ NonBlock=true
 [tokenCenterRpc]
 Endpoints=127.0.0.1:2009
 NonBlock=true
+
+[baiduMap]
+AccessKey=

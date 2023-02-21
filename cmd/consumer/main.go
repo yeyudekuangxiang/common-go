@@ -28,7 +28,7 @@ func main() {
 			log.Println("关闭消费者成功")
 		}
 	}()
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 }

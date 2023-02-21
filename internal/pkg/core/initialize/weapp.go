@@ -3,11 +3,11 @@ package initialize
 import (
 	"context"
 	"github.com/medivhzhan/weapp/v3/logger"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/pkg/wxapp"
 	"time"
 )
 

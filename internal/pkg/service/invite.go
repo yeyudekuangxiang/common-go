@@ -1,11 +1,11 @@
 package service
 
 import (
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/util/timeutils"
 )
 
 var DefaultInviteService = InviteService{}
@@ -28,7 +28,7 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 			return nil, err
 		}
 
-		d := timeutils.StartOfDay(invite.Time.Time).Unix()
+		d := timetool.StartOfDay(invite.Time.Time).Unix()
 		point := 0
 
 		if pointMap[d] < 5 {
@@ -40,7 +40,7 @@ func (srv InviteService) GetInviteList(openid string) ([]InviteInfo, error) {
 			OpenId:    user.OpenId,
 			Nickname:  user.Nickname,
 			AvatarUrl: user.AvatarUrl,
-			Time:      timeutils.ToTime(invite.Time.Time),
+			Time:      timetool.ToTime(invite.Time.Time),
 			Point:     point,
 		})
 	}

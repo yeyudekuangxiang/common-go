@@ -3,9 +3,9 @@ package business
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"time"
 )
@@ -45,7 +45,7 @@ func (srv CarbonCreditsLimitService) checkLimit(userId int64, t ebusiness.Carbon
 	}
 
 	limitLog, err := DefaultCarbonCreditsLimitLogService.FindLimitLog(FindCarbonCreditsLimitLogParam{
-		TimePoint: timeutils.Now().StartOfDay().Time,
+		TimePoint: timetool.Now().StartOfDay().Time,
 		Type:      t,
 		UserId:    userId,
 	})
@@ -90,7 +90,7 @@ func (srv CarbonCreditsLimitService) CheckLimitAndUpdate(userId int64, value dec
 		Type:            t,
 		UserId:          userId,
 		AddCurrentValue: value,
-		TimePoint:       timeutils.StartOfDay(time.Now()),
+		TimePoint:       timetool.StartOfDay(time.Now()),
 	})
 	return log, err
 }

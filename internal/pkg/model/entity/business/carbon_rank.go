@@ -2,8 +2,8 @@ package business
 
 import (
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/internal/pkg/model"
-	"mio/internal/pkg/util/timeutils"
 	"time"
 )
 
@@ -17,7 +17,7 @@ const (
 
 // ParseLastTime 昨天开始和结束 上周开始和结束 上个月开始和结束
 func (rdt RankDateType) ParseLastTime() (time.Time, time.Time) {
-	t := timeutils.Now()
+	t := timetool.Now()
 	var start, end time.Time
 	switch rdt {
 	case RankDateTypeDay:

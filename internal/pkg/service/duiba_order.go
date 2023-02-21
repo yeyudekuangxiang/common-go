@@ -1,13 +1,13 @@
 package service
 
 import (
+	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
-	"mio/internal/pkg/util/timeutils"
-	duibaApi "mio/pkg/duiba/api/model"
 	"mio/pkg/errno"
 )
 
@@ -109,7 +109,7 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["用户uid"] = uid
 	zhuGeAttr["兑吧订单号"] = order.OrderNum
-	zhuGeAttr["下单时间"] = timeutils.UnixMilli(order.CreateTime.ToInt()).Format(timeutils.TimeFormat)
+	zhuGeAttr["下单时间"] = timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat)
 	zhuGeAttr["消耗积分数"] = order.TotalCredits
 	zhuGeAttr["支付金额"] = order.ConsumerPayPrice
 	zhuGeAttr["兑换类型"] = order.Source

@@ -1,11 +1,11 @@
 package quiz
 
 import (
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gorm.io/gorm"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/util/timeutils"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func (srv QuizSummaryService) UpdateTodaySummary(param UpdateSummaryParam) error
 
 	summary.TotalAnsweredNum += param.TodayAnsweredNum
 	summary.TotalCorrectNum += param.TodayCorrectNum
-	summary.LastUpdateDate = model.Date{Time: timeutils.StartOfDay(time.Now())}
+	summary.LastUpdateDate = model.Date{Time: timetool.StartOfDay(time.Now())}
 	return app.DB.Save(&summary).Error
 }
 func (srv QuizSummaryService) FindOrCreateSummary(openId string) (*entity.QuizSummary, error) {

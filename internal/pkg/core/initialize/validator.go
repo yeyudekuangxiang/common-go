@@ -2,8 +2,8 @@ package initialize
 
 import (
 	"github.com/gin-gonic/gin/binding"
+	"gitlab.miotech.com/miotech-application/backend/common-go/validator"
 	"log"
-	"mio/pkg/validator"
 )
 
 func InitValidator() {

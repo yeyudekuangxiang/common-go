@@ -3,9 +3,9 @@ package errno
 import (
 	"errors"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"log"
 	"mio/config"
-	"mio/pkg/wxwork"
 	"os"
 	"runtime"
 	"strconv"

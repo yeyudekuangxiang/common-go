@@ -1,11 +1,11 @@
 package service
 
 import (
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 )
 
@@ -61,7 +61,7 @@ func (a SystemAdminService) Login(account, password string) (string, error) {
 		return "", errno.ErrAdminNotFound
 	}
 
-	if admin.Password != encrypt.Md5(password) {
+	if admin.Password != encrypttool.Md5(password) {
 		return "", errno.ErrValidation
 	}
 

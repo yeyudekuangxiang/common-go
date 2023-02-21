@@ -4,6 +4,8 @@ import (
 	contextRedis "context"
 	"fmt"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -13,7 +15,6 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"strconv"
 	"time"
@@ -94,7 +95,7 @@ func (srv StepService) WeeklyHistory(openId string) (*WeeklyHistoryInfo, error) 
 	//最近7天记录
 	historyList, err := DefaultStepHistoryService.GetStepHistoryList(GetStepHistoryListBy{
 		OpenId:            openId,
-		StartRecordedTime: model.Time{Time: timeutils.StartOfDay(time.Now().Add(-6 * time.Hour * 24))},
+		StartRecordedTime: model.Time{Time: timetool.StartOfDay(time.Now().Add(-6 * time.Hour * 24))},
 	})
 	if err != nil {
 		return nil, err
@@ -245,11 +246,11 @@ func (srv StepService) computePendingStep(history entity.StepHistory, step entit
 		return 0
 	}
 
-	currentStep := util.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
+	currentStep := commontool.Ternary(history.Count < stepUpperLimit, history.Count, stepUpperLimit).Int()
 
 	result := currentStep - lastCheckedSteps
 
-	return util.Ternary(result > 0, result, 0).Int()
+	return commontool.Ternary(result > 0, result, 0).Int()
 }
 
 // computePendingStep 计算可领取的积分数量 和 步行数量

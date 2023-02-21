@@ -2,16 +2,16 @@ package track
 
 import (
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/repository"
 	service "mio/internal/pkg/service/userExtend"
 	"mio/pkg/errno"
 
+	"gitlab.miotech.com/miotech-application/backend/common-go/zhuge"
+	"gitlab.miotech.com/miotech-application/backend/common-go/zhuge/types"
 	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/util"
-	"mio/pkg/zhuge"
-	"mio/pkg/zhuge/types"
 	"time"
 )
 
@@ -24,7 +24,7 @@ type ZhuGeService struct {
 }
 
 func DefaultZhuGeService() *ZhuGeService {
-	return NewZhuGeService(zhuge.NewClient(config.Config.Zhuge.AppKey, config.Config.Zhuge.AppSecret), config.Config.App.Env == "prod")
+	return NewZhuGeService(zhuge.NewClient(config.Config.Zhuge.AppKey, config.Config.Zhuge.AppSecret, 0), config.Config.App.Env == "prod")
 }
 func NewZhuGeService(client *zhuge.Client, open bool) *ZhuGeService {
 	return &ZhuGeService{client: client, Open: open}
@@ -56,9 +56,9 @@ func (srv ZhuGeService) TrackPoint(point srv_types.TrackPoint) {
 		},
 	}, map[string]interface{}{
 		"积分类型": point.PointType.RealText(),
-		"变动方式": util.Ternary(point.ChangeType == "dec", "积分消耗", "积分获取").String(),
-		"变动数量": util.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
-		"是否失败": util.Ternary(point.IsFail, "操作失败", "操作成功").String(),
+		"变动方式": commontool.Ternary(point.ChangeType == "dec", "积分消耗", "积分获取").String(),
+		"变动数量": commontool.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
+		"是否失败": commontool.Ternary(point.IsFail, "操作失败", "操作成功").String(),
 		"失败原因": point.FailMessage,
 		"备注":   point.AdditionInfo,
 	})
@@ -94,9 +94,9 @@ func (srv ZhuGeService) TrackPoints(point srv_types.TrackPoints) {
 		},
 	}, map[string]interface{}{
 		"积分类型": point.PointType,
-		"变动方式": util.Ternary(point.ChangeType == "dec", "积分消耗", "积分获取").String(),
-		"变动数量": util.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
-		"是否失败": util.Ternary(point.IsFail, "操作失败", "操作成功").String(),
+		"变动方式": commontool.Ternary(point.ChangeType == "dec", "积分消耗", "积分获取").String(),
+		"变动数量": commontool.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
+		"是否失败": commontool.Ternary(point.IsFail, "操作失败", "操作成功").String(),
 		"失败原因": point.FailMessage,
 	})
 
@@ -122,8 +122,8 @@ func (srv ZhuGeService) TrackBusinessPoints(point srv_types.TrackBusinessPoints)
 		},
 	}, map[string]interface{}{
 		"用户编号": point.Uid,
-		"变动类型": util.Ternary(point.ChangeType == "dec", "积分减少", "积分增加").String(),
-		"变动数量": util.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
+		"变动类型": commontool.Ternary(point.ChangeType == "dec", "积分减少", "积分增加").String(),
+		"变动数量": commontool.Ternary(point.ChangeType == "dec", -int(point.Value), int(point.Value)).Int(),
 		"用户昵称": point.Nickname,
 		"用户姓名": point.Username,
 		"部门":   point.Department,
@@ -152,8 +152,8 @@ func (srv ZhuGeService) TrackBusinessCredit(credit srv_types.TrackBusinessCredit
 		},
 	}, map[string]interface{}{
 		"用户编号": credit.Uid,
-		"变动类型": util.Ternary(credit.ChangeType == "dec", "积分减少", "积分增加").String(),
-		"变动数量": util.Ternary(credit.ChangeType == "dec", -int(credit.Value), int(credit.Value)).Int(),
+		"变动类型": commontool.Ternary(credit.ChangeType == "dec", "积分减少", "积分增加").String(),
+		"变动数量": commontool.Ternary(credit.ChangeType == "dec", -int(credit.Value), int(credit.Value)).Int(),
 		"用户昵称": credit.Nickname,
 		"用户姓名": credit.Username,
 		"部门":   credit.Department,
@@ -186,7 +186,7 @@ func (srv ZhuGeService) Track(eventName, openId string, attr map[string]interfac
 	err := srv.client.Track(types.Event{
 		Dt:    "evt",
 		Pl:    "js",
-		Debug: util.Ternary(srv.Debug, int(1), int(0)).Int(),
+		Debug: commontool.Ternary(srv.Debug, int(1), int(0)).Int(),
 		Ip:    ip,
 		Pr: types.EventJs{
 			Ct:   time.Now().UnixMilli(),
@@ -221,7 +221,7 @@ func (srv ZhuGeService) TrackWithErr(eventName, openId string, attr map[string]i
 	err := srv.client.Track(types.Event{
 		Dt:    "evt",
 		Pl:    "js",
-		Debug: util.Ternary(srv.Debug, int(1), int(0)).Int(),
+		Debug: commontool.Ternary(srv.Debug, int(1), int(0)).Int(),
 		Ip:    ip,
 		Pr: types.EventJs{
 			Ct:   time.Now().UnixMilli(),

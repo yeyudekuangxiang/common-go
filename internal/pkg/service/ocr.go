@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
@@ -10,9 +13,6 @@ import (
 	repo "mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
-	"mio/pkg/baidu"
 	"mio/pkg/errno"
 	"time"
 )
@@ -25,9 +25,9 @@ type OCRService struct {
 
 func NewDefaultImageClient() *baidu.ImageClient {
 	return &baidu.ImageClient{
-		AccessToken: baidu.NewAccessToken(baidu.AccessTokenConfig{
+		AccessToken: baidu.NewRedisAccessToken(baidu.RedisAccessTokenConfig{
 			RedisClient: app.Redis,
-			Prefix:      config.RedisKey.BaiDu,
+			Prefix:      config.RedisKey.BaiDuAccessToken,
 			AppKey:      config.Config.BaiDu.AppKey,
 			AppSecret:   config.Config.BaiDu.AppSecret,
 		}),
@@ -134,11 +134,11 @@ func (srv OCRService) ScanWithHash(imageUrl string, imageHash string) ([]string,
 	return result, nil
 }
 func (srv OCRService) GetImageHash(imageUrl string) (string, error) {
-	data, err := httputil.Get(imageUrl)
+	data, err := httptool.Get(imageUrl)
 	if err != nil {
 		return "", err
 	}
-	return encrypt.Sha256Byte(data), nil
+	return encrypttool.Sha256Byte(data), nil
 }
 func (srv OCRService) UpdateImageScanCount(imageHash string, imageUrl string, scanResult []string) (int, error) {
 	log, exist, err := srv.scanRepo.FindByHash(imageHash)

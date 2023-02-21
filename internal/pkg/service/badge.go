@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/randomtool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
@@ -13,7 +15,6 @@ import (
 	"mio/internal/pkg/service/event"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/timeutils"
 	"mio/pkg/errno"
 	"strconv"
 	"strings"
@@ -57,7 +58,7 @@ func (srv BadgeService) GenerateCode(certificateId string) (string, error) {
 	}
 	switch cert.Type {
 	case entity.CertTypeRandom:
-		return util.RandomStr(badgeCodeLength, util.RandomStrUpper), nil
+		return randomtool.RandomStr(badgeCodeLength, randomtool.RandomStrUpper), nil
 	case entity.CertTypeRule:
 		return srv.GenerateRuleCode(), nil
 	case entity.CertTypeStock:
@@ -71,7 +72,7 @@ func (srv BadgeService) GenerateCode(certificateId string) (string, error) {
 }
 func (srv BadgeService) GenerateRuleCode() string {
 	badge := srv.repo.FindLastWithType(entity.CertTypeRule)
-	currentDate := timeutils.NowDate().Format("20060102")
+	currentDate := timetool.NowDate().Format("20060102")
 
 	code := strings.Builder{}
 	code.WriteString(badgeCodePrefix)

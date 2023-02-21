@@ -1,6 +1,6 @@
 package entity
 
-import duibaApi "mio/pkg/duiba/api/model"
+import duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
 
 type DuiBaOrder struct {
 	ID               int64

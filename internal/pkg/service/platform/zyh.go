@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"mio/config"
 	"mio/internal/pkg/core/context"
 	entity "mio/internal/pkg/model/entity/activity"
@@ -12,7 +13,6 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service/srv_types"
 	util2 "mio/internal/pkg/util/encrypt"
-	"mio/internal/pkg/util/httputil"
 	"mio/pkg/errno"
 )
 
@@ -61,7 +61,7 @@ func (srv ZyhService) SendPoint(pointType string, openid string, point string) (
 	sign := util2.GetSign(params)
 	params["Signature"] = sign //strings.ToUpper()
 	url := srv.Domain
-	body, err := httputil.PostMapFrom(url, params)
+	body, err := httptool.PostMapFrom(url, params)
 	fmt.Printf("%s\n", body)
 	if err != nil {
 		return "30001", err
@@ -88,7 +88,7 @@ func (srv ZyhService) SendPointJb(pointType string, volId string, point string) 
 	sign := util2.GetSign(params)
 	params["Signature"] = sign //strings.ToUpper()
 	url := srv.Domain
-	body, err := httputil.PostMapFrom(url, params)
+	body, err := httptool.PostMapFrom(url, params)
 	fmt.Printf("%s\n", body)
 	if err != nil {
 		return "30001", err

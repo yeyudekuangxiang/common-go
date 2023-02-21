@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
-	"mio/internal/pkg/util/encrypt"
 	"mio/pkg/errno"
 	"reflect"
 	"sort"
@@ -121,7 +121,7 @@ func (srv RecycleService) CheckSign(params map[string]interface{}, secret string
 		signStr += v + "=" + util.InterfaceToString(params[v]) + ";"
 	}
 	//验证签名
-	signMd5 := encrypt.Md5(secret + signStr)
+	signMd5 := encrypttool.Md5(secret + signStr)
 	if signMd5 != sign {
 		return errno.ErrValidation
 	}
@@ -136,7 +136,7 @@ func (srv RecycleService) CheckFmySign(params FmySignParams, appId string, secre
 	marshal, _ := json.Marshal(params)
 	fmt.Printf("marshal:%s\n", marshal)
 	verifyData := rand1 + appId + string(marshal) + secret + rand2
-	md5Str := encrypt.Md5(verifyData)
+	md5Str := encrypttool.Md5(verifyData)
 	signMd5 := rand1 + md5Str[7:28] + rand2
 	//验证签名
 	if signMd5 != sign {
