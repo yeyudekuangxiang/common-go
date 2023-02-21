@@ -299,8 +299,8 @@ func (srv SubjectService) GetUserQuestionV2(dto srv_types.GetQuestionUserDTO) (*
 		CarbonCompletion:    carbonCompletion,
 		CarbonGroup:         srv.group(),
 		TodayCarbonClassify: todayCarbonClassify,
-		CarbonCountry:       6800,
-		CarbonGlobal:        4400,
+		CarbonCountry:       6800000,
+		CarbonGlobal:        4400000,
 	}, nil
 }
 
@@ -308,16 +308,16 @@ func (srv SubjectService) group() []srv_types.CarbonGroup {
 	carbonGroup := make([]srv_types.CarbonGroup, 0)
 	carbonGroup = append(carbonGroup, srv_types.CarbonGroup{
 		Key:   "绿色",
-		Value: 2000,
+		Value: 2000000,
 	}, srv_types.CarbonGroup{
 		Key:   "蓝色",
-		Value: 6000,
+		Value: 6000000,
 	}, srv_types.CarbonGroup{
 		Key:   "黄色",
-		Value: 12000,
+		Value: 12000000,
 	}, srv_types.CarbonGroup{
 		Key:   "红色",
-		Value: 24000,
+		Value: 24000000,
 	})
 	return carbonGroup
 }
