@@ -13,5 +13,5 @@ func Interaction(rk routerkey.BehaviorRouterKey, info usermsg.Interaction) error
 		app.Logger.Errorf("格式化回收数据异常 %+v %+v %+v\n", info, rk, err)
 		return err
 	}
-	return pdr.PublishDataLogErr(data, []string{string(rk)}, "lvmio")
+	return pdr.PublishDataLogErr(data, []string{string(rk)}, "userExchange")
 }
