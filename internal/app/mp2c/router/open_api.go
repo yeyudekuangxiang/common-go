@@ -40,7 +40,6 @@ func openRouter(router *gin.Engine) {
 		}
 
 		openRouter.GET("zyh", apiutil.Format(open.DefaultZyhController.Zyh))
-		//订单同步接口 （星星充电、快电）
 		openRouter.POST("sendpoint", apiutil.Format(open.DefaultZyhController.SendPoint))
 
 		oaRouter := openRouter.Group("/oa")
@@ -110,11 +109,11 @@ func openRouter(router *gin.Engine) {
 			openPlatformRouter.POST("/pre_point", apiutil.Format(open.DefaultPlatformController.PrePoint))                //第三方平台 预加积分
 			openPlatformRouter.POST("/get_pre_point", apiutil.Format(open.DefaultPlatformController.GetPrePointList))     //第三方平台 获取积分
 			openPlatformRouter.POST("/collect_pre_point", apiutil.Format(open.DefaultPlatformController.CollectPrePoint)) //第三方平台 消费积分
-			//第三方
-			openPlatformRouter.POST("/syncusr", apiutil.Format(open.DefaultPlatformController.Syncusr)) //注册回调
-			openPlatformRouter.POST("/recycle", apiutil.Format(open.DefaultRecycleController.Recycle))  //旧物回收
+			openPlatformRouter.POST("/syncusr", apiutil.Format(open.DefaultPlatformController.Syncusr))                   //注册回调
+			openPlatformRouter.POST("/recycle", apiutil.Format(open.DefaultRecycleController.Recycle))                    //旧物回收
 			//
 			openPlatformRouter.POST("/charge/ykc", apiutil.Format(open.DefaultChargeController.Ykc))
 		}
+
 	}
 }

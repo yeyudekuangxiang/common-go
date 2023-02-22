@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
 	point2 "gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -31,16 +32,17 @@ type ChargeController struct {
 func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	form := api.GetChargeForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		app.Logger.Errorf("charge/push 参数错误: %s", form)
 		return nil, err
 	}
 
 	ctx := context.NewMioContext()
+
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
 		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
+
 	//白名单验证
 	ip := c.ClientIP()
 	if err := service.DefaultBdSceneService.CheckWhiteList(ip, form.Ch); err != nil {
@@ -57,14 +59,15 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//通过手机号查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
+	userInfo, exist, err := service.DefaultUserService.GetUser(repository.GetUserBy{
 		Mobile: form.Mobile,
 		Source: entity.UserSourceMio,
 	})
-
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
 	//用户验证
-	if userInfo.ID <= 0 {
-		fmt.Println("charge 未找到用户 ", form)
+	if !exist {
 		return nil, errno.ErrCommon.WithMessage("未找到用户")
 	}
 
@@ -83,15 +86,22 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		Type:   string(typeString),
 		Note:   form.Ch + "#" + form.OutTradeNo,
 	})
+
 	if err != nil {
 		return nil, err
 	}
 
 	if by.ID != 0 {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
+		app.Logger.Infof("[%s] 重复提交订单", form.Ch)
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   string(typeString),
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
 
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
@@ -184,27 +194,34 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 
 //调用星星充电发券
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
-	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 {
-		fmt.Println("星星充电 发券start")
-		startTime, _ := time.ParseInLocation("2006-01-02", "2022-12-24", time.Local)
-		endTime, _ := time.ParseInLocation("2006-01-02", "2023-01-01", time.Local)
-		if platformKey == "lvmiao" && time.Now().After(startTime) && time.Now().Before(endTime) {
+	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 && platformKey == "lvmiao" {
+		rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx.Context, &activity.ActiveRuleReq{
+			Code: platformKey,
+		})
+		if err != nil {
+			app.Logger.Info(fmt.Printf("[%s]用户[%s]发券失败:%s\n", platformKey, userInfo.OpenId, err.Error()))
+			return
+		}
+		if !rule.GetExist() {
+			app.Logger.Info(fmt.Printf("[%s]用户[%s]发券失败:%s\n", platformKey, userInfo.OpenId, "无有效规则"))
+			return
+		}
+		startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
+		endTime := time.UnixMilli(rule.GetActivityRule().GetEndTime())
+		if time.Now().After(startTime) && time.Now().Before(endTime) {
 			starChargeService := star_charge.NewStarChargeService(ctx)
 			token, err := starChargeService.GetAccessToken()
 			if err != nil {
-				fmt.Printf("星星充电 获取token失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
 			//限制一次
 			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, endTime); err != nil {
-				fmt.Printf("星星充电 检查次数限制:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
 			//send coupon
 			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
-				fmt.Printf("星星充电 发券失败:%s\n", err.Error())
 				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
 				return
 			}
@@ -261,9 +278,6 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	params, _ := json.Marshal(form)
-	app.Logger.Infof("云快充 参数:%s", params)
-
 	ch := "ykc"
 	ctx := context.NewMioContext()
 
@@ -303,6 +317,13 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("重复订单")
 	}
 
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   tp,
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
+
 	//查询今日积分总量
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.ExternalUserId
@@ -324,7 +345,10 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	}
 
 	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
-
+	marshal, err := json.Marshal(form)
+	if err != nil {
+		app.Logger.Errorf("云快充 info:%s", err.Error())
+	}
 	//加积分
 	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point2.IncPointReq{
 		Openid:       userInfo.OpenId,
@@ -332,14 +356,13 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		BizId:        form.TradeSeq,
 		BizName:      "云快充订单同步",
 		ChangePoint:  uint64(thisPoint),
-		AdditionInfo: string(params),
+		AdditionInfo: string(marshal),
 	})
 	if err != nil {
 		app.Logger.Errorf("云快充 加积分失败:%s", err.Error())
 	}
 
 	//加碳量
-
 	pointDec := decimal.NewFromInt(int64(thisPoint))
 	electric := pointDec.Div(decimal.NewFromInt(10))
 	f, _ := electric.Float64()
@@ -348,7 +371,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		UserId:  userInfo.ID,
 		Type:    entity.CARBON_ECAR,
 		Value:   f,
-		Info:    string(params),
+		Info:    string(marshal),
 		AdminId: 0,
 		Ip:      "",
 	})

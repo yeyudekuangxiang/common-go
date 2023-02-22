@@ -41,6 +41,8 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+	ctx := context.NewMioContext()
+
 	if form.Type != "1" {
 		return nil, errno.ErrCommon.WithMessage("非回收订单")
 	}
@@ -59,7 +61,6 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	}
 
 	//new RecycleService
-	ctx := context.NewMioContext()
 	RecycleService := recycle.NewRecycleService(ctx)
 	TransActionLimitService := service.NewPointTransactionCountLimitService(ctx)
 	PointService := service.NewPointService(ctx)
@@ -73,10 +74,12 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	defer trackOola(form)
 
 	//通过openid查询用户
-	userInfo, _ := service.DefaultUserService.GetUserByOpenId(form.ClientId)
-	if userInfo.ID == 0 {
-		fmt.Printf("%s 未找到用户 %v", scene.Ch, form)
-		return nil, errno.ErrUserNotFound.WithCaller()
+	userInfo, exist, err := service.DefaultUserService.GetUser(repository.GetUserBy{OpenId: form.ClientId})
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+	if !exist {
+		return nil, errno.ErrUserNotFound
 	}
 
 	//查重
@@ -86,14 +89,21 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
-	//回调光环
-	go ctr.turnPlatform(userInfo, form)
-
 	//匹配大类型
 	typeName := RecycleService.GetType(form.ProductCategoryName)
 	if typeName == "" {
 		return nil, errno.ErrCommon.WithMessage("未识别回收分类")
 	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   string(typeName),
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
+
+	//回调光环
+	go ctr.turnPlatform(userInfo, form)
 
 	//查询今日该类型获取积分次数
 	err = RecycleService.CheckLimit(userInfo.OpenId, form.Name)
@@ -165,11 +175,16 @@ func (ctr RecycleController) GetOolaKey(c *gin.Context) (gin.H, error) {
 
 func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	// type fmy
-	form := api.RecycleFmyForm{}
+	form := RecycleFmyForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
 
+	ctx := context.NewMioContext()
+
+	if strings.ToUpper(form.Data.Status) != "COMPLETE" {
+		return nil, errno.ErrCommon.WithMessage("订单未完成")
+	}
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh("fmy")
 	if scene.Key == "" || scene.Key == "e" {
@@ -182,7 +197,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	ctx := context.NewMioContext()
+	//new RecycleService
 	RecycleService := recycle.NewRecycleService(ctx)
 	//校验sign
 	if err := RecycleService.CheckFmySign(dst, scene.AppId, scene.Key); err != nil {
@@ -200,13 +215,17 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	PointService := service.NewPointService(ctx)
 
 	//通过phone_number查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
+	userInfo, exist, err := service.DefaultUserService.GetUser(repository.GetUserBy{
 		Source: entity.UserSourceMio,
 		Mobile: form.Data.Phone,
 	})
 
-	if userInfo.ID == 0 {
-		return nil, errno.ErrUserNotFound.WithCaller()
+	if err != nil {
+		return nil, errno.ErrUserNotFound.WithMessage(err.Error())
+	}
+
+	if !exist {
+		return nil, errno.ErrUserNotFound
 	}
 
 	//默认只有衣物
@@ -217,6 +236,13 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.Data.OrderSn); err != nil {
 		return nil, err
 	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   string(typeName),
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
 
 	//查询今日该类型获取积分次数
 	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
@@ -315,6 +341,8 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	ctx := context.NewMioContext()
+
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
 	if scene.Key == "" || scene.Key == "e" {
@@ -349,14 +377,19 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrUserNotFound
 	}
 
-	ctx := context.NewMioContext()
-
 	//校验重复订单
 	RecycleService := recycle.NewRecycleService(ctx)
-
 	if err = RecycleService.CheckOrder(userInfo.OpenId, scene.Ch+"#"+form.OrderNo); err != nil {
 		return nil, errno.ErrExisting.WithMessage(fmt.Sprintf("重复订单:%s", form.OrderNo))
 	}
+
+	pt := RecycleService.GetPointType(scene.Ch)
+
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   string(pt),
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
 
 	//每日次数限制
 	keyPrefix := fmt.Sprintf("%s:%s:", config.RedisKey.NumberLimit, form.Ch)
@@ -395,7 +428,6 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrInternalServer
 	}
 	//加积分
-	pt := RecycleService.GetPointType(scene.Ch)
 	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       userInfo.OpenId,
 		Type:         pt,
@@ -465,7 +497,7 @@ func trackRecycle(req recycleReq) {
 		Sign:         req.Sign,
 	})
 }
-func trackFmy(form api.RecycleFmyForm) {
+func trackFmy(form RecycleFmyForm) {
 	_ = recyclepdr.Recycle(routerkey.RecycleFMY, recyclemsg.RecycleFmyInfo{
 		AppId:          form.AppId,
 		NotificationAt: form.NotificationAt,
@@ -499,7 +531,6 @@ func trackOola(form api.RecyclePushForm) {
 		Unit:                form.Unit,
 	})
 }
-
 func (ctr RecycleController) incPointForActivity(ctx context2.Context, params incPointForActivityParams) {
 	//检查活动
 	result, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{

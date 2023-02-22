@@ -1,7 +1,6 @@
 package open
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"mio/internal/app/mp2c/controller/api"
@@ -253,15 +252,41 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//查询用户
-	userInfo, _ := service.DefaultUserService.GetUserBy(repository.GetUserBy{
+	userInfo, exist, err := service.DefaultUserService.GetUser(repository.GetUserBy{
 		Mobile: form.Mobile,
 		Source: entity.UserSourceMio,
 	})
-
-	//用户验证
-	if userInfo.ID <= 0 {
-		return nil, errno.ErrCommon.WithMessage("未找到用户")
+	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
+	//用户验证
+	if !exist {
+		return nil, errno.ErrUserNotFound
+	}
+
+	//查重
+	transService := service.NewPointTransactionService(ctx)
+	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
+
+	by, err := transService.FindBy(repository.FindPointTransactionBy{
+		OpenId: userInfo.OpenId,
+		Type:   string(typeString),
+		Note:   form.PlatformKey + "#" + form.Tradeno,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if by.ID != 0 {
+		return nil, errno.ErrCommon.WithMessage("重复提交订单")
+	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:   form.PlatformKey,
+		Data: form,
+		Ip:   c.ClientIP(),
+	})
 
 	//风险登记验证
 	if userInfo.Risk >= 4 {
@@ -295,25 +320,6 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 				app.Logger.Errorf("callback jinhuaxing bind_success error:%s", err.Error())
 			}
 		}
-	}
-
-	//查重
-	transService := service.NewPointTransactionService(ctx)
-	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
-
-	by, err := transService.FindBy(repository.FindPointTransactionBy{
-		OpenId: userInfo.OpenId,
-		Type:   string(typeString),
-		Note:   form.PlatformKey + "#" + form.Tradeno,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if by.ID != 0 {
-		fmt.Println("charge 重复提交订单", form)
-		app.Logger.Info("charge 重复提交订单", form)
-		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
 	//预加积分

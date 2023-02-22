@@ -4,7 +4,7 @@ type FmySignParams struct {
 	AppId          string         `json:"app_id" form:"app_id" binding:"required"`
 	NotificationAt string         `json:"notification_at" form:"notification_at" binding:"required"`
 	Data           recycleFmyData `json:"data" form:"data"`
-	Sign           string         `json:"sign,omitempty"`
+	Sign           string         `json:"sign" form:"sign" binding:"required"`
 }
 
 type recycleFmyData struct {

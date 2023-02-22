@@ -70,25 +70,6 @@ type RecyclePushForm struct {
 	Unit                string `json:"unit,omitempty" form:"unit"`                               //与下单数量&重量关联的计量单位 如：公斤，个 等
 }
 
-type RecycleFmyForm struct {
-	AppId          string         `json:"app_id" form:"app_id" binding:"required"`
-	NotificationAt string         `json:"notification_at" form:"notification_at" binding:"required"`
-	Data           RecycleFmyData `json:"data" form:"data"`
-	Sign           string         `json:"sign" form:"sign" binding:"required"`
-}
-
-type RecycleFmyData struct {
-	OrderSn          string `json:"order_sn,omitempty" binding:"required"`
-	Status           string `json:"status,omitempty" binding:"required"`
-	Weight           string `json:"weight,omitempty"`
-	Reason           string `json:"reason,omitempty"`
-	CourierRealName  string `json:"courier_real_name,omitempty"`
-	CourierPhone     string `json:"courier_phone,omitempty"`
-	CourierJobNumber string `json:"courier_job_number,omitempty"`
-	Waybill          string `json:"waybill,omitempty"`
-	Phone            string `json:"phone,omitempty"`
-}
-
 type QueryTokenForm struct {
 	OperatorID     string `json:"operatorID" form:"operatorID" alias:"运营商标识" binding:"required"`
 	OperatorSecret string `json:"operatorSecret" form:"operatorSecret" alias:"运营商密钥" binding:"required"`
@@ -177,4 +158,12 @@ type UpdateIntroductionRequest struct {
 
 type HomePageRequest struct {
 	UserId int64 `json:"userId" form:"userId"`
+}
+
+type trackInteractionParam struct {
+	Tp         string      `json:"tp"`
+	Data       interface{} `json:"data"`
+	Ip         string      `json:"ip"`
+	Result     string      `json:"result"`
+	ResultCode string      `json:"resultCode"`
 }
