@@ -17,7 +17,7 @@ func (p CarbonTransactionType) Text() string {
 	case CARBON_STEP:
 		return "步行"
 	case CARBON_COFFEE_CUP:
-		return "自带咖啡杯"
+		return "自带杯"
 	case CARBON_BIKE_RIDE:
 		return "骑行"
 	case CARBON_ECAR:
