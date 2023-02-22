@@ -475,6 +475,13 @@ func (srv CarbonTransactionService) GetClassifyToday(uid int64) ([]api_types.Car
 		StartTime: time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
 		EndTime:   time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
 	})
+
+	//用默认的
+	if len(list) == 0 {
+		listNoDate := []api_types.CarbonTransactionClassifyList{{Key: entity.CARBON_BIKE_RIDE.Text(), Val: 0}, {Key: entity.CARBON_STEP.Text(), Val: 0}, {Key: entity.CARBON_ECAR.Text(), Val: 0}, {Key: entity.CARBON_COFFEE_CUP.Text(), Val: 0}, {Key: "其他", Val: 0}}
+		return listNoDate, nil
+	}
+
 	dateMap := make(map[entity.CarbonTransactionType]float64)
 	for _, by := range list {
 		dateMap[by.Type] = by.Sum
@@ -483,19 +490,19 @@ func (srv CarbonTransactionService) GetClassifyToday(uid int64) ([]api_types.Car
 	//map转化成切片,方便排序
 	tmpList := make([]KVPair, 0)
 
-	recyling := KVPair{
+	recycling := KVPair{
 		Key: entity.CARBON_RECYCLING,
 	}
 	for k, v := range dateMap {
 		if find := strings.Contains(string(k), "RECYCLING_"); find {
-			recyling.Val = recyling.Val + v
+			recycling.Val = recycling.Val + v
 			continue
 		}
 		tmpList = append(tmpList, KVPair{Key: k, Val: v})
 	}
 
-	if recyling.Val != 0 {
-		tmpList = append(tmpList, recyling)
+	if recycling.Val != 0 {
+		tmpList = append(tmpList, recycling)
 	}
 	//排序
 	sort.Slice(tmpList, func(i, j int) bool {

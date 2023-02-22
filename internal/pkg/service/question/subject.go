@@ -352,15 +352,15 @@ func (srv SubjectService) userGroup(carbon float64) (userGroup srv_types.UserGro
 		}
 	case carbon > 6000000 && carbon <= 12000000:
 		{
-			group = "减碳小白"
-			groupTips = "别躺平～美丽地球，没你真不行！"
+			group = "减碳新人"
+			groupTips = "环保不难，从小事做起，节能减排"
 			level = 2
 			break
 		}
 	case carbon > 12000000 && carbon <= 24000000:
 		{
-			group = "环保新人"
-			groupTips = "环保不难，从小事做起，节能减排！"
+			group = "减碳小白"
+			groupTips = "别躺平～美丽地球，没你真不行！！"
 			level = 3
 			break
 		}
