@@ -18,6 +18,7 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/duiba"
 	"mio/pkg/errno"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -322,8 +323,9 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 		break
 
 	case entity.DuiBaActivityCaronPkLuckyDrawActivity:
+		cid := strconv.FormatInt(activity.Cid, 10)
 		log, err := app.RpcService.CarbonPkRpcSrv.DetailCarbonPkRewardLog(mioContext.NewMioContext(), &carbonpk.DetailCarbonPkRewardReq{
-			RewardUrl: activity.ActivityUrl,
+			RewardUrl: "/pages/duiba_v2/duiba-share/index?activityId=" + activityId + "&cid=" + cid + "&bind=true&hideShare=false",
 			UserId:    userId,
 		})
 		if err != nil {
