@@ -100,6 +100,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 	case "carbonpk":
 		templateIds = append(templateIds, config.MessageTemplateIds.PunchClockRemind)
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitCarbonPkShow, time.Now().Format("20060102"))
+		return
 		break
 	default:
 		break
