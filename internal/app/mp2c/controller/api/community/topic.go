@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -348,9 +347,8 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 	}
 
 	if len(form.Images) > 1 {
-		reviewSrv := service.DefaultReviewService()
 		for i, imgUrl := range form.Images {
-			if err := reviewSrv.ReviewImage(baidu.ImageReviewParam{ImgUrl: imgUrl}); err != nil {
+			if err := validator.CheckMediaWithOpenId(user.OpenId, imgUrl); err != nil {
 				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
 				zhuGeAttr := make(map[string]interface{}, 0)
 				zhuGeAttr["场景"] = "发帖-图片内容审核"

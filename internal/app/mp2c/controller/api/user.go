@@ -243,7 +243,7 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 
 	if form.Avatar != "" {
-		err := service.DefaultReviewService().ReviewImage(baidu.ImageReviewParam{ImgUrl: form.Avatar})
+		err := validator.CheckMsgWithOpenId(user.OpenId, form.Avatar)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage("头像审核未通过")
 		}
