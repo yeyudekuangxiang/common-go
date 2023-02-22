@@ -507,13 +507,14 @@ func (srv CarbonTransactionService) GetClassifyToday(uid int64) ([]api_types.Car
 	total := 0.00 //总碳量
 	for i := range tmpList {
 		n := tmpList[len(tmpList)-1-i]
+		n.Val, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", n.Val), 64)
 		total += n.Val
 		if i == 0 {
 			ret = append(ret, api_types.CarbonTransactionClassifyList{
 				Val: n.Val,
 				Key: n.Key.Text(),
 			})
-		} else if i == 1 || i == 2 {
+		} else if i == 1 || i == 2 || i == 3 {
 			ret = append(ret, api_types.CarbonTransactionClassifyList{
 				Val: n.Val,
 				Key: n.Key.Text(),
@@ -522,6 +523,7 @@ func (srv CarbonTransactionService) GetClassifyToday(uid int64) ([]api_types.Car
 			other += n.Val
 		}
 	}
+	other, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", other), 64)
 	return append(ret, api_types.CarbonTransactionClassifyList{Key: "其他", Val: other}), nil
 }
 

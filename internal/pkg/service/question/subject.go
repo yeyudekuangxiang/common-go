@@ -229,16 +229,23 @@ func (srv SubjectService) GetUserQuestionV2(dto srv_types.GetQuestionUserDTO) (*
 	//用户碳量分类汇总
 	carbonClassify := srv.repoAnswer.GetUserAnswer(repotypes.GetQuestionUserCarbon{Uid: userId, QuestionId: dto.QuestionId})
 
-	var userCarbonClassify []srv_types.UserCarbonClassify
+	carbonClassifyMap := make(map[string]float64)
 	for _, answerStruct := range carbonClassify {
-		userCarbonClassify = append(userCarbonClassify, srv_types.UserCarbonClassify{
-			CategoryId:   qnrEntity.QuestionCategoryType(answerStruct.CategoryId),
-			Carbon:       util.CarbonToRate(answerStruct.Carbon),
-			CategoryName: qnrEntity.QuestionCategoryType(answerStruct.CategoryId).Text(),
-			CarbonValue:  answerStruct.Carbon,
-		})
+		carbonClassifyMap[answerStruct.CategoryId] = answerStruct.Carbon
 	}
+	var userCarbonClassify []srv_types.UserCarbonClassify
 
+	for _, v := range qnrEntity.QuestionCategoryTypeMap {
+		l, err := carbonClassifyMap[string(v)]
+		if err {
+			userCarbonClassify = append(userCarbonClassify, srv_types.UserCarbonClassify{
+				CategoryId:   v, //qnrEntity.QuestionCategoryType(v)
+				Carbon:       util.CarbonToRate(l),
+				CategoryName: v.Text(),
+				CarbonValue:  l,
+			})
+		}
+	}
 	//获取今日碳分类
 	todayCarbonClassify, err := service.NewCarbonTransactionService(context.NewMioContext()).GetClassifyToday(dto.UserId)
 	if err != nil {
