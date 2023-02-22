@@ -247,7 +247,7 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	if form.Avatar != "" {
 		err := validator.CheckMsgWithOpenId(user.OpenId, form.Avatar)
 		if err != nil {
-			return nil, errno.ErrCommon.WithMessage("头像审核未通过")
+			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 

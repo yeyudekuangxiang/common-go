@@ -107,16 +107,19 @@ func CheckMediaWithOpenId(openid, mediaUrl string) error {
 	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 		resp, err = app.Weapp.NewSecurity().MediaCheckAsync(req)
 		if err != nil {
+			app.Logger.Errorf("[图片审核失败]：%s\n", err.Error())
 			return false, err
 		}
 		return app.Weapp.IsExpireAccessToken(resp.ErrCode)
 	}, 1)
 
 	if err != nil {
+		app.Logger.Errorf("[图片审核失败]：%s\n", err.Error())
 		return err
 	}
 
 	if resp.ErrCode != 0 {
+		app.Logger.Errorf("[图片审核失败]：%s\n", err.Error())
 		return errors.New(resp.ErrMSG)
 	}
 
