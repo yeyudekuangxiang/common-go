@@ -75,7 +75,7 @@ type app struct {
 	UserRpc             rpcSetting `ini:"userRpc"`
 	ActivityCarbonPkRpc rpcSetting `ini:"activityCarbonPkRpc"`
 	BaiDuMap            baiDuMap   `ini:"baiduMap"`
-	Saas                saas       `ini:"sass"`
+	Saas                saas       `ini:"saas"`
 }
 
 type appSetting struct {
