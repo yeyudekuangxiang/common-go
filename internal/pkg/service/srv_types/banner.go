@@ -9,26 +9,26 @@ type GetBannerListDTO struct {
 }
 
 type CreateBannerDTO struct {
-	Scene    entity.BannerScene
-	Type     entity.BannerType
-	Status   entity.BannerStatus
-	Name     string
-	ImageUrl string
-	AppId    string
-	Sort     int
-	Redirect string
+	Scene    entity.BannerScene  `json:"scene"`
+	Type     entity.BannerType   `json:"type"`
+	Status   entity.BannerStatus `json:"status"`
+	Name     string              `json:"name"`
+	ImageUrl string              `json:"imageUrl"`
+	AppId    string              `json:"appId"`
+	Sort     int                 `json:"sort"`
+	Redirect string              `json:"redirect"`
 }
 
 type UpdateBannerDTO struct {
-	Id       int64
-	Scene    entity.BannerScene
-	Type     entity.BannerType
-	Status   entity.BannerStatus
-	Name     string
-	ImageUrl string
-	AppId    string
-	Sort     int
-	Redirect string
+	Id       int64               `json:"id"`
+	Scene    entity.BannerScene  `json:"scene"`
+	Type     entity.BannerType   `json:"type"`
+	Status   entity.BannerStatus `json:"status"`
+	Name     string              `json:"name"`
+	ImageUrl string              `json:"imageUrl"`
+	AppId    string              `json:"appId"`
+	Sort     int                 `json:"sort"`
+	Redirect string              `json:"redirect"`
 }
 
 type GetPageBannerDTO struct {
