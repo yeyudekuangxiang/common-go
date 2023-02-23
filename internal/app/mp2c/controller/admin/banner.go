@@ -42,7 +42,7 @@ func (ctl BannerController) Create(c *gin.Context) (gin.H, error) {
 		Status:   form.Status,
 	}
 	if form.Scene == "event" {
-		err := ctl.CreateSass(insertDate)
+		err := ctl.CreateSaas(insertDate)
 		if err != nil {
 			return nil, err
 		}
@@ -55,7 +55,7 @@ func (ctl BannerController) Create(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-type ListSassResponse struct {
+type ListSaasResponse struct {
 	Code       int         `json:"code"`
 	DetailCode interface{} `json:"detailCode"`
 	Message    string      `json:"message"`
@@ -75,7 +75,7 @@ type ListSassResponse struct {
 	Page interface{} `json:"page"`
 }
 
-type CreateSassResponse struct {
+type CreateSaasResponse struct {
 	Code       int         `json:"code"`
 	DetailCode interface{} `json:"detailCode"`
 	Message    string      `json:"message"`
@@ -83,13 +83,13 @@ type CreateSassResponse struct {
 	Page       interface{} `json:"page"`
 }
 
-func (ctl BannerController) CreateSass(insertDate srv_types.CreateBannerDTO) error {
-	body, err := httptool.PostJson(config.Config.Sass.Domain+"/api/mp2c/spu/public-welfare/banner/edit", insertDate)
+func (ctl BannerController) CreateSaas(insertDate srv_types.CreateBannerDTO) error {
+	body, err := httptool.PostJson(config.Config.Saas.Domain+"/api/mp2c/spu/public-welfare/banner/edit", insertDate)
 	if err != nil {
-		app.Logger.Errorf("banner同步Sass系统出错: post error %s", err.Error())
+		app.Logger.Errorf("banner同步Saas系统出错: post error %s", err.Error())
 		return err
 	}
-	response := CreateSassResponse{}
+	response := CreateSaasResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
@@ -101,13 +101,13 @@ func (ctl BannerController) CreateSass(insertDate srv_types.CreateBannerDTO) err
 	return nil
 }
 
-func (ctl BannerController) UpdateSass(insertDate srv_types.UpdateBannerDTO) error {
-	body, err := httptool.PostJson(config.Config.Sass.Domain+"/api/mp2c/spu/public-welfare/banner/edit", insertDate)
+func (ctl BannerController) UpdateSaas(insertDate srv_types.UpdateBannerDTO) error {
+	body, err := httptool.PostJson(config.Config.Saas.Domain+"/api/mp2c/spu/public-welfare/banner/edit", insertDate)
 	if err != nil {
-		app.Logger.Errorf("banner同步Sass系统出错: post error %s", err.Error())
+		app.Logger.Errorf("banner同步Saas系统出错: post error %s", err.Error())
 		return err
 	}
-	response := CreateSassResponse{}
+	response := CreateSaasResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
@@ -121,13 +121,13 @@ func (ctl BannerController) UpdateSass(insertDate srv_types.UpdateBannerDTO) err
 
 func (ctl BannerController) GetPageListSaas(insertDate srv_types.GetPageBannerDTO) ([]entity.Banner, int64, error) {
 	list := make([]entity.Banner, 0)
-	url := fmt.Sprintf("%s/api/mp2c/spu/public-welfare/banner/list?pageSize=%d&page=%d&name=%s&status=%d", config.Config.Sass.Domain, insertDate.Limit, insertDate.Offset, insertDate.Name, insertDate.Status)
+	url := fmt.Sprintf("%s/api/mp2c/spu/public-welfare/banner/list?pageSize=%d&page=%d&name=%s&status=%d", config.Config.Saas.Domain, insertDate.Limit, insertDate.Offset, insertDate.Name, insertDate.Status)
 	body, err := httptool.Get(url)
 	if err != nil {
-		app.Logger.Errorf("banner同步Sass系统出错: post error %s", err.Error())
+		app.Logger.Errorf("banner同步Saas系统出错: post error %s", err.Error())
 		return list, 0, err
 	}
-	response := ListSassResponse{}
+	response := ListSaasResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		fmt.Printf("Unmarshal body: %s\n", err.Error())
@@ -174,7 +174,7 @@ func (ctl BannerController) Update(c *gin.Context) (gin.H, error) {
 		Status:   form.Status,
 	}
 	if form.Scene == "event" {
-		err := ctl.UpdateSass(updateDate)
+		err := ctl.UpdateSaas(updateDate)
 		if err != nil {
 			return nil, err
 		}
