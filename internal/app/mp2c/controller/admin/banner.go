@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
+	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
@@ -83,7 +84,7 @@ type CreateSassResponse struct {
 }
 
 func (ctl BannerController) CreateSass(insertDate srv_types.CreateBannerDTO) error {
-	body, err := httptool.PostJson("https://apidev-welfare.miotech.com/api/mp2c/spu/public-welfare/banner/edit", insertDate)
+	body, err := httptool.PostJson(config.Config.Sass.Domain+"/api/mp2c/spu/public-welfare/banner/edit", insertDate)
 	if err != nil {
 		app.Logger.Errorf("banner同步Sass系统出错: post error %s", err.Error())
 		return err
@@ -101,7 +102,7 @@ func (ctl BannerController) CreateSass(insertDate srv_types.CreateBannerDTO) err
 }
 
 func (ctl BannerController) UpdateSass(insertDate srv_types.UpdateBannerDTO) error {
-	body, err := httptool.PostJson("https://apidev-welfare.miotech.com/api/mp2c/spu/public-welfare/banner/edit", insertDate)
+	body, err := httptool.PostJson(config.Config.Sass.Domain+"/api/mp2c/spu/public-welfare/banner/edit", insertDate)
 	if err != nil {
 		app.Logger.Errorf("banner同步Sass系统出错: post error %s", err.Error())
 		return err
@@ -120,7 +121,7 @@ func (ctl BannerController) UpdateSass(insertDate srv_types.UpdateBannerDTO) err
 
 func (ctl BannerController) GetPageListSaas(insertDate srv_types.GetPageBannerDTO) ([]entity.Banner, int64, error) {
 	list := make([]entity.Banner, 0)
-	url := fmt.Sprintf("https://apidev-welfare.miotech.com/api/mp2c/spu/public-welfare/banner/list?pageSize=%d&page=%d&name=%s&status=%d", insertDate.Limit, insertDate.Offset, insertDate.Name, insertDate.Status)
+	url := fmt.Sprintf("%s/api/mp2c/spu/public-welfare/banner/list?pageSize=%d&page=%d&name=%s&status=%d", config.Config.Sass.Domain, insertDate.Limit, insertDate.Offset, insertDate.Name, insertDate.Status)
 	body, err := httptool.Get(url)
 	if err != nil {
 		app.Logger.Errorf("banner同步Sass系统出错: post error %s", err.Error())
