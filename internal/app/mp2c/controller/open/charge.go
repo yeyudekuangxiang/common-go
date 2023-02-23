@@ -115,6 +115,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	go ctr.turnPlatform(userInfo, form)
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
+	carbonPoint := thisPoint
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
@@ -131,23 +132,24 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	app.Redis.Set(ctx, key, totalPoint, 24*36000*time.Second)
 
 	//加积分
-	pointService := service.NewPointService(ctx)
-	_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       userInfo.OpenId,
-		Type:         typeString,
-		ChangePoint:  int64(thisPoint),
-		BizId:        util.UUID(),
-		AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
-	})
-
-	if err != nil {
-		fmt.Println("charge 加积分失败 ", form)
+	if thisPoint != 0 {
+		pointService := service.NewPointService(ctx)
+		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       userInfo.OpenId,
+			Type:         typeString,
+			ChangePoint:  int64(thisPoint),
+			BizId:        util.UUID(),
+			AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+		})
+		if err != nil {
+			app.Logger.Errorf("[%s]加积分失败: %s; query: [%v]\n", form.Ch, err.Error(), form)
+		}
 	}
 
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" {
-		pointDec := decimal.NewFromInt(int64(thisPoint))
+		pointDec := decimal.NewFromInt(int64(carbonPoint))
 		electric := pointDec.Div(decimal.NewFromInt(10))
 		f, _ := electric.Float64()
 		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
@@ -333,6 +335,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	thisPoint0 := form.ChargedPower
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
+	carbonPoint := thisPoint
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		return nil, nil
@@ -349,6 +352,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Errorf("云快充 info:%s", err.Error())
 	}
+
 	//加积分
 	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point2.IncPointReq{
 		Openid:       userInfo.OpenId,
@@ -359,24 +363,24 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		AdditionInfo: string(marshal),
 	})
 	if err != nil {
-		app.Logger.Errorf("云快充 加积分失败:%s", err.Error())
+		app.Logger.Errorf(fmt.Sprintf("[ykc]加积分失败: %s; query: %v", err.Error(), fmt.Sprint(marshal)))
 	}
 
 	//加碳量
-	pointDec := decimal.NewFromInt(int64(thisPoint))
+	pointDec := decimal.NewFromInt(int64(carbonPoint))
 	electric := pointDec.Div(decimal.NewFromInt(10))
 	f, _ := electric.Float64()
 	_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 		OpenId:  userInfo.OpenId,
 		UserId:  userInfo.ID,
-		Type:    entity.CARBON_ECAR,
+		Type:    entity.CARBON_YKC,
 		Value:   f,
 		Info:    string(marshal),
 		AdminId: 0,
 		Ip:      "",
 	})
 	if errCarbon != nil {
-		app.Logger.Errorf("云快充 加碳失败:%s", err.Error())
+		app.Logger.Errorf(fmt.Sprintf("[ykc]加碳失败: %s; query: %v", err.Error(), fmt.Sprint(marshal)))
 	}
 
 	return gin.H{}, nil

@@ -176,7 +176,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	if response.SubCode != "0000" {
-		app.Logger.Errorf("亿通行 grantV2 err: %s\n", response.SubMessage)
+		app.Logger.Errorf("亿通行 grantV2 resp: %s, openId:%s\n", respData, sceneUser.OpenId)
 		return "", errors.New(response.SubMessage)
 	}
 
