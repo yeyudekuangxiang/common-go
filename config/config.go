@@ -31,6 +31,11 @@ var Config = app{
 	//args
 	MqArgs:   mqArgs{},
 	BaiDuMap: baiDuMap{},
+	Saas:     saas{},
+}
+
+type saas struct {
+	Domain string
 }
 
 type baiDuMap struct {
@@ -70,6 +75,7 @@ type app struct {
 	UserRpc             rpcSetting `ini:"userRpc"`
 	ActivityCarbonPkRpc rpcSetting `ini:"activityCarbonPkRpc"`
 	BaiDuMap            baiDuMap   `ini:"baiduMap"`
+	Saas                saas       `ini:"saas"`
 }
 
 type appSetting struct {
