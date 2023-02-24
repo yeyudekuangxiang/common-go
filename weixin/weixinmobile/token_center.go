@@ -25,18 +25,21 @@ func NewRedisAccessTokenCenterFromOpenId(c RedisAccessTokenCenterConf, openId st
 	return &RedisAccessTokenCenter{RedisAccessTokenCenterConf: c, openId: openId}
 }
 
-func NewRedisAccessTokenCenterFromCode(c RedisAccessTokenCenterConf, code string) (*RedisAccessTokenCenter, error) {
+type UserInfo struct {
+}
+
+func NewRedisAccessTokenCenterFromCode(c RedisAccessTokenCenterConf, code string) (center *RedisAccessTokenCenter, openId string, err error) {
 	resp, err := Code2AccessToken(c.AppId, c.AppSecret, code)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.New(fmt.Sprintf("code:%d message:%s", resp.Errcode, resp.Errmsg))
+		return nil, "", errors.New(fmt.Sprintf("code:%d message:%s", resp.Errcode, resp.Errmsg))
 	}
 	client := NewRedisAccessTokenCenterFromOpenId(c, resp.Openid)
 	client.RedisClient.SetEX(context.Background(), client.refreshAccessTokenKey(), resp.RefreshToken, 30*time.Hour*24)
 	client.RedisClient.SetEX(context.Background(), client.accessTokenKey(), resp.AccessToken, time.Duration(resp.ExpiresIn)*time.Second)
-	return client, nil
+	return client, resp.Openid, nil
 }
 
 var (
