@@ -115,7 +115,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	go ctr.turnPlatform(userInfo, form)
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
-	carbonPoint := thisPoint
+	carbonPoint := thisPoint0
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
@@ -149,9 +149,8 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" {
-		pointDec := decimal.NewFromInt(int64(carbonPoint))
-		electric := pointDec.Div(decimal.NewFromInt(10))
-		f, _ := electric.Float64()
+		carbonDec := decimal.NewFromInt(int64(carbonPoint))
+		f, _ := carbonDec.Float64()
 		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 			OpenId:  userInfo.OpenId,
 			UserId:  userInfo.ID,
@@ -305,7 +304,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	//查重
 	var bizId, tp string
 	bizId = form.TradeSeq
-	tp = string(entity.Point_YKC)
+	tp = string(entity.POINT_YKC)
 	by, err := app.RpcService.PointRpcSrv.FindPointTransaction(ctx.Context, &point2.FindPointTransactionReq{
 		BizId: &bizId,
 		Type:  &tp,
@@ -332,10 +331,9 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	cmd := app.Redis.Get(ctx, key)
 
 	lastPoint, _ := strconv.Atoi(cmd.Val())
-	thisPoint0 := form.ChargedPower
 
-	thisPoint := int(thisPoint0 * float64(scene.Override))
-	carbonPoint := thisPoint
+	thisPoint := int(form.ChargedPower * float64(scene.Override))
+	carbonPoint := form.ChargedPower
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		return nil, nil
@@ -353,24 +351,26 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		app.Logger.Errorf("云快充 info:%s", err.Error())
 	}
 
-	//加积分
-	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point2.IncPointReq{
-		Openid:       userInfo.OpenId,
-		Type:         string(entity.Point_YKC),
-		BizId:        form.TradeSeq,
-		BizName:      "云快充订单同步",
-		ChangePoint:  uint64(thisPoint),
-		AdditionInfo: string(marshal),
-	})
-	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("[ykc]加积分失败: %s; query: %v", err.Error(), fmt.Sprint(marshal)))
+	if thisPoint != 0 {
+		//加积分
+		_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point2.IncPointReq{
+			Openid:       userInfo.OpenId,
+			Type:         string(entity.POINT_YKC),
+			BizId:        form.TradeSeq,
+			BizName:      "云快充订单同步",
+			ChangePoint:  uint64(thisPoint),
+			AdditionInfo: string(marshal),
+		})
+		if err != nil {
+			app.Logger.Errorf(fmt.Sprintf("[ykc]加积分失败: %s; query: %v", err.Error(), fmt.Sprint(marshal)))
+		}
+
 	}
 
-	//加碳量
-	pointDec := decimal.NewFromInt(int64(carbonPoint))
-	electric := pointDec.Div(decimal.NewFromInt(10))
-	f, _ := electric.Float64()
-	_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+	//加减碳量
+	carbonDec := decimal.NewFromInt(int64(carbonPoint))
+	f, _ := carbonDec.Float64()
+	_, errCarbon := service.NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
 		OpenId:  userInfo.OpenId,
 		UserId:  userInfo.ID,
 		Type:    entity.CARBON_YKC,

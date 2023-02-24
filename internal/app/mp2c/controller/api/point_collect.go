@@ -1,11 +1,7 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"mio/internal/app/mp2c/controller/api/api_types"
-	"mio/internal/pkg/core/context"
-	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
 )
@@ -44,18 +40,7 @@ func (PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		point, err = service.DefaultPointCollectService.CollectReducePlastic(user.OpenId, user.Risk, form.ImgUrl)
 	}
 	carbon := 0.0
-	if err == nil {
-		//发碳量
-		carbon, _ = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
-			OpenId:  user.OpenId,
-			UserId:  user.ID,
-			Type:    entity.CarbonTransactionType(form.PointCollectType),
-			Value:   1,
-			Info:    fmt.Sprintf("{imageUrl=%s}", form.ImgUrl),
-			AdminId: 0,
-			Ip:      ctx.ClientIP(),
-		})
-	}
+
 	return gin.H{
 		"point":  point,
 		"carbon": carbon,
