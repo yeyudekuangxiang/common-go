@@ -551,20 +551,13 @@ func (srv CarbonTransactionService) AddHistory() {
 }
 
 // 根据type获取当日减碳量
-func (srv CarbonTransactionService) GetTodayCarbonByType(openId string, tps []string) float64 {
-	results, err := srv.repo.GetSumTodayCarbonByType(openId, tps)
+func (srv CarbonTransactionService) GetTodayCarbonByType(openId string, tps []entity.CarbonTransactionType) ([]entity.CarbonTransaction, int64, error) {
+	results, count, err := srv.repo.GetSumTodayCarbonByType(openId, tps)
 	if err != nil {
-		return 0
+		return nil, 0, err
 	}
-	var carbon decimal.Decimal
-	if len(results) == 0 {
-		return 0
+	if count == 0 {
+		return nil, 0, nil
 	}
-
-	for _, item := range results {
-		val := decimal.NewFromFloat(item.Value)
-		carbon = carbon.Add(val)
-	}
-	f, _ := carbon.Round(2).Float64()
-	return f
+	return results, count, nil
 }

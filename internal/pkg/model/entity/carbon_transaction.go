@@ -128,25 +128,26 @@ func (p CarbonTransactionType) RealText() string {
 }
 
 const (
-	CARBON_STEP                      CarbonTransactionType = "STEP"                   //步行
-	CARBON_COFFEE_CUP                CarbonTransactionType = "COFFEE_CUP"             //自带咖啡杯
-	CARBON_BIKE_RIDE                 CarbonTransactionType = "BIKE_RIDE"              //骑行
-	CARBON_ECAR                      CarbonTransactionType = "ECAR"                   //电动车主
-	CARBON_POWER_REPLACE             CarbonTransactionType = "POWER_REPLACE"          //换电
-	CARBON_REDUCE_PLASTIC            CarbonTransactionType = "REDUCE_PLASTIC"         //环保减塑
-	CARBON_RECYCLING_CLOTHING        CarbonTransactionType = "RECYCLING_CLOTHING"     //旧物回收 oola衣物鞋帽
-	CARBON_RECYCLING_DIGITAL         CarbonTransactionType = "RECYCLING_COMPUTER"     //旧物回收 oola数码
-	CARBON_RECYCLING_APPLIANCE       CarbonTransactionType = "RECYCLING_APPLIANCE"    //旧物回收 oola家电
-	CARBON_RECYCLING_BOOK            CarbonTransactionType = "RECYCLING_BOOK"         //旧物回收 oola书籍
-	CARBON_FMY_RECYCLING_CLOTHING    CarbonTransactionType = "RECYCLING_FMY_CLOTHING" //旧物回收 fmy衣物鞋帽
-	CARBON_JHX                       CarbonTransactionType = "JHX"                    //金华行
-	CARBON_RECYCLING                 CarbonTransactionType = "RECYCLING"              //旧物回收总的
-	CARBON_RECYCLING_AIHUISHOU       CarbonTransactionType = "RECYCLING_AIHUISHOU"    //爱回收
-	CARBON_RECYCLING_SHISHANGHUISHOU CarbonTransactionType = "RECYCLING_SHISHANGHUISHOU"
-	CARBON_RECYCLING_DANGDANGYIXIA   CarbonTransactionType = "RECYCLING_DANGDANGYIXIA"
-	CARBON_YTX                       CarbonTransactionType = "YTX"     //亿通行
-	CARBON_CYCLING                   CarbonTransactionType = "CYCLING" //java 骑行
-	CARBON_YKC                       CarbonTransactionType = "YKC"     //云快充
+	CARBON_STEP                      CarbonTransactionType = "STEP"                      //步行
+	CARBON_COFFEE_CUP                CarbonTransactionType = "COFFEE_CUP"                //自带咖啡杯
+	CARBON_BIKE_RIDE                 CarbonTransactionType = "BIKE_RIDE"                 //骑行
+	CARBON_ECAR                      CarbonTransactionType = "ECAR"                      //电动车主
+	CARBON_POWER_REPLACE             CarbonTransactionType = "POWER_REPLACE"             //换电
+	CARBON_FAST_ELECTRICITY          CarbonTransactionType = "FAST_ELECTRICITY"          //快电
+	CARBON_REDUCE_PLASTIC            CarbonTransactionType = "REDUCE_PLASTIC"            //环保减塑
+	CARBON_RECYCLING_CLOTHING        CarbonTransactionType = "RECYCLING_CLOTHING"        //旧物回收 oola衣物鞋帽
+	CARBON_RECYCLING_DIGITAL         CarbonTransactionType = "RECYCLING_COMPUTER"        //旧物回收 oola数码
+	CARBON_RECYCLING_APPLIANCE       CarbonTransactionType = "RECYCLING_APPLIANCE"       //旧物回收 oola家电
+	CARBON_RECYCLING_BOOK            CarbonTransactionType = "RECYCLING_BOOK"            //旧物回收 oola书籍
+	CARBON_FMY_RECYCLING_CLOTHING    CarbonTransactionType = "RECYCLING_FMY_CLOTHING"    //旧物回收 fmy衣物鞋帽
+	CARBON_JHX                       CarbonTransactionType = "JHX"                       //金华行
+	CARBON_RECYCLING                 CarbonTransactionType = "RECYCLING"                 //旧物回收总的
+	CARBON_RECYCLING_AIHUISHOU       CarbonTransactionType = "RECYCLING_AIHUISHOU"       //爱回收
+	CARBON_RECYCLING_SHISHANGHUISHOU CarbonTransactionType = "RECYCLING_SHISHANGHUISHOU" //时尚回收
+	CARBON_RECYCLING_DANGDANGYIXIA   CarbonTransactionType = "RECYCLING_DANGDANGYIXIA"   //铛铛一下
+	CARBON_YTX                       CarbonTransactionType = "YTX"                       //亿通行
+	CARBON_CYCLING                   CarbonTransactionType = "CYCLING"                   //java 骑行
+	CARBON_YKC                       CarbonTransactionType = "YKC"                       //云快充
 
 )
 
