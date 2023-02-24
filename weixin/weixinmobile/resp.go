@@ -1,4 +1,4 @@
-package wexinmobile
+package weixinmobile
 
 type errorResp struct {
 	Errcode int    `json:"errcode"`

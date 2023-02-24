@@ -1,4 +1,4 @@
-package wexinmobile
+package weixinmobile
 
 import (
 	"context"
