@@ -115,7 +115,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	go ctr.turnPlatform(userInfo, form)
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
-	carbonPoint := thisPoint
+	carbonPoint := thisPoint0
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
@@ -334,7 +334,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	thisPoint0 := form.ChargedPower
 
 	thisPoint := int(thisPoint0 * float64(scene.Override))
-	carbonPoint := thisPoint
+	carbonPoint := thisPoint0
 	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		return nil, nil
