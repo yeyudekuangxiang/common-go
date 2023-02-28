@@ -327,6 +327,7 @@ type GetRedeemCodeBy struct {
 type GetScenePrePoint struct {
 	PlatformKey    string    `json:"platformKey"`
 	PlatformUserId string    `json:"platformUserId"`
+	TradeNo        string    `json:"tradeno"`
 	OpenId         string    `json:"openId"`
 	StartTime      time.Time `json:"startTime"`
 	EndTime        time.Time `json:"endTime"`

@@ -183,7 +183,6 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	ctx := context.NewMioContext()
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -212,20 +211,17 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
-	//查重
-	PointTransService := service.NewPointTransactionService(ctx)
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
-	by, err := PointTransService.FindBy(repository.FindPointTransactionBy{
-		Type: string(typeString),
-		Note: form.PlatformKey + "#" + form.TradeNo,
+	//幂等
+	_, exist, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
+		PlatformKey: form.PlatformKey,
+		TradeNo:     form.TradeNo,
 	})
-
 	if err != nil {
-		return nil, errno.ErrCommon.WithMessage(err.Error())
+		return nil, err
 	}
-
-	if by.ID != 0 {
+	if exist {
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
@@ -397,7 +393,8 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 
 	//获取pre_point数据 one limit
 	id, _ := strconv.ParseInt(form.PrePointId, 10, 64)
-	one, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
+
+	one, exist, err := repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
 		Id:             id,
@@ -405,6 +402,9 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 	})
 
 	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+	if !exist {
 		return nil, errno.ErrRecordNotFound
 	}
 
