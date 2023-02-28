@@ -15,7 +15,7 @@ type (
 		FindAllByOpenId(openId string) ([]entity.BdScenePrePoint, int64, error)
 		FindAllByPlatformKey(platformKey string) ([]entity.BdScenePrePoint, int64, error)
 		FindBy(by GetScenePrePoint) ([]entity.BdScenePrePoint, int64, error)
-		FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, error)
+		FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, bool, error)
 		Create(data *entity.BdScenePrePoint) error
 		Save(data *entity.BdScenePrePoint) error
 		Updates(cond GetScenePrePoint, up map[string]interface{}) error
@@ -123,21 +123,24 @@ func (m defaultBdScenePrePointModel) FindBy(by GetScenePrePoint) ([]entity.BdSce
 	return items, total, nil
 }
 
-func (m defaultBdScenePrePointModel) FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, error) {
+func (m defaultBdScenePrePointModel) FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, bool, error) {
 	var item entity.BdScenePrePoint
 
 	query := m.ctx.DB.Where("id = ?", by.Id)
 	if by.OpenId != "" {
-		query.Where("open_id = ?", by.OpenId)
+		query = query.Where("open_id = ?", by.OpenId)
 	}
 	if by.PlatformUserId != "" {
-		query.Where("platform_user_id = ?", by.PlatformUserId)
+		query = query.Where("platform_user_id = ?", by.PlatformUserId)
 	}
 	if by.PlatformKey != "" {
-		query.Where("platform_key = ?", by.PlatformKey)
+		query = query.Where("platform_key = ?", by.PlatformKey)
 	}
 	if by.Status != 0 {
-		query.Where("status = ?", by.Status)
+		query = query.Where("status = ?", by.Status)
+	}
+	if by.TradeNo != "" {
+		query = query.Where("tradeno = ?", by.TradeNo)
 	}
 
 	err := query.First(&item).Error
@@ -145,9 +148,9 @@ func (m defaultBdScenePrePointModel) FindOne(by GetScenePrePoint) (entity.BdScen
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
-		return entity.BdScenePrePoint{}, err
+		return entity.BdScenePrePoint{}, false, nil
 	}
-	return item, nil
+	return item, true, nil
 }
 
 func (m defaultBdScenePrePointModel) Create(data *entity.BdScenePrePoint) error {

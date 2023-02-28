@@ -224,7 +224,6 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 		app.Logger.Errorf("参数错误: %s", form)
 		return nil, err
 	}
-	ctx := context.NewMioContext()
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -265,19 +264,15 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	//查重
-	transService := service.NewPointTransactionService(ctx)
-	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
-
-	by, err := transService.FindBy(repository.FindPointTransactionBy{
-		OpenId: userInfo.OpenId,
-		Type:   string(typeString),
-		Note:   form.PlatformKey + "#" + form.Tradeno,
+	_, exist, err = repository.DefaultBdScenePrePointRepository.FindOne(repository.GetScenePrePoint{
+		PlatformKey: form.PlatformKey,
+		TradeNo:     form.Tradeno,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	if by.ID != 0 {
+	if exist {
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
