@@ -45,6 +45,10 @@ func (repo BdSceneRepository) SceneToCarbonType(ch string) entity.CarbonTransact
 		return entity.CARBON_JHX
 	case "yitongxing":
 		return entity.CARBON_YTX
+	case "fastElectricity":
+		return entity.CARBON_FAST_ELECTRICITY
+	case "ykc":
+		return entity.CARBON_YKC
 	}
 
 	return ""
