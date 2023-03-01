@@ -133,6 +133,7 @@ const (
 	CARBON_BIKE_RIDE                 CarbonTransactionType = "BIKE_RIDE"              //骑行
 	CARBON_ECAR                      CarbonTransactionType = "ECAR"                   //电动车主
 	CARBON_POWER_REPLACE             CarbonTransactionType = "POWER_REPLACE"          //换电
+	CARBON_FAST_ELECTRICITY          CarbonTransactionType = "FAST_ELECTRICITY"       //快电
 	CARBON_REDUCE_PLASTIC            CarbonTransactionType = "REDUCE_PLASTIC"         //环保减塑
 	CARBON_RECYCLING_CLOTHING        CarbonTransactionType = "RECYCLING_CLOTHING"     //旧物回收 oola衣物鞋帽
 	CARBON_RECYCLING_DIGITAL         CarbonTransactionType = "RECYCLING_COMPUTER"     //旧物回收 oola数码
