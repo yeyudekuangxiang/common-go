@@ -4,7 +4,7 @@ package handler
 import (
 	"net/http"{{if .hasTimeout}}
 	"time"{{end}}
-
+    {{if .hasJwtMiddleware}}"{{.projectPath}}/{{.jwtMiddlewarePath}}"{{end}}
 	{{.importPackages}}
 )
 
