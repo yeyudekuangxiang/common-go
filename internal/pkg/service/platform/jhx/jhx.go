@@ -353,7 +353,7 @@ func (srv Service) CollectPoint(collect Collect) (*entity.BdScenePrePoint, error
 	//获取pre_point数据 one limit
 	id, _ := strconv.ParseInt(collect.PrePointId, 10, 64)
 
-	one, err := srv.prePoint.FindOne(repository.GetScenePrePoint{
+	one, b, err := srv.prePoint.FindOne(repository.GetScenePrePoint{
 		PlatformKey:    collect.PlatformKey,
 		PlatformUserId: collect.MemberId,
 		Id:             id,
@@ -361,6 +361,10 @@ func (srv Service) CollectPoint(collect Collect) (*entity.BdScenePrePoint, error
 	})
 
 	if err != nil {
+		return nil, errno.ErrCommon.WithMessage(err.Error())
+	}
+
+	if !b {
 		return nil, errno.ErrRecordNotFound
 	}
 
