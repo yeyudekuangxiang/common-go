@@ -117,10 +117,28 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	thisPoint := int(thisPoint0 * float64(scene.Override))
 	carbonPoint := thisPoint0
 	totalPoint := lastPoint + thisPoint
+	//加碳量
+	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	if typeCarbonStr != "" {
+		carbonDec := decimal.NewFromInt(int64(carbonPoint))
+		f, _ := carbonDec.Float64()
+		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  userInfo.OpenId,
+			UserId:  userInfo.ID,
+			Type:    typeCarbonStr,
+			Value:   f,
+			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
+			AdminId: 0,
+			Ip:      "",
+		})
+		if errCarbon != nil {
+			fmt.Println("charge 加碳失败", form)
+		}
+	}
+
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
 		return nil, nil
-		//return nil, errors.New("充电获取积分已达到上限")
 	}
 
 	if totalPoint > scene.PointLimit {
@@ -143,25 +161,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		})
 		if err != nil {
 			app.Logger.Errorf("[%s]加积分失败: %s; query: [%v]\n", form.Ch, err.Error(), form)
-		}
-	}
-
-	//加碳量
-	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
-	if typeCarbonStr != "" {
-		carbonDec := decimal.NewFromInt(int64(carbonPoint))
-		f, _ := carbonDec.Float64()
-		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
-			OpenId:  userInfo.OpenId,
-			UserId:  userInfo.ID,
-			Type:    typeCarbonStr,
-			Value:   f,
-			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
-			AdminId: 0,
-			Ip:      "",
-		})
-		if errCarbon != nil {
-			fmt.Println("charge 加碳失败", form)
 		}
 	}
 
