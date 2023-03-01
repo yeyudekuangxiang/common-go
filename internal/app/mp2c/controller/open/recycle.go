@@ -105,40 +105,39 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	//回调光环
 	go ctr.turnPlatform(userInfo, form)
 
-	//查询今日该类型获取积分次数
-	err = RecycleService.CheckLimit(userInfo.OpenId, form.Name)
-	if err != nil {
-		return nil, err
-	}
-
 	//本次可得积分
 	currPoint, _ := RecycleService.GetPoint(form.Name, form.Qua)
-	//本次可得减碳量
-	currCo2, _ := RecycleService.GetCo2(form.Name, form.Qua)
 	//本月可获得积分上限
 	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
 
 	//最终本次回收可获得积分
-	point, err := TransActionLimitService.CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, monthPoint)
+	lastPoint, err := TransActionLimitService.CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, monthPoint)
 	if err != nil {
 		return nil, err
 	}
-	//加积分
-	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       userInfo.OpenId,
-		Type:         typeName,
-		ChangePoint:  point,
-		BizId:        util.UUID(),
-		AdditionInfo: form.OrderNo + "#" + strconv.FormatFloat(currCo2, 'f', 2, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
-		Note:         scene.Ch + "#" + form.OrderNo,
-	})
-	if err != nil {
-		fmt.Println("oola 旧物回收 加积分失败 ", form)
-	}
+	//本次可得减碳量
+	currCo2, _ := RecycleService.GetCo2(form.Name, form.Qua)
 	carbonString := fmt.Sprintf("%f", currCo2)
 
+	//查询今日该类型获取积分次数
+	err = RecycleService.CheckLimit(userInfo.OpenId, form.Name)
+	if err == nil {
+		//加积分
+		_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       userInfo.OpenId,
+			Type:         typeName,
+			ChangePoint:  lastPoint,
+			BizId:        util.UUID(),
+			AdditionInfo: form.OrderNo + "#" + strconv.FormatFloat(currCo2, 'f', 2, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
+			Note:         scene.Ch + "#" + form.OrderNo,
+		})
+		if err != nil {
+			app.Logger.Errorf("[oola]旧物回收加积分失败: %s; query:[%v]", err.Error(), form)
+		}
+	}
+
 	//发碳量
-	carbon, _ := service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
+	_, _ = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
 		OpenId:  userInfo.OpenId,
 		UserId:  userInfo.ID,
 		Type:    entity.CarbonTransactionType(typeName),
@@ -147,8 +146,6 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		AdminId: 0,
 		Ip:      "",
 	})
-	println(carbon)
-
 	return gin.H{}, nil
 }
 
@@ -244,35 +241,37 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		Ip:   c.ClientIP(),
 	})
 
-	//查询今日该类型获取积分次数
-	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
-	if err != nil {
-		return nil, err
-	}
-
 	//本次可得积分
 	currPoint, _ := RecycleService.GetPoint(typeText, form.Data.Weight)
 	//本次可得减碳量
 	currCo2, _ := RecycleService.GetCo2(typeText, form.Data.Weight)
+	carbonString := fmt.Sprintf("%f", currCo2)
+
 	//本月可获得积分上限
 	monthPoint, _ := RecycleService.GetMaxPointByMonth(typeName)
 
 	//最终本次回收可获得积分
-	point, err := TransActionLimitService.CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, monthPoint)
+	lastPoint, err := TransActionLimitService.CheckMaxPointByMonth(typeName, userInfo.OpenId, currPoint, monthPoint)
 	if err != nil {
 		return nil, err
 	}
-	//加积分
-	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       userInfo.OpenId,
-		Type:         entity.POINT_FMY_RECYCLING_CLOTHING,
-		ChangePoint:  point,
-		BizId:        util.UUID(),
-		AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.Data.Phone,
-		Note:         scene.Ch + "#" + form.Data.OrderSn,
-	})
 
-	carbonString := fmt.Sprintf("%f", currCo2)
+	//查询今日该类型获取积分次数
+	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
+	if err == nil {
+		//加积分
+		_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       userInfo.OpenId,
+			Type:         entity.POINT_FMY_RECYCLING_CLOTHING,
+			ChangePoint:  lastPoint,
+			BizId:        util.UUID(),
+			AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.Data.Phone,
+			Note:         scene.Ch + "#" + form.Data.OrderSn,
+		})
+		if err != nil {
+			app.Logger.Errorf("[fmy]旧物回收加积分失败: %s; query:[%v]", err.Error(), form)
+		}
+	}
 
 	//发碳量
 	_, _ = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
@@ -285,9 +284,6 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		Ip:      "",
 	})
 
-	if err != nil {
-		fmt.Println("fmy 旧物回收 加积分失败 ", form)
-	}
 	return gin.H{}, nil
 }
 
@@ -391,6 +387,24 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		Ip:   c.ClientIP(),
 	})
 
+	//计算积分
+	PointService := service.NewPointService(ctx)
+	currPoint, _ := RecycleService.GetPointV2(form.Category, form.Number, form.Name) //本次可得积分
+	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number, form.Name)     //本次可得减碳量
+
+	//发碳量
+	ct := RecycleService.GetCarbonType(scene.Ch)
+	_, err = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
+		OpenId: userInfo.OpenId,
+		UserId: userInfo.ID,
+		Type:   ct,
+		Value:  currCo2,
+		Info:   fmt.Sprint(params),
+	})
+	if err != nil {
+		app.Logger.Errorf(fmt.Sprintf("[%s]旧物回收加减碳量失败: %s", form.Ch, err.Error()))
+	}
+
 	//每日次数限制
 	keyPrefix := fmt.Sprintf("%s:%s:", config.RedisKey.NumberLimit, form.Ch)
 	PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), scene.Override, app.Redis, keyPrefix, limit.PeriodAlign())
@@ -401,14 +415,8 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	}
 
 	if resNumber != 1 && resNumber != 2 {
-		app.Logger.Infof("旧物回收: ch:%s user:%s 超过每日次数上限", scene.Ch, form.MemberId)
 		return nil, errno.ErrLimit.WithMessage("超过每日次数上限")
 	}
-
-	//计算积分
-	PointService := service.NewPointService(ctx)
-	currPoint, _ := RecycleService.GetPointV2(form.Category, form.Number, form.Name) //本次可得积分
-	currCo2, _ := RecycleService.GetCo2V2(form.Category, form.Number, form.Name)     //本次可得减碳量
 
 	//每月分数上限 (按分类分别计算)
 	maxPoint, err := RecycleService.GetMaxPoint(form.Category)
@@ -427,32 +435,21 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrInternalServer
 	}
-	//加积分
-	_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       userInfo.OpenId,
-		Type:         pt,
-		ChangePoint:  current,
-		BizId:        form.OrderNo,
-		AdditionInfo: fmt.Sprint(params),
-		Note:         scene.Ch + "#" + form.OrderNo,
-	})
-	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("%s 增加积分失败: err:%s; form:%s", form.Ch, err.Error(), fmt.Sprint(params)))
+	if current != 0 {
+		//加积分
+		_, err = PointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       userInfo.OpenId,
+			Type:         pt,
+			ChangePoint:  current,
+			BizId:        form.OrderNo,
+			AdditionInfo: fmt.Sprint(params),
+			Note:         scene.Ch + "#" + form.OrderNo,
+		})
+		if err != nil {
+			app.Logger.Errorf(fmt.Sprintf("[%s]旧物回收加积分失败: %s; query:%v", form.Ch, err.Error(), fmt.Sprint(params)))
+		}
 	}
 
-	//发碳量
-	ct := RecycleService.GetCarbonType(scene.Ch)
-	_, err = service.NewCarbonTransactionService(context.NewMioContext()).CreateV2(api_types.CreateCarbonTransactionDto{
-		OpenId: userInfo.OpenId,
-		UserId: userInfo.ID,
-		Type:   ct,
-		Value:  currCo2,
-		Info:   fmt.Sprint(params),
-	})
-
-	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("增加减碳量失败:%s", err.Error()))
-	}
 	//活动
 	go func(userId int64, openId, Ch, orderNo, memberId, orderCreateTime, orderCompleteTime string) {
 		defer func() {
