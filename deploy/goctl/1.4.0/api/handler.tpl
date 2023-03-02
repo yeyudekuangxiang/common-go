@@ -16,7 +16,7 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		{{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
+		{{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx, r)
 		{{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}&req{{end}})
 		{{if .HasResp}}result.HttpResult(r, w, resp, err){{else}}result.HttpResult(r, w, nil, err){{end}}
 	}
