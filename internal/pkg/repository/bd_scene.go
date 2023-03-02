@@ -32,7 +32,7 @@ func (repo BdSceneRepository) SceneToType(ch string) entity.PointTransactionType
 	case "yitongxing":
 		return entity.POINT_YTX
 	case "ykc":
-		return entity.Point_YKC
+		return entity.POINT_YKC
 	}
 	return entity.POINT_ECAR
 }

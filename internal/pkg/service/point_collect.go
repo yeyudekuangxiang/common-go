@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -157,9 +158,6 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	if err != nil {
 		return 0, err
 	}
-	if !ok {
-		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
-	}
 
 	valid, result, err := srv.validateBikeRideImage(imageUrl)
 	if err != nil {
@@ -168,25 +166,39 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	if !valid {
 		return 0, errno.ErrCommon.WithMessage("不是有效的单车图片")
 	}
-
-	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
-		OpenId:          openId,
-		TransactionType: entity.POINT_BIKE_RIDE,
-		Info:            fmt.Sprintf("bikeRide=%v", result),
+	ctx := context.NewMioContext()
+	var point int
+	//减碳量
+	_, err = NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
+		OpenId: openId,
+		Type:   entity.CARBON_BIKE_RIDE,
+		Value:  1,
+		Info:   fmt.Sprintf("%s", result),
 	})
 	if err != nil {
-		app.Logger.Error("添加骑行更酷记录失败", openId, imageUrl, err)
+		app.Logger.Error("添加骑行更酷减碳量失败", openId, imageUrl, err)
+	}
+	if ok {
+		_, err = NewPointCollectHistoryService(ctx).CreateHistory(CreateHistoryParam{
+			OpenId:          openId,
+			TransactionType: entity.POINT_BIKE_RIDE,
+			Info:            fmt.Sprintf("bikeRide=%v", result),
+		})
+		if err != nil {
+			app.Logger.Error("添加骑行更酷记录失败", openId, imageUrl, err)
+		}
+
+		point = entity.PointCollectValueMap[entity.POINT_BIKE_RIDE]
+		_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			Type:         entity.POINT_BIKE_RIDE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(point),
+			AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+		})
 	}
 
-	value := entity.PointCollectValueMap[entity.POINT_BIKE_RIDE]
-	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       openId,
-		Type:         entity.POINT_BIKE_RIDE,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(value),
-		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
-	})
-	return value, err
+	return point, err
 }
 
 func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUrl string) (int, error) {
@@ -203,9 +215,6 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 	if err != nil {
 		return 0, err
 	}
-	if !ok {
-		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
-	}
 
 	valid, result, err := srv.validateCoffeeCupImage(imageUrl)
 	if err != nil {
@@ -214,25 +223,38 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 	if !valid {
 		return 0, errno.ErrCommon.WithMessage("不是有效的自带杯图片")
 	}
-
-	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
-		OpenId:          openId,
-		TransactionType: entity.POINT_COFFEE_CUP,
-		Info:            fmt.Sprintf("coffeeCup=%v", result),
+	ctx := context.NewMioContext()
+	var point int
+	//减碳量
+	_, err = NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
+		OpenId: openId,
+		Type:   entity.CARBON_COFFEE_CUP,
+		Value:  1,
+		Info:   fmt.Sprintf("%s", result),
 	})
 	if err != nil {
-		app.Logger.Error("添加自带咖啡杯记录失败", openId, imageUrl, err)
+		app.Logger.Error("添加骑行更酷减碳量失败", openId, imageUrl, err)
+	}
+	if ok {
+		_, err = NewPointCollectHistoryService(ctx).CreateHistory(CreateHistoryParam{
+			OpenId:          openId,
+			TransactionType: entity.POINT_COFFEE_CUP,
+			Info:            fmt.Sprintf("coffeeCup=%v", result),
+		})
+		if err != nil {
+			app.Logger.Error("添加自带咖啡杯记录失败", openId, imageUrl, err)
+		}
+		point = entity.PointCollectValueMap[entity.POINT_COFFEE_CUP]
+		_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			Type:         entity.POINT_COFFEE_CUP,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(point),
+			AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+		})
 	}
 
-	value := entity.PointCollectValueMap[entity.POINT_COFFEE_CUP]
-	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       openId,
-		Type:         entity.POINT_COFFEE_CUP,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(value),
-		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
-	})
-	return value, err
+	return point, err
 }
 
 func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imageUrl string) (int, error) {
@@ -249,10 +271,7 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 	if err != nil {
 		return 0, err
 	}
-	if !ok {
-		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
-	}
-
+	var point int
 	valid, result, err := srv.validatePowerReplaceImage(imageUrl)
 	if err != nil {
 		return 0, err
@@ -260,25 +279,27 @@ func (srv PointCollectService) CollectPowerReplace(openId string, risk int, imag
 	if !valid {
 		return 0, errno.ErrCommon.WithMessage("不是有效的图片")
 	}
+	if ok {
+		_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
+			OpenId:          openId,
+			TransactionType: entity.POINT_POWER_REPLACE,
+			Info:            fmt.Sprintf("powerReplace=%v", result),
+		})
+		if err != nil {
+			app.Logger.Error("添加电车换电记录失败", openId, imageUrl, err)
+		}
 
-	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
-		OpenId:          openId,
-		TransactionType: entity.POINT_POWER_REPLACE,
-		Info:            fmt.Sprintf("powerReplace=%v", result),
-	})
-	if err != nil {
-		app.Logger.Error("添加电车换电记录失败", openId, imageUrl, err)
+		point := entity.PointCollectValueMap[entity.POINT_POWER_REPLACE]
+		_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			Type:         entity.POINT_POWER_REPLACE,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(point),
+			AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+		})
 	}
 
-	value := entity.PointCollectValueMap[entity.POINT_POWER_REPLACE]
-	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       openId,
-		Type:         entity.POINT_POWER_REPLACE,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(value),
-		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
-	})
-	return value, err
+	return point, err
 }
 
 func (srv PointCollectService) CollectReducePlastic(openId string, risk int, imageUrl string) (int, error) {
@@ -296,9 +317,6 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 	if err != nil {
 		return 0, err
 	}
-	if !ok {
-		return 0, errno.ErrCommon.WithMessage("达到当日该类别最大积分限制")
-	}
 
 	valid, result, err := srv.validateReducePlasticImage(imageUrl)
 	if err != nil {
@@ -308,22 +326,37 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 		return 0, errno.ErrCommon.WithMessage("不是有效的图片")
 	}
 
-	_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
-		OpenId:          openId,
-		TransactionType: entity.POINT_REDUCE_PLASTIC,
-		Info:            fmt.Sprintf("reducePlastic=%v", result),
+	ctx := context.NewMioContext()
+	var point int
+	//减碳量
+	_, err = NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
+		OpenId: openId,
+		Type:   entity.CARBON_REDUCE_PLASTIC,
+		Value:  1,
+		Info:   fmt.Sprintf("%s", result),
 	})
 	if err != nil {
-		app.Logger.Error("添加环保减塑记录失败", openId, imageUrl, err)
+		app.Logger.Error("添加骑行更酷减碳量失败", openId, imageUrl, err)
+	}
+	if ok {
+		_, err = NewPointCollectHistoryService(context.NewMioContext()).CreateHistory(CreateHistoryParam{
+			OpenId:          openId,
+			TransactionType: entity.POINT_REDUCE_PLASTIC,
+			Info:            fmt.Sprintf("reducePlastic=%v", result),
+		})
+		if err != nil {
+			app.Logger.Error("添加环保减塑记录失败", openId, imageUrl, err)
+		}
+
+		point = entity.PointCollectValueMap[entity.POINT_REDUCE_PLASTIC]
+		_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			Type:         entity.POINT_REDUCE_PLASTIC,
+			BizId:        util.UUID(),
+			ChangePoint:  int64(point),
+			AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+		})
 	}
 
-	value := entity.PointCollectValueMap[entity.POINT_REDUCE_PLASTIC]
-	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
-		OpenId:       openId,
-		Type:         entity.POINT_REDUCE_PLASTIC,
-		BizId:        util.UUID(),
-		ChangePoint:  int64(value),
-		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
-	})
-	return value, err
+	return point, err
 }

@@ -48,7 +48,7 @@ func (c *defaultClientHandle) powerReplace() error {
 		if err != nil {
 			return err
 		}
-		kwh, _ := fromString.Float64() //本次碳量
+		kwh, _ := fromString.Float64()
 		//发碳量
 		_, _ = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 			OpenId:  c.clientHandle.OpenId,
@@ -66,7 +66,7 @@ func (c *defaultClientHandle) powerReplace() error {
 		fmt.Printf("error: %s", err.Error())
 		return err
 	}
-	data, _, err := c.getTodayData([]string{c.clientHandle.OpenId}, []entity.PointTransactionType{c.clientHandle.Type})
+	data, _, err := c.getPointTodayData([]string{c.clientHandle.OpenId}, []entity.PointTransactionType{c.clientHandle.Type})
 	if err != nil {
 		return err
 	}
