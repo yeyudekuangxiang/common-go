@@ -12,7 +12,7 @@ type QuizQuestionService struct {
 
 func (srv QuizQuestionService) GetDailyQuestions(num int) ([]entity.QuizQuestion, error) {
 	list := make([]entity.QuizQuestion, 0)
-	err := app.DB.Order("random() asc").Limit(num).Find(&list).Error
+	err := app.DB.Order("random()").Limit(num).Find(&list).Error
 	if err != nil {
 		panic(err)
 	}

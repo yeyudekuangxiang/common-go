@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/shopspring/decimal"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
 	point2 "gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/internal/app/mp2c/controller/api"
@@ -103,10 +102,10 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		Ip:   c.ClientIP(),
 	})
 
-	totalPower, _ := strconv.ParseFloat(form.TotalPower, 64)
-
 	//回调光环
 	go ctr.turnPlatform(userInfo, form)
+
+	totalPower, _ := strconv.ParseFloat(form.TotalPower, 64)
 
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
@@ -130,7 +129,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	key := timeStr + scene.Ch + form.Mobile
 	cmd := app.Redis.Get(ctx, key)
 	lastPoint, _ := strconv.Atoi(cmd.Val())
-
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
 		return nil, nil
@@ -314,11 +312,6 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("重复订单")
 	}
 
-	marshal, err := json.Marshal(form)
-	if err != nil {
-		app.Logger.Errorf("云快充 info:%s", err.Error())
-	}
-
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
 		Tp:   tp,
@@ -326,20 +319,22 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		Ip:   c.ClientIP(),
 	})
 
+	info, _ := json.Marshal(form)
 	//加减碳量
-	carbonDec := decimal.NewFromInt(int64(form.ChargedPower))
-	f, _ := carbonDec.Float64()
-	_, errCarbon := service.NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
-		OpenId:  userInfo.OpenId,
-		UserId:  userInfo.ID,
-		Type:    entity.CARBON_YKC,
-		Value:   f,
-		Info:    string(marshal),
-		AdminId: 0,
-		Ip:      "",
-	})
-	if errCarbon != nil {
-		app.Logger.Errorf(fmt.Sprintf("[ykc]加碳失败: %s; query: %v", err.Error(), fmt.Sprint(marshal)))
+	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
+	if typeCarbonStr != "" && form.ChargedPower != 0 {
+		_, errCarbon := service.NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
+			OpenId:  userInfo.OpenId,
+			UserId:  userInfo.ID,
+			Type:    entity.CARBON_YKC,
+			Value:   form.ChargedPower,
+			Info:    string(info),
+			AdminId: 0,
+			Ip:      "",
+		})
+		if errCarbon != nil {
+			app.Logger.Errorf(fmt.Sprintf("[ykc]加碳失败: %s; query: %v", err.Error(), fmt.Sprint(info)))
+		}
 	}
 
 	//查询今日积分总量
@@ -348,12 +343,12 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	cmd := app.Redis.Get(ctx, key)
 
 	lastPoint, _ := strconv.Atoi(cmd.Val())
-
-	thisPoint := int(form.ChargedPower * float64(scene.Override))
-	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		return nil, nil
 	}
+
+	thisPoint := int(form.ChargedPower * float64(scene.Override))
+	totalPoint := lastPoint + thisPoint
 
 	if totalPoint > scene.PointLimit {
 		fmt.Printf("%s 充电量限制修正 thisPoint:%d, lastPoint:%d", ch, thisPoint, lastPoint)
@@ -371,12 +366,11 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 			BizId:        form.TradeSeq,
 			BizName:      "云快充订单同步",
 			ChangePoint:  uint64(thisPoint),
-			AdditionInfo: string(marshal),
+			AdditionInfo: string(info),
 		})
 		if err != nil {
-			app.Logger.Errorf(fmt.Sprintf("[ykc]加积分失败: %s; query: %v", err.Error(), fmt.Sprint(marshal)))
+			app.Logger.Errorf(fmt.Sprintf("[ykc]加积分失败: %s; query: %v", err.Error(), fmt.Sprint(info)))
 		}
-
 	}
 
 	return gin.H{}, nil
