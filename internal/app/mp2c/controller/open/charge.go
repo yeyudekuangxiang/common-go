@@ -130,13 +130,13 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	cmd := app.Redis.Get(ctx, key)
 
 	lastPoint, _ := strconv.Atoi(cmd.Val())
-	thisPoint := int(totalPower * float64(scene.Override))
-	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
 		return nil, nil
 	}
 
+	thisPoint := int(totalPower * float64(scene.Override))
+	totalPoint := lastPoint + thisPoint
 	if totalPoint > scene.PointLimit {
 		fmt.Println("charge 充电量限制修正 ", form, thisPoint, lastPoint)
 		thisPoint = scene.PointLimit - lastPoint
@@ -321,7 +321,6 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	})
 
 	info, _ := json.Marshal(form)
-
 	//加减碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" && form.ChargedPower != 0 {
@@ -345,12 +344,12 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	cmd := app.Redis.Get(ctx, key)
 
 	lastPoint, _ := strconv.Atoi(cmd.Val())
-	thisPoint := int(form.ChargedPower * float64(scene.Override))
-	totalPoint := lastPoint + thisPoint
 	if lastPoint >= scene.PointLimit {
 		return nil, nil
 	}
 
+	thisPoint := int(form.ChargedPower * float64(scene.Override))
+	totalPoint := lastPoint + thisPoint
 	if totalPoint > scene.PointLimit {
 		fmt.Printf("%s 充电量限制修正 thisPoint:%d, lastPoint:%d", ch, thisPoint, lastPoint)
 		thisPoint = scene.PointLimit - lastPoint
@@ -372,7 +371,6 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		if err != nil {
 			app.Logger.Errorf(fmt.Sprintf("[ykc]加积分失败: %s; query: %v", err.Error(), fmt.Sprint(info)))
 		}
-
 	}
 
 	return gin.H{}, nil
