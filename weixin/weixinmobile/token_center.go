@@ -66,7 +66,7 @@ func (r RedisAccessTokenCenter) AccessToken() (token string, expireIn time.Time,
 	}
 
 	t, err := r.RedisClient.PTTL(context.Background(), r.accessTokenKey()).Result()
-	if err != nil || err != redis.Nil {
+	if err != nil && err != redis.Nil {
 		return "", time.Time{}, err
 	}
 	return token, time.Now().Add(t), nil
