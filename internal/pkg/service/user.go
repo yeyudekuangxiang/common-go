@@ -139,9 +139,8 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 	}
 
 	return util2.CreateToken(auth.User{
-		ID:        user.ID,
-		Mobile:    user.PhoneNumber,
-		CreatedAt: model.Time{Time: time.Now()},
+		ID:     user.ID,
+		Mobile: user.PhoneNumber,
 	})
 }
 
