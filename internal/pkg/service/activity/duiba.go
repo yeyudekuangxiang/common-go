@@ -325,7 +325,7 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	case entity.DuiBaActivityCaronPkLuckyDrawActivity:
 		cid := strconv.FormatInt(activity.Cid, 10)
 		log, err := app.RpcService.CarbonPkRpcSrv.DetailCarbonPkRewardLog(mioContext.NewMioContext(), &carbonpk.DetailCarbonPkRewardReq{
-			RewardUrl: "/pages/duiba_v2/duiba-share/index?activityId=" + activityId + "&cid=" + cid + "&bind=true&hideShare=false",
+			RewardUrl: "/pages/duiba_v2/duiba/index?activityId=" + activityId + "&cid=" + cid + "&bind=true&hideShare=false",
 			UserId:    userId,
 		})
 		if err != nil {
