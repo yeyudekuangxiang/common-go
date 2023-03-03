@@ -41,9 +41,8 @@ to quickly create a Cobra application.`,
 		switch t {
 		case "user":
 			token, err = util.CreateToken(auth.User{
-				ID:        id,
-				Mobile:    "",
-				CreatedAt: model.Time{},
+				ID:     id,
+				Mobile: "",
 			})
 		case "admin":
 			token, err = util.CreateToken(auth.Admin{
