@@ -147,7 +147,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 	url := srv.option.Domain + "/markting_redenvelopegateway/redenvelope/grantV2"
 	body, err := httptool.PostJson(url, grantV2Request)
-	app.Logger.Infof("亿通行 grantV2 返回 : %s", body)
+	app.Logger.Infof("亿通行 grantV2 返回 : %s, openId: %s", body, user.OpenId)
 	if err != nil {
 		return "", err
 	}
@@ -159,14 +159,12 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		return "", err
 	}
 
-	respData, _ := json.Marshal(response)
-
 	err = activity.NewYtxLogRepository(srv.ctx).Save(&entityActivity.YtxLog{
 		OrderNo:        response.SubData.OrderNo,
 		OpenId:         sceneUser.OpenId,
 		PlatformUserId: sceneUser.PlatformUserId,
 		Amount:         amount,
-		AdditionalInfo: string(respData),
+		AdditionalInfo: string(body),
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
@@ -176,7 +174,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	}
 
 	if response.SubCode != "0000" {
-		app.Logger.Errorf("亿通行 grantV2 resp: %s, openId:%s\n", respData, sceneUser.OpenId)
+		app.Logger.Errorf("亿通行 发放红包失败: %s; openId: %s", string(body), user.OpenId)
 		return "", errors.New(response.SubMessage)
 	}
 
