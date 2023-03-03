@@ -8,21 +8,21 @@ import (
 	"strings"
 )
 
-type SmsClient struct {
+type MarketTemplateSmsClient struct {
 	Account  string
 	Password string
 	BaseUrl  string
 }
 
-func NewSmsClient(account string, password string, BaseUrl string) *SmsClient {
-	return &SmsClient{
+func NewMarketTemplateSmsClient(account string, password string, baseUrl string) *MarketTemplateSmsClient {
+	return &MarketTemplateSmsClient{
 		Account:  account,
 		Password: password,
-		BaseUrl:  BaseUrl,
+		BaseUrl:  baseUrl,
 	}
 }
 
-type SmsReturn struct {
+type MarketTemplateSmsReturn struct {
 	Code       string `json:"code"`
 	FailNum    string `json:"failNum"`
 	SuccessNum string `json:"successNum"`
@@ -31,19 +31,27 @@ type SmsReturn struct {
 	ErrorMsg   string `json:"errorMsg"`
 }
 
-func (c *SmsClient) Send(mobile string, content string) (*SmsReturn, error) {
+func (c *MarketTemplateSmsClient) Send(phone string, templateContent string, msg string) (smsReturn *SmsReturn, err error) {
+	params := ""
+	if msg == "" {
+		params = phone //组装 18840853003,小李,1;
+	} else {
+		params = phone + "," + msg + ";" //组装 18840853003,小李,1;
+	}
+
 	url := c.BaseUrl
 	method := "POST"
 	payload := strings.NewReader(`{
     "account": "` + c.Account + `",
     "password": "` + c.Password + `", //需要加入K8S
-    "msg": "` + content + `",
-    "phone": "` + mobile + `",
+    "msg": "` + templateContent + `",
+	"params":"` + params + `",
     "sendtime": "201704101400",
     "report": "true",
     "extend": "555",
     "uid": "321abc"
 }`)
+
 	fmt.Println(payload)
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
