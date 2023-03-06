@@ -13,6 +13,7 @@ func TestBuildQuery(t *testing.T) {
 	}
 	assert.Equal(t, "age=18&name=test&sex=1", BuildQuery(m))
 }
+
 func TestMapTo(t *testing.T) {
 	s := struct {
 		Name string `json:"name"`
