@@ -26,13 +26,11 @@ func NewSmsClient(account string, password string, BaseUrl string) *SmsClient {
 }
 
 type SmsReturn struct {
-	errorResp
-	Code       string `json:"code"`
+	ErrorResp
 	FailNum    string `json:"failNum"`
 	SuccessNum string `json:"successNum"`
 	MsgId      string `json:"msgId"`
 	Time       string `json:"time"`
-	ErrorMsg   string `json:"errorMsg"`
 }
 
 func (c *SmsClient) Send(mobile string, content string, sign string) (*SmsReturn, error) {
