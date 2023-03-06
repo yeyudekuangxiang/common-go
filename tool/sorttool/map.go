@@ -71,7 +71,7 @@ func sortMap(m interface{}, f func(key interface{}), sortF func(key1, key2 inter
 		return
 	}
 	sort.Slice(keys, func(i, j int) bool {
-		if keys[i].Kind() != keys[2].Kind() {
+		if keys[i].Kind() != keys[0].Kind() {
 			return false
 		}
 		switch keys[i].Kind() {
