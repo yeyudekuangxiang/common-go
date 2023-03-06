@@ -44,7 +44,7 @@ func TestSign(t *testing.T) {
 		Password: "8Xx53be5pXc568",
 	}
 	contentV4 := "很遗憾，由于【{$var}】，你并未通过绿喵社区的乐活家认证申请。践行可持续生活方式，绿喵与你同行~退订回T"
-	_, err = cV4.SendTemplateSms("18840852848", contentV4, "【绿喵mio】", []string{"6767"})
+	_, err = cV4.SendTemplate("18840852848", contentV4, "【绿喵mio】", []string{"6767"})
 	if err != nil {
 		return
 	}

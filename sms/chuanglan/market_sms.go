@@ -75,7 +75,7 @@ func (c *MarketSmsClient) Send(mobile string, content string, sign string) (*Sms
 	return ret, err
 }
 
-func (c *MarketSmsClient) SendTemplateSms(phone string, templateContent string, sign string, paramsSlice []string) (smsReturn *SmsReturn, err error) {
+func (c *MarketSmsClient) SendTemplate(phone string, templateContent string, sign string, paramsSlice []string) (smsReturn *SmsReturn, err error) {
 	url := domain + queryMarketTemplate
 	params := ""
 	if len(paramsSlice) == 0 {
