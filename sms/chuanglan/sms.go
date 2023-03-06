@@ -18,7 +18,7 @@ type SmsClient struct {
 	Password string
 }
 
-func NewSmsClient(account string, password string, BaseUrl string) *SmsClient {
+func NewSmsClient(account string, password string) *SmsClient {
 	return &SmsClient{
 		Account:  account,
 		Password: password,
@@ -32,6 +32,8 @@ type SmsReturn struct {
 	MsgId      string `json:"msgId"`
 	Time       string `json:"time"`
 }
+
+//发验证码短信 mobile 手机号 content 短信内容  sign 签名，不填默认是【绿喵mio】企业是【企业员工碳减排管理平台】
 
 func (c *SmsClient) Send(mobile string, content string, sign string) (*SmsReturn, error) {
 	url := domain + query
@@ -67,5 +69,5 @@ func (c *SmsClient) Send(mobile string, content string, sign string) (*SmsReturn
 	if err != nil {
 		return nil, err
 	}
-	return ret, err
+	return ret, nil
 }

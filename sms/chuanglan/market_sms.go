@@ -17,14 +17,12 @@ const (
 type MarketSmsClient struct {
 	Account  string
 	Password string
-	BaseUrl  string
 }
 
-func NewMarketSmsClient(account string, password string, baseUrl string) *MarketSmsClient {
+func NewMarketSmsClient(account string, password string) *MarketSmsClient {
 	return &MarketSmsClient{
 		Account:  account,
 		Password: password,
-		BaseUrl:  baseUrl,
 	}
 }
 
@@ -36,7 +34,9 @@ type MarketSmsReturn struct {
 	Time       string `json:"time"`
 }
 
-func (c *MarketSmsClient) Send(mobile string, content string, sign string) (*SmsReturn, error) {
+//发放营销短信 mobile 手机号 content 短信内容 sign 签名，不填默认是【绿喵mio】
+
+func (c *MarketSmsClient) Send(mobile string, content string, sign string) (*MarketSmsReturn, error) {
 	url := domain + queryMarket
 	params := make(map[string]string, 0)
 	//请登录zz.253.com获取API账号、密码以及短信发送的URL
@@ -65,15 +65,17 @@ func (c *MarketSmsClient) Send(mobile string, content string, sign string) (*Sms
 	if err != nil {
 		return nil, err
 	}
-	ret := &SmsReturn{}
+	ret := &MarketSmsReturn{}
 	err = json.Unmarshal(body, ret)
 	if err != nil {
 		return nil, err
 	}
-	return ret, err
+	return ret, nil
 }
 
-func (c *MarketSmsClient) SendTemplate(phone string, templateContent string, sign string, paramsSlice []string) (smsReturn *SmsReturn, err error) {
+//发放营销短信 mobile 手机号 templateContent 短信内容 sign 签名，不填默认是【绿喵mio】
+
+func (c *MarketSmsClient) SendTemplate(phone string, content string, sign string, paramsSlice []string) (smsReturn *MarketSmsReturn, err error) {
 	url := domain + queryMarketTemplate
 	params := ""
 	if len(paramsSlice) == 0 {
@@ -85,7 +87,7 @@ func (c *MarketSmsClient) SendTemplate(phone string, templateContent string, sig
 	payload := strings.NewReader(`{
     "account": "` + c.Account + `",
     "password": "` + c.Password + `", //需要加入K8S
-    "msg": "` + sign + templateContent + `",
+    "msg": "` + sign + content + `",
 	"params":"` + params + `",
     "sendtime": "201704101400",
     "report": "true",
@@ -109,10 +111,10 @@ func (c *MarketSmsClient) SendTemplate(phone string, templateContent string, sig
 	if err != nil {
 		return nil, err
 	}
-	ret := &SmsReturn{}
+	ret := &MarketSmsReturn{}
 	err = json.Unmarshal(body, ret)
 	if err != nil {
 		return nil, err
 	}
-	return ret, err
+	return ret, nil
 }

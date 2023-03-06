@@ -1,10 +1,10 @@
 package chuanglan
 
 type ErrorResp struct {
-	Code   int    `json:"code"`
-	Errmsg string `json:"errmsg"`
+	Code   string `json:"code"`
+	Errmsg string `json:"errorMsg"`
 }
 
 func (e ErrorResp) IsSuccess() bool {
-	return e.Code == 0
+	return e.Code == "0"
 }
