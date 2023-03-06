@@ -130,10 +130,6 @@ type Code2AccessTokenResp struct {
 	Unionid      string `json:"unionid"`
 }
 
-func (e errorResp) IsSuccess() bool {
-	return e.Errcode == 0
-}
-
 // Code2AccessToken code换取accesstoken
 func Code2AccessToken(appId, secret, code string) (*Code2AccessTokenResp, error) {
 	u := fmt.Sprintf(code2AccessTokenUrl, appId, secret, code)
@@ -142,6 +138,7 @@ func Code2AccessToken(appId, secret, code string) (*Code2AccessTokenResp, error)
 		return nil, err
 	}
 	resp := Code2AccessTokenResp{}
+
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err

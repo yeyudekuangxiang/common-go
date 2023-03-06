@@ -8,21 +8,25 @@ import (
 	"strings"
 )
 
+const (
+	domain = "https://smssh1.253.com"
+	query  = "/msg/v1/send/json"
+)
+
 type SmsClient struct {
 	Account  string
 	Password string
-	BaseUrl  string
 }
 
 func NewSmsClient(account string, password string, BaseUrl string) *SmsClient {
 	return &SmsClient{
 		Account:  account,
 		Password: password,
-		BaseUrl:  BaseUrl,
 	}
 }
 
 type SmsReturn struct {
+	errorResp
 	Code       string `json:"code"`
 	FailNum    string `json:"failNum"`
 	SuccessNum string `json:"successNum"`
@@ -31,13 +35,13 @@ type SmsReturn struct {
 	ErrorMsg   string `json:"errorMsg"`
 }
 
-func (c *SmsClient) Send(mobile string, content string) (*SmsReturn, error) {
-	url := c.BaseUrl
+func (c *SmsClient) Send(mobile string, content string, sign string) (*SmsReturn, error) {
+	url := domain + query
 	method := "POST"
 	payload := strings.NewReader(`{
     "account": "` + c.Account + `",
     "password": "` + c.Password + `", //需要加入K8S
-    "msg": "` + content + `",
+    "msg": "` + sign + content + `",
     "phone": "` + mobile + `",
     "sendtime": "201704101400",
     "report": "true",
@@ -65,8 +69,5 @@ func (c *SmsClient) Send(mobile string, content string) (*SmsReturn, error) {
 	if err != nil {
 		return nil, err
 	}
-	if ret.Code != "0" {
-		return ret, fmt.Errorf("send sms failed, response code: %s, msgId: %s", ret.Code, ret.MsgId)
-	}
-	return ret, nil
+	return ret, err
 }
