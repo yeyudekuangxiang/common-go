@@ -1,0 +1,10 @@
+package unittool
+
+import "testing"
+
+func TestName(t *testing.T) {
+
+	ll := G(1).ToString()
+	println(ll)
+
+}
