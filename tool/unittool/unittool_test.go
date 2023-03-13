@@ -4,7 +4,7 @@ import "testing"
 
 func TestName(t *testing.T) {
 
-	ll := GWeight(1).ToString()
+	ll := G(1).ToString()
 	println(ll)
 
 }

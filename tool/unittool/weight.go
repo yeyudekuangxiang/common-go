@@ -4,9 +4,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type GWeight float64
+type G float64
 
-func (k GWeight) ToString() string {
+func (k G) ToString() string {
 	carbonDec := decimal.NewFromFloat(float64(k))
 	if carbonDec.Cmp(decimal.NewFromFloat(10000)) == -1 {
 		return carbonDec.Round(1).String() + "g"
