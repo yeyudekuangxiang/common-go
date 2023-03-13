@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+const (
+	GenerateSchemeUrl = "https://api.weixin.qq.com/wxa/generatescheme?access_token="
+)
+
 type noCache struct {
 }
 
@@ -188,4 +192,23 @@ func (c *Client) AutoTryAccessToken(f func(accessToken string) (try bool, err er
 		return c.AutoTryAccessToken(f, maxTryCount)
 	}
 	return nil
+}
+func (c *Client) GenerateURLScheme(request *URLSchemeRequest) (*weapp.URLSchemeResponse, error) {
+	token, err := c.AccessToken()
+	if err != nil {
+		return nil, err
+	}
+	u := GenerateSchemeUrl + token
+	body, err := httptool.PostJson(u, request)
+	if err != nil {
+		log.Printf("request:%s response:%v\n", u, err)
+		return nil, err
+	}
+	log.Printf("request:%s response:%s\n", u, string(body))
+	resp := weapp.URLSchemeResponse{}
+	err = json.Unmarshal(body, &resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
