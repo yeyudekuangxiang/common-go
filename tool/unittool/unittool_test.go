@@ -3,6 +3,8 @@ package unittool
 import "testing"
 
 func TestName(t *testing.T) {
-	a := CarbonToRate(1212)
-	println(a)
+
+	ll := GWeight(1).ToString()
+	println(ll)
+
 }
