@@ -78,7 +78,10 @@ func (p CarbonTransactionType) Cover() string {
 		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	case CARBON_REDUCE_PLASTIC:
 		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
+	case CARBON_HELLO_BIKE_RIDE:
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_riding.png"
 	}
+
 	return ""
 }
 
@@ -123,6 +126,8 @@ func (p CarbonTransactionType) RealText() string {
 		return "铛铛一下"
 	case CARBON_YKC:
 		return "云快充"
+	case CARBON_HELLO_BIKE_RIDE:
+		return "骑行"
 	}
 	return p.Text()
 }
@@ -148,7 +153,7 @@ const (
 	CARBON_YTX                       CarbonTransactionType = "YTX"                       //亿通行
 	CARBON_CYCLING                   CarbonTransactionType = "CYCLING"                   //java 骑行
 	CARBON_YKC                       CarbonTransactionType = "YKC"                       //云快充
-
+	CARBON_HELLO_BIKE_RIDE           CarbonTransactionType = "HELLO_BIKE_RIDE"           //哈啰骑行
 )
 
 type CarbonTransaction struct {
