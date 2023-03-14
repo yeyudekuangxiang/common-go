@@ -127,7 +127,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if sceneUser.PlatformUserId == "" {
-		app.Logger.Errorf("亿通行 未找到绑定关系 : %s; 红包金额:%f", user.OpenId, amount)
+		app.Logger.Errorf("亿通行 未找到绑定关系: %s; 红包金额:%f", user.OpenId, amount)
 		return "", errno.ErrBindRecordNotFound
 	}
 
@@ -147,7 +147,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 
 	url := srv.option.Domain + "/markting_redenvelopegateway/redenvelope/grantV2"
 	body, err := httptool.PostJson(url, grantV2Request)
-	app.Logger.Infof("亿通行 grantV2 返回 : %s, openId: %s", body, user.OpenId)
+	app.Logger.Infof("亿通行 grantV2 返回: %s; openId: %s", body, user.OpenId)
 	if err != nil {
 		return "", err
 	}
@@ -155,7 +155,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	response := GrantV2Response{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		app.Logger.Errorf("亿通行 grantV2 json_decode_err: %s", err.Error())
+		app.Logger.Errorf("亿通行 grantV2 json解析失败: %s", err.Error())
 		return "", err
 	}
 
@@ -170,11 +170,11 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 save_log_err : %s", err.Error())
+		app.Logger.Errorf("亿通行 保存记录失败: %s; openId: %s\n", err.Error(), user.OpenId)
 	}
 
 	if response.SubCode != "0000" {
-		app.Logger.Errorf("亿通行 发放红包失败: %s; openId: %s", string(body), user.OpenId)
+		app.Logger.Errorf("亿通行 response错误: %s; openId: %s\n", string(body), user.OpenId)
 		return "", errors.New(response.SubMessage)
 	}
 
@@ -189,7 +189,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 券包 发放错误 : %s\n", err.Error())
+		app.Logger.Errorf("亿通行 红包发放失败: %s; openId: %s; 金额: %f\n", err.Error(), user.OpenId, amount)
 		return "", err
 	}
 
