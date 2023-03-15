@@ -44,6 +44,8 @@ func (p CarbonTransactionType) Text() string {
 		return "地铁"
 	case CARBON_CYCLING:
 		return "骑行"
+	case CARBON_HELLO_BIKE_RIDE:
+		return "骑行"
 	}
 	return "未知积分"
 }
