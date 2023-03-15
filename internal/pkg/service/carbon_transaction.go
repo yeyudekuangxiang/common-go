@@ -304,7 +304,8 @@ func (srv CarbonTransactionService) GetTodayCarbon(uid int64) float64 {
 	todayDate := time.Now().Format("20060102") //当天时间 年月日
 	redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, todayDate)
 	myCarbon := app.Redis.ZScore(contextRedis.Background(), redisKey, uidStr) //我的碳量
-	return myCarbon.Val()
+	value, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", myCarbon.Val()), 64)
+	return value
 }
 
 type KVPair struct {
