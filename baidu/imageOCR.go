@@ -11,9 +11,16 @@ const (
 	accurateBasicUrl = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
 )
 
-type ImageClient struct {
+type OCRClient struct {
 	AccessToken *AccessToken
 }
+
+func NewOCRClient(accessToken *AccessToken) *OCRClient {
+	return &OCRClient{
+		AccessToken: accessToken,
+	}
+}
+
 type WebImageParam struct {
 	ImageUrl string
 }
@@ -28,7 +35,7 @@ type WebImageResult struct {
 }
 
 // WebImage 网络图片文字识别
-func (c *ImageClient) WebImage(param WebImageParam) (*WebImageResult, error) {
+func (c *OCRClient) WebImage(param WebImageParam) (*WebImageResult, error) {
 	token, err := c.AccessToken.GetToken()
 	if err != nil {
 		return nil, err
@@ -61,7 +68,7 @@ type AccurateBasicResult struct {
 }
 
 // AccurateBasic 通用文字识别（高精度版)
-func (c *ImageClient) AccurateBasic(param AccurateBasicParam) (*AccurateBasicResult, error) {
+func (c *OCRClient) AccurateBasic(param AccurateBasicParam) (*AccurateBasicResult, error) {
 	token, err := c.AccessToken.GetToken()
 	if err != nil {
 		return nil, err
