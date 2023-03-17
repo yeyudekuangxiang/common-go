@@ -3,11 +3,12 @@ package hellobike
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	mrand "math/rand"
 	"net/http"
+	"sort"
 	"strconv"
-	"time"
+	"strings"
 )
 
 const (
@@ -18,59 +19,51 @@ const (
 )
 
 type Client struct {
-	//https://app.trtpazyz.com
-	Domain    string
 	AppId     string
 	Version   string
 	htpClient http.Client
+	Action    string
+	AppKey    string
+	Domain    string
 }
 
-// TicketAllot 发放电子票
-func (c *Client) SendCoupon(param SendCouponParam) (resp *BaseResponse, bizId string, err error) {
+// SendCoupon 发放电子票
+
+func (c *Client) SendCoupon(param SendCouponParam) (resp *BaseResponse, err error) {
 	//c.Domain+path
-	return c.request("https://openapi.hellobike.com/bike/activity", param)
+	return c.request(c.Domain, param)
 }
 
-func (c *Client) request(url string, v interface{}) (resp *BaseResponse, bizId string, err error) {
-	data, err := json.Marshal(v)
+func (c *Client) request(url string, param SendCouponParam) (resp *BaseResponse, err error) {
+	params := make(map[string]string, 0)
+	bizContent, _ := json.Marshal(param.BizContent)
+	params["version"] = param.Version
+	params["action"] = param.Action
+	params["app_id"] = param.AppId
+	params["biz_content"] = string(bizContent)
+	params["utc_timestamp"] = param.UtcTimestamp
+	sign := c.GetSign(params, "&", c.AppKey)
+	param.Sign = sign
+	marshal, err := json.Marshal(param)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
-	s, err := c.sign(data)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(marshal))
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
-	fmt.Println(string(data))
-	fmt.Println(s)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
-	if err != nil {
-		return nil, "", err
-	}
-	bizId = time.Now().Format("20060102150405") + c.rand()
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("appid", c.AppId)
-	req.Header.Add("sequence", bizId)
-	req.Header.Add("version", c.Version)
-	req.Header.Add("signature", s)
-
 	htpRes, err := c.htpClient.Do(req)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 	defer htpRes.Body.Close()
 
 	resp = &BaseResponse{}
 	err = json.NewDecoder(htpRes.Body).Decode(resp)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
-	return resp, bizId, nil
-}
-
-func (c *Client) sign(v []byte) (string, error) {
-
-	return "", nil
+	return resp, nil
 }
 
 func (c *Client) rand() string {
@@ -79,4 +72,62 @@ func (c *Client) rand() string {
 		s += strconv.Itoa(mrand.Intn(10))
 	}
 	return s
+}
+
+// GetSign 签名
+func (c *Client) GetSign(params map[string]string, joiner string, appKey string) string {
+	if joiner == "" {
+		joiner = "&"
+	}
+	var slice []string
+	for k := range params {
+		slice = append(slice, k)
+	}
+	sort.Strings(slice)
+	var signStr string
+	for _, v := range slice {
+		signStr += v + "=" + params[v] + joiner
+	}
+	if joiner != ";" {
+		signStr = strings.TrimRight(signStr, joiner)
+	}
+	//验证签名
+	return encrypttool.Md5(signStr + appKey)
+}
+
+func (c *Client) RefundCard(param RefundCardParam) (resp *RefundCardResponse, err error) {
+	//c.Domain+path
+	return c.RefundCardRequest(c.Domain, param)
+}
+
+func (c *Client) RefundCardRequest(url string, param RefundCardParam) (resp *RefundCardResponse, err error) {
+	params := make(map[string]string, 0)
+	bizContent, _ := json.Marshal(param.BizContent)
+	params["version"] = param.Version
+	params["action"] = param.Action
+	params["appId"] = param.AppId
+	params["bizContent"] = string(bizContent)
+	params["timestamp"] = param.Timestamp
+	sign := c.GetSign(params, "&", c.AppKey)
+	param.Sign = sign
+	marshal, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(marshal))
+	if err != nil {
+		return nil, err
+	}
+	htpRes, err := c.htpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer htpRes.Body.Close()
+
+	resp = &RefundCardResponse{}
+	err = json.NewDecoder(htpRes.Body).Decode(resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }

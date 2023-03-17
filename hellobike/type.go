@@ -7,9 +7,9 @@ type SendCouponParam struct {
 	Sign         string `json:"sign"`
 	Version      string `json:"version"`
 	BizContent   struct {
-		TransactionId string `json:"transactionId"`
-		MobilePhone   string `json:"mobilePhone"`
 		ActivityId    string `json:"activityId"`
+		MobilePhone   string `json:"mobilePhone"`
+		TransactionId string `json:"transactionId"`
 	} `json:"biz_content"`
 }
 
@@ -20,8 +20,34 @@ const (
 )
 
 type BaseResponse struct {
-	//0000表示成功 其他表示失败
-	ResultCode ResultCode
-	ResultDesc string
-	ResultData interface{}
+	ErrorCode string `json:"error_code"`
+	Success   bool   `json:"success"`
+	Data      string `json:"data"`
+}
+
+/*{"orderNo":"TP20230317180734200102903590028"}*/
+/**
+{
+    "code": 302,
+    "msg": "appId无效"
+}
+*/
+
+type RefundCardResponse struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+type RefundCardParam struct {
+	AppId      string `json:"appId"`
+	Action     string `json:"action"`
+	Timestamp  string `json:"timestamp"`
+	Sign       string `json:"sign"`
+	Version    string `json:"version"`
+	BizContent struct {
+		ActivityId    string `json:"activityId"`
+		OrderNo       string `json:"orderNo"`
+		MobilePhone   string `json:"mobilePhone"`
+		TransactionId string `json:"transactionId"`
+	} `json:"bizContent"`
 }
