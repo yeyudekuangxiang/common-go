@@ -36,8 +36,8 @@ func apiRouter(router *gin.Engine) {
 	{
 		authRouter.GET("/aeskey", apiutil.Format(func(context *gin.Context) (gin.H, error) {
 			return gin.H{
-				"aesKey": "HDSK7jDNdjsDNDMD",
-				"iv":     "HDSK7jDNdjsDNDMD",
+				"aesKey": "4844534B376A444E646A73444E444D44",
+				"iv":     "4844534B376A444E646A73444E444D44",
 			}, nil
 		}))
 
