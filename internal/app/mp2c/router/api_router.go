@@ -23,6 +23,10 @@ import (
 )
 
 func apiRouter(router *gin.Engine) {
+	aesFormat := apiutil.AesFormat{
+		Key: []byte("HDSK7jDNdjsDNDMD"),
+		IV:  []byte("HDSK7jDNdjsDNDMD"),
+	}
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 	router.GET("/sendSign", apiutil.Format(message.DefaultMessageController.SendSign))
 
@@ -30,6 +34,13 @@ func apiRouter(router *gin.Engine) {
 	authRouter := router.Group("/api/mp2c")
 	authRouter.Use(middleware.Auth2(), middleware.Throttle())
 	{
+		authRouter.GET("/aeskey", apiutil.Format(func(context *gin.Context) (gin.H, error) {
+			return gin.H{
+				"aesKey": "HDSK7jDNdjsDNDMD",
+				"iv":     "HDSK7jDNdjsDNDMD",
+			}, nil
+		}))
+
 		userRouter := authRouter.Group("/user")
 		{
 			userRouter.GET("/get-yzm", apiutil.Format(api.DefaultUserController.GetYZM))          //获取验证码
@@ -257,6 +268,8 @@ func apiRouter(router *gin.Engine) {
 			//获取最近7天内步行数据
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
 			stepRouter.POST("/collect", apiutil.Format(api.DefaultStepController.Collect))
+
+			stepRouter.POST("/update_by_encrypt", aesFormat.Format(api.DefaultStepController.UpdateStep))
 		}
 
 		//签到相关路由

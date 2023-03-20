@@ -2,8 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/medivhzhan/weapp/v3"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"sort"
 )
 
 var DefaultStepController = StepController{}
@@ -25,7 +27,27 @@ func (StepController) UpdateStepTotal(ctx *gin.Context) (gin.H, error) {
 	})
 	return nil, err
 }
+func (StepController) UpdateStep(ctx *gin.Context) (gin.H, error) {
+	form := UpdateStepForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
 
+	user := apiutil.GetAuthUser(ctx)
+
+	stepList := make([]weapp.SetpInfo, 0)
+	for _, item := range form.StepList {
+		stepList = append(stepList, weapp.SetpInfo{
+			Step:      item.Step,
+			Timestamp: item.Timestamp,
+		})
+	}
+	sort.Slice(stepList, func(i, j int) bool {
+		return stepList[i].Timestamp < stepList[j].Timestamp
+	})
+	err := service.DefaultStepHistoryService.UpdateStepHistoryByList(user.OpenId, stepList)
+	return nil, err
+}
 func (StepController) WeeklyHistory(ctx *gin.Context) (interface{}, error) {
 	user := apiutil.GetAuthUser(ctx)
 	return service.DefaultStepService.WeeklyHistory(user.OpenId)
