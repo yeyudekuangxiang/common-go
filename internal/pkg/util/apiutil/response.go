@@ -1,12 +1,17 @@
 package apiutil
 
 import (
+	"bufio"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"io/ioutil"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/pkg/errno"
 	"reflect"
+	"strings"
 )
 
 func Format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
@@ -66,5 +71,50 @@ func FormatCtx(f func(*context.MioContext) (gin.H, error)) gin.HandlerFunc {
 			DB:      app.DB,
 		})
 		ctx.JSON(FormatErr(err, data))
+	}
+}
+
+type AesFormat struct {
+	Key []byte
+	IV  []byte
+}
+type AesRequest struct {
+	RequestBody string `json:"requestBody" binding:"required"`
+}
+
+func (a AesFormat) Format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		req := AesRequest{}
+		err := BindForm(ctx, &req)
+		if err != nil {
+			ctx.JSON(FormatErr(err, nil))
+			return
+		}
+		body, err := encrypttool.AesDecrypt(req.RequestBody, string(a.Key), string(a.IV))
+		if err != nil {
+			ctx.JSON(FormatErr(err, nil))
+			return
+		}
+		ctx.Request.Body = ioutil.NopCloser(bufio.NewReader(strings.NewReader(body)))
+
+		data, err := f(ctx)
+		if err != nil {
+			ctx.JSON(FormatErr(err, nil))
+			return
+		}
+
+		if data == nil {
+			data = gin.H{}
+		}
+
+		respBody, err := json.Marshal(data)
+		if err != nil {
+			ctx.JSON(FormatErr(err, nil))
+			return
+		}
+		respBodyStr := encrypttool.AesEncrypt(string(respBody), string(a.Key), string(a.IV))
+		ctx.JSON(FormatErr(err, gin.H{
+			"responseBody": respBodyStr,
+		}))
 	}
 }
