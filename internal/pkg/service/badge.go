@@ -16,6 +16,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"mio/pkg/miosass"
 	"strconv"
 	"strings"
 	"time"
@@ -91,7 +92,23 @@ func (srv BadgeService) GenerateRuleCode() string {
 	return code.String()
 }
 func (srv BadgeService) GetUserCertCount(openId string) (int64, error) {
-	return srv.repo.FindUserCertCount(openId)
+	c := miosass.Client{
+		Domain:    config.Config.MioSassCert.Domain,
+		AppKey:    config.Config.MioSassCert.AppKey,
+		AccessKey: config.Config.MioSassCert.AccessKey,
+	}
+	certNumResp, err := c.CertificateCount(miosass.CertificateCountParam{
+		UserId: openId,
+	})
+	if err != nil {
+		app.Logger.Errorf("查询证书数量异常 %v %+v", openId, err)
+		return 0, nil
+	}
+	if !certNumResp.IsSuccess() {
+		app.Logger.Errorf("查询证书数量失败 %v %+v", openId, err)
+		return 0, nil
+	}
+	return certNumResp.Data.Count, nil
 }
 func (srv BadgeService) GetUserCertCountById(userId int64) (int64, error) {
 	user, err := DefaultUserService.GetUserById(userId)

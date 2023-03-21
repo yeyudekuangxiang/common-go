@@ -29,11 +29,17 @@ var Config = app{
 	TokenCenterRpc: rpcSetting{},
 	ActivityRpc:    rpcSetting{},
 	//args
-	MqArgs:   mqArgs{},
-	BaiDuMap: baiDuMap{},
-	Saas:     saas{},
+	MqArgs:      mqArgs{},
+	BaiDuMap:    baiDuMap{},
+	Saas:        saas{},
+	MioSassCert: mioSassCertConf{},
 }
 
+type mioSassCertConf struct {
+	Domain    string
+	AppKey    string
+	AccessKey string
+}
 type saas struct {
 	Domain string
 }
@@ -68,14 +74,15 @@ type app struct {
 	//mq自调
 	MqArgs mqArgs `ini:"mqArgs"`
 	//rpc
-	CouponRpc           rpcSetting `ini:"couponRpc"`
-	TokenCenterRpc      rpcSetting `ini:"tokenCenterRpc"`
-	ActivityRpc         rpcSetting `ini:"activityRpc"`
-	PointRpc            rpcSetting `ini:"pointRpc"`
-	UserRpc             rpcSetting `ini:"userRpc"`
-	ActivityCarbonPkRpc rpcSetting `ini:"activityCarbonPkRpc"`
-	BaiDuMap            baiDuMap   `ini:"baiduMap"`
-	Saas                saas       `ini:"saas"`
+	CouponRpc           rpcSetting      `ini:"couponRpc"`
+	TokenCenterRpc      rpcSetting      `ini:"tokenCenterRpc"`
+	ActivityRpc         rpcSetting      `ini:"activityRpc"`
+	PointRpc            rpcSetting      `ini:"pointRpc"`
+	UserRpc             rpcSetting      `ini:"userRpc"`
+	ActivityCarbonPkRpc rpcSetting      `ini:"activityCarbonPkRpc"`
+	BaiDuMap            baiDuMap        `ini:"baiduMap"`
+	Saas                saas            `ini:"saas"`
+	MioSassCert         mioSassCertConf `ini:"mioSassCert"`
 }
 
 type appSetting struct {
