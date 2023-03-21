@@ -69,6 +69,10 @@ func (srv StepHistoryService) CreateOrUpdate(param CreateOrUpdateStepHistoryPara
 	return &history, srv.repo.Save(&history)
 }
 
+func (srv StepHistoryService) UpdateStepHistoryByList(openId string, stepInfoList []weapp.SetpInfo) error {
+	return srv.updateStepHistoryByList(openId, stepInfoList)
+}
+
 // updateStepHistoryByList 根据微信运动数据列表创建或者更新步行历史记录(最多更新最近8天数据)
 func (srv StepHistoryService) updateStepHistoryByList(openId string, stepInfoList []weapp.SetpInfo) error {
 

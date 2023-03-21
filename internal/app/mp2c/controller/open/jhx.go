@@ -278,9 +278,10 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   form.PlatformKey,
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     form.PlatformKey,
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//风险登记验证

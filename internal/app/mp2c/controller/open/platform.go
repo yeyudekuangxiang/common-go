@@ -225,23 +225,28 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
-	//入参保存
-	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeString),
-		Data: form,
-		Ip:   c.ClientIP(),
-	})
-
 	var openId, mobile string
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
 	})
-
+	var userId int64
 	if sceneUser.ID != 0 {
 		openId = sceneUser.OpenId
 		mobile = sceneUser.Phone
+		userInfo, b, err := repository.DefaultUserRepository.GetUser(repository.GetUserBy{OpenId: openId})
+		if err == nil && b {
+			userId = userInfo.ID
+		}
 	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:     string(typeString),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userId,
+	})
 
 	//预加积分
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
@@ -575,6 +580,7 @@ func trackBehaviorInteraction(form trackInteractionParam) {
 		Ip:         form.Ip,
 		Result:     form.Result,
 		ResultCode: form.ResultCode,
+		UserId:     form.UserId,
 	})
 	if err != nil {
 		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())
