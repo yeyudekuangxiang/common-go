@@ -13,7 +13,7 @@ func mp2cCron() {
 		service.NewCarbonTransactionService(context.NewMioContext()).AddClassify()
 	})*/
 	//碳历史 每天跑一次
-	AddFunc("0 0 * * ?", func() {
+	AddFunc("0 1 * * ?", func() {
 		log.Println("每天执行一次")
 		service.NewCarbonTransactionService(context.NewMioContext()).AddHistory()
 	})
