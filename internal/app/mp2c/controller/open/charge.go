@@ -190,7 +190,7 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 
 //调用星星充电发券
 func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
-	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point > 0 && platformKey == "lvmiao" {
+	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point >= 10 && platformKey == "lvmiao" {
 		rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx.Context, &activity.ActiveRuleReq{
 			Code: platformKey,
 		})
