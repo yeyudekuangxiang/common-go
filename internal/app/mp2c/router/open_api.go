@@ -7,6 +7,7 @@ import (
 	"mio/internal/app/mp2c/controller/open"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,10 +48,16 @@ func openRouter(router *gin.Engine) {
 
 			//微信公众号网页授权登陆
 			oaRouter.GET("/auth", func(context *gin.Context) {
+				//登录改造，公众号授权现在没有改造且现在没用到，先关闭此接口
+				context.String(http.StatusOK, "系统开小差了,请稍后再试")
+				return
 				authApi.DefaultOaController.AutoLogin(context)
 			})
 			//微信公众号网页授权登陆回调
 			oaRouter.Any("/auth/callback", func(context *gin.Context) {
+				//登录改造，公众号授权现在没有改造且现在没用到，先关闭此接口
+				context.String(http.StatusOK, "系统开小差了,请稍后再试")
+				return
 				authApi.DefaultOaController.AutoLoginCallback(context)
 			})
 			//微信公众号网页code登陆
