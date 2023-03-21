@@ -174,4 +174,5 @@ type trackInteractionParam struct {
 	Ip         string      `json:"ip"`
 	Result     string      `json:"result"`
 	ResultCode string      `json:"resultCode"`
+	UserId     int64       `json:"userId"`
 }

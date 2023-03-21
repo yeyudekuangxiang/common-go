@@ -97,9 +97,10 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeString),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeString),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//回调光环
@@ -315,9 +316,10 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   tp,
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     tp,
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userId,
 	})
 
 	info, _ := json.Marshal(form)
