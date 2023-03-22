@@ -9,7 +9,6 @@ import (
 type Config struct {
 	rest.RestConf
     GlobalClientConf globalclient.GlobalClientConf
-	{{.auth}}
 	{{.jwtTrans}}
 	RpcConf zrpc.RpcClientConf
 	JwtAuth       struct {
