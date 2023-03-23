@@ -54,6 +54,10 @@ func NewMemoryAccessToken(config MemoryAccessTokenConfig) *AccessToken {
 	}
 }
 
+type IAccessToken interface {
+	GetToken() (string, error)
+	RefreshToken() (string, error)
+}
 type AccessToken struct {
 	cache     ICache
 	AppKey    string
