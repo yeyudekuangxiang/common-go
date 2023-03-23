@@ -161,7 +161,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//发券
-	go ctr.sendCoupon(ctx, scene.Ch, int64(thisPoint), userInfo)
+	go ctr.sendCoupon(ctx, scene.Ch, totalPower, userInfo)
 	return gin.H{}, nil
 }
 
@@ -189,8 +189,8 @@ func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
 }
 
 //调用星星充电发券
-func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, point int64, userInfo *entity.User) {
-	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && point >= 10 && platformKey == "lvmiao" {
+func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, power float64, userInfo *entity.User) {
+	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && power >= 10.00 && platformKey == "lvmiao" {
 		rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx.Context, &activity.ActiveRuleReq{
 			Code: platformKey,
 		})
