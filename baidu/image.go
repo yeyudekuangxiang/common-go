@@ -13,10 +13,10 @@ const (
 )
 
 type ImageClient struct {
-	AccessToken *AccessToken
+	AccessToken IAccessToken
 }
 
-func NewImageClient(accessToken *AccessToken) *ImageClient {
+func NewImageClient(accessToken IAccessToken) *ImageClient {
 	return &ImageClient{
 		AccessToken: accessToken,
 	}

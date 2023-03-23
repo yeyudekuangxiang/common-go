@@ -13,10 +13,10 @@ const (
 )
 
 type ReviewClient struct {
-	AccessToken *AccessToken
+	AccessToken IAccessToken
 }
 
-func NewReviewClient(accessToken *AccessToken) *ReviewClient {
+func NewReviewClient(accessToken IAccessToken) *ReviewClient {
 	return &ReviewClient{AccessToken: accessToken}
 }
 
