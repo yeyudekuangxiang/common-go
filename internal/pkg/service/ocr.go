@@ -25,7 +25,7 @@ type OCRService struct {
 }
 
 func NewDefaultImageClient() *baidu.ImageClient {
-	return factory.NewBaiDuImageFromTokenCenterRpc("baiduimage", app.RpcService.TokenCenterRpcSrv)
+	return factory.NewBaiDuImageFromTokenCenterRpc("baiduocr", app.RpcService.TokenCenterRpcSrv)
 }
 
 func NewOCRService(mioContext *mioctx.MioContext, imageClient *baidu.ImageClient) *OCRService {
