@@ -125,6 +125,8 @@ func (c *Client) GetUserRiskRank(param UserRiskRankParam, recursiveCount ...int)
 	}
 
 	u := fmt.Sprintf("https://api.weixin.qq.com/wxa/getuserriskrank?access_token=%s", accessToken)
+	param.AppId = c.appId
+
 	body, err := httptool.PostJson(u, param)
 	if err != nil {
 		return nil, err
