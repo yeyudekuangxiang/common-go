@@ -90,6 +90,15 @@ type UpdateStepTotalForm struct {
 	EncryptedData string `json:"encryptedData" form:"encryptedData" binding:"required" alias:"encryptedData"`
 	IV            string `json:"iv" form:"iv" binding:"required" alias:"iv"`
 }
+type UpdateStepForm struct {
+	StepList []StepInfo `json:"stepList"`
+}
+type StepInfo struct {
+	//步数
+	Step int `json:"step"`
+	//每天凌晨的秒级时间戳
+	Timestamp int64 `json:"timestamp"`
+}
 
 type AnswerQuizQuestionForm struct {
 	QuestionId string `json:"questionId" form:"questionId" binding:"required" alias:"questionId"`
