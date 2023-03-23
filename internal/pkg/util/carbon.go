@@ -21,9 +21,14 @@ func CarbonToTree(carbon float64) (string, string) {
 		return "1", msg
 	} else {
 		//不够一棵树
-		val := carbonDec.Div(rateDec).Round(1).String()
+		valDec := carbonDec.Div(rateDec).Round(1)
+		if valDec.Cmp(decimal.NewFromInt(10000)) >= 0 {
+			valWanDec := valDec.Div(decimal.NewFromInt(10000).Round(2))
+			msg := "万棵沙棘树,1年碳吸收量"
+			return valWanDec.String(), msg
+		}
 		msg := "棵沙棘树,1年碳吸收量"
-		return val, msg
+		return valDec.String(), msg
 	}
 }
 
