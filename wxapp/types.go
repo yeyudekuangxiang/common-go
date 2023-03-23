@@ -11,8 +11,11 @@ type QRCodeResponse struct {
 	Buffer      []byte `json:"buffer"`
 }
 
+type internalAppId struct {
+	AppId string `json:"appid"`
+}
 type UserRiskRankParam struct {
-	AppId        string `json:"appid"`
+	internalAppId
 	OpenId       string `json:"openid"`
 	Scene        int64  `json:"scene"`
 	MobileNo     string `json:"mobile_no"`
