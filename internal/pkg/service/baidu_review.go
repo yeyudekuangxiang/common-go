@@ -3,9 +3,9 @@ package service
 import (
 	"fmt"
 	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioctx "mio/internal/pkg/core/context"
+	"mio/internal/pkg/util/factory"
 	"mio/pkg/errno"
 )
 
@@ -15,14 +15,7 @@ type ReviewService struct {
 }
 
 func NewDefaultReviewClient() *baidu.ReviewClient {
-	return &baidu.ReviewClient{
-		AccessToken: baidu.NewRedisAccessToken(baidu.RedisAccessTokenConfig{
-			RedisClient: app.Redis,
-			Prefix:      config.RedisKey.BaiDuAccessToken,
-			AppKey:      config.Config.BaiDuReview.AppKey,
-			AppSecret:   config.Config.BaiDuReview.AppSecret,
-		}),
-	}
+	return factory.NewBaiDuReviewFromTokenCenterRpc("baidureview", app.RpcService.TokenCenterRpcSrv)
 }
 
 func NewReviewService(mioContext *mioctx.MioContext, reviewClient *baidu.ReviewClient) *ReviewService {

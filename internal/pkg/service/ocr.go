@@ -13,6 +13,7 @@ import (
 	repo "mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
+	"mio/internal/pkg/util/factory"
 	"mio/pkg/errno"
 	"time"
 )
@@ -24,14 +25,7 @@ type OCRService struct {
 }
 
 func NewDefaultImageClient() *baidu.ImageClient {
-	return &baidu.ImageClient{
-		AccessToken: baidu.NewRedisAccessToken(baidu.RedisAccessTokenConfig{
-			RedisClient: app.Redis,
-			Prefix:      config.RedisKey.BaiDuAccessToken,
-			AppKey:      config.Config.BaiDu.AppKey,
-			AppSecret:   config.Config.BaiDu.AppSecret,
-		}),
-	}
+	return factory.NewBaiDuImageFromTokenCenterRpc("baiduimage", app.RpcService.TokenCenterRpcSrv)
 }
 
 func NewOCRService(mioContext *mioctx.MioContext, imageClient *baidu.ImageClient) *OCRService {

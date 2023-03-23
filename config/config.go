@@ -6,19 +6,15 @@ var Config = app{
 	Database:         databaseSetting{},
 	Log:              logSetting{},
 	AliLog:           aliLogSetting{},
-	Weapp:            wxSetting{},
 	MioSubOA:         wxSetting{},
 	MioSrvOA:         wxSetting{},
 	Redis:            redisSetting{},
 	DuiBa:            duiBaSetting{},
 	OSS:              ossSetting{},
-	BaiDu:            baiDuSetting{},
-	BaiDuReview:      baiDuReviewSetting{},
 	Java:             javaConfig{},
 	Zhuge:            zhugeConfig{},
 	AMQP:             amqpSetting{},
 	ActivityZyh:      activityZyh{},
-	BaiDuImageSearch: baiDuImageSearchSetting{},
 	DatabaseBusiness: databaseSetting{},
 	DatabaseActivity: databaseSetting{},
 	Sms:              sms{},
@@ -48,29 +44,25 @@ type baiDuMap struct {
 	AccessKey string
 }
 type app struct {
-	App              appSetting              `ini:"app"`
-	Http             httpSetting             `ini:"http"`
-	Database         databaseSetting         `ini:"database"`
-	DatabaseBusiness databaseSetting         `ini:"databaseBusiness"`
-	DatabaseActivity databaseSetting         `ini:"databaseActivity"`
-	Log              logSetting              `ini:"log"`
-	AliLog           aliLogSetting           `ini:"aliLog"`
-	Weapp            wxSetting               `ini:"weapp"`
-	MioSubOA         wxSetting               `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting               `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis            redisSetting            `ini:"redis"`
-	DuiBa            duiBaSetting            `ini:"duiba"`
-	OSS              ossSetting              `ini:"oss"`
-	AMQP             amqpSetting             `ini:"amqp"`
-	BaiDu            baiDuSetting            `ini:"baidu"`
-	BaiDuReview      baiDuReviewSetting      `ini:"baiduReview"`
-	Java             javaConfig              `ini:"java"`
-	Zhuge            zhugeConfig             `ini:"zhuge"`
-	ActivityZyh      activityZyh             `ini:"activityZyh"`
-	BaiDuImageSearch baiDuImageSearchSetting `ini:"baiduImageSearch"`
-	Sms              sms                     `ini:"sms"`
-	SmsMarket        smsMarket               `ini:"smsMarket"`
-	Prometheus       promSetting             `ini:"prometheus"`
+	App              appSetting      `ini:"app"`
+	Http             httpSetting     `ini:"http"`
+	Database         databaseSetting `ini:"database"`
+	DatabaseBusiness databaseSetting `ini:"databaseBusiness"`
+	DatabaseActivity databaseSetting `ini:"databaseActivity"`
+	Log              logSetting      `ini:"log"`
+	AliLog           aliLogSetting   `ini:"aliLog"`
+	MioSubOA         wxSetting       `ini:"mioSubOa"` //绿喵订阅号配置
+	MioSrvOA         wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
+	Redis            redisSetting    `ini:"redis"`
+	DuiBa            duiBaSetting    `ini:"duiba"`
+	OSS              ossSetting      `ini:"oss"`
+	AMQP             amqpSetting     `ini:"amqp"`
+	Java             javaConfig      `ini:"java"`
+	Zhuge            zhugeConfig     `ini:"zhuge"`
+	ActivityZyh      activityZyh     `ini:"activityZyh"`
+	Sms              sms             `ini:"sms"`
+	SmsMarket        smsMarket       `ini:"smsMarket"`
+	Prometheus       promSetting     `ini:"prometheus"`
 	//mq自调
 	MqArgs mqArgs `ini:"mqArgs"`
 	//rpc

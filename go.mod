@@ -25,14 +25,14 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/sony/sonyflake v1.1.0
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.6.1
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693
 	github.com/stretchr/testify v1.8.1
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.0.22
+	gitlab.miotech.com/miotech-application/backend/common-go v1.1.4
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.2
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.5.0
@@ -90,7 +90,7 @@ require (
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/iris-contrib/jade v1.1.4 // indirect
 	github.com/iris-contrib/pongo2 v0.0.1 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect
@@ -188,6 +188,7 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.2 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.8.2
+//replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.2 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.8.2
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.8.2 => ../mp2c-micro
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.0.22 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.0.22
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.1.4 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.4

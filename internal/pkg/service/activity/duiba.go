@@ -177,7 +177,6 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 
 	//检测用户风险等级
 	userRiskRankParam := wxapp.UserRiskRankParam{
-		AppId:    config.Config.Weapp.AppId,
 		OpenId:   userInfo.OpenId,
 		Scene:    0,
 		ClientIp: cip,
