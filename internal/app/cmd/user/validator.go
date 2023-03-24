@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"log"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/initialize"
 	"mio/internal/pkg/repository"
@@ -46,7 +45,6 @@ to quickly create a Cobra application.`,
 		for i, user := range list {
 			fmt.Println(i)
 			rest, err := app.Weapp.GetUserRiskRank(wxapp.UserRiskRankParam{
-				AppId:    config.Config.Weapp.AppId,
 				OpenId:   user.OpenId,
 				Scene:    0,
 				ClientIp: "192.168.0.1",
