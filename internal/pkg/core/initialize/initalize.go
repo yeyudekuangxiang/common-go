@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"github.com/shopspring/decimal"
+	"mio/internal/pkg/core/app"
 )
 
 func Initialize(configPath string) {
@@ -12,12 +13,12 @@ func Initialize(configPath string) {
 	InitActivityDB()
 	InitRedis()
 	InitValidator()
-	InitWeapp()
 	InitOss()
 	InitSts()
 	InitWxoa()
 	InitProm()
 	InitRpc()
+	InitWeapp(app.RpcService.TokenCenterRpcSrv)
 	initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
 }
