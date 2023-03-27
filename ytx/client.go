@@ -2,7 +2,6 @@ package ytx
 
 import (
 	"encoding/json"
-	"fmt"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"strconv"
@@ -25,7 +24,7 @@ type Client struct {
 	AppId    string
 }
 
-func (c *Client) SendCoupon(orderId, thirdUserId string, amount float64, channelKey string) (*GrantV2Response, error) {
+func (c *Client) SendCoupon(orderId, thirdUserId string, amount float64, remark string) (*GrantV2Response, error) {
 	grantV2Request := GrantV2Request{
 		AppId:     c.AppId,
 		AppSecret: c.getAppSecret(),
@@ -35,7 +34,7 @@ func (c *Client) SendCoupon(orderId, thirdUserId string, amount float64, channel
 			PoolCode: c.PoolCode,
 			Amount:   amount,
 			OpenId:   thirdUserId,
-			Remark:   fmt.Sprintf("%s%f%s", channelKey, amount, "元红包"),
+			Remark:   remark,
 		},
 	}
 
