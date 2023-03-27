@@ -24,10 +24,18 @@ type GrantV2ReqData struct {
 	Remark   string  `json:"remark"`
 }
 
+type CommonErr struct {
+	SubCode    string `json:"subCode,omitempty"`
+	SubMessage string `json:"subMessage,omitempty"`
+}
+
+func (c *CommonErr) IsSuccess() bool {
+	return c.SubCode == "0000"
+}
+
 type GrantV2Response struct {
-	SubCode    string         `json:"subCode,omitempty"`
-	SubData    GrantV2SubData `json:"subData"`
-	SubMessage string         `json:"subMessage,omitempty"`
+	CommonErr
+	SubData GrantV2SubData `json:"subData"`
 }
 
 type GrantV2SubData struct {

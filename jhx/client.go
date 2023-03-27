@@ -22,7 +22,7 @@ type Client struct {
 }
 
 //发放券码
-func (c *Client) SendCoupon(orderId, phone string) (*CommonResponse, error) {
+func (c *Client) SendCoupon(orderId, phone string) (*TicketCreateResponse, error) {
 	commonParams := make(map[string]interface{}, 0)
 	commonParams["version"] = c.Version
 	commonParams["appid"] = c.AppId
@@ -38,7 +38,7 @@ func (c *Client) SendCoupon(orderId, phone string) (*CommonResponse, error) {
 		return nil, err
 	}
 
-	response := CommonResponse{}
+	response := TicketCreateResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return nil, err
