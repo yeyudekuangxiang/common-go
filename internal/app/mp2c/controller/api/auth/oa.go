@@ -5,6 +5,7 @@ import (
 	"mio/internal/pkg/model/entity"
 	authSrv "mio/internal/pkg/service/auth"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"net/http"
 )
 
@@ -70,6 +71,9 @@ func (OaController) AutoLoginCallback(c *gin.Context) {
 }
 
 func (OaController) Login(c *gin.Context) (gin.H, error) {
+	//登录改造，公众号授权现在没有改造且现在没用到，先关闭此接口
+	return nil, errno.ErrInternalServer
+
 	form := OaAuthForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err

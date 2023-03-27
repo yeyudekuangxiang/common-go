@@ -134,9 +134,21 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	url := srv.Domain + "/query_delivery_provide"
 	authToken := httptool.HttpWithHeader("Authorization", "Bearer "+token)
 	body, err := httptool.PostJson(url, queryParams, authToken)
-	fmt.Printf("%s\n", body)
+	app.Logger.Infof("星星充电 返回: %+v", body)
 	if err != nil {
+		app.Logger.Errorf("星星充电 发券失败:%s", err.Error())
 		return err
+	}
+	//保存记录
+	_, err = srv.history.Insert(&entity.CouponHistory{
+		OpenId:     openId,
+		CouponType: "star_charge",
+		Code:       fmt.Sprintf("%s", body),
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
+	})
+	if err != nil {
+		app.Logger.Errorf("星星充电 发券记录插入失败:%s", err.Error())
 	}
 	// response
 	provideResponse := starChargeResponse{}
@@ -153,19 +165,6 @@ func (srv StarChargeService) SendCoupon(openId, phoneNumber string, provideId st
 	_ = json.Unmarshal([]byte(encryptStr), &provideResult)
 	if provideResult.SuccStat != 0 {
 		return errno.ErrCommon.WithMessage(provideResult.FailReasonMsg)
-	}
-
-	//保存记录
-	_, err = srv.history.Insert(&entity.CouponHistory{
-		OpenId:     openId,
-		CouponType: "star_charge",
-		Code:       provideResult.CouponCode,
-		CreateTime: time.Now(),
-		UpdateTime: time.Now(),
-	})
-
-	if err != nil {
-		app.Logger.Errorf("星星充电发券记录插入失败:%s", err.Error())
 	}
 
 	return nil
