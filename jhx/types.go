@@ -1,10 +1,10 @@
 package jhx
 
-type commonResponse struct {
-	Code int                    `json:"code"`
-	Msg  string                 `json:"msg"`
-	Time string                 `json:"time"`
-	Data map[string]interface{} `json:"data"`
+type CommonResponse struct {
+	Code int                  `json:"code"`
+	Msg  string               `json:"msg"`
+	Time string               `json:"time"`
+	Data TicketCreateResponse `json:"data"`
 }
 
 type TicketCreateResponse struct {

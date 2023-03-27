@@ -1,11 +1,7 @@
 package jhx
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"math/rand"
@@ -20,25 +16,19 @@ const (
 )
 
 type Client struct {
-	ctx       context.Context
-	Domain    string
-	AppId     string
-	Version   string
-	Timestamp string
-	Nonce     string
+	Domain  string
+	AppId   string
+	Version string
 }
 
 //发放券码
-func (c *Client) SendCoupon(phone string) (*TicketCreateResponse, error) {
+func (c *Client) SendCoupon(orderId, phone string) (*CommonResponse, error) {
 	commonParams := make(map[string]interface{}, 0)
 	commonParams["version"] = c.Version
 	commonParams["appid"] = c.AppId
-	commonParams["timestamp"] = c.Timestamp
-	commonParams["nonce"] = c.Nonce
-
-	rand.Seed(time.Now().UnixNano())
-	tradeNo := "jhx" + strconv.FormatInt(time.Now().UnixMilli(), 10) + strconv.FormatInt(rand.Int63(), 10)
-	commonParams["tradeno"] = tradeNo
+	commonParams["timestamp"] = strconv.FormatInt(time.Now().Unix(), 10)
+	commonParams["nonce"] = strconv.Itoa(rand.Int())
+	commonParams["tradeno"] = orderId
 	commonParams["mobile"] = phone
 	commonParams["sign"] = strings.ToUpper(c.getSign(commonParams, "", "&"))
 
@@ -48,23 +38,13 @@ func (c *Client) SendCoupon(phone string) (*TicketCreateResponse, error) {
 		return nil, err
 	}
 
-	response := commonResponse{}
+	response := CommonResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.Code != 0 {
-		return nil, errors.New(fmt.Sprintf("%s", body))
-	}
-
-	ticketCreateResponse := &TicketCreateResponse{}
-	err = converttool.MapTo(response.Data, &ticketCreateResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	return ticketCreateResponse, nil
+	return &response, nil
 }
 
 func (c *Client) getSign(params map[string]interface{}, key string, joiner string) string {
