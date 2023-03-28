@@ -93,7 +93,7 @@ func (repo IndexIconRepository) GetPage(do repotypes.GetIndexIconPageDO) ([]enti
 		db.Where("title like ?", "%"+do.Title+"%")
 	}
 	if do.Display != "" {
-		db.Where("display", do.Display)
+		db.Where("display = ?", do.Display)
 	}
 	db.Order("sort asc ,id desc")
 	list := make([]entity.IndexIcon, 0)
