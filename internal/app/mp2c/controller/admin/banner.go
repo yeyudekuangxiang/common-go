@@ -165,14 +165,15 @@ func (ctl BannerController) Update(c *gin.Context) (gin.H, error) {
 	}
 	updateDate := srv_types.UpdateBannerDTO{
 		Id:       form.Id,
-		Name:     form.Name,
-		ImageUrl: form.ImageUrl,
 		Scene:    form.Scene,
 		Type:     form.Type,
+		Status:   form.Status,
+		Name:     form.Name,
+		ImageUrl: form.ImageUrl,
 		AppId:    form.AppId,
 		Sort:     form.Sort,
 		Redirect: form.Redirect,
-		Status:   form.Status,
+		Display:  form.Display,
 	}
 	if form.Scene == "event" {
 		err := ctl.UpdateSaas(updateDate)
