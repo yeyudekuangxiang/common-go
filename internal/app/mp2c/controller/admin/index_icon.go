@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/repository/repotypes"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/util/apiutil"
+	"time"
 )
 
 var DefaultIndexIconController = NewIndexIconController()
@@ -26,12 +27,15 @@ func (ctl IndexIconController) Create(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	err := service.NewIndexIconService(context.NewMioContext()).Create(entity.IndexIcon{
-		Title:  form.Title,
-		RowNum: form.RowNum,
-		Sort:   form.Sort,
-		Status: form.Status,
-		IsOpen: form.IsOpen,
-		Pic:    form.Pic,
+		Title:     form.Title,
+		RowNum:    form.RowNum,
+		Sort:      form.Sort,
+		Status:    form.Status,
+		IsOpen:    form.IsOpen,
+		Pic:       form.Pic,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+		Display:   form.Display,
 	})
 	if err != nil {
 		return nil, err
@@ -46,13 +50,14 @@ func (ctl IndexIconController) Update(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	err := service.NewIndexIconService(context.NewMioContext()).Update(entity.IndexIcon{
-		ID:     form.Id,
-		Title:  form.Title,
-		RowNum: form.RowNum,
-		Sort:   form.Sort,
-		Status: form.Status,
-		IsOpen: form.IsOpen,
-		Pic:    form.Pic,
+		ID:      form.Id,
+		Title:   form.Title,
+		RowNum:  form.RowNum,
+		Sort:    form.Sort,
+		Status:  form.Status,
+		IsOpen:  form.IsOpen,
+		Pic:     form.Pic,
+		Display: form.Display,
 	})
 	if err != nil {
 		return nil, err
@@ -81,10 +86,11 @@ func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	list, total, err := service.NewIndexIconService(context.NewMioContext()).Page(repotypes.GetIndexIconPageDO{
-		Offset: form.Offset(),
-		Limit:  form.Limit(),
-		Title:  form.Title,
-		IsOpen: form.IsOpen,
+		Offset:   form.Offset(),
+		Limit:    form.Limit(),
+		Title:    form.Title,
+		IsOpen:   form.IsOpen,
+		Displays: form.Display,
 	})
 
 	voList := make([]api_types.IndexIconVO, 0)
@@ -98,6 +104,7 @@ func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 			Status:    activity.Status,
 			IsOpen:    activity.IsOpen,
 			Pic:       activity.Pic,
+			Display:   activity.Display,
 			CreatedAt: activity.CreatedAt.Format("2006.01.02 15:04:05"),
 			UpdatedAt: activity.UpdatedAt.Format("2006.01.02 15:04:05"),
 		})
