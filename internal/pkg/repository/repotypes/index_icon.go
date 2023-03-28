@@ -21,11 +21,12 @@ type DeleteIndexIconDO struct {
 }
 
 type GetIndexIconPageDO struct {
-	Offset int
-	Limit  int
-	Title  string
-	Status entity.IndexIconStatus
-	IsOpen entity.IndexIconIsOpen
+	Offset   int
+	Limit    int
+	Title    string
+	Status   entity.IndexIconStatus
+	IsOpen   entity.IndexIconIsOpen
+	Displays []string
 }
 
 type UpdateIndexIconDO struct {

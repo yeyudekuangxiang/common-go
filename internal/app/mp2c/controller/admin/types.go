@@ -202,6 +202,7 @@ type CreateBannerForm struct {
 	Sort     int                 `json:"sort" form:"sort" binding:"" alias:"排序"`
 	Redirect string              `json:"redirect" form:"redirect" binding:"" alias:"跳转路径"`
 	Status   entity.BannerStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"上线和下线状态"`
+	Display  string              `json:"display" form:"display" binding:""`
 }
 
 type UpdateBannerForm struct {
@@ -214,12 +215,14 @@ type UpdateBannerForm struct {
 	Sort     int                 `json:"sort" form:"sort" binding:"" alias:"排序"`
 	Redirect string              `json:"redirect" form:"redirect" binding:"" alias:"跳转路径"`
 	Status   entity.BannerStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"上线和下线状态"`
+	Display  string              `json:"display" form:"display" binding:""`
 }
 
 type GetBannerPageForm struct {
-	Name   string `json:"name" form:"name" binding:"" alias:"banner名称"`
-	Scene  string `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
-	Status int8   `json:"status" form:"status" binding:"" alias:"上线和下线状态"`
+	Name     string   `json:"name" form:"name" binding:"" alias:"banner名称"`
+	Scene    string   `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
+	Status   int8     `json:"status" form:"status" binding:"" alias:"上线和下线状态"`
+	Displays []string `json:"displays" form:"displays" binding:""`
 	controller.PageFrom
 }
 
@@ -289,28 +292,31 @@ type UpdateUserRisk struct {
 //index_icon start 金刚位
 
 type CreateIndexIconForm struct {
-	Title  string                 `json:"title" form:"title" binding:"required" alias:"标题"`
-	RowNum string                 `json:"rowNum" form:"rowNum" binding:"oneof=1 2" alias:"行"`
-	Sort   int8                   `json:"sort" form:"sort" binding:"" alias:"排序"`
-	Status entity.IndexIconStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"是否删除 1 正常 2删除"`
-	IsOpen int8                   `json:"isOpen" form:"isOpen" binding:"oneof=1 2" alias:"是否开启 1开启 2关闭"`
-	Pic    string                 `json:"pic" form:"pic" binding:"" alias:"图标"`
+	Title   string                 `json:"title" form:"title" binding:"required" alias:"标题"`
+	RowNum  string                 `json:"rowNum" form:"rowNum" binding:"oneof=1 2" alias:"行"`
+	Sort    int8                   `json:"sort" form:"sort" binding:"" alias:"排序"`
+	Status  entity.IndexIconStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"是否删除 1 正常 2删除"`
+	IsOpen  int8                   `json:"isOpen" form:"isOpen" binding:"oneof=1 2" alias:"是否开启 1开启 2关闭"`
+	Pic     string                 `json:"pic" form:"pic" binding:"" alias:"图标"`
+	Display string                 `json:"display" form:"display" binding:"" alias:"展示位置"`
 }
 
 type UpdateIndexIconForm struct {
-	Id     int64                  `json:"id" form:"id" binding:"required" alias:"id"`
-	Title  string                 `json:"title" form:"title" binding:"required" alias:"标题"`
-	Type   string                 `json:"type" form:"type" binding:"" alias:"类型"`
-	RowNum string                 `json:"rowNum" form:"rowNum" binding:"oneof=1 2" alias:"行"`
-	Sort   int8                   `json:"sort" form:"sort" binding:"" alias:"排序"`
-	Status entity.IndexIconStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"是否删除 1 正常 2删除"`
-	IsOpen int8                   `json:"isOpen" form:"isOpen" binding:"oneof=1 2" alias:"是否开启 1开启 2关闭"`
-	Pic    string                 `json:"pic" form:"pic" binding:"" alias:"图标"`
+	Id      int64                  `json:"id" form:"id" binding:"required" alias:"id"`
+	Title   string                 `json:"title" form:"title" binding:"required" alias:"标题"`
+	Type    string                 `json:"type" form:"type" binding:"" alias:"类型"`
+	RowNum  string                 `json:"rowNum" form:"rowNum" binding:"oneof=1 2" alias:"行"`
+	Sort    int8                   `json:"sort" form:"sort" binding:"" alias:"排序"`
+	Status  entity.IndexIconStatus `json:"status" form:"status" binding:"oneof=1 2" alias:"是否删除 1 正常 2删除"`
+	IsOpen  int8                   `json:"isOpen" form:"isOpen" binding:"oneof=1 2" alias:"是否开启 1开启 2关闭"`
+	Pic     string                 `json:"pic" form:"pic" binding:"" alias:"图标"`
+	Display string                 `json:"display" form:"display" binding:"" alias:"展示位置"`
 }
 
 type GetIndexIconPageForm struct {
-	Title  string                 `json:"title" form:"title" binding:"" alias:"标题"`
-	IsOpen entity.IndexIconIsOpen `json:"isOpen" form:"isOpen" binding:"" alias:"是否开启 1开启 2关闭"`
+	Title   string                 `json:"title" form:"title" binding:"" alias:"标题"`
+	IsOpen  entity.IndexIconIsOpen `json:"isOpen" form:"isOpen" binding:"" alias:"是否开启 1开启 2关闭"`
+	Display []string               `json:"display" form:"display" binding:""`
 	controller.PageFrom
 }
 

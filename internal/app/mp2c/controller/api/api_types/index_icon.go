@@ -13,15 +13,17 @@ type IndexIconVO struct {
 	Pic       string                 `json:"pic"`
 	CreatedAt string                 `json:"createdAt"`
 	UpdatedAt string                 `json:"updatedAt"`
+	Display   string                 `json:"display"`
 }
 
 type IndexIconApiVO struct {
-	ID     int64  `json:"id"`
-	Title  string `json:"title"`
-	Type   string `json:"type"`
-	RowNum string `json:"rowNum"`
-	Sort   int8   `json:"sort"`
-	Pic    string `json:"pic"`
-	Custom string `json:"custom"`
-	Abbr   string `json:"abbr"`
+	ID      int64  `json:"id"`
+	Title   string `json:"title"`
+	Type    string `json:"type"`
+	RowNum  string `json:"rowNum"`
+	Sort    int8   `json:"sort"`
+	Pic     string `json:"pic"`
+	Custom  string `json:"custom"`
+	Abbr    string `json:"abbr"`
+	Display string `json:"display"`
 }

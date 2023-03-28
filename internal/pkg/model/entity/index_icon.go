@@ -17,6 +17,7 @@ type IndexIcon struct {
 	Abbr      string          `gorm:"column:abbr" json:"abbr"`
 	CreatedAt time.Time       `gorm:"column:created_at" json:"createdAt"`
 	UpdatedAt time.Time       `gorm:"column:updated_at" json:"updatedAt"`
+	Display   string          `gorm:"column:display" json:"display"`
 }
 
 func (IndexIcon) TableName() string {
