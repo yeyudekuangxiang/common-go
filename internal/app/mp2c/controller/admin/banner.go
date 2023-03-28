@@ -195,12 +195,12 @@ func (ctl BannerController) GetPageList(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	ParamsDate := srv_types.GetPageBannerDTO{
-		Name:     form.Name,
-		Scene:    form.Scene,
-		Status:   form.Status,
-		Offset:   form.Offset(),
-		Limit:    form.Limit(),
-		Displays: form.Displays,
+		Name:    form.Name,
+		Scene:   form.Scene,
+		Status:  form.Status,
+		Offset:  form.Offset(),
+		Limit:   form.Limit(),
+		Display: form.Display,
 	}
 	if form.Scene == "event" {
 		list, total, err := ctl.GetPageListSaas(ParamsDate)

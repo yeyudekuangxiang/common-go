@@ -19,12 +19,12 @@ type GetBannerListDO struct {
 }
 
 type GetBannerPageDO struct {
-	Scene    entity.BannerScene
-	Type     entity.BannerType
-	Status   entity.BannerStatus
-	Name     string
-	OrderBy  entity.OrderByList
-	Offset   int
-	Limit    int
-	Displays []string
+	Scene   entity.BannerScene
+	Type    entity.BannerType
+	Status  entity.BannerStatus
+	Name    string
+	OrderBy entity.OrderByList
+	Offset  int
+	Limit   int
+	Display string
 }

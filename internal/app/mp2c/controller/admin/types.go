@@ -219,10 +219,10 @@ type UpdateBannerForm struct {
 }
 
 type GetBannerPageForm struct {
-	Name     string   `json:"name" form:"name" binding:"" alias:"banner名称"`
-	Scene    string   `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
-	Status   int8     `json:"status" form:"status" binding:"" alias:"上线和下线状态"`
-	Displays []string `json:"displays" form:"displays" binding:""`
+	Name    string `json:"name" form:"name" binding:"" alias:"banner名称"`
+	Scene   string `json:"scene" form:"scene" binding:"" alias:"轮播图场景"`
+	Status  int8   `json:"status" form:"status" binding:"" alias:"上线和下线状态"`
+	Display string `json:"display" form:"display" binding:""`
 	controller.PageFrom
 }
 
@@ -316,7 +316,7 @@ type UpdateIndexIconForm struct {
 type GetIndexIconPageForm struct {
 	Title   string                 `json:"title" form:"title" binding:"" alias:"标题"`
 	IsOpen  entity.IndexIconIsOpen `json:"isOpen" form:"isOpen" binding:"" alias:"是否开启 1开启 2关闭"`
-	Display []string               `json:"display" form:"display" binding:""`
+	Display string                 `json:"display" form:"display" binding:""`
 	controller.PageFrom
 }
 

@@ -86,11 +86,11 @@ func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	list, total, err := service.NewIndexIconService(context.NewMioContext()).Page(repotypes.GetIndexIconPageDO{
-		Offset:   form.Offset(),
-		Limit:    form.Limit(),
-		Title:    form.Title,
-		IsOpen:   form.IsOpen,
-		Displays: form.Display,
+		Offset:  form.Offset(),
+		Limit:   form.Limit(),
+		Title:   form.Title,
+		IsOpen:  form.IsOpen,
+		Display: form.Display,
 	})
 
 	voList := make([]api_types.IndexIconVO, 0)
