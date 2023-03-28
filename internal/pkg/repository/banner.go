@@ -89,7 +89,7 @@ func (repo BannerRepository) Page(do repotypes.GetBannerPageDO) ([]entity.Banner
 		db.Where("name like ?", "%"+do.Name+"%")
 	}
 	if do.Display != "" {
-		db.Where("display", do.Display)
+		db.Where("display = ?", do.Display)
 	}
 	for _, orderBy := range do.OrderBy {
 		switch orderBy {
