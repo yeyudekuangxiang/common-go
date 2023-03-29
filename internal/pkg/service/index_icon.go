@@ -39,6 +39,7 @@ func (srv IndexIconService) Create(dto entity.IndexIcon) error {
 		Status:    dto.Status,
 		IsOpen:    dto.IsOpen,
 		Pic:       dto.Pic,
+		Display:   dto.Display,
 		CreatedAt: time.Now(),
 	})
 	return err
@@ -46,22 +47,24 @@ func (srv IndexIconService) Create(dto entity.IndexIcon) error {
 
 func (srv IndexIconService) Update(dto entity.IndexIcon) error {
 	return srv.repo.Update(srv_types.UpdateIndexIconDTO{
-		Id:     dto.ID,
-		Title:  dto.Title,
-		RowNum: dto.RowNum,
-		Sort:   dto.Sort,
-		Status: dto.Status,
-		IsOpen: dto.IsOpen,
-		Pic:    dto.Pic,
+		Id:      dto.ID,
+		Title:   dto.Title,
+		RowNum:  dto.RowNum,
+		Sort:    dto.Sort,
+		Status:  dto.Status,
+		IsOpen:  dto.IsOpen,
+		Pic:     dto.Pic,
+		Display: dto.Display,
 	})
 }
 
 func (srv IndexIconService) Page(dto repotypes.GetIndexIconPageDO) ([]entity.IndexIcon, int64, error) {
 	return srv.repo.GetPage(repotypes.GetIndexIconPageDO{
-		Offset: dto.Offset,
-		Limit:  dto.Limit,
-		Title:  dto.Title,
-		Status: entity.IndexIconStatusOk,
-		IsOpen: dto.IsOpen,
+		Offset:  dto.Offset,
+		Limit:   dto.Limit,
+		Title:   dto.Title,
+		Status:  entity.IndexIconStatusOk,
+		IsOpen:  dto.IsOpen,
+		Display: dto.Display,
 	})
 }

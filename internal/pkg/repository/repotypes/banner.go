@@ -26,4 +26,5 @@ type GetBannerPageDO struct {
 	OrderBy entity.OrderByList
 	Offset  int
 	Limit   int
+	Display string
 }

@@ -17,6 +17,7 @@ type CreateBannerDTO struct {
 	AppId    string              `json:"appId"`
 	Sort     int                 `json:"sort"`
 	Redirect string              `json:"redirect"`
+	Display  string              `json:"display"`
 }
 
 type UpdateBannerDTO struct {
@@ -29,6 +30,7 @@ type UpdateBannerDTO struct {
 	AppId    string              `json:"appId"`
 	Sort     int                 `json:"sort"`
 	Redirect string              `json:"redirect"`
+	Display  string              `json:"display"`
 }
 
 type GetPageBannerDTO struct {
@@ -38,4 +40,5 @@ type GetPageBannerDTO struct {
 	Offset  int                `json:"offset"`
 	Limit   int                `json:"limit"` //limit为0时不限制数量
 	OrderBy entity.OrderByList `json:"orderBy"`
+	Display string             `json:"display"`
 }

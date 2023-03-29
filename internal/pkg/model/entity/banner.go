@@ -17,6 +17,7 @@ type Banner struct {
 	Ext        string       `json:"ext" gorm:"type:varchar(1000);not null;default:'';comment:额外参数"`
 	CreateTime model.Time   `json:"createTime" gorm:"type:timestamptz;not null;comment:创建时间"`
 	UpdateTime model.Time   `json:"updateTime" gorm:"type:timestamptz;not null;comment:更新时间"`
+	Display    string       `json:"display"  gorm:"type:varchar(1000);not null;comment:展示位置"`
 }
 type BannerStatus int8
 
