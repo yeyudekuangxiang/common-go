@@ -37,6 +37,7 @@ type redisKey struct {
 	NumberLimit              string
 	CarbonPkRemindUser       string
 	ReportYear               string
+	QuizMessageRemind        string
 }
 
 var RedisKey = redisKey{
@@ -74,6 +75,7 @@ var RedisKey = redisKey{
 	PointMonthLimit:          "mp2c:point_limit:month",
 	NumberLimit:              "mp2c:point_limit:number",
 	MessageLimitCarbonPkShow: "mp2c:message_limit_carbon_pk_show:%s", //订阅消息每天弹出限制 打卡挑战
-	CarbonPkRemindUser:       "mp2c:carbon_pk_remind_user",           //提醒用户池
-	ReportYear:               "mp2c:report_year_v1",                  //年终报告
+	QuizMessageRemind:        "mp2c:message_limit_quiz",
+	CarbonPkRemindUser:       "mp2c:carbon_pk_remind_user", //提醒用户池
+	ReportYear:               "mp2c:report_year_v1",        //年终报告
 }

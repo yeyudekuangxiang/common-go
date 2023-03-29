@@ -9,6 +9,7 @@ type MessageTemplateId struct {
 	TopicPass            string
 	TopicCarefullyChosen string
 	PunchClockRemind     string
+	QuizRemind           string
 }
 
 //模版id
@@ -20,7 +21,7 @@ var MessageTemplateIds = MessageTemplateId{
 	TopicPass:            "0CNGli55ko4VBKdaUEiVbKWXEmu6tmnY",            //帖子审核通过提醒
 	TopicCarefullyChosen: "G8_5XpSOsL0E0AmL0UfNZ3pwWRjU-PYdk40ptT_viFI", //帖子被精选通知
 	PunchClockRemind:     "lxV--pg9udJn_iJL0txG00rRqZiwJYLGOPm9g2dEo4Q", //打开提醒
-
+	QuizRemind:           "8AHI8Iqd-HzSyYQIeNpZ-L2tKeJm8IkEneoBcFL0OkA", //答题提醒
 }
 
 //小程序订阅消息模版
@@ -32,6 +33,7 @@ type MessageSendMixCount struct {
 	TopicPass            float64
 	TopicCarefullyChosen float64
 	PunchClockRemind     float64
+	QuizRemind           float64
 }
 
 //每个模版最多发送条数
@@ -43,7 +45,7 @@ var MessageSendMixCounts = MessageSendMixCount{
 	TopicPass:            1, //帖子审核通过提醒
 	TopicCarefullyChosen: 1, //帖子被精选通知
 	PunchClockRemind:     1, //打卡提醒
-
+	QuizRemind:           1,
 }
 
 //模版路径

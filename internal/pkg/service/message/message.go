@@ -100,7 +100,10 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 	case "carbonpk":
 		templateIds = append(templateIds, config.MessageTemplateIds.PunchClockRemind)
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitCarbonPkShow, time.Now().Format("20060102"))
-		return
+		break
+	case "quiz":
+		templateIds = append(templateIds, config.MessageTemplateIds.QuizRemind)
+		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitCarbonPkShow, time.Now().Format("20060102"))
 		break
 	default:
 		break
@@ -229,6 +232,51 @@ func (srv MessageService) SendMessageToCarbonPk() {
 		}, 1)
 		if err != nil {
 			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
+		}
+	}
+}
+
+func (srv MessageService) SendMessageToQuiz() {
+	if !util.DefaultLock.Lock("sendMessageToQuiz", time.Minute*5) {
+		return
+	}
+	defer util.DefaultLock.UnLock("sendMessageToQuiz")
+	redisKey := config.RedisKey.QuizMessageRemind
+	list, err := app.Redis.SMembersMap(contextRedis.Background(), redisKey).Result()
+	if err != nil {
+		app.Logger.Infof("答题挑战提醒,小程序订阅消息发送失败,错误信息%s", err.Error())
+		return
+	}
+
+	template := MiniQuizRemindTemplate{
+		Title:   "答题挑战提醒",
+		Name:    "每日一题",
+		Content: "今天的每日一题还没有做哦！",
+	}
+	uIds := make([]int64, 0)
+	for id, _ := range list {
+		uid, _ := strconv.ParseInt(id, 10, 64)
+		uIds = append(uIds, uid)
+	}
+	ctx := context.Background()
+	userList, err := app.RpcService.UserRpcSrv.GetUserList(ctx, &user.GetUserListReq{
+		UserIds: uIds,
+	})
+	if err != nil {
+		app.Logger.Infof("答题挑战提醒，小程序订阅消息发送失败，模版%s，错误信息%s", template.TemplateId(), err.Error())
+		return
+	}
+
+	for _, usr := range userList.GetList() {
+		code, _ := srv.SendMiniSubMessage(usr.Openid, config.MessageJumpUrls.QuizRemind, template)
+		if code == 0 {
+			//发送成功，提醒时间延长24小时
+			srv.ExtensionSignTime(usr.Openid)
+		} else if code == 43101 {
+			//用户拒绝提醒，删除用户提醒
+			srv.DelExtensionSignTime(usr.Openid) //删除提醒
+		} else {
+			srv.DelExtensionSignTime(usr.Openid) //删除提醒
 		}
 	}
 }
