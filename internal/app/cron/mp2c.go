@@ -33,6 +33,6 @@ func mp2cCron() {
 	})
 	AddFunc("0 18 * * ?", func() {
 		service := messageSrv.MessageService{}
-		service.SendMessageToCarbonPk()
+		service.SendMessageToQuiz()
 	})
 }
