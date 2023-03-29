@@ -200,18 +200,18 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			UserId: uid,
 		})
 		if err != nil {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
+			app.Logger.Infof("低碳打卡挑战，小程序订阅消息发送失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		if !getUserById.Exist {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,用户不存在，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
+			app.Logger.Infof("低碳打卡挑战，小程序订阅消息发送失败,用户不存在，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		days, err := app.RpcService.CarbonPkRpcSrv.TotalCarbonPkDays(context.Background(), &carbonpk.TotalCarbonPkDaysReq{
 			UserId: uid,
 		})
 		if err != nil {
-			app.Logger.Info("低碳打卡挑战，小程序订阅消息发送失败,获取打卡天数失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
+			app.Logger.Infof("低碳打卡挑战，小程序订阅消息发送失败,获取打卡天数失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
 		template.Date = strconv.FormatInt(days.Total, 10) + "天"
@@ -231,7 +231,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			return app.Weapp.IsExpireAccessToken(ret.ErrCode)
 		}, 1)
 		if err != nil {
-			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
+			app.Logger.Infof("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
 		}
 	}
 }
@@ -241,8 +241,9 @@ func (srv MessageService) SendMessageToQuiz() {
 		return
 	}
 	defer util.DefaultLock.UnLock("sendMessageToQuiz")
-	redisKey := config.RedisKey.QuizMessageRemind
-	list, err := app.Redis.SMembersMap(contextRedis.Background(), redisKey).Result()
+	QuizRemindKey := config.RedisKey.QuizMessageRemind
+	ctx := contextRedis.Background()
+	list, err := app.Redis.SMembersMap(ctx, QuizRemindKey).Result()
 	if err != nil {
 		app.Logger.Infof("答题挑战提醒,小程序订阅消息发送失败,错误信息%s", err.Error())
 		return
@@ -258,25 +259,19 @@ func (srv MessageService) SendMessageToQuiz() {
 		uid, _ := strconv.ParseInt(id, 10, 64)
 		uIds = append(uIds, uid)
 	}
-	ctx := context.Background()
 	userList, err := app.RpcService.UserRpcSrv.GetUserList(ctx, &user.GetUserListReq{
 		UserIds: uIds,
 	})
 	if err != nil {
-		app.Logger.Infof("答题挑战提醒，小程序订阅消息发送失败，模版%s，错误信息%s", template.TemplateId(), err.Error())
+		app.Logger.Infof("答题挑战提醒,小程序订阅消息发送失败,模版: %s，错误信息: %s", template.TemplateId(), err.Error())
 		return
 	}
 
 	for _, usr := range userList.GetList() {
-		code, _ := srv.SendMiniSubMessage(usr.Openid, config.MessageJumpUrls.QuizRemind, template)
-		if code == 0 {
-			//发送成功，提醒时间延长24小时
-			srv.ExtensionSignTime(usr.Openid)
-		} else if code == 43101 {
-			//用户拒绝提醒，删除用户提醒
-			srv.DelExtensionSignTime(usr.Openid) //删除提醒
-		} else {
-			srv.DelExtensionSignTime(usr.Openid) //删除提醒
+		code, err := srv.SendMiniSubMessage(usr.Openid, config.MessageJumpUrls.QuizRemind, template)
+		if err != nil || code != 0 {
+			app.Logger.Infof("答题挑战提醒,小程序订阅消息发送失败,模版: %s,错误信息: %s, code: %d", template.TemplateId(), err.Error(), code)
+			app.Redis.ZRem(ctx, QuizRemindKey, usr.GetId())
 		}
 	}
 }
