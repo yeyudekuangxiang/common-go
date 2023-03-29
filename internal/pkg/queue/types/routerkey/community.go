@@ -1,3 +1,3 @@
 package routerkey
 
-const TopicSeekingStore = "topic.seekingStore"
+const TopicSeekingStore = "community.topic.seeking_store"
