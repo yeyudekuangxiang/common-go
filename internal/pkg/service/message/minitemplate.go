@@ -230,3 +230,29 @@ func (m MiniTopicCarefullyChosenTemplate) SendMixCount() float64 {
 func (m MiniTopicCarefullyChosenTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
+
+type MiniQuizRemindTemplate struct {
+	Title   string `json:"title"`
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func (m MiniQuizRemindTemplate) ToData() map[string]subscribemessage.SendValue {
+	return map[string]subscribemessage.SendValue{
+		"thing1": {Value: m.Title},
+		"thing2": {Value: m.Name},
+		"thing3": {Value: m.Content},
+	}
+}
+
+func (m MiniQuizRemindTemplate) TemplateId() string {
+	return config.MessageTemplateIds.QuizRemind
+}
+
+func (m MiniQuizRemindTemplate) SendMixCount() float64 {
+	return config.MessageSendMixCounts.QuizRemind
+}
+
+func (m MiniQuizRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+	return
+}
