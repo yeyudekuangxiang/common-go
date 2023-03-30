@@ -12,10 +12,11 @@ type GetBannerExistDO struct {
 	NotId    int64
 }
 type GetBannerListDO struct {
-	Scene   entity.BannerScene
-	Type    entity.BannerType
-	Status  entity.BannerStatus
-	OrderBy entity.OrderByList
+	Scene    entity.BannerScene
+	Type     entity.BannerType
+	Status   entity.BannerStatus
+	OrderBy  entity.OrderByList
+	Displays []string
 }
 
 type GetBannerPageDO struct {

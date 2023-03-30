@@ -64,7 +64,9 @@ func (repo BannerRepository) List(do repotypes.GetBannerListDO) ([]entity.Banner
 	if do.Status != 0 {
 		db.Where("status = ?", do.Status)
 	}
-
+	if len(do.Displays) != 0 {
+		db.Where("display in (?)", do.Displays)
+	}
 	for _, orderBy := range do.OrderBy {
 		switch orderBy {
 		case entity.OrderByBannerSortAsc:

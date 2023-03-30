@@ -60,11 +60,12 @@ func (srv IndexIconService) Update(dto entity.IndexIcon) error {
 
 func (srv IndexIconService) Page(dto repotypes.GetIndexIconPageDO) ([]entity.IndexIcon, int64, error) {
 	return srv.repo.GetPage(repotypes.GetIndexIconPageDO{
-		Offset:  dto.Offset,
-		Limit:   dto.Limit,
-		Title:   dto.Title,
-		Status:  entity.IndexIconStatusOk,
-		IsOpen:  dto.IsOpen,
-		Display: dto.Display,
+		Offset:   dto.Offset,
+		Limit:    dto.Limit,
+		Title:    dto.Title,
+		Status:   entity.IndexIconStatusOk,
+		IsOpen:   dto.IsOpen,
+		Display:  dto.Display,
+		Displays: dto.Displays,
 	})
 }
