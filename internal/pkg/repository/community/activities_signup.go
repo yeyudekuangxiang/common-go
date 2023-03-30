@@ -122,7 +122,7 @@ func (d defaultCommunityActivitiesSignupModel) FindAll(params FindAllActivitiesS
 }
 
 func (d defaultCommunityActivitiesSignupModel) CancelSignup(signup *entity.CommunityActivitiesSignup) error {
-	err := d.ctx.DB.Model(signup).Updates(&entity.CommunityActivitiesSignup{SignupStatus: 2, CancelTime: time.Now()}).Error
+	err := d.ctx.DB.Model(signup).Updates(&entity.CommunityActivitiesSignup{SignupStatus: SignupStatusFalse, CancelTime: time.Now()}).Error
 	if err != nil {
 		return err
 	}

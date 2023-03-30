@@ -26,7 +26,7 @@ var DefaultActivitiesSignupService = NewCommunityActivitiesSignupService(mioCont
 type (
 	ActivitiesSignupService interface {
 		GetPageList(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignup, int64, error)
-		GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, error)
+		GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, bool, error)
 		FindAll(params community.FindAllActivitiesSignupParams) ([]*entity.CommunityActivitiesSignup, int64, error)
 		FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error)
 		Signup(params SignupParams) error    //报名
@@ -141,7 +141,7 @@ func (srv defaultCommunityActivitiesSignupService) GetPageList(params community.
 	return list, total, nil
 }
 
-func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, error) {
+func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, bool, error) {
 	signup, err := srv.signupModel.FindOneAPISignup(community.FindOneActivitiesSignupParams{
 		Id:           params.Id,
 		TopicId:      params.TopicId,
@@ -150,12 +150,12 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 	})
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return &entity.APIActivitiesSignup{}, errno.ErrRecordNotFound
+			return &entity.APIActivitiesSignup{}, false, nil
 		}
-		return &entity.APIActivitiesSignup{}, errno.ErrInternalServer.WithMessage(err.Error())
+		return &entity.APIActivitiesSignup{}, false, errno.ErrInternalServer.WithMessage(err.Error())
 	}
 
-	return signup, nil
+	return signup, true, nil
 }
 
 func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) error {
