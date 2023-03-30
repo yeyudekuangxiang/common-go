@@ -212,6 +212,18 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	//下架
+	err = communityPdr.SeekingStore(communitymsg.Topic{
+		Event:  "down",
+		Id:     topic.Id,
+		UserId: topic.UserId,
+		Status: int(topic.Status),
+		Type:   topic.Type,
+		Tags:   topic.Tags,
+	})
+	if err != nil {
+		app.Logger.Errorf("communityPdr Err: %s", err.Error())
+	}
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:       0,

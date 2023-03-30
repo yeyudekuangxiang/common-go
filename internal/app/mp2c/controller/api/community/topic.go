@@ -9,6 +9,8 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/common"
+	communityPdr "mio/internal/pkg/queue/producer/community"
+	"mio/internal/pkg/queue/types/message/communitymsg"
 	"mio/internal/pkg/queue/types/message/smsmsg"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
@@ -395,6 +397,18 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	topic, err := TopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
 		return nil, err
+	}
+	//删除
+	err = communityPdr.SeekingStore(communitymsg.Topic{
+		Event:  "delete",
+		Id:     topic.Id,
+		UserId: topic.UserId,
+		Status: int(topic.Status),
+		Type:   topic.Type,
+		Tags:   topic.Tags,
+	})
+	if err != nil {
+		app.Logger.Errorf("communityPdr topic Err: %s", err.Error())
 	}
 	// 报名活动删除的话 通知报名者
 	if topic.Type == 1 {
