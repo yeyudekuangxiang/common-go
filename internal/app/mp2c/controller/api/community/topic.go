@@ -481,12 +481,14 @@ func (ctr *TopicController) DetailTopic(c *gin.Context) (gin.H, error) {
 		topic.IsCollection = collection.Status
 	}
 	if topic.Type == communityModel.TopicTypeActivity {
-		info, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{
-			TopicId:      topic.Id,
-			UserId:       user.ID,
-			SignupStatus: communityModel.SignupStatusTrue,
+		info, b, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{
+			TopicId: topic.Id,
+			UserId:  user.ID,
 		})
-		if err == nil {
+		if err != nil {
+			return nil, err
+		}
+		if b {
 			topic.Activity.SignupStatus = info.SignupStatus
 		}
 		topic.Activity.Status = 1
@@ -610,7 +612,7 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 		City:         form.City,
 		Remarks:      form.Remarks,
 		SignupTime:   time.Now(),
-		SignupStatus: 1,
+		SignupStatus: communityModel.SignupStatusTrue,
 	}
 	err := signupService.Signup(params)
 	if err != nil {
@@ -668,11 +670,9 @@ func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	//user := apiutil.GetAuthUser(c)
-
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	signInfo, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
+	signInfo, _, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
 	if err != nil {
 		return nil, err
 	}
