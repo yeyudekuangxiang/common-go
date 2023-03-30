@@ -152,16 +152,16 @@ func (srv DuiBaActivityService) Show(dto srv_types.ShowDuiBaActivityDTO) (*api_t
 // checkPhone 访问页面是否必须绑定手机号 1必须绑定 2不必须绑定
 // 返回值 pages/duiba_v2/duiba/duiba-share/index?activityId=001&cid=12&bind=bind
 func (srv DuiBaActivityService) GetActivityAppPath(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
-	path := ""
-	isCheckPhone := commontool.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "true", "false").String()
-	isNeedShare := commontool.Ternary(needShare == entity.DuiBaActivityIsShareYes, "true", "false").String()
-	path = fmt.Sprintf("/pages/duiba_v2/duiba/index?activityId=%s&cid=%d&bind=%s&hideShare=%s", activityId, cid, isCheckPhone, isNeedShare)
+	checkPhoneParam := commontool.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "&bind=true", "&bind=false").String()
+	checkNeedShareParam := commontool.Ternary(needShare == entity.DuiBaActivityIsShareYes, "&hideShare=true", "&hideShare=false").String()
+	path := fmt.Sprintf("/pages/duiba_v2/share/index?activityId=%s&cid=%d%s%s", activityId, cid, checkPhoneParam, checkNeedShareParam)
+	return path
+
 	/*if needShare == entity.DuiBaActivityIsShareYes {
 		path = fmt.Sprintf("/pages/duiba_v2/duiba-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
 	} else {
 		path = fmt.Sprintf("/pages/duiba_v2/duiba-not-share/index?activityId=%s&cid=%d&bind=%s", activityId, cid, isCheckPhone)
 	}*/
-	return path
 }
 
 // GetActivityViewQrCode 生成兑吧页面预览小程序码
@@ -191,11 +191,10 @@ func (srv DuiBaActivityService) GetActivityH5(activityId string, cid int64) stri
 // checkPhone 访问页面是否必须绑定手机号 1必须绑定 2不必须绑定
 // return https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=index&cid=12&bind=true
 func (srv DuiBaActivityService) GetJumpAppH5(activityId string, cid int64, needShare entity.DuiBaActivityIsShare, checkPhone entity.DuiBaActivityIsPhone) string {
-	link := ""
-	checkPhoneParam := commontool.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "", "&bind=bind").String()
-	checkNeedShareParam := commontool.Ternary(needShare == entity.DuiBaActivityIsShareYes, "", "&bind=bind").String()
+	checkPhoneParam := commontool.Ternary(checkPhone == entity.DuiBaActivityIsPhoneYes, "&bind=true", "&bind=false").String()
+	checkNeedShareParam := commontool.Ternary(needShare == entity.DuiBaActivityIsShareYes, "&hideShare=true", "&hideShare=false").String()
 
-	link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%d&bind=%s&hideShare=%s", activityId, cid, checkPhoneParam, checkNeedShareParam)
+	link := fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/share_v2.html?activityId=%s&cid=%d%s%s", activityId, cid, checkPhoneParam, checkNeedShareParam)
 
 	/*if needShare == entity.DuiBaActivityIsShareYes {
 		link = fmt.Sprintf("https://cloud1-1g6slnxm1240a5fb-1306244665.tcloudbaseapp.com/duiba_share_v2.html?activityId=%s&cid=%d%s", activityId, cid, checkPhoneParam)

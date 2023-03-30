@@ -51,9 +51,9 @@ var MessageSendMixCounts = MessageSendMixCount{
 //模版路径
 
 var MessageJumpUrls = MessageTemplateId{
-	ChangePoint:          "/pages/my_info/integral/index",                                                          //积分到账提醒
-	OrderDeliver:         "/pages/duiba_v2/duiba/index?activityId=duiba_order",                                     //订单发货提醒
-	SignRemind:           "/pages/duiba_v2/duiba-not-share/index?activityId=duiba_sign_Subnews&cid=1055&bind=true", //签到提醒
-	TopicPass:            "index",                                                                                  //帖子审核通过提醒
-	TopicCarefullyChosen: "index",                                                                                  //帖子被精选通知
+	ChangePoint:          "/pages/my_info/integral/index",                                                                //积分到账提醒
+	OrderDeliver:         "/pages/duiba_v2/share/index?activityId=duiba_order",                                           //订单发货提醒
+	SignRemind:           "/pages/duiba_v2/share/index?activityId=duiba_sign_Subnews&cid=1055&bind=true&hideShare=false", //签到提醒
+	TopicPass:            "index",                                                                                        //帖子审核通过提醒
+	TopicCarefullyChosen: "index",                                                                                        //帖子被精选通知
 }
