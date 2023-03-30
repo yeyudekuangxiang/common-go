@@ -20,9 +20,10 @@ type IndexIconController struct {
 
 func (ctl IndexIconController) Page(c *gin.Context) (gin.H, error) {
 	list, _, err := service.NewIndexIconService(context.NewMioContext()).Page(repotypes.GetIndexIconPageDO{
-		Offset: 0,
-		Limit:  20,
-		IsOpen: entity.IndexIconIsOpenOk,
+		Offset:   0,
+		Limit:    20,
+		IsOpen:   entity.IndexIconIsOpenOk,
+		Displays: []string{"all", "min"},
 	})
 	if err != nil {
 		return gin.H{}, err

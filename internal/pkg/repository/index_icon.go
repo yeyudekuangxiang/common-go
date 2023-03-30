@@ -95,6 +95,9 @@ func (repo IndexIconRepository) GetPage(do repotypes.GetIndexIconPageDO) ([]enti
 	if do.Display != "" {
 		db.Where("display = ?", do.Display)
 	}
+	if len(do.Displays) != 0 {
+		db.Where("display in (?)", do.Displays)
+	}
 	db.Order("sort asc ,id desc")
 	list := make([]entity.IndexIcon, 0)
 	var total int64
