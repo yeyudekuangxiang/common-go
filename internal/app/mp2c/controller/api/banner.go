@@ -19,9 +19,16 @@ func (BannerController) GetBannerList(ctx *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
 	}
+	var displays []string
+	if form.Display == "" {
+		displays = append(displays, "min", "all")
+	} else {
+		displays = append(displays, form.Display, "all")
+	}
 	list, err := service.DefaultBannerService.List(srv_types.GetBannerListDTO{
-		Scene:  entity.BannerScene(form.Scene),
-		Status: 1,
+		Scene:    entity.BannerScene(form.Scene),
+		Status:   1,
+		Displays: displays,
 	})
 	if err != nil {
 		return nil, err
