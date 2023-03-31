@@ -2,6 +2,7 @@ package httptool
 
 import (
 	"github.com/stretchr/testify/assert"
+	"log"
 	"net/url"
 	"testing"
 )
@@ -29,5 +30,12 @@ func TestPostForm(t *testing.T) {
 		"userId": {"1"},
 		"name":   {"haha"},
 	})
+	assert.Equal(t, nil, err)
+}
+func TestFuncLogger(t *testing.T) {
+	SetLogger(FuncLogger(func(data LogData, err error) {
+		log.Println("测试log", data, err)
+	}))
+	_, err := Get("https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=nihao&fenlei=256&rsv_pq=0xbbc238bb000021db&rsv_t=ff8cWxNk5LAZjIYf5SY2dDHrQMdLh2UOyB1oPKWHH%2FJzgxhFNN7iiSzNfOuc&rqlang=en&rsv_dl=tb&rsv_enter=1&rsv_sug3=5&rsv_sug1=3&rsv_sug7=100&rsv_sug2=0&rsv_btype=i&prefixsug=nihao&rsp=5&inputT=801&rsv_sug4=801")
 	assert.Equal(t, nil, err)
 }
