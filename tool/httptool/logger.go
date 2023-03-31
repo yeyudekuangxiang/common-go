@@ -34,3 +34,16 @@ func (d *ConsoleLogger) Log(data LogData, err error) {
 		data, err,
 	)
 }
+
+type logFunc struct {
+	f func(data LogData, err error)
+}
+
+func (l logFunc) Log(data LogData, err error) {
+	l.f(data, err)
+}
+func FuncLogger(f func(data LogData, err error)) Logger {
+	return logFunc{
+		f: f,
+	}
+}
