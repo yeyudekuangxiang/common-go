@@ -1,12 +1,14 @@
 package initialize
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gitlab.miotech.com/miotech-application/backend/common-go/logger/aliyunzap"
 	"gitlab.miotech.com/miotech-application/backend/common-go/logger/aliyunzero"
 	mzap "gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -100,6 +102,16 @@ func closeLogger() {
 		}
 	}
 
+}
+func InitHttpToolLog() {
+	httptool.SetLogger(httptool.FuncLogger(func(data httptool.LogData, err error) {
+		dataByte, err2 := json.Marshal(data)
+		if err2 != nil {
+			logx.Error("转化http数据异常 data:%+v err:%+v err2:%+v", data, err, err2)
+		} else {
+			logx.Infof(`request_log data:%+v err:%+v`, string(dataByte), err)
+		}
+	}))
 }
 
 var wxRobotHook = zap.Hooks(func(entry zapcore.Entry) error {
