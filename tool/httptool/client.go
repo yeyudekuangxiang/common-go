@@ -133,7 +133,6 @@ func (c HttpClient) do(start time.Time, data []byte, req *http.Request, options 
 			Start:        start,
 			Duration:     time.Now().Sub(start).Milliseconds(),
 			Method:       req.Method,
-			StatusCode:   nil,
 			RequestBody:  data,
 			ResponseBody: nil,
 		}, err)
@@ -148,7 +147,7 @@ func (c HttpClient) do(start time.Time, data []byte, req *http.Request, options 
 			Start:          start,
 			Duration:       time.Now().Sub(start).Milliseconds(),
 			Method:         req.Method,
-			StatusCode:     &res.StatusCode,
+			StatusCode:     res.StatusCode,
 			RequestBody:    data,
 			ResponseBody:   nil,
 		}, nil)
@@ -167,7 +166,7 @@ func (c HttpClient) do(start time.Time, data []byte, req *http.Request, options 
 			Start:          start,
 			Duration:       time.Now().Sub(start).Milliseconds(),
 			Method:         req.Method,
-			StatusCode:     &res.StatusCode,
+			StatusCode:     res.StatusCode,
 			RequestBody:    data,
 			ResponseBody:   nil,
 		}, err)
@@ -180,7 +179,7 @@ func (c HttpClient) do(start time.Time, data []byte, req *http.Request, options 
 		Start:          start,
 		Duration:       time.Now().Sub(start).Milliseconds(),
 		Method:         req.Method,
-		StatusCode:     &res.StatusCode,
+		StatusCode:     res.StatusCode,
 		RequestBody:    data,
 		ResponseBody:   body,
 	}, nil)

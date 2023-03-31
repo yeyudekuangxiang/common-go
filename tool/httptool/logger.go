@@ -17,7 +17,7 @@ type LogData struct {
 	//毫秒
 	Duration     int64
 	Method       string
-	StatusCode   *int
+	StatusCode   int
 	RequestBody  []byte
 	ResponseBody []byte
 }
