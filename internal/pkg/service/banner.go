@@ -34,7 +34,7 @@ func (srv BannerService) Create(dto srv_types.CreateBannerDTO) error {
 	if banner.ID != 0 {
 		return errno.ErrCommon.WithMessage("banner名称或图片已存在")
 	}
-	if dto.Type == entity.BannerTypeH5 {
+	if dto.Type == entity.BannerTypeH5 && dto.Display != "app" {
 		dto.Redirect = "pages/load_bearing/webview/index?url=" + dto.Redirect
 	}
 	bannerDo := entity.Banner{
@@ -60,7 +60,7 @@ func (srv BannerService) Update(dto srv_types.UpdateBannerDTO) error {
 		return errno.ErrCommon.WithMessage("banner名称已存在")
 	}
 
-	if dto.Type == entity.BannerTypeH5 {
+	if dto.Type == entity.BannerTypeH5 && dto.Display != "app" {
 		if find := strings.Contains(dto.Redirect, "pages/load_bearing/webview/index?url="); !find {
 			dto.Redirect = "pages/load_bearing/webview/index?url=:" + dto.Redirect
 		}
