@@ -166,7 +166,8 @@ func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneAc
 	if params.UserId != 0 {
 		db.Where("user_id = ?", params.UserId)
 	}
-	err := db.Unscoped().First(&resp).Error
+
+	err := db.Unscoped().Order("signup_time desc").First(&resp).Error
 	if err != nil {
 		return &entity.APIActivitiesSignup{}, err
 	}
