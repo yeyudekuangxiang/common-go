@@ -27,7 +27,7 @@ type option func(db *gorm.DB, options *Options) (*gorm.DB, *Options)
 func ForUpdate() option {
 	return func(db *gorm.DB, options *Options) (*gorm.DB, *Options) {
 		options.skipFindCache = true
-		return db.Set("gorm:query_option", "for update"), options
+		return db.Clauses(clause.Locking{Strength: "UPDATE"}), options
 	}
 }
 
