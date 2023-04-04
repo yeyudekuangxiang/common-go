@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
+	"math/big"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
@@ -12,7 +13,6 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util/apiutil"
 	"mio/pkg/errno"
-	"strconv"
 )
 
 var DefaultBannerController = NewBannerController(service.DefaultBannerService)
@@ -141,9 +141,10 @@ func (ctl BannerController) GetPageListSaas(insertDate srv_types.GetPageBannerDT
 		return list, 0, nil
 	}
 	for _, s := range response.Data.List {
-		id, _ := strconv.ParseInt(s.Id, 10, 64)
+		id := new(big.Int)
+		id.SetString(s.Id, 10)
 		list = append(list, entity.Banner{
-			ID:       id,
+			ID:       id.Int64(),
 			Name:     s.Name,
 			ImageUrl: s.ImageUrl,
 			Scene:    entity.BannerScene(s.Scene),
