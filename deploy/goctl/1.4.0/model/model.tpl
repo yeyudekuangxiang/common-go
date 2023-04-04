@@ -58,7 +58,6 @@ func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}
 func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error) {
 
 	db := c.db.WithContext(ctx)
-	db ,_ = initOptions(db,&c.options, opts)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
 
 	//在此处组装sql
@@ -69,6 +68,7 @@ func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param 
 	if err != nil {
 		return nil, 0, err
 	}
+	db ,_ = initOptions(db,&c.options, opts)
 	err = db.Limit(param.Limit).Offset(param.Offset).Find(&list).Error
 	if err != nil {
 		return nil, 0, err
