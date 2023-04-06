@@ -13,7 +13,7 @@ import (
 func TestNewDBWithReplicas(t *testing.T) {
 	db, err := NewDB(Config{
 		Type:         "postgres",
-		Host:         "pgm-uf680kf1780dfqvt.pg.rds.aliyuncs.com",
+		Host:         "127.0.0.1",
 		UserName:     "miniprogram",
 		Password:     "f8N27Tj3Is3ZIbU",
 		Database:     "miniprogram",
@@ -58,7 +58,7 @@ func TestNewDBWithReplicas(t *testing.T) {
 func TestNewDB(t *testing.T) {
 	db, err := NewDB(Config{
 		Type:         "postgres",
-		Host:         "pgm-uf680kf1780dfqvt.pg.rds.aliyuncs.com",
+		Host:         "127.0.0.1",
 		UserName:     "miniprogram",
 		Password:     "f8N27Tj3Is3ZIbU",
 		Database:     "miniprogram",
