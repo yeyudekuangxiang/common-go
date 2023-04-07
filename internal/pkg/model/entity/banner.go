@@ -29,9 +29,11 @@ const (
 type BannerType string
 
 const (
-	BannerTypeMini BannerType = "mini"
-	BannerTypePath BannerType = "path"
-	BannerTypeH5   BannerType = "h5"
+	BannerTypeMini  BannerType = "mini"
+	BannerTypePath  BannerType = "path"
+	BannerTypeH5    BannerType = "h5"
+	BannerTypeInapp BannerType = "inapp"
+	BannerTypeOapp  BannerType = "oapp"
 )
 
 type BannerScene string
@@ -59,8 +61,10 @@ var (
 		BannerSceneUser:    "用户",
 	}
 	BannerTypeMap = map[BannerType]string{
-		BannerTypeMini: "第三方小程序",
-		BannerTypePath: "内部小程序路径",
-		BannerTypeH5:   "H5链接",
+		BannerTypeMini:  "第三方小程序",
+		BannerTypePath:  "内部小程序路径",
+		BannerTypeH5:    "H5链接",
+		BannerTypeInapp: "内部app链接",
+		BannerTypeOapp:  "外部app链接",
 	}
 )
