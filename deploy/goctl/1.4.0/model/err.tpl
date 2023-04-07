@@ -4,6 +4,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/syncx"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 )
 

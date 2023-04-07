@@ -3,11 +3,13 @@ package {{.pkg}}
 import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 	"context"
 )
 {{else}}
 import (
     "gorm.io/gorm"
+    "gorm.io/plugin/dbresolver"
     "context"
 )
 {{end}}
@@ -21,12 +23,20 @@ type (
 		FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param,opts ...option) (*{{.upperStartCamelObject}},bool,error)
 		List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error)
 		Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error)
+	    // Policy 设置从主库还是从库读
+	    Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model
 	}
 
 	custom{{.upperStartCamelObject}}Model struct {
 		*default{{.upperStartCamelObject}}Model
 	}
 )
+
+// Policy 设置从主库还是从库读
+func (c *customUserModel) Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model {
+	db := c.db.Clauses(operation).Session(&gorm.Session{NewDB: true})
+	return New{{.upperStartCamelObject}}Model(db,{{if .withCache}}c.cacheConf{{end}})
+}
 
 // New{{.upperStartCamelObject}}Model returns a model for the database table.
 func New{{.upperStartCamelObject}}Model(db *gorm.DB,{{if .withCache}} c cache.CacheConf{{end}}) {{.upperStartCamelObject}}Model {
