@@ -20,7 +20,7 @@ var labelMap = map[int]string{
 	21000: "其他",
 }
 
-func CheckMsgWithOpenId(guid, content string) error {
+func CheckMsgWithOpenId(openId, content string) error {
 	content = strings.ReplaceAll(content, " ", "")
 	content = strings.ReplaceAll(content, "\n", "")
 	length := len(content)
@@ -34,7 +34,7 @@ func CheckMsgWithOpenId(guid, content string) error {
 					Content: buffer.String(),
 					Version: 2,
 					Scene:   2,
-					Openid:  guid,
+					Openid:  openId,
 				}
 				err := checkMsg(params)
 				buffer.Reset()
@@ -47,7 +47,7 @@ func CheckMsgWithOpenId(guid, content string) error {
 			Content: buffer.String(),
 			Version: 2,
 			Scene:   2,
-			Openid:  guid,
+			Openid:  openId,
 		}
 		err := checkMsg(params)
 		buffer.Reset()
@@ -61,7 +61,7 @@ func CheckMsgWithOpenId(guid, content string) error {
 		Content: content,
 		Version: 2,
 		Scene:   2,
-		Openid:  guid,
+		Openid:  openId,
 	}
 	err := checkMsg(params)
 	if err != nil {
@@ -95,12 +95,13 @@ func checkMsg(params *security.MsgSecCheckRequest) error {
 	return nil
 }
 
-func CheckMediaWithOpenId(guid, mediaUrl string) error {
+func CheckMediaWithOpenId(openId, mediaUrl string) error {
+
 	req := &security.MediaCheckAsyncRequest{
 		MediaUrl:  mediaUrl + "?x-oss-process=image/resize,m_fixed,h_200,w_200",
 		MediaType: 2,
 		Version:   2,
-		Openid:    guid,
+		Openid:    openId,
 		Scene:     3,
 	}
 	var resp *security.MediaCheckAsyncResponse

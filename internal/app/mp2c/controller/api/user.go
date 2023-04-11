@@ -222,7 +222,10 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-
+	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	if err != nil {
+		return nil, err
+	}
 	var birthday *time.Time
 	if form.Birthday != nil {
 		t, err := time.Parse("2006-01-02", *form.Birthday)
@@ -238,20 +241,20 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 
 	if strings.Trim(form.Nickname, " ") != "" {
-		err := validator.CheckMsgWithOpenId(user.GUID, form.Nickname)
+		err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Nickname)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
 		}
 	}
 
 	if form.Avatar != "" {
-		err := validator.CheckMsgWithOpenId(user.GUID, form.Avatar)
+		err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Avatar)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
 
-	_, err := service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
+	_, err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
 		UserId:      user.ID,
 		Nickname:    form.Nickname,
 		Avatar:      form.Avatar,
@@ -308,14 +311,16 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
-
 	user := apiutil.GetAuthUser(c)
-
+	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	if err != nil {
+		return nil, err
+	}
 	if len(strings.Trim(form.Introduction, " ")) == 0 {
 		return nil, errno.ErrCommon.WithMessage("内容不可以为空")
 	}
 
-	err := validator.CheckMsgWithOpenId(user.GUID, strings.Trim(form.Introduction, " "))
+	err = validator.CheckMsgWithOpenId(userPlatform.Openid, strings.Trim(form.Introduction, " "))
 	if err != nil {
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
