@@ -212,7 +212,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			continue
 		}
 		template.Date = strconv.FormatInt(days.Total, 10) + "天"
-		openid := getUserById.UserInfo.Openid
+		openid := getUserById.UserInfo.Guid
 		var ret *request.CommonError
 		err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 			ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
