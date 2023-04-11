@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"mio/internal/app/mp2c/controller/api/api_types"
+	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/service/upload"
 	"mio/internal/pkg/util/apiutil"
@@ -119,6 +121,15 @@ func (UploadController) UploadCallback(ctx *gin.Context) (gin.H, error) {
 	return nil, err
 }
 func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(ctx)
+	if user.Auth != 1 {
+		return nil, errno.ErrCommon.WithMessage("无权限")
+	}
+	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(ctx.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	if err != nil {
+		return nil, err
+	}
+
 	form := UploadImageForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err
@@ -151,17 +162,15 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	defer file.Close()
-	user := apiutil.GetAuthUser(ctx)
-
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
-	if err = validator.CheckMediaWithOpenId(user.GUID, base64.StdEncoding.EncodeToString(data)); err != nil {
+	if err = validator.CheckMediaWithOpenId(userPlatform.Openid, base64.StdEncoding.EncodeToString(data)); err != nil {
 		return nil, err
 	}
 
-	imgUrl, err := upload.DefaultUploadService.UploadImage(user.OpenId, file, fileHeader.Filename, uploadScene.OssDir)
+	imgUrl, err := upload.DefaultUploadService.UploadImage(userPlatform.Openid, file, fileHeader.Filename, uploadScene.OssDir)
 	return gin.H{
 		"imgUrl": imgUrl,
 	}, err
