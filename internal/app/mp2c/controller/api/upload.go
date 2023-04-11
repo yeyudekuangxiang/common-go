@@ -157,7 +157,7 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = validator.CheckMediaWithOpenId(user.OpenId, base64.StdEncoding.EncodeToString(data)); err != nil {
+	if err = validator.CheckMediaWithOpenId(user.GUID, base64.StdEncoding.EncodeToString(data)); err != nil {
 		return nil, err
 	}
 

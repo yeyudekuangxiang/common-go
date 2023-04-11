@@ -150,7 +150,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	messageService := message.NewWebMessageService(ctx)
 	topicService := community.NewTopicService(ctx)
 
-	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
+	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.GUID)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
@@ -164,7 +164,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	keyPrefix := "periodLimit:sendPoint:comment:push:"
 	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 3, app.Redis, keyPrefix, limit.PeriodAlign())
-	resNumber, err := periodLimit.TakeCtx(ctx.Context, user.OpenId)
+	resNumber, err := periodLimit.TakeCtx(ctx.Context, user.GUID)
 	if err != nil {
 		return nil, err
 	}
@@ -231,12 +231,12 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	}
 	if form.Message != "" {
 		//检查内容
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
+		if err := validator.CheckMsgWithOpenId(user.GUID, form.Message); err != nil {
 			app.Logger.Error(fmt.Errorf("update Comment error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "更新评论"
 			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 			return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}

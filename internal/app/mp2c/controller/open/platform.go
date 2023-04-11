@@ -508,12 +508,12 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	if form.Content != "" {
 		//检查内容
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Content); err != nil {
+		if err := validator.CheckMsgWithOpenId(user.GUID, form.Content); err != nil {
 			app.Logger.Errorf("文本校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "文本校验"
 			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
@@ -529,13 +529,13 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 	images := strings.Split(strings.Trim(form.MediaUrl, ","), ",")
 	if len(images) > 0 {
 		for _, imageUrl := range images {
-			err := validator.CheckMediaWithOpenId(user.OpenId, imageUrl)
+			err := validator.CheckMediaWithOpenId(user.GUID, imageUrl)
 			if err != nil {
 				app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
 				zhuGeAttr := make(map[string]interface{}, 0)
 				zhuGeAttr["场景"] = "图片校验"
 				zhuGeAttr["失败原因"] = err.Error()
-				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 				return nil, errno.ErrCommon.WithMessage(err.Error())
 			}
 		}

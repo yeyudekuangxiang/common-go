@@ -194,7 +194,7 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, GUID string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
 		if err == entity.ErrNotFount {
@@ -205,12 +205,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 
 	if message != "" {
 		//检查内容
-		if err := validator.CheckMsgWithOpenId(openId, message); err != nil {
+		if err := validator.CheckMsgWithOpenId(GUID, message); err != nil {
 			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "发布评论"
 			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, GUID, zhuGeAttr)
 			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
