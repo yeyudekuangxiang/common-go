@@ -46,10 +46,11 @@ func NewUserService(r repository.UserRepository,
 }
 
 type UserService struct {
-	r           repository.UserRepository
-	rInvite     repository.InviteRepository
-	rCity       repository.CityRepository
-	rUserExtend repository.UserExtentInfoRepository
+	r                repository.UserRepository
+	userPlatformRepo repository.UserPlatformRepository
+	rInvite          repository.InviteRepository
+	rCity            repository.CityRepository
+	rUserExtend      repository.UserExtentInfoRepository
 }
 
 // GetUser 查询用户信息
@@ -809,4 +810,11 @@ func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
 
 func (u UserService) checkOpenId(openId string) bool {
 	return strings.HasPrefix(openId, "oy_")
+}
+
+func (u *UserService) FindOneUserPlatformByGuid(ctx context.Context, guid string, platform entity.UserPlatformType) (*entity.UserPlatform, bool, error) {
+	return u.userPlatformRepo.FindOneByGuidPlatform(ctx, guid, platform)
+}
+func (u *UserService) FindOneUserPlatform(ctx context.Context, id int64) (*entity.UserPlatform, bool, error) {
+	return u.userPlatformRepo.FindOne(ctx, id)
 }
