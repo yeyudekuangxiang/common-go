@@ -31,17 +31,19 @@ import (
 
 var DefaultUserService = NewUserService(
 	repository.DefaultUserRepository,
+	repository.NewUserPlatformRepository(contextMix.NewMioContext()),
 	repository.InviteRepository{},
 	repository.NewCityRepository(contextMix.NewMioContext()),
 	repository.NewUserExtendInfoRepository(contextMix.NewMioContext()))
 
-func NewUserService(r repository.UserRepository,
+func NewUserService(r repository.UserRepository, userPlatformRepo repository.UserPlatformRepository,
 	rInvite repository.InviteRepository, rCity repository.CityRepository, rUserExtend repository.UserExtentInfoRepository) UserService {
 	return UserService{
-		r:           r,
-		rInvite:     rInvite,
-		rCity:       rCity,
-		rUserExtend: rUserExtend,
+		r:                r,
+		userPlatformRepo: userPlatformRepo,
+		rInvite:          rInvite,
+		rCity:            rCity,
+		rUserExtend:      rUserExtend,
 	}
 }
 

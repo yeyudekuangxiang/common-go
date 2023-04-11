@@ -7,6 +7,12 @@ import (
 	"mio/internal/pkg/model/entity"
 )
 
+func NewUserPlatformRepository(ctx *mioctx.MioContext) UserPlatformRepository {
+	return UserPlatformRepository{
+		ctx: ctx,
+	}
+}
+
 type UserPlatformRepository struct {
 	ctx *mioctx.MioContext
 }
