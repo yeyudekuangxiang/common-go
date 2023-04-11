@@ -238,14 +238,14 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 	}
 
 	if strings.Trim(form.Nickname, " ") != "" {
-		err := validator.CheckMsgWithOpenId(user.OpenId, form.Nickname)
+		err := validator.CheckMsgWithOpenId(user.GUID, form.Nickname)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
 		}
 	}
 
 	if form.Avatar != "" {
-		err := validator.CheckMsgWithOpenId(user.OpenId, form.Avatar)
+		err := validator.CheckMsgWithOpenId(user.GUID, form.Avatar)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
@@ -315,7 +315,7 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("内容不可以为空")
 	}
 
-	err := validator.CheckMsgWithOpenId(user.OpenId, strings.Trim(form.Introduction, " "))
+	err := validator.CheckMsgWithOpenId(user.GUID, strings.Trim(form.Introduction, " "))
 	if err != nil {
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
