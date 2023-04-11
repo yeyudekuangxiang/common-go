@@ -61,7 +61,7 @@ func (srv BannerService) Update(dto srv_types.UpdateBannerDTO) error {
 	}
 
 	if dto.Type == entity.BannerTypeH5 && dto.Display != "app" {
-		if find := strings.Contains(dto.Redirect, "pages/load_bearing/webview/index?url="); !find {
+		if find := strings.Contains(dto.Redirect, "/pages/load_bearing/webview/index?url="); !find {
 			dto.Redirect = "/pages/load_bearing/webview/index?url=" + dto.Redirect
 		}
 	}
