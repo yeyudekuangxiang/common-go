@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -190,8 +191,25 @@ func (srv PointService) afterChangePoint(ptId int64, balance int64, dto srv_type
 			Time:     time.Now().Format("2006年01月02日"),
 			AllPoint: balance,
 		}
+
+		sendOpenid := dto.OpenId
+		match, err := regexp.MatchString("^[0-9]+$", sendOpenid)
+		if err != nil {
+			return
+		}
+		//如果是纯数字，去user_platform表查询真正的openid
+		if match {
+			userPlatform, exist, err := DefaultUserService.FindOneUserPlatformByGuid(srv.ctx, sendOpenid, entity.UserPlatformWxMiniApp)
+			if err != nil {
+				return
+			}
+			if !exist {
+				return
+			}
+			sendOpenid = userPlatform.Openid
+		}
 		service := messageSrv.MessageService{}
-		_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
+		_, messageErr := service.SendMiniSubMessage(sendOpenid, config.MessageJumpUrls.ChangePoint, message)
 		if messageErr != nil {
 
 		}

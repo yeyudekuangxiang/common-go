@@ -11,13 +11,9 @@ import (
 	"golang.org/x/net/context"
 	"mio/config"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-	"regexp"
-
 	"strconv"
 	"time"
 )
@@ -28,22 +24,6 @@ type MessageService struct {
 // SendMiniSubMessage  小程序订阅消息发送
 func (srv *MessageService) SendMiniSubMessage(toUser string, page string, template IMiniSubTemplate) (int, error) {
 	zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
-
-	match, err := regexp.MatchString("^[0-9]+$", toUser)
-	if err != nil {
-		return 0, err
-	}
-	//如果是纯数字，去user_platform表查询真正的openid
-	if match {
-		userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(context.Background(), toUser, entity.UserPlatformWxMiniApp)
-		if err != nil {
-			return 0, err
-		}
-		if !exist {
-			return 0, errno.ErrCommon.WithMessage("用户不存在")
-		}
-		toUser = userPlatform.Openid
-	}
 	zhuGeAttr["openid"] = toUser
 	redisTemplateKey := fmt.Sprintf(config.RedisKey.MessageLimitByTemplate, template.TemplateId(), time.Now().Format("20060102"))
 	if !util.DefaultLock.Lock(redisTemplateKey, time.Minute*5) {
@@ -69,7 +49,7 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 	}*/
 
 	var ret *request.CommonError
-	err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
+	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 		ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
 			ToUser:           toUser,
 			TemplateID:       template.TemplateId(),
@@ -233,31 +213,10 @@ func (srv MessageService) SendMessageToCarbonPk() {
 		}
 		template.Date = strconv.FormatInt(days.Total, 10) + "天"
 
-		guid := getUserById.UserInfo.Guid
-		var openid string
-
-		match, err := regexp.MatchString("^[0-9]+$", guid)
-		if err != nil {
-			continue
-		}
-		//如果是纯数字，去user_platform表查询真正的openid
-		if match {
-			userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(context.Background(), guid, entity.UserPlatformWxMiniApp)
-			if err != nil {
-				continue
-			}
-			if !exist {
-				continue
-			}
-			openid = userPlatform.Openid
-		} else {
-			openid = guid
-		}
-
 		var ret *request.CommonError
 		err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 			ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
-				ToUser:           openid, //oy_BA5IGl1JgkJKbD14wq_-Yorqw
+				ToUser:           getUserById.UserInfo.Openid, //oy_BA5IGl1JgkJKbD14wq_-Yorqw
 				TemplateID:       template.TemplateId(),
 				Page:             "/pages/activity/punch/start/index", //页面跳转
 				MiniprogramState: subscribemessage.MiniprogramStateFormal,
@@ -269,7 +228,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			return app.Weapp.IsExpireAccessToken(ret.ErrCode)
 		}, 1)
 		if err != nil {
-			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
+			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), getUserById.UserInfo.Openid, err.Error())
 		}
 	}
 }
