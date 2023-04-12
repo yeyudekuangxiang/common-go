@@ -409,15 +409,16 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	}
 	//删除
 	err = communityPdr.SeekingStore(communitymsg.Topic{
-		Event:  "delete",
-		Id:     topic.Id,
-		UserId: topic.UserId,
-		Status: int(topic.Status),
-		Type:   topic.Type,
-		Tags:   topic.Tags,
+		Event:     "delete",
+		Id:        topic.Id,
+		UserId:    topic.UserId,
+		Status:    int(topic.Status),
+		Type:      topic.Type,
+		Tags:      topic.Tags,
+		CreatedAt: topic.CreatedAt.Time,
 	})
 	if err != nil {
-		app.Logger.Errorf("communityPdr topic Err: %s", err.Error())
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 	}
 	// 报名活动删除的话 通知报名者
 	if topic.Type == 1 {

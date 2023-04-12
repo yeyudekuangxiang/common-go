@@ -1,6 +1,9 @@
 package communitymsg
 
-import "mio/internal/pkg/model/entity"
+import (
+	"mio/internal/pkg/model/entity"
+	"time"
+)
 
 type Topic struct {
 	Event      string       `json:"event"`
@@ -10,6 +13,7 @@ type Topic struct {
 	Status     int          `json:"status"` // 状态：1 待审核 2审核失败 3已发布 4已下架
 	Type       int          `json:"type"`   // 1 文章 2 活动
 	Tags       []entity.Tag `json:"tags"`
+	CreatedAt  time.Time    `json:"createdAt"`
 }
 
 type Tag struct {

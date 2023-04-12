@@ -214,15 +214,16 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	}
 	//下架
 	err = communityPdr.SeekingStore(communitymsg.Topic{
-		Event:  "down",
-		Id:     topic.Id,
-		UserId: topic.UserId,
-		Status: int(topic.Status),
-		Type:   topic.Type,
-		Tags:   topic.Tags,
+		Event:     "down",
+		Id:        topic.Id,
+		UserId:    topic.UserId,
+		Status:    int(topic.Status),
+		Type:      topic.Type,
+		Tags:      topic.Tags,
+		CreatedAt: topic.CreatedAt.Time,
 	})
 	if err != nil {
-		app.Logger.Errorf("communityPdr Err: %s", err.Error())
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 	}
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
@@ -263,15 +264,16 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if topic.Status == 3 {
 		//审核通过
 		err = communityPdr.SeekingStore(communitymsg.Topic{
-			Event:  "push",
-			Id:     topic.Id,
-			UserId: topic.UserId,
-			Status: int(topic.Status),
-			Type:   topic.Type,
-			Tags:   topic.Tags,
+			Event:     "push",
+			Id:        topic.Id,
+			UserId:    topic.UserId,
+			Status:    int(topic.Status),
+			Type:      topic.Type,
+			Tags:      topic.Tags,
+			CreatedAt: topic.CreatedAt.Time,
 		})
 		if err != nil {
-			app.Logger.Errorf("communityPdr Err: %s", err.Error())
+			app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 		}
 		//审核通过发积分
 		keyPrefix := fmt.Sprintf("%s:%s", "periodLimit:sendPoint:article:push", topic.CreatedAt.Time.Format("2006-01-02"))

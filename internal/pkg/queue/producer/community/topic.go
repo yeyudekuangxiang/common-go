@@ -33,15 +33,18 @@ func SeekingStore(topic communitymsg.Topic) error {
 	if !rule.GetExist() {
 		return errno.ErrRecordNotFound
 	}
-
+	startTime := rule.GetActivityRule().GetStartTime() //毫秒
+	endTime := rule.GetActivityRule().GetEndTime()     //毫秒
+	createTime := topic.CreatedAt.UnixMilli()
+	if createTime < startTime || createTime > endTime {
+		return errno.ErrTimeout.WithMessage("帖子不在当期活动时间内")
+	}
 	marshal, err := json.Marshal(topic)
 	if err != nil {
-		app.Logger.Errorf("[城市碳秘] json_encode 错误: %+v\n", err.Error())
 		return err
 	}
 	err = app.QueueProduct.Publish(marshal, []string{routerkey.TopicSeekingStore}, rabbitmq.WithPublishOptionsExchange("lvmio"))
 	if err != nil {
-		app.Logger.Errorf("[城市碳秘] 错误:%+v\n", err.Error())
 		return err
 	}
 	return nil

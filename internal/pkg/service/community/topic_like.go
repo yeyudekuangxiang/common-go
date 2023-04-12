@@ -1,6 +1,7 @@
 package community
 
 import (
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -60,6 +61,7 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		likeNum = -1
 	}
 	_ = srv.topicModel.AddTopicLikeCount(topicId, likeNum)
+
 	err = communityPdr.SeekingStore(communitymsg.Topic{
 		Event:      "like",
 		LikeStatus: int(like.Status),
@@ -68,7 +70,12 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		Status:     int(topic.Status),
 		Type:       topic.Type,
 		Tags:       topic.Tags,
+		CreatedAt:  topic.CreatedAt.Time,
 	})
+	if err != nil {
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
+	}
+
 	err = srv.topicLikeModel.Save(&like)
 	if err != nil {
 		return TopicChangeLikeResp{}, err
