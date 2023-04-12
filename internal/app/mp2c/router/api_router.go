@@ -28,7 +28,6 @@ func apiRouter(router *gin.Engine) {
 		IV:  []byte("HDSK7jDNdjsDNDMD"),
 	}
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
-	router.GET("/sendSign", apiutil.Format(message.DefaultMessageController.SendSign))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
@@ -146,7 +145,6 @@ func apiRouter(router *gin.Engine) {
 		//消息相关路由
 		messageRouter := mustAuthRouter.Group("/message")
 		{
-			messageRouter.GET("/sendMessage", apiutil.Format(message.DefaultMessageController.SendMessage))
 			messageRouter.GET("/getTemplateId", apiutil.Format(message.DefaultMessageController.GetTemplateId))
 			messageRouter.POST("/web-message", apiutil.Format(message.DefaultMessageController.GetWebMessage))
 			messageRouter.POST("/web-message-count", apiutil.Format(message.DefaultMessageController.GetWebMessageCount))
