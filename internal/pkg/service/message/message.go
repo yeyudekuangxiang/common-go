@@ -231,7 +231,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			return app.Weapp.IsExpireAccessToken(ret.ErrCode)
 		}, 1)
 		if err != nil {
-			app.Logger.Infof("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
+			app.Logger.Infof("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), getUserById.UserInfo.Openid, err.Error())
 		}
 	}
 }
@@ -272,7 +272,6 @@ func (srv MessageService) SendMessageToQuiz() {
 		if err != nil || code != 0 {
 			app.Logger.Infof("答题挑战提醒,小程序订阅消息发送失败,模版: %s,错误信息: %s, code: %d", template.TemplateId(), err.Error(), code)
 			app.Redis.ZRem(ctx, QuizRemindKey, usr.GetId())
-			app.Logger.Info("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), getUserById.UserInfo.Openid, err.Error())
 		}
 	}
 }
