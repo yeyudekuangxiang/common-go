@@ -42,7 +42,12 @@ func NewClient(appId, appSecret string, tokenCenter AccessTokenCenter, level log
 	}), weapp.WithCache(noCache{}))
 	wpClient.SetLogLevel(level)
 
-	return &Client{Client: wpClient, tokenCenter: tokenCenter}
+	return &Client{
+		appId:       appId,
+		appSecret:   appSecret,
+		Client:      wpClient,
+		tokenCenter: tokenCenter,
+	}
 }
 
 type Client struct {
