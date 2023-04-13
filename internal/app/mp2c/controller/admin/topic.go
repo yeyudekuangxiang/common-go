@@ -7,6 +7,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	communityPdr "mio/internal/pkg/queue/producer/community"
+	"mio/internal/pkg/queue/types/message/communitymsg"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -210,6 +212,19 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	//下架
+	err = communityPdr.SeekingStore(communitymsg.Topic{
+		Event:     "down",
+		Id:        topic.Id,
+		UserId:    topic.UserId,
+		Status:    int(topic.Status),
+		Type:      topic.Type,
+		Tags:      topic.Tags,
+		CreatedAt: topic.CreatedAt.Time,
+	})
+	if err != nil {
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
+	}
 	//发消息
 	err = messageService.SendMessage(message.SendWebMessage{
 		SendId:       0,
@@ -247,18 +262,26 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	messageService := message.NewWebMessageService(ctx)
 
 	if topic.Status == 3 {
-		keyPrefix := "periodLimit:sendPoint:article:push:"
-		if topic.CreatedAt.Time.Day() != time.Now().Day() {
-			timeKey := topic.CreatedAt.Time.Format("2006-01-02")
-			keyPrefix = "periodLimit:sendPoint:article:push:" + timeKey
+		//审核通过
+		err = communityPdr.SeekingStore(communitymsg.Topic{
+			Event:     "push",
+			Id:        topic.Id,
+			UserId:    topic.UserId,
+			Status:    int(topic.Status),
+			Type:      topic.Type,
+			Tags:      topic.Tags,
+			CreatedAt: topic.CreatedAt.Time,
+		})
+		if err != nil {
+			app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 		}
+		//审核通过发积分
+		keyPrefix := fmt.Sprintf("%s:%s", "periodLimit:sendPoint:article:push", topic.CreatedAt.Time.Format("2006-01-02"))
 		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.PeriodAlign())
 		resNumber, err := PeriodLimit.TakeCtx(ctx.Context, topic.User.OpenId)
-
 		if err != nil {
 			return nil, err
 		}
-
 		key := "push_topic_v2"
 		if resNumber == 1 || resNumber == 2 {
 			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
@@ -275,7 +298,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			}
 			key = "push_topic"
 		}
-
+		//首次审核通过发通知
 		if isFirst {
 			err = messageService.SendMessage(message.SendWebMessage{
 				SendId:   0,

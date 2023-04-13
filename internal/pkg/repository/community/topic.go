@@ -16,6 +16,7 @@ type (
 		GetTopicPageList(by repository.GetTopicPageListBy) (list []entity.Topic, total int64)
 		FindById(topicId int64) *entity.Topic
 		FindOneTopic(params repository.FindTopicParams) (*entity.Topic, error)
+		FindOneTopicAndTag(params repository.FindTopicParams) (*entity.Topic, error)
 		FindOneUnscoped(params repository.FindTopicParams) *entity.Topic
 		Save(topic *entity.Topic) error
 		AddTopicLikeCount(topicId int64, num int) error
@@ -449,6 +450,32 @@ func (d defaultTopicModel) UpdatesColumn(cond repository.UpdatesTopicCond, upCol
 	}
 
 	return nil
+}
+
+func (d defaultTopicModel) FindOneTopicAndTag(params repository.FindTopicParams) (*entity.Topic, error) {
+	var resp entity.Topic
+	query := d.ctx.DB.Model(&entity.Topic{}).Preload("User").Preload("Tags")
+	if params.TopicId != 0 {
+		query = query.Where("id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		query = query.Where("user_id = ?", params.UserId)
+	}
+	if params.Type != nil {
+		query = query.Where("type = ?", *params.Type)
+	}
+	if params.Status != 0 {
+		query = query.Where("status = ?", params.Status)
+	}
+	err := query.First(&resp).Error
+	switch err {
+	case nil:
+		return &resp, nil
+	case gorm.ErrRecordNotFound:
+		return nil, entity.ErrNotFount
+	default:
+		return nil, err
+	}
 }
 
 func NewTopicModel(ctx *mioContext.MioContext) TopicModel {

@@ -9,6 +9,8 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/common"
+	communityPdr "mio/internal/pkg/queue/producer/community"
+	"mio/internal/pkg/queue/types/message/communitymsg"
 	"mio/internal/pkg/queue/types/message/smsmsg"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
@@ -157,7 +159,6 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 		if err != nil {
 			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
 		}
-
 	}
 
 	return gin.H{
@@ -396,6 +397,19 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	topic, err := TopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
 		return nil, err
+	}
+	//删除
+	err = communityPdr.SeekingStore(communitymsg.Topic{
+		Event:     "delete",
+		Id:        topic.Id,
+		UserId:    topic.UserId,
+		Status:    int(topic.Status),
+		Type:      topic.Type,
+		Tags:      topic.Tags,
+		CreatedAt: topic.CreatedAt.Time,
+	})
+	if err != nil {
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 	}
 	// 报名活动删除的话 通知报名者
 	if topic.Type == 1 {

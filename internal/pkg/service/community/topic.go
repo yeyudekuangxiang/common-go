@@ -782,7 +782,7 @@ func (srv TopicService) DetailTopic(params FindTopicParams) (*entity.Topic, erro
 
 // DelTopic 软删除
 func (srv TopicService) DelTopic(userId, topicId int64) (*entity.Topic, error) {
-	topicModel, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+	topicModel, err := srv.topicModel.FindOneTopicAndTag(repository.FindTopicParams{
 		TopicId: topicId,
 		UserId:  userId,
 	})

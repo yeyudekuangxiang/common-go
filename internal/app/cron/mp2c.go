@@ -31,4 +31,8 @@ func mp2cCron() {
 		service := messageSrv.MessageService{}
 		service.SendMessageToCarbonPk()
 	})
+	//AddFunc("0 18 * * ?", func() {
+	//	service := messageSrv.MessageService{}
+	//	service.SendMessageToQuiz()
+	//})
 }
