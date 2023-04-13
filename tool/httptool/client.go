@@ -38,7 +38,7 @@ func HttpWithHeader(key, value string) RequestOption {
 	}
 }
 func (c HttpClient) PutJson(url string, data interface{}, options ...RequestOption) ([]byte, error) {
-	body, err := json.Marshal(data)
+	body, err := c.json(data)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c HttpClient) PutJson(url string, data interface{}, options ...RequestOpti
 	return result.Body, nil
 }
 func (c HttpClient) PostJson(url string, data interface{}, options ...RequestOption) ([]byte, error) {
-	body, err := json.Marshal(data)
+	body, err := c.json(data)
 	if err != nil {
 		return nil, err
 	}
@@ -227,4 +227,10 @@ func (c HttpClient) log(data LogData, err error) {
 		return
 	}
 	c.logger.Log(data, err)
+}
+func (c HttpClient) json(data interface{}) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	encoder := json.NewEncoder(buf)
+	encoder.SetEscapeHTML(false)
+	return buf.Bytes(), encoder.Encode(data)
 }
