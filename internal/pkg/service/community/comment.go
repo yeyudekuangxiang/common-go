@@ -1,18 +1,14 @@
 package community
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/community"
-	"mio/internal/pkg/service/track"
-	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"strconv"
 	"time"
@@ -25,7 +21,7 @@ type (
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
 		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
-		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, *entity.CommentIndex, int64, error)
+		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, *entity.CommentIndex, int64, error)
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
@@ -194,24 +190,13 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string, openId string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
 		if err == entity.ErrNotFount {
 			return entity.CommentIndex{}, nil, 0, errno.ErrRecordNotFound
 		}
 		return entity.CommentIndex{}, nil, 0, errno.ErrCommon.WithMessage(err.Error())
-	}
-	if message != "" {
-		//检查内容
-		if err := validator.CheckMsgWithOpenId(openId, message); err != nil {
-			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发布评论"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, openId, zhuGeAttr)
-			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, errno.ErrCommon.WithMessage(err.Error())
-		}
 	}
 
 	comment := entity.CommentIndex{

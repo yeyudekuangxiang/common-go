@@ -222,7 +222,7 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
 	if err != nil {
 		return nil, err
 	}
@@ -240,14 +240,14 @@ func (ctr UserController) UpdateUserInfo(c *gin.Context) (gin.H, error) {
 		gender = (*entity.UserGender)(form.Gender)
 	}
 
-	if strings.Trim(form.Nickname, " ") != "" {
+	if strings.Trim(form.Nickname, " ") != "" && exist {
 		err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Nickname)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage("昵称审核未通过")
 		}
 	}
 
-	if form.Avatar != "" {
+	if form.Avatar != "" && exist {
 		err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Avatar)
 		if err != nil {
 			return nil, errno.ErrCommon.WithMessage(err.Error())
@@ -312,17 +312,21 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 		return gin.H{}, err
 	}
 	user := apiutil.GetAuthUser(c)
-	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	
+	userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(strings.Trim(form.Introduction, " ")) == 0 {
 		return nil, errno.ErrCommon.WithMessage("内容不可以为空")
 	}
 
-	err = validator.CheckMsgWithOpenId(userPlatform.Openid, strings.Trim(form.Introduction, " "))
-	if err != nil {
-		return nil, errno.ErrCommon.WithMessage(err.Error())
+	if exist {
+		err = validator.CheckMsgWithOpenId(userPlatform.Openid, strings.Trim(form.Introduction, " "))
+		if err != nil {
+			return nil, errno.ErrCommon.WithMessage(err.Error())
+		}
 	}
 
 	_, err = service.DefaultUserService.UpdateUserInfo(service.UpdateUserInfoParam{
