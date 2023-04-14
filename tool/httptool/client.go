@@ -232,5 +232,9 @@ func (c HttpClient) json(data interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	encoder := json.NewEncoder(buf)
 	encoder.SetEscapeHTML(false)
-	return buf.Bytes(), encoder.Encode(data)
+	err := encoder.Encode(data)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
