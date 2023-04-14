@@ -501,18 +501,18 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
 	if err != nil {
 		return nil, err
 	}
-	if form.Content != "" {
+	if form.Content != "" && exist {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Content); err != nil {
 			app.Logger.Errorf("文本校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "文本校验"
 			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, userPlatform.Openid, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
@@ -525,12 +525,12 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
-	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
 	if err != nil {
 		return nil, err
 	}
 	images := strings.Split(strings.Trim(form.MediaUrl, ","), ",")
-	if len(images) > 0 {
+	if len(images) > 0 && exist {
 		for _, imageUrl := range images {
 			err := validator.CheckMediaWithOpenId(userPlatform.Openid, imageUrl)
 			if err != nil {
