@@ -225,18 +225,22 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	if user.Auth == 0 {
 		return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage("无权限")
 	}
+	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	if err != nil {
+		return nil, err
+	}
 	form := CommentEditForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return gin.H{}, err
 	}
 	if form.Message != "" {
 		//检查内容
-		if err := validator.CheckMsgWithOpenId(user.OpenId, form.Message); err != nil {
+		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Message); err != nil {
 			app.Logger.Error(fmt.Errorf("update Comment error:%s", err.Error()))
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "更新评论"
 			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.OpenId, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, userPlatform.Openid, zhuGeAttr)
 			return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
@@ -244,7 +248,7 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := community.NewCommentService(ctx)
 
-	err := commentService.UpdateComment(user.ID, form.CommentId, form.Message)
+	err = commentService.UpdateComment(user.ID, form.CommentId, form.Message)
 	if err != nil {
 		return gin.H{}, err
 	}
