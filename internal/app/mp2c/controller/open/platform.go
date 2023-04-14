@@ -506,14 +506,18 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 	user := apiutil.GetAuthUser(c)
+	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	if err != nil {
+		return nil, err
+	}
 	if form.Content != "" {
 		//检查内容
-		if err := validator.CheckMsgWithOpenId(user.GUID, form.Content); err != nil {
+		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Content); err != nil {
 			app.Logger.Errorf("文本校验 Error:%s\n", err.Error())
 			zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "文本校验"
 			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, userPlatform.Openid, zhuGeAttr)
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
