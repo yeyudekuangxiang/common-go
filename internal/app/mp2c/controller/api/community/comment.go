@@ -144,13 +144,16 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	if user.Auth == 0 {
 		return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage("无权限")
 	}
-
+	userPlatform, _, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
+	if err != nil {
+		return nil, err
+	}
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := community.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 	topicService := community.NewTopicService(ctx)
 
-	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, user.OpenId)
+	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message, userPlatform.Openid)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
