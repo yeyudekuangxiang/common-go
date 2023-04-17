@@ -31,7 +31,7 @@ func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 		User: repository.GetUserListBy{
 			Mobile:   form.Mobile,
 			UserId:   form.ID,
-			Status:   form.State,
+			Status:   form.Status,
 			Nickname: form.Nickname,
 			Position: entity.UserPosition(form.Position),
 			Partners: entity.Partner(form.Partners),
@@ -167,7 +167,7 @@ func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
 		User: repository.GetUserListBy{
 			Mobile:   form.Mobile,
 			UserId:   form.ID,
-			Status:   form.State,
+			Status:   form.Status,
 			Nickname: form.Nickname,
 		},
 		OrderBy: "id desc",
