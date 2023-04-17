@@ -1,8 +1,12 @@
+// FindOneBy{{.upperField}} 根据索引查询信息
 func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx context.Context, {{.in}}, opts ...option) (*{{.upperStartCamelObject}},bool, error) {
+
+    {{.cacheKey}}
+    db := m.autoDB(ctx,{{.cacheKeyVariable}})
+
 	{{if .withCache}}
-	{{.cacheKey}}
     var resp {{.upperStartCamelObject}}
-	db,op:= initOptions(m.db.WithContext(ctx),&m.options,opts)
+	db,op := initOptions(db,&m.options,opts)
     var primaryKey {{.primaryKeyDataType}}
     var found bool
     var err error
@@ -43,11 +47,11 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	}
 
     skipFindCache:
-	//从缓存中查到了 主键的索引 从缓存中查询数据
+	//从缓存中查到了索引对应的主键 查询用户信息
 	return m.FindOne(ctx, primaryKey,opts...)
 	{{else}}
 	var resp {{.upperStartCamelObject}}
-    db,_:= initOptions(m.db.WithContext(ctx),&m.options,opts)
+    db,_ = initOptions(db,&m.options,opts)
     err := db.Model(&resp).Where("{{.originalField}}", {{.lowerStartCamelField}}).First(&resp).Error
     if err==nil{
         return &resp,true,nil

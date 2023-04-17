@@ -1,10 +1,14 @@
 
+// FindOne 根据主键查询信息
 func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}},opts ...option) (*{{.upperStartCamelObject}},bool, error) {
 
-	{{if .withCache}}
-	db,op:= initOptions(m.db.WithContext(ctx),&m.options,opts)
+    {{.cacheKey}}
+    db := m.autoDB(ctx,{{.cacheKeyVariable}})
 
-	{{.cacheKey}}
+	{{if .withCache}}
+
+	db,op:= initOptions(db,&m.options,opts)
+
 	var resp {{.upperStartCamelObject}}
 	var err error
 
@@ -26,7 +30,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{
 	}
 	return nil, false, err
     {{else}}
-    db,_:= initOptions(m.db.WithContext(ctx),&m.options,opts)
+    db,_ = initOptions(db,&m.options,opts)
     var resp {{.upperStartCamelObject}}
     err:=db.Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Take(&resp).Error
  	if err == nil {

@@ -5,8 +5,8 @@ type (
 	}
 
 	default{{.upperStartCamelObject}}Model struct {
-		{{if .withCache}}cache cache.Cache{{end}}
-		{{if .withCache}}cacheConf cache.CacheConf{{end}}
+		cache cache.Cache
+		cacheConf cache.CacheConf
 		options Options
 		db    *gorm.DB
 	}

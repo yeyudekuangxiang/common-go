@@ -8,6 +8,7 @@ import (
 )
 {{else}}
 import (
+    "github.com/zeromicro/go-zero/core/stores/cache"
     "gorm.io/gorm"
     "gorm.io/plugin/dbresolver"
     "context"
@@ -23,7 +24,7 @@ type (
 		FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param,opts ...option) (*{{.upperStartCamelObject}},bool,error)
 		List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error)
 		Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error)
-	    // Policy 设置从主库还是从库读
+	    // Policy 设置从主库还是从库读 仅对customUserModel下面的方法生效
 	    Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model
 	}
 
@@ -32,19 +33,21 @@ type (
 	}
 )
 
-// Policy 设置从主库还是从库读
-func (c *customUserModel) Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model {
-	db := c.db.Clauses(operation).Session(&gorm.Session{NewDB: true})
-	return New{{.upperStartCamelObject}}Model(db,{{if .withCache}}c.cacheConf{{end}})
-}
 
 // New{{.upperStartCamelObject}}Model returns a model for the database table.
-func New{{.upperStartCamelObject}}Model(db *gorm.DB,{{if .withCache}} c cache.CacheConf{{end}}) {{.upperStartCamelObject}}Model {
+func New{{.upperStartCamelObject}}Model(db *gorm.DB,c cache.CacheConf) {{.upperStartCamelObject}}Model {
 	return &custom{{.upperStartCamelObject}}Model{
-		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(db,{{if .withCache}} c{{end}}),
+		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(db,c),
 	}
 }
 
+// Policy 设置从主库还是从库读 仅对customUserModel中的方法生效
+func (c *customUserModel) Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model {
+	db := c.db.Clauses(operation).Session(&gorm.Session{})
+	return New{{.upperStartCamelObject}}Model(db,c.cacheConf)
+}
+
+// FindOne{{.upperStartCamelObject}} 根据条件查询数据
 func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param, opts ...option) (*{{.upperStartCamelObject}},bool,error) {
 	db := c.db.WithContext(ctx)
 	db ,_ = initOptions(db,&c.options, opts)
@@ -65,6 +68,7 @@ func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}
 	return nil, false, err
 }
 
+// Page 根据条件查询分页数据
 func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error) {
 
 	db := c.db.WithContext(ctx)
@@ -85,6 +89,7 @@ func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param 
 	}
 	return list, count, nil
 }
+// List 根据条件查询列表
 func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error) {
 
 	db := c.db.WithContext(ctx)
@@ -102,21 +107,29 @@ func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param 
 	return list, nil
 }
 
+// {{.upperStartCamelObject}}OrderByList {{.upperStartCamelObject}}排序列表
 type {{.upperStartCamelObject}}OrderByList []{{.upperStartCamelObject}}OrderBy
+// {{.upperStartCamelObject}}OrderBy 排序
 type {{.upperStartCamelObject}}OrderBy struct {
 	OrderBy string
 }
 
 var (
+    // {{.upperStartCamelObject}}OrderBy{{.upperStartCamelPrimaryKey}}Desc 根据主键递减排序
     {{.upperStartCamelObject}}OrderBy{{.upperStartCamelPrimaryKey}}Desc = {{.upperStartCamelObject}}OrderBy{OrderBy: "{{.originPrimaryKey}} desc"}
+    // {{.upperStartCamelObject}}OrderBy{{.upperStartCamelPrimaryKey}}Asc 根据主键递增排序
     {{.upperStartCamelObject}}OrderBy{{.upperStartCamelPrimaryKey}}Asc = {{.upperStartCamelObject}}OrderBy{OrderBy: "{{.originPrimaryKey}} asc"}
     {{if .hasCreatedAt}}
-     {{.upperStartCamelObject}}OrderByCreatedAtDesc = {{.upperStartCamelObject}}OrderBy{OrderBy: "created_at desc"}
-        {{.upperStartCamelObject}}OrderByCreatedAtAsc = {{.upperStartCamelObject}}OrderBy{OrderBy: "created_at asc"}
+    // {{.upperStartCamelObject}}OrderByCreatedAtDesc 根据创建时间递减排序
+    {{.upperStartCamelObject}}OrderByCreatedAtDesc = {{.upperStartCamelObject}}OrderBy{OrderBy: "created_at desc"}
+    // {{.upperStartCamelObject}}OrderByCreatedAtAsc 根据创建时间递增排序
+    {{.upperStartCamelObject}}OrderByCreatedAtAsc = {{.upperStartCamelObject}}OrderBy{OrderBy: "created_at asc"}
     {{end}}
     {{if .hasUpdatedAt}}
-         {{.upperStartCamelObject}}OrderByUpdatedAtDesc = {{.upperStartCamelObject}}OrderBy{OrderBy: "updated_at desc"}
-         {{.upperStartCamelObject}}OrderByUpdatedAtAsc = {{.upperStartCamelObject}}OrderBy{OrderBy: "updated_at asc"}
+    // {{.upperStartCamelObject}}OrderByUpdatedAtDesc 根据更新时间递减排序
+    {{.upperStartCamelObject}}OrderByUpdatedAtDesc = {{.upperStartCamelObject}}OrderBy{OrderBy: "updated_at desc"}
+    // {{.upperStartCamelObject}}OrderByUpdatedAtAsc 根据更新时间递增排序
+    {{.upperStartCamelObject}}OrderByUpdatedAtAsc = {{.upperStartCamelObject}}OrderBy{OrderBy: "updated_at asc"}
     {{end}}
 )
 

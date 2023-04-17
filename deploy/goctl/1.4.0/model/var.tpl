@@ -1,4 +1,4 @@
 
 var (
-	{{if .withCache}}{{.cacheKeys}}{{end}}
+	{{.cacheKeys}}
 )

@@ -9,16 +9,18 @@ import (
 )
 
 var (
+    // singleFlights 在缓存中使用,用于查询缓存时只允许一个线程进入查询,其它线程等待
     singleFlights = syncx.NewSingleFlight()
+    // stats 统计缓存
     stats = cache.NewStat("sqlc")
 )
 
 
-// see doc/sql-cache.md
+// cacheSafeGapBetweenIndexAndPrimary 主键缓存比索引缓存多缓存一些时间 避免有索引缓存但没有主键缓存的情况
 const cacheSafeGapBetweenIndexAndPrimary = time.Second * 5
 
 type Options struct {
-	//查询数据是否跳过缓存直接从数据库中查询
+	// skipFindCache 查询数据是否跳过缓存直接从数据库中查询
     skipFindCache bool
 }
 

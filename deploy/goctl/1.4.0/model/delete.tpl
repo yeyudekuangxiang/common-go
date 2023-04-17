@@ -1,6 +1,8 @@
-
+// Delete 根据主键删除数据
 func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) error {
-	{{if .withCache}}{{if .containsIndexCache}}data,exist, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
+	{{if .containsIndexCache}}
+	//查询数据用于删除索引
+	data,exist, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
 	if err!=nil{
 		return err
 	}
@@ -9,11 +11,12 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
     }
 
 {{end}}	{{.keys}}
-    err {{if .containsIndexCache}}={{else}}:={{end}} m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&{{.upperStartCamelObject}}{}).Error
+    //删除数据
+    err {{if .containsIndexCache}}={{else}}:={{end}} m.db.WithContext(ctx).Clauses(dbresolver.Write).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&{{.upperStartCamelObject}}{}).Error
     if err != nil {
         return err
     }
-	err = m.cache.DelCtx(ctx, {{.keyValues}})
+    //删除缓存,标记删除
+	err = m.deleteCache(ctx, {{.keyValues}})
 	return err
-    {{else}}return m.db.WithContext(ctx).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Delete(&{{.upperStartCamelObject}}{}).Error{{end}}
 }
