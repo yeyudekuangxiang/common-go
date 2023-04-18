@@ -35,9 +35,9 @@ type (
 
 
 // New{{.upperStartCamelObject}}Model returns a model for the database table.
-func New{{.upperStartCamelObject}}Model(db *gorm.DB,c cache.CacheConf) {{.upperStartCamelObject}}Model {
+func New{{.upperStartCamelObject}}Model(db *gorm.DB,c cache.CacheConf, opts ...modelOption) {{.upperStartCamelObject}}Model {
 	return &custom{{.upperStartCamelObject}}Model{
-		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(db,c),
+		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(db,c,opts...),
 	}
 }
 
@@ -50,7 +50,7 @@ func (c *customUserModel) Policy(operation dbresolver.Operation) {{.upperStartCa
 // FindOne{{.upperStartCamelObject}} 根据条件查询数据
 func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param, opts ...option) (*{{.upperStartCamelObject}},bool,error) {
 	db := c.db.WithContext(ctx)
-	db ,_ = initOptions(db,&c.options, opts)
+	db ,_ = initOptions(db,c.options, opts)
 
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
     //在此处组装sql
@@ -82,7 +82,7 @@ func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param 
 	if err != nil {
 		return nil, 0, err
 	}
-	db ,_ = initOptions(db,&c.options, opts)
+	db ,_ = initOptions(db,c.options, opts)
 	err = db.Limit(param.Limit).Offset(param.Offset).Find(&list).Error
 	if err != nil {
 		return nil, 0, err
@@ -93,7 +93,7 @@ func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param 
 func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error) {
 
 	db := c.db.WithContext(ctx)
-	db ,_ = initOptions(db,&c.options, opts)
+	db ,_ = initOptions(db,c.options, opts)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
 
 	//在此处组装sql

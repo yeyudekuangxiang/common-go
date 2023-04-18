@@ -1,10 +1,19 @@
 
-func new{{.upperStartCamelObject}}Model(db *gorm.DB,c cache.CacheConf) *default{{.upperStartCamelObject}}Model {
+func new{{.upperStartCamelObject}}Model(db *gorm.DB,c cache.CacheConf,opts ...modelOption) *default{{.upperStartCamelObject}}Model {
+	opt := initMobileOptions(Options{}, opts)
 	return &default{{.upperStartCamelObject}}Model{
 		cache: cache.New(c,singleFlights, stats,gorm.ErrRecordNotFound),
 		cacheConf: c,
+		options: opt,
 		db:    db,
 	}
+}
+func (m *default{{.upperStartCamelObject}}Model)initOptions(db *gorm.DB, opts []option) (*gorm.DB,Options){
+    options:=m.options
+    for _, opt := range opts {
+		db, options = opt(db, options)
+	}
+	return db, options
 }
 
 // deleteCache 删除缓存,并且标记key已更新,10秒内从主库中读取
@@ -16,11 +25,11 @@ func (m *default{{.upperStartCamelObject}}Model) deleteCache(ctx context.Context
 
 	for _, k := range keys {
 		val := ""
-		err = m.cache.SetWithExpireCtx(ctx, "update"+k, val, time.Second*10)
+		err = m.cache.SetWithExpireCtx(ctx, "update"+k, val, time.Second*cacheUpdateSync)
 		if err != nil {
 			logx.Errorf("标记更新失败 %+v %+v\n", keys, err)
 			cache.AddCleanTask(func() error {
-				return m.cache.SetWithExpire("update"+k, val, time.Second*10)
+				return m.cache.SetWithExpire("update"+k, val, time.Second*cacheUpdateSync)
 			})
 		}
 	}

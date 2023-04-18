@@ -6,7 +6,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 
 	{{if .withCache}}
     var resp {{.upperStartCamelObject}}
-	db,op := initOptions(db,&m.options,opts)
+	db,op := initOptions(db,m.options,opts)
     var primaryKey {{.primaryKeyDataType}}
     var found bool
     var err error
@@ -51,7 +51,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	return m.FindOne(ctx, primaryKey,opts...)
 	{{else}}
 	var resp {{.upperStartCamelObject}}
-    db,_ = initOptions(db,&m.options,opts)
+    db,_ = initOptions(db,m.options,opts)
     err := db.Model(&resp).Where("{{.originalField}}", {{.lowerStartCamelField}}).First(&resp).Error
     if err==nil{
         return &resp,true,nil

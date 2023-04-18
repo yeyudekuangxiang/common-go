@@ -31,8 +31,9 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Contex
 	if !exist {
 		return nil
 	}
-
-	{{.keys}}
+    {{.keys}}
+    {{else}}
+    public{{.upperStartCamelObject}}PrimaryKeyKey := fmt.Sprintf("%s%v", cachePublicExchangeCodeTypeExchangeCodeTypeIdPrefix, {{.lowerStartCamelPrimaryKey}})
 	{{end}}
 
 	if len(skipHook)>0 && skipHook[0] {
@@ -43,7 +44,11 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumn(ctx context.Contex
 	if err != nil {
 		return err
 	}
-	return m.deleteCache(ctx, {{.keyValues}})
+    {{if .containsIndexCache}}
+    return m.deleteCache(ctx, {{.keyValues}})
+    {{else}}
+    return m.deleteCache(ctx, public{{.upperStartCamelObject}}PrimaryKeyKey)
+    {{end}}
 }
 
 // UpdateColumns 更新多列数据
@@ -60,9 +65,12 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumns(ctx context.Conte
 	if !exist {
 		return nil
 	}
-
-	{{.keys}}
+    {{.keys}}
+    {{else}}
+    public{{.upperStartCamelObject}}PrimaryKeyKey := fmt.Sprintf("%s%v", cachePublicExchangeCodeTypeExchangeCodeTypeIdPrefix, {{.lowerStartCamelPrimaryKey}})
 	{{end}}
+
+
 
 	if len(skipHook)>0 && skipHook[0] {
 		err = m.db.WithContext(ctx).Clauses(dbresolver.Write).Model({{.upperStartCamelObject}}{}).Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).UpdateColumns(values).Error
@@ -73,5 +81,9 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateColumns(ctx context.Conte
 		return err
 	}
 
+    {{if .containsIndexCache}}
     return m.deleteCache(ctx, {{.keyValues}})
+    {{else}}
+    return m.deleteCache(ctx, public{{.upperStartCamelObject}}PrimaryKeyKey)
+    {{end}}
 }

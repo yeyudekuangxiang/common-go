@@ -7,7 +7,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{
 
 	{{if .withCache}}
 
-	db,op:= initOptions(db,&m.options,opts)
+	db,op:= initOptions(db,m.options,opts)
 
 	var resp {{.upperStartCamelObject}}
 	var err error
@@ -30,7 +30,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{
 	}
 	return nil, false, err
     {{else}}
-    db,_ = initOptions(db,&m.options,opts)
+    db,_ = initOptions(db,m.options,opts)
     var resp {{.upperStartCamelObject}}
     err:=db.Where("{{.originalPrimaryKey}} = ?", {{.lowerStartCamelPrimaryKey}}).Take(&resp).Error
  	if err == nil {
