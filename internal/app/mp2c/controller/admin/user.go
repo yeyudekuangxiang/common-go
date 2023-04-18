@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -20,11 +19,14 @@ var DefaultUserController = UserController{}
 type UserController struct {
 }
 
+var order = "id desc"
+
 func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 	form := UserPageListForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
 	}
+
 	list, total := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
 		Limit:  form.Limit(),
 		Offset: form.Offset(),
@@ -36,7 +38,7 @@ func (ctr UserController) List(c *gin.Context) (gin.H, error) {
 			Position: entity.UserPosition(form.Position),
 			Partners: entity.Partner(form.Partners),
 		},
-		OrderBy: "id desc",
+		OrderBy: order,
 	})
 	return gin.H{
 		"users":    list,
@@ -113,19 +115,21 @@ func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 	for {
 		list, _ := service.DefaultUserService.GetUserPageListBy(repository.GetUserPageListBy{
 			Limit:   10,
-			Offset:  i,
-			OrderBy: "id desc",
+			Offset:  i * 10,
+			OrderBy: order,
 			User:    repository.GetUserListBy{Risk: -1},
 		})
 		if len(list) == 0 {
 			break
 		}
-		i += len(list)
+		i++
 		var ids []string
+		openIdMap := make(map[string]int64, 0)
 		for _, v := range list {
 			if strings.Contains(v.OpenId, "oy_") {
 				ids = append(ids, v.OpenId)
 			}
+			openIdMap[v.OpenId] = v.ID
 		}
 
 		//openid 一次最多传十个
@@ -133,22 +137,16 @@ func (ctr UserController) UpdateUserRisk(c *gin.Context) (gin.H, error) {
 		if cas == nil {
 			continue
 		}
-		i -= len(cas.List)
-		//保存risk
-		for _, v := range list {
-			for _, c := range cas.List {
-				if v.OpenId == c.Openid {
-					fmt.Println("checkopenid", v.ID, c.RiskRank, v.OpenId)
-					service.DefaultUserService.UpdateUserRisk(service.UpdateUserRiskParam{
-						UserId: v.ID,
-						Risk:   c.RiskRank,
-					})
 
-				}
+		//保存risk
+		for _, c := range cas.List {
+			if id, ok := openIdMap[c.Openid]; ok {
+				service.DefaultUserService.UpdateUserRisk(service.UpdateUserRiskParam{
+					UserId: id,
+					Risk:   c.RiskRank,
+				})
 			}
 		}
-		fmt.Println("risk i ", i)
-
 	}
 
 	return nil, nil
@@ -170,7 +168,7 @@ func (ctr UserController) ListRisk(c *gin.Context) (gin.H, error) {
 			Status:   form.Status,
 			Nickname: form.Nickname,
 		},
-		OrderBy: "id desc",
+		OrderBy: order,
 	})
 	return gin.H{
 		"users":    list,
