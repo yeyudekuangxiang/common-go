@@ -65,6 +65,7 @@ const (
 	DuiBaActivityYtxLuckyDrawActivity               DuiBaActivityVipType = 5
 	DuiBaActivityCaronPkLuckyDrawActivity           DuiBaActivityVipType = 6
 	DuiBaActivityRedBlackRankActivity               DuiBaActivityVipType = 7
+	DuiBaActivityCrazyThursdayActivity              DuiBaActivityVipType = 8
 )
 
 const (

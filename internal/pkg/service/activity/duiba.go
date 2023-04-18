@@ -6,6 +6,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
@@ -345,6 +346,30 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 			}
 		}
 		if !isExit {
+			return "", errno.ErrMisMatchCondition
+		}
+		vip = activity.VipId
+		break
+	case entity.DuiBaActivityCrazyThursdayActivity:
+		CrazyThursdayActivityId := strings.Split(activityId, "_")
+		startTime := timetool.MustParse("2006-01-02", CrazyThursdayActivityId[1])
+		if !startTime.IsZero() {
+			return "", errno.ErrMisMatchCondition
+		}
+		endTime := timetool.MustParse("2006-01-02", CrazyThursdayActivityId[2])
+		if !endTime.IsZero() {
+			return "", errno.ErrMisMatchCondition
+		}
+		var crazyThursdayActivitySql = `select count(*)  from "duiba_order" where order_id in (
+select order_id from order_item where item_id in (select  product_item_id  from product_item where title like '%疯狂星期四%' 
+)   order  by id desc)  and finish_time > ? and finish_time < ? and user_id = ?`
+		var crazyThursdayActivityTotal int64
+		err = app.DB.Raw(crazyThursdayActivitySql, startTime.UnixMilli(), endTime.UnixMilli(), userId).Scan(&crazyThursdayActivityTotal).Error
+		if err != nil {
+			app.Logger.Error("查询疯狂星期四订单失败", err)
+			return "", errno.ErrMisMatchCondition
+		}
+		if crazyThursdayActivityTotal <= 0 {
 			return "", errno.ErrMisMatchCondition
 		}
 		vip = activity.VipId
