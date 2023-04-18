@@ -353,11 +353,11 @@ func (srv ZeroService) DuiBaAutoLogin(userId int64, activityId, short, thirdPart
 	case entity.DuiBaActivityCrazyThursdayActivity:
 		CrazyThursdayActivityId := strings.Split(activityId, "_")
 		startTime := timetool.MustParse("2006-01-02", CrazyThursdayActivityId[1])
-		if !startTime.IsZero() {
+		if startTime.IsZero() {
 			return "", errno.ErrMisMatchCondition
 		}
 		endTime := timetool.MustParse("2006-01-02", CrazyThursdayActivityId[2])
-		if !endTime.IsZero() {
+		if endTime.IsZero() {
 			return "", errno.ErrMisMatchCondition
 		}
 		var crazyThursdayActivitySql = `select count(*)  from "duiba_order" where order_id in (
