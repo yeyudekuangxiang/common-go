@@ -34,6 +34,7 @@ var DefaultZeroService = ZeroService{
 }
 
 type ZeroService struct {
+	ctx        *mioContext.MioContext
 	repo       *repository.PointTransactionRepository
 	repoOrder  repository.OrderRepository
 	repoInvite *repository.InviteRepository
@@ -41,6 +42,7 @@ type ZeroService struct {
 
 func NewZeroService(ctx *mioContext.MioContext) *ZeroService {
 	return &ZeroService{
+		ctx:       ctx,
 		repo:      repository.NewPointTransactionRepository(ctx),
 		repoOrder: repository.NewOrderRepository(app.DB),
 	}
@@ -370,6 +372,13 @@ select order_id from order_item where item_id in (select  product_item_id  from 
 			return "", errno.ErrMisMatchCondition
 		}
 		if crazyThursdayActivityTotal <= 0 {
+			return "", errno.ErrMisMatchCondition
+		}
+		vip = activity.VipId
+		break
+	case entity.DuiBaActivityStarChargeActivity:
+		rdsKey := fmt.Sprintf("%s:%s", config.RedisKey.StarCharge, "starCharge-luckyDraw")
+		if !app.Redis.SIsMember(srv.ctx, rdsKey, userInfo.ID).Val() {
 			return "", errno.ErrMisMatchCondition
 		}
 		vip = activity.VipId

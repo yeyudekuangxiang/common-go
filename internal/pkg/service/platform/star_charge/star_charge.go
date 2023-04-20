@@ -183,15 +183,6 @@ func (srv StarChargeService) CheckChargeLimit(openId string, endTime time.Time) 
 		return errno.ErrCommon.WithMessage("每日上限1次")
 	}
 
-	//isWhitelist, err := srv.whitelist(openId)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if isWhitelist {
-	//	return nil
-	//}
-
 	keyPrefix2 := "periodLimit:sendCoupon:star_charge:"
 	periodLimit2 := limit.NewPeriodLimit(int(endTime.Sub(time.Now()).Seconds()), 2, app.Redis, keyPrefix2)
 	res2, err := periodLimit2.TakeCtx(srv.ctx.Context, openId)

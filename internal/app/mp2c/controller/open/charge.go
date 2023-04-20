@@ -1,15 +1,18 @@
 package open
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
-	point2 "gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
+	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
-	"mio/internal/pkg/core/context"
+	mioContext "mio/internal/pkg/core/context"
+
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -18,6 +21,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
+	"mio/internal/pkg/util/limit"
 	"mio/pkg/errno"
 	"strconv"
 	"time"
@@ -34,7 +38,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	ctx := context.NewMioContext()
+	ctx := c.Request.Context()
 
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.Ch)
@@ -77,7 +81,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	}
 
 	//查重
-	transService := service.NewPointTransactionService(ctx)
+	transService := service.NewPointTransactionService(mioContext.NewMioContext(mioContext.WithContext(ctx)))
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
 	by, err := transService.FindBy(repository.FindPointTransactionBy{
@@ -110,7 +114,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" && totalPower != 0 {
-		_, errCarbon := service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
+		_, errCarbon := service.NewCarbonTransactionService(mioContext.NewMioContext(mioContext.WithContext(ctx))).Create(api_types.CreateCarbonTransactionDto{
 			OpenId:  userInfo.OpenId,
 			UserId:  userInfo.ID,
 			Type:    typeCarbonStr,
@@ -147,7 +151,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//加积分
 	if thisPoint != 0 {
-		pointService := service.NewPointService(ctx)
+		pointService := service.NewPointService(mioContext.NewMioContext(mioContext.WithContext(ctx)))
 		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
 			OpenId:       userInfo.OpenId,
 			Type:         typeString,
@@ -160,71 +164,118 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-	//发券
-	go ctr.sendCoupon(ctx, scene.Ch, totalPower, userInfo)
+	//抽奖
+	err = ctr.luckyDraw(ctx, scene.Ch, userInfo.ID, totalPower)
+	if err != nil {
+		app.Logger.Errorf("[%s][%s][%s]错误:%s", "charge", "luckyDraw", scene.Ch, err.Error())
+		return gin.H{}, nil
+	}
+
+	err = ctr.sendCoupon(ctx, scene.Ch, totalPower, userInfo)
+	if err != nil {
+		app.Logger.Errorf("[%s][%s][%s]错误:%s", "charge", "sendCoupon", scene.Ch, err.Error())
+		return gin.H{}, nil
+	}
 	return gin.H{}, nil
 }
 
-func (ctr ChargeController) SetException(c *gin.Context) (gin.H, error) {
-	form := api.ChangeChargeExceptionForm{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
+func (ctr ChargeController) luckyDraw(ctx context.Context, platformKey string, userId int64, power float64) error {
+	if power < 10.00 || platformKey != "lvmiao" {
+		return nil
 	}
-	ctx := context.NewMioContext()
-	err := app.Redis.Set(ctx, form.Ch+"_"+"ChargeException", 1, 0).Err()
+	rule, err := ctr.checkRule(ctx, "starCharge-luckyDraw")
+	if err != nil {
+		return err
+	}
+
+	rdsKey := fmt.Sprintf("%s:%s", config.RedisKey.StarCharge, "starCharge-luckyDraw")
+	_, err = app.Redis.SAdd(ctx, rdsKey, userId).Result()
+	app.Redis.ExpireAt(ctx, rdsKey, time.UnixMilli(rule.GetEndTime()))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ctr ChargeController) sendCoupon(ctx context.Context, platformKey string, power float64, userInfo *entity.User) error {
+	if power < 10.00 || platformKey != "lvmiao" {
+		return nil
+	}
+	rule, err := ctr.checkRule(ctx, platformKey)
+	if err != nil {
+		app.Logger.Info(fmt.Printf("[charge][sendCoupon] openId:%s ; checkRule失败:%s\n", userInfo.OpenId, err.Error()))
+		return err
+	}
+	//限制判断
+	err = ctr.checkLimitOfDay(ctx, platformKey, userInfo.ID)
+	if err != nil {
+		app.Logger.Info(fmt.Printf("[charge][sendCoupon] openId:%s ; checkLimitOfDay失败:%s\n", userInfo.OpenId, err.Error()))
+		return err
+	}
+
+	err = ctr.checkLimitOfPeriod(ctx, platformKey, userInfo.ID, 2, rule.GetEndTime())
+	if err != nil {
+		app.Logger.Info(fmt.Printf("[charge][sendCoupon] openId:%s ; checkLimitOfPeriod失败:%s\n", userInfo.OpenId, err.Error()))
+		return err
+	}
+	//发券
+	starChargeService := star_charge.NewStarChargeService(mioContext.NewMioContext(mioContext.WithContext(ctx)))
+	token, err := starChargeService.GetAccessToken()
+	if err != nil {
+		app.Logger.Info(fmt.Printf("[charge][sendCoupon] openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
+		return err
+	}
+	if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
+		app.Logger.Info(fmt.Printf("[charge][sendCoupon] openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
+		return err
+	}
+
+	return nil
+}
+
+func (ctr ChargeController) checkRule(ctx context.Context, platformKey string) (*activity.ActivityRule, error) {
+	rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
+		Code: platformKey,
+	})
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	if !rule.GetExist() {
+		return nil, errno.ErrRecordNotFound
+	}
+	startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
+	endTime := time.UnixMilli(rule.GetActivityRule().GetEndTime())
+	if time.Now().Before(startTime) || time.Now().After(endTime) {
+		return nil, errno.ErrMisMatchCondition.WithMessage("活动未开始或已失效")
+	}
+	return rule.GetActivityRule(), nil
 }
 
-func (ctr ChargeController) DelException(c *gin.Context) (gin.H, error) {
-	form := api.ChangeChargeExceptionForm{}
-	if err := apiutil.BindForm(c, &form); err != nil {
-		return nil, err
+func (ctr ChargeController) checkLimitOfDay(ctx context.Context, platformKey string, userId int64) error {
+	rdsKey := fmt.Sprintf("%s:%s:%s:%d", config.RedisKey.PeriodLimit, platformKey, time.Now().Format("20060102"), userId)
+	periodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds())*24, 1, app.Redis, rdsKey, limit.PeriodAlign())
+	res1, err := periodLimit.TakeCtx(ctx, "")
+	if err != nil {
+		return err
 	}
-	ctx := context.NewMioContext()
-	app.Redis.Del(ctx, form.Ch+"_"+"ChargeException")
-	return nil, nil
+	if res1 != 1 && res1 != 2 {
+		return errno.ErrCommon.WithMessage("每日上限1次")
+	}
+	return nil
 }
 
-//调用星星充电发券
-func (ctr ChargeController) sendCoupon(ctx *context.MioContext, platformKey string, power float64, userInfo *entity.User) {
-	if app.Redis.Exists(ctx, platformKey+"_"+"ChargeException").Val() == 0 && power >= 10.00 && platformKey == "lvmiao" {
-		rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx.Context, &activity.ActiveRuleReq{
-			Code: platformKey,
-		})
-		if err != nil {
-			app.Logger.Info(fmt.Printf("[%s]用户[%s]发券失败:%s\n", platformKey, userInfo.OpenId, err.Error()))
-			return
-		}
-		if !rule.GetExist() {
-			app.Logger.Info(fmt.Printf("[%s]用户[%s]发券失败:%s\n", platformKey, userInfo.OpenId, "无有效规则"))
-			return
-		}
-		startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
-		endTime := time.UnixMilli(rule.GetActivityRule().GetEndTime())
-		if time.Now().After(startTime) && time.Now().Before(endTime) {
-			starChargeService := star_charge.NewStarChargeService(ctx)
-			token, err := starChargeService.GetAccessToken()
-			if err != nil {
-				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 获取token失败:%s\n", userInfo.OpenId, err.Error()))
-				return
-			}
-			//限制一次
-			if err = starChargeService.CheckChargeLimit(userInfo.OpenId, endTime); err != nil {
-				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 检查次数限制:%s\n", userInfo.OpenId, err.Error()))
-				return
-			}
-			//send coupon
-			if err = starChargeService.SendCoupon(userInfo.OpenId, userInfo.PhoneNumber, starChargeService.ProvideId, token); err != nil {
-				app.Logger.Info(fmt.Printf("星星充电 openId:%s ; 发券失败:%s\n", userInfo.OpenId, err.Error()))
-				return
-			}
-			return
-		}
-		return
+func (ctr ChargeController) checkLimitOfPeriod(ctx context.Context, platformKey string, userId int64, frequency int, endTime int64) error {
+	rdsKey := fmt.Sprintf("%s:%s:%d", config.RedisKey.PeriodLimit, platformKey, userId)
+	s := endTime - time.Now().UnixMilli()
+	periodLimit2 := limit.NewPeriodLimit(int(s), frequency, app.Redis, rdsKey)
+	res2, err := periodLimit2.TakeCtx(ctx, "")
+	if err != nil {
+		return err
 	}
+	if res2 != 1 && res2 != 2 {
+		return errno.ErrCommon.WithMessage(fmt.Sprintf("活动内上限%d次", frequency))
+	}
+	return nil
 }
 
 func (ctr ChargeController) turnPlatform(user *entity.User, form api.GetChargeForm) {
@@ -275,7 +326,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	}
 
 	ch := "ykc"
-	ctx := context.NewMioContext()
+	ctx := mioContext.NewMioContext(mioContext.WithContext(c.Request.Context()))
 
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(ch)
@@ -300,7 +351,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 	var bizId, tp string
 	bizId = form.TradeSeq
 	tp = string(entity.POINT_YKC)
-	by, err := app.RpcService.PointRpcSrv.FindPointTransaction(ctx.Context, &point2.FindPointTransactionReq{
+	by, err := app.RpcService.PointRpcSrv.FindPointTransaction(ctx.Context, &point.FindPointTransactionReq{
 		BizId: &bizId,
 		Type:  &tp,
 	})
@@ -360,7 +411,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	if thisPoint != 0 {
 		//加积分
-		_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point2.IncPointReq{
+		_, err = app.RpcService.PointRpcSrv.IncPoint(ctx.Context, &point.IncPointReq{
 			Openid:       userInfo.OpenId,
 			Type:         string(entity.POINT_YKC),
 			BizId:        form.TradeSeq,
