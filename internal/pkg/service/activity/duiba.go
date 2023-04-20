@@ -377,8 +377,8 @@ select order_id from order_item where item_id in (select  product_item_id  from 
 		vip = activity.VipId
 		break
 	case entity.DuiBaActivityStarChargeActivity:
-		rdsKey := fmt.Sprintf("%s:%s:%s", config.RedisKey.StarCharge, "starCharge-luckyDraw", userInfo.OpenId)
-		if app.Redis.Exists(srv.ctx.Context, rdsKey).Val() == 0 {
+		rdsKey := fmt.Sprintf("%s:%s", config.RedisKey.StarCharge, "starCharge-luckyDraw")
+		if !app.Redis.SIsMember(srv.ctx, rdsKey, userInfo.ID).Val() {
 			return "", errno.ErrMisMatchCondition
 		}
 		vip = activity.VipId
