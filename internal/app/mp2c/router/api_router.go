@@ -106,9 +106,6 @@ func apiRouter(router *gin.Engine) {
 		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
 		authRouter.GET("upload/sts/token", apiutil.Format(api.DefaultUploadController.GetUploadSTSTokenInfo))
 		authRouter.Any("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
-		//星星发券接口限制
-		authRouter.POST("/set-exception", apiutil.Format(open.DefaultChargeController.SetException))
-		authRouter.POST("/del-exception", apiutil.Format(open.DefaultChargeController.DelException))
 		authRouter.GET("icon/list", apiutil.Format(api.DefaultIndexIconController.Page))
 	}
 

@@ -38,6 +38,8 @@ type redisKey struct {
 	CarbonPkRemindUser       string
 	ReportYear               string
 	QuizMessageRemind        string
+	PeriodLimit              string
+	StarCharge               string
 }
 
 var RedisKey = redisKey{
@@ -78,4 +80,6 @@ var RedisKey = redisKey{
 	QuizMessageRemind:        "mp2c:quiz:tpl:remind",
 	CarbonPkRemindUser:       "mp2c:carbon_pk_remind_user", //提醒用户池
 	ReportYear:               "mp2c:report_year_v1",        //年终报告
+	PeriodLimit:              "mp2c:period_limit",
+	StarCharge:               "mp2c:star_charge",
 }
