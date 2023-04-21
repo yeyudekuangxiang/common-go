@@ -233,7 +233,6 @@ func (srv ZhuGeService) TrackWithErr(eventName, openId string, attr map[string]i
 
 	if err != nil {
 		return err
-		app.Logger.Errorf("积分打点失败 %+v %v %+v", eventName, openId, attr)
 	}
 	return nil
 }

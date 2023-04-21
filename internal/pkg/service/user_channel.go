@@ -18,7 +18,7 @@ type UserChannelService struct {
 }
 
 func (srv UserChannelService) Create(param *entity.UserChannel) error {
-	channel, err := srv.getByCid(param.Cid)
+	channel, err := srv.GetByCid(param.Cid)
 	if err == nil {
 		if channel.Cid != 0 {
 			return errno.ErrCommon.WithMessage("渠道已存在，不能重复创建")
@@ -66,7 +66,7 @@ func (srv UserChannelService) GetChannelByCid(cid int64) *entity.UserChannel {
 	if cid == 0 {
 		return ch
 	}
-	channel, err := srv.getByCid(cid)
+	channel, err := srv.GetByCid(cid)
 	if err != nil {
 		return ch
 	}
@@ -74,18 +74,8 @@ func (srv UserChannelService) GetChannelByCid(cid int64) *entity.UserChannel {
 }
 
 /**根据cid获取渠道信息*/
-func (srv UserChannelService) getByCid(cid int64) (channel *entity.UserChannel, err error) {
-	ch := srv.r.FindByCid(repository.FindUserChannelBy{
-		Cid: cid,
-	})
-	if ch.Cid == 0 {
-		return nil, errno.ErrCommon.WithMessage("渠道不存在")
-	}
-	return ch, nil
-}
 
-// GetChannelInfoByCid 根据cid获取渠道信息
-func (srv UserChannelService) GetChannelInfoByCid(cid int64) (channel *entity.UserChannel, err error) {
+func (srv UserChannelService) GetByCid(cid int64) (channel *entity.UserChannel, err error) {
 	ch := srv.r.FindByCid(repository.FindUserChannelBy{
 		Cid: cid,
 	})
@@ -96,6 +86,7 @@ func (srv UserChannelService) GetChannelInfoByCid(cid int64) (channel *entity.Us
 }
 
 /**获取渠道列表*/
+
 func (srv UserChannelService) GetUserChannelPageList(by repository.GetUserChannelPageListBy) ([]entity.UserChannel, int64, error) {
 	list, total := srv.r.GetUserChannelPageList(by)
 	return list, total, nil

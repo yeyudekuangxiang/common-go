@@ -7,7 +7,7 @@ import (
 	"mio/internal/pkg/model/entity"
 )
 
-func /**/ NewCarbonRepository(ctx *context.MioContext) CarbonRepository {
+func NewCarbonRepository(ctx *context.MioContext) CarbonRepository {
 	return CarbonRepository{ctx: ctx}
 }
 
