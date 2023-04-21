@@ -149,8 +149,8 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 
 //SendUserIdentifyToZhuGe 用户属性上报到诸葛
 func (u UserService) SendUserIdentifyToZhuGe(openid string) {
-	return
-	if openid == "" {
+	//return ""
+	/*if openid == "" {
 		return
 	}
 	user, exit, _ := u.r.GetUserIdentifyInfo(openid)
@@ -160,7 +160,7 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
 	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
 	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
-	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)
+	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)*/
 }
 
 //func (u UserService) SendUserRegisterCoupon(user entity.User) {
@@ -414,7 +414,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		userInfo.Risk = rest.RiskRank
 	}
 
-	//获取用户地址  todo 加入队列
+	//获取用户地址   加入队列
 	city, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(cip)
 	if err != nil || !city.IsSuccess() {
 		app.Logger.Errorf("BindPhoneByCode ip地址查询失败 %+v %+v", err, city)

@@ -24,18 +24,3 @@ func (receiver platformCommon) SwitchService() interface{} {
 	}
 	return nil
 }
-
-// 获取气泡数据
-func (receiver platformCommon) GetPrePointList() {
-
-}
-
-// 生产气泡数据
-func (receiver platformCommon) PrePoint() {
-
-}
-
-// 消费气泡数据
-func (receiver platformCommon) CollectPoint() {
-
-}

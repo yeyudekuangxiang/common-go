@@ -72,7 +72,7 @@ func (ctr UserController) GetUserInfo(c *gin.Context) (gin.H, error) {
 	user := api_types.UserInfoVO{}
 	_ = util.MapTo(userInfo, &user)
 	if userInfo.ChannelId != 0 {
-		channel, err := service.DefaultUserChannelService.GetChannelInfoByCid(userInfo.ChannelId)
+		channel, err := service.DefaultUserChannelService.GetByCid(userInfo.ChannelId)
 		if err == nil {
 			user.ChannelName = channel.Name
 		}
@@ -312,7 +312,7 @@ func (ctr UserController) UpdateIntroduction(c *gin.Context) (gin.H, error) {
 		return gin.H{}, err
 	}
 	user := apiutil.GetAuthUser(c)
-	
+
 	userPlatform, exist, err := service.DefaultUserService.FindOneUserPlatformByGuid(c.Request.Context(), user.GUID, entity.UserPlatformWxMiniApp)
 	if err != nil {
 		return nil, err

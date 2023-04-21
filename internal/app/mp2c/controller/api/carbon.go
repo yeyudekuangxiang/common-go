@@ -24,11 +24,6 @@ type CarbonController struct {
 var DefaultCarbonController = CarbonController{
 	service.NewCarbonTransactionService(context.NewMioContext())}
 
-func (c CarbonController) PointToCarbon(ctx *gin.Context) (gin.H, error) {
-	c.service.PointToCarbon()
-	return gin.H{}, nil
-}
-
 func GetSignToJava(params map[string]string) string {
 	//排序
 	var slice []string
@@ -44,7 +39,7 @@ func GetSignToJava(params map[string]string) string {
 }
 
 //Save 测试用
-//{ "status":"ok", "errorMessage":" ", 'bizId':"20140730192133033", "carbonValue":22.22 }
+
 func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	form := api_types.GetCarbonTransactionCreateForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {

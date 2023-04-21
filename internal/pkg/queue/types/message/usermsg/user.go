@@ -14,7 +14,7 @@ type BindMobile struct {
 }
 
 func (d BindMobile) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() {
-
+	return
 }
 func (d BindMobile) JSON() ([]byte, error) {
 	return json.Marshal(d)
@@ -30,7 +30,7 @@ type Interaction struct {
 }
 
 func (d Interaction) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() {
-
+	return
 }
 func (d Interaction) JSON() ([]byte, error) {
 	return json.Marshal(d)
