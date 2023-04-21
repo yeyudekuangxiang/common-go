@@ -55,12 +55,12 @@ func (ctr ZyhController) Zyh(ctx *gin.Context) (gin.H, error) {
 			Mobile: form.Mobile,
 		})
 	}
-
-	if form.VolId != "" {
-		zyhService := platform.NewZyhService(context.NewMioContext())
-		return zyhService.GetZyhInfoByVolId(srv_types.GetZyhOpenDTO{
-			VolId: form.VolId,
-		})
-	}
+	/*
+		if form.VolId != "" {
+			zyhService := platform.NewZyhService(context.NewMioContext())
+			return zyhService.GetZyhInfoByVolId(srv_types.GetZyhOpenDTO{
+				VolId: form.VolId,
+			})
+		}*/
 	return gin.H{}, nil
 }

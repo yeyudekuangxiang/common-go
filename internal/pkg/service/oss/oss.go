@@ -138,7 +138,6 @@ func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFile
 	bucket, err := srv.client.Bucket(bucketName)
 	if err != nil {
 		return "", err
-		os.Exit(-1)
 	}
 	// 将本地文件分片，且分片数量指定为3。
 	chunks, err := oss.SplitFileByPartNum(locaFilename, 3)
@@ -172,7 +171,6 @@ func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFile
 		part, err := bucket.UploadPart(imur, reader, chunk.Size, chunk.Number)
 		if err != nil {
 			return "", err
-			os.Exit(-1)
 		}
 		parts = append(parts, part)
 	}
@@ -184,7 +182,6 @@ func (srv OssService) MultipartPutObject(name string, reader io.Reader, locaFile
 	cmur, err := bucket.CompleteMultipartUpload(imur, parts, objectAcl)
 	if err != nil {
 		return "", err
-		os.Exit(-1)
 	}
 	fmt.Println("cmur:", cmur)
 	return cmur.Location, nil

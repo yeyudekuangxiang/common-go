@@ -205,6 +205,7 @@ func (srv ZyhService) GetZyhInfoByMobile(dto srv_types.GetZyhOpenDTO) (gin.H, er
 	}, nil
 }
 
+/*
 func (srv ZyhService) GetZyhInfoByVolId(dto srv_types.GetZyhOpenDTO) (gin.H, error) {
 	if dto.VolId != "" {
 		openid := ""
@@ -268,3 +269,4 @@ func (srv ZyhService) GetZyhInfoByVolId(dto srv_types.GetZyhOpenDTO) (gin.H, err
 	return gin.H{}, nil
 
 }
+*/
