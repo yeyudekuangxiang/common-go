@@ -110,9 +110,7 @@ func (ctr ReportController) Index(ctx *gin.Context) (gin.H, error) {
 			return nil, err
 		}
 		redisRet["user_page"] = userPage
-		if config.Config.App.Env == "prod" {
-			return redisRet, nil
-		}
+		return redisRet, nil
 	}
 	//碳量
 	carbon := make([]carbonList, 0)
