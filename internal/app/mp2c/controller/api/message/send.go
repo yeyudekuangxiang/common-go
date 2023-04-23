@@ -15,6 +15,7 @@ type MsgController struct {
 }
 
 //获取模板
+
 func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 	form := MessageGetTemplateIdForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -28,6 +29,7 @@ func (ctr MsgController) GetTemplateId(c *gin.Context) (gin.H, error) {
 }
 
 //获取消息
+
 func (ctr MsgController) GetWebMessage(c *gin.Context) (gin.H, error) {
 	form := WebMessageRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
