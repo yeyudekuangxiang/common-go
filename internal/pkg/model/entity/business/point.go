@@ -18,8 +18,6 @@ const (
 
 // Text 展示给用户看的
 func (t PointType) Text() string {
-	switch t {
-	}
 	return t.RealText()
 }
 

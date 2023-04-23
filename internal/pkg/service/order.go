@@ -187,17 +187,7 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 
 	//下单失败返还积分
 	defer func() {
-		if !orderSuccess {
-			//返还积分
-
-			_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-				OpenId:       user.OpenId,
-				ChangePoint:  int64(param.Order.TotalCost),
-				BizId:        util2.UUID(),
-				Type:         entity.POINT_ADJUSTMENT,
-				AdditionInfo: `{"orderId":"` + orderId + `","message":"下单失败返还积分"}`,
-			})
-		}
+		srv.returnFailedOrderPoint(orderSuccess, pointService, user.OpenId, orderId, int64(param.Order.TotalCost))
 	}()
 
 	//创建订单
@@ -210,6 +200,22 @@ func (srv OrderService) submitOrder(param submitOrderParam) (*entity.Order, erro
 
 	orderSuccess = true
 	return order, nil
+}
+func (srv OrderService) returnFailedOrderPoint(orderSuccess bool, pointService PointService, openId string, orderId string, total int64) {
+	if !orderSuccess {
+		//返还积分
+		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+			OpenId:       openId,
+			ChangePoint:  total,
+			BizId:        util2.UUID(),
+			Type:         entity.POINT_ADJUSTMENT,
+			AdditionInfo: `{"orderId":"` + orderId + `","message":"下单失败返还积分"}`,
+		})
+		if err != nil {
+			app.Logger.Errorf("返还积分失败 %+v %+v %+v %+v", orderId, openId, total, err)
+		}
+	}
+
 }
 
 //直接创建订单 不会扣除积分(请勿使用此方法创建订单 请使用 OrderService.SubmitOrder 方法创建订单)
