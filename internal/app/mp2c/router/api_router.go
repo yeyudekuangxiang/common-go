@@ -9,6 +9,7 @@ import (
 	"mio/internal/app/mp2c/controller/api/common"
 	"mio/internal/app/mp2c/controller/api/community"
 	"mio/internal/app/mp2c/controller/api/coupon"
+	"mio/internal/app/mp2c/controller/api/event"
 	"mio/internal/app/mp2c/controller/api/message"
 	rabbitmqApi "mio/internal/app/mp2c/controller/api/mq"
 	"mio/internal/app/mp2c/controller/api/points"
@@ -96,7 +97,7 @@ func apiRouter(router *gin.Engine) {
 
 		eventRouter := authRouter.Group("/event")
 		{
-			eventRouter.GET("category/list", apiutil.Format(deleteRoute))
+			eventRouter.GET("category/list", apiutil.Format(event.DefaultEventController.GetEventCategoryList))
 			eventRouter.GET("/list", apiutil.Format(deleteRoute))
 			eventRouter.GET("detail", apiutil.Format(deleteRoute))
 		}
