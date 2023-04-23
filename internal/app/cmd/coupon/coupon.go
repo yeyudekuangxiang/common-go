@@ -19,6 +19,3 @@ to quickly create a Cobra application.`,
 		fmt.Println("validator called")
 	},
 }
-
-func init() {
-}

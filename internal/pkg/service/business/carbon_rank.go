@@ -295,7 +295,7 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 	defer func() {
 		err := recover()
 		if err != nil {
-			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+			app.Logger.Error("生成积分排行榜失败1", dateType, companyId, offset, limit, err)
 		}
 	}()
 
@@ -308,7 +308,7 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 			Offset:    offset,
 		})
 		if err != nil {
-			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+			app.Logger.Error("生成积分排行榜失败2", dateType, companyId, offset, limit, err)
 			return
 		}
 		if len(list) == 0 {
@@ -337,7 +337,7 @@ func (srv CarbonRankService) InitCompanyUserRank(companyId int, dateType busines
 			}
 			err = srv.repo.Create(&rankInfo)
 			if err != nil {
-				app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+				app.Logger.Error("生成积分排行榜失败3", dateType, companyId, offset, limit, err)
 				return
 			}
 			rank++
@@ -380,13 +380,12 @@ func (srv CarbonRankService) InitDepartmentRank(dateType business.RankDateType) 
 func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType business.RankDateType) {
 	limit := 500
 	offset := 0
-	rank := 1
 	start, end := dateType.ParseLastTime()
-
+	rank := 1
 	defer func() {
 		err := recover()
 		if err != nil {
-			app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
+			app.Logger.Error("生成积分排行榜失败4", dateType, companyId, offset, limit, err)
 		}
 	}()
 
@@ -406,39 +405,42 @@ func (srv CarbonRankService) InitCompanyDepartmentRank(companyId int, dateType b
 			return
 		}
 
-		for _, item := range list {
-			//部门等于0跳过
-			if item.DepartmentId == 0 {
-				continue
-			}
-			rankInfo := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
-				Pid:        item.DepartmentId,
-				ObjectType: business.RankObjectTypeDepartment,
-				DateType:   dateType,
-				TimePoint:  start,
-			})
-			if rankInfo.ID != 0 {
-				app.Logger.Error("排行榜数据已存在", dateType, companyId)
-				return
-			}
-			rankInfo = business.CarbonRank{
-				DateType:   dateType,
-				ObjectType: business.RankObjectTypeDepartment,
-				Value:      item.Value,
-				Rank:       rank,
-				Pid:        item.DepartmentId,
-				LikeNum:    0,
-				TimePoint:  model.Time{Time: start},
-			}
-			err = srv.repo.Create(&rankInfo)
-			if err != nil {
-				app.Logger.Error("生成积分排行榜失败", dateType, companyId, offset, limit, err)
-				return
-			}
-			rank++
-		}
+		srv.initList(list, dateType, start, &rank)
 
 		offset += limit
+	}
+}
+func (srv CarbonRankService) initList(list []business.DepartCarbonRank, dateType business.RankDateType, start time.Time, rank *int) {
+	for _, item := range list {
+		//部门等于0跳过
+		if item.DepartmentId == 0 {
+			continue
+		}
+		rankInfo := srv.repo.FindCarbonRank(rbusiness.FindCarbonRankBy{
+			Pid:        item.DepartmentId,
+			ObjectType: business.RankObjectTypeDepartment,
+			DateType:   dateType,
+			TimePoint:  start,
+		})
+		if rankInfo.ID != 0 {
+			app.Logger.Error("排行榜数据已存在", dateType)
+			return
+		}
+		rankInfo = business.CarbonRank{
+			DateType:   dateType,
+			ObjectType: business.RankObjectTypeDepartment,
+			Value:      item.Value,
+			Rank:       *rank,
+			Pid:        item.DepartmentId,
+			LikeNum:    0,
+			TimePoint:  model.Time{Time: start},
+		}
+		err := srv.repo.Create(&rankInfo)
+		if err != nil {
+			app.Logger.Error("生成积分排行榜失败", dateType, err)
+			return
+		}
+		*rank++
 	}
 }
 

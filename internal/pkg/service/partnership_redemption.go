@@ -28,6 +28,15 @@ func (srv PartnershipRedemptionService) ProcessPromotionInformation(openId strin
 	if len(promotionList) == 0 {
 		return nil, nil
 	}
+
+	infoList, err := srv.formatInfoList(openId, promotionList)
+	if err != nil {
+		return nil, err
+	}
+
+	return infoList, app.DB.Create(&infoList).Error
+}
+func (srv PartnershipRedemptionService) formatInfoList(openId string, promotionList []entity.PartnershipPromotion) ([]entity.PartnershipRedemption, error) {
 	t := time.Now()
 	infoList := make([]entity.PartnershipRedemption, 0)
 	app.Logger.Infof("循环第三方活动列表 %+v", promotionList)
@@ -47,67 +56,81 @@ func (srv PartnershipRedemptionService) ProcessPromotionInformation(openId strin
 		}
 
 		if coupon.External {
-			app.Logger.Info("获取一张未发放的优惠券", promotion.ID, promotion.CouponTypeId)
-			//获取一张未发放的优惠券
-			unSendCoupon, err := DefaultCouponService.RetrieveUnassignedCoupon(promotion.CouponTypeId)
+			item, err := srv.findCouponToSend(openId, promotion, t)
 			if err != nil {
-				app.Logger.Error(promotion, err)
 				return nil, err
 			}
-			if unSendCoupon.ID == 0 {
-				return nil, errno.ErrCommon.WithMessage("兑换券存量不足")
-			}
-
-			app.Logger.Info("获取一张未发放的优惠券", openId, unSendCoupon.CouponTypeId, entity.OrderTypeRedeem)
-			//兑换优惠券
-			_, err = DefaultCouponService.RedeemCoupon(RedeemCouponParam{
-				OpenId:    openId,
-				CouponId:  unSendCoupon.CouponId,
-				OrderType: entity.OrderTypeRedeem,
-			})
-
-			if err != nil {
-				app.Logger.Error(promotion, err)
-				return nil, err
-			}
-
-			infoList = append(infoList, entity.PartnershipRedemption{
-				OpenId:      openId,
-				Time:        model.Time{Time: t},
-				CouponId:    model.NullString(unSendCoupon.CouponId),
-				PromotionId: model.NullString(promotion.PromotionId),
-			})
+			infoList = append(infoList, *item)
 		} else {
-
-			//生成优惠券发放
-			couponIds, err := DefaultCouponService.GenerateCouponBatch(GenerateCouponBatchParam{
-				CouponTypeId: promotion.CouponTypeId,
-				BatchSize:    1,
-			})
+			itemList, err := srv.createCouponToSend(openId, promotion, t)
 			if err != nil {
 				return nil, err
 			}
-			app.Logger.Info("生成优惠券用于发放", promotion.ID, promotion.CouponTypeId, couponIds)
-
-			for _, couponId := range couponIds {
-				app.Logger.Info("兑换优惠券", openId, couponId, entity.OrderTypeRedeem)
-				_, err := DefaultCouponService.RedeemCoupon(RedeemCouponParam{
-					OpenId:    openId,
-					CouponId:  couponId,
-					OrderType: entity.OrderTypeRedeem,
-				})
-				if err != nil {
-					return nil, err
-				}
-				infoList = append(infoList, entity.PartnershipRedemption{
-					OpenId:      openId,
-					Time:        model.Time{Time: t},
-					CouponId:    model.NullString(couponId),
-					PromotionId: model.NullString(promotion.PromotionId),
-				})
-			}
+			infoList = append(infoList, itemList...)
 		}
 	}
+	return infoList, nil
+}
+func (srv PartnershipRedemptionService) findCouponToSend(openId string, promotion entity.PartnershipPromotion, now time.Time) (*entity.PartnershipRedemption, error) {
+	app.Logger.Info("获取一张未发放的优惠券", promotion.ID, promotion.CouponTypeId)
+	//获取一张未发放的优惠券
+	unSendCoupon, err := DefaultCouponService.RetrieveUnassignedCoupon(promotion.CouponTypeId)
+	if err != nil {
+		app.Logger.Error(promotion, err)
+		return nil, err
+	}
+	if unSendCoupon.ID == 0 {
+		return nil, errno.ErrCommon.WithMessage("兑换券存量不足")
+	}
 
-	return infoList, app.DB.Create(&infoList).Error
+	app.Logger.Info("获取一张未发放的优惠券", openId, unSendCoupon.CouponTypeId, entity.OrderTypeRedeem)
+	//兑换优惠券
+	_, err = DefaultCouponService.RedeemCoupon(RedeemCouponParam{
+		OpenId:    openId,
+		CouponId:  unSendCoupon.CouponId,
+		OrderType: entity.OrderTypeRedeem,
+	})
+
+	if err != nil {
+		app.Logger.Error(promotion, err)
+		return nil, err
+	}
+
+	return &entity.PartnershipRedemption{
+		OpenId:      openId,
+		Time:        model.Time{Time: now},
+		CouponId:    model.NullString(unSendCoupon.CouponId),
+		PromotionId: model.NullString(promotion.PromotionId),
+	}, nil
+}
+func (srv PartnershipRedemptionService) createCouponToSend(openId string, promotion entity.PartnershipPromotion, now time.Time) ([]entity.PartnershipRedemption, error) {
+	//生成优惠券发放
+	couponIds, err := DefaultCouponService.GenerateCouponBatch(GenerateCouponBatchParam{
+		CouponTypeId: promotion.CouponTypeId,
+		BatchSize:    1,
+	})
+	if err != nil {
+		return nil, err
+	}
+	app.Logger.Info("生成优惠券用于发放", promotion.ID, promotion.CouponTypeId, couponIds)
+
+	infoList := make([]entity.PartnershipRedemption, 0)
+	for _, couponId := range couponIds {
+		app.Logger.Info("兑换优惠券", openId, couponId, entity.OrderTypeRedeem)
+		_, err := DefaultCouponService.RedeemCoupon(RedeemCouponParam{
+			OpenId:    openId,
+			CouponId:  couponId,
+			OrderType: entity.OrderTypeRedeem,
+		})
+		if err != nil {
+			return nil, err
+		}
+		infoList = append(infoList, entity.PartnershipRedemption{
+			OpenId:      openId,
+			Time:        model.Time{Time: now},
+			CouponId:    model.NullString(couponId),
+			PromotionId: model.NullString(promotion.PromotionId),
+		})
+	}
+	return infoList, nil
 }

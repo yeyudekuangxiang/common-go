@@ -21,46 +21,48 @@ func initQueueProducer() {
 		app.QueueProduct = pub
 		log.Println("初始化amqp生产者成功")
 	}
-
+	logErr()
+}
+func logErr() {
 	if app.QueueProduct != nil {
-		publishConfirm := app.QueueProduct.NotifyPublish()
-		returnCh := app.QueueProduct.NotifyReturn()
+		go logReturn()
+		go logConfirm()
+	}
+}
+func logReturn() {
+	returnCh := app.QueueProduct.NotifyReturn()
 
-		returnMsg := make(map[string]int)
-		go func() {
-			for {
-				select {
-				case msg := <-returnCh:
-					app.Logger.Errorf("消息被退回 %s %+v", msg.MessageId, msg)
-					if returnMsg[msg.MessageId] >= 3 {
-						app.Logger.Errorf("重试3次失败 %s %+v", msg.MessageId, msg)
-						continue
-					}
-					err = app.QueueProduct.Publish(msg.Body, []string{msg.RoutingKey})
-					returnMsg[msg.MessageId] = returnMsg[msg.MessageId] + 1
-					if err != nil {
-						app.Logger.Errorf("消息重发失败 %s %+v", msg.MessageId, msg)
-					}
-				}
+	returnMsg := make(map[string]int)
+	for {
+		select {
+		case msg := <-returnCh:
+			app.Logger.Errorf("消息被退回 %s %+v", msg.MessageId, msg)
+			if returnMsg[msg.MessageId] >= 3 {
+				app.Logger.Errorf("重试3次失败 %s %+v", msg.MessageId, msg)
+				continue
 			}
-		}()
-
-		go func() {
-			for {
-				select {
-				case c := <-publishConfirm:
-					if !c.Ack {
-						app.Logger.Errorf("消息队列发送失败 %d %d", c.ReconnectionCount, c.DeliveryTag)
-					} else {
-						app.Logger.Info("消息发送成功", c)
-					}
-				}
+			err := app.QueueProduct.Publish(msg.Body, []string{msg.RoutingKey})
+			returnMsg[msg.MessageId] = returnMsg[msg.MessageId] + 1
+			if err != nil {
+				app.Logger.Errorf("消息重发失败 %s %+v", msg.MessageId, msg)
 			}
-		}()
+		}
+	}
+}
+func logConfirm() {
+	publishConfirm := app.QueueProduct.NotifyPublish()
+	for {
+		select {
+		case c := <-publishConfirm:
+			if !c.Ack {
+				app.Logger.Errorf("消息队列发送失败 %d %d", c.ReconnectionCount, c.DeliveryTag)
+			} else {
+				app.Logger.Info("消息发送成功", c)
+			}
+		}
 	}
 }
 func closeQueueProducer() {
-
 	if app.QueueProduct != nil {
 		log.Println("关闭QueueProduct")
 		err := app.QueueProduct.Close()
@@ -70,5 +72,4 @@ func closeQueueProducer() {
 			log.Println("关闭QueueProduct成功")
 		}
 	}
-
 }

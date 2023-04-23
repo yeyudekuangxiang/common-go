@@ -19,7 +19,7 @@ type RecycleInfo struct {
 	Sign         string `json:"sign"`
 }
 
-func (i RecycleInfo) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() {}
+func (i RecycleInfo) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() { return }
 func (i RecycleInfo) JSON() ([]byte, error) {
 	return json.Marshal(i)
 }
@@ -42,7 +42,7 @@ type RecycleFmyData struct {
 	Phone            string `json:"phone"`
 }
 
-func (i RecycleFmyInfo) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() {}
+func (i RecycleFmyInfo) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() { return }
 func (i RecycleFmyInfo) JSON() ([]byte, error) {
 	return json.Marshal(i)
 }
@@ -62,7 +62,7 @@ type RecycleOolaInfo struct {
 	Unit                string `json:"unit"`                //与下单数量&重量关联的计量单位 如：公斤，个 等
 }
 
-func (i RecycleOolaInfo) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() {}
+func (i RecycleOolaInfo) IUHDIOUHOIQWHIOEIOWEIOWEASOKA() { return }
 func (i RecycleOolaInfo) JSON() ([]byte, error) {
 	return json.Marshal(i)
 }
