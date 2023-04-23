@@ -36,6 +36,3 @@ func (repo EventParticipationRepository) GetParticipationPageList(by GetParticip
 	}
 	return list, total, db.Count(&total).Limit(by.Limit).Offset(by.Offset).Find(&list).Error
 }
-func (repo EventRepository) GetUserParticipationCount() {
-
-}

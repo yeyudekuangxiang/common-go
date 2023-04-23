@@ -104,12 +104,12 @@ func (srv ZeroService) IsNewUser(userId int64, createTime time.Time) (int, error
 
 	//兑吧自己有判断 不用我们记录了
 	//判断是否已经助力过
-	redisKey := fmt.Sprintf(config.RedisKey.ActivityZeroIsNewUser, userId)
+	/*redisKey := fmt.Sprintf(config.RedisKey.ActivityZeroIsNewUser, userId)
 	result, err := app.Redis.SetNX(context.Background(), redisKey, time.Now().Unix(), time.Hour*24*30).Result()
 	if err != nil && err != redis.Nil {
 		return 0, err
 	}
-	return commontool.Ternary(result, 1, 0).Int(), nil
+	return commontool.Ternary(result, 1, 0).Int(), nil*/
 }
 
 type DuiBaActivity struct {
