@@ -6,28 +6,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/model/entity/pugc"
 	questionEntity "mio/internal/pkg/model/entity/question"
-	"mio/internal/pkg/queue/producer/quizpdr"
-	"mio/internal/pkg/queue/types/message/quizmsg"
-	"mio/internal/pkg/queue/types/message/zhugemsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/common"
-	messageSrv "mio/internal/pkg/service/message"
 	"mio/internal/pkg/service/platform"
 	questionService "mio/internal/pkg/service/question"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
-	platformUtil "mio/internal/pkg/util/platform"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -36,12 +28,13 @@ var DefaultPugcController = PugcController{}
 type PugcController struct {
 }
 
+/*
 func (receiver PugcController) TestMqV3(c *gin.Context) (gin.H, error) {
 
 	service := messageSrv.MessageService{}
 	service.SendMessageToCarbonPk()
 
-	return gin.H{}, nil /*
+	return gin.H{}, nil
 		pointService := service.NewDuiBaActivityService(context.NewMioContext())
 		activity, err := pointService.FindActivity("/etc/passwd")
 
@@ -55,7 +48,7 @@ func (receiver PugcController) TestMqV3(c *gin.Context) (gin.H, error) {
 
 		if !log.Exist {
 
-		}*/
+		}
 
 	commonParams := make(map[string]interface{}, 0)
 	commonParams["mobile"] = 15797705451
@@ -149,6 +142,7 @@ func (receiver PugcController) TestMqV3(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 
 }
+*/
 
 //周年庆双倍积分奖励明细
 
@@ -211,6 +205,8 @@ func (PugcController) SendZyhPoint(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+/**
+
 //周年庆双倍积分奖励明细
 
 func (PugcController) SendZyhPointV2(c *gin.Context) (gin.H, error) {
@@ -239,6 +235,7 @@ func (PugcController) SendZyhPointV2(c *gin.Context) (gin.H, error) {
 	fmt.Println("发完了")
 	return nil, nil
 }
+**/
 
 func (PugcController) AddPugc(c *gin.Context) (gin.H, error) {
 	f, err := excelize.OpenFile("/Users/leo/Downloads/test1.xlsx")
@@ -4997,7 +4994,6 @@ func (PugcController) CarbonInit(c *gin.Context) (gin.H, error) {
 }
 
 func (PugcController) QnrInitChannel(c *gin.Context) (gin.H, error) {
-	return nil, nil
 	f, err := excelize.OpenFile("/Users/apple/Desktop/qnr.xlsx")
 	rows, err := f.GetRows("Sheet1")
 	if err != nil {
@@ -5009,14 +5005,15 @@ func (PugcController) QnrInitChannel(c *gin.Context) (gin.H, error) {
 			continue
 		}
 		cid, _ := strconv.ParseInt(row[0], 10, 64)
-		service.DefaultUserChannelService.Create(&entity.UserChannel{
+		println(cid)
+		/*service.DefaultUserChannelService.Create(&entity.UserChannel{
 			Cid:        cid,
 			Pid:        2,
 			Name:       row[2],
 			Code:       row[1],
 			CreateTime: model.NewTime(),
 			UpdateTime: model.NewTime(),
-		})
+		})*/
 	}
 	return nil, nil
 }

@@ -131,7 +131,6 @@ func (ctl BannerController) GetPageListSaas(insertDate srv_types.GetPageBannerDT
 	response := ListSaasResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		fmt.Printf("Unmarshal body: %s\n", err.Error())
 		return list, 0, err
 	}
 	if response.Code != 200 {
@@ -158,6 +157,7 @@ func (ctl BannerController) GetPageListSaas(insertDate srv_types.GetPageBannerDT
 }
 
 /*创建banner*/
+
 func (ctl BannerController) Update(c *gin.Context) (gin.H, error) {
 	var form UpdateBannerForm
 	if err := apiutil.BindForm(c, &form); err != nil {
