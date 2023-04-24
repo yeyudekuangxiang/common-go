@@ -32,12 +32,13 @@ func (srv StepHistoryService) FindStepHistory(by FindStepHistoryBy) (*entity.Ste
 func (srv StepHistoryService) UpdateStepHistoryByEncrypted(param UpdateStepHistoryByEncryptedParam) error {
 	sessionKey, err := DefaultSessionService.MustGetSessionKey(param.OpenId)
 	if err != nil {
+		app.Logger.Errorf("查询sessionKey失败 %v %+v", param.OpenId, err)
 		return err
 	}
 
 	runData, err := app.Weapp.DecryptRunData(sessionKey, param.EncryptedData, param.IV)
 	if err != nil {
-		app.Logger.Error("解析微信运动数据失败", param, err)
+		app.Logger.Errorf("解析微信运动数据失败 %v %+v %+v %+v", param.OpenId, sessionKey, param, err)
 		return errno.ErrAuth
 	}
 
