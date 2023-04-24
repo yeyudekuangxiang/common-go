@@ -97,10 +97,7 @@ func (e err) WithCaller() err {
 
 // With 带上错误和调用栈
 func (e err) With(err error) err {
-	e.err = err
-	_, f, l, _ := runtime.Caller(1)
-	e.callers = f + ":" + strconv.Itoa(l)
-	return e
+	return e.WithErr(err)
 }
 func (e err) Code() int {
 	return e.code
