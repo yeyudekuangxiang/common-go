@@ -40,6 +40,9 @@ func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, 
 	if admin.ID == 0 {
 		return nil, false, nil
 	}
+	if admin.Status != 1 {
+		return nil, false, errno.ErrCommon.WithMessage("账号已被禁用")
+	}
 	return &admin, true, nil
 }
 
@@ -59,6 +62,9 @@ func (a SystemAdminService) Login(account, password string) (string, error) {
 	})
 	if admin.ID == 0 {
 		return "", errno.ErrAdminNotFound
+	}
+	if admin.Status != 1 {
+		return "", errno.ErrCommon.WithMessage("账号已被禁用")
 	}
 
 	if admin.Password != encrypttool.Md5(password) {
