@@ -58,16 +58,16 @@ type LatLon struct {
 // 算法参考 https://github.com/chrisveness/geodesy
 func (l LatLon) DistanceTo(point LatLon) float64 {
 	R := 6371e3
-	φ1 := toRadians(decimal.NewFromFloat(l.Lat))
-	λ1 := toRadians(decimal.NewFromFloat(l.Lng))
-	φ2 := toRadians(decimal.NewFromFloat(point.Lat))
-	λ2 := toRadians(decimal.NewFromFloat(point.Lng))
-	Δφ := φ2.Sub(φ1)
-	Δλ := λ2.Sub(λ1)
+	a1 := toRadians(decimal.NewFromFloat(l.Lat))
+	b1 := toRadians(decimal.NewFromFloat(l.Lng))
+	a2 := toRadians(decimal.NewFromFloat(point.Lat))
+	b2 := toRadians(decimal.NewFromFloat(point.Lng))
+	ca := a2.Sub(a1)
+	cb := b2.Sub(b1)
 
-	s1 := Δφ.Div(decimal.NewFromInt(2)).Sin().Pow(decimal.NewFromInt(2))
-	s2 := φ1.Cos().Mul(φ2.Cos())
-	s3 := Δλ.Div(decimal.NewFromInt(2)).Sin().Pow(decimal.NewFromInt(2))
+	s1 := ca.Div(decimal.NewFromInt(2)).Sin().Pow(decimal.NewFromInt(2))
+	s2 := a1.Cos().Mul(a2.Cos())
+	s3 := cb.Div(decimal.NewFromInt(2)).Sin().Pow(decimal.NewFromInt(2))
 
 	a := s1.Add(s2.Mul(s3))
 
