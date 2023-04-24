@@ -108,7 +108,7 @@ func AuthAdmin() gin.HandlerFunc {
 		admin, exists, err := service2.DefaultSystemAdminService.GetAdminByToken(token)
 		if err != nil || !exists {
 			app.Logger.Error("用户登陆验证失败", admin, err)
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(err, nil))
 			return
 		}
 		ctx.Set("AuthAdmin", *admin)
@@ -127,7 +127,7 @@ func AuthBusinessUser() gin.HandlerFunc {
 		user, err := business.DefaultUserService.GetBusinessUserByToken(token)
 		if err != nil || user == nil {
 			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(err, nil))
 			return
 		}
 
