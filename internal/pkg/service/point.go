@@ -191,10 +191,10 @@ func (srv PointService) afterChangePoint(ptId int64, balance int64, dto srv_type
 			AllPoint: balance,
 		}
 		service := messageSrv.MessageService{}
-		_, messageErr := service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
-		if messageErr != nil {
+		service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
+		/*if messageErr != nil {
 
-		}
+		}*/
 	}
 
 	//同步到志愿汇
