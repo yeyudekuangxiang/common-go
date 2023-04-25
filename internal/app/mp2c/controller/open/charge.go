@@ -133,6 +133,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	timeStr := time.Now().Format("2006-01-02")
 	key := timeStr + scene.Ch + form.Mobile
 	cmd := app.Redis.Get(ctx, key)
+
 	lastPoint, _ := strconv.Atoi(cmd.Val())
 	if lastPoint >= scene.PointLimit {
 		fmt.Println("charge 充电量已达到上限 ", form)
