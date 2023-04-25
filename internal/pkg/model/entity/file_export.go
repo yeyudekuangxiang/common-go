@@ -14,6 +14,8 @@ var (
 	FileExportTypeCoupon       FileExportType = enum.NewEnumIntStatus(2, "优惠券码", "优惠券码")
 	FileExportTypeExchange     FileExportType = enum.NewEnumIntStatus(3, "兑换券码", "兑换券码")
 	FileExportPointBatchFailed FileExportType = enum.NewEnumIntStatus(4, "批量积分失败明细", "批量积分失败明细")
+	FileExportQuiz             FileExportType = enum.NewEnumIntStatus(5, "题库", "题库")
+	FileExportRecycle          FileExportType = enum.NewEnumIntStatus(6, "回收", "回收")
 )
 
 var FileExportTypeList = enum.EnumIntStatusList{
@@ -21,6 +23,8 @@ var FileExportTypeList = enum.EnumIntStatusList{
 	FileExportTypeCoupon,
 	FileExportTypeExchange,
 	FileExportPointBatchFailed,
+	FileExportQuiz,
+	FileExportRecycle,
 }
 
 type FileExportStatus int
