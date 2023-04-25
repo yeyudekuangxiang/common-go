@@ -5018,6 +5018,7 @@ func (PugcController) QnrInitChannel(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+/*
 func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
 	f, err := excelize.OpenFile("/Users/apple/Desktop/liumei1.xlsx")
 	rows, err := f.GetRows("Sheet1")
@@ -5073,4 +5074,4 @@ func (PugcController) QuestionInit(c *gin.Context) (gin.H, error) {
 	questionService.NewSubjectService(context.NewMioContext()).CreateInBatches(subject)
 	questionService.NewOptionService(context.NewMioContext()).CreateInBatches(option)
 	return nil, nil
-}
+}*/

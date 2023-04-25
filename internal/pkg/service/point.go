@@ -209,10 +209,12 @@ func (srv PointService) afterChangePoint(ptId int64, balance int64, dto srv_type
 			sendOpenid = userPlatform.Openid
 		}
 		service := messageSrv.MessageService{}
+		service.SendMiniSubMessage(dto.OpenId, config.MessageJumpUrls.ChangePoint, message)
+		/*if messageErr != nil {
 		_, messageErr := service.SendMiniSubMessage(sendOpenid, config.MessageJumpUrls.ChangePoint, message)
 		if messageErr != nil {
 
-		}
+		}*/
 	}
 
 	//同步到志愿汇
