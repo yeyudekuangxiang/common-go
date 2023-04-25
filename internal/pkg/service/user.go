@@ -56,17 +56,17 @@ type UserService struct {
 }
 
 // GetUser 查询用户信息
-func (u UserService) GetUser(by repository.GetUserBy) (*entity.User, bool, error) {
+func (u *UserService) GetUser(by repository.GetUserBy) (*entity.User, bool, error) {
 	return u.r.GetUser(by)
 }
 
 // GetUserExtend 查询用户信息
 
-func (u UserService) GetUserExtend(by repository.GetUserExtendBy) (*entity.UserExtendInfo, bool, error) {
+func (u *UserService) GetUserExtend(by repository.GetUserExtendBy) (*entity.UserExtendInfo, bool, error) {
 	return u.rUserExtend.GetUserExtend(by)
 }
 
-func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.UserExtendInfo, error) {
+func (u *UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.UserExtendInfo, error) {
 	user, exist, err := u.rUserExtend.GetUserExtend(repository.GetUserExtendBy{
 		OpenId: param.OpenId,
 	})
@@ -104,16 +104,16 @@ func (u UserService) CreateUserExtend(param CreateUserExtendParam) (*entity.User
 }
 
 // GetUserByID 根据用户id获取用户信息
-func (u UserService) GetUserByID(id int64) (*entity.User, bool, error) {
+func (u *UserService) GetUserByID(id int64) (*entity.User, bool, error) {
 	return u.r.GetUserByID(id)
 }
 
 // GetUserById 请使用 GetUserByID 代替此方法
-func (u UserService) GetUserById(id int64) (*entity.User, error) {
+func (u *UserService) GetUserById(id int64) (*entity.User, error) {
 	user := u.r.GetUserById(id)
 	return &user, nil
 }
-func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
+func (u *UserService) GetUserByOpenId(openId string) (*entity.User, error) {
 	if openId == "" {
 		return &entity.User{}, nil
 	}
@@ -122,7 +122,7 @@ func (u UserService) GetUserByOpenId(openId string) (*entity.User, error) {
 	})
 	return &user, nil
 }
-func (u UserService) GetUserByToken(token string) (*entity.User, error) {
+func (u *UserService) GetUserByToken(token string) (*entity.User, error) {
 	var authUser auth.User
 	err := util2.ParseToken(token, &authUser)
 	if err != nil {
@@ -131,7 +131,7 @@ func (u UserService) GetUserByToken(token string) (*entity.User, error) {
 	user := u.r.GetUserById(authUser.ID)
 	return &user, nil
 }
-func (u UserService) CreateUserToken(id int64) (string, error) {
+func (u *UserService) CreateUserToken(id int64) (string, error) {
 	if id == 0 {
 		return "", errno.ErrUserNotFound.WithCaller()
 	}
@@ -151,19 +151,22 @@ func (u UserService) CreateUserToken(id int64) (string, error) {
 func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 	//return ""
 	/*if openid == "" {
+	func (u *UserService) SendUserIdentifyToZhuGe(openid string) {
 		return
-	}
-	user, exit, _ := u.r.GetUserIdentifyInfo(openid)
-	if !exit {
-		return //不存在用户信息，返回
-	}
-	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
-	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
-	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
-	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)*/
+		if openid == "" {
+			return
+		}
+		user, exit, _ := u.r.GetUserIdentifyInfo(openid)
+		if !exit {
+			return //不存在用户信息，返回
+		}
+		zhuGeIdentifyAttr := make(map[string]interface{}, 0)
+		zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
+		zhuGeIdentifyAttr["子渠道"] = user.ChannelName
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)*/
 }
 
-//func (u UserService) SendUserRegisterCoupon(user entity.User) {
+//func (u *UserService) SendUserRegisterCoupon(user entity.User) {
 //	orderNo := "jhx" + strconv.FormatInt(time.Now().Unix(), 10)
 //	startTime, _ := time.Parse("2006-01-02", "2022-09-29")
 //	endTime, _ := time.Parse("2006-01-02", "2022-10-31")
@@ -176,7 +179,7 @@ func (u UserService) SendUserIdentifyToZhuGe(openid string) {
 //	return
 //}
 
-func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
+func (u *UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	user := u.r.GetUserBy(repository.GetUserBy{
 		OpenId: param.OpenId,
 		Source: param.Source,
@@ -228,7 +231,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.NewUserAdd, param.OpenId, zhuGeAttr)
 	return &user, ret
 }
-func (u UserService) UpdateUserUnionId(id int64, unionid string) {
+func (u *UserService) UpdateUserUnionId(id int64, unionid string) {
 	if unionid == "" || id == 0 {
 		return
 	}
@@ -240,11 +243,11 @@ func (u UserService) UpdateUserUnionId(id int64, unionid string) {
 }
 
 // GetUserBy 请使用 GetUser 代替此方法
-func (u UserService) GetUserBy(by repository.GetUserBy) (*entity.User, error) {
+func (u *UserService) GetUserBy(by repository.GetUserBy) (*entity.User, error) {
 	user := repository.DefaultUserRepository.GetUserBy(by)
 	return &user, nil
 }
-func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.User, error) {
+func (u *UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.User, error) {
 	if mobile == "" {
 		return nil, errno.ErrCommon.WithMessage("手机号不能为空")
 	}
@@ -267,7 +270,7 @@ func (u UserService) FindOrCreateByMobile(mobile string, cid int64) (*entity.Use
 }
 
 // BindMobileByYZM 绑定手机号
-func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
+func (u *UserService) BindMobileByYZM(userId int64, mobile string) error {
 	if mobile == "" {
 		return errno.ErrCommon.WithMessage("手机号不能为空")
 	}
@@ -287,7 +290,7 @@ func (u UserService) BindMobileByYZM(userId int64, mobile string) error {
 }
 
 // FindUserBySource 根据用户id 获取指定平台的用户
-func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
+func (u *UserService) FindUserBySource(source entity.UserSource, userId int64) (*entity.User, error) {
 	if userId == 0 {
 		return &entity.User{}, nil
 	}
@@ -305,7 +308,7 @@ func (u UserService) FindUserBySource(source entity.UserSource, userId int64) (*
 
 	return &sourceUer, nil
 }
-func (u UserService) GetYZM(mobile string) (string, error) {
+func (u *UserService) GetYZM(mobile string) (string, error) {
 	code := ""
 	for i := 0; i < 4; i++ {
 		code += strconv.Itoa(rand.Intn(9))
@@ -318,7 +321,7 @@ func (u UserService) GetYZM(mobile string) (string, error) {
 
 	return code, nil
 }
-func (u UserService) GetYZM2B(mobile string) (string, error) {
+func (u *UserService) GetYZM2B(mobile string) (string, error) {
 	code := ""
 	for i := 0; i < 4; i++ {
 		code += strconv.Itoa(rand.Intn(9))
@@ -333,7 +336,7 @@ func (u UserService) GetYZM2B(mobile string) (string, error) {
 	}
 	return code, nil
 }
-func (u UserService) CheckYZM(mobile string, code string) bool {
+func (u *UserService) CheckYZM(mobile string, code string) bool {
 	//取出缓存
 	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM+mobile)
 	fmt.Println(codeCmd.String())
@@ -346,7 +349,7 @@ func (u UserService) CheckYZM(mobile string, code string) bool {
 
 //企业版验证验证码
 
-func (u UserService) CheckYZM2B(mobile string, code string) bool {
+func (u *UserService) CheckYZM2B(mobile string, code string) bool {
 	//取出缓存
 	codeCmd := app.Redis.Get(context.Background(), config.RedisKey.YZM2B+mobile)
 	if codeCmd.Val() == code {
@@ -356,7 +359,7 @@ func (u UserService) CheckYZM2B(mobile string, code string) bool {
 	return false
 }
 
-func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
+func (u *UserService) BindPhoneByCode(userId int64, code string, cip string, invitedBy string) error {
 	userInfo := u.r.GetUserById(userId)
 
 	if userInfo.ID == 0 {
@@ -494,7 +497,7 @@ func (u UserService) BindPhoneByCode(userId int64, code string, cip string, invi
 		}*/
 	return ret
 }
-func (u UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
+func (u *UserService) BindPhoneByIV(param BindPhoneByIVParam) error {
 	userInfo := u.r.GetUserById(param.UserId)
 	if userInfo.ID == 0 {
 		return errno.ErrCommon.WithMessage("未查到用户信息")
@@ -528,7 +531,7 @@ type Summery struct {
 }
 
 // UserSummary 获取用户步行相关的数据统计
-func (u UserService) UserSummary(userId int64) (*Summery, error) {
+func (u *UserService) UserSummary(userId int64) (*Summery, error) {
 	summery := Summery{}
 
 	userInfo := u.r.GetUserById(userId)
@@ -578,7 +581,7 @@ func (u UserService) UserSummary(userId int64) (*Summery, error) {
 }
 
 //获取用户今日已领取步行积分
-func (u UserService) calculateStepPointsOfToday(userId int64) (int64, error) {
+func (u *UserService) calculateStepPointsOfToday(userId int64) (int64, error) {
 	userInfo := u.r.GetUserById(userId)
 	if userInfo.ID == 0 {
 		return 0, nil
@@ -600,7 +603,7 @@ func (u UserService) calculateStepPointsOfToday(userId int64) (int64, error) {
 }
 
 // history 今天的步行历史 step 步行总历史
-func (u UserService) computePendingHistoryStep(history entity.StepHistory, step entity.Step) int {
+func (u *UserService) computePendingHistoryStep(history entity.StepHistory, step entity.Step) int {
 	// date check is moved outside
 	lastCheckedSteps := 0
 	stepUpperLimit := StepToScoreConvertRatio * StepScoreUpperLimit
@@ -622,7 +625,7 @@ func (u UserService) computePendingHistoryStep(history entity.StepHistory, step 
 }
 
 //比昨天减少
-func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 model.Time) (int, error) {
+func (u *UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 model.Time) (int, error) {
 	userinfo := u.r.GetUserById(userId)
 	if userinfo.ID == 0 {
 		return 0, nil
@@ -644,10 +647,10 @@ func (u UserService) getStepDiffFromDates(userId int64, day1 model.Time, day2 mo
 	}
 	return stepHistory1.Count - stepHistory2.Count, nil
 }
-func (u UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, error) {
+func (u *UserService) GetUserListBy(by repository.GetUserListBy) ([]entity.User, error) {
 	return u.r.GetUserListBy(by), nil
 }
-func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) (*entity.User, error) {
+func (u *UserService) UpdateUserInfo(param UpdateUserInfoParam) (*entity.User, error) {
 	//图片审核
 	user := u.r.GetUserById(param.UserId)
 
@@ -694,11 +697,11 @@ func (u UserService) UpdateUserInfo(param UpdateUserInfoParam) (*entity.User, er
 	}
 	return &entity.User{}, err
 }
-func (u UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
+func (u *UserService) GetUserPageListBy(by repository.GetUserPageListBy) ([]entity.User, int64) {
 	return u.r.GetUserPageListBy(by)
 }
 
-func (u UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
+func (u *UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
 	user := u.r.GetUserById(param.UserId)
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
@@ -708,7 +711,7 @@ func (u UserService) UpdateUserRisk(param UpdateUserRiskParam) error {
 }
 
 // CheckUserRisk 检测用户风险等级
-func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRiskRankResponse, error) {
+func (u *UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRiskRankResponse, error) {
 	var rest *wxapp.UserRiskRankResponse
 	err := app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 		rest, err = app.Weapp.GetUserRiskRank(param)
@@ -739,7 +742,7 @@ func (u UserService) CheckUserRisk(param wxapp.UserRiskRankParam) (*wxapp.UserRi
 }
 
 // AccountInfo 用户账户信息
-func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
+func (u *UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	point, err := NewPointService(mioctx.NewMioContext()).FindByUserId(userId)
 	if err != nil {
 		return nil, err
@@ -759,7 +762,7 @@ func (u UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	}, nil
 }
 
-func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile string) bool {
+func (u *UserService) CheckMobileBound(source entity.UserSource, id int64, mobile string) bool {
 	user := u.r.GetUserBy(repository.GetUserBy{
 		Source: source,
 		Mobile: mobile,
@@ -771,7 +774,7 @@ func (u UserService) CheckMobileBound(source entity.UserSource, id int64, mobile
 	return true
 }
 
-func (u UserService) ChangeUserState(param ChangeUserState) error {
+func (u *UserService) ChangeUserState(param ChangeUserState) error {
 	user := u.r.GetUserById(param.UserId)
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
@@ -782,7 +785,7 @@ func (u UserService) ChangeUserState(param ChangeUserState) error {
 	return u.r.Save(&user)
 }
 
-func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
+func (u *UserService) ChangeUserPosition(param ChangeUserPosition) error {
 	user := u.r.GetUserById(param.UserId)
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
@@ -796,7 +799,7 @@ func (u UserService) ChangeUserPosition(param ChangeUserPosition) error {
 	return u.r.Save(&user)
 }
 
-func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
+func (u *UserService) ChangeUserPartner(param ChangeUserPartner) error {
 	user := u.r.GetUserById(param.UserId)
 	if user.ID == 0 {
 		return errno.ErrUserNotFound
@@ -810,7 +813,7 @@ func (u UserService) ChangeUserPartner(param ChangeUserPartner) error {
 	return u.r.Save(&user)
 }
 
-func (u UserService) checkOpenId(openId string) bool {
+func (u *UserService) checkOpenId(openId string) bool {
 	return strings.HasPrefix(openId, "oy_")
 }
 
