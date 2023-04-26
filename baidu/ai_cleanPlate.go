@@ -28,8 +28,8 @@ type CleanPlateResult struct {
 	CommonRespCode
 	LogId   int64 `json:"log_id"`
 	Results []struct {
-		Name  string `json:"name"`
-		Score int64  `json:"score"`
+		Name  string  `json:"name"`
+		Score float64 `json:"score"`
 	} `json:"results"`
 }
 
@@ -39,7 +39,7 @@ func (c *AiCleanPlateClient) CleanPlate(param CleanPlateParam) (*CleanPlateResul
 		return nil, err
 	}
 	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlateUrl, token, "url")
-	body, err := httptool.PostMapFrom(u, map[string]string{
+	body, err := httptool.PostJson(u, map[string]string{
 		"url": param.ImageUrl,
 	})
 	if err != nil {
