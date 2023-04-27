@@ -298,7 +298,8 @@ func Router(router *gin.Engine) {
 </body>
 </html>`)
 	})
-	router.StaticFile("/apple-app-site-association", "./static/apple-app-site-association.rtf")
+	router.StaticFile("/apple-app-site-association", "./static/apple-app-site-association")
+	router.StaticFile("/.well-known/apple-app-site-association", "./static/apple-app-site-association")
 	apiRouter(router)
 	adminRouter(router)
 	openRouter(router)

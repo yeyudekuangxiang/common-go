@@ -1,0 +1,11 @@
+{
+    "applinks":{
+        "apps":[],
+        "details":[
+            {
+                "appID":"5MLP8VB4J8.com.miotech.lvmio",
+                "paths":["/app/*"]
+            }
+        ]
+    }
+}
