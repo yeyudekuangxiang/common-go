@@ -298,21 +298,7 @@ func Router(router *gin.Engine) {
 </body>
 </html>`)
 	})
-	router.Any("/apple-app-site-association", func(context *gin.Context) {
-		context.String(200, `
-{
-    "applinks": {
-        "apps": [],
-        "details": [
-            {
-                "appID": "5MLP8VB4J8.com.miotech.lvmio",
-                "paths": [“app/*”]
-            }
-        ]
-    }
-}
-`)
-	})
+	router.StaticFile("/apple-app-site-association", "./static/apple-app-site-association.rtf")
 	apiRouter(router)
 	adminRouter(router)
 	openRouter(router)
