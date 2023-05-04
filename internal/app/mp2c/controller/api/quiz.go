@@ -6,6 +6,7 @@ import (
 	"mio/internal/pkg/service/quiz"
 	"mio/internal/pkg/util/apiutil"
 	"sort"
+	"strconv"
 )
 
 var DefaultQuizController = QuizController{}
@@ -20,6 +21,7 @@ func (QuizController) GetDailyQuestions(ctx *gin.Context) (gin.H, error) {
 
 	for i, item := range list {
 		list[i].Choices = randomOptions(item.Choices)
+		list[i].QuestionId = strconv.FormatInt(list[i].ID, 10)
 	}
 	return gin.H{
 		"list": list,
