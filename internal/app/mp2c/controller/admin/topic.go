@@ -23,12 +23,12 @@ import (
 	"time"
 )
 
-var Default TopicController = TopicController{}
+var DefaultTopicController = TopicController{}
 
 type TopicController struct {
 }
 
-func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	form := TopicListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr *TopicController) Detail(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
 	form := IDForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (ctr *TopicController) Detail(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr *TopicController) Create(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 	form := CreateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -146,7 +146,7 @@ func (ctr *TopicController) Create(c *gin.Context) (gin.H, error) {
 
 }
 
-func (ctr *TopicController) Update(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 	form := UpdateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (ctr *TopicController) Update(c *gin.Context) (gin.H, error) {
 }
 
 // Delete 软删除
-func (ctr *TopicController) Delete(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func (ctr *TopicController) Delete(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (ctr *TopicController) Down(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -244,7 +244,7 @@ func (ctr *TopicController) Down(c *gin.Context) (gin.H, error) {
 }
 
 // Review 审核
-func (ctr *TopicController) Review(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -289,17 +289,6 @@ func (ctr *TopicController) Review(c *gin.Context) (gin.H, error) {
 			}
 			key = "push_topic"
 		}
-
-		//诸葛打点
-		zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["场景"] = "发布帖子"
-		zhuGeAttr["审核状态"] = "审核已通过"
-		eventName := config.ZhuGeEventName.PostArticle
-		if topic.Type == 1 {
-			zhuGeAttr["场景"] = "发布活动"
-			eventName = config.ZhuGeEventName.PostActivity
-		}
-		track.DefaultZhuGeService().Track(eventName, topic.User.OpenId, zhuGeAttr)
 	}
 
 	if topic.Status == 4 {
@@ -309,13 +298,14 @@ func (ctr *TopicController) Review(c *gin.Context) (gin.H, error) {
 		key = "fail_topic"
 	}
 	if key != "" {
-
+		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id)
+		ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
 	}
 	return nil, nil
 }
 
 // Top 置顶
-func (ctr *TopicController) Top(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -352,7 +342,7 @@ func (ctr *TopicController) Top(c *gin.Context) (gin.H, error) {
 }
 
 // Essence 精华
-func (ctr *TopicController) Essence(c *gin.Context) (gin.H, error) {
+func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -414,9 +404,9 @@ func (ctr *TopicController) Essence(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (ctr *TopicController) seekingStore(event string, topic *entity.Topic) error {
+func (ctr TopicController) seekingStore(event string, topic *entity.Topic) error {
 	err := communityPdr.SeekingStore(communitymsg.Topic{
-		Event:     "push",
+		Event:     event,
 		Id:        topic.Id,
 		UserId:    topic.UserId,
 		Status:    int(topic.Status),
@@ -426,12 +416,11 @@ func (ctr *TopicController) seekingStore(event string, topic *entity.Topic) erro
 	})
 	if err != nil {
 		return err
-		//app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 	}
 	return nil
 }
 
-func (ctr *TopicController) sendMessage(ctx *context.MioContext, key string, sendId, recId, turnId int64) {
+func (ctr TopicController) sendMessage(ctx *context.MioContext, key string, sendId, recId, turnId int64) {
 	messageService := message.NewWebMessageService(ctx)
 	err := messageService.SendMessage(message.SendWebMessage{
 		SendId:   sendId,
@@ -446,12 +435,18 @@ func (ctr *TopicController) sendMessage(ctx *context.MioContext, key string, sen
 	}
 }
 
-func (ctr *TopicController) zhuGe(status, tp int, openId string) {
-
+func (ctr TopicController) zhuGe(status, tp int, openId string) {
+	var review string
+	switch status {
+	case 3:
+		review = "审核通过"
+	default:
+		review = "审核未通过"
+	}
 	//诸葛打点
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["场景"] = "发布帖子"
-	zhuGeAttr["审核状态"] = "审核未通过"
+	zhuGeAttr["审核状态"] = review
 	eventName := config.ZhuGeEventName.PostArticle
 	if tp == 1 {
 		zhuGeAttr["场景"] = "发布活动"
