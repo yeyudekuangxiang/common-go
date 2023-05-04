@@ -25,7 +25,7 @@ type TopicLikeService struct {
 	topicModel     community.TopicModel
 }
 
-func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId string) (TopicChangeLikeResp, error) {
+func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64) (TopicChangeLikeResp, error) {
 	topic, err := srv.topicModel.FindOneTopicAndTag(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
 		if err == entity.ErrNotFount {
@@ -61,20 +61,7 @@ func (srv TopicLikeService) ChangeLikeStatus(topicId, userId int64, openId strin
 		likeNum = -1
 	}
 	_ = srv.topicModel.AddTopicLikeCount(topicId, likeNum)
-
-	err = communityPdr.SeekingStore(communitymsg.Topic{
-		Event:      "like",
-		LikeStatus: int(like.Status),
-		Id:         topic.Id,
-		UserId:     topic.UserId,
-		Status:     int(topic.Status),
-		Type:       topic.Type,
-		Tags:       topic.Tags,
-		CreatedAt:  topic.CreatedAt.Time,
-	})
-	if err != nil {
-		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
-	}
+	srv.seekingStore("like", int(like.Status), topic)
 
 	err = srv.topicLikeModel.Save(&like)
 	if err != nil {
@@ -107,4 +94,20 @@ func (srv TopicLikeService) GetOneByTopic(topicId int64, userId int64) (entity.T
 		return entity.TopicLike{}, errno.ErrCommon.WithMessage("未找到点赞数据")
 	}
 	return like, nil
+}
+
+func (srv TopicLikeService) seekingStore(event string, status int, topic *entity.Topic) {
+	err := communityPdr.SeekingStore(communitymsg.Topic{
+		Event:      event,
+		LikeStatus: status,
+		Id:         topic.Id,
+		UserId:     topic.UserId,
+		Status:     int(topic.Status),
+		Type:       topic.Type,
+		Tags:       topic.Tags,
+		CreatedAt:  topic.CreatedAt.Time,
+	})
+	if err != nil {
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
+	}
 }
