@@ -23,12 +23,12 @@ import (
 	"time"
 )
 
-var DefaultTopicController = TopicController{}
+var Default TopicController = TopicController{}
 
 type TopicController struct {
 }
 
-func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	form := TopicListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (ctr TopicController) List(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Detail(c *gin.Context) (gin.H, error) {
 	form := IDForm{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (ctr TopicController) Detail(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Create(c *gin.Context) (gin.H, error) {
 	form := CreateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -146,7 +146,7 @@ func (ctr TopicController) Create(c *gin.Context) (gin.H, error) {
 
 }
 
-func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Update(c *gin.Context) (gin.H, error) {
 	form := UpdateTopicRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (ctr TopicController) Update(c *gin.Context) (gin.H, error) {
 }
 
 // Delete 软删除
-func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Delete(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func (ctr TopicController) Delete(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Down(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -244,7 +244,7 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 }
 
 // Review 审核
-func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Review(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -253,28 +253,19 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	adminTopicService := community.NewTopicAdminService(ctx)
 
-	topic, isFirst, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
+	topic, _, err := adminTopicService.Review(form.ID, form.Status, form.Reason)
 	if err != nil {
 		return nil, err
 	}
 
 	pointService := service.NewPointService(ctx)
-	messageService := message.NewWebMessageService(ctx)
-
+	key := ""
 	if topic.Status == 3 {
-		//审核通过
-		err = communityPdr.SeekingStore(communitymsg.Topic{
-			Event:     "push",
-			Id:        topic.Id,
-			UserId:    topic.UserId,
-			Status:    int(topic.Status),
-			Type:      topic.Type,
-			Tags:      topic.Tags,
-			CreatedAt: topic.CreatedAt.Time,
-		})
+		err = ctr.seekingStore("push", topic)
 		if err != nil {
 			app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 		}
+
 		//审核通过发积分
 		keyPrefix := fmt.Sprintf("%s:%s", "periodLimit:sendPoint:article:push", topic.CreatedAt.Time.Format("2006-01-02"))
 		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.PeriodAlign())
@@ -282,7 +273,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		if err != nil {
 			return nil, err
 		}
-		key := "push_topic_v2"
+		key = "push_topic_v2"
 		if resNumber == 1 || resNumber == 2 {
 			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 				OpenId:       topic.User.OpenId,
@@ -298,23 +289,6 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			}
 			key = "push_topic"
 		}
-		//首次审核通过发通知
-		if isFirst {
-			err = messageService.SendMessage(message.SendWebMessage{
-				SendId:   0,
-				RecId:    topic.UserId,
-				Key:      key,
-				Type:     message.MsgTypeSystem,
-				TurnId:   topic.Id,
-				TurnType: message.MsgTurnTypeArticle,
-				//MessageNotes: topic.Title,
-			})
-
-			if err != nil {
-				app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
-			}
-
-		}
 
 		//诸葛打点
 		zhuGeAttr := make(map[string]interface{}, 0)
@@ -329,50 +303,19 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	}
 
 	if topic.Status == 4 {
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:   0,
-			RecId:    topic.UserId,
-			Key:      "down_topic",
-			Type:     message.MsgTypeSystem,
-			TurnType: message.MsgTurnTypeArticle,
-			TurnId:   topic.Id,
-		})
-
-		if err != nil {
-			app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
-		}
+		key = "down_topic"
 	}
-
 	if topic.Status == 2 {
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:   0,
-			RecId:    topic.UserId,
-			Key:      "fail_topic",
-			Type:     message.MsgTypeSystem,
-			TurnType: message.MsgTurnTypeArticle,
-			TurnId:   topic.Id,
-		})
-
-		if err != nil {
-			app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
-		}
-		//诸葛打点
-		zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["场景"] = "发布帖子"
-		zhuGeAttr["审核状态"] = "审核未通过"
-		eventName := config.ZhuGeEventName.PostArticle
-		if topic.Type == 1 {
-			zhuGeAttr["场景"] = "发布活动"
-			eventName = config.ZhuGeEventName.PostActivity
-		}
-		track.DefaultZhuGeService().Track(eventName, topic.User.OpenId, zhuGeAttr)
+		key = "fail_topic"
 	}
+	if key != "" {
 
+	}
 	return nil, nil
 }
 
 // Top 置顶
-func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Top(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -409,7 +352,7 @@ func (ctr TopicController) Top(c *gin.Context) (gin.H, error) {
 }
 
 // Essence 精华
-func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) Essence(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicStatus{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -469,4 +412,50 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	}
 
 	return nil, nil
+}
+
+func (ctr *TopicController) seekingStore(event string, topic *entity.Topic) error {
+	err := communityPdr.SeekingStore(communitymsg.Topic{
+		Event:     "push",
+		Id:        topic.Id,
+		UserId:    topic.UserId,
+		Status:    int(topic.Status),
+		Type:      topic.Type,
+		Tags:      topic.Tags,
+		CreatedAt: topic.CreatedAt.Time,
+	})
+	if err != nil {
+		return err
+		//app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
+	}
+	return nil
+}
+
+func (ctr *TopicController) sendMessage(ctx *context.MioContext, key string, sendId, recId, turnId int64) {
+	messageService := message.NewWebMessageService(ctx)
+	err := messageService.SendMessage(message.SendWebMessage{
+		SendId:   sendId,
+		RecId:    recId,
+		Key:      key,
+		Type:     message.MsgTypeSystem,
+		TurnType: message.MsgTurnTypeArticle,
+		TurnId:   turnId,
+	})
+	if err != nil {
+		app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
+	}
+}
+
+func (ctr *TopicController) zhuGe(status, tp int, openId string) {
+
+	//诸葛打点
+	zhuGeAttr := make(map[string]interface{}, 0)
+	zhuGeAttr["场景"] = "发布帖子"
+	zhuGeAttr["审核状态"] = "审核未通过"
+	eventName := config.ZhuGeEventName.PostArticle
+	if tp == 1 {
+		zhuGeAttr["场景"] = "发布活动"
+		eventName = config.ZhuGeEventName.PostActivity
+	}
+	track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
 }
