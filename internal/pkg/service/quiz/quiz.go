@@ -55,7 +55,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 
 	question := entity.QuizQuestion{}
 
-	err := app.DB.Where("question_id = ?", questionId).Take(&question).Error
+	err := app.DB.Where("id = ?", questionId).Take(&question).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		panic(err)
 	}
