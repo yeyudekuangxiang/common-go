@@ -119,7 +119,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	topicLikeService := community.NewTopicLikeService(ctx)
 	messageService := message.NewWebMessageService(ctx)
 
-	resp, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID, user.OpenId)
+	resp, err := topicLikeService.ChangeLikeStatus(form.TopicId, user.ID)
 	if err != nil {
 		return nil, err
 	}
