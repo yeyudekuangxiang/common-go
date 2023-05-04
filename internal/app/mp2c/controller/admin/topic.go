@@ -205,41 +205,12 @@ func (ctr TopicController) Down(c *gin.Context) (gin.H, error) {
 	//更新帖子
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	adminTopicService := community.NewTopicAdminService(ctx)
-	messageService := message.NewWebMessageService(ctx)
-
 	topic, err := adminTopicService.DownTopic(form.ID, form.Reason)
-
 	if err != nil {
 		return nil, err
 	}
-	//下架
-	err = communityPdr.SeekingStore(communitymsg.Topic{
-		Event:     "down",
-		Id:        topic.Id,
-		UserId:    topic.UserId,
-		Status:    int(topic.Status),
-		Type:      topic.Type,
-		Tags:      topic.Tags,
-		CreatedAt: topic.CreatedAt.Time,
-	})
-	if err != nil {
-		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
-	}
-	//发消息
-	err = messageService.SendMessage(message.SendWebMessage{
-		SendId:       0,
-		RecId:        topic.UserId,
-		Key:          "down_topic",
-		TurnId:       topic.Id,
-		TurnType:     message.MsgTurnTypeArticle,
-		Type:         message.MsgTypeSystem,
-		MessageNotes: topic.Title,
-	})
-
-	if err != nil {
-		app.Logger.Errorf("【帖子下架】站内信发送失败:%s", err.Error())
-	}
-
+	ctr.seekingStore("down", topic)
+	ctr.sendMessage(ctx, "down_topic", 0, topic.UserId, topic.Id, topic.Title)
 	return nil, nil
 }
 
@@ -261,11 +232,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	pointService := service.NewPointService(ctx)
 	key := ""
 	if topic.Status == 3 {
-		err = ctr.seekingStore("push", topic)
-		if err != nil {
-			app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
-		}
-
+		ctr.seekingStore("push", topic)
 		//审核通过发积分
 		keyPrefix := fmt.Sprintf("%s:%s", "periodLimit:sendPoint:article:push", topic.CreatedAt.Time.Format("2006-01-02"))
 		PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), 2, app.Redis, keyPrefix, limit.PeriodAlign())
@@ -298,7 +265,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		key = "fail_topic"
 	}
 	if key != "" {
-		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id)
+		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id, "")
 		ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
 	}
 	return nil, nil
@@ -404,7 +371,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
-func (ctr TopicController) seekingStore(event string, topic *entity.Topic) error {
+func (ctr TopicController) seekingStore(event string, topic *entity.Topic) {
 	err := communityPdr.SeekingStore(communitymsg.Topic{
 		Event:     event,
 		Id:        topic.Id,
@@ -415,20 +382,20 @@ func (ctr TopicController) seekingStore(event string, topic *entity.Topic) error
 		CreatedAt: topic.CreatedAt.Time,
 	})
 	if err != nil {
-		return err
+		app.Logger.Errorf("[城市碳秘] communityPdr Err: %s", err.Error())
 	}
-	return nil
 }
 
-func (ctr TopicController) sendMessage(ctx *context.MioContext, key string, sendId, recId, turnId int64) {
+func (ctr TopicController) sendMessage(ctx *context.MioContext, key string, sendId, recId, turnId int64, msg string) {
 	messageService := message.NewWebMessageService(ctx)
 	err := messageService.SendMessage(message.SendWebMessage{
-		SendId:   sendId,
-		RecId:    recId,
-		Key:      key,
-		Type:     message.MsgTypeSystem,
-		TurnType: message.MsgTurnTypeArticle,
-		TurnId:   turnId,
+		SendId:       sendId,
+		RecId:        recId,
+		Key:          key,
+		Type:         message.MsgTypeSystem,
+		TurnType:     message.MsgTurnTypeArticle,
+		TurnId:       turnId,
+		MessageNotes: msg,
 	})
 	if err != nil {
 		app.Logger.Errorf("【帖子审核】站内信发送失败:%s", err.Error())
