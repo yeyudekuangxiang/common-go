@@ -299,6 +299,7 @@ func Router(router *gin.Engine) {
 </html>`)
 	})
 	router.StaticFile("/apple-app-site-association", "./static/apple-app-site-association")
+	router.StaticFile("/.well-known/apple-app-site-association", "./static/apple-app-site-association")
 	router.Any("/app/*path", func(context *gin.Context) {
 		context.String(200, "")
 	})
