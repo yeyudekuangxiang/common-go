@@ -34,7 +34,7 @@ func (srv QuizSingleRecordService) CreateSingleRecord(param CreateSingleRecordPa
 }
 func (srv QuizSingleRecordService) IsAnswered(openId string, questionId string, day timetool.Date) error {
 	record := entity.QuizSingleRecord{}
-	err := app.DB.Where("openid = ? and question_id = ? and answer_time >= ? and answer_time < ?", openId, questionId, day.FullString(), day.AddDay(1).FullString()).Take(&record).Error
+	err := app.DB.Where("openid = ? and id = ? and answer_time >= ? and answer_time < ?", openId, questionId, day.FullString(), day.AddDay(1).FullString()).Take(&record).Error
 
 	if err == nil {
 		return errno.ErrLimit.WithMessage("重复提交")
