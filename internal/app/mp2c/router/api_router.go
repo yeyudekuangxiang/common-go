@@ -240,8 +240,8 @@ func apiRouter(router *gin.Engine) {
 		//社区2.0 评论相关
 		commentRouter := mustAuthRouter.Group("/comment")
 		{
-			commentRouter.POST("/create", apiutil.Format(community.DefaultCommentController.Create))
-			commentRouter.POST("/update", apiutil.Format(community.DefaultCommentController.Update))
+			commentRouter.Use(middleware.BanSpeech()).POST("/create", apiutil.Format(community.DefaultCommentController.Create))
+			commentRouter.Use(middleware.BanSpeech()).POST("/update", apiutil.Format(community.DefaultCommentController.Update))
 			commentRouter.POST("/delete", apiutil.Format(community.DefaultCommentController.Delete))
 			commentRouter.POST("/like", apiutil.Format(community.DefaultCommentController.Like))
 			commentRouter.GET("/detail", apiutil.Format(community.DefaultCommentController.Detail))
