@@ -167,7 +167,6 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		if err != nil {
 			app.Logger.Error(user, invitedBy, err)
 		}
-		println(err)
 		//进入好友关系表
 		_, errFriend := service.DefaultUserFriendService.Create(user, invitedBy)
 		if errFriend != nil {
@@ -177,6 +176,11 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		zhuGeAttr["邀请人"] = invitedBy
 		zhuGeAttr["用户"] = user.OpenId
 		track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserInvitedBy, user.OpenId, zhuGeAttr)
+
+		track.DefaultSensorsService().Track(true, config.SensorsEventName.UserInvitedBy, user.GUID, map[string]interface{}{
+			"invitedGuid": invitedBy,
+			"guid":        user.GUID,
+		})
 	}
 
 	if partnershipType != "" {

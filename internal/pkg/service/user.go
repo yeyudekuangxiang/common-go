@@ -227,8 +227,24 @@ func (u *UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 		zhuGeAttr["是否成功"] = "失败"
 		zhuGeAttr["失败原因"] = ret.Error()
 	}
-
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.NewUserAdd, param.OpenId, zhuGeAttr)
+
+	properties := map[string]interface{}{
+		"source":      param.Source,
+		"channelName": ch.Name,
+		"province":    param.Province,
+		"city":        param.City,
+		"status":      "成功",
+		"error":       ret.Error(),
+	}
+	if ret == nil {
+		properties["status"] = "成功"
+	} else {
+		properties["status"] = "失败"
+		properties["error"] = ret.Error()
+	}
+	track.DefaultSensorsService().Track(true, config.SensorsEventName.NewUserAdd, param.OpenId, properties)
+
 	return &user, ret
 }
 func (u *UserService) UpdateUserUnionId(id int64, unionid string) {

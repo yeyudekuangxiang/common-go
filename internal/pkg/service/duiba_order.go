@@ -105,6 +105,9 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 		statusName = "待发货"
 		break
 	}
+	duibaOrder := srv.repo.FindByUid(uid)
+
+	/** 可废除开始 **/
 	//上报到诸葛
 	zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["用户uid"] = uid
@@ -135,7 +138,7 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 		zhuGeAttr["所需兑换金额"] = item.PerPrice
 		break
 	}
-	duibaOrder := srv.repo.FindByUid(uid)
+
 	if duibaOrder.ID == 0 {
 		zhuGeAttr["是否首单"] = "是"
 	} else {
@@ -144,5 +147,41 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	app.Logger.Infof("商场订单，积分打点失败 %+v %v %+v", config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
 
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
+	/** 可废除结束 **/
+
+	//上报到诸葛
+
+	properties := map[string]interface{}{
+		"orderNum":         order.OrderNum,
+		"createTime":       timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat),
+		"totalCredits":     order.TotalCredits,
+		"consumerPayPrice": order.ConsumerPayPrice,
+		"source":           order.Source,
+		"goodsType":        typeName,
+		"expressPrice":     order.ExpressPrice,
+		"orderStatus":      statusName,
+	}
+	for _, item := range order.OrderItemList.OrderItemList() {
+		orderItemType := ""
+		switch item.IsSelf {
+		case "1":
+			orderItemType = "自有"
+			break
+		case "0":
+			orderItemType = "兑吧"
+			break
+		}
+		properties["goodsName"] = item.Title
+		properties["goodsSource"] = orderItemType
+		properties["goodsPoint"] = item.PerCredit
+		properties["goodsPrice"] = item.PerPrice
+		break
+	}
+	if duibaOrder.ID == 0 {
+		properties["isFirstOrder"] = "是"
+	} else {
+		properties["isFirstOrder"] = "否"
+	}
+	track.DefaultSensorsService().Track(true, config.SensorsEventName.DuiBaOrder, openid, properties)
 	return nil
 }

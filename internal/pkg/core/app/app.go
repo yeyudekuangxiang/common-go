@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-redis/redis/v8"
+	sdk "github.com/sensorsdata/sa-sdk-go"
 	"github.com/wagslane/go-rabbitmq"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxoa"
@@ -16,6 +17,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/userclient"
+
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"reflect"
@@ -44,6 +46,8 @@ var (
 	QueueProduct = new(rabbitmq.Publisher)
 
 	RpcService = new(RpcClient)
+
+	SensorsClient = new(sdk.SensorsAnalytics)
 )
 
 type RpcClient struct {
