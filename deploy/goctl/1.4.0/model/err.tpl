@@ -21,6 +21,9 @@ const cacheSafeGapBetweenIndexAndPrimary = time.Second * 5
 // cacheUpdateSync 主从同步间隔时间
 const cacheUpdateSync = time.Second * 10
 
+// 更新删除数据后标记名称
+const updateTagKey = "dbupdatetag:"
+
 type Options struct {
 	// skipFindCache 查询数据是否跳过缓存直接从数据库中查询
     skipFindCache bool

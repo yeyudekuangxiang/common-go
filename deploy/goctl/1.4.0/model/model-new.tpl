@@ -25,11 +25,11 @@ func (m *default{{.upperStartCamelObject}}Model) deleteCache(ctx context.Context
 
 	for _, k := range keys {
 		val := ""
-		err = m.cache.SetWithExpireCtx(ctx, "update"+k, val, time.Second*cacheUpdateSync)
+		err = m.cache.SetWithExpireCtx(ctx, updateTagKey+k, val, cacheUpdateSync)
 		if err != nil {
 			logx.Errorf("标记更新失败 %+v %+v\n", keys, err)
 			cache.AddCleanTask(func() error {
-				return m.cache.SetWithExpire("update"+k, val, time.Second*cacheUpdateSync)
+				return m.cache.SetWithExpire(updateTagKey+k, val, cacheUpdateSync)
 			})
 		}
 	}
@@ -38,12 +38,12 @@ func (m *default{{.upperStartCamelObject}}Model) deleteCache(ctx context.Context
 // autoDB 根据是否有更新标记选择主库还是从库
 func (m *default{{.upperStartCamelObject}}Model) autoDB(ctx context.Context, key string) *gorm.DB {
 	v := ""
-	err := m.cache.GetCtx(ctx, "update"+key, &v)
+	err := m.cache.GetCtx(ctx, updateTagKey+key, &v)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return m.db.Clauses(dbresolver.Read)
 		}
-		logx.Errorf("查询tag失败", err)
+		logx.Errorf("查询tag失败 %+v", err)
 	}
 	return m.db.Clauses(dbresolver.Write)
 }

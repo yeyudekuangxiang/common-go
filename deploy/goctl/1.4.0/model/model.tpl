@@ -42,7 +42,7 @@ func New{{.upperStartCamelObject}}Model(db *gorm.DB,c cache.CacheConf, opts ...m
 }
 
 // Policy 设置从主库还是从库读 仅对customUserModel中的方法生效
-func (c *customUserModel) Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model {
+func (c *custom{{.upperStartCamelObject}}Model) Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model {
 	db := c.db.Clauses(operation).Session(&gorm.Session{})
 	return New{{.upperStartCamelObject}}Model(db,c.cacheConf)
 }
