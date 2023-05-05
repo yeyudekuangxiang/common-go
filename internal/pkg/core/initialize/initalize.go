@@ -22,4 +22,5 @@ func Initialize(configPath string) {
 	InitWeapp(app.RpcService.TokenCenterRpcSrv)
 	initQueueProducer()
 	decimal.MarshalJSONWithoutQuotes = true
+	InitSensors()
 }

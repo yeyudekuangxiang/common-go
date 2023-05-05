@@ -29,6 +29,7 @@ var Config = app{
 	BaiDuMap:    baiDuMap{},
 	Saas:        saas{},
 	MioSassCert: mioSassCertConf{},
+	Sensors:     SensorsConf{},
 }
 
 type mioSassCertConf struct {
@@ -75,6 +76,7 @@ type app struct {
 	BaiDuMap            baiDuMap        `ini:"baiduMap"`
 	Saas                saas            `ini:"saas"`
 	MioSassCert         mioSassCertConf `ini:"mioSassCert"`
+	Sensors             SensorsConf     `ini:"sensors"`
 }
 
 type appSetting struct {
@@ -198,6 +200,12 @@ type promSetting struct {
 }
 type mqArgs struct {
 	SmsUrl string
+}
+
+type SensorsConf struct {
+	SaServerUrl      string
+	SaRequestTimeout int
+	Debug            bool `json:",optional"`
 }
 
 func FindOaSetting(source string) wxSetting {
