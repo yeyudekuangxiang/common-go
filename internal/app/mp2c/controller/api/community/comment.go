@@ -160,6 +160,11 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["场景"] = "发布评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
+
+			track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				"scene": "发布评论",
+				"error": err.Error(),
+			})
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
@@ -263,6 +268,12 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["场景"] = "更新评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
+
+			track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				"scene": "更新评论",
+				"error": err.Error(),
+			})
+
 			return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}

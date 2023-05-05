@@ -115,6 +115,12 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 	attr["渠道名称"] = channelName
 	attr["邀请人的openid"] = InvitedByOpenId
 	srv.ToZhuGe(userInfo.OpenId, attr) //上报
+
+	track.DefaultSensorsService().Track(true, config.SensorsEventName.Qnr, userInfo.GUID, map[string]interface{}{
+		"channelName": channelName,
+		"invitedGuid": InvitedByOpenId,
+	})
+
 	return nil
 }
 
