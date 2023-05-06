@@ -24,7 +24,6 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shopspring/decimal v1.3.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	github.com/sony/sonyflake v1.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693
 	github.com/stretchr/testify v1.8.1
@@ -137,6 +136,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/sony/sonyflake v1.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/minify/v2 v2.9.4 // indirect
