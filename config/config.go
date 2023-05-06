@@ -1,5 +1,7 @@
 package config
 
+import "github.com/zeromicro/go-zero/zrpc"
+
 var Config = app{
 	App:              appSetting{},
 	Http:             httpSetting{},
@@ -21,9 +23,9 @@ var Config = app{
 	SmsMarket:        smsMarket{},
 	Prometheus:       promSetting{},
 	//rpc
-	CouponRpc:      rpcSetting{},
-	TokenCenterRpc: rpcSetting{},
-	ActivityRpc:    rpcSetting{},
+	CouponRpc:      zrpc.RpcClientConf{},
+	TokenCenterRpc: zrpc.RpcClientConf{},
+	ActivityRpc:    zrpc.RpcClientConf{},
 	//args
 	MqArgs:      mqArgs{},
 	BaiDuMap:    baiDuMap{},
@@ -44,45 +46,45 @@ type baiDuMap struct {
 	AccessKey string
 }
 type app struct {
-	App              appSetting      `ini:"app"`
-	Http             httpSetting     `ini:"http"`
-	Database         databaseSetting `ini:"database"`
-	DatabaseBusiness databaseSetting `ini:"databaseBusiness"`
-	DatabaseActivity databaseSetting `ini:"databaseActivity"`
-	Log              logSetting      `ini:"log"`
-	AliLog           aliLogSetting   `ini:"aliLog"`
-	MioSubOA         wxSetting       `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis            redisSetting    `ini:"redis"`
-	DuiBa            duiBaSetting    `ini:"duiba"`
-	OSS              ossSetting      `ini:"oss"`
-	AMQP             amqpSetting     `ini:"amqp"`
-	Java             javaConfig      `ini:"java"`
-	Zhuge            zhugeConfig     `ini:"zhuge"`
-	ActivityZyh      activityZyh     `ini:"activityZyh"`
-	Sms              sms             `ini:"sms"`
-	SmsMarket        smsMarket       `ini:"smsMarket"`
-	Prometheus       promSetting     `ini:"prometheus"`
+	App              appSetting      `ini:"app" json:"app"`
+	Http             httpSetting     `ini:"http" json:"http"`
+	Database         databaseSetting `ini:"database" json:"database"`
+	DatabaseBusiness databaseSetting `ini:"databaseBusiness" json:"databaseBusiness"`
+	DatabaseActivity databaseSetting `ini:"databaseActivity" json:"databaseActivity"`
+	Log              logSetting      `ini:"log" json:"log"`
+	AliLog           aliLogSetting   `ini:"aliLog" json:"aliLog"`
+	MioSubOA         wxSetting       `ini:"mioSubOa" json:"mioSubOa,optional"` //绿喵订阅号配置
+	MioSrvOA         wxSetting       `ini:"mioSrvOa" json:"mioSrvOa,optional"` //绿喵服务号配置
+	Redis            redisSetting    `ini:"redis" json:"redis"`
+	DuiBa            duiBaSetting    `ini:"duiba" json:"duiba"`
+	OSS              ossSetting      `ini:"oss" json:"oss"`
+	AMQP             amqpSetting     `ini:"amqp" json:"amqp"`
+	Java             javaConfig      `ini:"java" json:"java"`
+	Zhuge            zhugeConfig     `ini:"zhuge" json:"zhuge,optional"`
+	ActivityZyh      activityZyh     `ini:"activityZyh" json:"activityZyh"`
+	Sms              sms             `ini:"sms" json:"sms"`
+	SmsMarket        smsMarket       `ini:"smsMarket" json:"smsMarket"`
+	Prometheus       promSetting     `ini:"prometheus" json:"prometheus"`
 	//mq自调
-	MqArgs mqArgs `ini:"mqArgs"`
+	MqArgs mqArgs `ini:"mqArgs" json:"mqArgs"`
 	//rpc
-	CouponRpc           rpcSetting      `ini:"couponRpc"`
-	TokenCenterRpc      rpcSetting      `ini:"tokenCenterRpc"`
-	ActivityRpc         rpcSetting      `ini:"activityRpc"`
-	PointRpc            rpcSetting      `ini:"pointRpc"`
-	UserRpc             rpcSetting      `ini:"userRpc"`
-	ActivityCarbonPkRpc rpcSetting      `ini:"activityCarbonPkRpc"`
-	BaiDuMap            baiDuMap        `ini:"baiduMap"`
-	Saas                saas            `ini:"saas"`
-	MioSassCert         mioSassCertConf `ini:"mioSassCert"`
+	CouponRpc           zrpc.RpcClientConf `ini:"couponRpc" json:"couponRpc"`
+	TokenCenterRpc      zrpc.RpcClientConf `ini:"tokenCenterRpc" json:"tokenCenterRpc"`
+	ActivityRpc         zrpc.RpcClientConf `ini:"activityRpc" json:"activityRpc"`
+	PointRpc            zrpc.RpcClientConf `ini:"pointRpc" json:"pointRpc"`
+	UserRpc             zrpc.RpcClientConf `ini:"userRpc" json:"userRpc"`
+	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
+	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
+	Saas                saas               `ini:"saas" json:"saas"`
+	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
 }
 
 type appSetting struct {
 	TokenKey string
 	Domain   string
-	Debug    bool
+	Debug    bool `json:",optional"`
 	//prod dev local
-	Env string
+	Env string `json:",default=local"`
 }
 type httpSetting struct {
 	Port         int
@@ -97,7 +99,7 @@ type databaseSetting struct {
 	UserName     string
 	Password     string
 	Database     string
-	TablePrefix  string
+	TablePrefix  string `json:",optional"`
 	MaxOpenConns int
 	MaxIdleConns int
 	MaxLifetime  int
@@ -113,8 +115,8 @@ type aliLogSetting struct {
 	AccessSecret string
 	ProjectName  string
 	LogStore     string
-	Topic        string
-	Source       string
+	Topic        string `json:",optional"`
+	Source       string `json:",optional"`
 }
 type wxSetting struct {
 	AppId  string
@@ -140,7 +142,7 @@ type ossSetting struct {
 	Bucket       string
 	Region       string
 	//用于分片上传sts授权 https://help.aliyun.com/document_detail/100624.htm?spm=a2c4g.11186623.0.0.5c452cb7TmaQGN#uicontrol-c69-98p-2bv
-	StsRoleArn string
+	StsRoleArn string `json:",optional"`
 }
 type amqpSetting struct {
 	Url string
