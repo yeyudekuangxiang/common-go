@@ -53,14 +53,14 @@ type app struct {
 	DatabaseActivity databaseSetting `ini:"databaseActivity" json:"databaseActivity"`
 	Log              logSetting      `ini:"log" json:"log"`
 	AliLog           aliLogSetting   `ini:"aliLog" json:"aliLog"`
-	MioSubOA         wxSetting       `ini:"mioSubOa" json:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting       `ini:"mioSrvOa" json:"mioSrvOa"` //绿喵服务号配置
+	MioSubOA         wxSetting       `ini:"mioSubOa" json:"mioSubOa,optional"` //绿喵订阅号配置
+	MioSrvOA         wxSetting       `ini:"mioSrvOa" json:"mioSrvOa,optional"` //绿喵服务号配置
 	Redis            redisSetting    `ini:"redis" json:"redis"`
 	DuiBa            duiBaSetting    `ini:"duiba" json:"duiba"`
 	OSS              ossSetting      `ini:"oss" json:"oss"`
 	AMQP             amqpSetting     `ini:"amqp" json:"amqp"`
 	Java             javaConfig      `ini:"java" json:"java"`
-	Zhuge            zhugeConfig     `ini:"zhuge" json:"zhuge"`
+	Zhuge            zhugeConfig     `ini:"zhuge" json:"zhuge,optional"`
 	ActivityZyh      activityZyh     `ini:"activityZyh" json:"activityZyh"`
 	Sms              sms             `ini:"sms" json:"sms"`
 	SmsMarket        smsMarket       `ini:"smsMarket" json:"smsMarket"`
@@ -82,9 +82,9 @@ type app struct {
 type appSetting struct {
 	TokenKey string
 	Domain   string
-	Debug    bool
+	Debug    bool `json:",optional"`
 	//prod dev local
-	Env string
+	Env string `json:",default=local"`
 }
 type httpSetting struct {
 	Port         int
@@ -99,7 +99,7 @@ type databaseSetting struct {
 	UserName     string
 	Password     string
 	Database     string
-	TablePrefix  string
+	TablePrefix  string `json:",optional"`
 	MaxOpenConns int
 	MaxIdleConns int
 	MaxLifetime  int
@@ -115,8 +115,8 @@ type aliLogSetting struct {
 	AccessSecret string
 	ProjectName  string
 	LogStore     string
-	Topic        string
-	Source       string
+	Topic        string `json:",optional"`
+	Source       string `json:",optional"`
 }
 type wxSetting struct {
 	AppId  string
@@ -142,7 +142,7 @@ type ossSetting struct {
 	Bucket       string
 	Region       string
 	//用于分片上传sts授权 https://help.aliyun.com/document_detail/100624.htm?spm=a2c4g.11186623.0.0.5c452cb7TmaQGN#uicontrol-c69-98p-2bv
-	StsRoleArn string
+	StsRoleArn string `json:",optional"`
 }
 type amqpSetting struct {
 	Url string
