@@ -165,20 +165,19 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 
+
 	//抽奖
-	go func(ctx context.Context, platformKey string, userId int64, power float64) {
-		err = ctr.luckyDraw(ctx, scene.Ch, userInfo.ID, totalPower)
-		if err != nil {
-			app.Logger.Errorf("[%s][%s][%s]错误:%s", "charge", "luckyDraw", scene.Ch, err.Error())
-		}
-	}(ctx, scene.Ch, userInfo.ID, totalPower)
-	//发券
-	go func(ctx context.Context, platformKey string, power float64, userInfo *entity.User) {
-		err := ctr.sendCoupon(ctx, scene.Ch, totalPower, userInfo)
-		if err != nil {
-			app.Logger.Errorf("[%s][%s][%s]错误:%s", "charge", "luckyDraw", scene.Ch, err.Error())
-		}
-	}(ctx, scene.Ch, totalPower, userInfo)
+	err = ctr.luckyDraw(ctx, scene.Ch, userInfo.ID, totalPower)
+	if err != nil {
+		app.Logger.Errorf("[%s][%s][%s]错误:%s", "charge", "luckyDraw", scene.Ch, err.Error())
+		return gin.H{}, nil
+	}
+
+	err = ctr.sendCoupon(ctx, scene.Ch, totalPower, userInfo)
+	if err != nil {
+		app.Logger.Errorf("[%s][%s][%s]错误:%s", "charge", "sendCoupon", scene.Ch, err.Error())
+		return gin.H{}, nil
+	}
 	return gin.H{}, nil
 }
 

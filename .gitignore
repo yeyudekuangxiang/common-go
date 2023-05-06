@@ -6,3 +6,5 @@ runtime
 config.ini
 config-dev.ini
 config-prod.ini
+config-dev.yaml
+config-prod.yaml
