@@ -19,7 +19,6 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	util2 "mio/internal/pkg/util"
 	"mio/internal/pkg/util/message"
@@ -206,7 +205,8 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 		})
 	*/
 	//上报到诸葛
-	zhuGeAttr := make(map[string]interface{}, 0)
+
+	/*zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["来源"] = param.Source
 	zhuGeAttr["渠道"] = ch.Name
 	zhuGeAttr["城市code"] = user.CityCode
@@ -214,10 +214,6 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 	zhuGeAttr["ip"] = user.Ip
 	zhuGeAttr["省"] = param.Province
 	zhuGeAttr["市"] = param.City
-
-	/*if cityErr == nil {
-		zhuGeAttr["城市名"] = retCity.Name
-	}*/
 	if ret == nil {
 		zhuGeAttr["是否成功"] = "成功"
 	} else {
@@ -225,21 +221,7 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 		zhuGeAttr["失败原因"] = ret.Error()
 	}
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.NewUserAdd, param.OpenId, zhuGeAttr)
-
-	properties := map[string]interface{}{
-		"source":      param.Source,
-		"channelName": ch.Name,
-		"province":    param.Province,
-		"city":        param.City,
-	}
-	if ret == nil {
-		properties["status"] = "成功"
-	} else {
-		properties["status"] = "失败"
-		properties["error"] = ret.Error()
-	}
-	track.DefaultSensorsService().Track(true, config.SensorsEventName.NewUserAdd, param.OpenId, properties)
-
+	*/
 	return &user, ret
 }
 func (u UserService) UpdateUserUnionId(id int64, unionid string) {

@@ -172,15 +172,15 @@ func (srv WeappService) AfterCreateUser(user *entity.User, invitedBy string, par
 		if errFriend != nil {
 			app.Logger.Error(user, invitedBy, errFriend)
 		}
-		zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["邀请人"] = invitedBy
-		zhuGeAttr["用户"] = user.OpenId
-		track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserInvitedBy, user.OpenId, zhuGeAttr)
+		/*	zhuGeAttr := make(map[string]interface{}, 0)
+			zhuGeAttr["邀请人"] = invitedBy
+			zhuGeAttr["用户"] = user.OpenId
+			track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserInvitedBy, user.OpenId, zhuGeAttr)
 
-		track.DefaultSensorsService().Track(true, config.SensorsEventName.UserInvitedBy, user.GUID, map[string]interface{}{
-			"invitedGuid": invitedBy,
-			"guid":        user.GUID,
-		})
+			track.DefaultSensorsService().Track(true, config.SensorsEventName.UserInvitedBy, user.GUID, map[string]interface{}{
+				"invitedGuid": invitedBy,
+				"guid":        user.GUID,
+			})*/
 	}
 
 	if partnershipType != "" {
