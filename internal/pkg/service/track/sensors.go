@@ -30,7 +30,7 @@ type TrackInfo struct {
 
 func (srv SensorsService) Track(sync bool, eventName, guid string, attr map[string]interface{}) {
 	if !srv.Open {
-		return
+		//return
 	}
 	if eventName == "" || guid == "" {
 		return

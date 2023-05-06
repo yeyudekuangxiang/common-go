@@ -231,8 +231,6 @@ func (u UserService) CreateUser(param CreateUserParam) (*entity.User, error) {
 		"channelName": ch.Name,
 		"province":    param.Province,
 		"city":        param.City,
-		"status":      "成功",
-		"error":       ret.Error(),
 	}
 	if ret == nil {
 		properties["status"] = "成功"
