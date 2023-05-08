@@ -198,13 +198,20 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		return err
 	}
 	//诸葛打点
-	zhuGeAttr := make(map[string]interface{}, 0)
-	zhuGeAttr["活动id"] = params.TopicId
-	zhuGeAttr["活动名称"] = topic.Title
-	zhuGeAttr["作者名称"] = topic.User.Nickname
-	zhuGeAttr["报名者id"] = params.UserId
-	zhuGeAttr["报名时间"] = params.SignupTime
-	track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostSignUp, params.OpenId, zhuGeAttr)
+	/*	zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["活动id"] = params.TopicId
+		zhuGeAttr["活动名称"] = topic.Title
+		zhuGeAttr["作者名称"] = topic.User.Nickname
+		zhuGeAttr["报名者id"] = params.UserId
+		zhuGeAttr["报名时间"] = params.SignupTime
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostSignUp, params.OpenId, zhuGeAttr)
+	*/
+	track.DefaultSensorsService().Track(true, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
+		"title":     topic.Title,
+		"topicId":   int(params.TopicId),
+		"applyTime": params.SignupTime,
+	})
+
 	return nil
 }
 
