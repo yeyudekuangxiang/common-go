@@ -6,7 +6,8 @@ import (
 )
 
 func Initialize(configPath string) {
-	InitIni(configPath)
+	//InitIni(configPath)
+	InitYaml(configPath)
 	InitLog()
 	InitHttpToolLog()
 	InitDB()

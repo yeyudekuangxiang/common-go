@@ -298,7 +298,24 @@ func Router(router *gin.Engine) {
 </body>
 </html>`)
 	})
-	router.StaticFile("/apple-app-site-association", "./static/apple-app-site-association")
+
+	apple := `{
+    "applinks":{
+        "apps":[],
+        "details":[
+            {
+                "appID":"5MLP8VB4J8.com.miotech.lvmio",
+                "paths":["/app/*"]
+            }
+        ]
+    }
+}`
+	router.GET("/apple-app-site-association", func(context *gin.Context) {
+		context.Data(200, "application/octet-stream", []byte(apple))
+	})
+	router.GET("/.well-known/apple-app-site-association", func(context *gin.Context) {
+		context.Data(200, "application/octet-stream", []byte(apple))
+	})
 	router.Any("/app/*path", func(context *gin.Context) {
 		context.String(200, "")
 	})

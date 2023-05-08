@@ -23,6 +23,9 @@ func SeekingStore(topic communitymsg.Topic) error {
 	if !flag {
 		return nil
 	}
+	if topic.Status != 3 {
+		return nil
+	}
 	ctx := context.Background()
 	rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
 		Code: "seeking_store",

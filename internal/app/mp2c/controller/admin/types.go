@@ -72,7 +72,7 @@ type UserPageListForm struct {
 	ID        int64     `json:"id" form:"id" alias:"用户id" binding:"gte=0"`
 	Mobile    string    `json:"mobile" form:"mobile" alias:"手机号码"`
 	Nickname  string    `json:"nickname" form:"nickname" alias:"昵称"`
-	State     int       `json:"state" form:"state" alias:"状态" binding:"min=0,max=3"`
+	Status    int       `json:"status" form:"status" alias:"状态" binding:"min=0,max=3"`
 	Position  string    `json:"position" form:"position" alias:"身份"`
 	Partners  int       `json:"partners" form:"partners" alias:"合作伙伴"`
 	Auth      int       `json:"auth"`

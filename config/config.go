@@ -1,5 +1,7 @@
 package config
 
+import "github.com/zeromicro/go-zero/zrpc"
+
 var Config = app{
 	App:              appSetting{},
 	Http:             httpSetting{},
@@ -21,9 +23,9 @@ var Config = app{
 	SmsMarket:        smsMarket{},
 	Prometheus:       promSetting{},
 	//rpc
-	CouponRpc:      rpcSetting{},
-	TokenCenterRpc: rpcSetting{},
-	ActivityRpc:    rpcSetting{},
+	CouponRpc:      zrpc.RpcClientConf{},
+	TokenCenterRpc: zrpc.RpcClientConf{},
+	ActivityRpc:    zrpc.RpcClientConf{},
 	//args
 	MqArgs:      mqArgs{},
 	BaiDuMap:    baiDuMap{},
@@ -65,7 +67,7 @@ type app struct {
 	SmsMarket        smsMarket       `ini:"smsMarket"`
 	Prometheus       promSetting     `ini:"prometheus"`
 	//mq自调
-	MqArgs mqArgs `ini:"mqArgs"`
+	MqArgs mqArgs `ini:"mqArgs" json:"mqArgs"`
 	//rpc
 	CouponRpc           rpcSetting      `ini:"couponRpc"`
 	TokenCenterRpc      rpcSetting      `ini:"tokenCenterRpc"`
@@ -82,9 +84,9 @@ type app struct {
 type appSetting struct {
 	TokenKey string
 	Domain   string
-	Debug    bool
+	Debug    bool `json:",optional"`
 	//prod dev local
-	Env string
+	Env string `json:",default=local"`
 }
 type httpSetting struct {
 	Port         int
@@ -99,7 +101,7 @@ type databaseSetting struct {
 	UserName     string
 	Password     string
 	Database     string
-	TablePrefix  string
+	TablePrefix  string `json:",optional"`
 	MaxOpenConns int
 	MaxIdleConns int
 	MaxLifetime  int
@@ -115,8 +117,8 @@ type aliLogSetting struct {
 	AccessSecret string
 	ProjectName  string
 	LogStore     string
-	Topic        string
-	Source       string
+	Topic        string `json:",optional"`
+	Source       string `json:",optional"`
 }
 type wxSetting struct {
 	AppId  string
@@ -142,7 +144,7 @@ type ossSetting struct {
 	Bucket       string
 	Region       string
 	//用于分片上传sts授权 https://help.aliyun.com/document_detail/100624.htm?spm=a2c4g.11186623.0.0.5c452cb7TmaQGN#uicontrol-c69-98p-2bv
-	StsRoleArn string
+	StsRoleArn string `json:",optional"`
 }
 type amqpSetting struct {
 	Url string
