@@ -316,9 +316,8 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 
 		}
 
-		/** 可废除开始 **/
 		//诸葛打点
-		zhuGeAttr := make(map[string]interface{}, 0)
+		/*zhuGeAttr := make(map[string]interface{}, 0)
 		zhuGeAttr["场景"] = "发布帖子"
 		zhuGeAttr["审核状态"] = "审核已通过"
 		eventName := config.ZhuGeEventName.PostArticle
@@ -326,8 +325,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["场景"] = "发布活动"
 			eventName = config.ZhuGeEventName.PostActivity
 		}
-		track.DefaultZhuGeService().Track(eventName, topic.User.OpenId, zhuGeAttr)
-		/** 可废除结束 **/
+		track.DefaultZhuGeService().Track(eventName, topic.User.OpenId, zhuGeAttr)*/
 
 		scene := "常规笔记"
 		if topic.Type == 1 {
@@ -336,7 +334,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		track.DefaultSensorsService().Track(true, config.SensorsEventName.CommunityTopic, topic.User.OpenId, map[string]interface{}{
 			"status":  "审核已通过",
 			"type":    scene,
-			"topicId": topic.Id,
+			"topicId": int(topic.Id),
 		})
 
 	}
@@ -389,7 +387,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 		track.DefaultSensorsService().Track(true, config.SensorsEventName.CommunityTopic, topic.User.OpenId, map[string]interface{}{
 			"status":  "审核未通过",
 			"type":    scene,
-			"topicId": topic.Id,
+			"topicId": int(topic.Id),
 		})
 	}
 

@@ -208,7 +208,7 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 	*/
 	track.DefaultSensorsService().Track(true, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
 		"title":     topic.Title,
-		"topicId":   params.TopicId,
+		"topicId":   int(params.TopicId),
 		"applyTime": params.SignupTime,
 	})
 
