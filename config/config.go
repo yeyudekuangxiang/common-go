@@ -77,7 +77,7 @@ type app struct {
 	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
 	Saas                saas               `ini:"saas" json:"saas"`
 	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
-	Sensors             SensorsConf        `ini:"sensors"`
+	Sensors             SensorsConf        `ini:"sensors" json:"sensors"`
 }
 
 type appSetting struct {
