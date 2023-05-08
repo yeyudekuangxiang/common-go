@@ -69,16 +69,16 @@ type app struct {
 	//mq自调
 	MqArgs mqArgs `ini:"mqArgs" json:"mqArgs"`
 	//rpc
-	CouponRpc           rpcSetting      `ini:"couponRpc"`
-	TokenCenterRpc      rpcSetting      `ini:"tokenCenterRpc"`
-	ActivityRpc         rpcSetting      `ini:"activityRpc"`
-	PointRpc            rpcSetting      `ini:"pointRpc"`
-	UserRpc             rpcSetting      `ini:"userRpc"`
-	ActivityCarbonPkRpc rpcSetting      `ini:"activityCarbonPkRpc"`
-	BaiDuMap            baiDuMap        `ini:"baiduMap"`
-	Saas                saas            `ini:"saas"`
-	MioSassCert         mioSassCertConf `ini:"mioSassCert"`
-	Sensors             SensorsConf     `ini:"sensors"`
+	CouponRpc           zrpc.RpcClientConf `ini:"couponRpc" json:"couponRpc"`
+	TokenCenterRpc      zrpc.RpcClientConf `ini:"tokenCenterRpc" json:"tokenCenterRpc"`
+	ActivityRpc         zrpc.RpcClientConf `ini:"activityRpc" json:"activityRpc"`
+	PointRpc            zrpc.RpcClientConf `ini:"pointRpc" json:"pointRpc"`
+	UserRpc             zrpc.RpcClientConf `ini:"userRpc" json:"userRpc"`
+	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
+	BaiDuMap            baiDuMap           `ini:"baiduMap"`
+	Saas                saas               `ini:"saas"`
+	MioSassCert         mioSassCertConf    `ini:"mioSassCert"`
+	Sensors             SensorsConf        `ini:"sensors"`
 }
 
 type appSetting struct {

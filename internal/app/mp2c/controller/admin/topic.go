@@ -267,6 +267,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if key != "" {
 		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id, "")
 		ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
+		ctr.sensors(int(topic.Status), topic.Type, topic.User.OpenId, topic.Id)
 	}
 	return nil, nil
 }
@@ -420,4 +421,24 @@ func (ctr TopicController) zhuGe(status, tp int, openId string) {
 		eventName = config.ZhuGeEventName.PostActivity
 	}
 	track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
+}
+
+func (ctr TopicController) sensors(status, tp int, openId string, topicId int64) {
+	var review string
+	switch status {
+	case 3:
+		review = "审核通过"
+	default:
+		review = "审核未通过"
+	}
+	//诸葛打点
+	scene := "发布帖子"
+	if tp == 1 {
+		scene = "发布活动"
+	}
+	track.DefaultSensorsService().Track(true, config.SensorsEventName.CommunityTopic, openId, map[string]interface{}{
+		"status":   review,
+		"type":     scene,
+		"topic_id": int(topicId),
+	})
 }
