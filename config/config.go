@@ -31,7 +31,6 @@ var Config = app{
 	BaiDuMap:    baiDuMap{},
 	Saas:        saas{},
 	MioSassCert: mioSassCertConf{},
-	Sensors:     SensorsConf{},
 }
 
 type mioSassCertConf struct {
@@ -47,25 +46,25 @@ type baiDuMap struct {
 	AccessKey string
 }
 type app struct {
-	App              appSetting      `ini:"app"`
-	Http             httpSetting     `ini:"http"`
-	Database         databaseSetting `ini:"database"`
-	DatabaseBusiness databaseSetting `ini:"databaseBusiness"`
-	DatabaseActivity databaseSetting `ini:"databaseActivity"`
-	Log              logSetting      `ini:"log"`
-	AliLog           aliLogSetting   `ini:"aliLog"`
-	MioSubOA         wxSetting       `ini:"mioSubOa"` //绿喵订阅号配置
-	MioSrvOA         wxSetting       `ini:"mioSrvOa"` //绿喵服务号配置
-	Redis            redisSetting    `ini:"redis"`
-	DuiBa            duiBaSetting    `ini:"duiba"`
-	OSS              ossSetting      `ini:"oss"`
-	AMQP             amqpSetting     `ini:"amqp"`
-	Java             javaConfig      `ini:"java"`
-	Zhuge            zhugeConfig     `ini:"zhuge"`
-	ActivityZyh      activityZyh     `ini:"activityZyh"`
-	Sms              sms             `ini:"sms"`
-	SmsMarket        smsMarket       `ini:"smsMarket"`
-	Prometheus       promSetting     `ini:"prometheus"`
+	App              appSetting      `ini:"app" json:"app"`
+	Http             httpSetting     `ini:"http" json:"http"`
+	Database         databaseSetting `ini:"database" json:"database"`
+	DatabaseBusiness databaseSetting `ini:"databaseBusiness" json:"databaseBusiness"`
+	DatabaseActivity databaseSetting `ini:"databaseActivity" json:"databaseActivity"`
+	Log              logSetting      `ini:"log" json:"log"`
+	AliLog           aliLogSetting   `ini:"aliLog" json:"aliLog"`
+	MioSubOA         wxSetting       `ini:"mioSubOa" json:"mioSubOa,optional"` //绿喵订阅号配置
+	MioSrvOA         wxSetting       `ini:"mioSrvOa" json:"mioSrvOa,optional"` //绿喵服务号配置
+	Redis            redisSetting    `ini:"redis" json:"redis"`
+	DuiBa            duiBaSetting    `ini:"duiba" json:"duiba"`
+	OSS              ossSetting      `ini:"oss" json:"oss"`
+	AMQP             amqpSetting     `ini:"amqp" json:"amqp"`
+	Java             javaConfig      `ini:"java" json:"java"`
+	Zhuge            zhugeConfig     `ini:"zhuge" json:"zhuge,optional"`
+	ActivityZyh      activityZyh     `ini:"activityZyh" json:"activityZyh"`
+	Sms              sms             `ini:"sms" json:"sms"`
+	SmsMarket        smsMarket       `ini:"smsMarket" json:"smsMarket"`
+	Prometheus       promSetting     `ini:"prometheus" json:"prometheus"`
 	//mq自调
 	MqArgs mqArgs `ini:"mqArgs" json:"mqArgs"`
 	//rpc
@@ -75,9 +74,9 @@ type app struct {
 	PointRpc            zrpc.RpcClientConf `ini:"pointRpc" json:"pointRpc"`
 	UserRpc             zrpc.RpcClientConf `ini:"userRpc" json:"userRpc"`
 	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
-	BaiDuMap            baiDuMap           `ini:"baiduMap"`
-	Saas                saas               `ini:"saas"`
-	MioSassCert         mioSassCertConf    `ini:"mioSassCert"`
+	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
+	Saas                saas               `ini:"saas" json:"saas"`
+	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
 	Sensors             SensorsConf        `ini:"sensors"`
 }
 
@@ -204,12 +203,6 @@ type mqArgs struct {
 	SmsUrl string
 }
 
-type SensorsConf struct {
-	SaServerUrl      string
-	SaRequestTimeout int
-	Debug            bool `json:",optional"`
-}
-
 func FindOaSetting(source string) wxSetting {
 	switch source {
 	case "mio-srv-oa":
@@ -218,4 +211,10 @@ func FindOaSetting(source string) wxSetting {
 		return Config.MioSubOA
 	}
 	return wxSetting{}
+}
+
+type SensorsConf struct {
+	SaServerUrl      string
+	SaRequestTimeout int
+	Debug            bool `json:",optional"`
 }
