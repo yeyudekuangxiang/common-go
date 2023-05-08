@@ -152,14 +152,14 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	//上报到诸葛
 
 	properties := map[string]interface{}{
-		"orderNum":         order.OrderNum,
-		"createTime":       timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat),
-		"totalCredits":     order.TotalCredits,
-		"consumerPayPrice": order.ConsumerPayPrice,
-		"source":           order.Source,
-		"goodsType":        typeName,
-		"expressPrice":     order.ExpressPrice,
-		"orderStatus":      statusName,
+		"order_num":          order.OrderNum,
+		"create_time":        timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat),
+		"total_credits":      order.TotalCredits,
+		"consumer_pay_price": order.ConsumerPayPrice,
+		"source":             order.Source,
+		"goods_type":         typeName,
+		"express_price":      order.ExpressPrice,
+		"order_status":       statusName,
 	}
 	for _, item := range order.OrderItemList.OrderItemList() {
 		orderItemType := ""
@@ -171,16 +171,16 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 			orderItemType = "兑吧"
 			break
 		}
-		properties["goodsName"] = item.Title
-		properties["goodsSource"] = orderItemType
-		properties["goodsPoint"] = item.PerCredit
-		properties["goodsPrice"] = item.PerPrice
+		properties["goods_name"] = item.Title
+		properties["goods_source"] = orderItemType
+		properties["goods_point"] = item.PerCredit
+		properties["goods_price"] = item.PerPrice
 		break
 	}
 	if duibaOrder.ID == 0 {
-		properties["isFirstOrder"] = "是"
+		properties["is_first_order"] = "是"
 	} else {
-		properties["isFirstOrder"] = "否"
+		properties["is_first_order"] = "否"
 	}
 	track.DefaultSensorsService().Track(true, config.SensorsEventName.DuiBaOrder, openid, properties)
 	return nil
