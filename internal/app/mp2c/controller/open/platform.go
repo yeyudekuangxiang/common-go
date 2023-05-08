@@ -260,8 +260,8 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
 	if openId != "" {
-		/** 可废除 **/
-		eventName := config.ZhuGeEventName.YTXOrder
+
+		/*eventName := config.ZhuGeEventName.YTXOrder
 		if form.PlatformKey == "yitongxing" {
 			eventName = config.ZhuGeEventName.YTXOrder
 		}
@@ -270,7 +270,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		zhuGeAttr["用户openId"] = mobile
 		zhuGeAttr["用户mobile"] = openId
 		track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
-		/** 可废除结束 **/
+		*/
 
 		track.DefaultSensorsService().Track(true, config.SensorsEventName.YTX, openId, map[string]interface{}{
 			"type": "完成乘车",
@@ -485,17 +485,16 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		}
 	}
 
-	/** 可废除开始 **/
-	eventName := config.ZhuGeEventName.YTXCollectPoint
-	if form.PlatformKey == "yitongxing" {
-		eventName = config.ZhuGeEventName.YTXCollectPoint
-	}
-	zhuGeAttr := make(map[string]interface{}, 0)
-	zhuGeAttr["用户Id"] = userInfo.ID
-	zhuGeAttr["用户openId"] = userInfo.OpenId
-	zhuGeAttr["用户mobile"] = userInfo.PhoneNumber
-	track.DefaultZhuGeService().Track(eventName, userInfo.OpenId, zhuGeAttr)
-	/** 可废除结束 **/
+	/*	eventName := config.ZhuGeEventName.YTXCollectPoint
+		if form.PlatformKey == "yitongxing" {
+			eventName = config.ZhuGeEventName.YTXCollectPoint
+		}
+		zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["用户Id"] = userInfo.ID
+		zhuGeAttr["用户openId"] = userInfo.OpenId
+		zhuGeAttr["用户mobile"] = userInfo.PhoneNumber
+		track.DefaultZhuGeService().Track(eventName, userInfo.OpenId, zhuGeAttr)
+	*/
 
 	track.DefaultSensorsService().Track(true, config.SensorsEventName.YTX, userInfo.GUID, map[string]interface{}{
 		"type": "收取气泡",
@@ -521,11 +520,11 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Content); err != nil {
 			app.Logger.Errorf("文本校验 Error:%s\n", err.Error())
-			zhuGeAttr := make(map[string]interface{}, 0)
+			/*zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "文本校验"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
-
+			*/
 			track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "文本校验",
 				"error": err.Error(),
@@ -553,11 +552,11 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 			err := validator.CheckMediaWithOpenId(userPlatform.Openid, imageUrl)
 			if err != nil {
 				app.Logger.Errorf("图片校验 Error:%s\n", err.Error())
-				zhuGeAttr := make(map[string]interface{}, 0)
+				/*zhuGeAttr := make(map[string]interface{}, 0)
 				zhuGeAttr["场景"] = "图片校验"
 				zhuGeAttr["失败原因"] = err.Error()
 				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
-
+				*/
 				track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 					"scene": "图片校验",
 					"error": err.Error(),

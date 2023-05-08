@@ -109,12 +109,12 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 		return errno.ErrCommon.WithMessage("保存答案失败")
 	}
 	//诸葛上报
-	attr := make(map[string]interface{}, 8)
+	/*attr := make(map[string]interface{}, 8)
 	attr["昵称"] = userInfo.Nickname
 	attr["手机号"] = userInfo.PhoneNumber
 	attr["渠道名称"] = channelName
 	attr["邀请人的openid"] = InvitedByOpenId
-	srv.ToZhuGe(userInfo.OpenId, attr) //上报
+	srv.ToZhuGe(userInfo.OpenId, attr) */
 
 	track.DefaultSensorsService().Track(true, config.SensorsEventName.Qnr, userInfo.GUID, map[string]interface{}{
 		"channel_name": channelName,

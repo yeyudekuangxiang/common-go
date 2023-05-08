@@ -5,7 +5,6 @@ import (
 	"github.com/wagslane/go-rabbitmq"
 	"log"
 	"mio/internal/pkg/queue/types/message/zhugemsg"
-	"mio/internal/pkg/service/track"
 )
 
 func SendToZhuge(delivery rabbitmq.Delivery) rabbitmq.Action {
@@ -21,6 +20,6 @@ func SendToZhuge(delivery rabbitmq.Delivery) rabbitmq.Action {
 		return rabbitmq.Ack
 	}
 	//上报到诸葛
-	track.DefaultZhuGeService().Track(msg.EventKey, msg.Openid, zhuGeAttr)
+	//track.DefaultZhuGeService().Track(msg.EventKey, msg.Openid, zhuGeAttr)
 	return rabbitmq.Ack
 }
