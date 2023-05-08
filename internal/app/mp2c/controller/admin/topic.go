@@ -266,7 +266,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	}
 	if key != "" {
 		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id, "")
-		ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
+		//ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
 		ctr.sensors(int(topic.Status), topic.Type, topic.User.OpenId, topic.Id)
 	}
 	return nil, nil
