@@ -285,7 +285,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 			*/
-			track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "发帖-文本内容审核",
 				"error": err.Error(),
 			})
@@ -306,7 +306,7 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 				zhuGeAttr["失败原因"] = err.Error()
 				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 				*/
-				track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 					"scene": "发帖-图片内容审核",
 					"error": err.Error(),
 				})
@@ -366,7 +366,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 			*/
-			track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "更新帖子",
 				"error": err.Error(),
 			})
@@ -384,7 +384,7 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 				zhuGeAttr["失败原因"] = err.Error()
 				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 				*/
-				track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 					"scene": "发帖-图片内容审核",
 					"error": err.Error(),
 				})

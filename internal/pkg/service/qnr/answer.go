@@ -116,7 +116,7 @@ func (srv AnswerService) Add(dto srv_types.AddQnrAnswerDTO) error {
 	attr["邀请人的openid"] = InvitedByOpenId
 	srv.ToZhuGe(userInfo.OpenId, attr) */
 
-	track.DefaultSensorsService().Track(true, config.SensorsEventName.Qnr, userInfo.GUID, map[string]interface{}{
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.Qnr, userInfo.GUID, map[string]interface{}{
 		"channel_name": channelName,
 		"invited_guid": InvitedByOpenId,
 	})
