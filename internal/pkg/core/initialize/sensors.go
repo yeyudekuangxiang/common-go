@@ -12,7 +12,7 @@ import (
 func InitSensors() {
 	if config.Config.Sensors.SaServerUrl != "" {
 		log.Println("开始初始化神策全局客户端...")
-		if config.Config.Sensors.Debug {
+		if config.Config.App.Env != "prod" {
 			// 初始化 Debug Consumer
 			consumer, err := sdk.InitDebugConsumer(config.Config.Sensors.SaServerUrl, config.Config.Sensors.Debug, config.Config.Sensors.SaRequestTimeout)
 			if err != nil {
@@ -25,7 +25,7 @@ func InitSensors() {
 			*app.SensorsClient = sa
 		} else {
 			//生产用
-			consumer, err := sdk.InitDefaultConsumer(config.Config.Sensors.SaServerUrl, config.Config.Sensors.SaRequestTimeout)
+			consumer, err := sdk.InitBatchConsumer(config.Config.Sensors.SaServerUrl, config.Config.Sensors.BatchMax, config.Config.Sensors.SaRequestTimeout)
 			if err != nil {
 				return
 			}

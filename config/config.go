@@ -217,4 +217,5 @@ type SensorsConf struct {
 	SaServerUrl      string
 	SaRequestTimeout int
 	Debug            bool `json:",optional"`
+	BatchMax         int
 }
