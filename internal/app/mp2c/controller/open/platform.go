@@ -277,7 +277,7 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
 		*/
 
-		track.DefaultSensorsService().Track(true, config.SensorsEventName.YTX, openId, map[string]interface{}{
+		track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, openId, map[string]interface{}{
 			"type": "完成乘车",
 		})
 
@@ -501,7 +501,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		track.DefaultZhuGeService().Track(eventName, userInfo.OpenId, zhuGeAttr)
 	*/
 
-	track.DefaultSensorsService().Track(true, config.SensorsEventName.YTX, userInfo.GUID, map[string]interface{}{
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, userInfo.GUID, map[string]interface{}{
 		"type": "收取气泡",
 	})
 
@@ -530,7 +530,7 @@ func (receiver PlatformController) CheckMgs(c *gin.Context) (gin.H, error) {
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 			*/
-			track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "文本校验",
 				"error": err.Error(),
 			})
@@ -562,7 +562,7 @@ func (receiver PlatformController) CheckMedia(c *gin.Context) (gin.H, error) {
 				zhuGeAttr["失败原因"] = err.Error()
 				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
 				*/
-				track.DefaultSensorsService().Track(true, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 					"scene": "图片校验",
 					"error": err.Error(),
 				})

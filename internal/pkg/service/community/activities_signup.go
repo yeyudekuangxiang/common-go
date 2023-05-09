@@ -206,7 +206,7 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		zhuGeAttr["报名时间"] = params.SignupTime
 		track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostSignUp, params.OpenId, zhuGeAttr)
 	*/
-	track.DefaultSensorsService().Track(true, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
 		"title":      topic.Title,
 		"topic_id":   int(params.TopicId),
 		"apply_time": params.SignupTime,

@@ -12,28 +12,32 @@ import (
 func InitSensors() {
 	if config.Config.Sensors.SaServerUrl != "" {
 		log.Println("开始初始化神策全局客户端...")
-		// 初始化 Debug Consumer
-		consumer, err := sdk.InitDebugConsumer(config.Config.Sensors.SaServerUrl, config.Config.Sensors.Debug, config.Config.Sensors.SaRequestTimeout)
-		if err != nil {
-			return
-		}
-		// 使用 Consumer 来构造 SensorsAnalytics 对象
-		sa := sdk.InitSensorsAnalytics(consumer, "default", false)
-		defer sa.Close()
+		if config.Config.Sensors.Debug {
+			// 初始化 Debug Consumer
+			consumer, err := sdk.InitDebugConsumer(config.Config.Sensors.SaServerUrl, config.Config.Sensors.Debug, config.Config.Sensors.SaRequestTimeout)
+			if err != nil {
+				return
+			}
+			// 使用 Consumer 来构造 SensorsAnalytics 对象
+			sa := sdk.InitSensorsAnalytics(consumer, "default", false)
+			defer sa.Close()
 
-		*app.SensorsClient = sa
+			*app.SensorsClient = sa
+		} else {
+			//生产用
+			consumer, err := sdk.InitDefaultConsumer(config.Config.Sensors.SaServerUrl, config.Config.Sensors.SaRequestTimeout)
+			if err != nil {
+				return
+			}
+			// 使用 Consumer 来构造 SensorsAnalytics 对象
+			sa := sdk.InitSensorsAnalytics(consumer, "default", false)
+			defer sa.Close()
+			*app.SensorsClient = sa
+		}
+
 		log.Println("初始化全局神策客户端成功...")
-
-		/*zhuGeAttr := make(map[string]interface{}, 0) //诸葛打点
-		zhuGeAttr["shop"] = "1"
-		err := app.SensorsClient.Track("37473t374t3", "sgsdgdggsd", zhuGeAttr, false)
-		if err != nil {
-			println("11212")
-		}
-		println("44444")*/
-
 		/*
-			guid := "qwqw121212"
+			guid := "test"
 			properties := map[string]interface{}{
 				"price": 12,
 				"name":  "apple",
@@ -50,7 +54,7 @@ func InitSensors() {
 			}
 		*/
 
-		/*guid := "qwqw121212"
+		/*guid := "testd"
 		properties := map[string]interface{}{
 			"price": 12,
 			"name":  "apple",

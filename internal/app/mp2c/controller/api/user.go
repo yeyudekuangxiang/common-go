@@ -380,7 +380,7 @@ func (ctr UserController) sendCoupon(user entity.User) {
 			app.Logger.Info("亿通行发红包结束")
 			*/
 
-			track.DefaultSensorsService().Track(true, config.SensorsEventName.YTX, user.GUID, map[string]interface{}{
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, user.GUID, map[string]interface{}{
 				"type":  "领取新人红包",
 				"title": "喵出行，亿起来",
 			})

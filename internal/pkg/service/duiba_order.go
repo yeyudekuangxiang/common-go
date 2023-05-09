@@ -177,6 +177,6 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	} else {
 		properties["is_first_order"] = "否"
 	}
-	track.DefaultSensorsService().Track(true, config.SensorsEventName.DuiBaOrder, openid, properties)
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.DuiBaOrder, openid, properties)
 	return nil
 }

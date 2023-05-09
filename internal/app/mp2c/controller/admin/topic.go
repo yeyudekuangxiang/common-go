@@ -436,7 +436,7 @@ func (ctr TopicController) sensors(status, tp int, openId string, topicId int64)
 	if tp == 1 {
 		scene = "发布活动"
 	}
-	track.DefaultSensorsService().Track(true, config.SensorsEventName.CommunityTopic, openId, map[string]interface{}{
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityTopic, openId, map[string]interface{}{
 		"status":   review,
 		"type":     scene,
 		"topic_id": int(topicId),
