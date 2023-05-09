@@ -23,9 +23,9 @@ func NewSensorsService(open bool) *SensorsService {
 }
 
 type TrackInfo struct {
-	EventName string  `json:"eventName"`
-	Guid      *string `json:"guid"`
-	Attr      map[string]interface{}
+	EventName string                 `json:"eventName"`
+	Guid      *string                `json:"guid"`
+	Attr      map[string]interface{} `json:"attr"`
 }
 
 func (srv SensorsService) Track(sync bool, eventName, guid string, attr map[string]interface{}) {
