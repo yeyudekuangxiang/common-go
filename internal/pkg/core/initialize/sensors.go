@@ -30,7 +30,7 @@ func InitSensors() {
 				return
 			}
 			// 使用 Consumer 来构造 SensorsAnalytics 对象
-			sa := sdk.InitSensorsAnalytics(consumer, "default", false)
+			sa := sdk.InitSensorsAnalytics(consumer, "production", false)
 			defer sa.Close()
 			*app.SensorsClient = sa
 		}
