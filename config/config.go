@@ -77,6 +77,7 @@ type app struct {
 	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
 	Saas                saas               `ini:"saas" json:"saas"`
 	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
+	Sensors             SensorsConf        `ini:"sensors" json:"sensors"`
 }
 
 type appSetting struct {
@@ -210,4 +211,11 @@ func FindOaSetting(source string) wxSetting {
 		return Config.MioSubOA
 	}
 	return wxSetting{}
+}
+
+type SensorsConf struct {
+	SaServerUrl      string
+	SaRequestTimeout int
+	Debug            bool `json:",optional"`
+	BatchMax         int
 }

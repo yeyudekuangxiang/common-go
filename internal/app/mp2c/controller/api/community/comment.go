@@ -156,10 +156,15 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Message); err != nil {
 			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
+			/*zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "发布评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
+			*/
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				"scene": "发布评论",
+				"error": err.Error(),
+			})
 			return nil, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}
@@ -259,10 +264,16 @@ func (ctr *CommentController) Update(c *gin.Context) (gin.H, error) {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Message); err != nil {
 			app.Logger.Error(fmt.Errorf("update Comment error:%s", err.Error()))
-			zhuGeAttr := make(map[string]interface{}, 0)
+			/*zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["场景"] = "更新评论"
 			zhuGeAttr["失败原因"] = err.Error()
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
+			*/
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
+				"scene": "更新评论",
+				"error": err.Error(),
+			})
+
 			return gin.H{"comment": nil, "point": 0}, errno.ErrCommon.WithMessage(err.Error())
 		}
 	}

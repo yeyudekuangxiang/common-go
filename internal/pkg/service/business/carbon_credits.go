@@ -6,8 +6,6 @@ import (
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"time"
 )
@@ -53,7 +51,7 @@ func (srv CarbonCreditsService) SendCarbonCredit(param SendCarbonCreditParam) (*
 	if err != nil {
 		return nil, decimal.Decimal{}, err
 	}
-	srv.trackCreditChange(param.UserId, param.AddCredit)
+	//srv.trackCreditChange(param.UserId, param.AddCredit)
 	return carbonCredit, param.AddCredit, nil
 }
 
@@ -215,7 +213,7 @@ func (srv CarbonCreditsService) SendCarbonGreenBusinessTrip(param SendCarbonGree
 	return &SendCarbonCreditOEPResult{
 		Credits: oepCredits,
 	}, err
-}
+} /*
 func (srv CarbonCreditsService) trackCreditChange(userId int64, value decimal.Decimal) {
 	go func() {
 		userInfo, err := DefaultUserService.GetBusinessUserById(userId)
@@ -239,4 +237,4 @@ func (srv CarbonCreditsService) trackCreditChange(userId int64, value decimal.De
 			ChangeTime: time.Now(),
 		})
 	}()
-}
+}*/

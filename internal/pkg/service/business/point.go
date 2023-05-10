@@ -2,13 +2,10 @@ package business
 
 import (
 	"fmt"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	ebusiness "mio/internal/pkg/model/entity/business"
 	rbusiness "mio/internal/pkg/repository/business"
-	"mio/internal/pkg/service/srv_types"
-	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 	"time"
@@ -65,7 +62,7 @@ func (srv PointService) createOrUpdatePoint(param createOrUpdatePointParam) (*eb
 
 	if point.ID != 0 {
 		point.Point += int64(param.AddPoint)
-		srv.trackPointChange(param.UserId, param.AddPoint)
+		//srv.trackPointChange(param.UserId, param.AddPoint)
 		return &point, srv.repo.Save(&point)
 	}
 
@@ -77,7 +74,7 @@ func (srv PointService) createOrUpdatePoint(param createOrUpdatePointParam) (*eb
 	if err != nil {
 		return nil, err
 	}
-	srv.trackPointChange(param.UserId, param.AddPoint)
+	//srv.trackPointChange(param.UserId, param.AddPoint)
 	return &point, nil
 }
 
@@ -316,6 +313,7 @@ func (srv PointService) SendPointGreenBusinessTrip(param SendPointGreenBusinessT
 	return addPoint, err
 }
 
+/*
 func (srv PointService) trackPointChange(userId int64, value int) {
 	go func() {
 		userInfo, err := DefaultUserService.GetBusinessUserById(userId)
@@ -340,3 +338,4 @@ func (srv PointService) trackPointChange(userId int64, value int) {
 		})
 	}()
 }
+*/

@@ -2,10 +2,8 @@ package point
 
 import (
 	"fmt"
-	"math"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service"
-	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
 )
@@ -64,22 +62,6 @@ func (c *defaultClientHandle) getText() string {
 //平台渠道
 func (c *defaultClientHandle) getRealText() string {
 	return service.PointTransactionTypeInfo{Type: c.clientHandle.Type}.Type.Text()
-}
-
-//诸葛埋点
-func (c *defaultClientHandle) trackPoint(err error) {
-	var isFail bool
-	if err != nil {
-		isFail = true
-	}
-	c.plugin.tracking.TrackPoints(srv_types.TrackPoints{
-		OpenId:      c.clientHandle.OpenId,
-		PointType:   c.getRealText(),
-		ChangeType:  c.additional.changeType,
-		Value:       uint(math.Abs(float64(c.clientHandle.point))),
-		IsFail:      isFail,
-		FailMessage: err.Error(),
-	})
 }
 
 //写日志

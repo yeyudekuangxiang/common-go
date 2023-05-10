@@ -4,7 +4,6 @@ import (
 	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
@@ -105,8 +104,10 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 		statusName = "待发货"
 		break
 	}
+	duibaOrder := srv.repo.FindByUid(uid)
+
 	//上报到诸葛
-	zhuGeAttr := make(map[string]interface{}, 0)
+	/*zhuGeAttr := make(map[string]interface{}, 0)
 	zhuGeAttr["用户uid"] = uid
 	zhuGeAttr["兑吧订单号"] = order.OrderNum
 	zhuGeAttr["下单时间"] = timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat)
@@ -116,10 +117,10 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	zhuGeAttr["商品类型"] = typeName
 	zhuGeAttr["运费"] = order.ExpressPrice
 	zhuGeAttr["订单状态"] = statusName
-	zhuGeAttr["用户openid"] = openid
+	zhuGeAttr["用户openid"] = openid*/
 	//var orderItemList []OrderItem
 	//json.Unmarshal([]byte(order.OrderItemList), &orderItemList)
-	for _, item := range order.OrderItemList.OrderItemList() {
+	/*for _, item := range order.OrderItemList.OrderItemList() {
 		orderItemType := ""
 		switch item.IsSelf {
 		case "1":
@@ -135,14 +136,47 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 		zhuGeAttr["所需兑换金额"] = item.PerPrice
 		break
 	}
-	duibaOrder := srv.repo.FindByUid(uid)
+
 	if duibaOrder.ID == 0 {
 		zhuGeAttr["是否首单"] = "是"
 	} else {
 		zhuGeAttr["是否首单"] = "否"
 	}
 	app.Logger.Infof("商场订单，积分打点失败 %+v %v %+v", config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
-
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
+	*/
+
+	properties := map[string]interface{}{
+		"order_num":          order.OrderNum,
+		"create_time":        timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat),
+		"total_credits":      order.TotalCredits,
+		"consumer_pay_price": order.ConsumerPayPrice,
+		"source":             order.Source,
+		"goods_type":         typeName,
+		"express_price":      order.ExpressPrice,
+		"order_status":       statusName,
+	}
+	for _, item := range order.OrderItemList.OrderItemList() {
+		orderItemType := ""
+		switch item.IsSelf {
+		case "1":
+			orderItemType = "自有"
+			break
+		case "0":
+			orderItemType = "兑吧"
+			break
+		}
+		properties["goods_name"] = item.Title
+		properties["goods_source"] = orderItemType
+		properties["goods_point"] = item.PerCredit
+		properties["goods_price"] = item.PerPrice
+		break
+	}
+	if duibaOrder.ID == 0 {
+		properties["is_first_order"] = "是"
+	} else {
+		properties["is_first_order"] = "否"
+	}
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.DuiBaOrder, openid, properties)
 	return nil
 }

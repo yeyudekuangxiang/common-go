@@ -367,7 +367,8 @@ func (ctr UserController) sendCoupon(user entity.User) {
 				app.Logger.Errorf("亿通行发红包失败:%s", err.Error())
 				return
 			}
-			zhuGeAttr := make(map[string]interface{}, 0)
+
+			/*zhuGeAttr := make(map[string]interface{}, 0)
 			zhuGeAttr["发放日期"] = time.Now().Format("2006-01-02 15:04:05")
 			zhuGeAttr["发放奖励名称"] = "新人亿通行地铁红包"
 			zhuGeAttr["活动名称"] = "喵出行，亿起来"
@@ -377,6 +378,13 @@ func (ctr UserController) sendCoupon(user entity.User) {
 			zhuGeAttr["用户mobile"] = user.PhoneNumber
 			track.DefaultZhuGeService().Track(config.ZhuGeEventName.YTXReward, user.OpenId, zhuGeAttr)
 			app.Logger.Info("亿通行发红包结束")
+			*/
+
+			track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, user.GUID, map[string]interface{}{
+				"type":  "领取新人红包",
+				"title": "喵出行，亿起来",
+			})
+
 		}()
 	}
 }

@@ -147,6 +147,11 @@ func (receiver PugcController) TestMqV3(c *gin.Context) (gin.H, error) {
 //周年庆双倍积分奖励明细
 
 func (PugcController) SendZyhPoint(c *gin.Context) (gin.H, error) {
+	/*
+		data := "{\"id\":4044883,\"openid\":\"oy_BA5IGl1JgkJKbD14wq_-Yorqw\",\"transactionId\":\"9ebb2efe-78a2-4124-8dab-0e4a2aa145d4\",\"type\":\"STEP\",\"value\":29,\"createTime\":1683359597141,\"additionalInfo\":\"{time=2023-05-06 15:53:17.109587117 +0800 CST m=+1580.809920677, count=2683, point=29}\",\"note\":\"\",\"balance\":795,\"adminId\":0}"
+		err := app.QueueProduct.Publish([]byte(data), []string{"point.change.success"}, rabbitmq.WithPublishOptionsExchange("lvmio"))
+	*/
+	return gin.H{}, nil
 	f, err := excelize.OpenFile("/Users/apple/Desktop/积分1000志愿汇重推v1.xlsx")
 	if err != nil {
 		fmt.Println(err)
