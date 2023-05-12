@@ -62,7 +62,7 @@ func TestMakeSign(t *testing.T) {
 }
 
 func TestAccessToken(t *testing.T) {
-	initialize.Initialize("/Users/yunfeng/Documents/workspace/mp2c-go/config.ini")
+	initialize.Initialize("/Users/yunfeng/Documents/workspace/mp2c-go/config.yaml")
 	token, _ := app.Weapp.AccessToken()
 	fmt.Println(token)
 }
