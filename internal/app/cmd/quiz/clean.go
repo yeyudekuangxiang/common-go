@@ -83,7 +83,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	cleanCmd.Flags().StringP("config", "c", "./config.ini", "config file")
+	cleanCmd.Flags().StringP("config", "c", "./config.yaml", "config file")
 
 	QuizCmd.AddCommand(cleanCmd)
 
