@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/medivhzhan/weapp/v3"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/model"
 	"mio/internal/pkg/model/entity"
@@ -50,26 +51,6 @@ func (srv StepHistoryService) UpdateStepHistoryByEncrypted(param UpdateStepHisto
 	return DefaultStepService.UpdateStepTotal(param.OpenId)
 }
 
-// CreateOrUpdate 创建或者更新步行历史记录
-func (srv StepHistoryService) CreateOrUpdate(param CreateOrUpdateStepHistoryParam) (*entity.StepHistory, error) {
-	history := srv.repo.FindBy(repository.FindStepHistoryBy{
-		OpenId:        param.OpenId,
-		RecordedEpoch: param.RecordedEpoch,
-	})
-	if history.ID == 0 {
-		history = entity.StepHistory{
-			OpenId:        param.OpenId,
-			Count:         param.Count,
-			RecordedTime:  param.RecordedTime,
-			RecordedEpoch: param.RecordedEpoch,
-		}
-		return &history, srv.repo.Create(&history)
-	}
-
-	history.Count = param.Count
-	return &history, srv.repo.Save(&history)
-}
-
 func (srv StepHistoryService) UpdateStepHistoryByList(openId string, stepInfoList []weapp.SetpInfo) error {
 	return srv.updateStepHistoryByList(openId, stepInfoList)
 }
@@ -82,17 +63,55 @@ func (srv StepHistoryService) updateStepHistoryByList(openId string, stepInfoLis
 		stepInfoList = stepInfoList[len(stepInfoList)-8:]
 	}
 
+	now := timetool.Now().StartOfDay().Unix()
 	for _, stepInfo := range stepInfoList {
-		updateParam := CreateOrUpdateStepHistoryParam{
+		//判断是否是今天
+		if stepInfo.Timestamp == now {
+			err := srv.createOrUpdateTodayStep(openId, stepInfo)
+			if err != nil {
+				return err
+			}
+		} else if stepInfo.Timestamp < now {
+			err := srv.createHistoryStep(openId, stepInfo)
+			if err != nil {
+				app.Logger.Errorf("更新历史步数失败 %s %+v", openId, stepInfo)
+			}
+		}
+	}
+	return nil
+}
+func (srv StepHistoryService) createOrUpdateTodayStep(openId string, info weapp.SetpInfo) error {
+	history := srv.repo.FindBy(repository.FindStepHistoryBy{
+		OpenId:        openId,
+		RecordedEpoch: info.Timestamp,
+	})
+	if history.ID == 0 {
+		history = entity.StepHistory{
 			OpenId:        openId,
-			Count:         stepInfo.Step,
-			RecordedTime:  model.Time{Time: time.Unix(stepInfo.Timestamp, 0)},
-			RecordedEpoch: stepInfo.Timestamp,
+			Count:         info.Step,
+			RecordedTime:  model.Time{Time: time.Unix(info.Timestamp, 0)},
+			RecordedEpoch: info.Timestamp,
 		}
-		_, err := srv.CreateOrUpdate(updateParam)
-		if err != nil {
-			return err
+		return srv.repo.Create(&history)
+	}
+	if info.Step > history.Count {
+		history.Count = info.Step
+	}
+	return srv.repo.Save(&history)
+}
+func (srv StepHistoryService) createHistoryStep(openId string, info weapp.SetpInfo) error {
+	history := srv.repo.FindBy(repository.FindStepHistoryBy{
+		OpenId:        openId,
+		RecordedEpoch: info.Timestamp,
+	})
+	if history.ID == 0 {
+		history = entity.StepHistory{
+			OpenId:        openId,
+			Count:         info.Step,
+			RecordedTime:  model.Time{Time: time.Unix(info.Timestamp, 0)},
+			RecordedEpoch: info.Timestamp,
 		}
+		return srv.repo.Create(&history)
 	}
 	return nil
 }
