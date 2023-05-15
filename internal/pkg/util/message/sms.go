@@ -126,7 +126,7 @@ func SendMarketSms(templateContent string, phone string, msg string) (smsReturn 
 		return nil, err
 	}
 	if ret.Code != "0" {
-		app.Logger.Errorf("SendMarketSms 错误5:%s", err.Error())
+		app.Logger.Errorf("SendMarketSms 错误5:%s", ret.Code)
 		return ret, errno.ErrCommon.WithMessage(ret.ErrorMsg)
 	}
 	return ret, nil

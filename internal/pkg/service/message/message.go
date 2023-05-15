@@ -203,7 +203,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			app.Logger.Infof("低碳打卡挑战，小程序订阅消息发送失败，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
-		if !getUserById.Exist {
+		if !getUserById.GetExist() {
 			app.Logger.Infof("低碳打卡挑战，小程序订阅消息发送失败,用户不存在，模版%s，uid%d，错误信息%s", template.TemplateId(), uid, err.Error())
 			continue
 		}
