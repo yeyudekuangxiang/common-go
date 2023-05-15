@@ -6,7 +6,6 @@ import (
 	"github.com/square/go-jose/v3/json"
 	"io/ioutil"
 	"mio/config"
-	"mio/internal/pkg/core/app"
 	"mio/pkg/errno"
 	"net/http"
 	"strings"
@@ -103,30 +102,25 @@ func SendMarketSms(templateContent string, phone string, msg string) (smsReturn 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
 	if err != nil {
-		app.Logger.Errorf("SendMarketSms 错误1:%s", err.Error())
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	res, err := client.Do(req)
 	if err != nil {
-		app.Logger.Errorf("SendMarketSms 错误2:%s", err.Error())
 		return nil, err
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		app.Logger.Errorf("SendMarketSms 错误3:%s", err.Error())
 		return nil, err
 	}
 	//fmt.Println(string(body))
 	ret := &SmsReturn{}
 	err = json.Unmarshal(body, ret)
 	if err != nil {
-		app.Logger.Errorf("SendMarketSms 错误4:%s", err.Error())
 		return nil, err
 	}
 	if ret.Code != "0" {
-		app.Logger.Errorf("SendMarketSms 错误5:%s", ret.Code)
 		return ret, errno.ErrCommon.WithMessage(ret.ErrorMsg)
 	}
 	return ret, nil
