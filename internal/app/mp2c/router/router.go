@@ -298,6 +298,177 @@ func Router(router *gin.Engine) {
 </body>
 </html>`)
 	})
+	router.GET("/mini/jumpv2.html", func(context *gin.Context) {
+		context.Header("content-type", "text/html; charset=utf-8")
+		context.Writer.WriteString(`<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>跳转中...</title>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
+</head>
+
+<body>
+    <script>
+        window.onload = function () {
+            try {
+                const t = getQueryVariable("t")
+                const path = decodeURIComponent(getQueryVariable("path"))
+                window.addEventListener('flutterInAppWebViewPlatformReady', () => {
+                    const appPath = decodeURIComponent(getQueryVariable("appPath"))
+                    goAppPath(t, appPath);
+                }, false);
+                if (isWechat()) {
+                    gotoPath(t, path)
+                } else {
+                    console.log('不在微信环境中');
+                }
+            } catch (e) {
+                console.error('appPath-----', e);
+                fail()
+            }
+
+        }
+        function goAppPath(t, path) {
+            if (window.flutter_inappwebview) {
+                switch (t) {
+                    case 'switchTab':
+                        window.flutter_inappwebview.callHandler('switchTab', path).then((res) => {
+                            if (!res) {
+                                fail();
+                            }
+
+                        }).catch(fail)
+                        break
+                    case 'redirectTo':
+                        window.flutter_inappwebview.callHandler('redirectTo', {
+                            path: path
+                        }).then((res) => {
+                            if (!res) {
+                                fail();
+                            }
+                        }).catch(fail)
+                        break
+                    case 'navigateTo':
+                        window.flutter_inappwebview.callHandler('navigateTo', {
+                            path: path
+                        }).then((res) => {
+                            if (res) {
+                                history.back()
+                            } else {
+                                fail();
+                            }
+                        }).catch(fail)
+                        break
+                    case 'navigateBack':
+                        window.flutter_inappwebview.callHandler('navigateBack').then((res) => {
+                            if (!res) {
+                                fail();
+                            }
+                        }).catch(fail)
+                        break
+                    default:
+                        alert("暂不支持此跳转方式")
+                        setTimeout(function () {
+                            history.back()
+                        }, 1000)
+                        break
+                }
+            }else{
+                fail()
+            }
+        }
+
+        function gotoPath(t, path) {
+            switch (t) {
+                case 'switchTab':
+                    wx.miniProgram.switchTab({
+                        url: path,
+                        fail: fail,
+                        success: () => {
+                            //此方法可以在跳转页点击返回时返回到真正的活动页
+                            history.back()
+                        }
+                    })
+                    break
+                case 'reLaunch':
+                    wx.miniProgram.reLaunch({
+                        url: path,
+                        fail: fail,
+                        success: () => {
+                            //此方法可以在跳转页点击返回时返回到真正的活动页
+                            history.back()
+                        }
+                    })
+                    break
+                case 'redirectTo':
+                    wx.miniProgram.redirectTo({
+                        url: path,
+                        fail: fail,
+                        success: () => {
+                            //此方法可以在跳转页点击返回时返回到真正的活动页
+                            history.back()
+                        }
+                    })
+                    break
+                case 'navigateTo':
+                    wx.miniProgram.navigateTo({
+                        url: path,
+                        fail: fail,
+                        success: () => {
+                            //此方法可以在跳转页点击返回时返回到真正的活动页
+                            history.back()
+                        }
+                    })
+                    break
+                case 'navigateBack':
+                    wx.miniProgram.navigateBack({
+                        url: path,
+                        fail:fail,
+                        success: () => {
+                            //此方法可以在跳转页点击返回时返回到真正的活动页
+                            history.back()
+                        }
+                    })
+                    break
+                default:
+                    alert("暂不支持此跳转方式")
+                    setTimeout(function () {
+                        history.back()
+                    }, 1000)
+                    break
+            }
+        }
+
+        function getQueryVariable(variable) {
+            let query = window.location.search.substring(1);
+            let vars = query.split("&");
+            for (let i = 0; i < vars.length; i++) {
+                let pair = vars[i].split("=");
+                if (pair[0] === variable) {
+                    return pair[1];
+                }
+            }
+            return false;
+        }
+
+        function isWechat() {
+            const ua = navigator.userAgent.toLowerCase();
+            return /micromessenger/i.test(ua) || /wechat/i.test(ua);
+        }
+
+        function fail() {
+            alert("跳转失败")
+            setTimeout(function () {
+                history.back()
+            }, 1000)
+        }
+    </script>
+</body>
+
+</html>`)
+	})
 
 	apple := `{
     "applinks":{
