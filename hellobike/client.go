@@ -9,20 +9,18 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
-	path       = "https://openapi.hellobike.com/bike/activity"
-	AppId      = "20230302145050102"
-	AppKey     = "d9244321dc3246caa54a29e7c156dd0c"
-	activityId = "H3979885952972083867"
+	version          = "1.0"
+	actionBikeCard   = "hellobike.activity.bikecard"
+	actionRefundCard = "hellobike.tw.refundcard"
 )
 
 type Client struct {
 	AppId     string
-	Version   string
 	htpClient http.Client
-	Action    string
 	AppKey    string
 	Domain    string
 }
@@ -35,16 +33,31 @@ func (c *Client) SendCoupon(param SendCouponParam) (resp *BaseResponse, err erro
 }
 
 func (c *Client) request(url string, param SendCouponParam) (resp *BaseResponse, err error) {
+	coupon := SendHelloBikeCouponParam{
+		AppId:        c.AppId,
+		Action:       actionBikeCard,
+		UtcTimestamp: strconv.FormatInt(time.Now().UnixMilli(), 10),
+		Version:      version,
+		BizContent: struct {
+			ActivityId    string `json:"activityId"`
+			MobilePhone   string `json:"mobilePhone"`
+			TransactionId string `json:"transactionId"`
+		}{
+			ActivityId:    param.ActivityId,
+			MobilePhone:   param.MobilePhone,
+			TransactionId: param.TransactionId,
+		},
+	}
 	params := make(map[string]string, 0)
-	bizContent, _ := json.Marshal(param.BizContent)
-	params["version"] = param.Version
-	params["action"] = param.Action
-	params["app_id"] = param.AppId
+	bizContent, _ := json.Marshal(coupon.BizContent)
+	params["version"] = version
+	params["action"] = actionBikeCard
+	params["app_id"] = c.AppId
 	params["biz_content"] = string(bizContent)
-	params["utc_timestamp"] = param.UtcTimestamp
+	params["utc_timestamp"] = coupon.UtcTimestamp
 	sign := c.GetSign(params, "&", c.AppKey)
-	param.Sign = sign
-	marshal, err := json.Marshal(param)
+	coupon.Sign = sign
+	marshal, err := json.Marshal(coupon)
 	if err != nil {
 		return nil, err
 	}
@@ -101,15 +114,32 @@ func (c *Client) RefundCard(param RefundCardParam) (resp *RefundCardResponse, er
 }
 
 func (c *Client) RefundCardRequest(url string, param RefundCardParam) (resp *RefundCardResponse, err error) {
+	coupon := RefundHelloBikeCardParam{
+		AppId:     c.AppId,
+		Action:    actionRefundCard,
+		Timestamp: strconv.FormatInt(time.Now().UnixMilli(), 10),
+		Version:   version,
+		BizContent: struct {
+			ActivityId    string `json:"activityId"`
+			OrderNo       string `json:"orderNo"`
+			MobilePhone   string `json:"mobilePhone"`
+			TransactionId string `json:"transactionId"`
+		}{
+			ActivityId:    param.ActivityId,
+			OrderNo:       param.OrderNo,
+			MobilePhone:   param.MobilePhone,
+			TransactionId: param.TransactionId,
+		},
+	}
 	params := make(map[string]string, 0)
-	bizContent, _ := json.Marshal(param.BizContent)
-	params["version"] = param.Version
-	params["action"] = param.Action
-	params["appId"] = param.AppId
+	bizContent, _ := json.Marshal(coupon.BizContent)
+	params["version"] = version
+	params["action"] = actionRefundCard
+	params["appId"] = c.AppId
 	params["bizContent"] = string(bizContent)
-	params["timestamp"] = param.Timestamp
+	params["timestamp"] = coupon.Timestamp
 	sign := c.GetSign(params, "&", c.AppKey)
-	param.Sign = sign
+	coupon.Sign = sign
 	marshal, err := json.Marshal(param)
 	if err != nil {
 		return nil, err
