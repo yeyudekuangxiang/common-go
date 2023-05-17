@@ -418,7 +418,7 @@ func Router(router *gin.Engine) {
                         fail: fail,
                         success: () => {
                             //此方法可以在跳转页点击返回时返回到真正的活动页
-                            history.back()
+                            //history.back()
                         }
                     })
                     break
