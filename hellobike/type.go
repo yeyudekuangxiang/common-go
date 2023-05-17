@@ -1,6 +1,12 @@
 package hellobike
 
 type SendCouponParam struct {
+	ActivityId    string `json:"activityId"`
+	MobilePhone   string `json:"mobilePhone"`
+	TransactionId string `json:"transactionId"`
+}
+
+type SendHelloBikeCouponParam struct {
 	AppId        string `json:"app_id"`
 	Action       string `json:"action"`
 	UtcTimestamp string `json:"utc_timestamp"`
@@ -39,6 +45,12 @@ type RefundCardResponse struct {
 }
 
 type RefundCardParam struct {
+	ActivityId    string `json:"activityId"`
+	OrderNo       string `json:"orderNo"`
+	MobilePhone   string `json:"mobilePhone"`
+	TransactionId string `json:"transactionId"`
+}
+type RefundHelloBikeCardParam struct {
 	AppId      string `json:"appId"`
 	Action     string `json:"action"`
 	Timestamp  string `json:"timestamp"`
