@@ -361,11 +361,6 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Content); err != nil {
 			app.Logger.Error(fmt.Errorf("update Topic error:%s", err.Error()))
-			/*zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "更新帖子"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
-			*/
 			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "更新帖子",
 				"error": err.Error(),
@@ -379,11 +374,6 @@ func (ctr *TopicController) UpdateTopic(c *gin.Context) (gin.H, error) {
 		for i, imgUrl := range form.Images {
 			if err := validator.CheckMediaWithOpenId(userPlatform.Openid, imgUrl); err != nil {
 				app.Logger.Error(fmt.Errorf("create Topic error:%s", err.Error()))
-				/*zhuGeAttr := make(map[string]interface{}, 0)
-				zhuGeAttr["场景"] = "发帖-图片内容审核"
-				zhuGeAttr["失败原因"] = err.Error()
-				track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
-				*/
 				track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 					"scene": "发帖-图片内容审核",
 					"error": err.Error(),
@@ -457,9 +447,10 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 			return nil, nil
 		}
 		for _, item := range signupList {
+			fmt.Println(item.Id)
 			//发送短信
 			err := common.SendSms(smsmsg.SmsMessage{
-				Phone:       item.Phone,
+				//Phone:       item.Phone,
 				Args:        topic.Title,
 				TemplateKey: message.SmsActivityCancel,
 			})
@@ -639,13 +630,6 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
 		OpenId:       user.OpenId,
-		RealName:     form.RealName,
-		Phone:        form.Phone,
-		Gender:       form.Gender,
-		Age:          form.Age,
-		Wechat:       form.Wechat,
-		City:         form.City,
-		Remarks:      form.Remarks,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
 	}

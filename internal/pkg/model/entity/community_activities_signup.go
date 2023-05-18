@@ -10,16 +10,10 @@ type CommunityActivitiesSignup struct {
 	Id           int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	TopicId      int64     `json:"topicId"`
 	UserId       int64     `json:"userId"`
-	RealName     string    `json:"realName"`
-	Phone        string    `json:"phone"`
-	Gender       int       `json:"gender"`
-	Age          int       `json:"age"`
-	Wechat       string    `json:"wechat"`
-	City         string    `json:"city"`
-	Remarks      string    `json:"remarks"`
 	SignupTime   time.Time `json:"signupTime"`
 	CancelTime   time.Time `json:"cancelTime,omitempty"`
 	SignupStatus int       `json:"signupStatus"`
+	SignupInfo   string    `json:"signupInfo"`
 }
 
 func (CommunityActivitiesSignup) TableName() string {
