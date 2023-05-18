@@ -3,6 +3,7 @@ package {{.pkg}}
 import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 )
 
 type Default{{.appName}}Repository struct {
