@@ -44,6 +44,7 @@ func (EventController) GetEventCategoryList(ctx *gin.Context) (gin.H, error) {
 			Title:           category.Title,
 			ImageUrl:        category.ImageUrl,
 			Icon:            category.Icon,
+			Link:            category.Link,
 		})
 	}
 
