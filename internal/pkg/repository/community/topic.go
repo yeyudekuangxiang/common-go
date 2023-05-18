@@ -52,12 +52,12 @@ func (d defaultTopicModel) Updates(topic *entity.Topic) error {
 	db := d.ctx.DB
 	if topic.Type == TopicTypeActivity {
 		activity := topic.Activity
-		err := db.Updates(&activity).Error
+		err := db.Save(&activity).Error
 		if err != nil {
 			return err
 		}
 	}
-	err := db.Omit(clause.Associations).Updates(topic).Error
+	err := db.Omit(clause.Associations).Save(topic).Error
 	if err != nil {
 		return err
 	}
