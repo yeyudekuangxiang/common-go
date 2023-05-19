@@ -31,6 +31,7 @@ func (EventController) GetEventCategoryList(ctx *gin.Context) (gin.H, error) {
 	categoryList, err := event.DefaultEventCategoryService.GetEventCategoryList(event.GetEventCategoryListParam{
 		OrderBy: entity.OrderByList{eevent.OrderByEventCategorySortDesc},
 		Active:  sql.NullBool{Bool: true, Valid: true},
+		Display: 1,
 	})
 
 	if err != nil {
@@ -44,7 +45,7 @@ func (EventController) GetEventCategoryList(ctx *gin.Context) (gin.H, error) {
 			Title:           category.Title,
 			ImageUrl:        category.ImageUrl,
 			Icon:            category.Icon,
-			Link:            category.Link,
+			Link:            category.Link.Link,
 		})
 	}
 
