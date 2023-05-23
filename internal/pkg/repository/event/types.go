@@ -27,6 +27,7 @@ type GetEventListBy struct {
 type GetEventCategoryListBy struct {
 	OrderBy entity.OrderByList
 	Active  sql.NullBool
+	Display int
 }
 type GetEventDetailListBy struct {
 	EventId string

@@ -11,9 +11,10 @@ type EventCategoryService struct {
 	repo revent.EventCategoryRepository
 }
 
-func (srv EventCategoryService) GetEventCategoryList(param GetEventCategoryListParam) ([]eevent.EventCategory, error) {
+func (srv EventCategoryService) GetEventCategoryList(param GetEventCategoryListParam) ([]eevent.APIEventCategory, error) {
 	return srv.repo.GetEventCategoryList(revent.GetEventCategoryListBy{
 		OrderBy: param.OrderBy,
 		Active:  param.Active,
+		Display: param.Display,
 	})
 }

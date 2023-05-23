@@ -75,4 +75,5 @@ type GetEventListParam struct {
 type GetEventCategoryListParam struct {
 	OrderBy entity.OrderByList
 	Active  sql.NullBool
+	Display int
 }
