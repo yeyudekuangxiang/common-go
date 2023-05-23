@@ -56,7 +56,7 @@ type CreateTopicParams struct {
 	Type           int      `json:"type"`
 	Region         string   `json:"region"`
 	Address        string   `json:"address" `
-	SATags         string   `json:"saTags"`
+	ActivityTagIds string   `json:"activityTagIds"`
 	Remarks        string   `json:"remarks"`
 	Qrcode         string   `json:"qrcode"`
 	MeetingLink    string   `json:"meetingLink"`
@@ -103,11 +103,17 @@ type AdminTopicListParams struct {
 type SignupParams struct {
 	TopicId      int64     `json:"topicId"`
 	UserId       int64     `json:"userId"`
-	OpenId       string    `json:"openId"`
+	RealName     string    `json:"realName"`
+	Phone        string    `json:"phone"`
+	Gender       int       `json:"gender"`
+	Age          int       `json:"age"`
+	Wechat       string    `json:"wechat"`
+	City         string    `json:"city"`
+	Remarks      string    `json:"remarks"`
 	SignupTime   time.Time `json:"signupTime"`
 	SignupStatus int       `json:"signupStatus"`
-	// infos
-	SignupInfo string `json:"signupInfo"`
+	//附加
+	OpenId string `json:"openId"`
 }
 
 //comment

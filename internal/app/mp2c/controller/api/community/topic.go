@@ -435,10 +435,9 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 			return nil, nil
 		}
 		for _, item := range signupList {
-			fmt.Println(item.Id)
 			//发送短信
 			err := common.SendSms(smsmsg.SmsMessage{
-				//Phone:       item.Phone,
+				Phone:       item.Phone,
 				Args:        topic.Title,
 				TemplateKey: message.SmsActivityCancel,
 			})
@@ -618,6 +617,13 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
 		OpenId:       user.OpenId,
+		RealName:     form.RealName,
+		Phone:        form.Phone,
+		Gender:       form.Gender,
+		Age:          form.Age,
+		Wechat:       form.Wechat,
+		City:         form.City,
+		Remarks:      form.Remarks,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
 	}

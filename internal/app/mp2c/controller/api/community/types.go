@@ -45,7 +45,7 @@ type CreateTopicRequest struct {
 	//报名活动字段
 	Region         string `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
 	Address        string `json:"address" form:"address" binding:"required_if=Type 1 ActivityType 1"`
-	SATags         string `json:"saTags" form:"saTags" binding:"required_if=Type 1"`
+	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds" binding:"required_if=Type 1"`
 	Remarks        string `json:"remarks" form:"remarks"`
 	Qrcode         string `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2 MeetingLink ''"`
 	MeetingLink    string `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2 Qrcode ''"`
@@ -54,7 +54,6 @@ type CreateTopicRequest struct {
 	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 1"`
 	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 1"`
 	ActivityType   int    `json:"activityType" form:"activityType" binding:"required_if=Type 1"`
-	Number         int    `json:"number" form:"number" binding:"required"`
 }
 
 type TopicActivity struct {
@@ -116,8 +115,14 @@ type CollectionRequest struct {
 
 // activity
 type SignupTopicRequest struct {
-	TopicId int64  `json:"topicId" form:"topicId" binding:"required"`
-	Infos   string `json:"infos" form:"infos" binding:"required"`
+	TopicId  int64  `json:"topicId" form:"topicId" binding:"required"`
+	RealName string `json:"realName" form:"realName"`
+	Gender   int    `json:"gender" form:"gender"`
+	Age      int    `json:"age" form:"age"`
+	Phone    string `json:"phone" form:"phone" `
+	Wechat   string `json:"wechat" form:"wechat"`
+	City     string `json:"city" form:"city"`
+	Remarks  string `json:"remarks" form:"remarks"`
 }
 
 type MySignupRequest struct {
