@@ -674,6 +674,7 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
 			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
 			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
+			SignupNumber:   params.SignupNumber,
 		}
 	}
 

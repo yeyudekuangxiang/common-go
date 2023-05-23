@@ -65,6 +65,7 @@ type CreateTopicParams struct {
 	EndTime        int64    `json:"endTime"`
 	SignupDeadline int64    `json:"signupDeadline"`
 	ActivityType   int      `json:"activityType"`
+	SignupNumber   int      `json:"signupNumber"`
 }
 
 type UpdateTopicParams struct {

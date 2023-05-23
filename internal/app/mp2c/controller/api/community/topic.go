@@ -620,6 +620,7 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 		OpenId:       user.OpenId,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
+		SignupInfo:   form.Infos,
 	}
 	err := signupService.Signup(params)
 	if err != nil {

@@ -16,7 +16,7 @@ type CommunityActivities struct {
 	StartTime      model.Time `json:"startTime" gorm:"start_time"`
 	EndTime        model.Time `json:"endTime" gorm:"end_time"`
 	SignupDeadline model.Time `json:"signupDeadline" gorm:"signup_deadline"`
-	Num            int        `json:"num" gorm:"num"`
+	SignupNumber   int        `json:"signupNumber" gorm:"signup_number"`
 	//数据库没有的字段
 	Status       int `json:"status,omitempty" gorm:"-"`
 	SignupStatus int `json:"signupStatus" gorm:"-"`

@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
@@ -225,16 +223,9 @@ func NewCommunityActivitiesSignupService(ctx *mioContext.MioContext) ActivitiesS
 }
 
 func (srv defaultCommunityActivitiesSignupService) findTopic(id int64, tp, status int) (*entity.Topic, error) {
-	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
-		TopicId: id,
-		Type:    converttool.PointerInt(tp),
-		Status:  status,
-	})
-	if err != nil {
-		if err == entity.ErrNotFount {
-			return nil, errno.ErrCommon.WithMessage("活动不存在")
-		}
-		return nil, errno.ErrCommon.WithMessage(err.Error())
+	topic := srv.topicModel.FindById(id)
+	if topic.Id == 0 {
+		return nil, errno.ErrCommon.WithMessage("活动不存在")
 	}
 	return topic, nil
 }

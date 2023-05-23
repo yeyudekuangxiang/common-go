@@ -41,7 +41,7 @@ type CreateTopicRequest struct {
 	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
 	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
 	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"max=2"`
-	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型"`
+	Type    int      `json:"type" form:"type" alias:"类型"`
 	//报名活动字段
 	Region         string `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
 	Address        string `json:"address" form:"address" binding:"required_if=Type 1 ActivityType 1"`
@@ -54,7 +54,7 @@ type CreateTopicRequest struct {
 	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 1"`
 	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 1"`
 	ActivityType   int    `json:"activityType" form:"activityType" binding:"required_if=Type 1"`
-	Number         int    `json:"number" form:"number" binding:"required"`
+	SignupNumber   int    `json:"signupNumber" form:"signupNumber" binding:"required_if=Type 1"`
 }
 
 type TopicActivity struct {
