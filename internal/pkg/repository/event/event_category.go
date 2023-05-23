@@ -15,7 +15,7 @@ type EventCategoryRepository struct {
 func (repo EventCategoryRepository) GetEventCategoryList(by GetEventCategoryListBy) ([]event.APIEventCategory, error) {
 	db := repo.DB.Model(event.EventCategory{}).Preload("Link", func(db *gorm.DB) *gorm.DB {
 		if by.Display >= 0 {
-			return db.Where("display = ?", by.Display)
+			return db.Where("display in ?", []int{0, by.Display})
 		}
 		return db
 	})
