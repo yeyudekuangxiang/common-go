@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
+	"strconv"
 )
 
 var DefaultDuiBaOrderService = DuiBaOrderService{repo: repository.DefaultDuiBaOrderRepository}
@@ -145,15 +146,18 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 	app.Logger.Infof("商场订单，积分打点失败 %+v %v %+v", config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
 	track.DefaultZhuGeService().Track(config.ZhuGeEventName.DuiBaOrder, openid, zhuGeAttr)
 	*/
-
+	ExpressPriceFloat, err := strconv.ParseFloat(order.ExpressPrice, 64)
+	if err != nil {
+		return err
+	}
 	properties := map[string]interface{}{
 		"order_num":          order.OrderNum,
 		"create_time":        timetool.UnixMilli(order.CreateTime.ToInt()).Format(timetool.TimeFormat),
-		"total_credits":      order.TotalCredits,
-		"consumer_pay_price": order.ConsumerPayPrice,
+		"total_credits":      int(order.TotalCredits.ToInt()),
+		"consumer_pay_price": order.ConsumerPayPrice.ToFloat(),
 		"source":             order.Source,
 		"goods_type":         typeName,
-		"express_price":      order.ExpressPrice,
+		"express_price":      ExpressPriceFloat,
 		"order_status":       statusName,
 	}
 	for _, item := range order.OrderItemList.OrderItemList() {
@@ -166,10 +170,14 @@ func (srv DuiBaOrderService) OrderMaiDian(order duibaApi.OrderInfo, uid int64, o
 			orderItemType = "兑吧"
 			break
 		}
+		PerPriceFloat, err := strconv.ParseFloat(item.PerPrice, 64)
+		if err != nil {
+			return err
+		}
 		properties["goods_name"] = item.Title
 		properties["goods_source"] = orderItemType
-		properties["goods_point"] = item.PerCredit
-		properties["goods_price"] = item.PerPrice
+		properties["goods_point"] = int(item.PerCredit.ToInt())
+		properties["goods_price"] = PerPriceFloat
 		break
 	}
 	if duibaOrder.ID == 0 {
