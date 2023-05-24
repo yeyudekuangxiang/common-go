@@ -57,7 +57,6 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 			MiniprogramState: subscribemessage.MiniprogramStateFormal,
 			Data:             template.ToData(),
 		})
-
 		if err != nil {
 			return false, err
 		}

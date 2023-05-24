@@ -193,25 +193,16 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 	if err != nil {
 		return err
 	}
+
 	err = srv.signupModel.Create(signupModel)
 	if err != nil {
 		return err
 	}
-	//诸葛打点
-	/*	zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["活动id"] = params.TopicId
-		zhuGeAttr["活动名称"] = topic.Title
-		zhuGeAttr["作者名称"] = topic.User.Nickname
-		zhuGeAttr["报名者id"] = params.UserId
-		zhuGeAttr["报名时间"] = params.SignupTime
-		track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostSignUp, params.OpenId, zhuGeAttr)
-	*/
 	track.DefaultSensorsService().Track(false, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
 		"title":      topic.Title,
 		"topic_id":   int(params.TopicId),
 		"apply_time": params.SignupTime,
 	})
-
 	return nil
 }
 
