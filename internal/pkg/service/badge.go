@@ -99,6 +99,7 @@ func (srv BadgeService) GetUserCertCount(openId string) (int64, error) {
 	}
 	certNumResp, err := c.CertificateCount(miosass.CertificateCountParam{
 		UserId: openId,
+		System: "H5",
 	})
 	if err != nil {
 		app.Logger.Errorf("查询证书数量异常 %v %+v", openId, err)
