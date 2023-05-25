@@ -101,6 +101,7 @@ type CertificateCountResp struct {
 type CertificateCountParam struct {
 	sign
 	UserId string `json:"userId"`
+	System string `json:"system"`
 }
 
 func (c CertificateCountParam) signParams() map[string]string {
