@@ -55,7 +55,7 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 	// 示例参数信息（Data）
 	data = "il7B0BSEjFdzpyKzfOFpvg/Se1CP802RItKYFPfSLRxJ3jfObV19hvYOEktPAYW2nd7S8MBcyHYyacHKbISq5iTmDzG+ivnR+SZJv3USNTYVMz9rCQVSxd0cLlqsJauko79NnwQJbzDTyLooYolwz75qBOH2/xOMirpeEqRJrF/EQjWekJmGk9RtboXePu2rka+Xm51syBPhiXJAq0GfbfaFu9tNqs/e2Vjja/ltE1M0lqvxfXQ6da6HrThsm5id4ClZFliOacRfrsPLRixS/IQYtksxghvJwbqOsblsITail9Ayy4tKcogeEZiOO+4Ed264NSKmk713wKwJLAFjCFogBx8GE3OBz4pqcAn/ydA="
 	// 示例时间戳（TimeStamp）
-	timestamp := string(time.Now().UnixMilli()) // "20160729142400"
+	timestamp := fmt.Sprint(time.Now().UnixMilli()) // "20160729142400"
 	// 示例自增序列（Seq）
 	seq := "0001"
 
