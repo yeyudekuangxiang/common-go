@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -58,7 +59,63 @@ func TestAES(t *testing.T) {
 	fmt.Println("加密结果：", decryptCode2)
 }
 
+func TestAESPKCS5Padding(t *testing.T) {
+	marshal := "{\"total\":1,\"stationStatusInfo\":{\"operationID\":\"123456789\", \"stationID\":\"1111111111111\", \"connectorStatusInfos\":{\"connectorlD\": 1 , \"equipmentID\":\"100000000000000000000001\", \"status\": 4, \"currentA\": 0, \"currentB\": 0,\"currentC\": 0, \"voltageA\": 0, \"voltageB\": 0, \"voltageC\": 0, \"soc\": 10, }}}"
+	pkcs5, err := AesEncryptPKCS5([]byte(marshal), []byte("1234567890abcdef"))
+	if err != nil {
+		return
+	}
+	pass64 := base64.StdEncoding.EncodeToString(pkcs5)
+	fmt.Printf("加密后:%v\n", pass64)
+}
+
+// GetSign 签名
+func GetSign(params map[string]string, joiner string, appKey string) string {
+	if joiner == "" {
+		joiner = "&"
+	}
+	var slice []string
+	for k := range params {
+		slice = append(slice, k)
+	}
+	var signStr string
+	for _, v := range slice {
+		signStr += v + "=" + params[v] + joiner
+	}
+	if joiner != ";" {
+		signStr = strings.TrimRight(signStr, joiner)
+	}
+	signStr = "OperatorID=123456789Data=il7B0BSEjFdzpyKzfOFpvg/Se1CP802RItKYFPfSLRxJ3jfObV19hvYOEktPAYW2nd7S8MBcyHYyacHKbISq5iTmDzG+ivnR+SZJv3USNTYVMz9rCQVSxd0cLlqsJauko79NnwQJbzDTyLooYolwz75qBOH2/xOMirpeEqRJrF/EQjWekJmGk9RtboXePu2rka+Xm51syBPhiXJAq0GfbfaFu9tNqs/e2Vjja/ltE1M0lqvxfXQ6da6HrThsm5id4ClZFliOacRfrsPLRixS/IQYtksxghvJwbqOsblsITail9Ayy4tKcogeEZiOO+4Ed264NSKmk713wKwJLAFjCFogBx8GE3OBz4pqcAn/ydA=TimeStamp=20160729142400Seq=0001"
+	//验证签名
+	return HmacMd5(signStr, appKey)
+}
+
+func HmacMd5(key, data string) string {
+	h := hmac.New(md5.New, []byte(key))
+	h.Write([]byte(data))
+	return hex.EncodeToString(h.Sum([]byte("")))
+}
+
 func aesEncrypt(orig string, key, iv string) string {
+	origData := []byte(orig)
+	k := []byte(key)
+	// 分组秘钥 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
+	block, _ := aes.NewCipher(k)
+	// 获取秘钥块的长度
+	blockSize := block.BlockSize()
+	// 补全码
+	origData = pkcs7Padding(origData, blockSize)
+	// 加密模式
+	blockMode := cipher.NewCBCEncrypter(block, []byte(iv))
+
+	// 创建数组
+	cryted := make([]byte, len(origData))
+	// 加密
+	blockMode.CryptBlocks(cryted, origData)
+	return base64.StdEncoding.EncodeToString(cryted)
+}
+
+func aesEncryptPKCS5Padding(orig string, key, iv string) string {
 	origData := []byte(orig)
 	k := []byte(key)
 	// 分组秘钥 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
