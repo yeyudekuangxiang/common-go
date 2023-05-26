@@ -631,7 +631,7 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	//神策
 	return nil, nil
 }
 

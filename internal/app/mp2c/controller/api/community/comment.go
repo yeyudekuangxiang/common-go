@@ -3,6 +3,7 @@ package community
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -156,11 +157,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Message); err != nil {
 			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
-			/*zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发布评论"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
-			*/
+
 			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "发布评论",
 				"error": err.Error(),
@@ -172,13 +169,25 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := community.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
-	topicService := community.NewTopicService(ctx)
 
-	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
+	comment, toComment, recId, topic, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
-
+	//埋点
+	trackData := map[string]interface{}{
+		"笔记ID":    form.ObjId,
+		"笔记标题":    topic.Title,
+		"笔记发布者ID": topic.User.ID,
+		"笔记发布者昵称": topic.User.Nickname,
+		"笔记话题":    topic.Tags,
+		"笔记类型":    topic.Type,
+		"评论发布时间":  comment.CreatedAt.Format(timetool.TimeFormat),
+		"评论者ID":   comment.MemberId,
+		"评论者身份":   comment.Member.Position,
+		"乐活家":     comment.Member.Partners,
+	}
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityComment, user.GUID, trackData)
 	//更新积分
 	msg := comment.Message
 	messagerune := []rune(comment.Message)
@@ -212,7 +221,6 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	if form.Parent == 0 {
 		msgKey = "reply_topic"
-		topic := topicService.FindById(form.ObjId)
 		notes = topic.Title
 	} else {
 		msgKey = "reply_comment"
