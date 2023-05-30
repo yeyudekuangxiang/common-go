@@ -35,7 +35,8 @@ func (c *Client) CertificateCount(param CertificateCountParam) (*CertificateCoun
 	uv.Set("sign", param.Sign)
 
 	log.Printf("获取证书数量 %v", uv)
-	respBody, err := httptool.Get(u + "?" + uv.Encode())
+
+	respBody, err := httptool.Get(u+"?"+uv.Encode(), httptool.HttpWithHeader("system", "H5"))
 	if err != nil {
 		return nil, err
 	}

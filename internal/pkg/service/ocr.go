@@ -117,7 +117,7 @@ func (srv OCRService) Scan(imgUrl string) ([]string, error) {
 
 // ScanWithHash 扫描图片 并且更新扫描次数
 func (srv OCRService) ScanWithHash(imageUrl string, imageHash string) ([]string, error) {
-	result, err := srv.Scan(imageUrl)
+	result, err := srv.Scan(fmt.Sprintf("%s?%s", imageUrl, "x-oss-process=image/resize,l_4000,m_lfit"))
 	if err != nil {
 		return nil, err
 	}
