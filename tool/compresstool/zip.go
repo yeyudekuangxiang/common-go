@@ -2,7 +2,6 @@ package compresstool
 
 import (
 	"archive/zip"
-	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
@@ -21,9 +20,7 @@ func unzip(f string, dir string) error {
 	return unzipFiles(read.File, dir)
 }
 func unzipFiles(files []*zip.File, dir string) error {
-	fmt.Println(len(files))
 	for _, f := range files {
-		fmt.Printf("%s %+v\n", f.Name, f)
 		if f.FileInfo().IsDir() {
 			err := os.Mkdir(path.Join(dir, f.Name), f.Mode())
 			if err != nil {
