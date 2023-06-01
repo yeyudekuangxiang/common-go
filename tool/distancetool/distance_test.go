@@ -21,6 +21,8 @@ func (rs resultSlice) Page(page int, pageSize int) []result {
 }
 
 func TestDis(t *testing.T) {
+	c := FormatDistance(1.222222)
+	println(c)
 	a := CalcLngLatDistance(116.4133836971231, 39.910924547299565, 121.48053886017651, 31.235929042252014)
 
 	println(a)

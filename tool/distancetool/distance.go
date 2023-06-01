@@ -1,6 +1,7 @@
 package distancetool
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"math"
 	"sort"
@@ -59,6 +60,14 @@ func DistanceArr(origin PointArr, targets []PointArr) (resultSlice, error) {
 	// 按距离升序排序
 	sort.Sort(results)
 	return results, nil
+}
+
+func FormatDistance(distance float64) string {
+	if distance < 1000 {
+		return fmt.Sprintf("%.2f m", distance)
+	} else {
+		return fmt.Sprintf("%.2f km", distance/1000.0)
+	}
 }
 
 // 结果项的结构体，包含距离和点的信息
