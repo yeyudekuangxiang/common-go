@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/zeromicro/go-zero/core/logx"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"io"
+	"mio/internal/pkg/core/app"
 	"mio/pkg/errno"
 	"net/http"
 )
@@ -35,7 +35,7 @@ func (w *AesResponseWriter) WriteString(str string) (int, error) {
 }
 func decodeErr(w http.ResponseWriter, r *http.Request, err error) {
 	if err != nil {
-		logx.Errorf("解码失败 %+v %+v", r, err)
+		app.Logger.Errorf("解码失败 %+v %+v", r, err)
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
