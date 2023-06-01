@@ -9,14 +9,16 @@ import (
 const earthRadius = 6371000 // 地球赤道半径，单位米
 
 // 点的结构体，包含经纬度和点的名称
-type point struct {
+
+type Point struct {
 	name string
 	lat  float64
 	lng  float64
 }
 
 // 用于计算距离的函数
-func distance(p1, p2 point) float64 {
+
+func Distance(p1, p2 Point) float64 {
 	deltaLat := toRadians(p2.lat - p1.lat)
 	deltaLng := toRadians(p2.lng - p1.lng)
 	a := math.Sin(deltaLat/2)*math.Sin(deltaLat/2) +
@@ -32,14 +34,14 @@ func toRadians(degrees float64) float64 {
 	return degrees * math.Pi / 180
 }
 
-func Distance(origin point, targets []point) (resultSlice, error) {
+func DistanceArr(origin Point, targets []Point) (resultSlice, error) {
 	if len(targets) == 0 {
 		return nil, errors.New("参数有误")
 	}
 	// 计算距离并存储结果到resultSlice
 	var results resultSlice
 	for _, target := range targets {
-		d := distance(origin, target)
+		d := Distance(origin, target)
 		r := result{distance: d, point: target}
 		results = append(results, r)
 	}
@@ -51,7 +53,7 @@ func Distance(origin point, targets []point) (resultSlice, error) {
 // 结果项的结构体，包含距离和点的信息
 type result struct {
 	distance float64
-	point    point
+	point    Point
 }
 
 // 定义结果项列表，用于存储每个点与起点之间的距离
