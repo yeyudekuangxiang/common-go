@@ -20,10 +20,10 @@ func (rs resultSlice) Page(page int, pageSize int) []result {
 
 func TestDis(t *testing.T) {
 	// 起点
-	origin := point{lat: 31.23, lng: 121.47}
+	origin := Point{lat: 31.23, lng: 121.47}
 
 	// 目标点列表
-	var targets []point = []point{
+	var targets []Point = []Point{
 		{name: "北京", lat: 39.90, lng: 116.41},
 		{name: "香港", lat: 22.27, lng: 114.17},
 		{name: "广州", lat: 23.13, lng: 113.27},
@@ -33,7 +33,7 @@ func TestDis(t *testing.T) {
 		{name: "福州", lat: 26.08, lng: 119.30},
 	}
 
-	slice, err := Distance(origin, targets)
+	slice, err := DistanceArr(origin, targets)
 	if err != nil {
 		return
 	}
