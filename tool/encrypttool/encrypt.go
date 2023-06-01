@@ -21,45 +21,54 @@ func Md5(str string) string {
 	return hex.EncodeToString(md5Data)
 }
 
+// Deprecated: 请使用 AesEncryptCBCPKCS7 代替
 func AesEncrypt(orig string, key, iv string) string {
-	origData := []byte(orig)
-	k := []byte(key)
+	return base64.StdEncoding.EncodeToString(AesEncryptCBCPKCS7([]byte(orig), []byte(key), []byte(iv)))
+}
+func AesEncryptCBCPKCS7(origData, key, iv []byte) []byte {
 	// 分组秘钥 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
-	block, _ := aes.NewCipher(k)
+	block, _ := aes.NewCipher(key)
 	// 获取秘钥块的长度
 	blockSize := block.BlockSize()
 	// 补全码
 	origData = pkcs7Padding(origData, blockSize)
 	// 加密模式
-	blockMode := cipher.NewCBCEncrypter(block, []byte(iv))
+	blockMode := cipher.NewCBCEncrypter(block, iv)
 	// 创建数组
 	cryted := make([]byte, len(origData))
 	// 加密
 	blockMode.CryptBlocks(cryted, origData)
-	return base64.StdEncoding.EncodeToString(cryted)
+	return cryted
 }
-
-func AesDecrypt(cryted, key, iv string) (string, error) {
-	// 转成字节数组
-	crytedByte, _ := base64.StdEncoding.DecodeString(cryted)
-
-	k := []byte(key)
+func AesDecryptCBCPKCS7(cryted, key, iv []byte) ([]byte, error) {
 	// 分组秘钥
-	block, _ := aes.NewCipher(k)
-	// 获取秘钥块的长度
-	//blockSize := block.BlockSize()
+	block, _ := aes.NewCipher(key)
 	// 加密模式 cbc
-	blockMode := cipher.NewCBCDecrypter(block, []byte(iv))
+	blockMode := cipher.NewCBCDecrypter(block, iv)
 	// 创建数组
-	origin := make([]byte, len(crytedByte))
+	origin := make([]byte, len(cryted))
 	// 解密
-	blockMode.CryptBlocks(origin, crytedByte)
+	blockMode.CryptBlocks(origin, cryted)
 	// 去补全码
 	origin, err := pkcs7Trimming(origin)
 	if err != nil {
+		return nil, err
+	}
+	return origin, nil
+}
+
+// Deprecated: 请使用 AesDecryptCBCPKCS7 代替
+func AesDecrypt(cryted, key, iv string) (string, error) {
+	// 转成字节数组
+	crytedByte, err := base64.StdEncoding.DecodeString(cryted)
+	if err != nil {
 		return "", err
 	}
-	return string(origin), nil
+	deData, err := AesDecryptCBCPKCS7(crytedByte, []byte(key), []byte(iv))
+	if err != nil {
+		return "", err
+	}
+	return string(deData), nil
 }
 
 func HMacMd5(orig, key string) string {
@@ -77,14 +86,14 @@ func hmacMD5Sign(key []byte, data []byte) string {
 	return signature
 }
 
-//补码
+// 补码
 func pkcs7Padding(ciphertext []byte, blocksize int) []byte {
 	padding := blocksize - len(ciphertext)%blocksize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
 
-//去码
+// 去码
 func pkcs7Trimming(encrypt []byte) ([]byte, error) {
 	length := len(encrypt)
 	if length == 0 {
