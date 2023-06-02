@@ -45,7 +45,7 @@ func Distance(p1, p2 Point) float64 {
 
 // 计算一个点到多个点距离列表
 
-func DistanceArr(origin PointArr, targets []PointArr) (ResultSlice, error) {
+func DistanceArr(origin Point, targets []PointArr) (ResultSlice, error) {
 	if len(targets) == 0 {
 		return nil, errors.New("参数有误")
 	}

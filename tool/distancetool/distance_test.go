@@ -23,7 +23,7 @@ func TestDis(t *testing.T) {
 		})
 		println(b)*/
 	// 起点
-	origin := PointArr{Lat: 31.23, Lng: 121.47}
+	origin := Point{Lat: 31.23, Lng: 121.47}
 
 	// 目标点列表
 	var targets []PointArr = []PointArr{
