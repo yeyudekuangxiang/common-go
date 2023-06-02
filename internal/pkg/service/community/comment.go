@@ -21,7 +21,7 @@ type (
 		FindAll(data *entity.CommentIndex) ([]*entity.CommentIndex, int64, error)
 		FindSubList(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
 		FindListAndChild(data *entity.CommentIndex, offset, limit int) ([]*entity.CommentIndex, int64, error)
-		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, *entity.CommentIndex, int64, error)
+		CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (*entity.CommentIndex, *entity.CommentIndex, int64, *entity.Topic, error)
 		UpdateComment(userId, commentId int64, message string) error
 		DelComment(userId, commentId int64) error
 		DelCommentSoft(userId, commentId int64) error
@@ -37,6 +37,7 @@ type defaultCommentService struct {
 	commentModel                   repository.CommentModel
 	commentLikeModel               repository.CommentLikeModel
 	topicModel                     community.TopicModel
+	tagModel                       community.TagModel
 	carbonCommentModel             repository.CarbonCommentModel
 	carbonCommentLikeModel         repository.CarbonCommentLikeModel
 	carbonSecondHandCommodityModel repository.CarbonSecondHandCommodityModel
@@ -48,6 +49,7 @@ func NewCommentService(ctx *context.MioContext) CommentService {
 		commentModel:                   repository.NewCommentModel(ctx),
 		commentLikeModel:               repository.NewCommentLikeRepository(ctx),
 		topicModel:                     community.NewTopicModel(ctx),
+		tagModel:                       community.NewTagModel(ctx),
 		carbonCommentModel:             repository.NewCarbonCommentModel(ctx),
 		carbonCommentLikeModel:         repository.NewCarbonCommentLikeRepository(ctx),
 		carbonSecondHandCommodityModel: repository.NewCarbonSecondHandCommodityModel(ctx),
@@ -190,16 +192,16 @@ func (srv *defaultCommentService) DelCommentSoft(userId, commentId int64) error 
 	return nil
 }
 
-func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (entity.CommentIndex, *entity.CommentIndex, int64, error) {
+func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, ToCommentId int64, message string) (*entity.CommentIndex, *entity.CommentIndex, int64, *entity.Topic, error) {
 	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{TopicId: topicId})
 	if err != nil {
 		if err == entity.ErrNotFount {
-			return entity.CommentIndex{}, nil, 0, errno.ErrRecordNotFound
+			return nil, nil, 0, nil, errno.ErrRecordNotFound
 		}
-		return entity.CommentIndex{}, nil, 0, errno.ErrCommon.WithMessage(err.Error())
+		return nil, nil, 0, nil, errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	comment := entity.CommentIndex{
+	comment := &entity.CommentIndex{
 		ObjId:         topicId,
 		Message:       message,
 		MemberId:      userId,
@@ -210,9 +212,9 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		comment.IsAuthor = 1
 	}
 
-	_, err = srv.commentModel.Insert(&comment)
+	_, err = srv.commentModel.Insert(comment)
 	if err != nil {
-		return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
+		return nil, nil, 0, nil, err
 	}
 
 	//更新count数据
@@ -222,7 +224,7 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 		//回复的评论
 		toComment, err = srv.commentModel.FindOne(ToCommentId)
 		if err != nil {
-			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
+			return nil, nil, 0, nil, err
 		}
 		recId = toComment.MemberId
 		err = srv.commentModel.Trans(func(tx *gorm.DB) error {
@@ -267,12 +269,12 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 			return nil
 		})
 		if err != nil {
-			return entity.CommentIndex{}, &entity.CommentIndex{}, 0, err
+			return nil, nil, 0, nil, err
 		}
 
 	}
 
-	return comment, toComment, recId, nil
+	return comment, toComment, recId, topic, nil
 }
 
 func (srv *defaultCommentService) Like(userId, commentId int64, openId string) (CommentChangeLikeResp, error) {
