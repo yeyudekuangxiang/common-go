@@ -9,12 +9,14 @@ import (
 
 const earthRadius = 6371000 // 地球赤道半径，单位米
 
-// 点的结构体，包含经纬度和点的名称
+// 点的结构体，包含经纬度
 
 type Point struct {
 	Lat float64
 	Lng float64
 }
+
+//点的结构体，包含经纬度和点的名称
 
 type PointArr struct {
 	Name string
@@ -22,7 +24,13 @@ type PointArr struct {
 	Lng  float64
 }
 
-// 用于计算距离的函数
+// 将角度转换为弧度
+
+func toRadians(degrees float64) float64 {
+	return degrees * math.Pi / 180
+}
+
+// 计算距离的函数
 
 func Distance(p1, p2 Point) float64 {
 	deltaLat := toRadians(p2.Lat - p1.Lat)
@@ -35,17 +43,14 @@ func Distance(p1, p2 Point) float64 {
 	return earthRadius * c
 }
 
-// 将角度转换为弧度
-func toRadians(degrees float64) float64 {
-	return degrees * math.Pi / 180
-}
+// 计算一个点到多个点距离列表
 
-func DistanceArr(origin PointArr, targets []PointArr) (resultSlice, error) {
+func DistanceArr(origin PointArr, targets []PointArr) (ResultSlice, error) {
 	if len(targets) == 0 {
 		return nil, errors.New("参数有误")
 	}
 	// 计算距离并存储结果到resultSlice
-	var results resultSlice
+	var results ResultSlice
 	for _, target := range targets {
 		d := Distance(Point{
 			Lat: origin.Lat,
@@ -54,13 +59,13 @@ func DistanceArr(origin PointArr, targets []PointArr) (resultSlice, error) {
 			Lat: target.Lat,
 			Lng: target.Lng,
 		})
-		r := result{Distance: d, Point: target}
+		r := Result{Distance: d, Point: target}
 		results = append(results, r)
 	}
-	// 按距离升序排序
-	sort.Sort(results)
 	return results, nil
 }
+
+//距离单位转换
 
 func FormatDistance(distance float64) string {
 	if distance < 1000 {
@@ -71,28 +76,51 @@ func FormatDistance(distance float64) string {
 }
 
 // 结果项的结构体，包含距离和点的信息
-type result struct {
+
+type Result struct {
 	Distance float64
 	Point    PointArr
 }
 
 // 定义结果项列表，用于存储每个点与起点之间的距离
-type resultSlice []result
+
+type ResultSlice []Result
 
 // 实现sort.Interface接口的Len方法
 
-func (rs resultSlice) Len() int {
+func (rs ResultSlice) Len() int {
 	return len(rs)
 }
 
 // 实现sort.Interface接口的Swap方法
 
-func (rs resultSlice) Swap(i, j int) {
+func (rs ResultSlice) Swap(i, j int) {
 	rs[i], rs[j] = rs[j], rs[i]
 }
 
 // 实现sort.Interface接口的Less方法，按距离升序排列
 
-func (rs resultSlice) Less(i, j int) bool {
+func (rs ResultSlice) Less(i, j int) bool {
 	return rs[i].Distance < rs[j].Distance
+}
+
+//距离列表，按距离升序排序
+
+func (rs ResultSlice) DistanceSort() (ResultSlice, error) {
+	sort.Sort(rs)
+	return rs, nil
+}
+
+// 实现分页方法
+
+func (rs ResultSlice) Page(page int, pageSize int) []Result {
+	start := (page - 1) * pageSize
+	end := start + pageSize
+	if end > len(rs) {
+		end = len(rs)
+	}
+	if start > end {
+		start = end
+	}
+	return rs[start:end]
 }

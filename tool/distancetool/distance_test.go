@@ -7,34 +7,21 @@ import (
 	"testing"
 )
 
-// 实现分页方法
-func (rs resultSlice) Page(page int, pageSize int) []result {
-	start := (page - 1) * pageSize
-	end := start + pageSize
-	if end > len(rs) {
-		end = len(rs)
-	}
-	if start > end {
-		start = end
-	}
-	return rs[start:end]
-}
-
 func TestDis(t *testing.T) {
-	c := FormatDistance(1.222222)
-	println(c)
-	a := CalcLngLatDistance(116.4133836971231, 39.910924547299565, 121.48053886017651, 31.235929042252014)
+	/*	c := FormatDistance(1.222222)
+		println(c)
+		a := CalcLngLatDistance(116.4133836971231, 39.910924547299565, 121.48053886017651, 31.235929042252014)
 
-	println(a)
+		println(a)
 
-	b := Distance(Point{
-		Lat: 39.910924547299565,
-		Lng: 116.4133836971231,
-	}, Point{
-		Lat: 31.235929042252014,
-		Lng: 121.48053886017651,
-	})
-	println(b)
+		b := Distance(Point{
+			Lat: 39.910924547299565,
+			Lng: 116.4133836971231,
+		}, Point{
+			Lat: 31.235929042252014,
+			Lng: 121.48053886017651,
+		})
+		println(b)*/
 	// 起点
 	origin := PointArr{Lat: 31.23, Lng: 121.47}
 
@@ -49,16 +36,37 @@ func TestDis(t *testing.T) {
 		{Name: "福州", Lat: 26.08, Lng: 119.30},
 	}
 
-	slice, err := DistanceArr(origin, targets)
+	sliceList, err := DistanceArr(origin, targets)
 	if err != nil {
 		return
 	}
+	sortList, err := sliceList.DistanceSort()
+	if err != nil {
+		return
+	}
+	list := sortList.Page(1, 2)
+
+	for _, result := range list {
+		fmt.Printf("%-4s距离 %.2f 米\n", result.Point.Name, result.Distance)
+	}
+
+	/*
+		pageSize := 2
+		pageCount := (len(sortList) + pageSize - 1) / pageSize
+		for i := 1; i <= pageCount; i++ {
+			pageResults := sortList.Page(i, pageSize)
+			fmt.Printf("第 %d 页：\n", i)
+			for _, r := range pageResults {
+				fmt.Printf("%-4s距离 %.2f 米\n", r.Point.Name, r.Distance*1000)
+			}
+		}*/
+
 	/*for _, r := range slice {
 		fmt.Printf("%-4s距离 %.2f 米\n", r.point.name, r.distance)
 	}*/
 
 	// 分页
-	pageSize := 2
+	/*pageSize := 2
 	pageCount := (len(slice) + pageSize - 1) / pageSize
 	for i := 1; i <= pageCount; i++ {
 		pageResults := slice.Page(i, pageSize)
@@ -66,7 +74,7 @@ func TestDis(t *testing.T) {
 		for _, r := range pageResults {
 			fmt.Printf("%-4s距离 %.2f 米\n", r.Point.Name, r.Distance*1000)
 		}
-	}
+	}*/
 	/*
 		// 计算距离并存储结果到resultSlice
 		var results resultSlice
