@@ -8,6 +8,8 @@ var SensorsEventName = sensorsEventName{
 	YTX:                  "YtxActivity",
 	CommunityTopic:       "CommunityTopic",
 	ActivityApply:        "ActivityApply",
+	CommunityIdAuth:      "CommunityIdAuth",
+	CommunityComment:     "CommunityComment",
 }
 
 //诸葛上报event_name
@@ -19,4 +21,6 @@ type sensorsEventName struct {
 	YTX                  string
 	CommunityTopic       string
 	ActivityApply        string
+	CommunityIdAuth      string
+	CommunityComment     string
 }

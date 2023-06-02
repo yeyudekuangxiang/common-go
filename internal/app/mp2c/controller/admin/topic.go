@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -267,7 +268,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	if key != "" {
 		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id, "")
 		//ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
-		ctr.sensors(int(topic.Status), topic.Type, topic.User.OpenId, topic.Id)
+		ctr.sensors(topic)
 	}
 	return nil, nil
 }
@@ -423,22 +424,30 @@ func (ctr TopicController) zhuGe(status, tp int, openId string) {
 	track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
 }
 
-func (ctr TopicController) sensors(status, tp int, openId string, topicId int64) {
+func (ctr TopicController) sensors(topic *entity.Topic) {
 	var review string
-	switch status {
+	switch topic.Status {
 	case 3:
 		review = "审核通过"
 	default:
 		review = "审核未通过"
 	}
-	//诸葛打点
 	scene := "发布帖子"
-	if tp == 1 {
+	if topic.Type == 1 {
 		scene = "发布活动"
 	}
-	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityTopic, openId, map[string]interface{}{
-		"status":   review,
-		"type":     scene,
-		"topic_id": int(topicId),
-	})
+
+	trackData := map[string]interface{}{
+		"topicId":   int(topic.Id),
+		"title":     topic.Title,
+		"tags":      topic.TopicTagId,
+		"type":      scene,
+		"partners":  int(topic.User.Partners),
+		"position":  string(topic.User.Position),
+		"status":    review,
+		"isEssence": topic.IsEssence,
+		"createdAt": topic.CreatedAt.Format(timetool.TimeFormat),
+	}
+
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityTopic, topic.User.OpenId, trackData)
 }

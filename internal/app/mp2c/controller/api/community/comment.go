@@ -176,16 +176,16 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	}
 	//埋点
 	trackData := map[string]interface{}{
-		"topic_id":              form.ObjId,
+		"topic_id":              int(form.ObjId),
 		"topic_title":           topic.Title,
-		"topic_user_id":         topic.User.ID,
+		"topic_user_id":         int(topic.User.ID),
 		"topic_user_nickname":   topic.User.Nickname,
-		"topic_tags":            topic.Tags,
+		"topic_tags":            topic.TopicTagId,
 		"topic_type":            topic.Type,
 		"comment_push_time":     comment.CreatedAt.Format(timetool.TimeFormat),
-		"comment_user_id":       comment.MemberId,
-		"comment_user_position": comment.Member.Position,
-		"comment_user_partner":  comment.Member.Partners,
+		"comment_user_id":       int(comment.MemberId),
+		"comment_user_position": string(comment.Member.Position),
+		"comment_user_partner":  int(comment.Member.Partners),
 	}
 	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityComment, user.GUID, trackData)
 	//更新积分
