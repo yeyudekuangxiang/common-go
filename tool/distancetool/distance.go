@@ -19,9 +19,9 @@ type Point struct {
 //点的结构体，包含经纬度和点的名称
 
 type PointArr struct {
-	Name string
-	Lat  float64
-	Lng  float64
+	Id  string
+	Lat float64
+	Lng float64
 }
 
 // 将角度转换为弧度

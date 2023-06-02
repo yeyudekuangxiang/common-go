@@ -27,13 +27,13 @@ func TestDis(t *testing.T) {
 
 	// 目标点列表
 	var targets []PointArr = []PointArr{
-		{Name: "北京", Lat: 39.90, Lng: 116.41},
-		{Name: "香港", Lat: 22.27, Lng: 114.17},
-		{Name: "广州", Lat: 23.13, Lng: 113.27},
-		{Name: "南京", Lat: 32.05, Lng: 118.78},
-		{Name: "上海", Lat: 31.23, Lng: 121.47},
-		{Name: "深圳", Lat: 22.54, Lng: 114.06},
-		{Name: "福州", Lat: 26.08, Lng: 119.30},
+		{Id: "北京", Lat: 39.90, Lng: 116.41},
+		{Id: "香港", Lat: 22.27, Lng: 114.17},
+		{Id: "广州", Lat: 23.13, Lng: 113.27},
+		{Id: "南京", Lat: 32.05, Lng: 118.78},
+		{Id: "上海", Lat: 31.23, Lng: 121.47},
+		{Id: "深圳", Lat: 22.54, Lng: 114.06},
+		{Id: "福州", Lat: 26.08, Lng: 119.30},
 	}
 
 	sliceList, err := DistanceArr(origin, targets)
@@ -47,7 +47,7 @@ func TestDis(t *testing.T) {
 	list := sortList.Page(1, 2)
 
 	for _, result := range list {
-		fmt.Printf("%-4s距离 %.2f 米\n", result.Point.Name, result.Distance)
+		fmt.Printf("%-4s距离 %.2f 米\n", result.Point.Id, result.Distance)
 	}
 
 	/*
