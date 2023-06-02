@@ -23,10 +23,7 @@ import (
 )
 
 func apiRouter(router *gin.Engine) {
-	aesFormat := apiutil.AesFormat{
-		Key: []byte("HDSK7jDNdjsDNDMD"),
-		IV:  []byte("HDSK7jDNdjsDNDMD"),
-	}
+	aesMiddleware := middleware.AesMiddleware([]byte("HDSK7jDNdjsDNDMD"), []byte("HDSK7jDNdjsDNDMD"))
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 
 	//非必须登陆的路由
@@ -264,7 +261,7 @@ func apiRouter(router *gin.Engine) {
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
 			stepRouter.POST("/collect", apiutil.Format(api.DefaultStepController.Collect))
 
-			stepRouter.POST("/update_by_encrypt", aesFormat.Format(api.DefaultStepController.UpdateStep))
+			stepRouter.POST("/update_by_encrypt", aesMiddleware, apiutil.Format(api.DefaultStepController.UpdateStep))
 		}
 
 		//签到相关路由

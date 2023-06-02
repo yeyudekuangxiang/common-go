@@ -32,13 +32,13 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.1.7
+	gitlab.miotech.com/miotech-application/backend/common-go v1.1.24
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.9.5
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.5.0
 	google.golang.org/grpc v1.50.1
 	gopkg.in/ini.v1 v1.62.0
-	gorm.io/gorm v1.24.2
+	gorm.io/gorm v1.24.3
 )
 
 require (
@@ -137,7 +137,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/sony/sonyflake v1.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/minify/v2 v2.9.4 // indirect
@@ -180,6 +179,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/mysql v1.4.4 // indirect
 	gorm.io/driver/postgres v1.4.5 // indirect
+	gorm.io/plugin/dbresolver v1.4.1 // indirect
 	k8s.io/api v0.22.9 // indirect
 	k8s.io/apimachinery v0.22.9 // indirect
 	k8s.io/client-go v0.22.9 // indirect
@@ -191,4 +191,4 @@ require (
 
 replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.9.5 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.9.5
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.1.7 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.7
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.1.24 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.24
