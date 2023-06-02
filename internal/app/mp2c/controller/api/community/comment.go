@@ -183,9 +183,9 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		"topic_tags":            topic.TopicTagId,
 		"topic_type":            topic.Type,
 		"comment_push_time":     comment.CreatedAt.Format(timetool.TimeFormat),
-		"comment_user_id":       int(comment.MemberId),
-		"comment_user_position": string(comment.Member.Position),
-		"comment_user_partner":  int(comment.Member.Partners),
+		"comment_user_id":       int(user.ID),
+		"comment_user_position": string(user.Position),
+		"comment_user_partner":  int(user.Partners),
 	}
 	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityComment, user.GUID, trackData)
 	//更新积分
