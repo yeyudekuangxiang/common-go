@@ -261,7 +261,7 @@ func apiRouter(router *gin.Engine) {
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
 			stepRouter.POST("/collect", apiutil.Format(api.DefaultStepController.Collect))
 
-			stepRouter.POST("/update_by_encrypt", apiutil.Format(api.DefaultStepController.UpdateStep)).Use(aesMiddleware)
+			stepRouter.POST("/update_by_encrypt", aesMiddleware, apiutil.Format(api.DefaultStepController.UpdateStep))
 		}
 
 		//签到相关路由
