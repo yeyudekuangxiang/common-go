@@ -267,6 +267,7 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 	}
 	if key != "" {
 		ctr.sendMessage(ctx, key, 0, topic.UserId, topic.Id, "")
+		//ctr.zhuGe(int(topic.Status), topic.Type, topic.User.OpenId)
 		ctr.sensors(topic)
 	}
 	return nil, nil
@@ -347,7 +348,7 @@ func (ctr TopicController) Essence(c *gin.Context) (gin.H, error) {
 				AdditionInfo: strconv.FormatInt(topic.Id, 10),
 			})
 			if err != nil {
-				app.Logger.Errorf("【帖子加精】积分增加失败:%s; 帖子ID:%v; 用户ID:%v", err.Error(),topic.Id, topic.UserId)
+				app.Logger.Errorf("【帖子加精】积分增加失败:%s; 帖子ID:%v; 用户ID:%v", err.Error(), topic.Id, topic.UserId)
 			}
 			key = "essence_topic"
 		}
@@ -435,13 +436,14 @@ func (ctr TopicController) sensors(topic *entity.Topic) {
 	if topic.Type == 1 {
 		scene = "发布活动"
 	}
+
 	trackData := map[string]interface{}{
-		"topicId":   topic.Id,
+		"topicId":   int(topic.Id),
 		"title":     topic.Title,
-		"tags":      topic.Tags,
+		"tags":      topic.TopicTagId,
 		"type":      scene,
-		"partners":  topic.User.Partners,
-		"position":  topic.User.Position,
+		"partners":  int(topic.User.Partners),
+		"position":  string(topic.User.Position),
 		"status":    review,
 		"isEssence": topic.IsEssence,
 		"createdAt": topic.CreatedAt.Format(timetool.TimeFormat),

@@ -37,6 +37,7 @@ type defaultCommentService struct {
 	commentModel                   repository.CommentModel
 	commentLikeModel               repository.CommentLikeModel
 	topicModel                     community.TopicModel
+	tagModel                       community.TagModel
 	carbonCommentModel             repository.CarbonCommentModel
 	carbonCommentLikeModel         repository.CarbonCommentLikeModel
 	carbonSecondHandCommodityModel repository.CarbonSecondHandCommodityModel
@@ -48,6 +49,7 @@ func NewCommentService(ctx *context.MioContext) CommentService {
 		commentModel:                   repository.NewCommentModel(ctx),
 		commentLikeModel:               repository.NewCommentLikeRepository(ctx),
 		topicModel:                     community.NewTopicModel(ctx),
+		tagModel:                       community.NewTagModel(ctx),
 		carbonCommentModel:             repository.NewCarbonCommentModel(ctx),
 		carbonCommentLikeModel:         repository.NewCarbonCommentLikeRepository(ctx),
 		carbonSecondHandCommodityModel: repository.NewCarbonSecondHandCommodityModel(ctx),
