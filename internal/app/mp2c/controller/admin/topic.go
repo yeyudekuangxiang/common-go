@@ -438,15 +438,15 @@ func (ctr TopicController) sensors(topic *entity.Topic) {
 	}
 
 	trackData := map[string]interface{}{
-		"topicId":   int(topic.Id),
-		"title":     topic.Title,
-		"tags":      topic.TopicTagId,
-		"type":      scene,
-		"partners":  int(topic.User.Partners),
-		"position":  string(topic.User.Position),
-		"status":    review,
-		"isEssence": topic.IsEssence,
-		"createdAt": topic.CreatedAt.Format(timetool.TimeFormat),
+		"topic_id":   int(topic.Id),
+		"title":      topic.Title,
+		"tags":       topic.TopicTagId,
+		"type":       scene,
+		"partners":   int(topic.User.Partners),
+		"position":   string(topic.User.Position),
+		"status":     review,
+		"is_essence": topic.IsEssence,
+		"created_at": topic.CreatedAt.Format(timetool.TimeFormat),
 	}
 
 	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityTopic, topic.User.OpenId, trackData)
