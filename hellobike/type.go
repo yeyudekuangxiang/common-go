@@ -19,25 +19,40 @@ type SendHelloBikeCouponParam struct {
 	} `json:"biz_content"`
 }
 
-type ResultCode string
-
-const (
-	ResultCodeSuccess ResultCode = "0000"
-)
-
 type BaseResponse struct {
 	ErrorCode string `json:"error_code"`
 	Success   bool   `json:"success"`
 	Data      string `json:"data"`
 }
 
-/*{"orderNo":"TP20230317180734200102903590028"}*/
-/**
-{
-    "code": 302,
-    "msg": "appId无效"
+func (c *BaseResponse) IsSuccess() bool {
+	return c.ErrorCode == "10000"
 }
-*/
+
+func (c *BaseResponse) GetErrMsg() string {
+	errMsg, ok := ErrorCodeList[c.ErrorCode]
+	if ok {
+		return errMsg
+	}
+	return c.ErrorCode
+}
+
+var ErrorCodeList = map[string]string{
+	"10101":  "系统错误",
+	"10104":  "参数异常",
+	"10114":  "用户异常",
+	"10302":  "appId无效",
+	"10500":  "sign校验失败",
+	"10501":  "权益校验失败",
+	"200000": "非法活动id",
+	"200001": "非法手机号",
+	"200002": "当前活动已结束",
+	"200003": "没找到对应的活动",
+	"200004": "活动库存不足",
+	"200005": "该用户不存在",
+	"200006": "卡发放失败，请重试",
+	"200007": "重复参加活动",
+}
 
 type RefundCardResponse struct {
 	Code int    `json:"code"`
