@@ -2,9 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"log"
 	"mio/internal/pkg/core/app"
 	"net/http"
+	"strings"
 )
 
 func Router(router *gin.Engine) {
@@ -487,12 +489,25 @@ func Router(router *gin.Engine) {
 	router.GET("/.well-known/apple-app-site-association", func(context *gin.Context) {
 		context.Data(200, "application/octet-stream", []byte(apple))
 	})
+	appHtml := getAppHtml()
 	router.Any("/app/*path", func(context *gin.Context) {
-		context.String(200, "")
+		context.Header("content-type", "text/html")
+		context.Writer.WriteString(appHtml)
 	})
 	apiRouter(router)
 	adminRouter(router)
 	openRouter(router)
 	pugcRouter(router)
 	BusinessRouter(router)
+}
+func getAppHtml() string {
+	body, err := httptool.Get("https://applet-app-dev.miotech.com/download.html")
+	if err != nil {
+		log.Printf("获取https://applet-app-dev.miotech.com/download.html失败 %v", err)
+		return ""
+	}
+
+	h := strings.ReplaceAll(string(body), `href="/`, `href="https://applet-app-dev.miotech.com/`)
+	h = strings.ReplaceAll(h, `src="/`, `src="https://applet-app-dev.miotech.com/`)
+	return h
 }
