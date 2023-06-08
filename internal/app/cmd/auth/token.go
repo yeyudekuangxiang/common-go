@@ -10,6 +10,7 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/util"
 	"strconv"
+	"time"
 )
 
 // tokenCmd represents the token command
@@ -45,7 +46,10 @@ to quickly create a Cobra application.`,
 			})
 		case "admin":
 			token, err = util.CreateToken(auth.Admin{
-				MioAdminID: int(id),
+				Type:       "Admin",
+				ID:         id,
+				MioAdminID: id,
+				CreatedAt:  time.Now().UnixMilli(),
 			})
 		case "business":
 			token, err = util.CreateToken(auth.BusinessUser{

@@ -7,6 +7,7 @@ import (
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"time"
 )
 
 var DefaultSystemAdminService ISystemAdminService = NewSystemAdminService(repository.DefaultSystemAdminRepository)
@@ -36,7 +37,7 @@ func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, 
 	if err != nil {
 		return nil, false, err
 	}
-	admin := a.r.GetAdminById(authAdmin.MioAdminID)
+	admin := a.r.GetAdminById(int(authAdmin.MioAdminID))
 	if admin.ID == 0 {
 		return nil, false, nil
 	}
@@ -72,6 +73,9 @@ func (a SystemAdminService) Login(account, password string) (string, error) {
 	}
 
 	return util.CreateToken(auth.Admin{
-		MioAdminID: admin.ID,
+		Type:       "Admin",
+		ID:         int64(admin.ID),
+		MioAdminID: int64(admin.ID),
+		CreatedAt:  time.Now().UnixMilli(),
 	})
 }
