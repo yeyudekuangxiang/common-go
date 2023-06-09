@@ -501,13 +501,13 @@ func Router(router *gin.Engine) {
 	BusinessRouter(router)
 }
 func getAppHtml() string {
-	body, err := httptool.Get("https://applet-app-dev.miotech.com/download.html")
+	body, err := httptool.Get("https://applet-app.miotech.com/download.html")
 	if err != nil {
-		log.Printf("获取https://applet-app-dev.miotech.com/download.html失败 %v", err)
+		log.Printf("获取https://applet-app.miotech.com/download.html失败 %v", err)
 		return ""
 	}
 
-	h := strings.ReplaceAll(string(body), `href="/`, `href="https://applet-app-dev.miotech.com/`)
-	h = strings.ReplaceAll(h, `src="/`, `src="https://applet-app-dev.miotech.com/`)
+	h := strings.ReplaceAll(string(body), `href="/`, `href="https://applet-app.miotech.com/`)
+	h = strings.ReplaceAll(h, `src="/`, `src="https://applet-app.miotech.com/`)
 	return h
 }
