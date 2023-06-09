@@ -22,8 +22,7 @@ type (
 	{{.upperStartCamelObject}}Model interface {
 		{{.lowerStartCamelObject}}Model
 		FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param,opts ...option) (*{{.upperStartCamelObject}},bool,error)
-		List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error)
-		Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error)
+		List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}},int64, error)
 	    // Policy 设置从主库还是从库读 仅对customUserModel下面的方法生效
 	    Policy(operation dbresolver.Operation) {{.upperStartCamelObject}}Model
 	}
@@ -68,43 +67,41 @@ func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}
 	return nil, false, err
 }
 
-// Page 根据条件查询分页数据
-func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param Page{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error) {
+// List 根据条件查询分页数据
+func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, int64, error) {
 
 	db := c.db.WithContext(ctx)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
 
 	//在此处组装sql
 
+
+	//查询总条数
     var count int64
-	list := make([]{{.upperStartCamelObject}}, 0)
-	err := db.Model({{.upperStartCamelObject}}{}).Count(&count).Error
-	if err != nil {
-		return nil, 0, err
-	}
+    if param.Limit != nil || param.Offset != nil {
+        err := db.Model({{.upperStartCamelObject}}{}).Count(&count).Error
+    	if err != nil {
+    		return nil, 0, err
+    	}
+    }
+
+    //查询列表
 	db ,_ = initOptions(db,c.options, opts)
-	err = db.Limit(param.Limit).Offset(param.Offset).Find(&list).Error
-	if err != nil {
-		return nil, 0, err
+	if param.Limit != nil{
+	    db = db.Limit(*param.Limit)
 	}
-	return list, count, nil
-}
-// List 根据条件查询列表
-func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error) {
-
-	db := c.db.WithContext(ctx)
-	db ,_ = initOptions(db,c.options, opts)
-	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
-
-	//在此处组装sql
-
-
+	if param.Offset != nil{
+	    db = db.Offset(*param.Offset)
+	}
 	list := make([]{{.upperStartCamelObject}}, 0)
 	err := db.Find(&list).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return list, nil
+	if count==0{
+	    count = int64(len(list))
+	}
+	return list, count, nil
 }
 
 // {{.upperStartCamelObject}}OrderByList {{.upperStartCamelObject}}排序列表
@@ -145,13 +142,10 @@ type FindOne{{.upperStartCamelObject}}Param struct {
     OrderBy {{.upperStartCamelObject}}OrderByList
 }
 
-type Page{{.upperStartCamelObject}}Param struct {
-    Limit int
-    Offset int
+type List{{.upperStartCamelObject}}Param struct {
+    Limit *int
+    Offset *int
     OrderBy {{.upperStartCamelObject}}OrderByList
 }
 
-type List{{.upperStartCamelObject}}Param struct {
-    OrderBy {{.upperStartCamelObject}}OrderByList
-}
 
