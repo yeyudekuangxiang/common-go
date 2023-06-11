@@ -1,13 +1,11 @@
 package starcharge
 
 import (
-	"net/http"
 	"testing"
 )
 
 func TestBikeCard(t *testing.T) {
 	c := Client{
-		htpClient:  http.Client{},
 		Domain:     "https://openapi.hellobike.com/bike/activity",
 		Version:    "",
 		AESSecret:  "",
@@ -16,11 +14,11 @@ func TestBikeCard(t *testing.T) {
 		OperatorID: "",
 	}
 	//bizId := time.Now().Format("20060102150405") + c.rand()
-	resp, _ := c.Request(SendStarChargeParam{
-		Data:     "",
-		QueryUrl: "",
+	resp, _ := c.QueryEquipAuth(QueryEquipAuthParam{
+		EquipBizSeq: "",
+		ConnectorID: "",
 	})
 
-	println(resp.Ret)
+	println(resp.EquipAuthSeq)
 
 }
