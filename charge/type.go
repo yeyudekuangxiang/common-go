@@ -112,6 +112,159 @@ type QueryStationsInfoParam struct {
 }
 
 type QueryStationsInfoResult struct {
+	PageNo       int `json:"PageNo"`
+	PageCount    int `json:"PageCount"`
+	ItemSize     int `json:"ItemSize"`
+	StationInfos []struct {
+		StationID                string   `json:"StationID"`
+		OperatorID               string   `json:"OperatorID"`
+		EquipmentOwnerID         string   `json:"EquipmentOwnerID"`
+		StationName              string   `json:"StationName"`
+		CountryCode              string   `json:"CountryCode"`
+		AreaCode                 string   `json:"AreaCode"`
+		Address                  string   `json:"Address"`
+		StationTel               string   `json:"StationTel"`
+		ServiceTel               string   `json:"ServiceTel"`
+		StationType              int      `json:"StationType"`
+		StationStatus            int      `json:"StationStatus"`
+		ParkNums                 int      `json:"ParkNums"`
+		StationLng               float64  `json:"StationLng"`
+		StationLat               float64  `json:"StationLat"`
+		SiteGuide                string   `json:"SiteGuide"`
+		Construction             int      `json:"Construction"`
+		Pictures                 []string `json:"Pictures"`
+		MatchCars                string   `json:"MatchCars"`
+		ParkInfo                 string   `json:"ParkInfo"`
+		BusineHours              string   `json:"BusineHours"`
+		ElectricityFee           string   `json:"ElectricityFee"`
+		ServiceFee               string   `json:"ServiceFee"`
+		ParkFee                  string   `json:"ParkFee"`
+		Payment                  string   `json:"Payment"`
+		SupportOrder             int      `json:"SupportOrder"`
+		Remark                   string   `json:"Remark"`
+		ParkingDiscountType      int      `json:"ParkingDiscountType"`
+		ParkFeeStatus            int      `json:"ParkFeeStatus"`
+		BusinessStationFeeDetail []struct {
+			ServiceFee     float64 `json:"ServiceFee"`
+			EndTime        string  `json:"EndTime"`
+			ElectricityFee float64 `json:"ElectricityFee"`
+			StartTime      string  `json:"StartTime"`
+			PvType         int     `json:"PvType"`
+		} `json:"BusinessStationFeeDetail"`
+		StationFeeDetail []struct {
+			ServiceFee     float64 `json:"ServiceFee"`
+			EndTime        string  `json:"EndTime"`
+			ElectricityFee float64 `json:"ElectricityFee"`
+			StartTime      string  `json:"StartTime"`
+			PvType         int     `json:"PvType"`
+		} `json:"StationFeeDetail"`
+		OriginalStationFeeDetail []struct {
+			ServiceFee     float64 `json:"ServiceFee"`
+			EndTime        string  `json:"EndTime"`
+			ElectricityFee float64 `json:"ElectricityFee"`
+			StartTime      string  `json:"StartTime"`
+			PvType         int     `json:"PvType"`
+		} `json:"OriginalStationFeeDetail"`
+		IsEnable    int `json:"IsEnable"`
+		PrinterFlag int `json:"PrinterFlag"`
+		BarrierFlag int `json:"BarrierFlag"`
+		TariffInfo  struct {
+			Elements []struct {
+				PriceComponents []struct {
+					PriceName string `json:"PriceName"`
+					PriceDesc string `json:"PriceDesc"`
+				} `json:"PriceComponents"`
+				Restrictions struct {
+					StartTime string `json:"StartTime"`
+					EndTime   string `json:"EndTime"`
+					TimeType  int    `json:"TimeType"`
+				} `json:"Restrictions"`
+			} `json:"Elements"`
+		} `json:"TariffInfo"`
+		FloorLevel          string `json:"FloorLevel"`
+		GuideMap            string `json:"GuideMap"`
+		RoadInfo            string `json:"RoadInfo"`
+		AdminName           string `json:"AdminName"`
+		AdminTel            string `json:"AdminTel"`
+		OperationWay        string `json:"OperationWay"`
+		EnableRoaming       int    `json:"EnableRoaming"`
+		GreenEnergyFlag     int    `json:"GreenEnergyFlag"`
+		Flags               string `json:"Flags"`
+		EquipmentOperatorID string `json:"EquipmentOperatorID"`
+		OnlineTime          string `json:"OnlineTime"`
+		StationGrade        int    `json:"StationGrade"`
+		BizExtParams        struct {
+			StubGroupId         string  `json:"StubGroupId"`
+			ServiceTax          float64 `json:"ServiceTax"`
+			IsBoutique          string  `json:"IsBoutique"`
+			ParkingTicketPrint  int     `json:"ParkingTicketPrint"`
+			RealOperatorID      string  `json:"RealOperatorID"`
+			ElectricityTax      float64 `json:"ElectricityTax"`
+			ParkingType         int     `json:"ParkingType"`
+			EquipmentOperatorID string  `json:"EquipmentOperatorID"`
+			ParkingBarrierFlag  int     `json:"ParkingBarrierFlag"`
+		} `json:"BizExtParams"`
+		SupportingFacilityInfo struct {
+			HasToilet           int `json:"HasToilet"`
+			HasFood             int `json:"HasFood"`
+			HasVendingMachine   int `json:"HasVendingMachine"`
+			HasCanopy           int `json:"HasCanopy"`
+			HasLounge           int `json:"HasLounge"`
+			FreeTeaRoom         int `json:"FreeTeaRoom"`
+			FreeCarWash         int `json:"FreeCarWash"`
+			HasMonitor          int `json:"HasMonitor"`
+			Staffing            int `json:"Staffing"`
+			HasConvenienceStore int `json:"HasConvenienceStore"`
+			HasCoffee           int `json:"HasCoffee"`
+			HasEVService        int `json:"HasEVService"`
+			HasWifi             int `json:"HasWifi"`
+			HasMassageChair     int `json:"HasMassageChair"`
+			HasAirConditioning  int `json:"HasAirConditioning"`
+			PowerExchange       int `json:"PowerExchange"`
+		} `json:"SupportingFacilityInfo"`
+		PlaceHolderType int `json:"PlaceHolderType"`
+		EquipmentInfos  []struct {
+			EquipmentID      string  `json:"EquipmentID"`
+			ManufacturerName string  `json:"ManufacturerName"`
+			EquipmentModel   string  `json:"EquipmentModel"`
+			ProductionDate   string  `json:"ProductionDate"`
+			EquipmentType    int     `json:"EquipmentType"`
+			EquipmentLng     float64 `json:"EquipmentLng"`
+			EquipmentLat     float64 `json:"EquipmentLat"`
+			Power            float64 `json:"Power"`
+			EquipmentName    string  `json:"EquipmentName"`
+			PowerType        int     `json:"PowerType"`
+			BizExtParams     struct {
+				ChargePointId string `json:"ChargePointId"`
+			} `json:"BizExtParams"`
+			ConnectorInfos []struct {
+				ConnectorID        string  `json:"ConnectorID"`
+				ConnectorName      string  `json:"ConnectorName"`
+				ConnectorType      int     `json:"ConnectorType"`
+				VoltageUpperLimits int     `json:"VoltageUpperLimits"`
+				VoltageLowerLimits int     `json:"VoltageLowerLimits"`
+				Current            int     `json:"Current"`
+				Power              float64 `json:"Power"`
+				ParkNo             string  `json:"ParkNo"`
+				NationalStandard   int     `json:"NationalStandard"`
+				ParkingLockFlag    int     `json:"ParkingLockFlag"`
+				Reservable         int     `json:"Reservable"`
+				BluetoothKey       string  `json:"BluetoothKey"`
+				VinSupport         int     `json:"VinSupport"`
+				BizExtParams       struct {
+					ModelNo    string `json:"ModelNo"`
+					StubStatus string `json:"StubStatus"`
+					StubId     string `json:"StubId"`
+					UpdateType string `json:"UpdateType"`
+					FrameWork  string `json:"FrameWork"`
+				} `json:"BizExtParams"`
+			} `json:"ConnectorInfos"`
+			ManufacturerID string `json:"ManufacturerID,omitempty"`
+		} `json:"EquipmentInfos"`
+	} `json:"StationInfos"`
+}
+
+type QueryStationsInfoResultV2 struct {
 	ItemSize     int            `json:"ItemSize"`
 	PageCount    int            `json:"pageCount"`
 	PageNo       int            `json:"PageNo"`
