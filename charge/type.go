@@ -1,4 +1,4 @@
-package starcharge
+package charge
 
 type SendStarChargeParam struct {
 	Data     []byte `json:"data"`
