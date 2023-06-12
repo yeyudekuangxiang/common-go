@@ -1,4 +1,4 @@
-package starcharge
+package charge
 
 import (
 	"encoding/base64"

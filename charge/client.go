@@ -1,4 +1,4 @@
-package starcharge
+package charge
 
 import (
 	"crypto/hmac"
@@ -12,13 +12,6 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"log"
 	"time"
-)
-
-const (
-	//每个接口的URL均采用如下格式定义：http（s）： //【域名】/evcs/v【版本号】/【接口名称】a） 域名：各接入运营商所属域名。
-	version        = "1.0"
-	actionBikeCard = "hellobike.activity.bikecard"
-	url            = "https://%s/evcs/%s/%s"
 )
 
 type Client struct {
@@ -198,7 +191,7 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 //请求星星接口
 
 func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, err error) {
-	sendUrl := fmt.Sprintf(url, c.Domain, c.Version, param.QueryUrl)
+	sendUrl := fmt.Sprintf("%s%s", c.Domain, param.QueryUrl)
 	//数据加解
 	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
 	if err != nil {
@@ -241,7 +234,7 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 
 //星星回调绿喵接口
 
-func (c *Client) NotificationValidate(param NotificationParam) (resp *[]byte, err error) {
+func (c *Client) NotificationValidate(param NotificationParam) (resp []byte, err error) {
 	operatorID := param.OperatorID // 示例参数信息（Data）
 	data := param.Data
 	timestamp := param.TimeStamp // 示例时间戳（TimeStamp）
@@ -259,7 +252,7 @@ func (c *Client) NotificationValidate(param NotificationParam) (resp *[]byte, er
 	if err != nil {
 		return nil, err
 	}
-	return &decryptPKCS5, nil
+	return decryptPKCS5, nil
 }
 
 // HMAC-MD5 参数签名
