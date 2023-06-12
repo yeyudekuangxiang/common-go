@@ -273,13 +273,25 @@ func (c *Client) NotificationRequest(param NotificationParam) (resp []byte, err 
 
 //返回结果加密返回
 
-func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeResponse, err error) {
+func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeResponse) {
+	if param.Ret != 0 {
+		return &chargeResponse{
+			Ret:  param.Ret,
+			Msg:  param.Msg,
+			Data: "",
+			Sig:  "",
+		}
+	}
 	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
 	if err != nil {
-		return
+		return &chargeResponse{
+			Ret:  param.Ret,
+			Msg:  err.Error(),
+			Data: "",
+			Sig:  "",
+		}
 	}
 	data := base64.StdEncoding.EncodeToString(pkcs5)
-
 	//返回值加签
 	encResp := strconv.Itoa(param.Ret) + c.interfaceToString(param.Msg) + data
 	sign := encrypttool.HMacMd5(encResp, c.SigSecret)
@@ -289,7 +301,7 @@ func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeRespo
 		Data: data,
 		Sig:  sign,
 	}
-	return &res, nil
+	return &res
 }
 
 func (c *Client) interfaceToString(data interface{}) string {
