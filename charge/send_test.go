@@ -10,7 +10,7 @@ import (
 
 func TestTokenV2(t *testing.T) {
 	c := Client{
-		Domain:       "0.0.0.0:1017/evcs/v1",
+		Domain:       "127.0.0.1:1017/evcs/v1",
 		Version:      "",
 		AESSecret:    "agRigdo8zFu4NMbC",
 		AESIv:        "aYqsMbzLCbKpnLLa",
