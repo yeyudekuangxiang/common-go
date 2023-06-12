@@ -6,6 +6,32 @@ import (
 	"testing"
 )
 
+func TestQueryStationsInfo(t *testing.T) {
+	c := Client{
+		Domain:       "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:      "",
+		AESSecret:    "a2164ada0026ccf7",
+		AESIv:        "82c91325e74bef0f",
+		SigSecret:    "9af2e7b2d7562ad5",
+		Token:        "35a04fd7-0d76-43ea-b621-157c4dd2dc12",
+		OperatorID:   "MA1G55M8X",
+		MIOAESSecret: "",
+		MIOAESIv:     "",
+		MIOSigSecret: "",
+	}
+	//bizId := time.Now().Format("20060102150405") + c.rand()
+	resp, err := c.QueryStationsInfo(QueryStationsInfoParam{
+		LastQueryTime: "2023-06-11 01:25:11",
+		PageNo:        1,
+		PageSize:      1,
+	})
+	if err != nil {
+		return
+	}
+	println(resp)
+
+}
+
 //星星充电回调用绿喵测试
 
 func TestTokenV2(t *testing.T) {

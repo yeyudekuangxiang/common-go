@@ -45,7 +45,7 @@ func (c *Client) QueryEquipAuth(param QueryEquipAuthParam) (resp *QueryEquipAuth
 		return nil, err
 	}
 	ret := QueryEquipAuthResult{}
-	err = json.Unmarshal(response.Data, ret)
+	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (c *Client) QueryStartCharge(param QueryStartChargeParam) (resp *QueryStart
 		return nil, err
 	}
 	ret := QueryStartChargeResult{}
-	err = json.Unmarshal(response.Data, ret)
+	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *Client) QueryStopCharge(param QueryStopChargeParam) (resp *QueryStopCha
 		return nil, err
 	}
 	ret := QueryStopChargeResult{}
-	err = json.Unmarshal(response.Data, ret)
+	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (c *Client) QueryStationsInfo(param QueryStationsInfoParam) (resp *QuerySta
 		return nil, err
 	}
 	ret := QueryStationsInfoResult{}
-	err = json.Unmarshal(response.Data, ret)
+	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -366,8 +366,4 @@ func getHMACMD5Signature(operatorID string, data string, timeStamp string, seq s
 	signature := hash.Sum(nil)
 	// 将签名转换为大写字符串
 	return hex.EncodeToString(signature)
-}
-
-func (c *Client) name() {
-
 }
