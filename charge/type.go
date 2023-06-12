@@ -5,10 +5,17 @@ type SendStarChargeParam struct {
 	QueryUrl string `json:"queryUrl"`
 }
 type starChargeResponse struct {
-	Ret  int    `json:"Ret"`
-	Msg  string `json:"Msg"`
-	Data []byte `json:"Data"`
-	Sig  string `json:"Sig"`
+	Ret  int         `json:"Ret"`
+	Msg  interface{} `json:"Msg"`
+	Data []byte      `json:"Data"`
+	Sig  string      `json:"Sig"`
+}
+
+type chargeResponse struct {
+	Ret  int         `json:"Ret"`
+	Msg  interface{} `json:"Msg"`
+	Data string      `json:"Data"`
+	Sig  string      `json:"Sig"`
 }
 
 type NotificationParam struct {
@@ -152,6 +159,15 @@ type QueryStationStatusParam struct {
 }
 
 type QueryStationStatusResult struct {
+	OperatorID         string `json:"OperatorID"`
+	SuccStat           int    `json:"SuccStat"`
+	AccessToken        string `json:"AccessToken"`
+	TokenAvailableTime int    `json:"TokenAvailableTime"`
+	FailReason         int    `json:"FailReason"`
+}
+type QueryTokenParam struct {
+	OperatorSecret string `json:"OperatorSecret"`
+	OperatorID     string `json:"OperatorID"`
 }
 
 type NotificationChargeOrderInfoParam struct {
