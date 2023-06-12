@@ -61,7 +61,7 @@ func TestAES(t *testing.T) {
 
 func TestAESPKCS5Padding(t *testing.T) {
 	marshal := "{\"total\":1,\"stationStatusInfo\":{\"operationID\":\"123456789\", \"stationID\":\"1111111111111\", \"connectorStatusInfos\":{\"connectorlD\": 1 , \"equipmentID\":\"100000000000000000000001\", \"status\": 4, \"currentA\": 0, \"currentB\": 0,\"currentC\": 0, \"voltageA\": 0, \"voltageB\": 0, \"voltageC\": 0, \"soc\": 10, }}}"
-	pkcs5, err := AesEncryptPKCS5([]byte(marshal), []byte("1234567890abcdef"))
+	pkcs5, err := AesEncryptPKCS5([]byte(marshal), []byte("1234567890abcdef"), []byte("1234567890abcdef"))
 	if err != nil {
 		return
 	}
