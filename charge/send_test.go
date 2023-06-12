@@ -16,7 +16,7 @@ func TestToken(t *testing.T) {
 		AESIv:        "82c91325e74bef0f",
 		SigSecret:    "9af2e7b2d7562ad5",
 		Token:        "",
-		OperatorID:   "MA1G55M8X1",
+		OperatorID:   "MA1G55M8X",
 		MIOAESSecret: "",
 		MIOAESIv:     "",
 		MIOSigSecret: "",
@@ -73,7 +73,7 @@ func TestNotificationResult(t *testing.T) {
 		MIOSigSecret: "dgNaWHDgto716GRd",
 	}
 
-	res := c.NotificationResult(starChargeResponse{
+	res := c.NotificationResult(QueryResponse{
 		Ret:  500,
 		Msg:  "错误信息",
 		Data: []byte("123"),

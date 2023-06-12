@@ -1,6 +1,6 @@
 package charge
 
-type queryRequest struct {
+type QueryRequest struct {
 	Sig        string `json:"Sig"`
 	Data       string `json:"Data"`
 	OperatorID string `json:"OperatorID"`
@@ -8,22 +8,28 @@ type queryRequest struct {
 	Seq        string `json:"Seq"`
 }
 
-type SendStarChargeParam struct {
-	Data     []byte `json:"data"`
-	QueryUrl string `json:"queryUrl"`
-}
-type starChargeResponse struct {
+type QueryResponse struct {
 	Ret  int         `json:"Ret"`
 	Msg  interface{} `json:"Msg"`
 	Data []byte      `json:"Data"`
 	Sig  string      `json:"Sig"`
 }
 
-type chargeResponse struct {
+type ChargeResponse struct {
 	Ret  int         `json:"Ret"`
 	Msg  interface{} `json:"Msg"`
 	Data string      `json:"Data"`
 	Sig  string      `json:"Sig"`
+}
+
+type SendStarChargeParam struct {
+	Data     []byte `json:"data"`
+	QueryUrl string `json:"queryUrl"`
+}
+
+type SendChargeParam struct {
+	Data     []byte `json:"data"`
+	QueryUrl string `json:"queryUrl"`
 }
 
 type NotificationParam struct {
@@ -63,6 +69,7 @@ type QueryStartChargeResult struct {
 type QueryEquipChargeStatusParam struct {
 	StartChargeSeq string `json:"StartChargeSeq"`
 }
+
 type QueryEquipChargeStatusResult struct {
 	StartChargeSeq     string  `json:"StartChargeSeq"`
 	StartChargeSeqStat int64   `json:"StartChargeSeqStat"`
@@ -214,4 +221,17 @@ type NotificationEquipChargeStatusParam struct {
 	StopReason         int64
 	SumPeriod          int64
 	ChargeDetails      string
+}
+
+type QueryTokenReq struct {
+	OperatorID     string `json:"OperatorId" form:"OperatorId" binding:"required"`
+	OperatorSecret string `json:"OperatorSecret" form:"OperatorSecret" binding:"required"`
+}
+
+type QueryTokenResp struct {
+	OperatorID         string `json:"OperatorId"`
+	SuccStat           int64  `json:"SuccStat"`
+	AccessToken        string `json:"AccessToken"`
+	TokenAvailableTime int64  `json:"TokenAvailableTime"`
+	FailReason         int64  `json:"FailReason"`
 }
