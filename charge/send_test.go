@@ -8,7 +8,32 @@ import (
 
 //星星充电回调用绿喵测试
 
-func TestNotificationValidate(t *testing.T) {
+func TestToken(t *testing.T) {
+	c := Client{
+		Domain:       "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:      "",
+		AESSecret:    "a2164ada0026ccf7",
+		AESIv:        "82c91325e74bef0f",
+		SigSecret:    "9af2e7b2d7562ad5",
+		Token:        "",
+		OperatorID:   "MA1G55M8X1",
+		MIOAESSecret: "",
+		MIOAESIv:     "",
+		MIOSigSecret: "",
+	}
+	//bizId := time.Now().Format("20060102150405") + c.rand()
+	resp, err := c.QueryToken(QueryTokenParam{
+		OperatorSecret: "acb93539fc9bg78k",
+		OperatorID:     "MA1G55M8X",
+	})
+	if err != nil {
+		return
+	}
+	println(resp)
+
+}
+
+func TestNotificationRequest(t *testing.T) {
 	c := Client{
 		Domain:       "http://test-evcs.starcharge.com/evcs/starcharge/",
 		Version:      "",
@@ -21,8 +46,8 @@ func TestNotificationValidate(t *testing.T) {
 		MIOAESIv:     "aYqsMbzLCbKpnLLa",
 		MIOSigSecret: "dgNaWHDgto716GRd",
 	}
-	validate, err := c.NotificationValidate(NotificationParam{
-		Sig:        "8087e178ac691f745bde39a8228181f9",
+	validate, err := c.NotificationRequest(NotificationParam{
+		Sig:        "E0E972AB13A63F38D6B228FE656FB5DE",
 		Data:       "NJJ5Fk6xAcU8d6lpqQhmPg==",
 		OperatorID: "1212",
 		TimeStamp:  "1212",
@@ -32,6 +57,29 @@ func TestNotificationValidate(t *testing.T) {
 		return
 	}
 	println(validate)
+}
+
+func TestNotificationResult(t *testing.T) {
+	c := Client{
+		Domain:       "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:      "",
+		AESSecret:    "a2164ada0026ccf7",
+		AESIv:        "",
+		SigSecret:    "9af2e7b2d7562ad5",
+		Token:        "",
+		OperatorID:   "",
+		MIOAESSecret: "agRigdo8zFu4NMbC",
+		MIOAESIv:     "aYqsMbzLCbKpnLLa",
+		MIOSigSecret: "dgNaWHDgto716GRd",
+	}
+
+	res := c.NotificationResult(starChargeResponse{
+		Ret:  500,
+		Msg:  "错误信息",
+		Data: []byte("123"),
+		Sig:  "",
+	})
+	println(res)
 }
 func TestBikeCard(t *testing.T) {
 

@@ -11,6 +11,8 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,16 +30,6 @@ type Client struct {
 	MIOSigSecret string //9af2e7b2d7562ad5  签名密钥
 }
 
-// SendCoupon 发放电子票
-
-type queryRequest struct {
-	Sig        string `json:"Sig"`
-	Data       string `json:"Data"`
-	OperatorID string `json:"OperatorID"`
-	TimeStamp  string `json:"TimeStamp"`
-	Seq        string `json:"Seq"`
-}
-
 //请求设备认证
 
 func (c *Client) QueryEquipAuth(param QueryEquipAuthParam) (resp *QueryEquipAuthResult, err error) {
@@ -51,9 +43,6 @@ func (c *Client) QueryEquipAuth(param QueryEquipAuthParam) (resp *QueryEquipAuth
 	})
 	if err != nil {
 		return nil, err
-	}
-	if response.Ret == 0 {
-		return nil, errors.New(response.Msg)
 	}
 	ret := QueryEquipAuthResult{}
 	err = json.Unmarshal(response.Data, ret)
@@ -78,9 +67,6 @@ func (c *Client) QueryStartCharge(param QueryStartChargeParam) (resp *QueryStart
 	if err != nil {
 		return nil, err
 	}
-	if response.Ret == 0 {
-		return nil, errors.New(response.Msg)
-	}
 	ret := QueryStartChargeResult{}
 	err = json.Unmarshal(response.Data, ret)
 	if err != nil {
@@ -102,9 +88,6 @@ func (c *Client) QueryEquipChargeStatus(param QueryEquipChargeStatusParam) (resp
 	})
 	if err != nil {
 		return nil, err
-	}
-	if response.Ret == 0 {
-		return nil, errors.New(response.Msg)
 	}
 	ret := QueryEquipChargeStatusResult{}
 	err = json.Unmarshal(response.Data, ret)
@@ -128,9 +111,6 @@ func (c *Client) QueryStopCharge(param QueryStopChargeParam) (resp *QueryStopCha
 	if err != nil {
 		return nil, err
 	}
-	if response.Ret == 0 {
-		return nil, errors.New(response.Msg)
-	}
 	ret := QueryStopChargeResult{}
 	err = json.Unmarshal(response.Data, ret)
 	if err != nil {
@@ -150,9 +130,6 @@ func (c *Client) QueryStationsInfo(param QueryStationsInfoParam) (resp *QuerySta
 	})
 	if err != nil {
 		return nil, err
-	}
-	if response.Ret == 0 {
-		return nil, errors.New(response.Msg)
 	}
 	ret := QueryStationsInfoResult{}
 	err = json.Unmarshal(response.Data, ret)
@@ -176,9 +153,6 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 	if err != nil {
 		return nil, err
 	}
-	if response.Ret == 0 {
-		return nil, errors.New(response.Msg)
-	}
 	ret := QueryStationStatusResult{}
 	err = json.Unmarshal(response.Data, ret)
 	if err != nil {
@@ -190,6 +164,28 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 
 //请求星星接口
 
+func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryStationStatusResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendStarChargeParam{
+		data,
+		"query_token",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := QueryStationStatusResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+//调用充电接口
+
 func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, err error) {
 	sendUrl := fmt.Sprintf("%s%s", c.Domain, param.QueryUrl)
 	//数据加解
@@ -198,25 +194,18 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 		return
 	}
 	data := base64.StdEncoding.EncodeToString(pkcs5)
-
-	//签名
 	operatorID := c.OperatorID
-	// 示例参数信息（Data）
-	data = "il7B0BSEjFdzpyKzfOFpvg/Se1CP802RItKYFPfSLRxJ3jfObV19hvYOEktPAYW2nd7S8MBcyHYyacHKbISq5iTmDzG+ivnR+SZJv3USNTYVMz9rCQVSxd0cLlqsJauko79NnwQJbzDTyLooYolwz75qBOH2/xOMirpeEqRJrF/EQjWekJmGk9RtboXePu2rka+Xm51syBPhiXJAq0GfbfaFu9tNqs/e2Vjja/ltE1M0lqvxfXQ6da6HrThsm5id4ClZFliOacRfrsPLRixS/IQYtksxghvJwbqOsblsITail9Ayy4tKcogeEZiOO+4Ed264NSKmk713wKwJLAFjCFogBx8GE3OBz4pqcAn/ydA="
-	// 示例时间戳（TimeStamp）
 	timestamp := fmt.Sprint(time.Now().UnixMilli()) // "20160729142400"
-	// 示例自增序列（Seq）
 	seq := "0001"
-
-	sign := getHMACMD5Signature(operatorID, data, timestamp, seq, c.SigSecret)
+	encReq := operatorID + data + timestamp + seq
+	signReq := encrypttool.HMacMd5(encReq, c.SigSecret)
 	queryParams := queryRequest{
-		Sig:        sign,
+		Sig:        strings.ToUpper(signReq),
 		Data:       data,
 		OperatorID: operatorID,
 		TimeStamp:  timestamp,
 		Seq:        "0001",
 	}
-
 	authToken := httptool.HttpWithHeader("Authorization", "Bearer "+c.Token)
 	body, err := httptool.PostJson(sendUrl, queryParams, authToken)
 	if err != nil {
@@ -224,22 +213,49 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 		return nil, err
 	}
 	log.Printf("request:%s response:%s\n", queryParams, string(body))
-	res := &starChargeResponse{}
+
+	res := &chargeResponse{}
 	err = json.Unmarshal(body, &res)
+
+	if res.Ret != 0 {
+		return nil, errors.New(c.interfaceToString(res.Msg))
+	}
+	encResp := strconv.Itoa(res.Ret) + c.interfaceToString(res.Msg) + res.Data
+	signResp := encrypttool.HMacMd5(encResp, c.SigSecret)
+	if strings.ToUpper(signResp) != res.Sig {
+		return nil, errors.New("签名有误")
+	}
+	decodeString, err := base64.StdEncoding.DecodeString(res.Data)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	decodeData, err := encrypttool.AesDecryptPKCS5(decodeString, []byte(c.AESSecret), []byte(c.AESIv))
+	if err != nil {
+		return
+	}
+	if err != nil {
+		return nil, err
+	}
+	resV2 := &starChargeResponse{
+		Ret:  res.Ret,
+		Msg:  res.Msg,
+		Data: decodeData,
+		Sig:  res.Sig,
+	}
+	return resV2, nil
 }
 
 //星星回调绿喵接口
 
-func (c *Client) NotificationValidate(param NotificationParam) (resp []byte, err error) {
-	operatorID := param.OperatorID // 示例参数信息（Data）
+func (c *Client) NotificationRequest(param NotificationParam) (resp []byte, err error) {
+	operatorID := param.OperatorID
 	data := param.Data
-	timestamp := param.TimeStamp // 示例时间戳（TimeStamp）
-	seq := param.Seq             // 示例自增序列（Seq）
-	sign := getHMACMD5Signature(operatorID, data, timestamp, seq, c.MIOSigSecret)
+	timestamp := param.TimeStamp
+	seq := param.Seq
+
+	encReq := operatorID + data + timestamp + seq
+	sign := strings.ToUpper(encrypttool.HMacMd5(encReq, c.SigSecret))
+
 	if sign != param.Sig {
 		return nil, errors.New("签名失败")
 	}
@@ -253,6 +269,58 @@ func (c *Client) NotificationValidate(param NotificationParam) (resp []byte, err
 		return nil, err
 	}
 	return decryptPKCS5, nil
+}
+
+//返回结果加密返回
+
+func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeResponse) {
+	if param.Ret != 0 {
+		return &chargeResponse{
+			Ret:  param.Ret,
+			Msg:  param.Msg,
+			Data: "",
+			Sig:  "",
+		}
+	}
+	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
+	if err != nil {
+		return &chargeResponse{
+			Ret:  param.Ret,
+			Msg:  err.Error(),
+			Data: "",
+			Sig:  "",
+		}
+	}
+	data := base64.StdEncoding.EncodeToString(pkcs5)
+	//返回值加签
+	encResp := strconv.Itoa(param.Ret) + c.interfaceToString(param.Msg) + data
+	sign := encrypttool.HMacMd5(encResp, c.SigSecret)
+	res := chargeResponse{
+		Ret:  param.Ret,
+		Msg:  param.Msg,
+		Data: data,
+		Sig:  sign,
+	}
+	return &res
+}
+
+func (c *Client) interfaceToString(data interface{}) string {
+	var key string
+	switch data.(type) {
+	case string:
+		key = data.(string)
+	case int:
+		key = strconv.Itoa(data.(int))
+	case int64:
+		it := data.(int64)
+		key = strconv.FormatInt(it, 10)
+	case float64:
+		it := data.(float64)
+		key = strconv.FormatFloat(it, 'f', -1, 64)
+	case nil:
+		key = "null"
+	}
+	return key
 }
 
 // HMAC-MD5 参数签名
