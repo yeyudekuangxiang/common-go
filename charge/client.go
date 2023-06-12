@@ -30,16 +30,6 @@ type Client struct {
 	MIOSigSecret string //9af2e7b2d7562ad5  签名密钥
 }
 
-// SendCoupon 发放电子票
-
-type queryRequest struct {
-	Sig        string `json:"Sig"`
-	Data       string `json:"Data"`
-	OperatorID string `json:"OperatorID"`
-	TimeStamp  string `json:"TimeStamp"`
-	Seq        string `json:"Seq"`
-}
-
 //请求设备认证
 
 func (c *Client) QueryEquipAuth(param QueryEquipAuthParam) (resp *QueryEquipAuthResult, err error) {
@@ -194,6 +184,8 @@ func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryStationStatusResu
 	return &ret, nil
 }
 
+//调用充电接口
+
 func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, err error) {
 	sendUrl := fmt.Sprintf("%s%s", c.Domain, param.QueryUrl)
 	//数据加解
@@ -255,12 +247,15 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 
 //星星回调绿喵接口
 
-func (c *Client) NotificationValidate(param NotificationParam) (resp []byte, err error) {
+func (c *Client) NotificationRequest(param NotificationParam) (resp []byte, err error) {
 	operatorID := param.OperatorID
 	data := param.Data
 	timestamp := param.TimeStamp
 	seq := param.Seq
-	sign := getHMACMD5Signature(operatorID, data, timestamp, seq, c.MIOSigSecret)
+
+	encReq := operatorID + data + timestamp + seq
+	sign := strings.ToUpper(encrypttool.HMacMd5(encReq, c.SigSecret))
+
 	if sign != param.Sig {
 		return nil, errors.New("签名失败")
 	}
@@ -279,54 +274,22 @@ func (c *Client) NotificationValidate(param NotificationParam) (resp []byte, err
 //返回结果加密返回
 
 func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeResponse, err error) {
-	//数据加密
 	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
 	if err != nil {
 		return
 	}
 	data := base64.StdEncoding.EncodeToString(pkcs5)
-	operatorID := c.OperatorID
-	timestamp := fmt.Sprint(time.Now().UnixMilli()) // "20160729142400"
-	seq := "0001"
 
-	//对返回结果进行加密
-	sign := getHMACMD5Signature(operatorID, data, timestamp, seq, c.SigSecret)
-
-	ret := chargeResponse{
+	//返回值加签
+	encResp := strconv.Itoa(param.Ret) + c.interfaceToString(param.Msg) + data
+	sign := encrypttool.HMacMd5(encResp, c.SigSecret)
+	res := chargeResponse{
 		Ret:  param.Ret,
 		Msg:  param.Msg,
 		Data: data,
 		Sig:  sign,
 	}
-	return &ret, nil
-}
-
-// HMAC-MD5 参数签名
-func getHMACMD5Signature(operatorID string, data string, timeStamp string, seq string, sigSecret string) string {
-	// 拼接参数
-	message := operatorID + data + timeStamp + seq
-	// 计算签名
-	key := []byte(sigSecret)
-	payload := []byte(message)
-	hash := hmac.New(md5.New, key)
-	hash.Write(payload)
-	signature := hash.Sum(nil)
-	// 将签名转换为大写字符串
-	return hex.EncodeToString(signature)
-}
-
-// HMAC-MD5 参数签名
-func getHMACMD5SignatureV2(Ret int, Msg string, data string, sigSecret string) string {
-	// 拼接参数
-	message := "0" + Msg + data
-	// 计算签名
-	key := []byte(sigSecret)
-	payload := []byte(message)
-	hash := hmac.New(md5.New, key)
-	hash.Write(payload)
-	signature := hash.Sum(nil)
-	// 将签名转换为大写字符串
-	return hex.EncodeToString(signature)
+	return &res, nil
 }
 
 func (c *Client) interfaceToString(data interface{}) string {
@@ -346,4 +309,18 @@ func (c *Client) interfaceToString(data interface{}) string {
 		key = "null"
 	}
 	return key
+}
+
+// HMAC-MD5 参数签名
+func getHMACMD5Signature(operatorID string, data string, timeStamp string, seq string, sigSecret string) string {
+	// 拼接参数
+	message := operatorID + data + timeStamp + seq
+	// 计算签名
+	key := []byte(sigSecret)
+	payload := []byte(message)
+	hash := hmac.New(md5.New, key)
+	hash.Write(payload)
+	signature := hash.Sum(nil)
+	// 将签名转换为大写字符串
+	return hex.EncodeToString(signature)
 }

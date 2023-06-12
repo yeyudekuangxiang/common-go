@@ -1,5 +1,13 @@
 package charge
 
+type queryRequest struct {
+	Sig        string `json:"Sig"`
+	Data       string `json:"Data"`
+	OperatorID string `json:"OperatorID"`
+	TimeStamp  string `json:"TimeStamp"`
+	Seq        string `json:"Seq"`
+}
+
 type SendStarChargeParam struct {
 	Data     []byte `json:"data"`
 	QueryUrl string `json:"queryUrl"`
