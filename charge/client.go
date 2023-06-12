@@ -37,7 +37,7 @@ func (c *Client) QueryEquipAuth(param QueryEquipAuthParam) (resp *QueryEquipAuth
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_equip_auth",
 	})
@@ -60,7 +60,7 @@ func (c *Client) QueryStartCharge(param QueryStartChargeParam) (resp *QueryStart
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_start_charge",
 	})
@@ -82,7 +82,7 @@ func (c *Client) QueryEquipChargeStatus(param QueryEquipChargeStatusParam) (resp
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_equip_charge_status",
 	})
@@ -104,7 +104,7 @@ func (c *Client) QueryStopCharge(param QueryStopChargeParam) (resp *QueryStopCha
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_stop_charge",
 	})
@@ -119,12 +119,14 @@ func (c *Client) QueryStopCharge(param QueryStopChargeParam) (resp *QueryStopCha
 	return &ret, nil
 }
 
+//获取充电信息
+
 func (c *Client) QueryStationsInfo(param QueryStationsInfoParam) (resp *QueryStationsInfoResult, err error) {
 	data, err := json.Marshal(param)
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_stations_info",
 	})
@@ -146,7 +148,7 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_station_status",
 	})
@@ -169,7 +171,7 @@ func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryStationStatusResu
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.Request(SendStarChargeParam{
+	response, err := c.Request(SendChargeParam{
 		data,
 		"query_token",
 	})
@@ -186,7 +188,7 @@ func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryStationStatusResu
 
 //调用充电接口
 
-func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, err error) {
+func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error) {
 	sendUrl := fmt.Sprintf("%s%s", c.Domain, param.QueryUrl)
 	//数据加解
 	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
@@ -199,7 +201,7 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 	seq := "0001"
 	encReq := operatorID + data + timestamp + seq
 	signReq := encrypttool.HMacMd5(encReq, c.SigSecret)
-	queryParams := queryRequest{
+	queryParams := QueryRequest{
 		Sig:        strings.ToUpper(signReq),
 		Data:       data,
 		OperatorID: operatorID,
@@ -214,7 +216,7 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 	}
 	log.Printf("request:%s response:%s\n", queryParams, string(body))
 
-	res := &chargeResponse{}
+	res := &ChargeResponse{}
 	err = json.Unmarshal(body, &res)
 
 	if res.Ret != 0 {
@@ -231,12 +233,9 @@ func (c *Client) Request(param SendStarChargeParam) (resp *starChargeResponse, e
 	}
 	decodeData, err := encrypttool.AesDecryptPKCS5(decodeString, []byte(c.AESSecret), []byte(c.AESIv))
 	if err != nil {
-		return
-	}
-	if err != nil {
 		return nil, err
 	}
-	resV2 := &starChargeResponse{
+	resV2 := &QueryResponse{
 		Ret:  res.Ret,
 		Msg:  res.Msg,
 		Data: decodeData,
@@ -273,9 +272,9 @@ func (c *Client) NotificationRequest(param NotificationParam) (resp []byte, err 
 
 //返回结果加密返回
 
-func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeResponse) {
+func (c *Client) NotificationResult(param QueryResponse) (resp *ChargeResponse) {
 	if param.Ret != 0 {
-		return &chargeResponse{
+		return &ChargeResponse{
 			Ret:  param.Ret,
 			Msg:  param.Msg,
 			Data: "",
@@ -284,7 +283,7 @@ func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeRespo
 	}
 	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
 	if err != nil {
-		return &chargeResponse{
+		return &ChargeResponse{
 			Ret:  param.Ret,
 			Msg:  err.Error(),
 			Data: "",
@@ -295,13 +294,43 @@ func (c *Client) NotificationResult(param starChargeResponse) (resp *chargeRespo
 	//返回值加签
 	encResp := strconv.Itoa(param.Ret) + c.interfaceToString(param.Msg) + data
 	sign := encrypttool.HMacMd5(encResp, c.SigSecret)
-	res := chargeResponse{
+	res := ChargeResponse{
 		Ret:  param.Ret,
 		Msg:  param.Msg,
 		Data: data,
 		Sig:  sign,
 	}
 	return &res
+}
+
+func (c *Client) QueryTokenRequest(param NotificationParam) (resp *QueryTokenReq, err error) {
+	request, err := c.NotificationRequest(param)
+	if err != nil {
+		return nil, err
+	}
+	QueryToken := QueryTokenReq{}
+	err = json.Unmarshal(request, &QueryToken)
+	if err != nil {
+		return nil, err
+	}
+	return &QueryToken, nil
+}
+
+func (c *Client) QueryTokenResult(param QueryTokenResp) (resp *ChargeResponse, err error) {
+	marshal, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	result := c.NotificationResult(QueryResponse{
+		Ret:  0,
+		Msg:  nil,
+		Data: marshal,
+		Sig:  "",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (c *Client) interfaceToString(data interface{}) string {
