@@ -8,6 +8,31 @@ import (
 
 //星星充电回调用绿喵测试
 
+func TestTokenV2(t *testing.T) {
+	c := Client{
+		Domain:       "0.0.0.0:1017/evcs/v1",
+		Version:      "",
+		AESSecret:    "agRigdo8zFu4NMbC",
+		AESIv:        "aYqsMbzLCbKpnLLa",
+		SigSecret:    "dgNaWHDgto716GRd",
+		Token:        "",
+		OperatorID:   "313744932",
+		MIOAESSecret: "agRigdo8zFu4NMbC",
+		MIOAESIv:     "aYqsMbzLCbKpnLLa",
+		MIOSigSecret: "dgNaWHDgto716GRd",
+	}
+	//bizId := time.Now().Format("20060102150405") + c.rand()
+	resp, err := c.QueryToken(QueryTokenParam{
+		OperatorSecret: "NU0gYnwsQaLTAQ0loRwol4NaRx8tZksX",
+		OperatorID:     "313744932",
+	})
+	if err != nil {
+		return
+	}
+	println(resp)
+
+}
+
 func TestToken(t *testing.T) {
 	c := Client{
 		Domain:       "http://test-evcs.starcharge.com/evcs/starcharge/",

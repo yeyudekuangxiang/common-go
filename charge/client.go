@@ -208,6 +208,8 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 		TimeStamp:  timestamp,
 		Seq:        "0001",
 	}
+	queryParamsstr, err := json.Marshal(queryParams)
+	println(queryParamsstr)
 	authToken := httptool.HttpWithHeader("Authorization", "Bearer "+c.Token)
 	body, err := httptool.PostJson(sendUrl, queryParams, authToken)
 	if err != nil {
@@ -253,7 +255,7 @@ func (c *Client) NotificationRequest(param NotificationParam) (resp []byte, err 
 	seq := param.Seq
 
 	encReq := operatorID + data + timestamp + seq
-	sign := strings.ToUpper(encrypttool.HMacMd5(encReq, c.SigSecret))
+	sign := strings.ToUpper(encrypttool.HMacMd5(encReq, c.MIOSigSecret))
 
 	if sign != param.Sig {
 		return nil, errors.New("签名失败")
@@ -281,7 +283,7 @@ func (c *Client) NotificationResult(param QueryResponse) (resp *ChargeResponse) 
 			Sig:  "",
 		}
 	}
-	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.AESSecret), []byte(c.AESIv))
+	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.MIOAESSecret), []byte(c.MIOAESIv))
 	if err != nil {
 		return &ChargeResponse{
 			Ret:  param.Ret,
@@ -293,7 +295,7 @@ func (c *Client) NotificationResult(param QueryResponse) (resp *ChargeResponse) 
 	data := base64.StdEncoding.EncodeToString(pkcs5)
 	//返回值加签
 	encResp := strconv.Itoa(param.Ret) + c.interfaceToString(param.Msg) + data
-	sign := encrypttool.HMacMd5(encResp, c.SigSecret)
+	sign := encrypttool.HMacMd5(encResp, c.MIOSigSecret)
 	res := ChargeResponse{
 		Ret:  param.Ret,
 		Msg:  param.Msg,
@@ -364,4 +366,8 @@ func getHMACMD5Signature(operatorID string, data string, timeStamp string, seq s
 	signature := hash.Sum(nil)
 	// 将签名转换为大写字符串
 	return hex.EncodeToString(signature)
+}
+
+func (c *Client) name() {
+
 }
