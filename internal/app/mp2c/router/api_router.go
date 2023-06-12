@@ -28,7 +28,7 @@ func apiRouter(router *gin.Engine) {
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
-	authRouter.Use(middleware.Auth2(), middleware.Throttle())
+	authRouter.Use(middleware.Auth(), middleware.Throttle())
 	{
 		authRouter.GET("/aeskey", apiutil.Format(func(context *gin.Context) (gin.H, error) {
 			return gin.H{
@@ -108,7 +108,7 @@ func apiRouter(router *gin.Engine) {
 
 	//必须登陆的路由
 	mustAuthRouter := router.Group("/api/mp2c")
-	mustAuthRouter.Use(middleware.MustAuth2(), middleware.Throttle())
+	mustAuthRouter.Use(middleware.MustAuth(), middleware.Throttle())
 	{
 		//答题相关
 		qnrRouter := mustAuthRouter.Group("/qnr") //活动答题
