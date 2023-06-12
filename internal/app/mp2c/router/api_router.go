@@ -153,10 +153,10 @@ func apiRouter(router *gin.Engine) {
 		{
 			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
-			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
+			//userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
-			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
-			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM))     //绑定手机
+			//userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
+			//userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM))     //绑定手机
 			userRouter.GET("/my-topic", apiutil.Format(community.DefaultTopicController.MyTopic))                //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                    //我的奖励
 			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignup))              //我的报名
