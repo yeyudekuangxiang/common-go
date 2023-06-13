@@ -111,6 +111,32 @@ func TestQueryStationsInfo(t *testing.T) {
 
 }
 
+func TestQueryTokenRequest(t *testing.T) {
+	c := Client{
+		Domain:       "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:      "",
+		AESSecret:    "a2164ada0026ccf7",
+		AESIv:        "82c91325e74bef0f",
+		SigSecret:    "9af2e7b2d7562ad5",
+		Token:        "35a04fd7-0d76-43ea-b621-157c4dd2dc12",
+		OperatorID:   "MA1G55M8X",
+		MIOAESSecret: "",
+		MIOAESIv:     "",
+		MIOSigSecret: "",
+	}
+	request, err := c.QueryTokenRequest(NotificationParam{
+		Sig:        "",
+		Data:       "",
+		OperatorID: "",
+		TimeStamp:  "",
+		Seq:        "",
+	})
+	println(request)
+	if err != nil {
+		return
+	}
+}
+
 //星星充电回调用绿喵测试
 
 func TestTokenV2(t *testing.T) {
