@@ -14,7 +14,7 @@ func MapTo(data interface{}, v interface{}, strict ...bool) error {
 		return errors.WithStack(err)
 	}
 	err = json.Unmarshal(bs, v)
-	if len(strict) > 1 && strict[0] {
+	if len(strict) > 0 && strict[0] {
 		return errors.WithStack(err)
 	}
 	switch err.(type) {

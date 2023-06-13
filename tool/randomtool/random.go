@@ -3,6 +3,7 @@ package randomtool
 import (
 	"math/rand"
 	"strings"
+	"time"
 )
 
 type RandomStrItem []string
@@ -25,6 +26,9 @@ var (
 	}
 )
 
+func init() {
+	rand.Seed(time.Now().UnixMilli())
+}
 func RandomStr(length int, items ...RandomStrItem) string {
 	strs := make([]string, 0)
 	if len(items) == 0 {
