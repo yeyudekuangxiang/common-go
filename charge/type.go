@@ -327,12 +327,19 @@ type QueryStationStatusParam struct {
 }
 
 type QueryStationStatusResult struct {
-	OperatorID         string `json:"OperatorID"`
-	SuccStat           int    `json:"SuccStat"`
-	AccessToken        string `json:"AccessToken"`
-	TokenAvailableTime int    `json:"TokenAvailableTime"`
-	FailReason         int    `json:"FailReason"`
+	Total              int `json:"Total"`
+	StationStatusInfos []struct {
+		StationID            string `json:"StationID"`
+		ConnectorStatusInfos []struct {
+			ConnectorID string `json:"ConnectorID"`
+			Status      int    `json:"Status"`
+			ParkStatus  int    `json:"ParkStatus"`
+			LockStatus  int    `json:"LockStatus"`
+			StatusCode  string `json:"StatusCode,omitempty"`
+		} `json:"ConnectorStatusInfos"`
+	} `json:"StationStatusInfos"`
 }
+
 type QueryTokenParam struct {
 	OperatorSecret string `json:"OperatorSecret"`
 	OperatorID     string `json:"OperatorID"`
