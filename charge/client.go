@@ -89,7 +89,7 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 
 //请求星星接口
 
-func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryStationStatusResult, err error) {
+func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryTokenResult, err error) {
 	data, err := json.Marshal(param)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryStationStatusResu
 	if err != nil {
 		return nil, err
 	}
-	ret := QueryStationStatusResult{}
+	ret := QueryTokenResult{}
 	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
@@ -235,7 +235,7 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 		return nil, err
 	}
 	ret := QueryStationStatusResult{}
-	err = json.Unmarshal(response.Data, ret)
+	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
 	}
