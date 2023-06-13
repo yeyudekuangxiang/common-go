@@ -83,7 +83,7 @@ func (c *NotifyClient) NotificationResult(param QueryResponse) (resp *ChargeResp
 	data := base64.StdEncoding.EncodeToString(pkcs5)
 	//返回值加签
 	encResp := strconv.Itoa(param.Ret) + InterfaceToString(param.Msg) + data
-	sign := encrypttool.HMacMd5(encResp, c.SigSecret)
+	sign := strings.ToUpper(encrypttool.HMacMd5(encResp, c.SigSecret))
 	res := ChargeResponse{
 		Ret:  param.Ret,
 		Msg:  param.Msg,

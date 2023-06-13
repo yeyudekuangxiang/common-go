@@ -6,6 +6,29 @@ import (
 	"testing"
 )
 
+//获取星星token
+func TestToken(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      "",
+		OperatorID: "MA1G55M8X",
+	}
+	//bizId := time.Now().Format("20060102150405") + c.rand()
+	resp, err := c.QueryToken(QueryTokenParam{
+		OperatorSecret: "acb93539fc9bg78k",
+		OperatorID:     "MA1G55M8X",
+	})
+	if err != nil {
+		return
+	}
+	println(resp)
+
+}
+
 //设备验证
 func TestQueryEquipAuth(t *testing.T) {
 	c := Client{
@@ -36,7 +59,7 @@ func TestQueryStationsInfo(t *testing.T) {
 		AESSecret:  "a2164ada0026ccf7",
 		AESIv:      "82c91325e74bef0f",
 		SigSecret:  "9af2e7b2d7562ad5",
-		Token:      "35a04fd7-0d76-43ea-b621-157c4dd2dc12",
+		Token:      "faebee63-d6e5-4ef5-8732-68c72e89d9af",
 		OperatorID: "MA1G55M8X",
 	}
 	//bizId := time.Now().Format("20060102150405") + c.rand()
@@ -52,27 +75,24 @@ func TestQueryStationsInfo(t *testing.T) {
 
 }
 
-//获取星星token
-func TestToken(t *testing.T) {
+//查询充电状态
+func TestQueryEquipChargeStatus(t *testing.T) {
 	c := Client{
 		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
 		Version:    "",
 		AESSecret:  "a2164ada0026ccf7",
 		AESIv:      "82c91325e74bef0f",
 		SigSecret:  "9af2e7b2d7562ad5",
-		Token:      "",
+		Token:      "faebee63-d6e5-4ef5-8732-68c72e89d9af",
 		OperatorID: "MA1G55M8X",
 	}
-	//bizId := time.Now().Format("20060102150405") + c.rand()
-	resp, err := c.QueryToken(QueryTokenParam{
-		OperatorSecret: "acb93539fc9bg78k",
-		OperatorID:     "MA1G55M8X",
+	status, err := c.QueryEquipChargeStatus(QueryEquipChargeStatusParam{
+		StartChargeSeq: "MA1G55M8X633322921",
 	})
+	println(status.ConnectorStatus)
 	if err != nil {
 		return
 	}
-	println(resp)
-
 }
 
 func TestBikeCard(t *testing.T) {
