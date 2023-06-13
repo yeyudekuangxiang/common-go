@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+func TestGenerateSerialNumber(t *testing.T) {
+	number := GenerateSerialNumber("MA1G55M8X")
+	println(number)
+}
 func TestNotificationStationStatusRequest(t *testing.T) {
 	c := Client{
 		Domain:       "127.0.0.1:1017/evcs/v1",

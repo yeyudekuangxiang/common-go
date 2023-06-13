@@ -8,6 +8,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -449,4 +450,11 @@ func (c *Client) interfaceToString(data interface{}) string {
 		key = "null"
 	}
 	return key
+}
+
+func GenerateSerialNumber(operatorID string) string {
+	rand.Seed(time.Now().UnixNano())
+	uniqueID := rand.Intn(1000000000)
+	serialNumber := fmt.Sprintf("%s%09d", operatorID, uniqueID)
+	return serialNumber
 }
