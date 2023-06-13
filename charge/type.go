@@ -338,18 +338,40 @@ type QueryTokenParam struct {
 	OperatorID     string `json:"OperatorID"`
 }
 
-type NotificationChargeOrderInfoParam struct {
-	StartChargeSeq   string
-	ConnectorId      string
-	StartTime        string
-	EndTime          string
-	TotalPower       float64
-	TotalElecMoney   float64
-	TotalSeviceMoney float64
-	TotalMoney       float64
-	StopReason       int64
-	SumPeriod        int64
-	ChargeDetails    string
+type QueryTokenReq struct {
+	OperatorID     string `json:"OperatorId" form:"OperatorId" binding:"required"`
+	OperatorSecret string `json:"OperatorSecret" form:"OperatorSecret" binding:"required"`
+}
+
+type QueryTokenResp struct {
+	OperatorID         string `json:"OperatorId"`
+	SuccStat           int64  `json:"SuccStat"`
+	AccessToken        string `json:"AccessToken"`
+	TokenAvailableTime int64  `json:"TokenAvailableTime"`
+	FailReason         int64  `json:"FailReason"`
+}
+
+type NotificationStationStatusParam struct {
+	StationStatusInfo StationStatusInfo
+}
+
+type StationStatusInfo struct {
+	ConnectorID string `json:"ConnectorID"`
+	Status      int64  `json:"Status"`
+	ParkStatus  int64  `json:"ParkStatus"`
+	LockStatus  int64  `json:"LockStatus"`
+}
+
+type NotificationStationStatusResult struct {
+	Status string `json:"Status"`
+}
+
+type NotificationStartChargeResultParam struct {
+	StartChargeSeq     string
+	StartChargeSeqStat int64
+	ConnectorID        string
+	StartTime          string
+	IdentCode          string
 }
 
 type NotificationEquipChargeStatusParam struct {
@@ -376,15 +398,24 @@ type NotificationEquipChargeStatusParam struct {
 	ChargeDetails      string
 }
 
-type QueryTokenReq struct {
-	OperatorID     string `json:"OperatorId" form:"OperatorId" binding:"required"`
-	OperatorSecret string `json:"OperatorSecret" form:"OperatorSecret" binding:"required"`
+type NotificationStopChargeResultParam struct {
+	StartChargeSeq     string
+	StartChargeSeqStat int64
+	ConnectorID        string
+	SuccStat           int64
+	FailReason         int64
 }
 
-type QueryTokenResp struct {
-	OperatorID         string `json:"OperatorId"`
-	SuccStat           int64  `json:"SuccStat"`
-	AccessToken        string `json:"AccessToken"`
-	TokenAvailableTime int64  `json:"TokenAvailableTime"`
-	FailReason         int64  `json:"FailReason"`
+type NotificationChargeOrderInfoParam struct {
+	StartChargeSeq   string
+	ConnectorId      string
+	StartTime        string
+	EndTime          string
+	TotalPower       float64
+	TotalElecMoney   float64
+	TotalSeviceMoney float64
+	TotalMoney       float64
+	StopReason       int64
+	SumPeriod        int64
+	ChargeDetails    string
 }
