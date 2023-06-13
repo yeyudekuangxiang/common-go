@@ -30,8 +30,8 @@ func LoadRsaPrivateKeyPKCS8Pem(privateKeyStr string) (privateKey *rsa.PrivateKey
 	return privateKey, nil
 }
 
-// LoadRsaPublicKeyPem 通过公钥的文本内容加载rsa公钥
-func LoadRsaPublicKeyPem(publicKeyStr string) (publicKey *rsa.PublicKey, err error) {
+// LoadRsaPublicKeyPKIXPem 通过公钥的文本内容加载rsa公钥
+func LoadRsaPublicKeyPKIXPem(publicKeyStr string) (publicKey *rsa.PublicKey, err error) {
 	block, _ := pem.Decode([]byte(publicKeyStr))
 	if block == nil {
 		return nil, errors.New("decode public key error")
@@ -67,8 +67,8 @@ func LoadRsaPrivateKeyPKCS8Base64(privateKeyStr string) (privateKey *rsa.Private
 	return privateKey, nil
 }
 
-// LoadRsaPublicKeyPKCS8Base64 通过公钥钥的base64字符串加载rsa私钥
-func LoadRsaPublicKeyPKCS8Base64(publicKeyStr string) (privateKey *rsa.PublicKey, err error) {
+// LoadRsaPublicKeyPKIXBase64 通过公钥钥的base64字符串加载rsa私钥
+func LoadRsaPublicKeyPKIXBase64(publicKeyStr string) (privateKey *rsa.PublicKey, err error) {
 	data, err := base64.StdEncoding.DecodeString(publicKeyStr)
 	if err != nil {
 		return nil, fmt.Errorf("decode public key err:%s", err.Error())
