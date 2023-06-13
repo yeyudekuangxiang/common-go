@@ -100,6 +100,66 @@ func TestNotificationEquipChargeStatus(t *testing.T) {
 	fmt.Println(marshal)
 }
 
+func TestNotificationStopChargeResultRequest(t *testing.T) {
+	c := NotifyClient{
+		AESSecret:  "agRigdo8zFu4NMbC",
+		AESIv:      "aYqsMbzLCbKpnLLa",
+		SigSecret:  "dgNaWHDgto716GRd",
+		OperatorID: "313744932",
+	}
+	result := c.QueryRequestEncrypt(NotificationStopChargeResultParam{
+		StartChargeSeq:     "MA1G55M8X633322921",
+		StartChargeSeqStat: 1,
+		ConnectorID:        "1212",
+	})
+	resultMarshal, err := json.Marshal(result)
+
+	println(resultMarshal)
+	resp, err := c.NotificationStopChargeResultRequest(*result)
+	if err != nil {
+		return
+	}
+	marshal, err := json.Marshal(resp)
+	if err != nil {
+		return
+	}
+	fmt.Println(marshal)
+}
+
+func TestNNotificationChargeOrderInfoRequest(t *testing.T) {
+	c := NotifyClient{
+		AESSecret:  "agRigdo8zFu4NMbC",
+		AESIv:      "aYqsMbzLCbKpnLLa",
+		SigSecret:  "dgNaWHDgto716GRd",
+		OperatorID: "313744932",
+	}
+	result := c.QueryRequestEncrypt(NotificationChargeOrderInfoParam{
+		StartChargeSeq:   "MA1G55M8X633322921",
+		ConnectorId:      "12",
+		StartTime:        "2023-06-14 00:06:20",
+		EndTime:          "2023-06-14 00:06:20",
+		TotalPower:       10,
+		TotalElecMoney:   11,
+		TotalSeviceMoney: 12,
+		TotalMoney:       13,
+		StopReason:       0,
+		SumPeriod:        0,
+		ChargeDetails:    "",
+	})
+	resultMarshal, err := json.Marshal(result)
+
+	println(resultMarshal)
+	resp, err := c.NotificationChargeOrderInfoRequest(*result)
+	if err != nil {
+		return
+	}
+	marshal, err := json.Marshal(resp)
+	if err != nil {
+		return
+	}
+	fmt.Println(marshal)
+}
+
 func TestNotificationStationStatusRequest(t *testing.T) {
 	c := NotifyClient{
 		AESSecret:  "agRigdo8zFu4NMbC",
