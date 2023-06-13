@@ -37,15 +37,16 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 	seq := "0001"
 	encReq := operatorID + data + timestamp + seq
 	signReq := encrypttool.HMacMd5(encReq, c.SigSecret)
+	signReq = strings.ToUpper(signReq)
 	queryParams := QueryRequest{
-		Sig:        strings.ToUpper(signReq),
+		Sig:        signReq,
 		Data:       data,
 		OperatorID: operatorID,
 		TimeStamp:  timestamp,
 		Seq:        "0001",
 	}
-	queryParamsstr, err := json.Marshal(queryParams)
-	println(queryParamsstr)
+	/*queryParamsstr, err := json.Marshal(queryParams)
+	fmt.Println(queryParamsstr)*/
 	authToken := httptool.HttpWithHeader("Authorization", "Bearer "+c.Token)
 	body, err := httptool.PostJson(sendUrl, queryParams, authToken)
 	if err != nil {
@@ -53,7 +54,6 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 		return nil, err
 	}
 	log.Printf("request:%s response:%s\n", queryParams, string(body))
-
 	res := &ChargeResponse{}
 	err = json.Unmarshal(body, &res)
 

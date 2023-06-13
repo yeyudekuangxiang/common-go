@@ -99,7 +99,7 @@ type QueryStopChargeParam struct {
 }
 type QueryStopChargeResult struct {
 	StartChargeSeq     string `json:"StartChargeSeq"`
-	StartChargeSeqStat int64  `json:"StartChargeSeqStat"`
+	StartChargeSeqStat int    `json:"StartChargeSeqStat"`
 	SuccStat           int    `json:"SuccStat"`
 	FailReason         int    `json:"FailReason"`
 }
