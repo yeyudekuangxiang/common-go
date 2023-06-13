@@ -326,6 +326,14 @@ type QueryStationStatusParam struct {
 	StationIDs []string `json:"StationIDs"`
 }
 
+type QueryTokenResult struct {
+	OperatorID         string `json:"OperatorID"`
+	SuccStat           int    `json:"SuccStat"`
+	AccessToken        string `json:"AccessToken"`
+	TokenAvailableTime int    `json:"TokenAvailableTime"`
+	FailReason         int    `json:"FailReason"`
+}
+
 type QueryStationStatusResult struct {
 	Total              int `json:"Total"`
 	StationStatusInfos []struct {
