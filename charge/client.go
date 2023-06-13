@@ -22,13 +22,7 @@ type Client struct {
 	SigSecret  string //9af2e7b2d7562ad5  签名密钥
 	Token      string
 	OperatorID string
-
-	MIOAESSecret string //绿喵AESSecret
-	MIOAESIv     string //绿喵AESIv
-	MIOSigSecret string //9af2e7b2d7562ad5  签名密钥
 }
-
-//调用充电接口
 
 func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error) {
 	sendUrl := fmt.Sprintf("%s%s", c.Domain, param.QueryUrl)
@@ -64,9 +58,9 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 	err = json.Unmarshal(body, &res)
 
 	if res.Ret != 0 {
-		return nil, errors.New(c.interfaceToString(res.Msg))
+		return nil, errors.New(InterfaceToString(res.Msg))
 	}
-	encResp := strconv.Itoa(res.Ret) + c.interfaceToString(res.Msg) + res.Data
+	encResp := strconv.Itoa(res.Ret) + InterfaceToString(res.Msg) + res.Data
 	signResp := encrypttool.HMacMd5(encResp, c.SigSecret)
 	if strings.ToUpper(signResp) != res.Sig {
 		return nil, errors.New("签名有误")
@@ -244,217 +238,45 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 
 }
 
-//星星回调绿喵接口
-
-func (c *Client) NotificationRequest(param NotificationParam) (resp []byte, err error) {
-	operatorID := param.OperatorID
-	data := param.Data
-	timestamp := param.TimeStamp
-	seq := param.Seq
-
-	encReq := operatorID + data + timestamp + seq
-	sign := strings.ToUpper(encrypttool.HMacMd5(encReq, c.MIOSigSecret))
-
-	if sign != param.Sig {
-		return nil, errors.New("签名失败")
-	}
-	dataString, err := base64.StdEncoding.DecodeString(param.Data)
-	if err != nil {
-		return nil, err
-	}
-	//数据解密
-	decryptPKCS5, err := encrypttool.AesDecryptPKCS5(dataString, []byte(c.MIOAESSecret), []byte(c.MIOAESIv))
-	if err != nil {
-		return nil, err
-	}
-	return decryptPKCS5, nil
-}
-
-//返回结果加密返回
-
-func (c *Client) NotificationResult(param QueryResponse) (resp *ChargeResponse) {
-	if param.Ret != 0 {
-		return &ChargeResponse{
-			Ret:  param.Ret,
-			Msg:  param.Msg,
-			Data: "",
-			Sig:  "",
-		}
-	}
-	pkcs5, err := encrypttool.AesEncryptPKCS5(param.Data, []byte(c.MIOAESSecret), []byte(c.MIOAESIv))
-	if err != nil {
-		return &ChargeResponse{
-			Ret:  param.Ret,
-			Msg:  err.Error(),
-			Data: "",
-			Sig:  "",
-		}
-	}
-	data := base64.StdEncoding.EncodeToString(pkcs5)
-	//返回值加签
-	encResp := strconv.Itoa(param.Ret) + c.interfaceToString(param.Msg) + data
-	sign := encrypttool.HMacMd5(encResp, c.MIOSigSecret)
-	res := ChargeResponse{
-		Ret:  param.Ret,
-		Msg:  param.Msg,
-		Data: data,
-		Sig:  sign,
-	}
-	return &res
-}
-
-//请求绿喵token
-
-func (c *Client) QueryTokenRequest(param NotificationParam) (resp *QueryTokenReq, err error) {
-	request, err := c.NotificationRequest(param)
-	if err != nil {
-		return nil, err
-	}
-	QueryToken := QueryTokenReq{}
-	err = json.Unmarshal(request, &QueryToken)
-	if err != nil {
-		return nil, err
-	}
-	return &QueryToken, nil
-}
-
-//请求绿喵token返回结果
-
-func (c *Client) QueryTokenResult(param QueryTokenResp) (resp *ChargeResponse, err error) {
-	marshal, err := json.Marshal(param)
-	if err != nil {
-		return nil, err
-	}
-	result := c.NotificationResult(QueryResponse{
-		Ret:  0,
-		Msg:  nil,
-		Data: marshal,
-		Sig:  "",
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-//设备状态变化推送
-
-func (c *Client) NotificationStationStatusRequest(param NotificationParam) (resp *NotificationStationStatusParam, err error) {
-	request, err := c.NotificationRequest(param)
-	if err != nil {
-		return nil, err
-	}
-	stationStatus := NotificationStationStatusParam{}
-	err = json.Unmarshal(request, &stationStatus)
-	if err != nil {
-		return nil, err
-	}
-	return &stationStatus, nil
-}
-
-//推送充电结果
-
-func (c *Client) NotificationStartChargeResultRequest(param NotificationParam) (resp *NotificationStartChargeResultParam, err error) {
-	request, err := c.NotificationRequest(param)
-	if err != nil {
-		return nil, err
-	}
-	stationStatus := NotificationStartChargeResultParam{}
-	err = json.Unmarshal(request, &stationStatus)
-	if err != nil {
-		return nil, err
-	}
-	return &stationStatus, nil
-}
-
-//推送充电状态
-
-func (c *Client) NotificationEquipChargeStatusRequest(param NotificationParam) (resp *NotificationEquipChargeStatusParam, err error) {
-	request, err := c.NotificationRequest(param)
-	if err != nil {
-		return nil, err
-	}
-	stationStatus := NotificationEquipChargeStatusParam{}
-	err = json.Unmarshal(request, &stationStatus)
-	if err != nil {
-		return nil, err
-	}
-	return &stationStatus, nil
-}
-
-//推送停止充电结果
-
-func (c *Client) NotificationStopChargeResultRequest(param NotificationParam) (resp *NotificationStopChargeResultParam, err error) {
-	request, err := c.NotificationRequest(param)
-	if err != nil {
-		return nil, err
-	}
-	stationStatus := NotificationStopChargeResultParam{}
-	err = json.Unmarshal(request, &stationStatus)
-	if err != nil {
-		return nil, err
-	}
-	return &stationStatus, nil
-}
-
-//推送充电订单信息
-
-func (c *Client) NotificationChargeOrderInfoRequest(param NotificationParam) (resp *NotificationChargeOrderInfoParam, err error) {
-	request, err := c.NotificationRequest(param)
-	if err != nil {
-		return nil, err
-	}
-	stationStatus := NotificationChargeOrderInfoParam{}
-	err = json.Unmarshal(request, &stationStatus)
-	if err != nil {
-		return nil, err
-	}
-	return &stationStatus, nil
-}
-
-// 请求绿喵方返回结果加密
-
-func (c *Client) NotificationResponse(param interface{}) (resp *ChargeResponse) {
-	marshal, err := json.Marshal(param)
-	if err != nil {
-		return &ChargeResponse{
-			Ret:  500,
-			Msg:  "解析失败",
-			Data: "",
-			Sig:  "",
-		}
-	}
-	result := c.NotificationResult(QueryResponse{
-		Ret:  0,
-		Msg:  nil,
-		Data: marshal,
-		Sig:  "",
-	})
-	return result
-}
-
-func (c *Client) interfaceToString(data interface{}) string {
-	var key string
-	switch data.(type) {
-	case string:
-		key = data.(string)
-	case int:
-		key = strconv.Itoa(data.(int))
-	case int64:
-		it := data.(int64)
-		key = strconv.FormatInt(it, 10)
-	case float64:
-		it := data.(float64)
-		key = strconv.FormatFloat(it, 'f', -1, 64)
-	case nil:
-		key = "null"
-	}
-	return key
-}
+//获取流水号订单号
 
 func GenerateSerialNumber(operatorID string) string {
 	rand.Seed(time.Now().UnixNano())
 	uniqueID := rand.Intn(1000000000)
 	serialNumber := fmt.Sprintf("%s%09d", operatorID, uniqueID)
 	return serialNumber
+}
+
+//获取StartChargeSeqStat对应的中文状态
+
+func GetStartChargeSeqStatDesc(startChargeSeqStat int) string {
+	switch startChargeSeqStat {
+	case 1:
+		return "启动中"
+	case 2:
+		return "充电中"
+	case 3:
+		return "停止中"
+	case 4:
+		return "已结束"
+	case 5:
+		return "未知"
+	default:
+		return "未知"
+	}
+}
+
+//获取FailReason对应的中文状态
+
+func GetFailReasonDesc(FailReason int) string {
+	switch FailReason {
+	case 0:
+		return "无"
+	case 1:
+		return "此设备尚未插抢"
+	case 2:
+		return "设备检测失败"
+	default:
+		return "未知错误"
+	}
 }

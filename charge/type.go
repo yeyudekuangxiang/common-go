@@ -46,12 +46,11 @@ type QueryEquipAuthParam struct {
 }
 
 type QueryEquipAuthResult struct {
-	EquipAuthSeq string `json:"EquipAuthSeq"`
-	ConnectorID  string `json:"ConnectorID"`
-	SuccStat     int    `json:"SuccStat"`
-	FailReason   int    `json:"FailReason"`
+	ConnectorID   string `json:"ConnectorID"`
+	SuccStat      int    `json:"SuccStat"`
+	FailReason    int    `json:"FailReason"`
+	FailReasonMsg string `json:"FailReasonMsg"`
 }
-
 type QueryStartChargeParam struct {
 	StartChargeSeq string //订单号
 	ConnectorID    string
