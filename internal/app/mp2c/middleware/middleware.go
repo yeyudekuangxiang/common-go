@@ -158,11 +158,11 @@ func Auth() gin.HandlerFunc {
 
 		if user == nil {
 			user = &entity.User{}
-		}
-		if user.UserStatus != 1 {
+		} else if user.UserStatus != 1 {
 			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithCaller(), nil))
 			return
 		}
+
 		ctx.Set("AuthUser", *user)
 	}
 }
