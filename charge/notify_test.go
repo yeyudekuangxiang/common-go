@@ -30,10 +30,9 @@ func TestNotifyToken(t *testing.T) {
 
 func TestNotificationStartChargeResultParams(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 	result := c.QueryRequestEncrypt(NotificationStartChargeResultParam{
 		StartChargeSeq:     "MA1G55M8X633322921",
@@ -58,33 +57,41 @@ func TestNotificationStartChargeResultParams(t *testing.T) {
 
 func TestNotificationEquipChargeStatus(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
+	ChargeDetailsList := make([]ChargeDetails, 0)
+	ChargeDetailsList = append(ChargeDetailsList, ChargeDetails{
+		DetailPower:       11.4,
+		ElecPrice:         0.8,
+		SevicePrice:       0.2,
+		DetailElecMoney:   9.12,
+		DetailSeviceMoney: 2.28,
+		DetailStartTime:   "2023-06-14 16:43:00",
+		DetailEndTime:     "2023-06-14 17:59:00",
+		DetailType:        2,
+	})
 	result := c.QueryRequestEncrypt(NotificationEquipChargeStatusParam{
-		StartChargeSeq:     "MA1G55M8X633322921",
-		StartChargeSeqStat: 1,
-		ConnectorID:        "1212",
-		StartTime:          "2023-06-13 20:40:05",
-		IdentCode:          "",
-		ConnectorStatus:    1,
-		CurrentA:           0,
+		StartChargeSeq:     "MA1G55M8XtmRTO6reuZLoiwJwq0",
+		StartChargeSeqStat: 2,
+		ConnectorID:        "12000000000000098136275002",
+		ConnectorStatus:    3,
+		CurrentA:           454.55,
 		CurrentB:           0,
 		CurrentC:           0,
-		VoltageA:           0,
+		VoltageA:           220,
 		VoltageB:           0,
 		VoltageC:           0,
 		Soc:                0,
-		EndTime:            "2023-06-13 20:40:05",
-		TotalPower:         0,
-		ElecMoney:          0,
-		ServiceMoney:       0,
-		TotalMoney:         0,
-		StopReason:         0,
-		SumPeriod:          0,
-		ChargeDetails:      "",
+		StartTime:          "2023-06-14 16:43:50",
+		EndTime:            "2023-06-14 17:59:39",
+		TotalPower:         11.4,
+		ElecMoney:          9.12,
+		SeviceMoney:        2.28,
+		TotalMoney:         11.4,
+		SumPeriod:          1,
+		ChargeDetails:      ChargeDetailsList,
 	})
 	resultMarshal, err := json.Marshal(result)
 
@@ -102,10 +109,9 @@ func TestNotificationEquipChargeStatus(t *testing.T) {
 
 func TestNotificationStopChargeResultRequest(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 	result := c.QueryRequestEncrypt(NotificationStopChargeResultParam{
 		StartChargeSeq:     "MA1G55M8X633322921",
@@ -128,10 +134,9 @@ func TestNotificationStopChargeResultRequest(t *testing.T) {
 
 func TestNNotificationChargeOrderInfoRequest(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 	result := c.QueryRequestEncrypt(NotificationChargeOrderInfoParam{
 		StartChargeSeq:   "MA1G55M8X633322921",
@@ -162,10 +167,9 @@ func TestNNotificationChargeOrderInfoRequest(t *testing.T) {
 
 func TestNotificationStationStatusRequest(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 	//bizId := time.Now().Format("20060102150405") + c.rand()
 	resp, err := c.NotificationStationStatusRequest(NotificationParam{
@@ -189,10 +193,9 @@ type NotificationStartChargeResult struct {
 
 func TestNotificationResponse(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 	a := NotificationStartChargeResult{
 		StartChargeSeq: "1212",
@@ -205,10 +208,9 @@ func TestNotificationResponse(t *testing.T) {
 
 func TestNotificationRequest(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 	validate, err := c.NotificationRequest(NotificationParam{
 		Sig:        "E0E972AB13A63F38D6B228FE656FB5DE",
@@ -225,10 +227,9 @@ func TestNotificationRequest(t *testing.T) {
 
 func TestNotificationResult(t *testing.T) {
 	c := NotifyClient{
-		AESSecret:  "agRigdo8zFu4NMbC",
-		AESIv:      "aYqsMbzLCbKpnLLa",
-		SigSecret:  "dgNaWHDgto716GRd",
-		OperatorID: "313744932",
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
 	}
 
 	res := c.NotificationResult(QueryResponse{

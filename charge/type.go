@@ -41,8 +41,8 @@ type NotificationParam struct {
 }
 
 type QueryEquipAuthParam struct {
-	EquipBizSeq string
-	ConnectorID string
+	EquipAuthSeq string
+	ConnectorID  string
 }
 
 type QueryEquipAuthResult struct {
@@ -71,11 +71,9 @@ type QueryEquipChargeStatusParam struct {
 
 type QueryEquipChargeStatusResult struct {
 	StartChargeSeq     string  `json:"StartChargeSeq"`
-	StartChargeSeqStat int64   `json:"StartChargeSeqStat"`
+	StartChargeSeqStat int     `json:"StartChargeSeqStat"`
 	ConnectorID        string  `json:"ConnectorID"`
-	StartTime          string  `json:"StartTime"`
-	IdentCode          string  `json:"IdentCode"`
-	ConnectorStatus    int64   `json:"ConnectorStatus"`
+	ConnectorStatus    int     `json:"ConnectorStatus"`
 	CurrentA           float64 `json:"CurrentA"`
 	CurrentB           float64 `json:"CurrentB"`
 	CurrentC           float64 `json:"CurrentC"`
@@ -83,16 +81,24 @@ type QueryEquipChargeStatusResult struct {
 	VoltageB           float64 `json:"VoltageB"`
 	VoltageC           float64 `json:"VoltageC"`
 	Soc                float64 `json:"Soc"`
+	StartTime          string  `json:"StartTime"`
 	EndTime            string  `json:"EndTime"`
 	TotalPower         float64 `json:"TotalPower"`
 	ElecMoney          float64 `json:"ElecMoney"`
-	ServiceMoney       float64 `json:"ServiceMoney"`
+	SeviceMoney        float64 `json:"SeviceMoney"`
 	TotalMoney         float64 `json:"TotalMoney"`
-	StopReason         int64   `json:"StopReason"`
-	SumPeriod          int64   `json:"SumPeriod"`
-	ChargeDetails      string  `json:"ChargeDetails"`
+	SumPeriod          int     `json:"SumPeriod"`
+	ChargeDetails      []struct {
+		DetailPower       float64 `json:"DetailPower"`
+		ElecPrice         float64 `json:"ElecPrice"`
+		SevicePrice       float64 `json:"SevicePrice"`
+		DetailElecMoney   float64 `json:"DetailElecMoney"`
+		DetailSeviceMoney float64 `json:"DetailSeviceMoney"`
+		DetailStartTime   string  `json:"DetailStartTime"`
+		DetailEndTime     string  `json:"DetailEndTime"`
+		DetailType        int     `json:"DetailType"`
+	} `json:"ChargeDetails"`
 }
-
 type QueryStopChargeParam struct {
 	StartChargeSeq string
 	ConnectorID    string
@@ -388,28 +394,37 @@ type NotificationStartChargeResultParam struct {
 	IdentCode          string
 }
 
+type ChargeDetails struct {
+	DetailPower       float64 `json:"DetailPower"`
+	ElecPrice         float64 `json:"ElecPrice"`
+	SevicePrice       float64 `json:"SevicePrice"`
+	DetailElecMoney   float64 `json:"DetailElecMoney"`
+	DetailSeviceMoney float64 `json:"DetailSeviceMoney"`
+	DetailStartTime   string  `json:"DetailStartTime"`
+	DetailEndTime     string  `json:"DetailEndTime"`
+	DetailType        int     `json:"DetailType"`
+}
+
 type NotificationEquipChargeStatusParam struct {
-	StartChargeSeq     string
-	StartChargeSeqStat int64
-	ConnectorID        string
-	StartTime          string
-	IdentCode          string
-	ConnectorStatus    int64
-	CurrentA           float64
-	CurrentB           float64
-	CurrentC           float64
-	VoltageA           float64
-	VoltageB           float64
-	VoltageC           float64
-	Soc                float64
-	EndTime            string
-	TotalPower         float64
-	ElecMoney          float64
-	ServiceMoney       float64
-	TotalMoney         float64
-	StopReason         int64
-	SumPeriod          int64
-	ChargeDetails      string
+	StartChargeSeq     string          `json:"StartChargeSeq"`
+	StartChargeSeqStat int             `json:"StartChargeSeqStat"`
+	ConnectorID        string          `json:"ConnectorID"`
+	ConnectorStatus    int             `json:"ConnectorStatus"`
+	CurrentA           float64         `json:"CurrentA"`
+	CurrentB           float64         `json:"CurrentB"`
+	CurrentC           float64         `json:"CurrentC"`
+	VoltageA           float64         `json:"VoltageA"`
+	VoltageB           float64         `json:"VoltageB"`
+	VoltageC           float64         `json:"VoltageC"`
+	Soc                float64         `json:"Soc"`
+	StartTime          string          `json:"StartTime"`
+	EndTime            string          `json:"EndTime"`
+	TotalPower         float64         `json:"TotalPower"`
+	ElecMoney          float64         `json:"ElecMoney"`
+	SeviceMoney        float64         `json:"SeviceMoney"`
+	TotalMoney         float64         `json:"TotalMoney"`
+	SumPeriod          int             `json:"SumPeriod"`
+	ChargeDetails      []ChargeDetails `json:"ChargeDetails"`
 }
 
 type NotificationStopChargeResultParam struct {
