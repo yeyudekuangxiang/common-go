@@ -149,7 +149,6 @@ func TestNNotificationChargeOrderInfoRequest(t *testing.T) {
 		TotalMoney:       13,
 		StopReason:       0,
 		SumPeriod:        0,
-		ChargeDetails:    "",
 	})
 	resultMarshal, err := json.Marshal(result)
 

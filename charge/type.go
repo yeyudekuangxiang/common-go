@@ -45,6 +45,26 @@ type QueryEquipAuthParam struct {
 	ConnectorID  string
 }
 
+type QueryEquipBusinessPolicyParam struct {
+	EquipBizSeq string
+	ConnectorID string
+}
+
+type PolicyInfos struct {
+	StartTime   string  `json:"StartTime"`
+	ElecPrice   float64 `json:"ElecPrice"`
+	SevicePrice float64 `json:"SevicePrice"`
+	PvType      int     `json:"PvType"`
+}
+type QueryEquipBusinessPolicyResult struct {
+	EquipBizSeq string        `json:"EquipBizSeq"`
+	ConnectorID string        `json:"ConnectorID"`
+	SuccStat    int           `json:"SuccStat"`
+	FailReason  int           `json:"FailReason"`
+	SumPeriod   int           `json:"SumPeriod"`
+	PolicyInfos []PolicyInfos `json:"PolicyInfos"`
+}
+
 type QueryEquipAuthResult struct {
 	ConnectorID   string `json:"ConnectorID"`
 	SuccStat      int    `json:"SuccStat"`
@@ -444,7 +464,7 @@ type NotificationChargeOrderInfoParam struct {
 	TotalElecMoney   float64
 	TotalSeviceMoney float64
 	TotalMoney       float64
-	StopReason       int64
-	SumPeriod        int64
-	ChargeDetails    string
+	StopReason       int
+	SumPeriod        int
+	ChargeDetails    []ChargeDetails
 }

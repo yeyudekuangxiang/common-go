@@ -95,6 +95,27 @@ func TestQueryEquipChargeStatus(t *testing.T) {
 	}
 }
 
+//查询充电状态
+func TestQueryEquipBusinessPolicy(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      "901b6e15-0fee-41f2-9762-1906b27b3a91",
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.QueryEquipBusinessPolicy(QueryEquipBusinessPolicyParam{
+		EquipBizSeq: GenerateSerialNumber(),
+		ConnectorID: "12000000000000098136275002",
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
 func TestBikeCard(t *testing.T) {
 
 	//数据加解
