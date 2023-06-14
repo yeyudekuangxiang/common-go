@@ -45,8 +45,8 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 		TimeStamp:  timestamp,
 		Seq:        "0001",
 	}
-	/*queryParamsstr, err := json.Marshal(queryParams)
-	fmt.Println(queryParamsstr)*/
+	queryParamsstr, err := json.Marshal(queryParams)
+	fmt.Println(queryParamsstr)
 	authToken := httptool.HttpWithHeader("Authorization", "Bearer "+c.Token)
 	body, err := httptool.PostJson(sendUrl, queryParams, authToken)
 	if err != nil {
@@ -164,7 +164,7 @@ func (c *Client) QueryEquipChargeStatus(param QueryEquipChargeStatusParam) (resp
 		return nil, err
 	}
 	ret := QueryEquipChargeStatusResult{}
-	err = json.Unmarshal(response.Data, ret)
+	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -240,11 +240,17 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 
 //获取流水号订单号
 
-func GenerateSerialNumber(operatorID string) string {
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func GenerateSerialNumber() string {
+	operatorID := "MA1G55M8X"
 	rand.Seed(time.Now().UnixNano())
-	uniqueID := rand.Intn(1000000000)
-	serialNumber := fmt.Sprintf("%s%09d", operatorID, uniqueID)
-	return serialNumber
+	b := make([]byte, 18)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	result := string(b)
+	return operatorID + result
 }
 
 //获取StartChargeSeqStat对应的中文状态

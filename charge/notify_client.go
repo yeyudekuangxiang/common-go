@@ -12,11 +12,10 @@ import (
 )
 
 type NotifyClient struct {
-	AESSecret  string //acb93539fc9bg78k
-	AESIv      string //82c91325e74bef0f
-	SigSecret  string //9af2e7b2d7562ad5  签名密钥
-	Token      string
-	OperatorID string
+	AESSecret string //acb93539fc9bg78k
+	AESIv     string //82c91325e74bef0f
+	SigSecret string //9af2e7b2d7562ad5  签名密钥
+	Token     string
 }
 
 //请求绿喵token
@@ -199,7 +198,7 @@ func (c *NotifyClient) QueryRequestEncrypt(param interface{}) (resp *Notificatio
 		return
 	}
 	data := base64.StdEncoding.EncodeToString(pkcs5)
-	operatorID := c.OperatorID
+	operatorID := "313744932"
 	timestamp := fmt.Sprint(time.Now().UnixMilli()) // "20160729142400"
 	seq := "0001"
 	encReq := operatorID + data + timestamp + seq

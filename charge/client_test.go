@@ -42,8 +42,8 @@ func TestQueryEquipAuth(t *testing.T) {
 	}
 	//bizId := time.Now().Format("20060102150405") + c.rand()
 	resp, err := c.QueryEquipAuth(QueryEquipAuthParam{
-		EquipBizSeq: "MA1G55M8X1",
-		ConnectorID: "12000000000000072155462002",
+		EquipAuthSeq: "MA1G55M8X1",
+		ConnectorID:  "12000000000000072155462002",
 	})
 	if err != nil {
 		return
@@ -134,6 +134,6 @@ func TestBikeCard(t *testing.T) {
 }
 
 func TestGenerateSerialNumber(t *testing.T) {
-	number := GenerateSerialNumber("MA1G55M8X")
+	number := GenerateSerialNumber()
 	println(number)
 }
