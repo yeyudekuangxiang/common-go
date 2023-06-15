@@ -185,18 +185,27 @@ func TestNotificationStationStatusRequest(t *testing.T) {
 		AESIv:     "aYqsMbzLCbKpnLLa",
 		SigSecret: "dgNaWHDgto716GRd",
 	}
-	//bizId := time.Now().Format("20060102150405") + c.rand()
-	resp, err := c.NotificationStationStatusRequest(NotificationParam{
-		Sig:        "",
-		Data:       "",
-		OperatorID: "",
-		TimeStamp:  "",
-		Seq:        "",
+	result := c.QueryRequestEncrypt(NotificationStationStatusParam{
+		StationStatusInfo: ConnectorStatusInfo{
+			ConnectorID: "12000000000000098136275002",
+			Status:      1,
+			ParkStatus:  1,
+			LockStatus:  1,
+			StatusCode:  "12121212",
+		},
 	})
+	resultMarshal, err := json.Marshal(result)
+
+	println(resultMarshal)
+	resp, err := c.NotificationStopChargeResultRequest(*result)
 	if err != nil {
 		return
 	}
-	println(resp)
+	marshal, err := json.Marshal(resp)
+	if err != nil {
+		return
+	}
+	fmt.Println(marshal)
 }
 
 type NotificationStartChargeResult struct {
