@@ -32,7 +32,7 @@ func GetSign(params map[string]interface{}, key string, joiner string) string {
 	}
 	signStr = strings.TrimRight(signStr, joiner)
 	//验证签名
-	return strings.ToUpper(encrypttool.Md5(key + joiner + signStr))
+	return strings.ToUpper(encrypttool.Md5(key + signStr))
 }
 
 func InterfaceToString(data interface{}) string {

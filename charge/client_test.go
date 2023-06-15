@@ -6,6 +6,30 @@ import (
 	"testing"
 )
 
+func TestPhoneEncrypt(t *testing.T) {
+	//数据加解
+	AESSecret := "OzxlBNxflRPwbePa"
+	AESIv := "xnEKN6vfqegWRsbw"
+	pkcs5, err := encrypttool.AesEncryptPKCS5([]byte("18840853003"), []byte(AESSecret), []byte(AESIv))
+	if err != nil {
+		return
+	}
+	data := base64.StdEncoding.EncodeToString(pkcs5)
+	println(data)
+}
+func TestPhoneDecode(t *testing.T) {
+	AESSecret := "OzxlBNxflRPwbePa"
+	AESIv := "xnEKN6vfqegWRsbw"
+	PhoneEncrypt := "y32i/F+ATATTbqthvk8qyA=="
+	decodeString, err := base64.StdEncoding.DecodeString(PhoneEncrypt)
+	if err != nil {
+
+	}
+	phoneByte, err := encrypttool.AesDecryptPKCS5(decodeString, []byte(AESSecret), []byte(AESIv))
+
+	println(string(phoneByte))
+}
+
 //获取星星token
 func TestToken(t *testing.T) {
 	c := Client{
