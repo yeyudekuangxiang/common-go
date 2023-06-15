@@ -67,6 +67,7 @@ const (
 	DuiBaActivityRedBlackRankActivity               DuiBaActivityVipType = 7
 	DuiBaActivityCrazyThursdayActivity              DuiBaActivityVipType = 8
 	DuiBaActivityStarChargeActivity                 DuiBaActivityVipType = 9
+	DuiBaActivityCarbon618Activity                  DuiBaActivityVipType = 10
 )
 
 const (
