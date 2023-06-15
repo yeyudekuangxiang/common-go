@@ -8,7 +8,6 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"log"
-	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -97,6 +96,26 @@ func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryTokenResult, err 
 		return nil, err
 	}
 	ret := QueryTokenResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+func (c *Client) QueryEquipBusinessPolicy(param QueryEquipBusinessPolicyParam) (resp *QueryEquipBusinessPolicyResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"query_equip_business_policy",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := QueryEquipBusinessPolicyResult{}
 	err = json.Unmarshal(response.Data, &ret)
 	if err != nil {
 		return nil, err
@@ -236,21 +255,6 @@ func (c *Client) QueryStationStatus(param QueryStationStatusParam) (resp *QueryS
 	}
 	return &ret, nil
 
-}
-
-//获取流水号订单号
-
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-func GenerateSerialNumber() string {
-	operatorID := "MA1G55M8X"
-	rand.Seed(time.Now().UnixNano())
-	b := make([]byte, 18)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	result := string(b)
-	return operatorID + result
 }
 
 //获取StartChargeSeqStat对应的中文状态

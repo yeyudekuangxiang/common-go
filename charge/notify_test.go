@@ -114,9 +114,11 @@ func TestNotificationStopChargeResultRequest(t *testing.T) {
 		SigSecret: "dgNaWHDgto716GRd",
 	}
 	result := c.QueryRequestEncrypt(NotificationStopChargeResultParam{
-		StartChargeSeq:     "MA1G55M8X633322921",
-		StartChargeSeqStat: 1,
-		ConnectorID:        "1212",
+		StartChargeSeq:     "313744932651370500",
+		StartChargeSeqStat: 4,
+		ConnectorID:        "12000000000000072155475002",
+		SuccStat:           0,
+		FailReason:         0,
 	})
 	resultMarshal, err := json.Marshal(result)
 
@@ -138,6 +140,18 @@ func TestNNotificationChargeOrderInfoRequest(t *testing.T) {
 		AESIv:     "aYqsMbzLCbKpnLLa",
 		SigSecret: "dgNaWHDgto716GRd",
 	}
+	ChargeDetail := make([]ChargeDetails, 0)
+
+	ChargeDetail = append(ChargeDetail, ChargeDetails{
+		DetailPower:       0,
+		ElecPrice:         0,
+		SevicePrice:       0,
+		DetailElecMoney:   0,
+		DetailSeviceMoney: 0,
+		DetailStartTime:   "1212",
+		DetailEndTime:     "121212",
+		DetailType:        0,
+	})
 	result := c.QueryRequestEncrypt(NotificationChargeOrderInfoParam{
 		StartChargeSeq:   "MA1G55M8X633322921",
 		ConnectorId:      "12",
@@ -149,7 +163,7 @@ func TestNNotificationChargeOrderInfoRequest(t *testing.T) {
 		TotalMoney:       13,
 		StopReason:       0,
 		SumPeriod:        0,
-		ChargeDetails:    "",
+		ChargeDetails:    ChargeDetail,
 	})
 	resultMarshal, err := json.Marshal(result)
 

@@ -177,7 +177,7 @@ func PKCS5UnPadding(origData []byte) []byte {
 	return origData[:(length - unpadding)]
 }
 
-//@brief:AES加密
+//@brief:AES/PKCS5
 
 func AesEncryptPKCS5(origData, key []byte, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
