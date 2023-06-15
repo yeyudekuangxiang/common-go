@@ -393,7 +393,7 @@ select order_id from order_item where item_id in (select  product_item_id  from 
 		}
 		var carbon618ActivitySql = `select count(*)  from "duiba_order" where order_id in (
 select order_id from order_item where item_id in (select  product_item_id  from product_item where title like '低碳618%' 
-)   order  by id desc)  and finish_time > ? and finish_time < ? and user_id = ?`
+)   order  by id desc)  and create_time > ? and create_time < ? and user_id = ?`
 		var carbon618ActivityTotal int64
 		err = app.DB.Raw(carbon618ActivitySql, startTime.UnixMilli(), endTime.UnixMilli(), userId).Scan(&carbon618ActivityTotal).Error
 		if err != nil {
