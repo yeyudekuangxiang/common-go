@@ -329,18 +329,21 @@ type QueryTokenResult struct {
 	FailReason         int    `json:"FailReason"`
 }
 
+type StationStatusInfos struct {
+	StationID            string                `json:"StationID"`
+	ConnectorStatusInfos []ConnectorStatusInfo `json:"ConnectorStatusInfos"`
+}
+
+type ConnectorStatusInfo struct {
+	ConnectorID string `json:"ConnectorID"`
+	Status      int    `json:"Status"`
+	ParkStatus  int    `json:"ParkStatus"`
+	LockStatus  int    `json:"LockStatus"`
+	StatusCode  string `json:"StatusCode,omitempty"`
+}
 type QueryStationStatusResult struct {
-	Total              int `json:"Total"`
-	StationStatusInfos []struct {
-		StationID            string `json:"StationID"`
-		ConnectorStatusInfos []struct {
-			ConnectorID string `json:"ConnectorID"`
-			Status      int    `json:"Status"`
-			ParkStatus  int    `json:"ParkStatus"`
-			LockStatus  int    `json:"LockStatus"`
-			StatusCode  string `json:"StatusCode,omitempty"`
-		} `json:"ConnectorStatusInfos"`
-	} `json:"StationStatusInfos"`
+	Total              int                  `json:"Total"`
+	StationStatusInfos []StationStatusInfos `json:"StationStatusInfos"`
 }
 
 type QueryTokenParam struct {
@@ -362,14 +365,7 @@ type QueryTokenResp struct {
 }
 
 type NotificationStationStatusParam struct {
-	StationStatusInfo StationStatusInfo
-}
-
-type StationStatusInfo struct {
-	ConnectorID string `json:"ConnectorID"`
-	Status      int64  `json:"Status"`
-	ParkStatus  int64  `json:"ParkStatus"`
-	LockStatus  int64  `json:"LockStatus"`
+	StationStatusInfo ConnectorStatusInfo
 }
 
 type NotificationStationStatusResult struct {
