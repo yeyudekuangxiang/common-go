@@ -7,25 +7,26 @@ import (
 )
 
 const (
-	aiCleanPlateUrl = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/emptyPlateRecognize"
-	aiRecycleUrl    = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/emptyPlateRecognize"
+	aiCleanPlate = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/emptyPlateRecognize"
+	aiRecycle    = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/recycle"
 )
 
-type AiCleanPlateClient struct {
+type AiImageClient struct {
 	AccessToken IAccessToken
 }
 
-func NewAiCleanPlateClient(accessToken IAccessToken) *AiCleanPlateClient {
-	return &AiCleanPlateClient{
+func NewAiImageClient(accessToken IAccessToken) *AiImageClient {
+	return &AiImageClient{
 		AccessToken: accessToken,
 	}
 }
 
-type CleanPlateParam struct {
+type AiImageParam struct {
 	ImageUrl string
+	Addr     string
 }
 
-type CleanPlateResult struct {
+type AiImageResult struct {
 	CommonRespCode
 	LogId   int64 `json:"log_id"`
 	Results []struct {
@@ -34,31 +35,31 @@ type CleanPlateResult struct {
 	} `json:"results"`
 }
 
-func (c *AiCleanPlateClient) CleanPlate(param CleanPlateParam) (*CleanPlateResult, error) {
+func (c *AiImageClient) CleanPlate(param AiImageParam) (*AiImageResult, error) {
 	token, err := c.AccessToken.GetToken()
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlateUrl, token, "url")
+	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
 	body, err := httptool.PostJson(u, map[string]string{
 		"url": param.ImageUrl,
 	})
 	if err != nil {
 		return nil, err
 	}
-	resp := CleanPlateResult{}
+	resp := AiImageResult{}
 	if err := json.Unmarshal(body, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-func (c *AiCleanPlateClient) Recycle(param AiImageParam) (*AiImageResult, error) {
+func (c *AiImageClient) Recycle(param AiImageParam) (*AiImageResult, error) {
 	token, err := c.AccessToken.GetToken()
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiRecycleUrl, token, "url")
+	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiRecycle, token, "url")
 	body, err := httptool.PostJson(u, map[string]string{
 		"url": param.ImageUrl,
 	})
