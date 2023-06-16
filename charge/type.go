@@ -137,10 +137,10 @@ type QueryStationsInfoParam struct {
 }
 
 type QueryStationsInfoResult struct {
-	PageNo       int            `json:"PageNo"`
-	PageCount    int            `json:"PageCount"`
-	ItemSize     int            `json:"ItemSize"`
-	StationInfos []StationInfos `json:"StationInfos"`
+	PageNo       int           `json:"PageNo"`
+	PageCount    int           `json:"PageCount"`
+	ItemSize     int           `json:"ItemSize"`
+	StationInfos []StationInfo `json:"StationInfos"`
 }
 
 type StationFeeDetail struct {
@@ -203,7 +203,8 @@ type SupportingFacilityInfo struct {
 	HasAirConditioning  int `json:"HasAirConditioning"`
 	PowerExchange       int `json:"PowerExchange"`
 }
-type StationInfos struct {
+
+type StationInfo struct {
 	StationID                string                     `json:"StationID"`
 	OperatorID               string                     `json:"OperatorID"`
 	EquipmentOwnerID         string                     `json:"EquipmentOwnerID"`
@@ -365,7 +366,11 @@ type QueryTokenResp struct {
 }
 
 type NotificationStationStatusParam struct {
-	StationStatusInfo ConnectorStatusInfo
+	StationStatusInfo ConnectorStatusInfo `json:"ConnectorStatusInfo"`
+}
+
+type NotificationStationInfoParam struct {
+	StationInfo StationInfo `json:"StationInfo"`
 }
 
 type NotificationStationStatusResult struct {

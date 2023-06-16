@@ -107,6 +107,21 @@ func (c *NotifyClient) NotificationStationStatusRequest(param NotificationParam)
 	return &stationStatus, nil
 }
 
+//站点信息推送
+
+func (c *NotifyClient) NotificationStationInfo(param NotificationParam) (resp *NotificationStationInfoParam, err error) {
+	request, err := c.NotificationRequest(param)
+	if err != nil {
+		return nil, err
+	}
+	stationStatus := NotificationStationInfoParam{}
+	err = json.Unmarshal(request, &stationStatus)
+	if err != nil {
+		return nil, err
+	}
+	return &stationStatus, nil
+}
+
 //推送充电结果
 
 func (c *NotifyClient) NotificationStartChargeResultRequest(param NotificationParam) (resp *NotificationStartChargeResultParam, err error) {
