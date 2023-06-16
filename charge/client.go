@@ -278,8 +278,8 @@ func GetStartChargeSeqStatDesc(startChargeSeqStat int) string {
 
 //获取FailReason对应的中文状态
 
-func GetFailReasonDesc(FailReason int) string {
-	switch FailReason {
+func GetFailReasonDesc(failReason int) string {
+	switch failReason {
 	case 0:
 		return "无"
 	case 1:
@@ -288,5 +288,24 @@ func GetFailReasonDesc(FailReason int) string {
 		return "设备检测失败"
 	default:
 		return "未知错误"
+	}
+}
+
+func GetConnectorStatusDesc(status int) string {
+	switch status {
+	case 0:
+		return "离线"
+	case 1:
+		return "空闲"
+	case 2:
+		return "占用(未充电)"
+	case 3:
+		return "占用(充电中)"
+	case 4:
+		return "占用(预约锁定中)"
+	case 255:
+		return "故障"
+	default:
+		return "未知"
 	}
 }
