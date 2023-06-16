@@ -187,11 +187,87 @@ func TestNotificationStationStatusRequest(t *testing.T) {
 	}
 	result := c.QueryRequestEncrypt(NotificationStationStatusParam{
 		StationStatusInfo: ConnectorStatusInfo{
-			ConnectorID: "12000000000000098136275002",
-			Status:      1,
-			ParkStatus:  1,
+			ConnectorID: "12000000000000098136271001",
+			Status:      2,
+			ParkStatus:  50,
 			LockStatus:  1,
 			StatusCode:  "12121212",
+		},
+	})
+	a := "{\"ConnectorStatusInfo\":{\"ConnectorID\":\"12000000000000098136272002\",\"Status\":2,\"ParkStatus\":50,\"LockStatus\":0},\"BizExtParams\":{\"ConnectorStatusInfo\":{\"ConnectorType\":4,\"EquipmentID\":\"12000000000000098136272\",\"StatusCode\":\"0B\"},\"TargetOperatorID\":\"MA1G55M8X\",\"AreaCode\":\"320411\",\"StationID\":\"89934319\",\"StationType\":1}}"
+	resultMarshal, err := json.Marshal(a)
+
+	println(resultMarshal)
+	resp, err := c.NotificationStopChargeResultRequest(*result)
+	if err != nil {
+		return
+	}
+	marshal, err := json.Marshal(resp)
+	if err != nil {
+		return
+	}
+	fmt.Println(marshal)
+}
+
+func TestNotificationStationInfoRequest(t *testing.T) {
+	c := NotifyClient{
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
+	}
+	result := c.QueryRequestEncrypt(NotificationStationInfoParam{
+		StationInfo: StationInfo{
+			StationID:                "33221989",
+			OperatorID:               "",
+			EquipmentOwnerID:         "1",
+			StationName:              "2",
+			CountryCode:              "3",
+			AreaCode:                 "4",
+			Address:                  "5",
+			StationTel:               "6",
+			ServiceTel:               "7",
+			StationType:              8,
+			StationStatus:            9,
+			ParkNums:                 10,
+			StationLng:               11,
+			StationLat:               12,
+			SiteGuide:                "13",
+			Construction:             14,
+			Pictures:                 []string{"1212"},
+			MatchCars:                "15",
+			ParkInfo:                 "16",
+			BusineHours:              "17",
+			ElectricityFee:           "18",
+			ServiceFee:               "19",
+			ParkFee:                  "20",
+			Payment:                  "21",
+			SupportOrder:             22,
+			Remark:                   "23",
+			ParkingDiscountType:      24,
+			ParkFeeStatus:            26,
+			BusinessStationFeeDetail: nil,
+			StationFeeDetail:         nil,
+			OriginalStationFeeDetail: nil,
+			IsEnable:                 0,
+			PrinterFlag:              0,
+			BarrierFlag:              0,
+			TariffInfo:               TariffInfo{},
+			FloorLevel:               "",
+			GuideMap:                 "",
+			RoadInfo:                 "",
+			AdminName:                "",
+			AdminTel:                 "",
+			OperationWay:             "",
+			EnableRoaming:            0,
+			GreenEnergyFlag:          0,
+			Flags:                    "",
+			EquipmentOperatorID:      "",
+			OnlineTime:               "",
+			StationGrade:             0,
+			BizExtParams:             BizExtParams{},
+			SupportingFacilityInfo:   SupportingFacilityInfo{},
+			PlaceHolderType:          0,
+			EquipmentInfos:           nil,
 		},
 	})
 	resultMarshal, err := json.Marshal(result)
