@@ -161,8 +161,13 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 	if err != nil {
 		return err
 	}
-
+	//查看是否已经报名
 	_, err = srv.findSignupRecord(params.TopicId, params.UserId, 1)
+	if err != nil {
+		return err
+	}
+	//查看是否超过上限
+	err = srv.checkSignupNum(topic.Id, int64(topic.Activity.SignupNumber))
 	if err != nil {
 		return err
 	}
@@ -243,6 +248,18 @@ func (srv defaultCommunityActivitiesSignupService) findSignupRecord(id, uid int6
 		return nil, errno.ErrCommon.WithMessage("不能重复报名哦")
 	}
 	return signup, nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) checkSignupNum(id, num int64) error {
+	count, err := srv.signupModel.FindListCount(community.FindListCountParams{TopicIds: []int64{id}})
+	if err != nil {
+		return nil
+	}
+
+	if len(count) > 0 && count[0].NumOfSignup >= num {
+		return errno.ErrCommon.WithMessage("报名人数已满")
+	}
+	return nil
 }
 
 //func (srv defaultCommunityActivitiesSignupService) checkSignupInfo(params SignupParams) error {
