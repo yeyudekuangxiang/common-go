@@ -5,7 +5,11 @@ import (
 )
 
 type Admin struct {
-	MioAdminID int `json:"mioAdminId"`
+	Type string `json:"type"`
+	ID   int64  `json:"id"`
+	//兼容auth改版前获取管理员id
+	MioAdminID int64 `json:"mioAdminId"`
+	CreatedAt  int64 `json:"createdAt"`
 }
 
 func (au Admin) Valid() error {

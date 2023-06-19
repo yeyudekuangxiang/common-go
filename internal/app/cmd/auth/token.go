@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package auth
 
@@ -11,6 +10,7 @@ import (
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/util"
 	"strconv"
+	"time"
 )
 
 // tokenCmd represents the token command
@@ -24,7 +24,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		initialize.Initialize("./config-dev.ini")
+		initialize.Initialize("./config-dev.yaml")
 		err := cmd.Flags().Parse(args)
 		if err != nil {
 			cmd.PrintErrln(err)
@@ -46,7 +46,10 @@ to quickly create a Cobra application.`,
 			})
 		case "admin":
 			token, err = util.CreateToken(auth.Admin{
-				MioAdminID: int(id),
+				Type:       "Admin",
+				ID:         id,
+				MioAdminID: id,
+				CreatedAt:  time.Now().UnixMilli(),
 			})
 		case "business":
 			token, err = util.CreateToken(auth.BusinessUser{

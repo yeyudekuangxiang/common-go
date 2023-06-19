@@ -2,7 +2,6 @@ package community
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"testing"
 )
@@ -22,14 +21,4 @@ func TestCheckMsg(t *testing.T) {
 		}
 	}
 	fmt.Printf("=>(0) '%v'\n", buffer.String())
-}
-
-func TestCheckSignupInfo(t *testing.T) {
-	info := "[{\"type\":1,\"title\":\"姓名\",\"sort\":1},{\"type\":2,\"title\":\"性别\",\"sort\":2,\"options\":{\"option1\":\"男\",\"option2\":\"女\"}},{\"type\":4,\"title\":\"爱好\",\"sort\":3,\"options\":{\"option1\":\"唱\",\"option2\":\"跳\",\"option3\":\"rap\",\"option4\":\"篮球\"}},{\"type\":3,\"title\":\"备注\",\"sort\":4}]"
-	infos := make([]interface{}, 0)
-	err := json.Unmarshal([]byte(info), &infos)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Printf("%+v", infos)
 }

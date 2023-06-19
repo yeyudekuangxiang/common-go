@@ -435,10 +435,9 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 			return nil, nil
 		}
 		for _, item := range signupList {
-			fmt.Println(item.Id)
 			//发送短信
 			err := common.SendSms(smsmsg.SmsMessage{
-				//Phone:       item.Phone,
+				Phone:       item.Phone,
 				Args:        topic.Title,
 				TemplateKey: message.SmsActivityCancel,
 			})

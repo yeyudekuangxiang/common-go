@@ -49,23 +49,26 @@ type TopicDetailResp struct {
 }
 
 type CreateTopicParams struct {
-	Title          string   `json:"title" `
-	Content        string   `json:"content"`
-	Images         []string `json:"images" `
-	TagIds         []int64  `json:"tagIds"`
-	Type           int      `json:"type"`
-	Region         string   `json:"region"`
-	Address        string   `json:"address" `
-	SATags         string   `json:"saTags"`
-	Remarks        string   `json:"remarks"`
-	Qrcode         string   `json:"qrcode"`
-	MeetingLink    string   `json:"meetingLink"`
-	Contacts       string   `json:"contacts"`
-	StartTime      int64    `json:"startTime"`
-	EndTime        int64    `json:"endTime"`
-	SignupDeadline int64    `json:"signupDeadline"`
-	ActivityType   int      `json:"activityType"`
-	SignupNumber   int      `json:"signupNumber"`
+	Title   string   `json:"title" `
+	Content string   `json:"content"`
+	Images  []string `json:"images" `
+	TagIds  []int64  `json:"tagIds"`
+	Type    int      `json:"type"`
+	TopicActivityParams
+}
+
+type TopicActivityParams struct {
+	Region         string `json:"region"`
+	Address        string `json:"address" `
+	SaTags         string `json:"saTags"`
+	Remarks        string `json:"remarks"`
+	Qrcode         string `json:"qrcode"`
+	MeetingLink    string `json:"meetingLink"`
+	Contacts       string `json:"contacts"`
+	StartTime      int64  `json:"startTime"`
+	EndTime        int64  `json:"endTime"`
+	SignupDeadline int64  `json:"signupDeadline"`
+	ActivityType   int    `json:"activityType"`
 }
 
 type UpdateTopicParams struct {
@@ -104,11 +107,11 @@ type AdminTopicListParams struct {
 type SignupParams struct {
 	TopicId      int64     `json:"topicId"`
 	UserId       int64     `json:"userId"`
-	OpenId       string    `json:"openId"`
+	SignupInfo   string    `json:"signupInfo"`
 	SignupTime   time.Time `json:"signupTime"`
 	SignupStatus int       `json:"signupStatus"`
-	// infos
-	SignupInfo string `json:"signupInfo"`
+	//附加
+	OpenId string `json:"openId"`
 }
 
 //comment

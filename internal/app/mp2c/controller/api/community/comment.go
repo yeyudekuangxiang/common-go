@@ -3,6 +3,7 @@ package community
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -156,11 +157,7 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 		//检查内容
 		if err := validator.CheckMsgWithOpenId(userPlatform.Openid, form.Message); err != nil {
 			app.Logger.Error(fmt.Errorf("create Comment error:%s", err.Error()))
-			/*zhuGeAttr := make(map[string]interface{}, 0)
-			zhuGeAttr["场景"] = "发布评论"
-			zhuGeAttr["失败原因"] = err.Error()
-			track.DefaultZhuGeService().Track(config.ZhuGeEventName.MsgSecCheck, user.GUID, zhuGeAttr)
-			*/
+
 			track.DefaultSensorsService().Track(false, config.SensorsEventName.MsgSecCheck, user.GUID, map[string]interface{}{
 				"scene": "发布评论",
 				"error": err.Error(),
@@ -172,13 +169,25 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	commentService := community.NewCommentService(ctx)
 	messageService := message.NewWebMessageService(ctx)
-	topicService := community.NewTopicService(ctx)
 
-	comment, toComment, recId, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
+	comment, toComment, recId, topic, err := commentService.CreateComment(user.ID, form.ObjId, form.Root, form.Parent, form.Message)
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
-
+	//埋点
+	trackData := map[string]interface{}{
+		"topic_id":              int(form.ObjId),
+		"topic_title":           topic.Title,
+		"topic_user_id":         int(topic.User.ID),
+		"topic_user_nickname":   topic.User.Nickname,
+		"topic_tags":            topic.TopicTagId,
+		"topic_type":            topic.Type,
+		"comment_push_time":     comment.CreatedAt.Format(timetool.TimeFormat),
+		"comment_user_id":       int(user.ID),
+		"comment_user_position": string(user.Position),
+		"comment_user_partner":  int(user.Partners),
+	}
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.CommunityComment, user.GUID, trackData)
 	//更新积分
 	msg := comment.Message
 	messagerune := []rune(comment.Message)
@@ -212,7 +221,6 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 
 	if form.Parent == 0 {
 		msgKey = "reply_topic"
-		topic := topicService.FindById(form.ObjId)
 		notes = topic.Title
 	} else {
 		msgKey = "reply_comment"

@@ -23,15 +23,12 @@ import (
 )
 
 func apiRouter(router *gin.Engine) {
-	aesFormat := apiutil.AesFormat{
-		Key: []byte("HDSK7jDNdjsDNDMD"),
-		IV:  []byte("HDSK7jDNdjsDNDMD"),
-	}
+	aesMiddleware := middleware.AesMiddleware([]byte("HDSK7jDNdjsDNDMD"), []byte("HDSK7jDNdjsDNDMD"))
 	router.GET("/newUser", apiutil.Format(api.DefaultUserController.GetNewUser))
 
 	//非必须登陆的路由
 	authRouter := router.Group("/api/mp2c")
-	authRouter.Use(middleware.Auth2(), middleware.Throttle())
+	authRouter.Use(middleware.Auth(), middleware.Throttle())
 	{
 		authRouter.GET("/aeskey", apiutil.Format(func(context *gin.Context) (gin.H, error) {
 			return gin.H{
@@ -111,7 +108,7 @@ func apiRouter(router *gin.Engine) {
 
 	//必须登陆的路由
 	mustAuthRouter := router.Group("/api/mp2c")
-	mustAuthRouter.Use(middleware.MustAuth2(), middleware.Throttle())
+	mustAuthRouter.Use(middleware.MustAuth(), middleware.Throttle())
 	{
 		//答题相关
 		qnrRouter := mustAuthRouter.Group("/qnr") //活动答题
@@ -156,10 +153,10 @@ func apiRouter(router *gin.Engine) {
 		{
 			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
-			userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
+			//userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
-			userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
-			userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM))     //绑定手机
+			//userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
+			//userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM))     //绑定手机
 			userRouter.GET("/my-topic", apiutil.Format(community.DefaultTopicController.MyTopic))                //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                    //我的奖励
 			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignup))              //我的报名
@@ -264,7 +261,7 @@ func apiRouter(router *gin.Engine) {
 			stepRouter.GET("/weekly-history", apiutil.FormatInterface(api.DefaultStepController.WeeklyHistory))
 			stepRouter.POST("/collect", apiutil.Format(api.DefaultStepController.Collect))
 
-			stepRouter.POST("/update_by_encrypt", aesFormat.Format(api.DefaultStepController.UpdateStep))
+			stepRouter.POST("/update_by_encrypt", aesMiddleware, apiutil.Format(api.DefaultStepController.UpdateStep))
 		}
 
 		//签到相关路由

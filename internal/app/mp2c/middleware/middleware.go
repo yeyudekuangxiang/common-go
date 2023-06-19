@@ -79,24 +79,7 @@ func callers() string {
 func access() gin.HandlerFunc {
 	return Access(app.OriginLogger.With(mzap.LogAccess), time.RFC3339, false)
 }
-func auth() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("token")
-		if token == "" {
-			//ctx.AbortWithStatusJSON(200,http.ErrorResponse(http.NewBaseError(400,"未登录")))
-			ctx.Set("AuthUser", entity.User{})
-			return
-		}
 
-		user, err := service2.DefaultUserService.GetUserByToken(token)
-		if err != nil {
-			//ctx.AbortWithStatusJSON(200,http.ErrorResponse(http.NewBaseError(400,err.Error())))
-			ctx.Set("AuthUser", entity.User{})
-			return
-		}
-		ctx.Set("AuthUser", *user)
-	}
-}
 func AuthAdmin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
@@ -134,26 +117,8 @@ func AuthBusinessUser() gin.HandlerFunc {
 		ctx.Set("BusinessUser", *user)
 	}
 }
-func mustAuth() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("token")
-		if token == "" {
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth, nil))
-			return
-		}
 
-		user, err := service2.DefaultUserService.GetUserByToken(token)
-		if err != nil || user.ID == 0 {
-			app.Logger.Error("用户登陆验证失败", user, err)
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrValidation.WithErrMessage(token), nil))
-			return
-		}
-		ctx.Set("AuthUser", *user)
-	}
-}
-
-//临时使用openid作为登陆验证
-func MustAuth2() gin.HandlerFunc {
+func MustAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user *entity.User
 		var err error
@@ -166,25 +131,20 @@ func MustAuth2() gin.HandlerFunc {
 			}
 		}
 
-		if openId := ctx.GetHeader("openid"); openId != "" {
-			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
-			if err != nil || user.ID == 0 {
-				app.Logger.Error("mustAuth openid err", openId, err)
-				ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithErrMessage(openId), nil))
-				return
-			}
-		}
-
 		if user == nil {
 			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithCaller(), nil))
 			return
 		}
+		if user.UserStatus != 1 {
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithCaller(), nil))
+			return
+		}
+
 		ctx.Set("AuthUser", *user)
 	}
 }
 
-//临时使用openid作为登陆验证
-func Auth2() gin.HandlerFunc {
+func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user *entity.User
 		var err error
@@ -196,15 +156,13 @@ func Auth2() gin.HandlerFunc {
 			}
 		}
 
-		if openId := ctx.GetHeader("openid"); openId != "" {
-			user, err = service2.DefaultUserService.GetUserByOpenId(openId)
-			if err != nil {
-				app.Logger.Error("auth openid err", openId, err)
-			}
-		}
 		if user == nil {
 			user = &entity.User{}
+		} else if user.UserStatus != 1 {
+			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithCaller(), nil))
+			return
 		}
+
 		ctx.Set("AuthUser", *user)
 	}
 }
@@ -240,7 +198,7 @@ func corsM() gin.HandlerFunc {
 	return cors.New(cfg)
 }
 
-//临时使用openid作为登陆验证
+// 临时使用openid作为登陆验证
 func MqAuth2() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")

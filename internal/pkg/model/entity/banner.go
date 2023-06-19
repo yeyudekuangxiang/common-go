@@ -39,11 +39,12 @@ const (
 type BannerScene string
 
 const (
-	BannerSceneHome    BannerScene = "home"
-	BannerSceneEvent   BannerScene = "event"
-	BannerSceneTopic   BannerScene = "topic"
-	BannerSceneWelfare BannerScene = "welfare"
-	BannerSceneUser    BannerScene = "user"
+	BannerSceneHome      BannerScene = "home"
+	BannerSceneEvent     BannerScene = "event"
+	BannerSceneTopic     BannerScene = "topic"
+	BannerSceneWelfare   BannerScene = "welfare"
+	BannerSceneUser      BannerScene = "user"
+	BannerSceneSSSCarbon BannerScene = "ssscarbon"
 )
 
 const OrderByBannerSortAsc OrderBy = "order_by_banner_sort_asc"
@@ -54,11 +55,12 @@ var (
 		BannerStatusDown: "下线",
 	}
 	BannerSceneMap = map[BannerScene]string{
-		BannerSceneHome:    "首页",
-		BannerSceneEvent:   "携手",
-		BannerSceneTopic:   "社区",
-		BannerSceneWelfare: "公益",
-		BannerSceneUser:    "用户",
+		BannerSceneHome:      "首页",
+		BannerSceneEvent:     "携手",
+		BannerSceneTopic:     "社区",
+		BannerSceneWelfare:   "公益",
+		BannerSceneUser:      "用户",
+		BannerSceneSSSCarbon: "随身行碳账户落地页",
 	}
 	BannerTypeMap = map[BannerType]string{
 		BannerTypeMini:  "第三方小程序",
