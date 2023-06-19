@@ -666,7 +666,7 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 			Type:           params.ActivityType,
 			Address:        params.Address,
 			Region:         params.Region,
-			TagIds:         params.ActivityTagIds,
+			SATag:          params.SaTags,
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
@@ -674,6 +674,7 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
 			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
 			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
+			SignupNumber:   params.SignupNumber,
 		}
 	}
 
@@ -738,11 +739,12 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 			Id:             topicModel.Id,
 			Type:           params.ActivityType,
 			Address:        params.Address,
-			TagIds:         params.ActivityTagIds,
+			SATag:          params.SaTags,
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
 			Contacts:       params.Contacts,
+			SignupNumber:   params.SignupNumber,
 			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
 			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
 			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},

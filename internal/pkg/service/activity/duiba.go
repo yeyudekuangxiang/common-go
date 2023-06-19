@@ -381,6 +381,29 @@ select order_id from order_item where item_id in (select  product_item_id  from 
 		}
 		vip = activity.VipId
 		break
+	case entity.DuiBaActivityCarbon618Activity:
+		carbon618ActivityId := strings.Split(activityId, "_")
+		startTime := timetool.MustParse("2006-01-02", carbon618ActivityId[1])
+		if startTime.IsZero() {
+			return "", errno.ErrMisMatchCondition
+		}
+		endTime := timetool.MustParse("2006-01-02", carbon618ActivityId[2])
+		if endTime.IsZero() {
+			return "", errno.ErrMisMatchCondition
+		}
+		var carbon618ActivitySql = `select count(*)  from "duiba_order" where order_id in (
+select order_id from order_item where item_id in (select  product_item_id  from product_item where title like '低碳618%' 
+)   order  by id desc)  and create_time > ? and create_time < ? and user_id = ?`
+		var carbon618ActivityTotal int64
+		err = app.DB.Raw(carbon618ActivitySql, startTime.UnixMilli(), endTime.UnixMilli(), userId).Scan(&carbon618ActivityTotal).Error
+		if err != nil {
+			app.Logger.Error("查询疯狂星期四订单失败", err)
+			return "", errno.ErrMisMatchCondition
+		}
+		if carbon618ActivityTotal <= 0 {
+			return "", errno.ErrMisMatchCondition
+		}
+		vip = activity.VipId
 	default:
 		break
 	}

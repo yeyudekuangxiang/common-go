@@ -41,11 +41,15 @@ type CreateTopicRequest struct {
 	Content string   `json:"content" form:"content" alias:"内容" binding:"min=0,max=10000"`
 	Images  []string `json:"images" form:"images" alias:"图片" binding:"required,min=1,max=12"`
 	TagIds  []int64  `json:"tagIds" form:"tagIds" alias:"话题" binding:"max=2"`
-	Type    int      `json:"type,default=1" form:"type,default=1" alias:"类型"`
+	Type    int      `json:"type" form:"type" alias:"类型"`
 	//报名活动字段
+	TopicActivity
+}
+
+type TopicActivity struct {
 	Region         string `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
 	Address        string `json:"address" form:"address" binding:"required_if=Type 1 ActivityType 1"`
-	ActivityTagIds string `json:"activityTagIds" form:"activityTagIds" binding:"required_if=Type 1"`
+	SATags         string `json:"saTags" form:"saTags" binding:"required_if=Type 1"`
 	Remarks        string `json:"remarks" form:"remarks"`
 	Qrcode         string `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2 MeetingLink ''"`
 	MeetingLink    string `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2 Qrcode ''"`
@@ -54,9 +58,7 @@ type CreateTopicRequest struct {
 	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 1"`
 	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 1"`
 	ActivityType   int    `json:"activityType" form:"activityType" binding:"required_if=Type 1"`
-}
-
-type TopicActivity struct {
+	SignupNumber   int    `json:"signupNumber" form:"signupNumber" binding:"required_if=Type 1"`
 }
 
 type UpdateTopicRequest struct {
@@ -115,14 +117,8 @@ type CollectionRequest struct {
 
 // activity
 type SignupTopicRequest struct {
-	TopicId  int64  `json:"topicId" form:"topicId" binding:"required"`
-	RealName string `json:"realName" form:"realName"`
-	Gender   int    `json:"gender" form:"gender"`
-	Age      int    `json:"age" form:"age"`
-	Phone    string `json:"phone" form:"phone" `
-	Wechat   string `json:"wechat" form:"wechat"`
-	City     string `json:"city" form:"city"`
-	Remarks  string `json:"remarks" form:"remarks"`
+	TopicId int64  `json:"topicId" form:"topicId" binding:"required"`
+	Infos   string `json:"infos" form:"infos" binding:"required"`
 }
 
 type MySignupRequest struct {

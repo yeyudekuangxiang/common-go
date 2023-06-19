@@ -49,22 +49,27 @@ type TopicDetailResp struct {
 }
 
 type CreateTopicParams struct {
-	Title          string   `json:"title" `
-	Content        string   `json:"content"`
-	Images         []string `json:"images" `
-	TagIds         []int64  `json:"tagIds"`
-	Type           int      `json:"type"`
-	Region         string   `json:"region"`
-	Address        string   `json:"address" `
-	ActivityTagIds string   `json:"activityTagIds"`
-	Remarks        string   `json:"remarks"`
-	Qrcode         string   `json:"qrcode"`
-	MeetingLink    string   `json:"meetingLink"`
-	Contacts       string   `json:"contacts"`
-	StartTime      int64    `json:"startTime"`
-	EndTime        int64    `json:"endTime"`
-	SignupDeadline int64    `json:"signupDeadline"`
-	ActivityType   int      `json:"activityType"`
+	Title   string   `json:"title" `
+	Content string   `json:"content"`
+	Images  []string `json:"images" `
+	TagIds  []int64  `json:"tagIds"`
+	Type    int      `json:"type"`
+	TopicActivityParams
+}
+
+type TopicActivityParams struct {
+	Region         string `json:"region"`
+	Address        string `json:"address" `
+	SaTags         string `json:"saTags"`
+	Remarks        string `json:"remarks"`
+	Qrcode         string `json:"qrcode"`
+	MeetingLink    string `json:"meetingLink"`
+	Contacts       string `json:"contacts"`
+	StartTime      int64  `json:"startTime"`
+	EndTime        int64  `json:"endTime"`
+	SignupDeadline int64  `json:"signupDeadline"`
+	ActivityType   int    `json:"activityType"`
+	SignupNumber   int    `json:"signupNumber"` //报名数量上限
 }
 
 type UpdateTopicParams struct {
@@ -103,13 +108,7 @@ type AdminTopicListParams struct {
 type SignupParams struct {
 	TopicId      int64     `json:"topicId"`
 	UserId       int64     `json:"userId"`
-	RealName     string    `json:"realName"`
-	Phone        string    `json:"phone"`
-	Gender       int       `json:"gender"`
-	Age          int       `json:"age"`
-	Wechat       string    `json:"wechat"`
-	City         string    `json:"city"`
-	Remarks      string    `json:"remarks"`
+	SignupInfo   string    `json:"signupInfo"`
 	SignupTime   time.Time `json:"signupTime"`
 	SignupStatus int       `json:"signupStatus"`
 	//附加

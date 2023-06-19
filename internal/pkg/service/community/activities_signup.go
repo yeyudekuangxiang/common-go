@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
@@ -159,28 +157,19 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 }
 
 func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) error {
-	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
-		TopicId: params.TopicId,
-		Type:    converttool.PointerInt(1),
-		Status:  3,
-	})
-	if err != nil {
-		if err == entity.ErrNotFount {
-			return errno.ErrCommon.WithMessage("活动不存在")
-		}
-		return errno.ErrCommon.WithMessage(err.Error())
-	}
-
-	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{
-		TopicId:      params.TopicId,
-		UserId:       params.UserId,
-		SignupStatus: 1,
-	})
+	topic, err := srv.findTopic(params.TopicId, 1, 3)
 	if err != nil {
 		return err
 	}
-	if signup.Id != 0 {
-		return errno.ErrCommon.WithMessage("不能重复报名哦")
+	//查看是否已经报名
+	_, err = srv.findSignupRecord(params.TopicId, params.UserId, 1)
+	if err != nil {
+		return err
+	}
+	//查看是否超过上限
+	err = srv.checkSignupNum(topic.Id, int64(topic.Activity.SignupNumber))
+	if err != nil {
+		return err
 	}
 
 	signupModel := &entity.CommunityActivitiesSignup{}
@@ -237,3 +226,56 @@ func NewCommunityActivitiesSignupService(ctx *mioContext.MioContext) ActivitiesS
 		topicModel:  community.NewTopicModel(ctx),
 	}
 }
+
+func (srv defaultCommunityActivitiesSignupService) findTopic(id int64, tp, status int) (*entity.Topic, error) {
+	topic := srv.topicModel.FindById(id)
+	if topic.Id == 0 {
+		return nil, errno.ErrCommon.WithMessage("活动不存在")
+	}
+	return topic, nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) findSignupRecord(id, uid int64, signupStatus int) (*entity.CommunityActivitiesSignup, error) {
+	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{
+		TopicId:      id,
+		UserId:       uid,
+		SignupStatus: signupStatus,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if signup.Id != 0 {
+		return nil, errno.ErrCommon.WithMessage("不能重复报名哦")
+	}
+	return signup, nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) checkSignupNum(id, num int64) error {
+	count, err := srv.signupModel.FindListCount(community.FindListCountParams{TopicIds: []int64{id}})
+	if err != nil {
+		return nil
+	}
+
+	if len(count) > 0 && count[0].NumOfSignup >= num {
+		return errno.ErrCommon.WithMessage("报名人数已满")
+	}
+	return nil
+}
+
+//func (srv defaultCommunityActivitiesSignupService) checkSignupInfo(params SignupParams) error {
+//	info := "[{\"type\":1,\"title\":\"姓名\",\"sort\":1},{\"type\":2,\"title\":\"性别\",\"sort\":2,\"options\":{\"option1\":\"男\",\"option2\":\"女\"}},{\"type\":4,\"title\":\"爱好\",\"sort\":3,\"options\":{\"option1\":\"唱\",\"option2\":\"跳\",\"option3\":\"rap\",\"option4\":\"篮球\"}},{\"type\":3,\"title\":\"备注\",\"sort\":4}]"
+//	infos := make([]interface{}, 0)
+//	err := json.Unmarshal([]byte(info), &infos)
+//	if err != nil {
+//		return err
+//	}
+//	if len(infos) == 0 {
+//		return errno.ErrCommon
+//	}
+//	//for _, item := range infos {
+//		item是map[string]interface / map[string]map[string]interface
+//
+//	}
+//	fmt.Println(infos)
+//	return nil
+//}

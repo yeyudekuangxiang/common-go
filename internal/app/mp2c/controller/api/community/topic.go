@@ -617,15 +617,9 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
 		OpenId:       user.OpenId,
-		RealName:     form.RealName,
-		Phone:        form.Phone,
-		Gender:       form.Gender,
-		Age:          form.Age,
-		Wechat:       form.Wechat,
-		City:         form.City,
-		Remarks:      form.Remarks,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
+		SignupInfo:   form.Infos,
 	}
 	err := signupService.Signup(params)
 	if err != nil {
