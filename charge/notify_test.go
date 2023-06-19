@@ -194,8 +194,7 @@ func TestNotificationStationStatusRequest(t *testing.T) {
 			StatusCode:  "12121212",
 		},
 	})
-	a := "{\"ConnectorStatusInfo\":{\"ConnectorID\":\"12000000000000098136272002\",\"Status\":2,\"ParkStatus\":50,\"LockStatus\":0},\"BizExtParams\":{\"ConnectorStatusInfo\":{\"ConnectorType\":4,\"EquipmentID\":\"12000000000000098136272\",\"StatusCode\":\"0B\"},\"TargetOperatorID\":\"MA1G55M8X\",\"AreaCode\":\"320411\",\"StationID\":\"89934319\",\"StationType\":1}}"
-	resultMarshal, err := json.Marshal(a)
+	resultMarshal, err := json.Marshal(result)
 
 	println(resultMarshal)
 	resp, err := c.NotificationStopChargeResultRequest(*result)
