@@ -2,10 +2,34 @@ package charge
 
 import (
 	"encoding/base64"
+	"fmt"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"strings"
 	"testing"
 )
 
+var Token = "166b64dd-e5a3-47e6-ab1c-f84a79dd9ab9"
+
+func TestGetConnectorID(t *testing.T) {
+	qrCode := "9813627502"
+	// 截取终端编号
+	if strings.HasPrefix(qrCode, "https://qrcode.starcharge.com/#/") {
+		qrCode = strings.TrimPrefix(qrCode, "https://qrcode.starcharge.com/#/")
+	}
+	// 转换为互联互通编号
+	var connectorID string
+	if len(qrCode) == 8 {
+		connectorID = "110000000000000" + qrCode + "000"
+	} else if len(qrCode) == 10 {
+		connectorID = "120000000000000" + qrCode[:8] + "0" + qrCode[8:]
+	} else {
+		return
+	}
+
+	fmt.Println("Terminal ID:", qrCode)
+	fmt.Println("Connector ID:", connectorID)
+
+}
 func TestPhoneEncrypt(t *testing.T) {
 	//数据加解
 	AESSecret := "OzxlBNxflRPwbePa"
@@ -61,13 +85,13 @@ func TestQueryEquipAuth(t *testing.T) {
 		AESSecret:  "a2164ada0026ccf7",
 		AESIv:      "82c91325e74bef0f",
 		SigSecret:  "9af2e7b2d7562ad5",
-		Token:      "35a04fd7-0d76-43ea-b621-157c4dd2dc12",
+		Token:      Token,
 		OperatorID: "MA1G55M8X",
 	}
 	//bizId := time.Now().Format("20060102150405") + c.rand()
 	resp, err := c.QueryEquipAuth(QueryEquipAuthParam{
 		EquipAuthSeq: "MA1G55M8X1",
-		ConnectorID:  "12000000000000072155462002",
+		ConnectorID:  "12000000000000098136272001",
 	})
 	if err != nil {
 		return
@@ -83,14 +107,14 @@ func TestQueryStationsInfo(t *testing.T) {
 		AESSecret:  "a2164ada0026ccf7",
 		AESIv:      "82c91325e74bef0f",
 		SigSecret:  "9af2e7b2d7562ad5",
-		Token:      "faebee63-d6e5-4ef5-8732-68c72e89d9af",
+		Token:      Token,
 		OperatorID: "MA1G55M8X",
 	}
 	//bizId := time.Now().Format("20060102150405") + c.rand()
 	resp, err := c.QueryStationsInfo(QueryStationsInfoParam{
-		LastQueryTime: "2023-06-11 01:25:11",
+		LastQueryTime: "",
 		PageNo:        1,
-		PageSize:      1,
+		PageSize:      30,
 	})
 	if err != nil {
 		return
@@ -107,11 +131,11 @@ func TestQueryEquipChargeStatus(t *testing.T) {
 		AESSecret:  "a2164ada0026ccf7",
 		AESIv:      "82c91325e74bef0f",
 		SigSecret:  "9af2e7b2d7562ad5",
-		Token:      "faebee63-d6e5-4ef5-8732-68c72e89d9af",
+		Token:      Token,
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.QueryEquipChargeStatus(QueryEquipChargeStatusParam{
-		StartChargeSeq: "MA1G55M8X633322921",
+		StartChargeSeq: "MA1G55M8Xh8uMNTmldoYxKazqu2",
 	})
 	println(status.ConnectorStatus)
 	if err != nil {
@@ -119,7 +143,7 @@ func TestQueryEquipChargeStatus(t *testing.T) {
 	}
 }
 
-//查询充电状态
+//查询策落
 func TestQueryEquipBusinessPolicy(t *testing.T) {
 	c := Client{
 		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
@@ -127,12 +151,31 @@ func TestQueryEquipBusinessPolicy(t *testing.T) {
 		AESSecret:  "a2164ada0026ccf7",
 		AESIv:      "82c91325e74bef0f",
 		SigSecret:  "9af2e7b2d7562ad5",
-		Token:      "901b6e15-0fee-41f2-9762-1906b27b3a91",
+		Token:      Token,
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.QueryEquipBusinessPolicy(QueryEquipBusinessPolicyParam{
 		EquipBizSeq: GenerateSerialNumber(),
 		ConnectorID: "12000000000000098136275002",
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+func TestQueryStationStatus(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.QueryStationStatus(QueryStationStatusParam{
+		StationIDs: []string{"33221994", "33221993", "33221995", "33221989", "33221990", "89934319"},
 	})
 	println(status)
 	if err != nil {
