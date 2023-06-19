@@ -12,6 +12,7 @@ import (
 	communityPdr "mio/internal/pkg/queue/producer/community"
 	"mio/internal/pkg/queue/types/message/communitymsg"
 	"mio/internal/pkg/queue/types/message/smsmsg"
+	"mio/internal/pkg/repository"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -404,7 +405,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext()
 	ActivitiesSignupService := community.NewCommunityActivitiesSignupService(ctx)
 	TopicService := community.NewTopicService(ctx)
-
+	UserService := service.DefaultUserService
 	//更新帖子
 	topic, err := TopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
@@ -434,10 +435,17 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		if count == 0 {
 			return nil, nil
 		}
+		uids := make([]int64, 0)
 		for _, item := range signupList {
-			//发送短信
+			uids = append(uids, item.UserId)
+		}
+		by, err := UserService.GetUserListBy(repository.GetUserListBy{UserIds: uids})
+		if err != nil {
+			return nil, err
+		}
+		for _, u := range by {
 			err := common.SendSms(smsmsg.SmsMessage{
-				Phone:       item.Phone,
+				Phone:       u.PhoneNumber,
 				Args:        topic.Title,
 				TemplateKey: message.SmsActivityCancel,
 			})
@@ -446,6 +454,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 				break
 			}
 		}
+
 	}
 
 	return nil, nil
