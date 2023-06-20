@@ -65,3 +65,14 @@ func GetConnectorID(qrCode string) string {
 	}
 	return connectorID
 }
+
+func RestoreConnectorID(connectorID string) string {
+	connectorIdStr := connectorID[0:2]
+	if connectorIdStr == "11" {
+		return connectorID[15:23]
+	} else if connectorIdStr == "12" {
+		return connectorID[15:23] + connectorID[24:26]
+	} else {
+		return ""
+	}
+}
