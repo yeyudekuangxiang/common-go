@@ -11,6 +11,10 @@ import (
 var Token = "166b64dd-e5a3-47e6-ab1c-f84a79dd9ab9"
 
 func TestGetConnectorID(t *testing.T) {
+	a := RestoreConnectorID("11000000000000010050638000")
+	b := GetConnectorID("https://qrcode.starcharge.com/#/10050638")
+	println(b)
+	println(a)
 	qrCode := "9813627502"
 	// 截取终端编号
 	if strings.HasPrefix(qrCode, "https://qrcode.starcharge.com/#/") {
