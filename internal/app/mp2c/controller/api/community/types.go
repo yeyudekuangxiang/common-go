@@ -47,18 +47,26 @@ type CreateTopicRequest struct {
 }
 
 type TopicActivity struct {
-	Region         string `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
-	Address        string `json:"address" form:"address" binding:"required_if=Type 1 ActivityType 1"`
-	SATags         string `json:"saTags" form:"saTags" binding:"required_if=Type 1"`
-	Remarks        string `json:"remarks" form:"remarks"`
-	Qrcode         string `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2 MeetingLink ''"`
-	MeetingLink    string `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2 Qrcode ''"`
-	Contacts       string `json:"contacts" form:"contacts" binding:"required_if=Type 1"`
-	StartTime      int64  `json:"startTime" form:"startTime" binding:"required_if=Type 1"`
-	EndTime        int64  `json:"endTime" form:"endTime" binding:"required_if=Type 1"`
-	SignupDeadline int64  `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 1"`
-	ActivityType   int    `json:"activityType" form:"activityType" binding:"required_if=Type 1"`
-	SignupNumber   int    `json:"signupNumber" form:"signupNumber" binding:"required_if=Type 1"`
+	Region         string  `json:"region" form:"region" binding:"required_if=Type 1 ActivityType 1"`
+	Address        string  `json:"address" form:"address" binding:"required_if=Type 1 ActivityType 1"`
+	SATags         []saTag `json:"saTags" form:"saTags" binding:"required_if=Type 1"`
+	Remarks        string  `json:"remarks" form:"remarks"`
+	Qrcode         string  `json:"qrcode" form:"qrcode" binding:"required_if=ActivityType 2 MeetingLink ''"`
+	MeetingLink    string  `json:"meetingLink" form:"meetingLink" binding:"required_if=ActivityType 2 Qrcode ''"`
+	Contacts       string  `json:"contacts" form:"contacts" binding:"required_if=Type 1"`
+	StartTime      int64   `json:"startTime" form:"startTime" binding:"required_if=Type 1"`
+	EndTime        int64   `json:"endTime" form:"endTime" binding:"required_if=Type 1"`
+	SignupDeadline int64   `json:"signupDeadline" form:"signupDeadline" binding:"required_if=Type 1"`
+	ActivityType   int     `json:"activityType" form:"activityType" binding:"required_if=Type 1"`
+	SignupNumber   int     `json:"signupNumber" form:"signupNumber" binding:"required_if=Type 1"`
+}
+
+type saTag struct {
+	Type     int      `json:"type"`
+	Code     string   `json:"code"`
+	Category int      `json:"category"`
+	Title    string   `json:"title"`
+	Options  []string `json:"options"`
 }
 
 type UpdateTopicRequest struct {
@@ -117,8 +125,17 @@ type CollectionRequest struct {
 
 // activity
 type SignupTopicRequest struct {
-	TopicId int64  `json:"topicId" form:"topicId" binding:"required"`
-	Infos   string `json:"infos" form:"infos" binding:"required"`
+	TopicId     int64        `json:"topicId" form:"topicId" binding:"required"`
+	SignupInfos []SignupInfo `json:"signupInfos" form:"signupInfos" binding:"required"`
+}
+
+type SignupInfo struct {
+	Title    string      `json:"title"`
+	Code     string      `json:"code"`
+	Category int         `json:"category"`
+	Type     int         `json:"type"`
+	Options  []string    `json:"options"`
+	Value    interface{} `json:"value"`
 }
 
 type MySignupRequest struct {

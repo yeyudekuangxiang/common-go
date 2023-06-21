@@ -27,8 +27,8 @@ type (
 		GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, bool, error)
 		FindAll(params community.FindAllActivitiesSignupParams) ([]*entity.CommunityActivitiesSignup, int64, error)
 		FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error)
-		Signup(params SignupParams) error    //报名
-		CancelSignup(Id, userId int64) error //取消报名
+		Signup(params SignupInfosParams) error //报名
+		CancelSignup(Id, userId int64) error   //取消报名
 		Export(w http.ResponseWriter, r *http.Request, topicId int64)
 		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
 	}
@@ -156,7 +156,7 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 	return signup, true, nil
 }
 
-func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) error {
+func (srv defaultCommunityActivitiesSignupService) Signup(params SignupInfosParams) error {
 	topic, err := srv.findTopic(params.TopicId, 1, 3)
 	if err != nil {
 		return err
@@ -172,21 +172,23 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupParams) e
 		return err
 	}
 
-	signupModel := &entity.CommunityActivitiesSignup{}
-	marshal, err := json.Marshal(params)
+	marshal, err := json.Marshal(params.SignupInfos)
 	if err != nil {
 		return err
 	}
-
-	err = json.Unmarshal(marshal, signupModel)
-	if err != nil {
-		return err
+	signupModel := &entity.CommunityActivitiesSignup{
+		TopicId:      params.TopicId,
+		UserId:       params.UserId,
+		SignupInfo:   string(marshal),
+		SignupTime:   params.SignupTime,
+		SignupStatus: params.SignupStatus,
 	}
 
 	err = srv.signupModel.Create(signupModel)
 	if err != nil {
 		return err
 	}
+
 	track.DefaultSensorsService().Track(false, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
 		"title":      topic.Title,
 		"topic_id":   int(params.TopicId),
