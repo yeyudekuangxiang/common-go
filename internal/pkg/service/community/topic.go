@@ -1,6 +1,7 @@
 package community
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
@@ -662,11 +663,12 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 	}
 
 	if params.Type == 1 {
+		SATag, _ := json.Marshal(params.SaTags)
 		topicModel.Activity = entity.CommunityActivities{
 			Type:           params.ActivityType,
 			Address:        params.Address,
 			Region:         params.Region,
-			SATag:          params.SaTags,
+			SATag:          string(SATag),
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
@@ -735,11 +737,12 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 	}
 
 	if params.Type == 1 {
+		SATag, _ := json.Marshal(params.SaTags)
 		topicModel.Activity = entity.CommunityActivities{
 			Id:             topicModel.Id,
 			Type:           params.ActivityType,
 			Address:        params.Address,
-			SATag:          params.SaTags,
+			SATag:          string(SATag),
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,

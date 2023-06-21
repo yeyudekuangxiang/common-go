@@ -58,18 +58,26 @@ type CreateTopicParams struct {
 }
 
 type TopicActivityParams struct {
-	Region         string `json:"region"`
-	Address        string `json:"address" `
-	SaTags         string `json:"saTags"`
-	Remarks        string `json:"remarks"`
-	Qrcode         string `json:"qrcode"`
-	MeetingLink    string `json:"meetingLink"`
-	Contacts       string `json:"contacts"`
-	StartTime      int64  `json:"startTime"`
-	EndTime        int64  `json:"endTime"`
-	SignupDeadline int64  `json:"signupDeadline"`
-	ActivityType   int    `json:"activityType"`
-	SignupNumber   int    `json:"signupNumber"` //报名数量上限
+	Region         string  `json:"region"`
+	Address        string  `json:"address" `
+	SaTags         []saTag `json:"saTags"`
+	Remarks        string  `json:"remarks"`
+	Qrcode         string  `json:"qrcode"`
+	MeetingLink    string  `json:"meetingLink"`
+	Contacts       string  `json:"contacts"`
+	StartTime      int64   `json:"startTime"`
+	EndTime        int64   `json:"endTime"`
+	SignupDeadline int64   `json:"signupDeadline"`
+	ActivityType   int     `json:"activityType"`
+	SignupNumber   int     `json:"signupNumber"` //报名数量上限
+}
+
+type saTag struct {
+	Type     int      `json:"type"`
+	Code     string   `json:"code"`
+	Category int      `json:"category"`
+	Title    string   `json:"title"`
+	Options  []string `json:"options"`
 }
 
 type UpdateTopicParams struct {
@@ -105,14 +113,23 @@ type AdminTopicListParams struct {
 }
 
 // activity
-type SignupParams struct {
-	TopicId      int64     `json:"topicId"`
-	UserId       int64     `json:"userId"`
-	SignupInfo   string    `json:"signupInfo"`
-	SignupTime   time.Time `json:"signupTime"`
-	SignupStatus int       `json:"signupStatus"`
+type SignupInfosParams struct {
+	TopicId      int64        `json:"topicId"`
+	UserId       int64        `json:"userId"`
+	SignupInfos  []SignupInfo `json:"signupInfo"`
+	SignupTime   time.Time    `json:"signupTime"`
+	SignupStatus int          `json:"signupStatus"`
 	//附加
 	OpenId string `json:"openId"`
+}
+
+type SignupInfo struct {
+	Title    string      `json:"title"`
+	Code     string      `json:"code"`
+	Category int         `json:"category"`
+	Type     int         `json:"type"`
+	Options  []string    `json:"options"`
+	Value    interface{} `json:"value"`
 }
 
 //comment

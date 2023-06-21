@@ -622,13 +622,26 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	params := community.SignupParams{
+
+	infos := make([]community.SignupInfo, 0)
+	for _, item := range form.SignupInfos {
+		infos = append(infos, community.SignupInfo{
+			Title:    item.Title,
+			Code:     item.Code,
+			Category: item.Category,
+			Type:     item.Type,
+			Options:  item.Options,
+			Value:    item.Value,
+		})
+	}
+
+	params := community.SignupInfosParams{
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
 		OpenId:       user.OpenId,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
-		SignupInfo:   form.Infos,
+		SignupInfos:  infos,
 	}
 	err := signupService.Signup(params)
 	if err != nil {
