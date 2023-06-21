@@ -67,6 +67,9 @@ func GetConnectorID(qrCode string) string {
 }
 
 func RestoreConnectorID(connectorID string) string {
+	if len(connectorID) != 26 {
+		return ""
+	}
 	connectorIdStr := connectorID[0:2]
 	if connectorIdStr == "11" {
 		return connectorID[15:23]
