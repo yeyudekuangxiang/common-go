@@ -14,6 +14,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpkclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/platform/cmd/rpc/platformclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/userclient"
@@ -57,6 +58,7 @@ type RpcClient struct {
 	TokenCenterRpcSrv tokencenterclient.TokenCenter
 	PointRpcSrv       pointclient.Point
 	ActivityRpcSrv    activityclient.Activity
+	PlatformRpcSrv    platformclient.Platform
 }
 
 func Ping(ctx context.Context) error {
@@ -99,6 +101,10 @@ func Ping(ctx context.Context) error {
 		return err
 	}
 	_, err = RpcService.TokenCenterRpcSrv.Ping(ctx, &tokencenterclient.Request{})
+	if err != nil {
+		return err
+	}
+	_, err = RpcService.PlatformRpcSrv.Ping(ctx, &platformclient.Request{})
 	if err != nil {
 		return err
 	}
