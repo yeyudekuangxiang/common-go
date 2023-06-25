@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	aiCleanPlate = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/emptyPlateRecognize"
-	aiRecycle    = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/recycle"
+	aiCleanPlate = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/emptyPlateRecognize" //光盘
+	aiRecycle    = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/recycle"             //旧瓶
+	aiWRS        = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/classification/lvmio_wrs"           //垃圾分类
 )
 
 type AiImageClient struct {
@@ -60,6 +61,25 @@ func (c *AiImageClient) Recycle(param AiImageParam) (*AiImageResult, error) {
 		return nil, err
 	}
 	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiRecycle, token, "url")
+	body, err := httptool.PostJson(u, map[string]string{
+		"url": param.ImageUrl,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp := AiImageResult{}
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *AiImageClient) GarbageSorting(param AiImageParam) (*AiImageResult, error) {
+	token, err := c.AccessToken.GetToken()
+	if err != nil {
+		return nil, err
+	}
+	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiWRS, token, "url")
 	body, err := httptool.PostJson(u, map[string]string{
 		"url": param.ImageUrl,
 	})
