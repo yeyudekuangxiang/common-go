@@ -2,6 +2,7 @@ package charge
 
 import (
 	"fmt"
+	"github.com/shopspring/decimal"
 	"math/rand"
 	"strings"
 	"time"
@@ -21,6 +22,22 @@ func TimeToDuration(startTimeStr string, endTimeStr string) string {
 	minutes := int(duration.Minutes()) - hours*60
 	seconds := int(duration.Seconds()) - hours*3600 - minutes*60
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+//获取时长，分钟单位，保留2位小数
+
+func TimeToDurationMinutes(startTimeStr string, endTimeStr string) float64 {
+	startTime, err := time.Parse("2006-01-02 15:04:05", startTimeStr)
+	if err != nil {
+		return 0
+	}
+	endTime, err := time.Parse("2006-01-02 15:04:05", endTimeStr)
+	if err != nil {
+		return 0
+	}
+	duration := endTime.Sub(startTime)
+	durationMinutesTime, _ := decimal.NewFromFloat(duration.Minutes()).Round(2).Float64()
+	return durationMinutesTime
 }
 
 //获取流水号订单号
