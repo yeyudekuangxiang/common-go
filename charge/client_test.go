@@ -38,7 +38,7 @@ func TestPhoneEncrypt(t *testing.T) {
 	//数据加解
 	AESSecret := "OzxlBNxflRPwbePa"
 	AESIv := "xnEKN6vfqegWRsbw"
-	pkcs5, err := encrypttool.AesEncryptPKCS5([]byte("18840853003"), []byte(AESSecret), []byte(AESIv))
+	pkcs5, err := encrypttool.AesEncryptPKCS5([]byte("17601258539"), []byte(AESSecret), []byte(AESIv))
 	if err != nil {
 		return
 	}
