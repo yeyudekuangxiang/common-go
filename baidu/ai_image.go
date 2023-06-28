@@ -29,11 +29,13 @@ type AiImageParam struct {
 
 type AiImageResult struct {
 	CommonRespCode
-	LogId   int64 `json:"log_id"`
-	Results []struct {
-		Name  string  `json:"name"`
-		Score float64 `json:"score"`
-	} `json:"results"`
+	LogId   int64    `json:"log_id"`
+	Results []Result `json:"results"`
+}
+
+type Result struct {
+	Name  string  `json:"name"`
+	Score float64 `json:"score"`
 }
 
 func (c *AiImageClient) CleanPlate(param AiImageParam) (*AiImageResult, error) {
