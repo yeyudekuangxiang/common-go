@@ -24,7 +24,7 @@ var DefaultQuizService = QuizService{}
 type QuizService struct {
 }
 
-func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestion, error) {
+func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestionV2, error) {
 	DefaultQuizSingleRecordService.ClearTodayRecord(openid)
 	return DefaultQuizQuestionService.GetDailyQuestions(OneDayAnswerNum)
 }

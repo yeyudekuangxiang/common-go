@@ -18,18 +18,19 @@ func (QuizController) GetDailyQuestions(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 
 	list, err := quiz.DefaultQuizService.DailyQuestions(user.OpenId)
-	res := make([]*Questions, len(list))
-	for i, item := range list {
-		res[i] = &Questions{
-			ID:                  item.ID,
-			QuestionId:          strconv.FormatInt(list[i].ID, 10),
+	result := make([]QuizQuestionAPI, 0, len(list))
+	for _, item := range list {
+		result = append(result, QuizQuestionAPI{
+			ID:                  strconv.FormatInt(item.ID, 10),
 			QuestionStatement:   item.QuestionStatement,
 			Choices:             randomOptions(item.Choices),
+			AnswerStatement:     item.AnswerStatement,
 			DetailedDescription: item.DetailedDescription,
-		}
+			Type:                item.Type,
+		})
 	}
 	return gin.H{
-		"list": res,
+		"list": result,
 	}, err
 }
 func randomOptions(options []string) []string {
