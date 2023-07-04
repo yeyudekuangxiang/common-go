@@ -741,16 +741,17 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 		topicModel.Activity = entity.CommunityActivities{
 			Id:             topicModel.Id,
 			Type:           params.ActivityType,
+			Region:         params.Region,
 			Address:        params.Address,
 			SATag:          string(SATag),
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
 			Contacts:       params.Contacts,
-			SignupNumber:   params.SignupNumber,
 			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
 			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
 			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
+			SignupNumber:   params.SignupNumber,
 		}
 	}
 
