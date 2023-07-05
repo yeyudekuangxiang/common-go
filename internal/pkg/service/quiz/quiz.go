@@ -53,7 +53,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 		return nil, errno.ErrCommon.WithMessage("答题数量超出限制")
 	}
 
-	question := entity.QuizQuestion{}
+	question := entity.QuizQuestionV2{}
 
 	err := app.DB.Where("id = ?", questionId).Take(&question).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
