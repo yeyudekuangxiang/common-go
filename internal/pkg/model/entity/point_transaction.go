@@ -94,6 +94,8 @@ func (p PointTransactionType) Text() string {
 		return "铛铛一下"
 	case POINT_HELLO_BIKE_RIDE:
 		return "骑行"
+	case POINT_ECAR_MIO:
+		return "绿喵积分"
 	}
 	return "未知积分"
 }
@@ -151,6 +153,8 @@ func (p PointTransactionType) RealText() string {
 		return "云快充"
 	case POINT_HELLO_BIKE_RIDE:
 		return "骑行"
+	case POINT_ECAR_MIO:
+		return "绿喵充电"
 	}
 	return p.Text()
 }
@@ -218,6 +222,7 @@ const (
 	POINT_SECONDHAND_ORDER_AWARD     PointTransactionType = "SECONDHAND_ORDER_AWARD"
 	POINT_NEW_TASK_PUBLISH_COMMODITY PointTransactionType = "NEW_TASK_PUBLISH_COMMODITY"
 	POINT_HELLO_BIKE_RIDE            PointTransactionType = "HELLO_BIKE_RIDE" //哈啰骑行
+	POINT_ECAR_MIO                   PointTransactionType = "ECAR_MIO"
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -267,6 +272,7 @@ var PointTransactionTypeList = []PointTransactionType{
 	POINT_SECONDHAND_ORDER_AWARD,
 	POINT_NEW_TASK_PUBLISH_COMMODITY,
 	POINT_HELLO_BIKE_RIDE,
+	POINT_ECAR_MIO,
 }
 
 const (
