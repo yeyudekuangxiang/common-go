@@ -23,13 +23,11 @@ type SmsSendController struct {
 //发送营销短信
 
 func (c SmsSendController) SendSms(ctx *gin.Context) (gin.H, error) {
-	app.Logger.Errorf("进来发短信了")
 	form := api_types.GetSendSmsForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		app.Logger.Errorf("SendSms 短信入参错误:%s", err.Error())
 		return nil, err
 	}
-	app.Logger.Errorf("进来发全新了:%s, phone:%s, msg: %s", form.Phone, form.TemplateKey, form.Msg)
 	//调用模版服务，获取模版内容
 	ctxMio := context.NewMioContext(context.WithContext(ctx.Request.Context()))
 	messageService := messageSrv.NewWebMessageService(ctxMio)
