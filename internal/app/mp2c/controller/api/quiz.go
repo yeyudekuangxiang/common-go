@@ -27,6 +27,7 @@ func (QuizController) GetDailyQuestions(ctx *gin.Context) (gin.H, error) {
 			AnswerStatement:     item.AnswerStatement,
 			DetailedDescription: item.DetailedDescription,
 			Type:                item.Type,
+			QuestionID:          strconv.FormatInt(item.ID, 10),
 		})
 	}
 	return gin.H{

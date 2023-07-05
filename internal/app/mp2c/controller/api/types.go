@@ -184,4 +184,5 @@ type QuizQuestionAPI struct {
 	AnswerStatement     string   `json:"answerStatement"`
 	DetailedDescription string   `json:"detailedDescription"`
 	Type                int      `json:"type"`
+	QuestionID          string   `json:"questionId"`
 }
