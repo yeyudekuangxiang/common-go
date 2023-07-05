@@ -61,7 +61,6 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 	if errCheck != nil {
 		return 0, errCheck
 	}*/
-
 	if dto.UserId == 0 && dto.OpenId != "" {
 		infoV2 := srv.repoUser.GetUserBy(repository.GetUserBy{OpenId: dto.OpenId})
 		if infoV2.ID != 0 {
