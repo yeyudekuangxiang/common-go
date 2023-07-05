@@ -11,5 +11,5 @@ type QuizQuestionV2 struct {
 }
 
 func (m QuizQuestionV2) TableName() string {
-	return "quiz_questions_v2"
+	return "quiz_question_v2"
 }
