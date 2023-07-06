@@ -112,8 +112,8 @@ type logSetting struct {
 }
 type aliLogSetting struct {
 	Endpoint     string
-	AccessKey    string
-	AccessSecret string
+	AccessKey    string `json:",optional"`
+	AccessSecret string `json:",optional"`
 	ProjectName  string
 	LogStore     string
 	Topic        string `json:",optional"`
@@ -137,8 +137,8 @@ type duiBaSetting struct {
 type ossSetting struct {
 	CdnDomain    string
 	Endpoint     string
-	AccessKey    string
-	AccessSecret string
+	AccessKey    string `json:",optional"`
+	AccessSecret string `json:",optional"`
 	BasePath     string
 	Bucket       string
 	Region       string
