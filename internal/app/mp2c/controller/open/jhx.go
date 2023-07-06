@@ -346,6 +346,7 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 			Type:   typeCarbonStr,
 			Value:  amount,
 			Ip:     ip,
+			BizId:  form.Tradeno,
 		})
 		if err != nil {
 			app.Logger.Errorf("预加积分 err:%s", err.Error())

@@ -166,6 +166,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	if !valid {
 		return 0, errno.ErrCommon.WithMessage("不是有效的单车图片")
 	}
+	bizId := util.UUID()
 	ctx := context.NewMioContext()
 	var point int
 	//减碳量
@@ -174,6 +175,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 		Type:   entity.CARBON_BIKE_RIDE,
 		Value:  1,
 		Info:   fmt.Sprintf("%s", result),
+		BizId:  bizId,
 	})
 	if err != nil {
 		app.Logger.Error("添加骑行更酷减碳量失败", openId, imageUrl, err)
@@ -195,7 +197,7 @@ func (srv PointCollectService) CollectBikeRide(openId string, risk int, imageUrl
 	_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openId,
 		Type:         entity.POINT_BIKE_RIDE,
-		BizId:        util.UUID(),
+		BizId:        bizId,
 		ChangePoint:  int64(point),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
 	})
@@ -225,6 +227,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 		return 0, errno.ErrCommon.WithMessage("不是有效的自带杯图片")
 	}
 	ctx := context.NewMioContext()
+	bizId := util.UUID()
 	var point int
 	//减碳量
 	_, err = NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
@@ -232,6 +235,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 		Type:   entity.CARBON_COFFEE_CUP,
 		Value:  1,
 		Info:   fmt.Sprintf("%s", result),
+		BizId:  bizId,
 	})
 	if err != nil {
 		app.Logger.Error("添加骑行更酷减碳量失败", openId, imageUrl, err)
@@ -252,7 +256,7 @@ func (srv PointCollectService) CollectCoffeeCup(openId string, risk int, imageUr
 	_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openId,
 		Type:         entity.POINT_COFFEE_CUP,
-		BizId:        util.UUID(),
+		BizId:        bizId,
 		ChangePoint:  int64(point),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
 	})
@@ -331,6 +335,7 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 		return 0, errno.ErrCommon.WithMessage("不是有效的图片")
 	}
 
+	bizId := util.UUID()
 	ctx := context.NewMioContext()
 	var point int
 	//减碳量
@@ -339,6 +344,7 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 		Type:   entity.CARBON_REDUCE_PLASTIC,
 		Value:  1,
 		Info:   fmt.Sprintf("%s", result),
+		BizId:  bizId,
 	})
 	if err != nil {
 		app.Logger.Error("添加骑行更酷减碳量失败", openId, imageUrl, err)
@@ -359,7 +365,7 @@ func (srv PointCollectService) CollectReducePlastic(openId string, risk int, ima
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       openId,
 		Type:         entity.POINT_REDUCE_PLASTIC,
-		BizId:        util.UUID(),
+		BizId:        bizId,
 		ChangePoint:  int64(point),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
 	})

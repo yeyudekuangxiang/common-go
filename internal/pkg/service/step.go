@@ -142,7 +142,7 @@ func (srv StepService) formatWeeklyHistoryStepList(list []entity.StepHistory) []
 }
 
 // RedeemPointFromPendingSteps 领取步行积分
-func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
+func (srv StepService) RedeemPointFromPendingSteps(openId string, bizId string) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemPointFromPendingSteps%s", openId), time.Second*5) {
 		return 0, errno.ErrCommon.WithMessage("操作频繁,请稍后再试")
 	}
@@ -180,7 +180,7 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 
 	_, err = NewPointService(context.NewMioContext()).IncUserPoint(srv_types.IncUserPointDTO{
 		ChangePoint:  pendingPoint,
-		BizId:        util.UUID(),
+		BizId:        bizId,
 		Type:         entity.POINT_STEP,
 		OpenId:       openId,
 		AdditionInfo: fmt.Sprintf("{time=%v, count=%d, point=%d}", time.Now(), stepHistory.Count, pendingPoint),
@@ -189,7 +189,7 @@ func (srv StepService) RedeemPointFromPendingSteps(openId string) (int, error) {
 }
 
 // RedeemCarbonFromPendingSteps 领取步行碳量
-func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip string) (float64, error) {
+func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip string, bizId string) (float64, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("RedeemCarbonFromPendingSteps%s", openId), time.Second*5) {
 		return 0, errno.ErrCommon.WithMessage("操作频繁,请稍后再试")
 	}
@@ -221,6 +221,7 @@ func (srv StepService) RedeemCarbonFromPendingSteps(openId string, uid int64, ip
 		Info:    fmt.Sprintf("{time=%v, count=%d,allCount=%f}", time.Now(), stepHistory.Count, addStepFloat),
 		AdminId: 0,
 		Ip:      ip,
+		BizId:   bizId,
 	})
 	if errCarbon != nil {
 		return 0, errCarbon

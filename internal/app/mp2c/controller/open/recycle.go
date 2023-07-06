@@ -120,6 +120,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	currCo2, _ := RecycleService.GetCo2(form.Name, form.Qua)
 	carbonString := fmt.Sprintf("%f", currCo2)
 
+	bizId := util.UUID()
 	//查询今日该类型获取积分次数
 	err = RecycleService.CheckLimit(userInfo.OpenId, form.Name)
 	if err == nil {
@@ -128,7 +129,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 			OpenId:       userInfo.OpenId,
 			Type:         typeName,
 			ChangePoint:  lastPoint,
-			BizId:        util.UUID(),
+			BizId:        bizId,
 			AdditionInfo: form.OrderNo + "#" + strconv.FormatFloat(currCo2, 'f', 2, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.ClientId,
 			Note:         scene.Ch + "#" + form.OrderNo,
 		})
@@ -146,6 +147,7 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		Info:    form.OrderNo + "#" + carbonString + "#" + form.ClientId,
 		AdminId: 0,
 		Ip:      "",
+		BizId:   bizId,
 	})
 	return gin.H{}, nil
 }
@@ -259,6 +261,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 	}
 
 	//查询今日该类型获取积分次数
+	bizId := util.UUID()
 	err = RecycleService.CheckLimit(userInfo.OpenId, typeText)
 	if err == nil {
 		//加积分
@@ -266,7 +269,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 			OpenId:       userInfo.OpenId,
 			Type:         entity.POINT_FMY_RECYCLING_CLOTHING,
 			ChangePoint:  lastPoint,
-			BizId:        util.UUID(),
+			BizId:        bizId,
 			AdditionInfo: form.Data.OrderSn + "#" + strconv.FormatFloat(currCo2, 'E', -1, 64) + "#" + strconv.FormatInt(currPoint, 10) + "#" + form.Data.Phone,
 			Note:         scene.Ch + "#" + form.Data.OrderSn,
 		})
@@ -284,6 +287,7 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		Info:    form.Data.OrderSn + "#" + carbonString + "#" + form.Data.Phone,
 		AdminId: 0,
 		Ip:      "",
+		BizId:   bizId,
 	})
 
 	return gin.H{}, nil
@@ -403,6 +407,7 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		Type:   ct,
 		Value:  currCo2,
 		Info:   fmt.Sprint(params),
+		BizId:  form.OrderNo,
 	})
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("[%s]旧物回收加减碳量失败: %s", form.Ch, err.Error()))

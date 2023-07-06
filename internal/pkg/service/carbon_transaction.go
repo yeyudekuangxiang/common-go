@@ -77,11 +77,13 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 			return 0, nil
 		}
 	}
-
+	if dto.BizId == "" {
+		dto.BizId = util.UUID()
+	}
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
 		Type:         dto.Type,
-		BizId:        util.UUID(),
+		BizId:        dto.BizId,
 		ChangePoint:  carbon,
 		AdditionInfo: dto.Info,
 		CityCode:     cityCode,
@@ -101,11 +103,14 @@ func (srv CarbonTransactionService) CreateV2(dto api_types.CreateCarbonTransacti
 			dto.UserId = infoV2.ID
 		}
 	}
+	if dto.BizId == "" {
+		dto.BizId = util.UUID()
+	}
 	//获取碳量
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
 		Type:         dto.Type,
-		BizId:        util.UUID(),
+		BizId:        dto.BizId,
 		ChangePoint:  dto.Value,
 		AdditionInfo: dto.Info,
 		CityCode:     "",
