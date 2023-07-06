@@ -6,7 +6,7 @@ require (
 	github.com/Baidu-AIP/golang-sdk v1.1.1
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18
 	github.com/aliyun/aliyun-log-go-sdk v0.1.40
-	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
+	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/chanxuehong/wechat v0.0.0-20211009063332-41a5c6d8b38b
@@ -32,10 +32,10 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.1.24
+	gitlab.miotech.com/miotech-application/backend/common-go v1.2.0
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.9.5
 	go.uber.org/zap v1.23.0
-	golang.org/x/net v0.5.0
+	golang.org/x/net v0.7.0
 	google.golang.org/grpc v1.50.1
 	gopkg.in/ini.v1 v1.62.0
 	gorm.io/gorm v1.24.3
@@ -52,6 +52,9 @@ require (
 	github.com/CloudyKit/jet/v5 v5.0.2 // indirect
 	github.com/PuerkitoBio/goquery v1.5.1 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 // indirect
+	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
+	github.com/alibabacloud-go/tea v1.1.8 // indirect
+	github.com/aliyun/credentials-go v1.3.0 // indirect
 	github.com/andybalholm/brotli v1.0.1-0.20200619015827-c3da72aa01ed // indirect
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -167,9 +170,9 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 // indirect
@@ -192,4 +195,4 @@ require (
 
 replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.9.5 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.9.5
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.1.24 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.24
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.0 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.0
