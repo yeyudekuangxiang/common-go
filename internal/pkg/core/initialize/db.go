@@ -22,7 +22,7 @@ func InitDB() {
 	log.Println("初始化数据库连接...")
 	dbc := config.Config.Database
 
-	//zlogger := app.OriginLogger.With(mzap.LogDatabase)
+	zlogger := app.OriginLogger.With(mzap.LogDatabase)
 	conf := db.Config{
 		Type:         dbc.Type,
 		Host:         dbc.Host,
@@ -34,7 +34,7 @@ func InitDB() {
 		MaxOpenConns: dbc.MaxOpenConns,
 		MaxIdleConns: dbc.MaxIdleConns,
 		MaxLifetime:  dbc.MaxLifetime,
-		Logger:       logger.Default.LogMode(logger.Info), //mzap.NewGormLogger(zlogger.Sugar()).LogMode(gormLevelMap[dbc.LogLevel]),
+		Logger:       mzap.NewGormLogger(zlogger.Sugar()).LogMode(gormLevelMap[dbc.LogLevel]),
 	}
 
 	gormDb, err := db.NewDB(conf)
