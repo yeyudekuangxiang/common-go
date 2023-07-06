@@ -104,7 +104,7 @@ func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*s
 	callbackBase64 := base64.StdEncoding.EncodeToString(callbackStr)
 
 	policyToken := srv_types.OssPolicyToken{}
-	policyToken.AccessKeyId = config.Config.OSS.AccessKey
+	policyToken.AccessKeyId = srv.client.Config.GetCredentials().GetAccessKeyID()
 	policyToken.Host = "https://" + srv.Bucket + "." + config.Config.OSS.Endpoint
 	policyToken.Expire = expireEnd
 	policyToken.Signature = signedStr
