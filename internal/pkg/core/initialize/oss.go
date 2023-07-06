@@ -15,6 +15,8 @@ func InitOss() {
 	if err != nil && err != aliyuntool.ErrCredentialNotFound {
 		log.Panic("初始化阿里云ossProvider异常", err)
 	}
+	log.Printf("配置:%+v provider:%+v\n", config.Config.OSS, provider)
+	log.Println("provider key ", provider.GetCredentials().GetAccessKeyID(), provider.GetCredentials().GetAccessKeySecret(), provider.GetCredentials().GetSecurityToken())
 	client, err := oss.New(config.Config.OSS.Endpoint, config.Config.OSS.AccessKey, config.Config.OSS.AccessSecret, oss.SetCredentialsProvider(provider))
 	if err != nil {
 		log.Panic(err)
@@ -31,8 +33,10 @@ func InitSts() {
 		log.Panic("初始化阿里云sts provider异常", err)
 	}
 	if providerClient != nil {
+		log.Printf("通过Provider初始化sts client %+v\n", providerClient)
 		*app.STSClient = *providerClient
 	} else {
+		log.Println("通过accessKey初始化sts")
 		client, err := sts.NewClientWithAccessKey(config.Config.OSS.Region, config.Config.OSS.AccessKey, config.Config.OSS.AccessSecret)
 		if err != nil {
 			log.Panic(err)
