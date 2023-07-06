@@ -8,6 +8,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/logger/aliyunzap"
 	"gitlab.miotech.com/miotech-application/backend/common-go/logger/aliyunzero"
 	mzap "gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/aliyuntool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxwork"
 	"go.uber.org/zap"
@@ -17,13 +18,19 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/util"
 	"os"
+	"time"
 )
 
 func InitLog() {
 	logx.DisableStat()
-	if config.Config.AliLog.AccessKey != "" && config.Config.AliLog.AccessSecret != "" {
+	cred, err := aliyuntool.UpdateAliYunStsTokenFunc(nil)
+	if err != nil && err != aliyuntool.ErrCredentialNotFound {
+		log.Panic("初始化阿里云UpdateAliYunStsTokenFunc异常", err)
+	}
+
+	if (config.Config.AliLog.AccessKey != "" && config.Config.AliLog.AccessSecret != "") || cred != nil {
 		log.Println("发现阿里云日志配置,自动初始化阿里云日志")
-		InitAliyunLog()
+		InitAliyunLog(cred)
 	} else {
 		log.Println("未发现阿里云日志配置,自动初始化控制台日志")
 		InitConsoleLog()
@@ -59,13 +66,16 @@ func InitFileLog() {
 	*app.Logger = *s
 	log.Println("初始化文件日志组件成功")
 }
-func InitAliyunLog() {
+func InitAliyunLog(UpdateStsToken func() (accessKeyID, accessKeySecret, securityToken string, expireTime time.Time, err error)) {
 	log.Println("初始化阿里云日志组件...")
+
 	aliConfig := config.Config.AliLog
 	prd := producer.InitProducer(&producer.ProducerConfig{
-		Endpoint:        aliConfig.Endpoint,
-		AccessKeyID:     aliConfig.AccessKey,
-		AccessKeySecret: aliConfig.AccessSecret,
+		Endpoint:         aliConfig.Endpoint,
+		AccessKeyID:      aliConfig.AccessKey,
+		AccessKeySecret:  aliConfig.AccessSecret,
+		UpdateStsToken:   UpdateStsToken,
+		StsTokenShutDown: make(chan struct{}),
 	})
 	prd.Start()
 
