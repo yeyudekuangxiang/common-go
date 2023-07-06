@@ -438,14 +438,14 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		isHalf = true
 		halfPoint = p - incPoint
 	}
-
+	bizId := util.UUID()
 	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
 	pointService := service.NewPointService(ctx)
 	//积分
 	point, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
 		Type:        tp,
-		BizId:       util.UUID(),
+		BizId:       bizId,
 		ChangePoint: incPoint,
 		AdminId:     0,
 		Note:        form.PlatformKey + "#" + one.Tradeno,
@@ -479,6 +479,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 			Type:   typeCarbonStr,
 			Value:  amount,
 			Ip:     ip,
+			BizId:  bizId,
 		})
 		if err != nil {
 			app.Logger.Errorf("预加积分 err:%s", err.Error())

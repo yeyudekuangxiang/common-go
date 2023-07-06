@@ -58,6 +58,7 @@ func (c *defaultClientHandle) powerReplace() error {
 			Info:    m["orderId"] + "#" + m["kwh"] + "#" + c.clientHandle.bizId + "#" + c.clientHandle.ImgUrl,
 			AdminId: 0,
 			Ip:      "",
+			BizId:   c.clientHandle.bizId,
 		})
 		return nil
 	})
