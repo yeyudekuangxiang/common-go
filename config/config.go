@@ -74,6 +74,7 @@ type app struct {
 	PointRpc            zrpc.RpcClientConf `ini:"pointRpc" json:"pointRpc"`
 	UserRpc             zrpc.RpcClientConf `ini:"userRpc" json:"userRpc"`
 	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
+	PlatformRpc         zrpc.RpcClientConf `ini:"platformRpc" json:"platformRpc"`
 	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
 	Saas                saas               `ini:"saas" json:"saas"`
 	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
