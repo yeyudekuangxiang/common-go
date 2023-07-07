@@ -659,6 +659,7 @@ github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mailru/easyjson v0.7.6 h1:8yTIVnZgCoiM1TgqoeTl+LfU5Jg6/xL3QhGQnimLYnA=
 github.com/mailru/easyjson v0.7.6/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
+github.com/makiuchi-d/gozxing v0.1.1/go.mod h1:eRIHbOjX7QWxLIDJoQuMLhuXg9LAuw6znsUtRkNw9DU=
 github.com/matryer/try v0.0.0-20161228173917-9ac251b645a2/go.mod h1:0KeJpeMD6o+O4hW7qJOT7vyQPKrWmj26uf5wMc/IiIs=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.1/go.mod h1:FuOcm+DKB9mbwrcAfNl7/TZVBZ6rcnceauSikq3lYCQ=
@@ -1050,10 +1051,10 @@ github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9/go.mod h1:E1AXubJB
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
 github.com/zeromicro/go-zero v1.4.2 h1:1P9TuzxONqxQG3Bvpk7r7vPOGEnfXn3lTX/4W5Y2GlQ=
 github.com/zeromicro/go-zero v1.4.2/go.mod h1:OK8ilGkhRzhi1NRRC76h5qTNFm6NbsYrUqld38i4NF4=
-gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.57 h1:m9t65ZzczgKdgHSRCS6KCzGCdKJs135DC8KkGXVkuoY=
-gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.57/go.mod h1:VoKLaVVWAvt6zFF0JJf8DYyNRDmjxcTQBGX8Gfzc4B8=
-gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.4.1-develop h1:6tIVbIUB2ueBoDmo0C/sNvl46ZGvFJfRaoNr15cbjj4=
-gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.4.1-develop/go.mod h1:PtrOaKXNwyBTLbDlrsm59n2hITDtOoyrnX7QmgYiyN8=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.59 h1:Ji1FNdqDp+2IotwjH5cw1JLXrbt1KxclsXo702xNF5U=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.1.59/go.mod h1:VoKLaVVWAvt6zFF0JJf8DYyNRDmjxcTQBGX8Gfzc4B8=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.2 h1:50sjdp/YdKd4D+/y7Apew/odINCvkBO3vRTrAfOUL0k=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.2/go.mod h1:HOAI6zVXMEB3SZDN1CHzQnsQLRaoCF8DFlWrXgYAXhY=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738 h1:VcrIfasaLFkyjk6KNlXQSzO+B0fZcnECiDrKJsfxka0=
