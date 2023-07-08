@@ -107,11 +107,12 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 		return nil, nil
 	}
 
+	bizId := util.UUID()
 	c := context.NewMioContext()
 	_, err = service.NewPointService(c).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       sceneUser.OpenId,
 		Type:         entity.POINT_YTX,
-		BizId:        util.UUID(),
+		BizId:        bizId,
 		ChangePoint:  incPoint,
 		AdditionInfo: "一键领取亿通行积分",
 	})
@@ -130,6 +131,7 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 			UserId: user.ID,
 			Type:   typeCarbonStr,
 			Value:  float64(incPoint / int64(scene.Override)),
+			BizId:  bizId,
 		})
 		if err != nil {
 			return nil, errno.ErrCommon.WithErr(err)

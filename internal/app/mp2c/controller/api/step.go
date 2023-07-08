@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/medivhzhan/weapp/v3"
 	"mio/internal/pkg/service"
+	"mio/internal/pkg/util"
 	"mio/internal/pkg/util/apiutil"
 	"sort"
 )
@@ -54,7 +55,8 @@ func (StepController) WeeklyHistory(ctx *gin.Context) (interface{}, error) {
 }
 func (StepController) Collect(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	carbon, err := service.DefaultStepService.RedeemCarbonFromPendingSteps(user.OpenId, user.ID, ctx.ClientIP())
+	bizId := util.UUID()
+	carbon, err := service.DefaultStepService.RedeemCarbonFromPendingSteps(user.OpenId, user.ID, ctx.ClientIP(), bizId)
 	if err != nil {
 		return gin.H{
 			"points": 0,
@@ -62,7 +64,7 @@ func (StepController) Collect(ctx *gin.Context) (gin.H, error) {
 		}, err
 	}
 	var points int
-	points, err = service.DefaultStepService.RedeemPointFromPendingSteps(user.OpenId)
+	points, err = service.DefaultStepService.RedeemPointFromPendingSteps(user.OpenId, bizId)
 	return gin.H{
 		"points": points,
 		"carbon": carbon,

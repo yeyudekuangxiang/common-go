@@ -110,7 +110,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 	go ctr.turnPlatform(userInfo, form)
 
 	totalPower, _ := strconv.ParseFloat(form.TotalPower, 64)
-
+	bizId := util.UUID()
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" && totalPower != 0 {
@@ -122,6 +122,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + fmt.Sprintf("%f", totalPower) + "#" + form.Sign,
 			AdminId: 0,
 			Ip:      "",
+			BizId:   bizId,
 		})
 		if errCarbon != nil {
 			fmt.Println("charge 加碳失败", form)
@@ -156,7 +157,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			OpenId:       userInfo.OpenId,
 			Type:         typeString,
 			ChangePoint:  int64(thisPoint),
-			BizId:        util.UUID(),
+			BizId:        bizId,
 			AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
 		})
 		if err != nil {
@@ -370,7 +371,6 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 		Data: form,
 		Ip:   c.ClientIP(),
 	})
-
 	info, _ := json.Marshal(form)
 	//加减碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
@@ -383,6 +383,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 			Info:    string(info),
 			AdminId: 0,
 			Ip:      "",
+			BizId:   form.TradeSeq,
 		})
 		if errCarbon != nil {
 			app.Logger.Errorf(fmt.Sprintf("[ykc]加碳失败: %s; query: %v", err.Error(), fmt.Sprint(info)))

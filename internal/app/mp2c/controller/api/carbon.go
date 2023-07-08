@@ -102,6 +102,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 		Info:     form.Info,
 		AdminId:  0,
 		Ip:       "", //ctx.ClientIP()*/
+		BizId:    util.UUID(),
 	})
 	if err != nil {
 		return gin.H{
