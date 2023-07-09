@@ -81,6 +81,74 @@ func (c *Client) Request(param SendChargeParam) (resp *QueryResponse, err error)
 	return resV2, nil
 }
 
+//发票相关
+
+//客户运营商支付信息回调
+
+func (c *Client) NotificationMspPaymentInfo(param NotificationMspPaymentInfoParam) (resp *NotificationMspPaymentInfoResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"notification_msp_payment_info",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := NotificationMspPaymentInfoResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+//发票申请
+
+func (c *Client) InvoiceApply(param InvoiceApplyParam) (resp *InvoiceApplyResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"invoice_apply",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := InvoiceApplyResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+//发票详情
+
+func (c *Client) InvoiceInfo(param InvoiceInfoParam) (resp *InvoiceInfoResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"invoice_info",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := InvoiceInfoResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
 //请求星星接口
 
 func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryTokenResult, err error) {

@@ -8,7 +8,90 @@ import (
 	"testing"
 )
 
-var Token = "166b64dd-e5a3-47e6-ab1c-f84a79dd9ab9"
+var Token = "71794542-f639-44db-86c1-b1e536ed24ab"
+
+//开发票1
+func TestNotificationMspPaymentInfo(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.NotificationMspPaymentInfo(NotificationMspPaymentInfoParam{
+		StartChargeSeq:       "MA1G55M8XufGQgWWL2RSEz5xxlh",
+		UserPaidAmount:       0.2,
+		SubsidyElecAmount:    0,
+		SubsidyServiceAmount: 0,
+		RoyaltyServiceAmount: 0.02,
+		ChannelAmount:        0,
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+//开发票2
+func TestInvoiceApply(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.InvoiceApply(InvoiceApplyParam{
+		OrderType:       0,
+		OutInvoiceId:    "",
+		InvoiceOrders:   nil,
+		BusinessType:    0,
+		InvoiceTitle:    "",
+		InvoiceType:     0,
+		PayerRegisterNo: "",
+		Remark:          "",
+		PayerEmail:      "",
+		ReceiverName:    "",
+		ReceiverAddress: "",
+		ReceiverPhone:   "",
+		CompanyPhone:    "",
+		CompanyAddress:  "",
+		BankName:        "",
+		Account:         "",
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+//查看发票
+
+func TestInvoiceInfo(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.InvoiceInfo(InvoiceInfoParam{
+		OutInvoiceId: "",
+		BatchNo:      "",
+		SubBatchNo:   "",
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
 
 func TestGetConnectorID(t *testing.T) {
 	a := RestoreConnectorID("11000000000000010050638000")
@@ -34,6 +117,7 @@ func TestGetConnectorID(t *testing.T) {
 	fmt.Println("Connector ID:", connectorID)
 
 }
+
 func TestPhoneEncrypt(t *testing.T) {
 	//数据加解
 	AESSecret := "OzxlBNxflRPwbePa"
