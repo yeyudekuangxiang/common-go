@@ -200,6 +200,21 @@ func (c *NotifyClient) NotificationResponse(param interface{}) (resp *ChargeResp
 	return result
 }
 
+//开票异步通知
+
+func (c *NotifyClient) NotificationInvoiceChange(param NotificationParam) (resp *NotificationInvoiceChangeParam, err error) {
+	request, err := c.NotificationRequest(param)
+	if err != nil {
+		return nil, err
+	}
+	stationStatus := NotificationInvoiceChangeParam{}
+	err = json.Unmarshal(request, &stationStatus)
+	if err != nil {
+		return nil, err
+	}
+	return &stationStatus, nil
+}
+
 //星星调用绿喵数据加密
 
 func (c *NotifyClient) QueryRequestEncrypt(param interface{}) (resp *NotificationParam) {
