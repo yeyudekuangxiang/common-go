@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var Token = "71794542-f639-44db-86c1-b1e536ed24ab"
+var Token = "3a233ea6-de04-4f56-aba7-7826933c0a67"
 
 //开发票1
 func TestNotificationMspPaymentInfo(t *testing.T) {
@@ -22,11 +22,11 @@ func TestNotificationMspPaymentInfo(t *testing.T) {
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.NotificationMspPaymentInfo(NotificationMspPaymentInfoParam{
-		StartChargeSeq:       "MA1G55M8XufGQgWWL2RSEz5xxlh",
-		UserPaidAmount:       0.2,
+		StartChargeSeq:       "MA1G55M8XynXQn3O13GNWWrMgik",
+		UserPaidAmount:       1.67,
 		SubsidyElecAmount:    0,
 		SubsidyServiceAmount: 0,
-		RoyaltyServiceAmount: 0.02,
+		RoyaltyServiceAmount: 0,
 		ChannelAmount:        0,
 	})
 	println(status)
@@ -46,23 +46,31 @@ func TestInvoiceApply(t *testing.T) {
 		Token:      Token,
 		OperatorID: "MA1G55M8X",
 	}
+	outInvoiceId := GetOutInvoiceId()
 	status, err := c.InvoiceApply(InvoiceApplyParam{
-		OrderType:       0,
-		OutInvoiceId:    "",
-		InvoiceOrders:   nil,
-		BusinessType:    0,
-		InvoiceTitle:    "",
-		InvoiceType:     0,
-		PayerRegisterNo: "",
+		OrderType:    1,
+		OutInvoiceId: outInvoiceId,
+		InvoiceOrders: []InvoiceOrders{
+			{
+				StartChargeSeq: "MA1G55M8XynXQn3O13GNWWrMgik",
+				ElecMoney:      1.36,
+				SeviceMoney:    0.31,
+				TotalMoney:     1.67,
+			},
+		},
+		BusinessType:    2,
+		InvoiceTitle:    "妙投信息科技（上海）有限公司",
+		InvoiceType:     1,
+		PayerRegisterNo: "91310109MA1G55M8XR",
 		Remark:          "",
-		PayerEmail:      "",
-		ReceiverName:    "",
-		ReceiverAddress: "",
-		ReceiverPhone:   "",
-		CompanyPhone:    "",
-		CompanyAddress:  "",
-		BankName:        "",
-		Account:         "",
+		PayerEmail:      "18840853003@163.com",
+		ReceiverName:    "刘梅",
+		ReceiverAddress: "上海市上海中心",
+		ReceiverPhone:   "18840853003",
+		CompanyPhone:    "021-62818881",
+		CompanyAddress:  "上海市虹口区广纪路173号1001-1007室131V",
+		BankName:        "浦发银行第一营业部",
+		Account:         "03003134635",
 	})
 	println(status)
 	if err != nil {
@@ -83,9 +91,101 @@ func TestInvoiceInfo(t *testing.T) {
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.InvoiceInfo(InvoiceInfoParam{
-		OutInvoiceId: "",
-		BatchNo:      "",
-		SubBatchNo:   "",
+		OutInvoiceId: "MA1G55M8X_18PbuPJNxO",
+		BatchNo:      "cf50528a-d152-4d6a-852b-3d8520f22381",
+		SubBatchNo:   "20230710143408618ug5",
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+//待开票汇总
+func TestUnInvoiceSummary(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.UnInvoiceSummary(UnInvoiceSummaryParam{
+		StartDate: "2022-07-10",
+		EndDate:   "2023-07-10",
+		OrderType: 0,
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+func TestUnInvoiceOrder(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.UnInvoiceOrder(UnInvoiceOrderParam{
+		PageNo:    1,
+		PageSize:  10,
+		StartDate: "2023-06-10",
+		EndDate:   "2023-07-11",
+		OrderType: 1,
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+func TestInvoiceList(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.InvoiceList(InvoiceListParam{
+		OutInvoiceId: "MA1G55M8X_18PbuPJNxO",
+		BatchNo:      "b958485d-e9a5-48f5-8b06-6b336e49ec96",
+		SubBatchNo:   "20230710143408618ug5",
+		PageNo:       1,
+		PageSize:     100,
+	})
+	println(status)
+	if err != nil {
+		return
+	}
+}
+
+func TestInvoiceOrder(t *testing.T) {
+	c := Client{
+		Domain:     "http://test-evcs.starcharge.com/evcs/starcharge/",
+		Version:    "",
+		AESSecret:  "a2164ada0026ccf7",
+		AESIv:      "82c91325e74bef0f",
+		SigSecret:  "9af2e7b2d7562ad5",
+		Token:      Token,
+		OperatorID: "MA1G55M8X",
+	}
+	status, err := c.InvoiceOrder(InvoiceOrderParam{
+		OutInvoiceId: "MA1G55M8X_18PbuPJNxO",
+		BatchNo:      "b958485d-e9a5-48f5-8b06-6b336e49ec96",
+		SubBatchNo:   "20230710143408618ug5",
+		OrderType:    1,
+		PageNo:       1,
+		PageSize:     100,
 	})
 	println(status)
 	if err != nil {

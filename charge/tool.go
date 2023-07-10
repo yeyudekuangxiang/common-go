@@ -55,6 +55,17 @@ func GenerateSerialNumber() string {
 	return operatorID + result
 }
 
+func GetOutInvoiceId() string {
+	operatorID := "MA1G55M8X_"
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, 10)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	result := string(b)
+	return operatorID + result
+}
+
 /**
 第一步：在扫码完成之后会获取到“二维码格式1”或者“二维码格式2”，在获取二维码格式2后需进行截取终端编号，如https://qrcode.starcharge.com/#/1012081501，截取得到1012081501
 第二步：将获取到的文本或者截取到文本转换成互联互通编号，大部分的星星充电桩上无互联互通编码，是使用的8位与10位的编号。所以需要接入方根据扫码后字符串的长度来判断，如果字符串长度是8位或10位，则说明是星星充电。

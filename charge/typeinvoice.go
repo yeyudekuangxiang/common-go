@@ -112,3 +112,81 @@ type NotificationInvoiceChangeParam struct {
 	InvoiceAmount   float64
 	PickupAddress   string
 }
+
+type UnInvoiceSummaryParam struct {
+	StartDate string
+	EndDate   string
+	OrderType int
+}
+
+type UnInvoiceSummaryResult struct {
+	BizCode         string        `json:"BizCode"`
+	BizMsg          string        `json:"BizMsg"`
+	Amount          float64       `json:"Amount"`
+	StartChargeSeqs []interface{} `json:"StartChargeSeqs"`
+	Count           int           `json:"Count"`
+	NormalAmount    float64       `json:"NormalAmount"`
+	RefundAmount    float64       `json:"RefundAmount"`
+	NormalCount     int           `json:"NormalCount"`
+	RefundCount     int           `json:"RefundCount"`
+}
+
+//待开票订单列表
+
+type UnInvoiceOrderParam struct {
+	PageNo    int
+	PageSize  int
+	StartDate string
+	EndDate   string
+	OrderType int
+}
+
+type UnInvoiceOrderResult struct {
+}
+
+type InvoiceListParam struct {
+	OutInvoiceId string
+	BatchNo      string
+	SubBatchNo   string
+	PageNo       int
+	PageSize     int
+}
+
+type InvoiceListResult struct {
+	BizCode   string             `json:"BizCode"`
+	PageNo    int                `json:"PageNo"`
+	PageCount int                `json:"PageCount"`
+	ItemSize  int                `json:"ItemSize"`
+	Items     []InvoiceListItems `json:"Items"`
+}
+
+type InvoiceListItems struct {
+	OutInvoiceId    string  `json:"outInvoiceId"`
+	BatchNo         string  `json:"BatchNo"`
+	InvoiceMaterial int     `json:"InvoiceMaterial"`
+	InvoiceType     int     `json:"InvoiceType"`
+	BusinessType    int     `json:"BusinessType"`
+	InvoiceTitle    string  `json:"InvoiceTitle"`
+	InvoiceAmount   float64 `json:"InvoiceAmount"`
+	ApplyTime       string  `json:"ApplyTime"`
+	Status          int     `json:"Status"`
+	Content         string  `json:"Content"`
+}
+
+type InvoiceOrderParam struct {
+	OutInvoiceId string
+	BatchNo      string
+	SubBatchNo   string
+	OrderType    int
+	PageNo       int
+	PageSize     int
+}
+
+type InvoiceOrderResult struct {
+	OutInvoiceId string `json:"OutInvoiceId"`
+	BatchNo      string `json:"BatchNo"`
+	SubBatchNo   string `json:"SubBatchNo"`
+	OrderType    int    `json:"OrderType"`
+	PageNo       int    `json:"PageNo"`
+	PageSize     int    `json:"PageSize"`
+}

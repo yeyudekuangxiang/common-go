@@ -28,6 +28,39 @@ func TestNotifyToken(t *testing.T) {
 	println(resp)
 }
 
+func TestNotificationInvoiceChange(t *testing.T) {
+	c := NotifyClient{
+		AESSecret: "agRigdo8zFu4NMbC",
+		AESIv:     "aYqsMbzLCbKpnLLa",
+		SigSecret: "dgNaWHDgto716GRd",
+	}
+	result := c.QueryRequestEncrypt(NotificationInvoiceChangeParam{
+		OutInvoiceId:    "1",
+		BatchNo:         "2",
+		SubBatchNo:      "3",
+		TotalCount:      4,
+		InvoiceMaterial: 5,
+		InvoiceTime:     "6",
+		Status:          7,
+		EInvoiceUrl:     "8",
+		EInvoiceMiniUrl: "9",
+		StartChargeSeqs: "10",
+		InvoiceAmount:   11,
+		PickupAddress:   "12",
+	})
+	resultMarshal, err := json.Marshal(result)
+
+	println(resultMarshal)
+	resp, err := c.NotificationInvoiceChange(*result)
+	if err != nil {
+		return
+	}
+	marshal, err := json.Marshal(resp)
+	if err != nil {
+		return
+	}
+	fmt.Println(marshal)
+}
 func TestNotificationStartChargeResultParams(t *testing.T) {
 	c := NotifyClient{
 		AESSecret: "agRigdo8zFu4NMbC",

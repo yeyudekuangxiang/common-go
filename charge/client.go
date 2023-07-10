@@ -149,7 +149,95 @@ func (c *Client) InvoiceInfo(param InvoiceInfoParam) (resp *InvoiceInfoResult, e
 	return &ret, nil
 }
 
-//请求星星接口
+//待开票汇总
+
+func (c *Client) UnInvoiceSummary(param UnInvoiceSummaryParam) (resp *UnInvoiceSummaryResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"un_invoice_summary",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := UnInvoiceSummaryResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+//待开票订单列表
+
+func (c *Client) UnInvoiceOrder(param UnInvoiceOrderParam) (resp *UnInvoiceOrderResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"un_invoice_order",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := UnInvoiceOrderResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+//发票申请对应订单列表
+
+func (c *Client) InvoiceList(param InvoiceListParam) (resp *InvoiceListResult, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"invoice_list",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := InvoiceListResult{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+
+}
+
+//发票申请对应订单列表
+
+func (c *Client) InvoiceOrder(param InvoiceOrderParam) (resp *InvoiceOrderParam, err error) {
+	data, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	response, err := c.Request(SendChargeParam{
+		data,
+		"invoice_order",
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := InvoiceOrderParam{}
+	err = json.Unmarshal(response.Data, &ret)
+	if err != nil {
+		return nil, err
+	}
+	return &ret, nil
+
+}
 
 func (c *Client) QueryToken(param QueryTokenParam) (resp *QueryTokenResult, err error) {
 	data, err := json.Marshal(param)
