@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var Token = "71794542-f639-44db-86c1-b1e536ed24ab"
+var Token = "9e309491-b2f2-4c49-80d6-303074ade1ee"
 
 //开发票1
 func TestNotificationMspPaymentInfo(t *testing.T) {
@@ -47,22 +47,29 @@ func TestInvoiceApply(t *testing.T) {
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.InvoiceApply(InvoiceApplyParam{
-		OrderType:       0,
-		OutInvoiceId:    "",
-		InvoiceOrders:   nil,
-		BusinessType:    0,
-		InvoiceTitle:    "",
-		InvoiceType:     0,
-		PayerRegisterNo: "",
+		OrderType:    1,
+		OutInvoiceId: "MA1G55M8X_test1",
+		InvoiceOrders: []InvoiceOrders{
+			{
+				StartChargeSeq: "MA1G55M8XufGQgWWL2RSEz5xxlh",
+				ElecMoney:      0.16,
+				SeviceMoney:    0.04,
+				TotalMoney:     0.20,
+			},
+		},
+		BusinessType:    2,
+		InvoiceTitle:    "颖投信息科技（上海）有限公司",
+		InvoiceType:     1,
+		PayerRegisterNo: "91310000MA1FY5992T",
 		Remark:          "",
-		PayerEmail:      "",
-		ReceiverName:    "",
-		ReceiverAddress: "",
-		ReceiverPhone:   "",
-		CompanyPhone:    "",
-		CompanyAddress:  "",
-		BankName:        "",
-		Account:         "",
+		PayerEmail:      "18840853003@163.com",
+		ReceiverName:    "刘梅",
+		ReceiverAddress: "上海市上海中心",
+		ReceiverPhone:   "18840853003",
+		CompanyPhone:    "021-62818881",
+		CompanyAddress:  "上海市中辉路60号6幢1层137室",
+		BankName:        "上海银行静安支行",
+		Account:         "03003134635",
 	})
 	println(status)
 	if err != nil {
