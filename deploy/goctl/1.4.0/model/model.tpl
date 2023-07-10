@@ -37,7 +37,7 @@ func New{{.upperStartCamelObject}}Model(db *gorm.DB,{{if .withCache}} c cache.Ca
 
 func (c *custom{{.upperStartCamelObject}}Model) FindOne{{.upperStartCamelObject}}(ctx context.Context,param FindOne{{.upperStartCamelObject}}Param, opts ...option) (*{{.upperStartCamelObject}},bool,error) {
 	db := c.db.WithContext(ctx)
-	db ,_ = initOptions(db,&c.options, opts)
+	db ,_ = initOptions(db,c.options, opts)
 
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
     //在此处组装sql
@@ -68,7 +68,7 @@ func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param 
 	if err != nil {
 		return nil, 0, err
 	}
-	db ,_ = initOptions(db,&c.options, opts)
+	db ,_ = initOptions(db,c.options, opts)
 	err = db.Limit(param.Limit).Offset(param.Offset).Find(&list).Error
 	if err != nil {
 		return nil, 0, err
@@ -78,7 +78,7 @@ func (c *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, param 
 func (c *custom{{.upperStartCamelObject}}Model) List(ctx context.Context, param List{{.upperStartCamelObject}}Param,opts ...option) ([]{{.upperStartCamelObject}}, error) {
 
 	db := c.db.WithContext(ctx)
-	db ,_ = initOptions(db,&c.options, opts)
+	db ,_ = initOptions(db,c.options, opts)
 	db = init{{.upperStartCamelObject}}OrderBy(db, param.OrderBy)
 
 	//在此处组装sql
