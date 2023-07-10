@@ -90,34 +90,28 @@ type QueryEquipChargeStatusParam struct {
 }
 
 type QueryEquipChargeStatusResult struct {
-	StartChargeSeq     string  `json:"StartChargeSeq"`
-	StartChargeSeqStat int     `json:"StartChargeSeqStat"`
-	ConnectorID        string  `json:"ConnectorID"`
-	ConnectorStatus    int     `json:"ConnectorStatus"`
-	CurrentA           float64 `json:"CurrentA"`
-	CurrentB           float64 `json:"CurrentB"`
-	CurrentC           float64 `json:"CurrentC"`
-	VoltageA           float64 `json:"VoltageA"`
-	VoltageB           float64 `json:"VoltageB"`
-	VoltageC           float64 `json:"VoltageC"`
-	Soc                float64 `json:"Soc"`
-	StartTime          string  `json:"StartTime"`
-	EndTime            string  `json:"EndTime"`
-	TotalPower         float64 `json:"TotalPower"`
-	ElecMoney          float64 `json:"ElecMoney"`
-	SeviceMoney        float64 `json:"SeviceMoney"`
-	TotalMoney         float64 `json:"TotalMoney"`
-	SumPeriod          int     `json:"SumPeriod"`
-	ChargeDetails      []struct {
-		DetailPower       float64 `json:"DetailPower"`
-		ElecPrice         float64 `json:"ElecPrice"`
-		SevicePrice       float64 `json:"SevicePrice"`
-		DetailElecMoney   float64 `json:"DetailElecMoney"`
-		DetailSeviceMoney float64 `json:"DetailSeviceMoney"`
-		DetailStartTime   string  `json:"DetailStartTime"`
-		DetailEndTime     string  `json:"DetailEndTime"`
-		DetailType        int     `json:"DetailType"`
-	} `json:"ChargeDetails"`
+	StartChargeSeq      string          `json:"StartChargeSeq"`
+	StartChargeSeqStat  int             `json:"StartChargeSeqStat"`
+	ConnectorID         string          `json:"ConnectorID"`
+	ConnectorStatus     int             `json:"ConnectorStatus"`
+	CurrentA            float64         `json:"CurrentA"`
+	CurrentB            float64         `json:"CurrentB"`
+	CurrentC            float64         `json:"CurrentC"`
+	VoltageA            float64         `json:"VoltageA"`
+	VoltageB            float64         `json:"VoltageB"`
+	VoltageC            float64         `json:"VoltageC"`
+	Soc                 float64         `json:"Soc"`
+	StartTime           string          `json:"StartTime"`
+	EndTime             string          `json:"EndTime"`
+	TotalPower          float64         `json:"TotalPower"`
+	ElecMoney           float64         `json:"ElecMoney"`
+	SeviceMoney         float64         `json:"SeviceMoney"`
+	TotalMoney          float64         `json:"TotalMoney"`
+	SumPeriod           int             `json:"SumPeriod"`
+	ChargeDetails       []ChargeDetails `json:"ChargeDetails"`
+	OriginalElecMoney   float64         `json:"OriginalElecMoney"`
+	OriginalSeviceMoney float64         `json:"OriginalSeviceMoney"`
+	OriginalMoney       float64         `json:"OriginalMoney"`
 }
 type QueryStopChargeParam struct {
 	StartChargeSeq string
