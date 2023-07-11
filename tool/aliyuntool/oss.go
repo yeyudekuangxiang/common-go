@@ -8,6 +8,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"hash"
 	"io"
+	"log"
 	"time"
 )
 
@@ -144,6 +145,7 @@ func (c *OssClient) CreatePolicyToken(param CreateOssPolicyTokenParam) (*CreateP
 	}
 	callbackBase64 := base64.StdEncoding.EncodeToString(callbackStr)
 
+	log.Printf("credentials %+v %+v\n", c.Client.Config.GetCredentials(), c.Client.Config.GetCredentials().GetSecurityToken())
 	policyToken := CreatePolicyTokenResult{}
 	policyToken.AccessKeyId = c.Client.Config.GetCredentials().GetAccessKeyID()
 	policyToken.Host = "https://" + param.Bucket + "." + c.Client.Config.Endpoint
