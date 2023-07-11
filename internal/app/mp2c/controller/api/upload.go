@@ -182,6 +182,9 @@ func (UploadController) UploadImage(ctx *gin.Context) (gin.H, error) {
 		"imgUrl": imgUrl,
 	}, err
 }
+
+// Deprecated: 阿里云无key改造废弃
+// GetUploadSTSTokenInfo
 func (UploadController) GetUploadSTSTokenInfo(ctx *gin.Context) (gin.H, error) {
 
 	form := api_types.GetUploadTokenInfoForm{}
