@@ -523,7 +523,7 @@ type NotificationChargeOrderInfoParam struct {
 	TotalOriginalMoney       float64                     `json:"TotalOriginalMoney"`
 	OriginalChargeDetails    []OriginalChargeDetails     `json:"OriginalChargeDetails"`
 	EndSOC                   int                         `json:"EndSOC"`
-	ElectricStart            int                         `json:"ElectricStart"`
+	ElectricStart            float64                     `json:"ElectricStart"`
 	ElectricEnd              float64                     `json:"ElectricEnd"`
 	UserID                   string                      `json:"UserID"`
 }
