@@ -152,6 +152,7 @@ func (c *OssClient) CreatePolicyToken(param CreateOssPolicyTokenParam) (*CreateP
 	policyToken.Directory = param.UploadDir
 	policyToken.Policy = baseConfig
 	policyToken.Callback = callbackBase64
+	policyToken.XOssSecurityToken = c.Client.Config.GetCredentials().GetSecurityToken()
 
 	return &policyToken, nil
 }
