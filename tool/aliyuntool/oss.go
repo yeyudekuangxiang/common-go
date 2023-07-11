@@ -110,11 +110,20 @@ func (c *OssClient) CreatePolicyToken(param CreateOssPolicyTokenParam) (*CreateP
 	//create post policy json
 	policyConfig := OssPolicyConfig{}
 	policyConfig.Expiration = tokenExpire
-	policyConfig.AddStartWithKey(param.UploadDir)
-	policyConfig.AddContentLength(param.MinSize, param.MaxSize)
-	policyConfig.AddBucket(param.Bucket)
+	if param.UploadDir != "" {
+		policyConfig.AddStartWithKey(param.UploadDir)
+	}
+
+	if param.MinSize > 0 {
+		policyConfig.AddContentLength(param.MinSize, param.MaxSize)
+	}
+	if param.Bucket != "" {
+		policyConfig.AddBucket(param.Bucket)
+	}
 	policyConfig.AddMaxAge(param.MaxAge)
-	policyConfig.AddContentType(param.MimeTypes)
+	if len(param.MimeTypes) > 0 {
+		policyConfig.AddContentType(param.MimeTypes)
+	}
 
 	//calucate signature
 	configData, err := json.Marshal(policyConfig)
