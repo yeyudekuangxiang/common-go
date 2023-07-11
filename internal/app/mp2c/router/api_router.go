@@ -100,7 +100,8 @@ func apiRouter(router *gin.Engine) {
 
 		authRouter.GET("banner/list", apiutil.Format(api.DefaultBannerController.GetBannerList))
 		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
-		authRouter.GET("upload/sts/token", apiutil.Format(api.DefaultUploadController.GetUploadSTSTokenInfo))
+		// Deprecated: 即将废弃
+		//authRouter.GET("upload/sts/token", apiutil.Format(api.DefaultUploadController.GetUploadSTSTokenInfo))
 		authRouter.Any("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
 		authRouter.GET("icon/list", apiutil.Format(api.DefaultIndexIconController.Page))
 	}

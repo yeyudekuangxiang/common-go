@@ -36,6 +36,10 @@ func InitSts() {
 	if err != nil && err.Error() != "No credential found" {
 		log.Panic("初始化阿里云sts provider异常", err)
 	}
+
+	// 屏蔽wukey
+	providerClient = nil
+
 	if providerClient != nil {
 		log.Printf("通过Provider初始化sts client %+v\n", providerClient)
 		*app.STSClient = *providerClient

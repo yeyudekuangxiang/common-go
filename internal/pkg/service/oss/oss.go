@@ -83,7 +83,7 @@ func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*s
 	}
 
 	baseConfig := base64.StdEncoding.EncodeToString(configData)
-	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(config.Config.OSS.AccessSecret))
+	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(srv.client.Config.GetCredentials().GetAccessKeySecret()))
 
 	_, err = io.WriteString(h, baseConfig)
 	if err != nil {

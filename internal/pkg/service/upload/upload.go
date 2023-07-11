@@ -37,7 +37,7 @@ func (srv UploadService) UploadImage(openid string, reader io.Reader, filename s
 	return oss.DefaultOssService.FullUrl(ocrPath), nil
 }
 
-//CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
+// CreateUploadToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
 func (srv UploadService) CreateUploadToken(operatorId int64, operatorType int8, scene string) (*srv_types.UploadTokenInfo, error) {
 	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
 		Scene: scene,
@@ -115,7 +115,8 @@ func (srv UploadService) MultipartUploadOcrImage(openid string, reader io.Reader
 	return ocrPath, nil
 }
 
-//CreateStsToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
+// Deprecated: 阿里云无key改造废弃
+// CreateStsToken operatorId 上传者id operatorType上传者类型 1用户 2管理员 3企业版用户 scene上传场景
 func (srv UploadService) CreateStsToken(operatorId int64, operatorType int8, scene string) (*srv_types.OssStsInfo, error) {
 	uploadScene, err := DefaultUploadSceneService.FindUploadScene(srv_types.FindSceneParam{
 		Scene: scene,
