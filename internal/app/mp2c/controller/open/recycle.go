@@ -25,6 +25,7 @@ import (
 	"mio/internal/pkg/util/limit"
 	"mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -359,6 +360,11 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	delete(params, "sign")
 	if sign := platform.Encrypt(params, scene.Key, "&", "md5"); sign != form.Sign {
 		return nil, errno.ErrValidation.WithMessage(fmt.Sprintf("sign:%s 验证失败", form.Sign))
+	}
+
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
 	}
 
 	defer trackRecycle(form)
