@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var Token = "3a233ea6-de04-4f56-aba7-7826933c0a67"
+var Token = "6d02a9dc-15ec-4654-a604-ba96951faa21"
 
 //开发票1
 func TestNotificationMspPaymentInfo(t *testing.T) {
@@ -22,8 +22,8 @@ func TestNotificationMspPaymentInfo(t *testing.T) {
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.NotificationMspPaymentInfo(NotificationMspPaymentInfoParam{
-		StartChargeSeq:       "MA1G55M8XynXQn3O13GNWWrMgik",
-		UserPaidAmount:       1.67,
+		StartChargeSeq:       "MA1G55M8XghAmfSRQe7B5zsBiS5",
+		UserPaidAmount:       2.06,
 		SubsidyElecAmount:    0,
 		SubsidyServiceAmount: 0,
 		RoyaltyServiceAmount: 0,
@@ -52,10 +52,10 @@ func TestInvoiceApply(t *testing.T) {
 		OutInvoiceId: outInvoiceId,
 		InvoiceOrders: []InvoiceOrders{
 			{
-				StartChargeSeq: "MA1G55M8XynXQn3O13GNWWrMgik",
-				ElecMoney:      1.36,
-				SeviceMoney:    0.31,
-				TotalMoney:     1.67,
+				StartChargeSeq: "MA1G55M8XbMzSbwvM33X6Wa1n9B",
+				ElecMoney:      2.08,
+				SeviceMoney:    0.47,
+				TotalMoney:     2.55,
 			},
 		},
 		BusinessType:    2,
@@ -113,15 +113,17 @@ func TestUnInvoiceSummary(t *testing.T) {
 		OperatorID: "MA1G55M8X",
 	}
 	status, err := c.UnInvoiceSummary(UnInvoiceSummaryParam{
-		StartDate: "2022-07-10",
-		EndDate:   "2023-07-10",
-		OrderType: 0,
+		StartDate: "2022-07-11",
+		EndDate:   "2023-07-11",
+		OrderType: 2,
 	})
 	println(status)
 	if err != nil {
 		return
 	}
 }
+
+//测试未通过
 
 func TestUnInvoiceOrder(t *testing.T) {
 	c := Client{
