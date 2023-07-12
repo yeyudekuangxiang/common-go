@@ -56,13 +56,16 @@ type PolicyInfos struct {
 	SevicePrice float64 `json:"SevicePrice"`
 	PvType      int     `json:"PvType"`
 }
+
 type QueryEquipBusinessPolicyResult struct {
-	EquipBizSeq string        `json:"EquipBizSeq"`
-	ConnectorID string        `json:"ConnectorID"`
-	SuccStat    int           `json:"SuccStat"`
-	FailReason  int           `json:"FailReason"`
-	SumPeriod   int           `json:"SumPeriod"`
-	PolicyInfos []PolicyInfos `json:"PolicyInfos"`
+	EquipBizSeq        string        `json:"EquipBizSeq"`
+	ConnectorID        string        `json:"ConnectorID"`
+	SuccStat           int           `json:"SuccStat"`
+	FailReason         int           `json:"FailReason"`
+	SumPeriod          int           `json:"SumPeriod"`
+	PolicyInfos        []PolicyInfos `json:"PolicyInfos"`
+	OriginalPriceInfos []PolicyInfos `json:"OriginalPriceInfos"`
+	BusinessPriceInfos []PolicyInfos `json:"BusinessPriceInfos"`
 }
 
 type QueryEquipAuthResult struct {
@@ -113,6 +116,7 @@ type QueryEquipChargeStatusResult struct {
 	OriginalSeviceMoney float64         `json:"OriginalSeviceMoney"`
 	OriginalMoney       float64         `json:"OriginalMoney"`
 }
+
 type QueryStopChargeParam struct {
 	StartChargeSeq string
 	ConnectorID    string

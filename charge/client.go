@@ -213,7 +213,6 @@ func (c *Client) InvoiceList(param InvoiceListParam) (resp *InvoiceListResult, e
 		return nil, err
 	}
 	return &ret, nil
-
 }
 
 //发票申请对应订单列表
