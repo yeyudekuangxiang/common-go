@@ -16,6 +16,7 @@ import (
 	"mio/internal/pkg/util/apiutil"
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/pkg/errno"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -101,7 +102,10 @@ func (ctr JhxController) JhxGetPreCollectPoint(ctx *gin.Context) (gin.H, error) 
 	}
 	sign := form.Sign
 	delete(params, "sign")
-
+	params["memberId"], err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
 	jhxService := jhx.NewJhxService(context.NewMioContext())
 	item, point, err := jhxService.GetPreCollectPointList(sign, params)
 	if err != nil {
@@ -125,6 +129,10 @@ func (ctr JhxController) JhxCollectPoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
+	memberId, err := url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
@@ -135,7 +143,7 @@ func (ctr JhxController) JhxCollectPoint(c *gin.Context) (gin.H, error) {
 	}
 
 	params := make(map[string]interface{}, 0)
-	err := util.MapTo(&form, &params)
+	err = util.MapTo(&form, &params)
 	if err != nil {
 		return nil, err
 	}
@@ -147,8 +155,9 @@ func (ctr JhxController) JhxCollectPoint(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
-	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	form.MemberId = memberId
 
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	var collect jhx.Collect
 	_ = util.MapTo(&form, &collect)
 
@@ -162,7 +171,7 @@ func (ctr JhxController) JhxCollectPoint(c *gin.Context) (gin.H, error) {
 	var isHalf bool
 	var halfPoint int64
 	timeStr := time.Now().Format("2006-01-02")
-	key := timeStr + ":prePoint:" + form.PlatformKey + form.MemberId
+	key := timeStr + ":prePoint:" + form.PlatformKey + memberId
 	lastPoint, _ := strconv.ParseInt(app.Redis.Get(ctx.Context, key).Val(), 10, 64)
 
 	incPoint := resp.Point
@@ -249,7 +258,10 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
-
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
 	//查询用户
 	userInfo, exist, err := service.DefaultUserService.GetUser(repository.GetUserBy{
 		Mobile: form.Mobile,

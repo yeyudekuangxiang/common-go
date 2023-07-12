@@ -10,6 +10,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/platform/cmd/rpc/platformclient"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
@@ -413,6 +414,17 @@ select order_id from order_item where item_id in (select  product_item_id  from 
 		messageService := messageSrv.MessageService{}
 		messageService.ExtensionSignTime(userInfo.OpenId)
 	}*/
+
+	checkResp, err := app.RpcService.PlatformRpcSrv.CheckEnableVisitDuiDaActivity(context.Background(), &platformclient.CheckEnableVisitDuiDaActivityReq{
+		ActivityId: activityId,
+		UserId:     userId,
+	})
+	if err != nil {
+		return "", err
+	}
+	if !checkResp.Ok {
+		return "", errno.ErrCommon.WithMessage("没有访问权限")
+	}
 
 	isNewUserInt := commontool.Ternary(isNewUser, 1, 0).Int()
 	return duiba.DefaultDuiBaService.AutoLoginOpenId(service.AutoLoginOpenIdParam{

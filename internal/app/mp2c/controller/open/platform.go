@@ -25,6 +25,7 @@ import (
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -128,7 +129,10 @@ func (receiver PlatformController) SyncPoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
 	//查询渠道号
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -209,6 +213,11 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
+	}
+
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
 	}
 
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
@@ -321,6 +330,11 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
+
 	res, total, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
@@ -387,6 +401,12 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
+
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx := context.NewMioContext()
 
 	tp := entity.PointTypesMap[form.PlatformKey]

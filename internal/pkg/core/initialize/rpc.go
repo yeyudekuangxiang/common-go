@@ -5,6 +5,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpkclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/platform/cmd/rpc/platformclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/tokencenter/cmd/rpc/tokencenterclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/userclient"
@@ -22,6 +23,7 @@ func InitRpc() {
 		TokenCenterRpcSrv: tokencenterclient.NewTokenCenter(zrpc.MustNewClient(config.Config.TokenCenterRpc)),
 		PointRpcSrv:       pointclient.NewPoint(zrpc.MustNewClient(config.Config.PointRpc)),
 		ActivityRpcSrv:    activityclient.NewActivity(zrpc.MustNewClient(config.Config.ActivityRpc)),
+		PlatformRpcSrv:    platformclient.NewPlatform(zrpc.MustNewClient(config.Config.PlatformRpc)),
 	}
 
 	log.Println("初始化rpc服务成功...")
