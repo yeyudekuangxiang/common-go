@@ -83,7 +83,7 @@ func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*s
 	}
 
 	baseConfig := base64.StdEncoding.EncodeToString(configData)
-	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(config.Config.OSS.AccessSecret))
+	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(srv.client.Config.GetCredentials().GetAccessKeySecret()))
 
 	_, err = io.WriteString(h, baseConfig)
 	if err != nil {
@@ -104,7 +104,7 @@ func (srv OssService) GetPolicyToken(param srv_types.GetOssPolicyTokenParam) (*s
 	callbackBase64 := base64.StdEncoding.EncodeToString(callbackStr)
 
 	policyToken := srv_types.OssPolicyToken{}
-	policyToken.AccessKeyId = config.Config.OSS.AccessKey
+	policyToken.AccessKeyId = srv.client.Config.GetCredentials().GetAccessKeyID()
 	policyToken.Host = "https://" + srv.Bucket + "." + config.Config.OSS.Endpoint
 	policyToken.Expire = expireEnd
 	policyToken.Signature = signedStr
