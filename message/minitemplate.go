@@ -11,6 +11,7 @@ type IMiniSubTemplate interface {
 	SendMixCount() float64
 	Page() string
 	IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU()
+	TemplateName() string
 }
 
 /*
@@ -47,6 +48,10 @@ func (m MiniChangePointTemplate) SendMixCount() float64 {
 
 func (m MiniChangePointTemplate) Page() string {
 	return MessageJumpUrls.ChangePoint
+}
+
+func (m MiniChangePointTemplate) TemplateName() string {
+	return MessageTemplateName.ChangePoint
 }
 
 func (m MiniChangePointTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
@@ -94,6 +99,10 @@ func (m MiniClockRemindTemplate) Page() string {
 	return MessageJumpUrls.PunchClockRemind
 }
 
+func (m MiniClockRemindTemplate) TemplateName() string {
+	return MessageTemplateName.PunchClockRemind
+}
+
 func (m MiniClockRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
@@ -137,6 +146,10 @@ func (m MiniOrderDeliverTemplate) Page() string {
 	return MessageJumpUrls.OrderDeliver
 }
 
+func (m MiniOrderDeliverTemplate) TemplateName() string {
+	return MessageTemplateName.OrderDeliver
+}
+
 func (m MiniOrderDeliverTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
@@ -169,6 +182,10 @@ func (m MiniSignRemindTemplate) SendMixCount() float64 {
 
 func (m MiniSignRemindTemplate) Page() string {
 	return MessageJumpUrls.SignRemind
+}
+
+func (m MiniSignRemindTemplate) TemplateName() string {
+	return MessageTemplateName.SignRemind
 }
 
 func (m MiniSignRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
@@ -211,6 +228,10 @@ func (m MiniTopicPassTemplate) Page() string {
 	return MessageJumpUrls.TopicPass
 }
 
+func (m MiniTopicPassTemplate) TemplateName() string {
+	return MessageTemplateName.TopicPass
+}
+
 func (m MiniTopicPassTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
@@ -251,6 +272,10 @@ func (m MiniTopicCarefullyChosenTemplate) Page() string {
 	return MessageJumpUrls.TopicCarefullyChosen
 }
 
+func (m MiniTopicCarefullyChosenTemplate) TemplateName() string {
+	return MessageTemplateName.TopicCarefullyChosen
+}
+
 func (m MiniTopicCarefullyChosenTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }
@@ -281,7 +306,9 @@ func (m MiniQuizRemindTemplate) SendMixCount() float64 {
 func (m MiniQuizRemindTemplate) Page() string {
 	return MessageJumpUrls.QuizRemind
 }
-
+func (m MiniQuizRemindTemplate) TemplateName() string {
+	return MessageTemplateName.QuizRemind
+}
 func (m MiniQuizRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
 	return
 }

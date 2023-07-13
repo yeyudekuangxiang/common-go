@@ -10,6 +10,16 @@ type MessageTemplateId struct {
 	QuizRemind           string
 }
 
+type MessageSendMixCount struct {
+	ChangePoint          float64
+	OrderDeliver         float64
+	SignRemind           float64
+	TopicPass            float64
+	TopicCarefullyChosen float64
+	PunchClockRemind     float64
+	QuizRemind           float64
+}
+
 //模版id
 
 var MessageTemplateIds = MessageTemplateId{
@@ -22,19 +32,7 @@ var MessageTemplateIds = MessageTemplateId{
 	QuizRemind:           "8AHI8Iqd-HzSyYQIeNpZ-L2tKeJm8IkEneoBcFL0OkA",
 }
 
-//小程序订阅消息模版
-
-type MessageSendMixCount struct {
-	ChangePoint          float64
-	OrderDeliver         float64
-	SignRemind           float64
-	TopicPass            float64
-	TopicCarefullyChosen float64
-	PunchClockRemind     float64
-	QuizRemind           float64
-}
-
-//每个模版最多发送条数
+//模版每天最多发送条数
 
 var MessageSendMixCounts = MessageSendMixCount{
 	ChangePoint:          1, //积分到账提醒
@@ -46,7 +44,19 @@ var MessageSendMixCounts = MessageSendMixCount{
 	QuizRemind:           1, //答题闯关提醒
 }
 
-//模版路径
+//模版跳转名称
+
+var MessageTemplateName = MessageTemplateId{
+	ChangePoint:          "积分变更提醒",
+	OrderDeliver:         "订单发货提醒",
+	SignRemind:           "签到提醒",
+	TopicPass:            "帖子审核通过提醒", //
+	TopicCarefullyChosen: "帖子被精选通知",  //
+	PunchClockRemind:     "打卡提醒",
+	QuizRemind:           "答题挑战提醒",
+}
+
+//模版跳转路径
 
 var MessageJumpUrls = MessageTemplateId{
 	ChangePoint:          "/pages/my_info/integral/index",                                                                //积分到账提醒
