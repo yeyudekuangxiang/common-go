@@ -8,6 +8,7 @@ type MessageTemplateId struct {
 	TopicCarefullyChosen string
 	PunchClockRemind     string
 	QuizRemind           string
+	ChargeOrder          string
 }
 
 type MessageSendMixCount struct {
@@ -18,6 +19,7 @@ type MessageSendMixCount struct {
 	TopicCarefullyChosen float64
 	PunchClockRemind     float64
 	QuizRemind           float64
+	ChargeOrder          float64
 }
 
 //模版id
@@ -29,7 +31,8 @@ var MessageTemplateIds = MessageTemplateId{
 	TopicPass:            "0CNGli55ko4VBKdaUEiVbKWXEmu6tmnY",            //帖子审核通过提醒
 	TopicCarefullyChosen: "G8_5XpSOsL0E0AmL0UfNZ3pwWRjU-PYdk40ptT_viFI", //帖子被精选通知
 	PunchClockRemind:     "lxV--pg9udJn_iJL0txG00rRqZiwJYLGOPm9g2dEo4Q", //打开提醒
-	QuizRemind:           "8AHI8Iqd-HzSyYQIeNpZ-L2tKeJm8IkEneoBcFL0OkA",
+	QuizRemind:           "8AHI8Iqd-HzSyYQIeNpZ-L2tKeJm8IkEneoBcFL0OkA", //答题闯关提醒
+	ChargeOrder:          "atTU5emLvZAF88DFQCF4bT5F3ihH-yS0IcdhWF9pAc4", //绿喵充电
 }
 
 //模版每天最多发送条数
@@ -42,6 +45,7 @@ var MessageSendMixCounts = MessageSendMixCount{
 	TopicCarefullyChosen: 1, //帖子被精选通知
 	PunchClockRemind:     1, //打卡提醒
 	QuizRemind:           1, //答题闯关提醒
+	ChargeOrder:          1,
 }
 
 //模版跳转名称
@@ -54,6 +58,7 @@ var MessageTemplateName = MessageTemplateId{
 	TopicCarefullyChosen: "帖子被精选通知",  //
 	PunchClockRemind:     "打卡提醒",
 	QuizRemind:           "答题挑战提醒",
+	ChargeOrder:          "充电结束订单提醒",
 }
 
 //模版跳转路径
@@ -66,4 +71,5 @@ var MessageJumpUrls = MessageTemplateId{
 	TopicCarefullyChosen: "index",                                                                                        //帖子被精选通知
 	PunchClockRemind:     "/pages/activity/punch/start/index",
 	QuizRemind:           "/pages/answer_game/index",
+	ChargeOrder:          "/pages/scene/charge/order/index?id=%s",
 }

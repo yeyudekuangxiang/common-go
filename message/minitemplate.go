@@ -10,7 +10,7 @@ type IMiniSubTemplate interface {
 	TemplateId() string
 	SendMixCount() float64
 	Page() string
-	IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU()
+	IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB()
 	TemplateName() string
 }
 
@@ -54,7 +54,7 @@ func (m MiniChangePointTemplate) TemplateName() string {
 	return MessageTemplateName.ChangePoint
 }
 
-func (m MiniChangePointTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniChangePointTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
 
@@ -103,7 +103,7 @@ func (m MiniClockRemindTemplate) TemplateName() string {
 	return MessageTemplateName.PunchClockRemind
 }
 
-func (m MiniClockRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniClockRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
 
@@ -150,7 +150,7 @@ func (m MiniOrderDeliverTemplate) TemplateName() string {
 	return MessageTemplateName.OrderDeliver
 }
 
-func (m MiniOrderDeliverTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniOrderDeliverTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
 
@@ -188,7 +188,7 @@ func (m MiniSignRemindTemplate) TemplateName() string {
 	return MessageTemplateName.SignRemind
 }
 
-func (m MiniSignRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniSignRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
 
@@ -232,7 +232,7 @@ func (m MiniTopicPassTemplate) TemplateName() string {
 	return MessageTemplateName.TopicPass
 }
 
-func (m MiniTopicPassTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniTopicPassTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
 
@@ -276,7 +276,7 @@ func (m MiniTopicCarefullyChosenTemplate) TemplateName() string {
 	return MessageTemplateName.TopicCarefullyChosen
 }
 
-func (m MiniTopicCarefullyChosenTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniTopicCarefullyChosenTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
 
@@ -309,6 +309,52 @@ func (m MiniQuizRemindTemplate) Page() string {
 func (m MiniQuizRemindTemplate) TemplateName() string {
 	return MessageTemplateName.QuizRemind
 }
-func (m MiniQuizRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIU() {
+func (m MiniQuizRemindTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
+	return
+}
+
+/**
+订单状态 {{phrase3.DATA}}
+订单类别 {{phrase2.DATA}}
+订单金额 {{amount6.DATA}}
+时间 {{time18.DATA}}
+服务网点 {{thing13.DATA}}
+*/
+
+//MiniChargeOrderTemplate 绿喵充电结束订单提醒
+
+type MiniChargeOrderTemplate struct {
+	Status         string `json:"status"`
+	Type           string `json:"type"`
+	Price          string `json:"price"`
+	Time           string `json:"time"`
+	ServiceStation string `json:"serviceStation"`
+}
+
+func (m MiniChargeOrderTemplate) ToData() map[string]subscribemessage.SendValue {
+	return map[string]subscribemessage.SendValue{
+		"phrase3": {Value: m.Status},
+		"phrase2": {Value: m.Type},
+		"amount6": {Value: m.Price},
+		"time18":  {Value: m.Time},
+		"thing13": {Value: m.ServiceStation},
+	}
+}
+
+func (m MiniChargeOrderTemplate) TemplateId() string {
+	return MessageTemplateIds.ChargeOrder
+}
+
+func (m MiniChargeOrderTemplate) SendMixCount() float64 {
+	return MessageSendMixCounts.ChargeOrder
+}
+
+func (m MiniChargeOrderTemplate) Page() string {
+	return MessageJumpUrls.ChargeOrder
+}
+func (m MiniChargeOrderTemplate) TemplateName() string {
+	return MessageTemplateName.ChargeOrder
+}
+func (m MiniChargeOrderTemplate) IDIUDGIUGISIAHSUIAHUISAHUIAGUISGIB() {
 	return
 }
