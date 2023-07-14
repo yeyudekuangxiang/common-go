@@ -106,7 +106,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.QuizMessageRemind)
 		return
 	case "charge":
-		templateIds = append(templateIds, message.MessageTemplateIds.ChangePoint)
+		templateIds = append(templateIds, message.MessageTemplateIds.ChargeOrder)
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitChargeRemind, time.Now().Format("20060102"))
 	default:
 		break
