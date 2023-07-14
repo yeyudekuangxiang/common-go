@@ -10,6 +10,7 @@ type MessageTemplateId struct {
 	TopicCarefullyChosen string
 	PunchClockRemind     string
 	QuizRemind           string
+	Charge               string
 }
 
 //模版id
