@@ -215,10 +215,10 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
-	form.MemberId, err = url.QueryUnescape(form.MemberId)
-	if err != nil {
-		return nil, err
-	}
+	//form.MemberId, err = url.QueryUnescape(form.MemberId)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
