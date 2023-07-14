@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/goccy/go-json"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
+	"github.com/yeyudekuangxiang/common-go/tool/httptool"
 	"time"
 )
 

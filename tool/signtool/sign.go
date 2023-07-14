@@ -1,7 +1,7 @@
 package signtool
 
 import (
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"github.com/yeyudekuangxiang/common-go/tool/encrypttool"
 	"sort"
 	"strconv"
 	"strings"

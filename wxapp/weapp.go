@@ -6,7 +6,7 @@ import (
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/medivhzhan/weapp/v3/logger"
 	"github.com/pkg/errors"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
+	"github.com/yeyudekuangxiang/common-go/tool/httptool"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"log"

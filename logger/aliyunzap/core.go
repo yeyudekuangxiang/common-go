@@ -4,7 +4,7 @@ import (
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"github.com/gogo/protobuf/proto"
-	"gitlab.miotech.com/miotech-application/backend/common-go/logger/zap"
+	"github.com/yeyudekuangxiang/common-go/logger/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
 	"time"

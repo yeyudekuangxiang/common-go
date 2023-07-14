@@ -2,7 +2,7 @@ package apitool
 
 import (
 	"github.com/gin-gonic/gin/binding"
-	"gitlab.miotech.com/miotech-application/backend/common-go/validator"
+	"github.com/yeyudekuangxiang/common-go/validator"
 	"net/http"
 	"strings"
 )

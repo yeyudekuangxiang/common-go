@@ -8,13 +8,13 @@ package types
     "status_changed_at": "2022-08-05 14:25:15 +0800",
     "deployment_id": 5200,
     "deployable_id": 302172,
-    "deployable_url": "https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/jobs/302172",
+    "deployable_url": "https://github.com/yeyudekuangxiang/mp2c-go/-/jobs/302172",
     "environment": "hotfix-tagsort",
     "project": {},
     "short_sha": "91b829b3",
     "user": {},
     "user_url": "https://gitlab.miotech.com/neiljin",
-    "commit_url": "https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/commit/91b829b3e42ddbb1ce1e213231ae353272c72d81",
+    "commit_url": "https://github.com/yeyudekuangxiang/mp2c-go/-/commit/91b829b3e42ddbb1ce1e213231ae353272c72d81",
     "commit_title": "fix:修复tag排序问题",
     "ref": "hotfix-tagsort"
 }
@@ -30,7 +30,7 @@ type Deployment struct {
 	DeploymentId int `json:"deployment_id"`
 	//deployable_id 部署任务的编号 302172
 	DeployableId int `json:"deployable_id"`
-	//部署任务url https://gitlab.miotech.com/miotech-application/backend/mp2c-go/-/jobs/302172
+	//部署任务url https://github.com/yeyudekuangxiang/mp2c-go/-/jobs/302172
 	DeployableUrl string `json:"deployable_url"`
 	//环境名称 hotfix-tagsort
 	Environment string `json:"environment"`

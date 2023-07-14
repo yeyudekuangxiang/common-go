@@ -6,19 +6,19 @@ package types
         "id": 294,
         "name": "mp2c-go",
         "description": "绿喵后端服务 - go",
-        "web_url": "https://gitlab.miotech.com/miotech-application/backend/mp2c-go",
+        "web_url": "https://github.com/yeyudekuangxiang/mp2c-go",
         "avatar_url": null,
         "git_ssh_url": "git@gitlab.miotech.com:miotech-application/backend/mp2c-go.git",
-        "git_http_url": "https://gitlab.miotech.com/miotech-application/backend/mp2c-go.git",
+        "git_http_url": "https://github.com/yeyudekuangxiang/mp2c-go.git",
         "namespace": "backend",
         "visibility_level": 0,
         "path_with_namespace": "miotech-application/backend/mp2c-go",
         "default_branch": "master",
         "ci_config_path": null,
-        "homepage": "https://gitlab.miotech.com/miotech-application/backend/mp2c-go",
+        "homepage": "https://github.com/yeyudekuangxiang/mp2c-go",
         "url": "git@gitlab.miotech.com:miotech-application/backend/mp2c-go.git",
         "ssh_url": "git@gitlab.miotech.com:miotech-application/backend/mp2c-go.git",
-        "http_url": "https://gitlab.miotech.com/miotech-application/backend/mp2c-go.git"
+        "http_url": "https://github.com/yeyudekuangxiang/mp2c-go.git"
     }
 */
 type Project struct {

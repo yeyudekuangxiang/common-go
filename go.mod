@@ -1,4 +1,4 @@
-module gitlab.miotech.com/miotech-application/backend/common-go
+module github.com/yeyudekuangxiang/common-go
 
 go 1.17
 
