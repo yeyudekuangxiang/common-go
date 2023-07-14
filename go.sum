@@ -956,8 +956,12 @@ github.com/zeromicro/go-zero v1.4.2 h1:1P9TuzxONqxQG3Bvpk7r7vPOGEnfXn3lTX/4W5Y2G
 github.com/zeromicro/go-zero v1.4.2/go.mod h1:OK8ilGkhRzhi1NRRC76h5qTNFm6NbsYrUqld38i4NF4=
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.0 h1:I3basSnXfriud0+7pMQWQqUKWGFFrE7v6lulVJQt4nA=
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.0/go.mod h1:uyWXI7mz503ik30A/lRzlyR46tEMKbWhF09+cCP5Q9k=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.12 h1:m34MoyAzxzIzKocU/8vVM34cxTomdaMe9dmVOk4S8B8=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.12/go.mod h1:crmTyW23anZaSA0QgxNqzcUM1ktMxRWfn2bWVAFhjOE=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.2 h1:50sjdp/YdKd4D+/y7Apew/odINCvkBO3vRTrAfOUL0k=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.2/go.mod h1:HOAI6zVXMEB3SZDN1CHzQnsQLRaoCF8DFlWrXgYAXhY=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.7 h1:Wv5/XnQ1eSXutXeFV0GykK4YJmM+jBMIJA5JT/MHU0M=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.7/go.mod h1:gSR2Vy+8wHo4uv2bziLkVtQu3qBMzWc1ua7Iuo7ZzrM=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738/go.mod h1:dnLIgRNXwCJa5e+c6mIZCrds/GIG4ncV9HhK5PX7jPg=
