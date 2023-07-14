@@ -6,6 +6,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/medivhzhan/weapp/v3/request"
 	"github.com/medivhzhan/weapp/v3/subscribemessage"
+	"gitlab.miotech.com/miotech-application/backend/common-go/message"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpk"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/user"
 	"golang.org/x/net/context"
@@ -104,6 +105,9 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		templateIds = append(templateIds, config.MessageTemplateIds.QuizRemind)
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.QuizMessageRemind)
 		return
+	case "charge":
+		templateIds = append(templateIds, message.MessageTemplateIds.ChangePoint)
+		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitChargeRemind, time.Now().Format("20060102"))
 	default:
 		break
 	}
