@@ -45,7 +45,7 @@ var MessageSendMixCounts = MessageSendMixCount{
 	TopicCarefullyChosen: 1, //帖子被精选通知
 	PunchClockRemind:     1, //打卡提醒
 	QuizRemind:           1, //答题闯关提醒
-	ChargeOrder:          1,
+	ChargeOrder:          20,
 }
 
 //模版跳转名称
