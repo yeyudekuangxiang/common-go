@@ -157,6 +157,7 @@ type OriginalStationFeeDetail struct {
 	PvType         int     `json:"PvType"`
 }
 
+/*
 type TariffInfo struct {
 	Elements []struct {
 		PriceComponents []struct {
@@ -169,9 +170,9 @@ type TariffInfo struct {
 			TimeType  int    `json:"TimeType"`
 		} `json:"Restrictions"`
 	} `json:"Elements"`
-}
+}*/
 
-type BizExtParams struct {
+/*type BizExtParams struct {
 	StubGroupId         string  `json:"StubGroupId"`
 	ServiceTax          float64 `json:"ServiceTax"`
 	IsBoutique          string  `json:"IsBoutique"`
@@ -181,7 +182,7 @@ type BizExtParams struct {
 	ParkingType         int     `json:"ParkingType"`
 	EquipmentOperatorID string  `json:"EquipmentOperatorID"`
 	ParkingBarrierFlag  int     `json:"ParkingBarrierFlag"`
-}
+}*/
 
 type SupportingFacilityInfo struct {
 	HasToilet           int `json:"HasToilet"`
@@ -237,23 +238,23 @@ type StationInfo struct {
 	IsEnable                 int                        `json:"IsEnable"`
 	PrinterFlag              int                        `json:"PrinterFlag"`
 	BarrierFlag              int                        `json:"BarrierFlag"`
-	TariffInfo               TariffInfo                 `json:"TariffInfo"`
-	FloorLevel               string                     `json:"FloorLevel"`
-	GuideMap                 string                     `json:"GuideMap"`
-	RoadInfo                 string                     `json:"RoadInfo"`
-	AdminName                string                     `json:"AdminName"`
-	AdminTel                 string                     `json:"AdminTel"`
-	OperationWay             string                     `json:"OperationWay"`
-	EnableRoaming            int                        `json:"EnableRoaming"`
-	GreenEnergyFlag          int                        `json:"GreenEnergyFlag"`
-	Flags                    string                     `json:"Flags"`
-	EquipmentOperatorID      string                     `json:"EquipmentOperatorID"`
-	OnlineTime               string                     `json:"OnlineTime"`
-	StationGrade             int                        `json:"StationGrade"`
-	BizExtParams             BizExtParams               `json:"BizExtParams"`
-	SupportingFacilityInfo   SupportingFacilityInfo     `json:"SupportingFacilityInfo"`
-	PlaceHolderType          int                        `json:"PlaceHolderType"`
-	EquipmentInfos           []EquipmentInfos           `json:"EquipmentInfos"`
+	/*	TariffInfo               TariffInfo                 `json:"TariffInfo"`*/
+	FloorLevel          string `json:"FloorLevel"`
+	GuideMap            string `json:"GuideMap"`
+	RoadInfo            string `json:"RoadInfo"`
+	AdminName           string `json:"AdminName"`
+	AdminTel            string `json:"AdminTel"`
+	OperationWay        string `json:"OperationWay"`
+	EnableRoaming       int    `json:"EnableRoaming"`
+	GreenEnergyFlag     int    `json:"GreenEnergyFlag"`
+	Flags               string `json:"Flags"`
+	EquipmentOperatorID string `json:"EquipmentOperatorID"`
+	OnlineTime          string `json:"OnlineTime"`
+	StationGrade        int    `json:"StationGrade"`
+	/*	BizExtParams             BizExtParams               `json:"BizExtParams"`*/
+	SupportingFacilityInfo SupportingFacilityInfo `json:"SupportingFacilityInfo"`
+	PlaceHolderType        int                    `json:"PlaceHolderType"`
+	EquipmentInfos         []EquipmentInfos       `json:"EquipmentInfos"`
 }
 
 type BusinessStationFeeDetail struct {
@@ -274,9 +275,9 @@ type EquipmentInfos struct {
 	Power            float64 `json:"Power"`
 	EquipmentName    string  `json:"EquipmentName"`
 	PowerType        int     `json:"PowerType"`
-	BizExtParams     struct {
+	/*	BizExtParams     struct {
 		ChargePointId string `json:"ChargePointId"`
-	} `json:"BizExtParams"`
+	} `json:"BizExtParams"`*/
 	ConnectorInfos []ConnectorInfo `json:"ConnectorInfos"`
 	ManufacturerID string          `json:"ManufacturerID,omitempty"`
 }
@@ -295,13 +296,13 @@ type ConnectorInfo struct {
 	Reservable         int     `json:"Reservable"`
 	BluetoothKey       string  `json:"BluetoothKey"`
 	VinSupport         int     `json:"VinSupport"`
-	BizExtParams       struct {
+	/*BizExtParams       struct {
 		ModelNo    string `json:"ModelNo"`
 		StubStatus string `json:"StubStatus"`
 		StubId     string `json:"StubId"`
 		UpdateType string `json:"UpdateType"`
 		FrameWork  string `json:"FrameWork"`
-	} `json:"BizExtParams"`
+	} `json:"BizExtParams"`*/
 }
 
 type ConnectorInfos struct {
@@ -423,65 +424,68 @@ type TariffChargeDetails struct {
 }
 
 type NotificationEquipChargeStatusParam struct {
-	StartChargeSeq        string                        `json:"StartChargeSeq"`
-	StartChargeSeqStat    int                           `json:"StartChargeSeqStat"`
-	ConnectorID           string                        `json:"ConnectorID"`
-	ConnectorStatus       int                           `json:"ConnectorStatus"`
-	CurrentA              float64                       `json:"CurrentA"`
-	CurrentB              float64                       `json:"CurrentB"`
-	CurrentC              float64                       `json:"CurrentC"`
-	VoltageA              float64                       `json:"VoltageA"`
-	VoltageB              float64                       `json:"VoltageB"`
-	VoltageC              float64                       `json:"VoltageC"`
-	Soc                   float64                       `json:"Soc"`
-	StartTime             string                        `json:"StartTime"`
-	EndTime               string                        `json:"EndTime"`
-	TotalPower            float64                       `json:"TotalPower"`
-	ElecMoney             float64                       `json:"ElecMoney"`
-	SeviceMoney           float64                       `json:"SeviceMoney"`
-	TotalMoney            float64                       `json:"TotalMoney"`
-	SumPeriod             int                           `json:"SumPeriod"`
-	ChargeDetails         []ChargeDetails               `json:"ChargeDetails"`
-	PWM                   int                           `json:"PWM"`
-	CurrentFrequency      int                           `json:"CurrentFrequency"`
-	ExpectEndTime         string                        `json:"ExpectEndTime"`
-	TariffChargeInfo      TariffChargeInfo              `json:"TariffChargeInfo"`
-	BizExtParams          EquipChargeStatusBizExtParams `json:"BizExtParams"`
-	OrderID               string                        `json:"OrderID"`
-	StartType             int                           `json:"StartType"`
-	LeftTime              int                           `json:"LeftTime"`
-	VoltageCar            int                           `json:"VoltageCar"`
-	CurrentCar            int                           `json:"CurrentCar"`
-	OriginalElecMoney     float64                       `json:"OriginalElecMoney"`
-	OriginalSeviceMoney   float64                       `json:"OriginalSeviceMoney"`
-	OriginalMoney         float64                       `json:"OriginalMoney"`
-	OriginalChargeDetails []OriginalChargeDetails       `json:"OriginalChargeDetails"`
+	StartChargeSeq     string          `json:"StartChargeSeq"`
+	StartChargeSeqStat int             `json:"StartChargeSeqStat"`
+	ConnectorID        string          `json:"ConnectorID"`
+	ConnectorStatus    int             `json:"ConnectorStatus"`
+	CurrentA           float64         `json:"CurrentA"`
+	CurrentB           float64         `json:"CurrentB"`
+	CurrentC           float64         `json:"CurrentC"`
+	VoltageA           float64         `json:"VoltageA"`
+	VoltageB           float64         `json:"VoltageB"`
+	VoltageC           float64         `json:"VoltageC"`
+	Soc                float64         `json:"Soc"`
+	StartTime          string          `json:"StartTime"`
+	EndTime            string          `json:"EndTime"`
+	TotalPower         float64         `json:"TotalPower"`
+	ElecMoney          float64         `json:"ElecMoney"`
+	SeviceMoney        float64         `json:"SeviceMoney"`
+	TotalMoney         float64         `json:"TotalMoney"`
+	SumPeriod          int             `json:"SumPeriod"`
+	ChargeDetails      []ChargeDetails `json:"ChargeDetails"`
+	/*	PWM                int             `json:"PWM"`
+		CurrentFrequency   int             `json:"CurrentFrequency"`*/
+	ExpectEndTime string `json:"ExpectEndTime"`
+	/*	TariffChargeInfo   TariffChargeInfo `json:"TariffChargeInfo"`*/
+	/*	BizExtParams          EquipChargeStatusBizExtParams `json:"BizExtParams"`*/
+	OrderID string `json:"OrderID"`
+	/*	StartType             int                     `json:"StartType"`
+		LeftTime              int                     `json:"LeftTime"`
+		VoltageCar            int                     `json:"VoltageCar"`
+		CurrentCar            int                     `json:"CurrentCar"`*/
+	OriginalElecMoney     float64                 `json:"OriginalElecMoney"`
+	OriginalSeviceMoney   float64                 `json:"OriginalSeviceMoney"`
+	OriginalMoney         float64                 `json:"OriginalMoney"`
+	OriginalChargeDetails []OriginalChargeDetails `json:"OriginalChargeDetails"`
 }
 
+/*
 type TariffChargeInfo struct {
 	TariffChargeDetails []TariffChargeDetails `json:"TariffChargeDetails"`
-}
+}*/
+
+/*
 
 type EquipChargeStatusBizExtParams struct {
-	CTS              string  `json:"CTS"`
-	ChargeOperatorID string  `json:"ChargeOperatorID"`
-	TempStub         int     `json:"TempStub"`
-	OrderID          string  `json:"OrderID"`
-	StationID        string  `json:"StationID"`
-	CurrentCar       int     `json:"CurrentCar"`
-	LeftTime         int     `json:"LeftTime"`
-	TargetOperatorID string  `json:"TargetOperatorID"`
-	StartType        int     `json:"StartType"`
-	StationType      int     `json:"StationType"`
-	EquipmentID      string  `json:"EquipmentID"`
-	ElectricMeterEnd float64 `json:"ElectricMeterEnd"`
-	TotalPower       float64 `json:"TotalPower"`
-	TempGun          int     `json:"TempGun"`
-	AreaCode         string  `json:"AreaCode"`
-	/*	ElectricMeterStart int     `json:"ElectricMeterStart"`
-		VoltageCar         int     `json:"VoltageCar"`*/
-	ConnectorID string `json:"ConnectorID"`
-}
+	CTS                string  `json:"CTS"`
+	ChargeOperatorID   string  `json:"ChargeOperatorID"`
+	TempStub           int     `json:"TempStub"`
+	OrderID            string  `json:"OrderID"`
+	StationID          string  `json:"StationID"`
+	CurrentCar         int     `json:"CurrentCar"`
+	LeftTime           int     `json:"LeftTime"`
+	TargetOperatorID   string  `json:"TargetOperatorID"`
+	StartType          int     `json:"StartType"`
+	StationType        int     `json:"StationType"`
+	EquipmentID        string  `json:"EquipmentID"`
+	ElectricMeterEnd   float64 `json:"ElectricMeterEnd"`
+	TotalPower         float64 `json:"TotalPower"`
+	TempGun            int     `json:"TempGun"`
+	AreaCode           string  `json:"AreaCode"`
+	ElectricMeterStart int     `json:"ElectricMeterStart"`
+	VoltageCar         int     `json:"VoltageCar"`
+	ConnectorID        string  `json:"ConnectorID"`
+}*/
 
 type OriginalChargeDetails struct {
 	DetailPower       float64 `json:"DetailPower"`
@@ -502,54 +506,55 @@ type NotificationStopChargeResultParam struct {
 }
 
 type NotificationChargeOrderInfoParam struct {
-	StartChargeSeq           string                      `json:"StartChargeSeq"`
-	ConnectorId              string                      `json:"ConnectorID"`
-	StartTime                string                      `json:"StartTime"`
-	EndTime                  string                      `json:"EndTime"`
-	TotalPower               float64                     `json:"TotalPower"`
-	TotalElecMoney           float64                     `json:"TotalElecMoney"`
-	TotalSeviceMoney         float64                     `json:"TotalSeviceMoney"`
-	TotalMoney               float64                     `json:"TotalMoney"`
-	StopReason               int                         `json:"StopReason"`
-	SumPeriod                int                         `json:"SumPeriod"`
-	ChargeDetails            []ChargeDetails             `json:"ChargeDetails"`
-	TariffChargeInfo         TariffChargeInfo            `json:"TariffChargeInfo"`
-	BizExtParams             ChargeOrderInfoBizExtParams `json:"BizExtParams"`
-	OrderID                  string                      `json:"OrderID"`
-	StationOwnerType         int                         `json:"StationOwnerType"`
-	StartType                int                         `json:"StartType"`
-	TotalBusinessElecMoney   float64                     `json:"TotalBusinessElecMoney"`
-	TotalBusinessSeviceMoney float64                     `json:"TotalBusinessSeviceMoney"`
-	TotalBusinessMoney       float64                     `json:"TotalBusinessMoney"`
-	BusinessChargeDetails    []BusinessChargeDetails     `json:"BusinessChargeDetails"`
-	TotalOriginalElecMoney   float64                     `json:"TotalOriginalElecMoney"`
-	TotalOriginalSeviceMoney float64                     `json:"TotalOriginalSeviceMoney"`
-	TotalOriginalMoney       float64                     `json:"TotalOriginalMoney"`
-	OriginalChargeDetails    []OriginalChargeDetails     `json:"OriginalChargeDetails"`
-	EndSOC                   int                         `json:"EndSOC"`
-	ElectricStart            float64                     `json:"ElectricStart"`
-	ElectricEnd              float64                     `json:"ElectricEnd"`
-	UserID                   string                      `json:"UserID"`
+	StartChargeSeq   string          `json:"StartChargeSeq"`
+	ConnectorId      string          `json:"ConnectorID"`
+	StartTime        string          `json:"StartTime"`
+	EndTime          string          `json:"EndTime"`
+	TotalPower       float64         `json:"TotalPower"`
+	TotalElecMoney   float64         `json:"TotalElecMoney"`
+	TotalSeviceMoney float64         `json:"TotalSeviceMoney"`
+	TotalMoney       float64         `json:"TotalMoney"`
+	StopReason       int             `json:"StopReason"`
+	SumPeriod        int             `json:"SumPeriod"`
+	ChargeDetails    []ChargeDetails `json:"ChargeDetails"`
+	/*	TariffChargeInfo         TariffChargeInfo            `json:"TariffChargeInfo"`*/
+	/*BizExtParams             ChargeOrderInfoBizExtParams `json:"BizExtParams"`*/
+	OrderID string `json:"OrderID"`
+	/*	StationOwnerType         int                         `json:"StationOwnerType"`
+		StartType                int                         `json:"StartType"`*/
+	TotalBusinessElecMoney   float64                 `json:"TotalBusinessElecMoney"`
+	TotalBusinessSeviceMoney float64                 `json:"TotalBusinessSeviceMoney"`
+	TotalBusinessMoney       float64                 `json:"TotalBusinessMoney"`
+	BusinessChargeDetails    []BusinessChargeDetails `json:"BusinessChargeDetails"`
+	TotalOriginalElecMoney   float64                 `json:"TotalOriginalElecMoney"`
+	TotalOriginalSeviceMoney float64                 `json:"TotalOriginalSeviceMoney"`
+	TotalOriginalMoney       float64                 `json:"TotalOriginalMoney"`
+	OriginalChargeDetails    []OriginalChargeDetails `json:"OriginalChargeDetails"`
+	/*	EndSOC                   int                         `json:"EndSOC"`*/
+	ElectricStart float64 `json:"ElectricStart"`
+	ElectricEnd   float64 `json:"ElectricEnd"`
+	UserID        string  `json:"UserID"`
 }
 
+/*
 type ChargeOrderInfoBizExtParams struct {
-	CTS              string  `json:"CTS"`
-	ChargeOperatorID string  `json:"ChargeOperatorID"`
-	OrderID          string  `json:"OrderID"`
-	TargetOperatorID string  `json:"TargetOperatorID"`
-	StartType        int     `json:"StartType"`
-	StationType      int     `json:"StationType"`
-	Soc              int     `json:"Soc"`
-	IsMergeOrder     int     `json:"IsMergeOrder"`
-	ElectricMeterEnd float64 `json:"ElectricMeterEnd"`
-	TotalPower       float64 `json:"TotalPower"`
-	TotalFeeInfo     string  `json:"TotalFeeInfo"`
-	EndType          int     `json:"EndType"`
-	CTL              string  `json:"CTL"`
-	/*	ElectricMeterStart int     `json:"ElectricMeterStart"`
-		CTP                int     `json:"CTP"`*/
+	CTS                string  `json:"CTS"`
+	ChargeOperatorID   string  `json:"ChargeOperatorID"`
+	OrderID            string  `json:"OrderID"`
+	TargetOperatorID   string  `json:"TargetOperatorID"`
+	StartType          int     `json:"StartType"`
+	StationType        int     `json:"StationType"`
+	Soc                int     `json:"Soc"`
+	IsMergeOrder       int     `json:"IsMergeOrder"`
+	ElectricMeterEnd   float64 `json:"ElectricMeterEnd"`
+	TotalPower         float64 `json:"TotalPower"`
+	TotalFeeInfo       string  `json:"TotalFeeInfo"`
+	EndType            int     `json:"EndType"`
+	CTL                string  `json:"CTL"`
+	ElectricMeterStart int     `json:"ElectricMeterStart"`
+	CTP                int     `json:"CTP"`
 }
-
+*/
 type BusinessChargeDetails struct {
 	DetailPower       float64 `json:"DetailPower"`
 	ElecPrice         float64 `json:"ElecPrice"`
