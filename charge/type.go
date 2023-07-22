@@ -463,24 +463,24 @@ type TariffChargeInfo struct {
 }
 
 type EquipChargeStatusBizExtParams struct {
-	CTS                string  `json:"CTS"`
-	ChargeOperatorID   string  `json:"ChargeOperatorID"`
-	TempStub           int     `json:"TempStub"`
-	OrderID            string  `json:"OrderID"`
-	StationID          string  `json:"StationID"`
-	CurrentCar         int     `json:"CurrentCar"`
-	LeftTime           int     `json:"LeftTime"`
-	TargetOperatorID   string  `json:"TargetOperatorID"`
-	StartType          int     `json:"StartType"`
-	StationType        int     `json:"StationType"`
-	EquipmentID        string  `json:"EquipmentID"`
-	ElectricMeterEnd   float64 `json:"ElectricMeterEnd"`
-	TotalPower         float64 `json:"TotalPower"`
-	TempGun            int     `json:"TempGun"`
-	AreaCode           string  `json:"AreaCode"`
-	ElectricMeterStart int     `json:"ElectricMeterStart"`
-	VoltageCar         int     `json:"VoltageCar"`
-	ConnectorID        string  `json:"ConnectorID"`
+	CTS              string  `json:"CTS"`
+	ChargeOperatorID string  `json:"ChargeOperatorID"`
+	TempStub         int     `json:"TempStub"`
+	OrderID          string  `json:"OrderID"`
+	StationID        string  `json:"StationID"`
+	CurrentCar       int     `json:"CurrentCar"`
+	LeftTime         int     `json:"LeftTime"`
+	TargetOperatorID string  `json:"TargetOperatorID"`
+	StartType        int     `json:"StartType"`
+	StationType      int     `json:"StationType"`
+	EquipmentID      string  `json:"EquipmentID"`
+	ElectricMeterEnd float64 `json:"ElectricMeterEnd"`
+	TotalPower       float64 `json:"TotalPower"`
+	TempGun          int     `json:"TempGun"`
+	AreaCode         string  `json:"AreaCode"`
+	/*	ElectricMeterStart int     `json:"ElectricMeterStart"`
+		VoltageCar         int     `json:"VoltageCar"`*/
+	ConnectorID string `json:"ConnectorID"`
 }
 
 type OriginalChargeDetails struct {
@@ -533,21 +533,21 @@ type NotificationChargeOrderInfoParam struct {
 }
 
 type ChargeOrderInfoBizExtParams struct {
-	CTS                string  `json:"CTS"`
-	ChargeOperatorID   string  `json:"ChargeOperatorID"`
-	OrderID            string  `json:"OrderID"`
-	TargetOperatorID   string  `json:"TargetOperatorID"`
-	StartType          int     `json:"StartType"`
-	StationType        int     `json:"StationType"`
-	Soc                int     `json:"Soc"`
-	IsMergeOrder       int     `json:"IsMergeOrder"`
-	ElectricMeterEnd   float64 `json:"ElectricMeterEnd"`
-	TotalPower         float64 `json:"TotalPower"`
-	TotalFeeInfo       string  `json:"TotalFeeInfo"`
-	EndType            int     `json:"EndType"`
-	CTL                string  `json:"CTL"`
-	ElectricMeterStart int     `json:"ElectricMeterStart"`
-	CTP                int     `json:"CTP"`
+	CTS              string  `json:"CTS"`
+	ChargeOperatorID string  `json:"ChargeOperatorID"`
+	OrderID          string  `json:"OrderID"`
+	TargetOperatorID string  `json:"TargetOperatorID"`
+	StartType        int     `json:"StartType"`
+	StationType      int     `json:"StationType"`
+	Soc              int     `json:"Soc"`
+	IsMergeOrder     int     `json:"IsMergeOrder"`
+	ElectricMeterEnd float64 `json:"ElectricMeterEnd"`
+	TotalPower       float64 `json:"TotalPower"`
+	TotalFeeInfo     string  `json:"TotalFeeInfo"`
+	EndType          int     `json:"EndType"`
+	CTL              string  `json:"CTL"`
+	/*	ElectricMeterStart int     `json:"ElectricMeterStart"`
+		CTP                int     `json:"CTP"`*/
 }
 
 type BusinessChargeDetails struct {
