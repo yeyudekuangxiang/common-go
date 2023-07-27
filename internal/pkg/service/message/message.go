@@ -113,7 +113,7 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 	}
 	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
 	if config.Config.App.Env == "prod" {
-		if showCount >= 1 {
+		if showCount >= 1 && scene != "charge" {
 			return []string{}
 		}
 	}
