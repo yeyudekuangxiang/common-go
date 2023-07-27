@@ -3,14 +3,15 @@ package srv_types
 import "mio/internal/pkg/model/entity"
 
 type CreateDuiBaActivityDTO struct {
-	Name        string
-	Cid         int64
-	Type        entity.DuiBaActivityType
-	IsShare     entity.DuiBaActivityIsShare
-	IsPhone     entity.DuiBaActivityIsPhone
-	ActivityUrl string
-	ActivityId  string
-	RiskLimit   int
+	Name           string
+	Cid            int64
+	Type           entity.DuiBaActivityType
+	IsShare        entity.DuiBaActivityIsShare
+	IsPhone        entity.DuiBaActivityIsPhone
+	ActivityUrl    string
+	ActivityId     string
+	RiskLimit      int
+	BlackWhiteType int
 }
 
 type UpdateDuiBaActivityDTO struct {
