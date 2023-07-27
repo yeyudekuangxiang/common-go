@@ -22,7 +22,7 @@ func NewDuiBaActivityController() DuiBaActivityController {
 type DuiBaActivityController struct {
 }
 
-//Save 创建兑吧链接
+// Save 创建兑吧链接
 func (ctl DuiBaActivityController) Create(c *gin.Context) (gin.H, error) {
 	var form CreateDuiBaActivityForm
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -37,14 +37,15 @@ func (ctl DuiBaActivityController) Create(c *gin.Context) (gin.H, error) {
 		url = "https:" + url
 	}
 	err := service.NewDuiBaActivityService(context.NewMioContext()).Create(srv_types.CreateDuiBaActivityDTO{
-		Name:        form.Name,
-		ActivityUrl: url,
-		Cid:         form.Cid,
-		Type:        form.Type,
-		ActivityId:  form.ActivityId,
-		IsShare:     form.IsShare,
-		IsPhone:     form.IsPhone,
-		RiskLimit:   form.RiskLimit,
+		Name:           form.Name,
+		Cid:            form.Cid,
+		Type:           form.Type,
+		IsShare:        form.IsShare,
+		IsPhone:        form.IsPhone,
+		ActivityUrl:    url,
+		ActivityId:     form.ActivityId,
+		RiskLimit:      form.RiskLimit,
+		BlackWhiteType: form.BlackWhiteType,
 	})
 	if err != nil {
 		return nil, err
@@ -52,7 +53,7 @@ func (ctl DuiBaActivityController) Create(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-//Update 修改兑吧链接
+// Update 修改兑吧链接
 func (ctl DuiBaActivityController) Update(c *gin.Context) (gin.H, error) {
 	var form UpdateDuiBaActivityForm
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -83,7 +84,7 @@ func (ctl DuiBaActivityController) Update(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-//GetPageList 根据分页获取渠道列表
+// GetPageList 根据分页获取渠道列表
 func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 	var form GetDuiBaActivityPageForm
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -137,7 +138,7 @@ func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//Delete 修改兑吧链接
+// Delete 修改兑吧链接
 func (ctl DuiBaActivityController) Delete(c *gin.Context) (gin.H, error) {
 	var form DeleteDuiBaActivityForm
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -153,7 +154,7 @@ func (ctl DuiBaActivityController) Delete(c *gin.Context) (gin.H, error) {
 	return gin.H{}, nil
 }
 
-//Show 根据分页获取渠道列表
+// Show 根据分页获取渠道列表
 func (ctl DuiBaActivityController) Show(c *gin.Context) (gin.H, error) {
 	var form ShowDuiBaActivityForm
 	if err := apiutil.BindForm(c, &form); err != nil {
