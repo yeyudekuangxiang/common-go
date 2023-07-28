@@ -117,17 +117,18 @@ func (ctl DuiBaActivityController) GetPageList(c *gin.Context) (gin.H, error) {
 		urlVo := url.QueryEscape(activity.ActivityUrl)
 		urlVo = "https://go-api.miotech.com?dbredirect=" + urlVo
 		voList = append(voList, api_types.DuiBaActivityVO{
-			ID:          activity.ID,
-			Name:        activity.Name,
-			Type:        activity.Type,
-			Cid:         activity.Cid,
-			IsShare:     activity.IsShare,
-			IsPhone:     activity.IsPhone,
-			ActivityId:  activity.ActivityId,
-			ActivityUrl: urlVo,
-			RiskLimit:   activity.RiskLimit,
-			CreatedAt:   activity.CreatedAt.Format("2006.01.02 15:04:05"),
-			UpdatedAt:   activity.UpdatedAt.Format("2006.01.02 15:04:05"),
+			ID:             activity.ID,
+			Name:           activity.Name,
+			Type:           activity.Type,
+			Cid:            activity.Cid,
+			IsShare:        activity.IsShare,
+			IsPhone:        activity.IsPhone,
+			ActivityId:     activity.ActivityId,
+			ActivityUrl:    urlVo,
+			RiskLimit:      activity.RiskLimit,
+			CreatedAt:      activity.CreatedAt.Format("2006.01.02 15:04:05"),
+			UpdatedAt:      activity.UpdatedAt.Format("2006.01.02 15:04:05"),
+			BlackWhiteType: activity.BlackWhiteType,
 		})
 	}
 	return gin.H{
