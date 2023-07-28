@@ -6,11 +6,14 @@ import (
 	"log"
 	"mio/config"
 	"mio/internal/pkg/core/app"
+	"time"
 )
 
 func initQueueProducer() {
 	log.Println("初始化amqp生产者...")
-	pub, err := rabbitmq.NewPublisher(config.Config.AMQP.Url, rabbitmq.Config{}, rabbitmq.WithPublisherOptionsLogger(zap.NewRabbitmqLogger(app.Logger)))
+	pub, err := rabbitmq.NewPublisher(config.Config.AMQP.Url, rabbitmq.Config{
+		Heartbeat: time.Minute,
+	}, rabbitmq.WithPublisherOptionsLogger(zap.NewRabbitmqLogger(app.Logger)))
 	if err != nil {
 		if config.Config.App.Env == "prod" {
 			log.Fatal("初始化amqp生产者失败", err)
