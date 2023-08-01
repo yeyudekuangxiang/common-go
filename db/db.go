@@ -92,7 +92,6 @@ func NewMysqlDB(conf Config, opts ...Option) (*gorm.DB, error) {
 	if conf.Logger != nil {
 		db.Logger = conf.Logger
 	}
-	db.Logger = conf.Logger
 	if options.replicas != nil {
 		err = db.Use(newMysqlDBResolver(*options.replicas))
 		if err != nil {
@@ -169,7 +168,7 @@ func initOptions(opts ...Option) Options {
 	return option
 }
 
-//NewPostgresDB 创建PostgreSQL数据库链接
+// NewPostgresDB 创建PostgreSQL数据库链接
 func NewPostgresDB(conf Config, opts ...Option) (*gorm.DB, error) {
 	options := initOptions(opts...)
 
