@@ -76,13 +76,24 @@ func (srv DuiBaActivityService) Update(dto srv_types.UpdateDuiBaActivityDTO) err
 	if one.ID != 0 {
 		return errno.ErrCommon.WithMessage("activityId已存在")
 	}
-	do := entity.DuiBaActivity{
+	/*do := entity.DuiBaActivity{
 		Status:    entity.DuiBaActivityStatusYes,
 		UpdatedAt: time.Now()}
+
 	if err := util.MapTo(dto, &do); err != nil {
 		return err
-	}
-	return srv.repo.Save(&do)
+	}*/
+	info.Status = entity.DuiBaActivityStatusYes
+	info.UpdatedAt = time.Now()
+	info.Name = dto.Name
+	info.Cid = dto.Cid
+	info.Type = dto.Type
+	info.IsShare = dto.IsShare
+	info.IsPhone = dto.IsPhone
+	info.ActivityUrl = dto.ActivityUrl
+	info.ActivityId = dto.ActivityId
+	info.RiskLimit = dto.RiskLimit
+	return srv.repo.Save(&info)
 }
 
 func (srv DuiBaActivityService) GetPageList(dto srv_types.GetPageDuiBaActivityDTO) ([]entity.DuiBaActivity, int64, error) {
