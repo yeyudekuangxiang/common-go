@@ -13,8 +13,20 @@ const (
 
 type Client struct {
 	UniTrustAppId string
-	Token         string
 	httpClient    http.Client
+	AccessToken   IAccessToken
+}
+
+func NewImageClient(accessToken IAccessToken, uniTrustAppId string) *Client {
+	return &Client{
+		UniTrustAppId: uniTrustAppId,
+		AccessToken:   accessToken,
+	}
+}
+
+type IAccessToken interface {
+	GetToken() (string, error)
+	RefreshToken() (string, error)
 }
 
 func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerificationResp, error) {
@@ -32,7 +44,11 @@ func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerific
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Add("Authorization", c.Token)
+	token, err := c.AccessToken.GetToken()
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Add("Authorization", token)
 	httpReq.Header.Add("Content-Type", "application/json; charset=UTF-8")
 	httpReq.Header.Add("UniTrust-AppId", c.UniTrustAppId)
 	res, err := c.httpClient.Do(httpReq)
