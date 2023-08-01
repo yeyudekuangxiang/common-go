@@ -31,7 +31,7 @@ func (m defaultBdSceneUserModel) CheckBind(params GetSceneUserOne) *entity.BdSce
 	if params.Id != 0 {
 		query.Where("id = ?", params.Id)
 	}
-	if params.PlatformKey != "" || params.PlatformUserId != "" || params.OpenId != "" {
+	if params.PlatformKey == "" || params.PlatformUserId == "" || params.OpenId == "" {
 		return &one
 	}
 
