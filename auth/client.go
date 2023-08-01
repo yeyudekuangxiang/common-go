@@ -22,7 +22,7 @@ func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerific
 		"name":          req.Name,
 		"idNo":          req.IdentityCard,
 		"mobile":        req.Phone,
-		"transactionId": req.transactionId,
+		"transactionId": req.TransactionId,
 	})
 	if err != nil {
 		return nil, err
