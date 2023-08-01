@@ -44,7 +44,7 @@ func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerific
 	if err != nil {
 		return nil, err
 	}
-	token, err := c.AccessToken.GetToken()
+	token, err := c.AccessToken.RefreshToken()
 	if err != nil {
 		return nil, err
 	}
