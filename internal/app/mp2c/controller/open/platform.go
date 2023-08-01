@@ -53,20 +53,21 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errno.ErrCommon.WithMessage("第三方绑定 渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	if user.ID == 0 {
-		return nil, errno.ErrCommon.WithMessage("第三方绑定 用户未登陆")
+		return nil, errno.ErrCommon.WithMessage("用户未登陆")
 	}
 
-	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", form.MemberId, user.OpenId)
+	app.Logger.Infof("第三方绑定 [%s] 入库: platformId:%s; openId:%s", form.PlatformKey, form.MemberId, user.OpenId)
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil {
 		if err != errno.ErrExisting {
-			app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%v", form.MemberId, user.OpenId, err)
+			app.Logger.Errorf("第三方绑定 [%s] 绑定失败: platformId:%s; openId:%s, error:%v", form.PlatformKey, form.MemberId, user.OpenId, err)
 			return gin.H{}, nil
 		}
+
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
 			"lvmiaoUserId": sceneUser.OpenId,
