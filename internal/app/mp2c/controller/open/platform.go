@@ -59,13 +59,17 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	if user.ID == 0 {
 		return nil, errno.ErrCommon.WithMessage("第三方绑定 用户未登陆")
 	}
-
-	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", form.MemberId, user.OpenId)
-	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
+	memberId, err := url.QueryUnescape(form.MemberId)
 	if err != nil {
-		app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%s", form.MemberId, user.OpenId, err.Error())
+		app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%v", memberId, user.OpenId, err)
+		return nil, err
+	}
+	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", memberId, user.OpenId)
+	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, memberId)
+	if err != nil {
 		if err != errno.ErrExisting {
-			return nil, nil
+			app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%v", memberId, user.OpenId, err)
+			return gin.H{}, nil
 		}
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
@@ -103,7 +107,7 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	)
 
 	if err != nil {
-		app.Logger.Errorf("第三方绑定 注册回调失败:%s; platformId:%s; openId:%s", err.Error(), form.MemberId, user.OpenId)
+		app.Logger.Errorf("第三方绑定 注册回调失败:%s; platformId:%s; openId:%s", err.Error(), memberId, user.OpenId)
 	}
 
 	//返回
