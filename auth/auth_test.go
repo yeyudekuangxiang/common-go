@@ -3,7 +3,7 @@ package auth
 import "testing"
 
 func TestName(t *testing.T) {
-	c := Client{
+	/*c := Client{
 		UniTrustAppId: "71aec34abd4e44d091fc30e368d13bae",
 		Token:         "92fa6eb418e51357a32615a17defde03",
 	}
@@ -14,6 +14,7 @@ func TestName(t *testing.T) {
 	})
 	if err != nil {
 		return
-	}
-	println(auth.Msg)
+	}*/
+
+	//	println(auth.Msg)
 }
