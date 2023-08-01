@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/idtool"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -15,6 +14,7 @@ const (
 type Client struct {
 	UniTrustAppId string
 	Token         string
+	httpClient    http.Client
 }
 
 func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerificationResp, error) {
@@ -22,13 +22,12 @@ func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerific
 		"name":          req.Name,
 		"idNo":          req.IdentityCard,
 		"mobile":        req.Phone,
-		"transactionId": idtool.UUID(),
+		"transactionId": req.transactionId,
 	})
 	if err != nil {
 		return nil, err
 	}
 	payload := strings.NewReader(string(param))
-	client := &http.Client{}
 	httpReq, err := http.NewRequest("POST", URL, payload)
 	if err != nil {
 		return nil, err
@@ -36,7 +35,7 @@ func (c *Client) SendAuth(req UserIdentityVerificationReq) (*UserIdentityVerific
 	httpReq.Header.Add("Authorization", c.Token)
 	httpReq.Header.Add("Content-Type", "application/json; charset=UTF-8")
 	httpReq.Header.Add("UniTrust-AppId", c.UniTrustAppId)
-	res, err := client.Do(httpReq)
+	res, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
