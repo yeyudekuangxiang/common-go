@@ -1,9 +1,10 @@
 package auth
 
 type UserIdentityVerificationReq struct {
-	Name         string `json:"name"`
-	IdentityCard string `json:"identityCard"`
-	Phone        string `json:"phone"`
+	Name          string `json:"name"`
+	IdentityCard  string `json:"identityCard"`
+	Phone         string `json:"phone"`
+	transactionId string `json:"transactionId"`
 }
 
 type UserIdentityVerificationResp struct {
