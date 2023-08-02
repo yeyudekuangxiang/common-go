@@ -47,7 +47,7 @@ func (srv OCRService) CheckIdempotent(openId string) error {
 
 func (srv OCRService) CheckRisk(risk int) error {
 	if risk > 2 {
-		return errno.ErrCommon.WithMessage("风险等级检测异常，请您稍后再试")
+		return errno.ErrCommon.WithMessage("系统正在升级中，暂时无法使用该功能")
 	}
 	return nil
 }
