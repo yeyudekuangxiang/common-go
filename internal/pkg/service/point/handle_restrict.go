@@ -11,7 +11,7 @@ import (
 )
 
 // 检查是否超过次数
-func (c *defaultClientHandle) checkTimes(times int64) error {
+func (c *DefaultClientHandle) checkTimes(times int64) error {
 	if times == 0 {
 		// 等于0表示不限次数
 		return nil
@@ -29,7 +29,7 @@ func (c *defaultClientHandle) checkTimes(times int64) error {
 	}
 	return nil
 }
-func (c *defaultClientHandle) checkTimes2() error {
+func (c *DefaultClientHandle) checkTimes2() error {
 	//获取次数记录
 	result := c.plugin.transactionLimit.FindBy(repository.FindPointTransactionCountLimitBy{
 		OpenId:          c.clientHandle.OpenId,
@@ -58,7 +58,7 @@ func (c *defaultClientHandle) checkTimes2() error {
 	return nil
 }
 
-func (c *defaultClientHandle) checkMaxPoint(maxPoint int64, currPoint int64) error {
+func (c *DefaultClientHandle) checkMaxPoint(maxPoint int64, currPoint int64) error {
 	today, _, err := c.plugin.transaction.CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: []string{c.clientHandle.OpenId},
 		Type:    c.clientHandle.Type,
@@ -82,7 +82,7 @@ func (c *defaultClientHandle) checkMaxPoint(maxPoint int64, currPoint int64) err
 }
 
 // 检查积分是否足够
-func (c *defaultClientHandle) checkUsrPoints(num int64) error {
+func (c *DefaultClientHandle) checkUsrPoints(num int64) error {
 	if c.additional.changeType == "dec" && num-c.clientHandle.point <= 0 {
 		return errno.ErrCommon.WithMessage("积分不足")
 	}
@@ -91,14 +91,14 @@ func (c *defaultClientHandle) checkUsrPoints(num int64) error {
 }
 
 // 幂等
-func (c *defaultClientHandle) checkIdempotency() error {
+func (c *DefaultClientHandle) checkIdempotency() error {
 	if !util.DefaultLock.Lock(fmt.Sprintf("%s", "collect"+"_"+c.clientHandle.OpenId), time.Second*5) {
 		return errno.ErrCommon.WithMessage("操作频率过快,请稍后再试")
 	}
 	return nil
 }
 
-func (c *defaultClientHandle) checkOrderId(orderId string) error {
+func (c *DefaultClientHandle) checkOrderId(orderId string) error {
 	if orderId == "" {
 		return errno.ErrCommon.WithMessage("参数错误:订单号为空")
 	}

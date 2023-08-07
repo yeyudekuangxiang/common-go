@@ -64,7 +64,7 @@ func (StepController) Collect(ctx *gin.Context) (gin.H, error) {
 		}, err
 	}
 	var points int
-	points, err = service.DefaultStepService.RedeemPointFromPendingSteps(user.OpenId, bizId)
+	points, err = service.DefaultStepService.RedeemPointFromPendingSteps(user.OpenId, bizId, user.ID)
 	return gin.H{
 		"points": points,
 		"carbon": carbon,

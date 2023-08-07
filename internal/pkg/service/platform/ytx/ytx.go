@@ -170,7 +170,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 保存记录失败: %s; openId: %s\n", err.Error(), user.OpenId)
+		app.Logger.Errorf("亿通行 method [saveLog] 保存记录失败: %v; openId: %s; amount:%.2f \n", err, user.OpenId, amount)
 	}
 
 	if response.SubCode != "0000" {
@@ -189,8 +189,8 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 红包发放失败: %s; openId: %s; 金额: %f\n", err.Error(), user.OpenId, amount)
-		return "", err
+		app.Logger.Errorf("亿通行 method [SendCoupon] 保存记录失败: %v; openId: %s; amount:%.2f\n", err, user.OpenId, amount)
+		//return "", err
 	}
 
 	return response.SubData.OrderNo, nil

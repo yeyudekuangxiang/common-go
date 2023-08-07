@@ -12,7 +12,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growthsystem"
 	"mio/internal/pkg/queue/producer/recyclepdr"
+	"mio/internal/pkg/queue/types/message"
 	"mio/internal/pkg/queue/types/message/recyclemsg"
 	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
@@ -95,6 +97,12 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	if typeName == "" {
 		return nil, errno.ErrCommon.WithMessage("未识别回收分类")
 	}
+
+	//成长体系
+	growthsystem.GrowthSystem(message.GrowthSystemParam{
+		TaskType: string(typeName),
+		UserId:   userInfo.OpenId,
+	})
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
