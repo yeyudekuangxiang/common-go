@@ -5,13 +5,16 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/user"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/producer/userpdr"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/usermsg"
 	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
@@ -188,6 +191,8 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	ctx := context.NewMioContext()
+
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -274,18 +279,20 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+
 	if openId != "" {
-
-		/*eventName := config.ZhuGeEventName.YTXOrder
-		if form.PlatformKey == "yitongxing" {
-			eventName = config.ZhuGeEventName.YTXOrder
+		findUser, err := app.RpcService.UserRpcSrv.FindUser(ctx, &user.FindUserReq{
+			OpenId: openId,
+		})
+		if err != nil {
+			return nil, err
 		}
-
-		zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["用户openId"] = mobile
-		zhuGeAttr["用户mobile"] = openId
-		track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
-		*/
+		//成长体系
+		growth_system.GrowthSystemSubway(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
+			UserId:      strconv.FormatInt(findUser.GetUserInfo().Id, 10),
+			TaskValue:   1,
+		})
 
 		track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, openId, map[string]interface{}{
 			"type": "完成乘车",

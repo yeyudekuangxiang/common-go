@@ -186,12 +186,27 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 保存记录失败: %s; openId: %s\n", err.Error(), user.OpenId)
+		app.Logger.Errorf("亿通行 method [saveLog] 保存记录失败: %v; openId: %s; amount:%.2f \n", err, user.OpenId, amount)
 	}
 
 	if response.SubCode != "0000" {
 		app.Logger.Errorf("亿通行 response错误: %s; openId: %s\n", string(body), user.OpenId)
 		return "", errors.New(response.SubMessage)
+	}
+
+	//记录
+	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+		CouponCardTypeId: typeId,
+		UserId:           user.ID,
+		BizId:            response.SubData.OrderNo,
+		CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+		StartTime:        time.Now().UnixMilli(),
+		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
+	})
+
+	if err != nil {
+		app.Logger.Errorf("亿通行 method [SendCoupon] 保存记录失败: %v; openId: %s; amount:%.2f\n", err, user.OpenId, amount)
+		//return "", err
 	}
 
 	return response.SubData.OrderNo, nil

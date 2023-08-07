@@ -12,6 +12,8 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -128,6 +130,12 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		if errCarbon != nil {
 			fmt.Println("charge 加碳失败", form)
 		}
+		//成长体系
+		growth_system.GrowthSystemRERecharge(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(typeString),
+			UserId:      strconv.FormatInt(userInfo.ID, 10),
+			TaskValue:   int64(totalPower),
+		})
 	}
 
 	//查询今日积分总量

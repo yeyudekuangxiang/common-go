@@ -9,7 +9,7 @@ import (
 )
 
 //检查图片
-func (c *defaultClientHandle) scanImage(imgUrl string) ([]string, error) {
+func (c *DefaultClientHandle) scanImage(imgUrl string) ([]string, error) {
 	ocrSrv := service.DefaultOCRService()
 	imageHash, err := ocrSrv.CheckImageScanCount(imgUrl, 1)
 	if err != nil {
@@ -28,7 +28,7 @@ func (c *defaultClientHandle) scanImage(imgUrl string) ([]string, error) {
 }
 
 //规则校验
-func (c *defaultClientHandle) validateRule(content []string, rules CollectRules) ([]string, error) {
+func (c *DefaultClientHandle) validateRule(content []string, rules CollectRules) ([]string, error) {
 	ruleArray := util.Intersect(content, rules[c.clientHandle.Type])
 	if len(ruleArray) == 0 {
 		return nil, errno.ErrCommon.WithMessage("不是有效的图片")
@@ -37,7 +37,7 @@ func (c *defaultClientHandle) validateRule(content []string, rules CollectRules)
 }
 
 //图片识别 根据rule匹配关键数据
-func (c *defaultClientHandle) identifyImg(identify []string) (map[string]string, error) {
+func (c *DefaultClientHandle) identifyImg(identify []string) (map[string]string, error) {
 	rule := identifyChRules[c.clientHandle.Type] //汉字
 	enRules := identifyEnRules[c.clientHandle.Type]
 	m, valid := util.IntersectContains(identify, rule)
@@ -55,16 +55,16 @@ func (c *defaultClientHandle) identifyImg(identify []string) (map[string]string,
 }
 
 //积分类型
-func (c *defaultClientHandle) getText() string {
+func (c *DefaultClientHandle) getText() string {
 	return service.PointTransactionTypeInfo{Type: c.clientHandle.Type}.Type.RealText()
 }
 
 //平台渠道
-func (c *defaultClientHandle) getRealText() string {
+func (c *DefaultClientHandle) getRealText() string {
 	return service.PointTransactionTypeInfo{Type: c.clientHandle.Type}.Type.Text()
 }
 
 //写日志
-func (c *defaultClientHandle) writeMessage(code int, message string) {
+func (c *DefaultClientHandle) writeMessage(code int, message string) {
 	app.Logger.Info(fmt.Sprintf("%d-%s", code, message))
 }
