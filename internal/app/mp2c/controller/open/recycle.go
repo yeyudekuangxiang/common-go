@@ -624,11 +624,5 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新用户活动状态失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
 		return
 	}
-	//更新发放次数
-	_, err = app.RpcService.ActivityRpcSrv.IncNumSended(ctx, &activity.IncNumSendedReq{Id: rule.GetId()})
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新发放次数失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
-		return
-	}
 	return
 }
