@@ -18,7 +18,7 @@ spec:
       containers:
         - image: 'hub-cn.miotech.com/mioyingtech/mio-go:v1.0.0'
           args:
-            - '-c=/app/config/config.ini'
+            - '-c=/app/config/config.yaml'
           imagePullPolicy: Always
           name: mp2c-go
           ports:

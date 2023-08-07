@@ -10,8 +10,8 @@ var DefaultQuizQuestionService = QuizQuestionService{}
 type QuizQuestionService struct {
 }
 
-func (srv QuizQuestionService) GetDailyQuestions(num int) ([]entity.QuizQuestion, error) {
-	list := make([]entity.QuizQuestion, 0)
+func (srv QuizQuestionService) GetDailyQuestions(num int) ([]entity.QuizQuestionV2, error) {
+	list := make([]entity.QuizQuestionV2, 0)
 	err := app.DB.Order("random()").Limit(num).Find(&list).Error
 	if err != nil {
 		panic(err)

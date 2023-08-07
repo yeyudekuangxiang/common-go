@@ -150,16 +150,19 @@ func (u *UserService) CreateUserToken(id int64) (string, error) {
 func (u *UserService) SendUserIdentifyToZhuGe(openid string) {
 	//return ""
 	/*if openid == "" {
+	func (u *UserService) SendUserIdentifyToZhuGe(openid string) {
 		return
-	}
-	user, exit, _ := u.r.GetUserIdentifyInfo(openid)
-	if !exit {
-		return //不存在用户信息，返回
-	}
-	zhuGeIdentifyAttr := make(map[string]interface{}, 0)
-	zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
-	zhuGeIdentifyAttr["子渠道"] = user.ChannelName
-	track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)*/
+		if openid == "" {
+			return
+		}
+		user, exit, _ := u.r.GetUserIdentifyInfo(openid)
+		if !exit {
+			return //不存在用户信息，返回
+		}
+		zhuGeIdentifyAttr := make(map[string]interface{}, 0)
+		zhuGeIdentifyAttr["用户渠道分类"] = user.ChannelTypeName
+		zhuGeIdentifyAttr["子渠道"] = user.ChannelName
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.UserIdentify, openid, zhuGeIdentifyAttr)*/
 }
 
 //func (u *UserService) SendUserRegisterCoupon(user entity.User) {

@@ -156,13 +156,9 @@ func Auth() gin.HandlerFunc {
 			}
 		}
 
-		if user == nil {
+		if user == nil || user.UserStatus != 1 {
 			user = &entity.User{}
-		} else if user.UserStatus != 1 {
-			ctx.AbortWithStatusJSON(apiutil.FormatErr(errno.ErrAuth.WithCaller(), nil))
-			return
 		}
-
 		ctx.Set("AuthUser", *user)
 	}
 }
@@ -191,6 +187,7 @@ func Throttle() gin.HandlerFunc {
 	}))
 	return middleware
 }
+
 func corsM() gin.HandlerFunc {
 	cfg := cors.DefaultConfig()
 	cfg.AllowAllOrigins = true

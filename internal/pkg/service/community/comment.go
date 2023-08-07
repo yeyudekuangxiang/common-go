@@ -258,7 +258,6 @@ func (srv *defaultCommentService) CreateComment(userId, topicId, RootCommentId, 
 				if err != nil {
 					return err
 				}
-
 				//更新顶级评论下的评论数量
 				err = tx.Model(&entity.CommentIndex{}).Where("id = ?", toComment.RootCommentId).Update("count", RootCommentIdChildCount).Error
 				if err != nil {

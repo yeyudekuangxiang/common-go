@@ -107,9 +107,10 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeName),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeName),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//回调光环
@@ -248,9 +249,10 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeName),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeName),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//本次可得积分
@@ -401,9 +403,10 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	pt := RecycleService.GetPointType(scene.Ch)
 
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(pt),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(pt),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//计算积分

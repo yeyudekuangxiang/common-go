@@ -401,6 +401,7 @@ func trackBehaviorInteraction(form trackInteractionParam) {
 		Ip:         form.Ip,
 		Result:     form.Result,
 		ResultCode: form.ResultCode,
+		UserId:     form.UserId,
 	})
 	if err != nil {
 		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())

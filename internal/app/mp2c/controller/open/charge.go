@@ -103,9 +103,10 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeString),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeString),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//回调光环
@@ -172,6 +173,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			app.Logger.Errorf("[%s]加积分失败: %s; query: [%v]\n", form.Ch, err.Error(), form)
 		}
 	}
+
 
 	//抽奖
 	err = ctr.luckyDraw(ctx, scene.Ch, userInfo.ID, totalPower)
@@ -375,9 +377,10 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   tp,
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     tp,
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userId,
 	})
 	info, _ := json.Marshal(form)
 	//加减碳量
@@ -410,6 +413,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	thisPoint := int(form.ChargedPower * float64(scene.Override))
 	totalPoint := lastPoint + thisPoint
+
 	if totalPoint > scene.PointLimit {
 		fmt.Printf("%s 充电量限制修正 thisPoint:%d, lastPoint:%d", ch, thisPoint, lastPoint)
 		thisPoint = scene.PointLimit - lastPoint

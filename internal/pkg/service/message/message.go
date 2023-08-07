@@ -15,7 +15,6 @@ import (
 	"mio/internal/pkg/service/track"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
-
 	"strconv"
 	"time"
 )
@@ -88,6 +87,7 @@ func (srv *MessageService) SendMiniSubMessage(toUser string, page string, templa
 func (srv *MessageService) GetTemplateId(openid string, scene string) (templateIds []string) {
 	var redisTemplateKey string
 	switch scene {
+
 	case "topic":
 		templateIds = append(templateIds, config.MessageTemplateIds.TopicPass, config.MessageTemplateIds.TopicCarefullyChosen)
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitTopicShow, time.Now().Format("20060102"))
@@ -218,11 +218,11 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			continue
 		}
 		template.Date = strconv.FormatInt(days.Total, 10) + "天"
-		openid := getUserById.UserInfo.Openid
+
 		var ret *request.CommonError
 		err = app.Weapp.AutoTryAccessToken(func(accessToken string) (try bool, err error) {
 			ret, err = app.Weapp.NewSubscribeMessage().Send(&subscribemessage.SendRequest{
-				ToUser:           openid, //oy_BA5IGl1JgkJKbD14wq_-Yorqw
+				ToUser:           getUserById.UserInfo.Openid, //oy_BA5IGl1JgkJKbD14wq_-Yorqw
 				TemplateID:       template.TemplateId(),
 				Page:             "/pages/activity/punch/start/index", //页面跳转
 				MiniprogramState: subscribemessage.MiniprogramStateFormal,
@@ -234,7 +234,7 @@ func (srv MessageService) SendMessageToCarbonPk() {
 			return app.Weapp.IsExpireAccessToken(ret.ErrCode)
 		}, 1)
 		if err != nil {
-			app.Logger.Infof("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), openid, err.Error())
+			app.Logger.Infof("小程序订阅消息发送失败，http层，模版%s，toUser%s，错误信息%s", template.TemplateId(), getUserById.UserInfo.Openid, err.Error())
 		}
 	}
 }

@@ -20,15 +20,16 @@ func (PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		point int
 		err   error
 	)
+	user := apiutil.GetAuthUser(ctx)
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   form.PointCollectType,
-		Data: form,
-		Ip:   ctx.ClientIP(),
+		Tp:     form.PointCollectType,
+		Data:   form,
+		Ip:     ctx.ClientIP(),
+		UserId: user.ID,
 	})
 
-	user := apiutil.GetAuthUser(ctx)
 	switch service.PointCollectType(form.PointCollectType) {
 	case service.PointCollectBikeRideType:
 		point, err = service.DefaultPointCollectService.CollectBikeRide(user, user.Risk, form.ImgUrl)

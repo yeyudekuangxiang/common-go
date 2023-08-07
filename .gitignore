@@ -3,7 +3,7 @@ runtime
 /.idea/
 /*.exe
 /acm
-config.ini
+config.yaml
 config-dev.ini
 config-prod.ini
 config-dev.yaml

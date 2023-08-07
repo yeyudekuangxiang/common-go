@@ -61,12 +61,12 @@ func openRouter(router *gin.Engine) {
 				authApi.DefaultOaController.AutoLoginCallback(context)
 			})
 			//微信公众号网页code登陆
-			oaRouter.Any("/login", apiutil.Format(authApi.DefaultOaController.Login))
+			oaRouter.Any("/login", apiutil.Format(deleteRoute))
 			//微信网页授权
 			oaRouter.POST("/sign", apiutil.Format(authApi.DefaultOaController.Sign))
 		}
 
-		openRouter.POST("/weapp/auth", apiutil.Format(authApi.DefaultWeappController.LoginByCode))
+		openRouter.POST("/weapp/auth", apiutil.Format(deleteRoute))
 		openRouter.GET("/activity/duiba/qr", func(context *gin.Context) {
 			if err := activityApi.DefaultZeroController.GetActivityMiniQR(context); err != nil {
 				context.String(400, err.Error())

@@ -14,6 +14,7 @@ import (
 	"mio/internal/pkg/queue/types/message/communitymsg"
 	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/smsmsg"
+	"mio/internal/pkg/repository"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -420,7 +421,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext()
 	ActivitiesSignupService := community.NewCommunityActivitiesSignupService(ctx)
 	TopicService := community.NewTopicService(ctx)
-
+	UserService := service.DefaultUserService
 	//更新帖子
 	topic, err := TopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
@@ -450,10 +451,17 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		if count == 0 {
 			return nil, nil
 		}
+		uids := make([]int64, 0)
 		for _, item := range signupList {
-			//发送短信
+			uids = append(uids, item.UserId)
+		}
+		by, err := UserService.GetUserListBy(repository.GetUserListBy{UserIds: uids})
+		if err != nil {
+			return nil, err
+		}
+		for _, u := range by {
 			err := common.SendSms(smsmsg.SmsMessage{
-				Phone:       item.Phone,
+				Phone:       u.PhoneNumber,
 				Args:        topic.Title,
 				TemplateKey: message.SmsActivityCancel,
 			})
@@ -462,6 +470,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 				break
 			}
 		}
+
 	}
 
 	return nil, nil
@@ -629,25 +638,32 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	params := community.SignupParams{
+
+	infos := make([]community.SignupInfo, 0)
+	for _, item := range form.SignupInfos {
+		infos = append(infos, community.SignupInfo{
+			Title:    item.Title,
+			Code:     item.Code,
+			Category: item.Category,
+			Type:     item.Type,
+			Options:  item.Options,
+			Value:    item.Value,
+		})
+	}
+
+	params := community.SignupInfosParams{
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
 		OpenId:       user.OpenId,
-		RealName:     form.RealName,
-		Phone:        form.Phone,
-		Gender:       form.Gender,
-		Age:          form.Age,
-		Wechat:       form.Wechat,
-		City:         form.City,
-		Remarks:      form.Remarks,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
+		SignupInfos:  infos,
 	}
 	err := signupService.Signup(params)
 	if err != nil {
 		return nil, err
 	}
-
+	//神策
 	return nil, nil
 }
 
