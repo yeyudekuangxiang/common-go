@@ -6,7 +6,6 @@ import (
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/auth"
 	"mio/internal/pkg/util/apiutil"
-	"mio/pkg/errno"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,6 @@ type TrackLoginZhuGe struct {
 }
 
 func (ctr WeappController) LoginByCode(ctx *gin.Context) (gin.H, error) {
-	return nil, errno.ErrCommon.WithMessage("系统升级中,请稍后再试")
 	form := WeappAuthForm{}
 	if err := apiutil.BindForm(ctx, &form); err != nil {
 		return nil, err

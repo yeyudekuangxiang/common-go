@@ -95,7 +95,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	CertificateCmd.AddCommand(importCmd)
-	importCmd.Flags().StringP("config", "c", "./config.ini", "config file")
+	importCmd.Flags().StringP("config", "c", "./config.yaml", "config file")
 
 	// Here you will define your flags and configuration settings.
 

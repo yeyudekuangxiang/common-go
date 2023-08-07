@@ -55,7 +55,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// businessCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	businessCmd.Flags().StringP("config", "c", "./config.ini", "config file")
+	businessCmd.Flags().StringP("config", "c", "./config.yaml", "config file")
 }
 func business(db *gorm.DB) {
 	db.Where("1=1").Delete(&ebusiness.User{})

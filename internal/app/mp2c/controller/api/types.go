@@ -175,4 +175,15 @@ type trackInteractionParam struct {
 	Ip         string      `json:"ip"`
 	Result     string      `json:"result"`
 	ResultCode string      `json:"resultCode"`
+	UserId     int64       `json:"userId"`
+}
+
+type QuizQuestionAPI struct {
+	ID                  string   `json:"id"`
+	QuestionStatement   string   `json:"questionStatement"`
+	Choices             []string `json:"choices"`
+	AnswerStatement     string   `json:"answerStatement"`
+	DetailedDescription string   `json:"detailedDescription"`
+	Type                int      `json:"type"`
+	QuestionID          string   `json:"questionId"`
 }

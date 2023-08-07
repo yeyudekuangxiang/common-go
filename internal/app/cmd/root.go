@@ -53,7 +53,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	RootCmd.Flags().StringP("config", "c", "./config.ini", "配置文件路径")
+	RootCmd.Flags().StringP("config", "c", "./config.yaml", "配置文件路径")
 
 	cmds()
 }

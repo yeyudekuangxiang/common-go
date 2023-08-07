@@ -9,7 +9,7 @@ import (
 )
 
 func TestExpireTime(t *testing.T) {
-	initialize.Initialize("/Users/yunfeng/Documents/workspace/mp2c-go/config.ini")
+	initialize.Initialize("/Users/yunfeng/Documents/workspace/mp2c-go/config.yaml")
 
 	userIds := []int64{
 		1535006, 1535024, 1535031, 1535032, 1535041, 1535046, 1535050, 1535063, 1535065, 1535077, 1535087, 1535095, 1535105, 1535107, 1535114, 1535129, 1535130, 1535174, 1535187, 1535190, 1535198, 1535201, 1535216, 1535221, 1535239, 1535245, 1535252, 1535256, 1535257,
