@@ -3,6 +3,7 @@ package initialize
 import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpkclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/platform/cmd/rpc/platformclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
@@ -16,7 +17,7 @@ import (
 
 func InitRpc() {
 	app.RpcService = &app.RpcClient{
-		//CarbonPkRpcSrv:    carbonpkclient.NewCarbonpk(zrpc.MustNewClient(config.Config.ActivityCarbonPkRpc)),
+		CarbonPkRpcSrv:    carbonpkclient.NewCarbonpk(zrpc.MustNewClient(config.Config.ActivityCarbonPkRpc)),
 		UserRpcSrv:        userclient.NewUser(zrpc.MustNewClient(config.Config.UserRpc)),
 		CouponRpcSrv:      couponclient.NewCoupon(zrpc.MustNewClient(config.Config.CouponRpc)),
 		TokenCenterRpcSrv: tokencenterclient.NewTokenCenter(zrpc.MustNewClient(config.Config.TokenCenterRpc)),
