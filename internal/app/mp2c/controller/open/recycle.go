@@ -12,9 +12,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
-	"mio/internal/pkg/queue/producer/growthsystem"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/producer/recyclepdr"
-	"mio/internal/pkg/queue/types/message"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/recyclemsg"
 	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
@@ -99,9 +99,10 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 	}
 
 	//成长体系
-	growthsystem.GrowthSystem(message.GrowthSystemParam{
-		TaskType: string(typeName),
-		UserId:   userInfo.OpenId,
+	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(typeName),
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
+		TaskValue:   1,
 	})
 
 	//入参保存

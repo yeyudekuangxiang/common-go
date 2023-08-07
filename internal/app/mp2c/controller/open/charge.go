@@ -12,8 +12,8 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
-	"mio/internal/pkg/queue/producer/growthsystem"
-	"mio/internal/pkg/queue/types/message"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -130,9 +130,10 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			fmt.Println("charge 加碳失败", form)
 		}
 		//成长体系
-		growthsystem.GrowthSystem(message.GrowthSystemParam{
-			TaskType: string(typeString),
-			UserId:   userInfo.OpenId,
+		growth_system.GrowthSystemRERecharge(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(typeString),
+			UserId:      strconv.FormatInt(userInfo.ID, 10),
+			TaskValue:   int64(totalPower),
 		})
 	}
 
