@@ -6,12 +6,16 @@ import (
 )
 
 func TestDiscount(t *testing.T) {
+	a := int64(-500)
+	b := uint64(-a)
+	println(b)
 	discountType := int64(0)
 	discountType = SetDiscountValue(Coupon, discountType)
 	isPoint := IsUseDiscount(Point, discountType)
 	println(isPoint)
 	isCoupon := IsUseDiscount(Coupon, discountType)
 	println(isCoupon)
+
 }
 
 func TestUnit(t *testing.T) {
