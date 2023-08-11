@@ -17,6 +17,16 @@ func (d DiscountEnum) Text() string {
 	return "未知类型"
 }
 
+func (d DiscountEnum) Type() string {
+	switch d {
+	case Point:
+		return "point"
+	case Coupon:
+		return "coupon"
+	}
+	return ""
+}
+
 // 检测是否有使用过该优惠
 
 func IsUseDiscount(discountType DiscountEnum, value int64) bool {
