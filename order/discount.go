@@ -7,6 +7,16 @@ const (
 	Coupon DiscountEnum = 2 //优惠券
 )
 
+func (d DiscountEnum) Text() string {
+	switch d {
+	case Point:
+		return "积分"
+	case Coupon:
+		return "优惠券"
+	}
+	return "未知类型"
+}
+
 // 检测是否有使用过该优惠
 
 func IsUseDiscount(discountType DiscountEnum, value int64) bool {
