@@ -17,7 +17,7 @@ func (d DiscountEnum) Text() string {
 	return "未知类型"
 }
 
-func (d DiscountEnum) DiscountType() string {
+func (d DiscountEnum) Type() string {
 	switch d {
 	case Point:
 		return "point"
