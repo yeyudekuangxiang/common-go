@@ -5,7 +5,13 @@ import (
 	"testing"
 )
 
+func TestName(t *testing.T) {
+	a := GetPointIntPart(609, 500)
+
+	println(a)
+}
 func TestDiscount(t *testing.T) {
+
 	a := int64(-500)
 	b := uint64(-a)
 	println(b)
@@ -19,9 +25,9 @@ func TestDiscount(t *testing.T) {
 }
 
 func TestUnit(t *testing.T) {
-	a := PointToMoneyFen(100, 500)
+	a := PointToMoneyFen(605, 500)
 	fmt.Println(a)
 
-	b := PointToMoneyYuan(100, 500)
+	b := PointToMoneyYuan(605, 500)
 	fmt.Println(b)
 }
