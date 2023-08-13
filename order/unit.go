@@ -19,3 +19,9 @@ func PointToMoneyYuan(point uint64, rate int64) float64 {
 	money, _ := decimal.NewFromInt(moneyFen).Div(decimal.NewFromInt(100)).Round(2).Float64()
 	return money
 }
+
+func GetPointIntPart(point int64, rate int64) int64 {
+	unit := decimal.NewFromInt(rate).Div(decimal.NewFromInt(100)).IntPart() //1分等于5积分，最少应用5积分
+	intPart := decimal.NewFromInt(point).Div(decimal.NewFromInt(unit)).IntPart()
+	return decimal.NewFromInt(intPart).Mul(decimal.NewFromInt(unit)).IntPart()
+}
