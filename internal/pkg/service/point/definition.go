@@ -18,17 +18,18 @@ type RuleTranslate map[entity.PointTransactionType]map[string]string
 var rules = CollectRules{
 	"COFFEE_CUP":    []string{"自带杯", "单号", "订单"},
 	"BIKE_RIDE":     []string{"骑行", "单车", "骑车", "bike", "出行", "哈啰", "摩拜", "青桔"},
-	"POWER_REPLACE": []string{"订单编号", "已支付", "待评价"},
+	"POWER_REPLACE": []string{"订单编号", "已支付", "待评价", "奥动换电"},
 }
 
+//内容key
 var identifyChRules = CollectRules{
-	"POWER_REPLACE": []string{"订单编号", "度", "支付状态", "充电量", "已支付"},
+	"POWER_REPLACE": []string{"订单编号", "支付状态", "奥动换电", "电量"},
 }
 
 var identifyEnRules = RuleTranslate{
 	"POWER_REPLACE": map[string]string{
 		"订单编号": "orderId",
-		"度":    "kwh",
+		"电量":   "kwh",
 	},
 }
 
