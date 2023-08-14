@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/service"
+	"regexp"
 	"strconv"
 )
 
@@ -22,7 +23,10 @@ func (c *DefaultClientHandle) powerReplace() error {
 	if err != nil {
 		return err
 	}
-	fromString, err := decimal.NewFromString(m["kwh"])
+	re := regexp.MustCompile("[^0-9.]") // 匹配非数字字符
+	result := re.ReplaceAllString(m["kwh"], "")
+	//转换成int
+	fromString, err := decimal.NewFromString(result)
 	if err != nil {
 		return err
 	}
