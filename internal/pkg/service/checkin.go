@@ -3,11 +3,15 @@ package service
 import (
 	"fmt"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -66,7 +70,7 @@ func (srv CheckinService) getQuickCheckin(currentCheckedDay int) []int {
 func (srv CheckinService) getCheckDayPoint(dayNumber int) int {
 	return CheckInPointRule[dayNumber-1]
 }
-func (srv CheckinService) Checkin(openId string) (int, error) {
+func (srv CheckinService) Checkin(openId string, userId int64) (int, error) {
 	if !util.DefaultLock.Lock(fmt.Sprintf("Checkin%s", openId), time.Second*5) {
 		return 0, errno.ErrCommon.WithMessage("操作太频繁,请稍后再试")
 	}
@@ -95,6 +99,16 @@ func (srv CheckinService) Checkin(openId string) (int, error) {
 		BizId:       util.UUID(),
 		ChangePoint: int64(point),
 	})
-
-	return currentCheckInDay, err
+	if err != nil {
+		app.Logger.Errorf("server [mp2c-go] method [Checkin] [IncUserPoint] failed: %v", err)
+		return 0, err
+	}
+	//成长体系
+	growth_system.GrowthSystemCheckIn(growthsystemmsg.GrowthSystemParam{
+		TaskType:    string(entity.POINT_CHECK_IN),
+		TaskSubType: string(entity.POINT_CHECK_IN),
+		UserId:      strconv.FormatInt(userId, 10),
+		TaskValue:   1,
+	})
+	return currentCheckInDay, nil
 }

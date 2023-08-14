@@ -12,6 +12,8 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -101,9 +103,10 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeString),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeString),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//回调光环
@@ -127,6 +130,12 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		if errCarbon != nil {
 			fmt.Println("charge 加碳失败", form)
 		}
+		//成长体系
+		growth_system.GrowthSystemRERecharge(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(typeString),
+			UserId:      strconv.FormatInt(userInfo.ID, 10),
+			TaskValue:   int64(totalPower),
+		})
 	}
 
 	//查询今日积分总量
@@ -164,6 +173,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			app.Logger.Errorf("[%s]加积分失败: %s; query: [%v]\n", form.Ch, err.Error(), form)
 		}
 	}
+
 
 	//抽奖
 	err = ctr.luckyDraw(ctx, scene.Ch, userInfo.ID, totalPower)
@@ -367,9 +377,10 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   tp,
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     tp,
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userId,
 	})
 	info, _ := json.Marshal(form)
 	//加减碳量
@@ -402,6 +413,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	thisPoint := int(form.ChargedPower * float64(scene.Override))
 	totalPoint := lastPoint + thisPoint
+
 	if totalPoint > scene.PointLimit {
 		fmt.Printf("%s 充电量限制修正 thisPoint:%d, lastPoint:%d", ch, thisPoint, lastPoint)
 		thisPoint = scene.PointLimit - lastPoint

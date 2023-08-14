@@ -24,7 +24,7 @@ var DefaultQuizService = QuizService{}
 type QuizService struct {
 }
 
-func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestion, error) {
+func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestionV2, error) {
 	DefaultQuizSingleRecordService.ClearTodayRecord(openid)
 	return DefaultQuizQuestionService.GetDailyQuestions(OneDayAnswerNum)
 }
@@ -53,7 +53,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 		return nil, errno.ErrCommon.WithMessage("答题数量超出限制")
 	}
 
-	question := entity.QuizQuestion{}
+	question := entity.QuizQuestionV2{}
 
 	err := app.DB.Where("id = ?", questionId).Take(&question).Error
 	if err != nil && err != gorm.ErrRecordNotFound {

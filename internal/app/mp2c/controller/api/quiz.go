@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"mio/internal/pkg/service/quiz"
@@ -18,13 +19,24 @@ func (QuizController) GetDailyQuestions(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 
 	list, err := quiz.DefaultQuizService.DailyQuestions(user.OpenId)
-
-	for i, item := range list {
-		list[i].Choices = randomOptions(item.Choices)
-		list[i].QuestionId = strconv.FormatInt(list[i].ID, 10)
+	result := make([]QuizQuestionAPI, 0, len(list))
+	for _, item := range list {
+		var choice []string
+		err := json.Unmarshal([]byte(item.Choices), &choice)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, QuizQuestionAPI{
+			ID:                  strconv.FormatInt(item.ID, 10),
+			QuestionStatement:   item.QuestionStatement,
+			Choices:             randomOptions(choice),
+			DetailedDescription: item.DetailedDescription,
+			Type:                item.Type,
+			QuestionID:          strconv.FormatInt(item.ID, 10),
+		})
 	}
 	return gin.H{
-		"list": list,
+		"list": result,
 	}, err
 }
 func randomOptions(options []string) []string {

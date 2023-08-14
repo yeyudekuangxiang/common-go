@@ -10,8 +10,11 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/common"
 	communityPdr "mio/internal/pkg/queue/producer/community"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/types/message/communitymsg"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/smsmsg"
+	"mio/internal/pkg/repository"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -130,35 +133,42 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}
 
 	var point int64
-	if resp.LikeStatus == 1 && resp.IsFirst == true {
-		pointService := service.NewPointService(ctx)
-		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_LIKE,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-			AdminId:      0,
-			Note:         "为文章 \"" + title + "\" 点赞",
-			AdditionInfo: strconv.FormatInt(resp.TopicId, 10),
-		})
+	if resp.LikeStatus == 1 {
+		if resp.IsFirst == true {
+			pointService := service.NewPointService(ctx)
+			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       user.OpenId,
+				Type:         entity.POINT_LIKE,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+				AdminId:      0,
+				Note:         "为文章 \"" + title + "\" 点赞",
+				AdditionInfo: strconv.FormatInt(resp.TopicId, 10),
+			})
 
-		if err == nil {
-			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+			if err == nil {
+				point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+			}
+			//发送消息
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:       user.ID,
+				RecId:        resp.TopicUserId,
+				Key:          "like_topic",
+				Type:         message.MsgTypeLike,
+				TurnType:     message.MsgTurnTypeArticle,
+				TurnId:       resp.TopicId,
+				MessageNotes: title,
+			})
+			if err != nil {
+				app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+			}
 		}
-
-		//发送消息
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:       user.ID,
-			RecId:        resp.TopicUserId,
-			Key:          "like_topic",
-			Type:         message.MsgTypeLike,
-			TurnType:     message.MsgTurnTypeArticle,
-			TurnId:       resp.TopicId,
-			MessageNotes: title,
+		//成长体系
+		growth_system.GrowthSystemCommunityLike(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(entity.POINT_LIKE),
+			UserId:      strconv.FormatInt(user.ID, 10),
+			TaskValue:   1,
 		})
-		if err != nil {
-			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
-		}
 	}
 
 	return gin.H{
@@ -319,6 +329,13 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	//成长体系
+	growth_system.GrowthSystemCommunityPush(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(entity.POINT_ARTICLE),
+		UserId:      strconv.FormatInt(user.ID, 10),
+		TaskValue:   1,
+	})
+
 	return gin.H{
 		"topic": topic,
 		"point": 0,
@@ -404,7 +421,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 	ctx := context.NewMioContext()
 	ActivitiesSignupService := community.NewCommunityActivitiesSignupService(ctx)
 	TopicService := community.NewTopicService(ctx)
-
+	UserService := service.DefaultUserService
 	//更新帖子
 	topic, err := TopicService.DelTopic(user.ID, form.ID)
 	if err != nil {
@@ -434,10 +451,17 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 		if count == 0 {
 			return nil, nil
 		}
+		uids := make([]int64, 0)
 		for _, item := range signupList {
-			//发送短信
+			uids = append(uids, item.UserId)
+		}
+		by, err := UserService.GetUserListBy(repository.GetUserListBy{UserIds: uids})
+		if err != nil {
+			return nil, err
+		}
+		for _, u := range by {
 			err := common.SendSms(smsmsg.SmsMessage{
-				Phone:       item.Phone,
+				Phone:       u.PhoneNumber,
 				Args:        topic.Title,
 				TemplateKey: message.SmsActivityCancel,
 			})
@@ -446,6 +470,7 @@ func (ctr *TopicController) DelTopic(c *gin.Context) (gin.H, error) {
 				break
 			}
 		}
+
 	}
 
 	return nil, nil
@@ -613,25 +638,32 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	params := community.SignupParams{
+
+	infos := make([]community.SignupInfo, 0)
+	for _, item := range form.SignupInfos {
+		infos = append(infos, community.SignupInfo{
+			Title:    item.Title,
+			Code:     item.Code,
+			Category: item.Category,
+			Type:     item.Type,
+			Options:  item.Options,
+			Value:    item.Value,
+		})
+	}
+
+	params := community.SignupInfosParams{
 		TopicId:      form.TopicId,
 		UserId:       user.ID,
 		OpenId:       user.OpenId,
-		RealName:     form.RealName,
-		Phone:        form.Phone,
-		Gender:       form.Gender,
-		Age:          form.Age,
-		Wechat:       form.Wechat,
-		City:         form.City,
-		Remarks:      form.Remarks,
 		SignupTime:   time.Now(),
 		SignupStatus: communityModel.SignupStatusTrue,
+		SignupInfos:  infos,
 	}
 	err := signupService.Signup(params)
 	if err != nil {
 		return nil, err
 	}
-
+	//神策
 	return nil, nil
 }
 
