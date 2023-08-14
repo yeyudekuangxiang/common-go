@@ -169,14 +169,14 @@ func (srv OCRService) CheckImageScanCount(imageUrl string, maxCount int) (hash s
 		return "", err
 	}
 
-	count, err := srv.GetImageScanCount(hash)
-	if err != nil {
-		return "", err
-	}
+	//count, err := srv.GetImageScanCount(hash)
+	//if err != nil {
+	//	return "", err
+	//}
 
-	if count >= maxCount {
-		return "", errno.ErrCommon.WithMessage("重复扫描")
-	}
+	//if count >= maxCount {
+	//	return "", errno.ErrCommon.WithMessage("重复扫描")
+	//}
 
 	return hash, nil
 }
