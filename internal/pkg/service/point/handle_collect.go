@@ -8,6 +8,7 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/service"
+	"regexp"
 	"strconv"
 )
 
@@ -22,10 +23,14 @@ func (c *defaultClientHandle) powerReplace() error {
 	if err != nil {
 		return err
 	}
-	fromString, err := decimal.NewFromString(m["kwh"])
+	re := regexp.MustCompile("\\D") // 匹配非数字字符
+	result := re.ReplaceAllString(m["kwh"], "")
+	//转换成int
+	fromString, err := decimal.NewFromString(result)
 	if err != nil {
 		return err
 	}
+
 	//本次积分
 	point := fromString.Mul(decimal.NewFromInt(c.clientHandle.point)).IntPart()
 	//检查积分
