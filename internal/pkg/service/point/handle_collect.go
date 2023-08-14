@@ -23,7 +23,7 @@ func (c *defaultClientHandle) powerReplace() error {
 	if err != nil {
 		return err
 	}
-	re := regexp.MustCompile("\\D") // 匹配非数字字符
+	re := regexp.MustCompile("[^0-9.]") // 匹配非数字字符
 	result := re.ReplaceAllString(m["kwh"], "")
 	//转换成int
 	fromString, err := decimal.NewFromString(result)
