@@ -294,8 +294,8 @@ var PointCollectLimitOnceMap = map[PointTransactionType]int{
 }
 
 var PointTypesMap = map[string]PointTransactionType{
-	"yitongxing":  POINT_YTX,
-	"jinghuaxing": POINT_JHX,
+	"yitongxing": POINT_YTX,
+	"jinhuaxing": POINT_JHX,
 }
 
 //每天获取 （多少）次积分
