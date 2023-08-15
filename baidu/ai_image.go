@@ -23,8 +23,8 @@ func NewAiImageClient(accessToken IAccessToken) *AiImageClient {
 }
 
 type AiImageParam struct {
-	ImageUrl string
-	Addr     string
+	ImageUrl string //url
+	Image    string //base64
 }
 
 type AiImageResult struct {
@@ -43,17 +43,29 @@ func (c *AiImageClient) CleanPlate(param AiImageParam) (*AiImageResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
-	body, err := httptool.PostJson(u, map[string]string{
-		"url": param.ImageUrl,
-	})
+
+	u := fmt.Sprintf("%s?access_token=%s", aiCleanPlate, token)
+	p := make(map[string]string, 0)
+
+	if param.Image != "" {
+		p["image"] = param.Image
+	}
+
+	if param.ImageUrl != "" {
+		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
+		p["url"] = param.ImageUrl
+	}
+
+	body, err := httptool.PostJson(u, p)
 	if err != nil {
 		return nil, err
 	}
+
 	resp := AiImageResult{}
 	if err := json.Unmarshal(body, &resp); err != nil {
 		return nil, err
 	}
+
 	return &resp, nil
 }
 
@@ -62,13 +74,22 @@ func (c *AiImageClient) Recycle(param AiImageParam) (*AiImageResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiRecycle, token, "url")
-	body, err := httptool.PostJson(u, map[string]string{
-		"url": param.ImageUrl,
-	})
+	u := fmt.Sprintf("%s?access_token=%s", aiCleanPlate, token)
+	p := make(map[string]string, 0)
+	if param.Image != "" {
+		p["image"] = param.Image
+	}
+
+	if param.ImageUrl != "" {
+		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
+		p["url"] = param.ImageUrl
+	}
+
+	body, err := httptool.PostJson(u, p)
 	if err != nil {
 		return nil, err
 	}
+
 	resp := AiImageResult{}
 	if err := json.Unmarshal(body, &resp); err != nil {
 		return nil, err
@@ -81,10 +102,16 @@ func (c *AiImageClient) GarbageSorting(param AiImageParam) (*AiImageResult, erro
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiWRS, token, "url")
-	body, err := httptool.PostJson(u, map[string]string{
-		"url": param.ImageUrl,
-	})
+	u := fmt.Sprintf("%s?access_token=%s", aiCleanPlate, token)
+	p := make(map[string]string, 0)
+	if param.Image != "" {
+		p["image"] = param.Image
+	}
+	if param.ImageUrl != "" {
+		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
+		p["url"] = param.ImageUrl
+	}
+	body, err := httptool.PostJson(u, p)
 	if err != nil {
 		return nil, err
 	}
