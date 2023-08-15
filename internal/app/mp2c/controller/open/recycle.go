@@ -12,7 +12,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/producer/recyclepdr"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/recyclemsg"
 	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
@@ -96,11 +98,19 @@ func (ctr RecycleController) OolaOrderSync(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("未识别回收分类")
 	}
 
+	//成长体系
+	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(typeName),
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
+		TaskValue:   1,
+	})
+
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeName),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeName),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//回调光环
@@ -239,9 +249,10 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeName),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeName),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//本次可得积分
@@ -392,9 +403,10 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	pt := RecycleService.GetPointType(scene.Ch)
 
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(pt),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(pt),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//计算积分
@@ -613,12 +625,6 @@ func (ctr RecycleController) incPointForActivity(ctx context2.Context, params in
 	})
 	if err != nil {
 		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新用户活动状态失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
-		return
-	}
-	//更新发放次数
-	_, err = app.RpcService.ActivityRpcSrv.IncNumSended(ctx, &activity.IncNumSendedReq{Id: rule.GetId()})
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新发放次数失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
 		return
 	}
 	return

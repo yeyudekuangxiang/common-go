@@ -68,5 +68,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// migrateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	migrateCmd.Flags().StringP("config", "c", "./config.ini", "config file")
+	migrateCmd.Flags().StringP("config", "c", "./config.yaml", "config file")
 }

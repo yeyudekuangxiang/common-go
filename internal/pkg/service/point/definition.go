@@ -6,8 +6,8 @@ type commandDescription struct {
 	Times      int64                            //限制次数 0表示不限次数
 	Amount     int64                            //积分
 	MaxAmount  int64                            //每日最多获取积分
-	Fn         func(*defaultClientHandle) error //执行方法
-	FnPageData func(*defaultClientHandle) (map[string]interface{}, error)
+	Fn         func(*DefaultClientHandle) error //执行方法
+	FnPageData func(*DefaultClientHandle) (map[string]interface{}, error)
 	IsOpen     bool //是否实现
 }
 
@@ -36,23 +36,23 @@ var identifyEnRules = RuleTranslate{
 //方法定义
 var commandMap = map[string]*commandDescription{
 	//times:每天可以提交次数 amount:1度电10积分 maxAmount:每天最多获取积分
-	"POWER_REPLACE": {Fn: (*defaultClientHandle).powerReplace, Times: 1, Amount: 10, MaxAmount: 300},
+	"POWER_REPLACE": {Fn: (*DefaultClientHandle).powerReplace, Times: 1, Amount: 10, MaxAmount: 300},
 }
 
 //before弹框页面获取数据
 var pageDataMap = map[string]*commandDescription{
-	"POWER_REPLACE":    {FnPageData: (*defaultClientHandle).powerReplacePageData}, //换电
-	"FAST_ELECTRICITY": {FnPageData: (*defaultClientHandle).toChargePageData},     //快电
-	"YKC":              {FnPageData: (*defaultClientHandle).toChargePageData},     //云快充
+	"POWER_REPLACE":    {FnPageData: (*DefaultClientHandle).powerReplacePageData}, //换电
+	"FAST_ELECTRICITY": {FnPageData: (*DefaultClientHandle).toChargePageData},     //快电
+	"YKC":              {FnPageData: (*DefaultClientHandle).toChargePageData},     //云快充
 
-	"REDUCE_PLASTIC": {FnPageData: (*defaultClientHandle).reducePlasticPageData}, //环保减塑
+	"REDUCE_PLASTIC": {FnPageData: (*DefaultClientHandle).reducePlasticPageData}, //环保减塑
 
-	"JHX": {FnPageData: (*defaultClientHandle).jhxPageData}, //金华行
-	"YTX": {FnPageData: (*defaultClientHandle).ytxPageData}, //亿通行
+	"JHX": {FnPageData: (*DefaultClientHandle).jhxPageData}, //金华行
+	"YTX": {FnPageData: (*DefaultClientHandle).ytxPageData}, //亿通行
 
-	"OOLA_RECYCLE": {FnPageData: (*defaultClientHandle).oolaRecyclePageData}, //oola旧物回收
-	"FMY_RECYCLE":  {FnPageData: (*defaultClientHandle).fmyRecyclePageData},  //飞蚂蚁旧物回收
-	"AHS_RECYCLE":  {FnPageData: (*defaultClientHandle).ahsRecyclePageData},  //爱回收旧物回收
-	"SSHS_RECYCLE": {FnPageData: (*defaultClientHandle).sshsRecyclePageData}, //时尚回收
-	"DDYX_RECYCLE": {FnPageData: (*defaultClientHandle).ddyxRecyclePageData}, //铛铛一下
+	"OOLA_RECYCLE": {FnPageData: (*DefaultClientHandle).oolaRecyclePageData}, //oola旧物回收
+	"FMY_RECYCLE":  {FnPageData: (*DefaultClientHandle).fmyRecyclePageData},  //飞蚂蚁旧物回收
+	"AHS_RECYCLE":  {FnPageData: (*DefaultClientHandle).ahsRecyclePageData},  //爱回收旧物回收
+	"SSHS_RECYCLE": {FnPageData: (*DefaultClientHandle).sshsRecyclePageData}, //时尚回收
+	"DDYX_RECYCLE": {FnPageData: (*DefaultClientHandle).ddyxRecyclePageData}, //铛铛一下
 }

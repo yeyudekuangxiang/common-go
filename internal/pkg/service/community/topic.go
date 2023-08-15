@@ -1,6 +1,7 @@
 package community
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
@@ -662,11 +663,12 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 	}
 
 	if params.Type == 1 {
+		SATag, _ := json.Marshal(params.SaTags)
 		topicModel.Activity = entity.CommunityActivities{
 			Type:           params.ActivityType,
 			Address:        params.Address,
 			Region:         params.Region,
-			TagIds:         params.ActivityTagIds,
+			SATag:          string(SATag),
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
@@ -674,6 +676,7 @@ func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*en
 			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
 			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
 			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
+			SignupNumber:   params.SignupNumber,
 		}
 	}
 
@@ -734,11 +737,13 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 	}
 
 	if params.Type == 1 {
+		SATag, _ := json.Marshal(params.SaTags)
 		topicModel.Activity = entity.CommunityActivities{
 			Id:             topicModel.Id,
 			Type:           params.ActivityType,
+			Region:         params.Region,
 			Address:        params.Address,
-			TagIds:         params.ActivityTagIds,
+			SATag:          string(SATag),
 			Remarks:        params.Remarks,
 			Qrcode:         params.Qrcode,
 			MeetingLink:    params.MeetingLink,
@@ -746,6 +751,7 @@ func (srv TopicService) UpdateTopic(userId int64, params UpdateTopicParams) (*en
 			StartTime:      model.Time{Time: time.UnixMilli(params.StartTime)},
 			EndTime:        model.Time{Time: time.UnixMilli(params.EndTime)},
 			SignupDeadline: model.Time{Time: time.UnixMilli(params.SignupDeadline)},
+			SignupNumber:   params.SignupNumber,
 		}
 	}
 

@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
@@ -290,9 +292,10 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   form.PlatformKey,
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     form.PlatformKey,
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//风险登记验证
@@ -329,6 +332,12 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 		}
 	}
 
+	//成长体系
+	growth_system.GrowthSystemBus(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
+		UserId:      userInfo.OpenId,
+		TaskValue:   1,
+	})
 	//预加积分
 	fromString, _ := decimal.NewFromString(form.Amount)
 	amount, _ := fromString.Float64()
@@ -348,6 +357,7 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	//减碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" {

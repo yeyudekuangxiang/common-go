@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
 	"mio/internal/pkg/service/message"
@@ -174,6 +176,13 @@ func (ctr *CommentController) Create(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return gin.H{"comment": nil, "point": 0}, err
 	}
+	//成长体系
+	growth_system.GrowthSystemCommunityComment(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(entity.POINT_COMMENT),
+		UserId:      strconv.FormatInt(user.ID, 10),
+		TaskValue:   1,
+	})
+
 	//埋点
 	trackData := map[string]interface{}{
 		"topic_id":              int(form.ObjId),
@@ -349,35 +358,43 @@ func (ctr *CommentController) Like(c *gin.Context) (gin.H, error) {
 	}
 
 	var point int64
-	if resp.LikeStatus == 1 && resp.IsFirst {
-		pointService := service.NewPointService(context.NewMioContext())
-		_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_LIKE,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-			AdminId:      0,
-			Note:         "评论 \"" + resp.CommentMessage + "\" 点赞",
-			AdditionInfo: "commendId: " + strconv.FormatInt(resp.CommentId, 10),
-		})
+	if resp.LikeStatus == 1 {
+		if resp.IsFirst {
+			pointService := service.NewPointService(context.NewMioContext())
+			_, err = pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       user.OpenId,
+				Type:         entity.POINT_LIKE,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+				AdminId:      0,
+				Note:         "评论 \"" + resp.CommentMessage + "\" 点赞",
+				AdditionInfo: "commendId: " + strconv.FormatInt(resp.CommentId, 10),
+			})
 
-		if err == nil {
-			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+			if err == nil {
+				point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+			}
+
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:       user.ID,
+				RecId:        resp.CommentUserId,
+				Key:          "like_comment",
+				Type:         message.MsgTypeLike,
+				TurnType:     message.MsgTurnTypeArticleComment,
+				TurnId:       resp.CommentId,
+				MessageNotes: resp.CommentMessage,
+			})
+
+			if err != nil {
+				app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
+			}
 		}
-
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:       user.ID,
-			RecId:        resp.CommentUserId,
-			Key:          "like_comment",
-			Type:         message.MsgTypeLike,
-			TurnType:     message.MsgTurnTypeArticleComment,
-			TurnId:       resp.CommentId,
-			MessageNotes: resp.CommentMessage,
+		//成长体系
+		growth_system.GrowthSystemCommunityLike(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(entity.POINT_LIKE),
+			UserId:      strconv.FormatInt(user.ID, 10),
+			TaskValue:   1,
 		})
-
-		if err != nil {
-			app.Logger.Errorf("【评论点赞】站内信发送失败:%s", err.Error())
-		}
 	}
 
 	return gin.H{
