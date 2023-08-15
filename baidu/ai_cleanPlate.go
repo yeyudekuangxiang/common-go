@@ -23,6 +23,7 @@ func NewAiCleanPlateClient(accessToken IAccessToken) *AiCleanPlateClient {
 
 type CleanPlateParam struct {
 	ImageUrl string
+	Image    string
 }
 
 type CleanPlateResult struct {
@@ -39,10 +40,20 @@ func (c *AiCleanPlateClient) CleanPlate(param CleanPlateParam) (*CleanPlateResul
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlateUrl, token, "url")
-	body, err := httptool.PostJson(u, map[string]string{
-		"url": param.ImageUrl,
-	})
+
+	u := fmt.Sprintf("%s?access_token=%s", aiCleanPlate, token)
+	p := make(map[string]string, 0)
+
+	if param.Image != "" {
+		p["image"] = param.Image
+	}
+
+	if param.ImageUrl != "" {
+		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
+		p["url"] = param.ImageUrl
+	}
+
+	body, err := httptool.PostJson(u, p)
 	if err != nil {
 		return nil, err
 	}
