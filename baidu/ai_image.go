@@ -74,7 +74,7 @@ func (c *AiImageClient) Recycle(param AiImageParam) (*AiImageResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s", aiCleanPlate, token)
+	u := fmt.Sprintf("%s?access_token=%s", aiRecycle, token)
 	p := make(map[string]string, 0)
 	if param.Image != "" {
 		p["image"] = param.Image
@@ -102,7 +102,7 @@ func (c *AiImageClient) GarbageSorting(param AiImageParam) (*AiImageResult, erro
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("%s?access_token=%s", aiCleanPlate, token)
+	u := fmt.Sprintf("%s?access_token=%s", aiWRS, token)
 	p := make(map[string]string, 0)
 	if param.Image != "" {
 		p["image"] = param.Image
