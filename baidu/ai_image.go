@@ -81,7 +81,7 @@ func (c *AiImageClient) Recycle(param AiImageParam) (*AiImageResult, error) {
 	}
 
 	if param.ImageUrl != "" {
-		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
+		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiRecycle, token, "url")
 		p["url"] = param.ImageUrl
 	}
 
@@ -108,7 +108,7 @@ func (c *AiImageClient) GarbageSorting(param AiImageParam) (*AiImageResult, erro
 		p["image"] = param.Image
 	}
 	if param.ImageUrl != "" {
-		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiCleanPlate, token, "url")
+		u = fmt.Sprintf("%s?access_token=%s&input_type=%s", aiWRS, token, "url")
 		p["url"] = param.ImageUrl
 	}
 	body, err := httptool.PostJson(u, p)
