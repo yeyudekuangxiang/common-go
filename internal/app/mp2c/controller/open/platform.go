@@ -5,6 +5,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/user"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
@@ -281,16 +282,19 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	}
 
 	if openId != "" {
-		findUser, err := app.RpcService.UserRpcSrv.FindUser(ctx, &user.FindUserReq{
-			OpenId: openId,
+		uInfo, err := app.RpcService.UserRpcSrv.FindUser(ctx, &user.FindUserReq{
+			Guid: converttool.PointerString(openId),
 		})
 		if err != nil {
 			return nil, err
 		}
+		if !uInfo.GetExist() {
+			return gin.H{}, nil
+		}
 		//成长体系
 		growth_system.GrowthSystemSubway(growthsystemmsg.GrowthSystemParam{
 			TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
-			UserId:      strconv.FormatInt(findUser.GetUserInfo().Id, 10),
+			UserId:      strconv.FormatInt(uInfo.GetUserInfo().GetId(), 10),
 			TaskValue:   1,
 		})
 
