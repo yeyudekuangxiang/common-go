@@ -32,7 +32,7 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.2.20
+	gitlab.miotech.com/miotech-application/backend/common-go v1.2.29
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.10.18
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.7.0
@@ -195,4 +195,4 @@ require (
 
 replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.10.18 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.18
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.20 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.20
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.29 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.29
