@@ -38,12 +38,3 @@ type LocationIpResult struct {
 	Adcode    string `json:"adcode"`
 	Rectangle string `json:"rectangle"`
 }
-
-type T struct {
-	Info         string `json:"info"`
-	Infocode     string `json:"infocode"`
-	Status       string `json:"status"`
-	SecCodeDebug string `json:"sec_code_debug"`
-	Key          string `json:"key"`
-	SecCode      string `json:"sec_code"`
-}
