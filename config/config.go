@@ -29,6 +29,7 @@ var Config = app{
 	//args
 	MqArgs:      mqArgs{},
 	BaiDuMap:    baiDuMap{},
+	GaoDeMap:    gaoDeMap{},
 	Saas:        saas{},
 	MioSassCert: mioSassCertConf{},
 }
@@ -43,6 +44,9 @@ type saas struct {
 }
 
 type baiDuMap struct {
+	AccessKey string
+}
+type gaoDeMap struct {
 	AccessKey string
 }
 type app struct {
@@ -76,6 +80,7 @@ type app struct {
 	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
 	PlatformRpc         zrpc.RpcClientConf `ini:"platformRpc" json:"platformRpc"`
 	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
+	GaoDeMap            gaoDeMap           `ini:"gaodeMap" json:"gaodeMap"`
 	Saas                saas               `ini:"saas" json:"saas"`
 	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
 	Sensors             SensorsConf        `ini:"sensors" json:"sensors"`
