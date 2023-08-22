@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/medivhzhan/weapp/v3/phonenumber"
 	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
+	"gitlab.miotech.com/miotech-application/backend/common-go/gaode"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/commontool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxapp"
 	"math/rand"
@@ -414,11 +415,14 @@ func (u *UserService) BindPhoneByCode(userId int64, code string, cip string, inv
 	}
 
 	//获取用户地址   加入队列
-	city, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(cip)
-	if err != nil || !city.IsSuccess() {
+	//city, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(cip)
+	city, err := gaode.NewMapClient(config.Config.GaoDeMap.AccessKey).LocationIp(cip)
+	if err != nil {
 		app.Logger.Errorf("BindPhoneByCode ip地址查询失败 %+v %+v", err, city)
+	} else if city.Status != "1" {
+		app.Logger.Errorf("BindPhoneByCode ip地址查询失败 %+v", city)
 	} else {
-		userInfo.CityCode = city.Content.AddressDetail.Adcode
+		userInfo.CityCode = city.Adcode
 		userInfo.Ip = cip
 	}
 
