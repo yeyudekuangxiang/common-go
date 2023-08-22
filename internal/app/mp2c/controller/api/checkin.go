@@ -13,7 +13,7 @@ type CheckinController struct {
 
 func (CheckinController) Checkin(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-	day, err := service.DefaultCheckinService.Checkin(user.OpenId)
+	day, err := service.DefaultCheckinService.Checkin(user.OpenId, user.ID)
 	return gin.H{
 		"checkedNumber": day,
 	}, err

@@ -3,7 +3,7 @@ package message
 import "mio/internal/app/mp2c/controller"
 
 type MessageGetTemplateIdForm struct {
-	Scene string `json:"scene" form:"scene" binding:"oneof=topic platform carbonpk quiz" alias:"模版场景"`
+	Scene string `json:"scene" form:"scene" binding:"" alias:"模版场景"`
 }
 
 type WebMessageRequest struct {

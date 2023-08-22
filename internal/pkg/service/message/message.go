@@ -106,14 +106,14 @@ func (srv *MessageService) GetTemplateId(openid string, scene string) (templateI
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.QuizMessageRemind)
 		return
 	case "charge":
-		templateIds = append(templateIds, message.MessageTemplateIds.ChangePoint)
+		templateIds = append(templateIds, message.MessageTemplateIds.ChargeOrder)
 		redisTemplateKey = fmt.Sprintf(config.RedisKey.MessageLimitChargeRemind, time.Now().Format("20060102"))
 	default:
 		break
 	}
 	showCount := app.Redis.ZScore(contextRedis.Background(), redisTemplateKey, openid).Val()
 	if config.Config.App.Env == "prod" {
-		if showCount >= 1 {
+		if showCount >= 1 && scene != "charge" {
 			return []string{}
 		}
 	}

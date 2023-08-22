@@ -60,8 +60,8 @@ func (ctr YtxController) AllReceive(ctx *gin.Context) (gin.H, error) {
 	prePoint, total, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
 		PlatformKey:    sceneUser.PlatformKey,
 		PlatformUserId: sceneUser.PlatformUserId,
-		OpenId:         sceneUser.OpenId,
-		Status:         1,
+		//OpenId:         sceneUser.OpenId,
+		Status: 1,
 	})
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)

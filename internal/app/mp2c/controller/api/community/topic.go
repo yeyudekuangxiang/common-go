@@ -10,7 +10,9 @@ import (
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/queue/producer/common"
 	communityPdr "mio/internal/pkg/queue/producer/community"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/types/message/communitymsg"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/smsmsg"
 	"mio/internal/pkg/repository"
 	communityModel "mio/internal/pkg/repository/community"
@@ -131,35 +133,42 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}
 
 	var point int64
-	if resp.LikeStatus == 1 && resp.IsFirst == true {
-		pointService := service.NewPointService(ctx)
-		_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
-			OpenId:       user.OpenId,
-			Type:         entity.POINT_LIKE,
-			BizId:        util.UUID(),
-			ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
-			AdminId:      0,
-			Note:         "为文章 \"" + title + "\" 点赞",
-			AdditionInfo: strconv.FormatInt(resp.TopicId, 10),
-		})
+	if resp.LikeStatus == 1 {
+		if resp.IsFirst == true {
+			pointService := service.NewPointService(ctx)
+			_, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
+				OpenId:       user.OpenId,
+				Type:         entity.POINT_LIKE,
+				BizId:        util.UUID(),
+				ChangePoint:  int64(entity.PointCollectValueMap[entity.POINT_LIKE]),
+				AdminId:      0,
+				Note:         "为文章 \"" + title + "\" 点赞",
+				AdditionInfo: strconv.FormatInt(resp.TopicId, 10),
+			})
 
-		if err == nil {
-			point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+			if err == nil {
+				point = int64(entity.PointCollectValueMap[entity.POINT_LIKE])
+			}
+			//发送消息
+			err = messageService.SendMessage(message.SendWebMessage{
+				SendId:       user.ID,
+				RecId:        resp.TopicUserId,
+				Key:          "like_topic",
+				Type:         message.MsgTypeLike,
+				TurnType:     message.MsgTurnTypeArticle,
+				TurnId:       resp.TopicId,
+				MessageNotes: title,
+			})
+			if err != nil {
+				app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
+			}
 		}
-
-		//发送消息
-		err = messageService.SendMessage(message.SendWebMessage{
-			SendId:       user.ID,
-			RecId:        resp.TopicUserId,
-			Key:          "like_topic",
-			Type:         message.MsgTypeLike,
-			TurnType:     message.MsgTurnTypeArticle,
-			TurnId:       resp.TopicId,
-			MessageNotes: title,
+		//成长体系
+		growth_system.GrowthSystemCommunityLike(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(entity.POINT_LIKE),
+			UserId:      strconv.FormatInt(user.ID, 10),
+			TaskValue:   1,
 		})
-		if err != nil {
-			app.Logger.Errorf("文章点赞站内信发送失败:%s", err.Error())
-		}
 	}
 
 	return gin.H{
@@ -320,6 +329,13 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	//成长体系
+	growth_system.GrowthSystemCommunityPush(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(entity.POINT_ARTICLE),
+		UserId:      strconv.FormatInt(user.ID, 10),
+		TaskValue:   1,
+	})
+
 	return gin.H{
 		"topic": topic,
 		"point": 0,

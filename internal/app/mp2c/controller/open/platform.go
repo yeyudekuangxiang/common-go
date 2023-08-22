@@ -5,13 +5,17 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/user"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/producer/userpdr"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/usermsg"
 	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
@@ -53,20 +57,21 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errno.ErrCommon.WithMessage("第三方绑定 渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	if user.ID == 0 {
-		return nil, errno.ErrCommon.WithMessage("第三方绑定 用户未登陆")
+		return nil, errno.ErrCommon.WithMessage("用户未登陆")
 	}
 
-	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", form.MemberId, user.OpenId)
+	app.Logger.Infof("第三方绑定 [%s] 入库: platformId:%s; openId:%s", form.PlatformKey, form.MemberId, user.OpenId)
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
 	if err != nil {
-		app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%s", form.MemberId, user.OpenId, err.Error())
 		if err != errno.ErrExisting {
-			return nil, nil
+			app.Logger.Errorf("第三方绑定 [%s] 绑定失败: platformId:%s; openId:%s, error:%v", form.PlatformKey, form.MemberId, user.OpenId, err)
+			return gin.H{}, nil
 		}
+
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
 			"lvmiaoUserId": sceneUser.OpenId,
@@ -187,6 +192,8 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, err
 	}
 
+	ctx := context.NewMioContext()
+
 	//查询 渠道信息
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -215,10 +222,10 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
-	form.MemberId, err = url.QueryUnescape(form.MemberId)
-	if err != nil {
-		return nil, err
-	}
+	//form.MemberId, err = url.QueryUnescape(form.MemberId)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
@@ -273,18 +280,23 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+
 	if openId != "" {
-
-		/*eventName := config.ZhuGeEventName.YTXOrder
-		if form.PlatformKey == "yitongxing" {
-			eventName = config.ZhuGeEventName.YTXOrder
+		uInfo, err := app.RpcService.UserRpcSrv.FindUser(ctx, &user.FindUserReq{
+			Guid: converttool.PointerString(openId),
+		})
+		if err != nil {
+			return nil, err
 		}
-
-		zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["用户openId"] = mobile
-		zhuGeAttr["用户mobile"] = openId
-		track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
-		*/
+		if !uInfo.GetExist() {
+			return gin.H{}, nil
+		}
+		//成长体系
+		growth_system.GrowthSystemSubway(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
+			UserId:      strconv.FormatInt(uInfo.GetUserInfo().GetId(), 10),
+			TaskValue:   1,
+		})
 
 		track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, openId, map[string]interface{}{
 			"type": "完成乘车",
