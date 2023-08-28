@@ -5,8 +5,6 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
-	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/user/cmd/rpc/user"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -280,21 +278,14 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	}
 
 	if openId != "" {
-		uInfo, err := app.RpcService.UserRpcSrv.FindUser(ctx, &user.FindUserReq{
-			Guid: converttool.PointerString(openId),
-		})
-		if err != nil {
-			return nil, err
+		if userId != 0 {
+			//成长体系
+			growth_system.GrowthSystemSubway(growthsystemmsg.GrowthSystemParam{
+				TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
+				UserId:      strconv.FormatInt(userId, 10),
+				TaskValue:   1,
+			})
 		}
-		if !uInfo.GetExist() {
-			return gin.H{}, nil
-		}
-		//成长体系
-		growth_system.GrowthSystemSubway(growthsystemmsg.GrowthSystemParam{
-			TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
-			UserId:      strconv.FormatInt(uInfo.GetUserInfo().GetId(), 10),
-			TaskValue:   1,
-		})
 
 		track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, openId, map[string]interface{}{
 			"type": "完成乘车",
