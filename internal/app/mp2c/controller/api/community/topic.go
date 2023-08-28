@@ -105,6 +105,11 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
+	growth_system.GrowthSystemCommunityShare(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(entity.POINT_ARTICLE),
+		UserId:      strconv.FormatInt(user.ID, 10),
+		TaskValue:   1,
+	})
 	return gin.H{
 		"qrcode": qr,
 	}, nil
@@ -795,4 +800,14 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	}
 
 	signupService.Export(c.Writer, c.Request, topic.Id)
+}
+
+func (ctr *TopicController) ShareTopic(c *gin.Context) (gin.H, error) {
+	user := apiutil.GetAuthUser(c)
+	growth_system.GrowthSystemCommunityShare(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(entity.POINT_ARTICLE),
+		UserId:      strconv.FormatInt(user.ID, 10),
+		TaskValue:   1,
+	})
+	return gin.H{}, nil
 }
