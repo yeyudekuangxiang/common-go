@@ -648,7 +648,7 @@ func trackBehaviorInteraction(form trackInteractionParam) {
 }
 
 func urlEncodedEqualSign(str string) (string, error) {
-	pattern := `%3D` // URL 编码后的等号"="
+	pattern := `%2B|%3D` // URL 编码后的等号"="
 	match, _ := regexp.MatchString(pattern, str)
 	if match {
 		unescape, err := url.QueryUnescape(str)
