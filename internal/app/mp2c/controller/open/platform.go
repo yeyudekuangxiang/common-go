@@ -2,6 +2,7 @@ package open
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
@@ -28,6 +29,7 @@ import (
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -61,9 +63,14 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	if user.ID == 0 {
 		return nil, errno.ErrCommon.WithMessage("用户未登陆")
 	}
+	//是否存在被转移的
+	sign, err := urlEncodedEqualSign(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
 
-	app.Logger.Infof("第三方绑定 [%s] 入库: platformId:%s; openId:%s", form.PlatformKey, form.MemberId, user.OpenId)
-	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
+	app.Logger.Infof("第三方绑定 [%s] 开始绑定: platformId:%s; openId:%s", form.PlatformKey, sign, user.OpenId)
+	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, sign)
 	if err != nil {
 		if err != errno.ErrExisting {
 			app.Logger.Errorf("第三方绑定 [%s] 绑定失败: platformId:%s; openId:%s, error:%v", form.PlatformKey, form.MemberId, user.OpenId, err)
@@ -638,4 +645,20 @@ func trackBehaviorInteraction(form trackInteractionParam) {
 		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())
 		return
 	}
+}
+
+func urlEncodedEqualSign(str string) (string, error) {
+	pattern := `%2B|%3D` // URL 编码后的等号"="
+	match, _ := regexp.MatchString(pattern, str)
+	if match {
+		unescape, err := url.QueryUnescape(str)
+		if err != nil {
+			return "", err
+		}
+		if containsSpace := strings.Contains(str, " "); containsSpace {
+			return "", errors.New("非法参数")
+		}
+		return unescape, nil
+	}
+	return str, nil
 }
