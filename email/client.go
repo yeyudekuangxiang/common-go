@@ -1,4 +1,4 @@
-package invoice
+package email
 
 import (
 	"bytes"
@@ -9,15 +9,8 @@ import (
 )
 
 type mail struct {
-	FromUser    string
-	Passwd      string
-	ToUser      string
-	Subject     string
-	ApplyDate   string
-	InvoiceDate string
-	Title       string
-	Price       string
-	Annex       []string
+	FromUser string
+	Passwd   string
 }
 
 //初始化用户名和密码
@@ -40,15 +33,13 @@ type SendInvoiceParam struct {
 	Annex       []string
 }
 
-//标题 文本 目标邮箱
-
 func (m mail) SendInvoice(param SendInvoiceParam) error {
 	e := email.NewEmail()
 	e.From = m.FromUser
 	e.To = []string{param.ToUser}
 	e.Subject = param.Subject
 	// 解析html模板
-	t1, err := template.ParseFiles("email-template.html")
+	t1, err := template.ParseFiles("https://miotech-mio.oss-cn-shanghai.aliyuncs.com/static/mp2c/test/email-template.html")
 	if err != nil {
 		return err
 	}
