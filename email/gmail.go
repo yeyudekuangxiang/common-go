@@ -7,7 +7,7 @@ import (
 	"net/smtp"
 )
 
-type mail struct {
+type mail2 struct {
 	user   string
 	passwd string
 }
@@ -19,13 +19,13 @@ func check(err error) {
 }
 
 //初始化用户名和密码
-func New(u string, p string) mail {
-	temp := mail{user: u, passwd: p}
+func New(u string, p string) mail2 {
+	temp := mail2{user: u, passwd: p}
 	return temp
 }
 
 //标题 文本 目标邮箱
-func (m mail) Send(title string, text string, toId string) {
+func (m mail2) Send(title string, text string, toId string) {
 	auth := smtp.PlainAuth("", m.user, m.passwd, "smtp.gmail.com")
 
 	tlsconfig := &tls.Config{
