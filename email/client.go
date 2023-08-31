@@ -6,6 +6,7 @@ import (
 	"github.com/jordan-wright/email"
 	"html/template"
 	"net/smtp"
+	"os"
 )
 
 type mail struct {
@@ -61,7 +62,9 @@ func (m mail) SendInvoice(param SendInvoiceParam) error {
 	body1 := `<html><body><div><p>尊敬的客户您好：</p><p>您于` + param.InvoiceDate + `申请开具电子发票，现我们将电子发票发送给您，以便作为您的报销凭证。</br>发票信息如下：</br>开票日期：` + param.InvoiceDate + `</br>购方名称：` + param.Title + `</br>价税合计：` + param.Price + `</br>详情请见附件</br></p></div></body></html>`
 	e.HTML = []byte(body1)
 	for _, annex := range param.Annex {
-		_, err := e.AttachFile(annex)
+		permissions := os.FileMode(0644) // 设置新的权限模式
+		err := os.Chmod(annex, permissions)
+		_, err = e.AttachFile(annex)
 		if err != nil {
 			continue
 		}
