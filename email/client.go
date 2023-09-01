@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"crypto/tls"
 	"github.com/jordan-wright/email"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/idtool"
 	"html/template"
+	"io"
+	"log"
+	"net/http"
 	"net/smtp"
 	"os"
 )
@@ -59,14 +63,31 @@ func (m mail) SendInvoice(param SendInvoiceParam) error {
 	if err != nil {
 		return err
 	}*/
-	body1 := `<html><body><div><p>尊敬的客户您好：</p><p>您于` + param.InvoiceDate + `申请开具电子发票，现我们将电子发票发送给您，以便作为您的报销凭证。</br>发票信息如下：</br>开票日期：` + param.InvoiceDate + `</br>购方名称：` + param.Title + `</br>价税合计：` + param.Price + `</br>详情请见附件</br></p></div></body></html>`
-	e.HTML = []byte(body1)
+	body3 := `<!DOCTYPE html><html lang='en'xmlns='http://www.w3.org/1999/html'><head><meta charset='UTF-8'><title>Title</title></head><body><div><table style='min-width: 348px; transform: scale(0.784483, 0.784483); transform-origin: left top 0px'><tbody><tr><td>尊敬的客户您好：</td></tr><tr><td>您于` + param.ApplyDate + `开具电子发票，我们将电子发票发送给您，以便作为您的维权保修凭证、报销凭证。</td></tr><tr><td>&nbsp;</td></tr><tr><td>发票信息如下：</td></tr><tr><td>开票日期：` + param.InvoiceDate + `</td></tr><tr><td>购方名称：` + param.Title + `</td></tr><tr><td>价税合计：` + param.Price + `</td></tr><tr><td>&nbsp;</td></tr><tr><td>详情请见附件</td></tr></tbody></table></div></body></html>`
+	e.HTML = []byte(body3)
 	for _, annex := range param.Annex {
-		permissions := os.FileMode(0644) // 设置新的权限模式
-		err := os.Chmod(annex, permissions)
-		_, err = e.AttachFile(annex)
+		response, e1 := http.Get(annex)
+		if e1 != nil {
+			log.Fatal(e1)
+		}
+		defer response.Body.Close()
+		fileName := idtool.UUID()
+		file, err := os.Create(fileName + ".pdf")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		_, err = io.Copy(file, response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = e.AttachFile(fileName + ".pdf")
 		if err != nil {
 			continue
+		}
+		err = os.Remove(fileName + ".pdf")
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 	err := e.SendWithTLS("smtp.gmail.com:465", smtp.PlainAuth("", m.FromUser, m.Passwd, "smtp.gmail.com"),
