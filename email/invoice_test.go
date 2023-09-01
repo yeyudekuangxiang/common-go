@@ -16,9 +16,3 @@ func Test555(t *testing.T) {
 	})
 	println(a)
 }
-
-/**
-邮箱：lvmiao@miotech.com
-密码：lvmiao123
-"mei.liu@miotech.com", "JN<dA6TF1"
-*/
