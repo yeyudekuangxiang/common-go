@@ -8,6 +8,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	carbonProducer "mio/internal/pkg/queue/producer/carbon"
+	carbonmsg "mio/internal/pkg/queue/types/message/carbon"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -129,7 +131,18 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 		if err != nil {
 			return err
 		}
-
+		//投递mq
+		if err := carbonProducer.ChangeSuccessToQueue(carbonmsg.CarbonChangeSuccess{
+			Openid:        CarbonTransactionDo.OpenId,
+			UserId:        CarbonTransactionDo.UserId,
+			TransactionId: CarbonTransactionDo.TransactionId,
+			Type:          string(CarbonTransactionDo.Type),
+			City:          CarbonTransactionDo.City,
+			Value:         CarbonTransactionDo.Value,
+			Info:          CarbonTransactionDo.Info,
+		}); err != nil {
+			app.Logger.Errorf("ChangeSuccessToQueue 投递失败:%v", err)
+		}
 		//记录redis,今日榜单
 		UserIdString := strconv.FormatInt(dto.Uid, 10) //用户uid
 		redisKey := fmt.Sprintf(config.RedisKey.UserCarbonRank, time.Now().Format("20060102"))
