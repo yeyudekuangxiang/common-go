@@ -73,6 +73,9 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, sign)
 	if err != nil {
 		app.Logger.Infof("第三方绑定 [%s] 绑定失败: platformId:%s; openId:%s, error:%v", form.PlatformKey, form.MemberId, user.OpenId, err)
+		if err != errno.ErrExisting {
+			return gin.H{}, nil
+		}
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
 			"lvmiaoUserId": sceneUser.OpenId,
