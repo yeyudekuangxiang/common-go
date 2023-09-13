@@ -47,6 +47,9 @@ func Router(router *gin.Engine) {
 	router.Any("8LF0rq9WPf.txt", func(context *gin.Context) {
 		context.String(200, "11d2f924ac51f2b502087d535c3c6b6e")
 	})
+	router.Any("vxqMmdbrL5.txt", func(context *gin.Context) {
+		context.String(200, "fd8a7f90065f91224ceab80fcb0104ae")
+	})
 
 	router.Any("f316109564d78b58af9dfe4a38160d81.txt", func(context *gin.Context) {
 		context.String(200, "d62cc36e9c20b9b294894f31bd5e620083dc4065")
