@@ -1,9 +1,9 @@
 package service
 
 import (
+	"fmt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/pkg/errno"
 )
 
 var DefaultBdSceneUserService = BdSceneUserService{}
@@ -48,7 +48,7 @@ func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, membe
 	})
 
 	if sceneUser.ID != 0 {
-		return sceneUser, errno.ErrExisting
+		return sceneUser, fmt.Errorf("重复绑定")
 	}
 
 	sceneUser.PlatformKey = scene.Ch
