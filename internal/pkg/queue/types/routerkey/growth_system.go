@@ -16,9 +16,9 @@ const (
 	GrowthSystemEPCoffeeCup        = "growth-system.ep.coffee-cup"        //自带杯
 	GrowthSystemEPPlasticReduction = "growth-system.ep.plastic-reduction" //环保 减塑
 
-	GrowthSystemRERecharge        = "growth-system.re.recharge"         //充电
-	GrowthSystemRERechargeMio     = "growth-system.re.recharge.mio"     //充电.绿喵
-	GrowthSystemREBatterySwapping = "growth-system.re.battery-swapping" //换电
+	GrowthSystemRERecharge = "growth-system.re.recharge" //充电
+	//GrowthSystemRERechargeMio     = "growth-system.re.recharge.mio"     //充电.绿喵
+	//GrowthSystemREBatterySwapping = "growth-system.re.battery-swapping" //换电
 
 	GrowthSystemRecycling       = "growth-system.recycling"        //旧物回收
 	GrowthSystemRecyclingBottle = "growth-system.recycling.bottle" //酒瓶回收

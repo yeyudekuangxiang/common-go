@@ -13,6 +13,8 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/platform/jhx"
@@ -289,7 +291,16 @@ func (srv DuiBaService) PointAddCallback(form duibaApi.PointAdd) (tranId string,
 	if err != nil {
 		return
 	}
-
+	//成长体系
+	if pointType == entity.POINT_DUIBA_SIGN {
+		//成长体系
+		growth_system.GrowthSystemCheckIn(growthsystemmsg.GrowthSystemParam{
+			TaskType:    string(entity.POINT_DUIBA_SIGN),
+			TaskSubType: string(entity.POINT_DUIBA_SIGN),
+			UserId:      form.Uid,
+			TaskValue:   1,
+		})
+	}
 	err = service.DefaultDuiBaPointAddLogService.UpdateLogTransaction(newLog.ID, bizId)
 	if err != nil {
 		app.Logger.Errorf("更新DuiBaPointAddLog失败 %d %s", newLog.ID, bizId)

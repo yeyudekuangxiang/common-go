@@ -11,6 +11,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
 	"strings"
 )
 
@@ -187,7 +188,7 @@ func (srv PointCollectService) CollectBikeRide(uInfo entity.User, risk int, imag
 	growth_system.GrowthSystemRide(growthsystemmsg.GrowthSystemParam{
 		TaskType:    string(entity.POINT_BIKE_RIDE),
 		TaskSubType: string(entity.POINT_BIKE_RIDE),
-		UserId:      uInfo.OpenId,
+		UserId:      uInfo.ID,
 		TaskValue:   1,
 	})
 
@@ -252,10 +253,10 @@ func (srv PointCollectService) CollectCoffeeCup(uInfo entity.User, risk int, ima
 		app.Logger.Error("添加自带杯减碳量失败", uInfo.OpenId, imageUrl, err)
 	}
 	//成长体系
-	growth_system.GrowthSystemRide(growthsystemmsg.GrowthSystemParam{
+	growth_system.GrowthSystemEPCoffeeCup(growthsystemmsg.GrowthSystemParam{
 		TaskType:    string(entity.CARBON_COFFEE_CUP),
 		TaskSubType: string(entity.CARBON_COFFEE_CUP),
-		UserId:      uInfo.OpenId,
+		UserId:      strconv.FormatInt(uInfo.ID, 10),
 		TaskValue:   1,
 	})
 	//每日上限检查
@@ -372,10 +373,10 @@ func (srv PointCollectService) CollectReducePlastic(uInfo entity.User, risk int,
 	}
 
 	//成长体系
-	growth_system.GrowthSystemRide(growthsystemmsg.GrowthSystemParam{
+	growth_system.GrowthSystemEPPlasticReduction(growthsystemmsg.GrowthSystemParam{
 		TaskType:    string(entity.POINT_REDUCE_PLASTIC),
 		TaskSubType: string(entity.POINT_REDUCE_PLASTIC),
-		UserId:      uInfo.OpenId,
+		UserId:      strconv.FormatInt(uInfo.ID, 10),
 		TaskValue:   1,
 	})
 

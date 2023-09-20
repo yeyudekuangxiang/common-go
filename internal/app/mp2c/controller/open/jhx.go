@@ -335,7 +335,7 @@ func (ctr JhxController) JhxPreCollectPoint(c *gin.Context) (gin.H, error) {
 	//成长体系
 	growth_system.GrowthSystemBus(growthsystemmsg.GrowthSystemParam{
 		TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
-		UserId:      userInfo.OpenId,
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
 		TaskValue:   1,
 	})
 	//预加积分
