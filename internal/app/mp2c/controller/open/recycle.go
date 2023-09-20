@@ -300,6 +300,12 @@ func (ctr RecycleController) FmyOrderSync(c *gin.Context) (gin.H, error) {
 		BizId:   bizId,
 	})
 
+	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(typeName),
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
+		TaskValue:   1,
+	})
+
 	return gin.H{}, nil
 }
 
@@ -427,6 +433,12 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("[%s]旧物回收加减碳量失败: %s", form.Ch, err.Error()))
 	}
+
+	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(pt),
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
+		TaskValue:   1,
+	})
 
 	//每日次数限制
 	keyPrefix := fmt.Sprintf("%s:%s:", config.RedisKey.NumberLimit, form.Ch)

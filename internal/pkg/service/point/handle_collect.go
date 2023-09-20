@@ -44,7 +44,7 @@ func (c *DefaultClientHandle) powerReplace() error {
 		BizId:   c.clientHandle.bizId,
 	})
 	//成长体系
-	growth_system.GrowthSystemCheckIn(growthsystemmsg.GrowthSystemParam{
+	growth_system.GrowthSystemRERecharge(growthsystemmsg.GrowthSystemParam{
 		TaskSubType: string(c.clientHandle.Type),
 		UserId:      strconv.FormatInt(c.clientHandle.UserId, 10),
 		TaskValue:   1,
