@@ -188,7 +188,7 @@ func (srv PointCollectService) CollectBikeRide(uInfo entity.User, risk int, imag
 	growth_system.GrowthSystemRide(growthsystemmsg.GrowthSystemParam{
 		TaskType:    string(entity.POINT_BIKE_RIDE),
 		TaskSubType: string(entity.POINT_BIKE_RIDE),
-		UserId:      uInfo.ID,
+		UserId:      strconv.FormatInt(uInfo.ID, 10),
 		TaskValue:   1,
 	})
 
