@@ -6,10 +6,57 @@ import (
 	"testing"
 )
 
+/**
+{OperatorID:313744932 Data:w2F+8JvtXbiaN7aWmWJYuMVwDfGqGAkhdbtz9O+xX/jckUyl3UXdjwA+r6sQaevE5j5+16585wh/Ixs+IAwIBrxYWFgMWvZCQRJlh7/EW5wKW2lM5NOnnr5s5dNmuQ371BRVHgRFAn2fYHtKn2kOoODt2vsJC5NRZjs7L/ekgSRyykFHmuva7W8lTgtvQzxvPjv7UtFwsCXrZSJSoR1mjxUYnUi2ad86e9InekgcaE6c/pbMh2RB9sWxFBEQCl770PrYyXxI7jDv3IE+pplbSXTvMkn7ZNWBuxVksWXam2cyBbvL4bsg2gmMdQleWey3dOQ2q4jL5Fh27lvAPRpszGwEBTmlZDPLOMRNmLQQc3QaoUrgOy8zWvvgZdZjz0TXNmmNIAdtoqwGaGxwLNiqUUw4gb3ei8I4+qOTbI1KRY5kzK/Q9EguaX0bb/hQxvUj7VJZti+8eT/TnYhtZexy70tbKW3qkBIvo3h8lFfw7+kgHJAeFkJRGbrrByy74mkeNuoP3UtBY657KkIPhsQorywAGREGldtOByYBMa/2zPxBXwLzXQGjS63deB86HerGGL5II4veF4IcJ6x4qviK2/fwrp6GVentIGm6vkL41SC/GPBnhv9TNF7lIC0xVvw30DUSOxfhR8vnLPblFWvLfQvIrXyDpt29PSQnGY2EhzM= TimeStamp:20230902184541 Seq:0001 Sig:7685298B0FD0D589E98ED7FCDA6FAA1F}
+*/
+
+func TestName(t *testing.T) {
+	c := Client{
+		Domain:     "https://godev-api.miotech.com/mp2c-micro/evcs/v1/",
+		Version:    "",
+		AESSecret:  "agRigdo8zFu4NMbC",
+		AESIv:      "aYqsMbzLCbKpnLLa",
+		SigSecret:  "dgNaWHDgto716GRd",
+		Token:      "",
+		OperatorID: "313744932",
+	}
+	//bizId := time.Now().Format("20060102150405") + c.rand()
+	resp, err := c.QueryToken(QueryTokenParam{
+		OperatorSecret: "NU0gYnwsQaLTAQ0loRwol4NaRx8tZksX",
+		OperatorID:     "313744932",
+	})
+	if err != nil {
+		return
+	}
+	println(resp)
+}
+
 //获取绿喵token
 func TestNotifyToken(t *testing.T) {
 	c := Client{
-		Domain:     "https://godev-api.miotech.com/mp2c-micro/evcs/v1/",
+		Domain:     "https://go-api.miotech.com/mp2c-micro/evcs/v1/",
+		Version:    "",
+		AESSecret:  "agRigdo8zFu4NMbC",
+		AESIv:      "aYqsMbzLCbKpnLLa",
+		SigSecret:  "dgNaWHDgto716GRd",
+		Token:      "",
+		OperatorID: "313744932",
+	}
+	//bizId := time.Now().Format("20060102150405") + c.rand()
+	resp, err := c.QueryToken(QueryTokenParam{
+		OperatorSecret: "NU0gYnwsQaLTAQ0loRwol4NaRx8tZksX",
+		OperatorID:     "313744932",
+	})
+	if err != nil {
+		return
+	}
+	println(resp)
+}
+
+//获取绿喵token
+func TestNotifyTokenV2(t *testing.T) {
+	c := Client{
+		Domain:     "https://go-api.miotech.com/mp2c-micro/evcs/v1/",
 		Version:    "",
 		AESSecret:  "agRigdo8zFu4NMbC",
 		AESIv:      "aYqsMbzLCbKpnLLa",
@@ -51,7 +98,13 @@ func TestNotificationInvoiceChange(t *testing.T) {
 	resultMarshal, err := json.Marshal(result)
 
 	println(resultMarshal)
-	resp, err := c.NotificationInvoiceChange(*result)
+	resp, err := c.NotificationInvoiceChange(NotificationParam{
+		Sig:        "7685298B0FD0D589E98ED7FCDA6FAA1F",
+		Data:       "w2F+8JvtXbiaN7aWmWJYuMVwDfGqGAkhdbtz9O+xX/jckUyl3UXdjwA+r6sQaevE5j5+16585wh/Ixs+IAwIBrxYWFgMWvZCQRJlh7/EW5wKW2lM5NOnnr5s5dNmuQ371BRVHgRFAn2fYHtKn2kOoODt2vsJC5NRZjs7L/ekgSRyykFHmuva7W8lTgtvQzxvPjv7UtFwsCXrZSJSoR1mjxUYnUi2ad86e9InekgcaE6c/pbMh2RB9sWxFBEQCl770PrYyXxI7jDv3IE+pplbSXTvMkn7ZNWBuxVksWXam2cyBbvL4bsg2gmMdQleWey3dOQ2q4jL5Fh27lvAPRpszGwEBTmlZDPLOMRNmLQQc3QaoUrgOy8zWvvgZdZjz0TXNmmNIAdtoqwGaGxwLNiqUUw4gb3ei8I4+qOTbI1KRY5kzK/Q9EguaX0bb/hQxvUj7VJZti+8eT/TnYhtZexy70tbKW3qkBIvo3h8lFfw7+kgHJAeFkJRGbrrByy74mkeNuoP3UtBY657KkIPhsQorywAGREGldtOByYBMa/2zPxBXwLzXQGjS63deB86HerGGL5II4veF4IcJ6x4qviK2/fwrp6GVentIGm6vkL41SC/GPBnhv9TNF7lIC0xVvw30DUSOxfhR8vnLPblFWvLfQvIrXyDpt29PSQnGY2EhzM=",
+		OperatorID: "313744932",
+		TimeStamp:  "20230902184541",
+		Seq:        "0001",
+	})
 	if err != nil {
 		return
 	}
@@ -61,6 +114,7 @@ func TestNotificationInvoiceChange(t *testing.T) {
 	}
 	fmt.Println(marshal)
 }
+
 func TestNotificationStartChargeResultParams(t *testing.T) {
 	c := NotifyClient{
 		AESSecret: "agRigdo8zFu4NMbC",

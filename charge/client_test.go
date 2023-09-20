@@ -222,8 +222,15 @@ func TestGetConnectorID(t *testing.T) {
 
 func TestPhoneEncrypt(t *testing.T) {
 	//数据加解
-	AESSecret := "OzxlBNxflRPwbePa"
-	AESIv := "xnEKN6vfqegWRsbw"
+	/*SignSecret:
+	  	zzkZqGgKUa
+	  AESSecret:
+	  	AebQAP0jpebtoSKr
+	  AESIv:
+	  	Cwee61s8E067nfW4*/
+
+	AESSecret := "AebQAP0jpebtoSKr"
+	AESIv := "Cwee61s8E067nfW4"
 	pkcs5, err := encrypttool.AesEncryptPKCS5([]byte("17601258539"), []byte(AESSecret), []byte(AESIv))
 	if err != nil {
 		return
