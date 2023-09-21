@@ -440,12 +440,6 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 		TaskValue:   1,
 	})
 
-	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
-		TaskSubType: string(pt),
-		UserId:      strconv.FormatInt(userInfo.ID, 10),
-		TaskValue:   1,
-	})
-
 	//每日次数限制
 	keyPrefix := fmt.Sprintf("%s:%s:", config.RedisKey.NumberLimit, form.Ch)
 	PeriodLimit := limit.NewPeriodLimit(int(time.Hour.Seconds()*24), scene.Override, app.Redis, keyPrefix, limit.PeriodAlign())
