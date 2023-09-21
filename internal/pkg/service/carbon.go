@@ -133,13 +133,13 @@ func (srv CarbonService) changeUserPoint(dto srv_types.ChangeUserCarbonDTO) (flo
 		}
 		//投递mq
 		if err := carbonProducer.ChangeSuccessToQueue(carbonmsg.CarbonChangeSuccess{
-			Openid:        CarbonTransactionDo.OpenId,
-			UserId:        CarbonTransactionDo.UserId,
+			Openid:        dto.OpenId,
+			UserId:        dto.Uid,
 			TransactionId: CarbonTransactionDo.TransactionId,
-			Type:          string(CarbonTransactionDo.Type),
-			City:          CarbonTransactionDo.City,
-			Value:         CarbonTransactionDo.Value,
-			Info:          CarbonTransactionDo.Info,
+			Type:          string(dto.Type),
+			City:          dto.CityCode,
+			Value:         dto.ChangePoint,
+			Info:          dto.AdditionInfo,
 		}); err != nil {
 			app.Logger.Errorf("ChangeSuccessToQueue 投递失败:%v", err)
 		}
