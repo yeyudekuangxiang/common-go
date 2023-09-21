@@ -27,17 +27,21 @@ func SeekingStore(topic communitymsg.Topic) error {
 		return nil
 	}
 	ctx := context.Background()
-	rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
-		Code: "seeking_store",
+	activeActivity, err := app.RpcService.ActivityRpcSrv.ActiveActivity(ctx, &activity.ActiveActivityReq{
+		ActivityCode: "seeking_store",
 	})
 	if err != nil {
 		return err
 	}
-	if !rule.GetExist() {
-		return errno.ErrRecordNotFound
+	if !activeActivity.ActivityExist {
+		return nil
 	}
-	startTime := rule.GetActivityRule().GetStartTime() //毫秒
-	endTime := rule.GetActivityRule().GetEndTime()     //毫秒
+	if !activeActivity.ActivityRuleExist {
+		return nil
+	}
+
+	startTime := activeActivity.ActiveActivity.ActivityRule.StartTime //毫秒
+	endTime := activeActivity.ActiveActivity.ActivityRule.EndTime     //毫秒
 	createTime := topic.CreatedAt.UnixMilli()
 	if createTime < startTime || createTime > endTime {
 		return errno.ErrTimeout.WithMessage("帖子不在当期活动时间内")

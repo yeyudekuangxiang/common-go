@@ -174,7 +174,6 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 		}
 	}
 
-
 	//抽奖
 	err = ctr.luckyDraw(ctx, scene.Ch, userInfo.ID, totalPower)
 	if err != nil {
@@ -245,21 +244,16 @@ func (ctr ChargeController) sendCoupon(ctx context.Context, platformKey string, 
 }
 
 func (ctr ChargeController) checkRule(ctx context.Context, platformKey string) (*activity.ActivityRule, error) {
-	rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
-		Code: platformKey,
+	rule, err := app.RpcService.ActivityRpcSrv.ActiveActivity(ctx, &activity.ActiveActivityReq{
+		ActivityCode: platformKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if !rule.GetExist() {
+	if !rule.ActivityRuleExist {
 		return nil, errno.ErrRecordNotFound
 	}
-	startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
-	endTime := time.UnixMilli(rule.GetActivityRule().GetEndTime())
-	if time.Now().Before(startTime) || time.Now().After(endTime) {
-		return nil, errno.ErrMisMatchCondition.WithMessage("活动未开始或已失效")
-	}
-	return rule.GetActivityRule(), nil
+	return rule.ActiveActivity.ActivityRule, nil
 }
 
 func (ctr ChargeController) checkLimitOfDay(ctx context.Context, platformKey string, userId int64) error {
