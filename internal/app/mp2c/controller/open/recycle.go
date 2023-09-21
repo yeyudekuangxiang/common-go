@@ -433,6 +433,12 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("[%s]旧物回收加减碳量失败: %s", form.Ch, err.Error()))
 	}
+	//成长体系
+	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(ct),
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
+		TaskValue:   1,
+	})
 
 	growth_system.GrowthSystemRecycling(growthsystemmsg.GrowthSystemParam{
 		TaskSubType: string(pt),
