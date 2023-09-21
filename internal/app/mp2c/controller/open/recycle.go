@@ -1,11 +1,8 @@
 package open
 
 import (
-	context2 "context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activity"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/point"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api"
 	"mio/internal/app/mp2c/controller/api/api_types"
@@ -474,22 +471,22 @@ func (ctr RecycleController) Recycle(c *gin.Context) (gin.H, error) {
 	}
 
 	//活动
-	go func(userId int64, openId, Ch, orderNo, memberId, orderCreateTime, orderCompleteTime string) {
-		defer func() {
-			if err := recover(); err != nil {
-				app.Logger.Errorf("旧物回收活动失败:%v", err)
-			}
-		}()
-		ctr.incPointForActivity(ctx, incPointForActivityParams{
-			OpenId:            openId,
-			UserId:            userId,
-			ActivityCode:      Ch,
-			BizId:             orderNo,
-			BizName:           memberId,
-			OrderCompleteTime: orderCompleteTime,
-			OrderCreateTime:   orderCreateTime,
-		})
-	}(userInfo.ID, userInfo.OpenId, scene.Ch, form.OrderNo, form.MemberId, form.CreateTime, form.CompleteTime)
+	//go func(userId int64, openId, Ch, orderNo, memberId, orderCreateTime, orderCompleteTime string) {
+	//	defer func() {
+	//		if err := recover(); err != nil {
+	//			app.Logger.Errorf("旧物回收活动失败:%v", err)
+	//		}
+	//	}()
+	//	ctr.incPointForActivity(ctx, incPointForActivityParams{
+	//		OpenId:            openId,
+	//		UserId:            userId,
+	//		ActivityCode:      Ch,
+	//		BizId:             orderNo,
+	//		BizName:           memberId,
+	//		OrderCompleteTime: orderCompleteTime,
+	//		OrderCreateTime:   orderCreateTime,
+	//	})
+	//}(userInfo.ID, userInfo.OpenId, scene.Ch, form.OrderNo, form.MemberId, form.CreateTime, form.CompleteTime)
 	return gin.H{}, nil
 }
 func trackRecycle(req recycleReq) {
@@ -551,81 +548,68 @@ func trackOola(form api.RecyclePushForm) {
 		Unit:                form.Unit,
 	})
 }
-func (ctr RecycleController) incPointForActivity(ctx context2.Context, params incPointForActivityParams) {
-	//检查活动
-	result, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
-		Code: params.ActivityCode,
-	})
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, err.Error())
-		return
-	}
-	if !result.GetExist() {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "未查询到有效活动规则")
-		return
-	}
-	rule := result.GetActivityRule()
-	if rule.GetNumPoint() == 0 {
-		return
-	}
-	//查看用户是否参与过活动并且是否已经领取过积分
-	membres, err := app.RpcService.ActivityRpcSrv.Members(ctx, &activity.MembersReq{
-		ActivityId: rule.ActivityId,
-		UserId:     params.UserId,
-	})
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, err.Error())
-		return
-	}
-	if membres.GetMember().GetStatus() == 1 {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "已经参加过活动并且奖励已经领取")
-		return
-	}
-	//三天限制
-	parseInt, err := strconv.ParseInt(params.OrderCreateTime, 10, 64)
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "时间解析失败")
-	}
-	if time.UnixMilli(parseInt).Sub(time.UnixMilli(membres.GetMember().GetCreatedAt())).Hours() > 72.0 {
-		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "超出3天时间限制")
-		return
-	}
-	//记录次数
-	expired := (rule.GetEndTime() - rule.GetStartTime()) / 1000 //秒级
-	QuantityLimit := limit.NewQuantityLimit(int(expired), int(rule.GetNumLimit()), app.Redis, config.RedisKey.NumberLimit)
-	current, err := QuantityLimit.TakeCtx(ctx, rule.GetActivityCode(), 1)
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 次数记录失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
-	}
-	if current == 0 {
-		//达到上限 不再赠送积分
-		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 活动奖励发放次数达到上限", params.OpenId, params.ActivityCode, rule.GetTitle())
-		return
-	}
-	//发放积分
-	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx, &point.IncPointReq{
-		Openid:      params.OpenId,
-		Type:        string(entity.POINT_PLATFORM),
-		BizId:       params.BizId,
-		BizName:     params.BizName,
-		ChangePoint: uint64(rule.NumPoint),
-		Node:        "活动赠送积分",
-	})
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 积分发放失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
-		//加积分失败次数-1
-		app.Redis.DecrBy(ctx, config.RedisKey.NumberLimit+rule.GetActivityCode(), 1)
-		return
-	}
-	//更新用户参与记录
-	_, err = app.RpcService.ActivityRpcSrv.MemberUpdate(ctx, &activity.MemberUpdateReq{
-		ActivityId: rule.GetActivityId(),
-		UserId:     params.UserId,
-		Status:     1,
-	})
-	if err != nil {
-		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新用户活动状态失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
-		return
-	}
-	return
-}
+
+//func (ctr RecycleController) incPointForActivity(ctx context2.Context, params incPointForActivityParams) {
+//	//检查活动
+//	result, err := app.RpcService.ActivityRpcSrv.ActiveActivity(ctx, &activity.ActiveActivityReq{
+//		ActivityCode: params.ActivityCode,
+//	})
+//	if err != nil {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, err.Error())
+//		return
+//	}
+//	if !result.ActivityRuleExist {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "未查询到有效活动规则")
+//		return
+//	}
+//	rule := result.ActiveActivity.ActivityRule
+//
+//	//三天限制
+//	parseInt, err := strconv.ParseInt(params.OrderCreateTime, 10, 64)
+//	if err != nil {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "时间解析失败")
+//	}
+//
+//	if time.UnixMilli(parseInt).Sub(time.UnixMilli(membres.GetMember().GetCreatedAt())).Hours() > 72.0 {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]失败: %s", params.OpenId, params.ActivityCode, "超出3天时间限制")
+//		return
+//	}
+//	//记录次数
+//	expired := (rule.GetEndTime() - rule.GetStartTime()) / 1000 //秒级
+//	QuantityLimit := limit.NewQuantityLimit(int(expired), int(rule.GetNumLimit()), app.Redis, config.RedisKey.NumberLimit)
+//	current, err := QuantityLimit.TakeCtx(ctx, rule.GetActivityCode(), 1)
+//	if err != nil {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 次数记录失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+//	}
+//	if current == 0 {
+//		//达到上限 不再赠送积分
+//		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 活动奖励发放次数达到上限", params.OpenId, params.ActivityCode, rule.GetTitle())
+//		return
+//	}
+//	//发放积分
+//	_, err = app.RpcService.PointRpcSrv.IncPoint(ctx, &point.IncPointReq{
+//		Openid:      params.OpenId,
+//		Type:        string(entity.POINT_PLATFORM),
+//		BizId:       params.BizId,
+//		BizName:     params.BizName,
+//		ChangePoint: uint64(rule.NumPoint),
+//		Node:        "活动赠送积分",
+//	})
+//	if err != nil {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 积分发放失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+//		//加积分失败次数-1
+//		app.Redis.DecrBy(ctx, config.RedisKey.NumberLimit+rule.GetActivityCode(), 1)
+//		return
+//	}
+//	//更新用户参与记录
+//	_, err = app.RpcService.ActivityRpcSrv.MemberUpdate(ctx, &activity.MemberUpdateReq{
+//		ActivityId: rule.GetActivityId(),
+//		UserId:     params.UserId,
+//		Status:     1,
+//	})
+//	if err != nil {
+//		app.Logger.Errorf("用户[%s]参加活动[%s]-[%s], 更新用户活动状态失败: %s", params.OpenId, params.ActivityCode, rule.GetTitle(), err.Error())
+//		return
+//	}
+//	return
+//}
