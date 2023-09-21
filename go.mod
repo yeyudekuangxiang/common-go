@@ -34,8 +34,6 @@ require (
 	github.com/zeromicro/go-zero v1.4.2
 	gitlab.miotech.com/miotech-application/backend/common-go v1.2.40
 	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.4.24-develop
-	go.uber.org/zap v1.23.0
-	golang.org/x/net v0.7.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.14.0
 	google.golang.org/grpc v1.50.1
