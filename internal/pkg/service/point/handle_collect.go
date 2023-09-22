@@ -35,7 +35,7 @@ func (c *DefaultClientHandle) powerReplace() error {
 	kwh, _ := fromString.Float64()
 	_, _ = service.NewCarbonTransactionService(context.NewMioContext()).Create(api_types.CreateCarbonTransactionDto{
 		OpenId:  c.clientHandle.OpenId,
-		UserId:  0,
+		UserId:  c.clientHandle.UserId,
 		Type:    entity.CarbonTransactionType(c.clientHandle.Type),
 		Value:   kwh,
 		Info:    m["orderId"] + "#" + m["kwh"] + "#" + c.clientHandle.bizId + "#" + c.clientHandle.ImgUrl,
@@ -47,7 +47,7 @@ func (c *DefaultClientHandle) powerReplace() error {
 	growth_system.GrowthSystemRERecharge(growthsystemmsg.GrowthSystemParam{
 		TaskSubType: string(c.clientHandle.Type),
 		UserId:      strconv.FormatInt(c.clientHandle.UserId, 10),
-		TaskValue:   1,
+		TaskValue:   int64(kwh),
 	})
 	//本次积分
 	point := fromString.Mul(decimal.NewFromInt(c.clientHandle.point)).IntPart()

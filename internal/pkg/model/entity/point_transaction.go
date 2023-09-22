@@ -203,10 +203,11 @@ const (
 
 	POINT_FAST_ELECTRICITY PointTransactionType = "FAST_ELECTRICITY" //快电
 
-	POINT_ARTICLE   PointTransactionType = "ARTICLE"   //发文章
-	POINT_COMMENT   PointTransactionType = "COMMENT"   //评论
-	POINT_RECOMMEND PointTransactionType = "RECOMMEND" //推荐
-	POINT_LIKE      PointTransactionType = "LIKE"      //点赞
+	POINT_ARTICLE       PointTransactionType = "ARTICLE"   //发文章
+	POINT_COMMENT       PointTransactionType = "COMMENT"   //评论
+	POINT_RECOMMEND     PointTransactionType = "RECOMMEND" //推荐
+	POINT_LIKE          PointTransactionType = "LIKE"      //点赞
+	POINT_ARTICLE_SHARE PointTransactionType = "ARTICLE_SHARE"
 
 	POINT_REDUCE_PLASTIC PointTransactionType = "REDUCE_PLASTIC" //环保减塑
 

@@ -42,9 +42,17 @@ var eventMap = map[string]string{
 	"bottle":                    "bottle_recycling",
 	"like":                      "post_like",
 	"article":                   "post_push",
+	"article_share":             "post_share",
 	"comment":                   "post_comment",
 	"charitable":                "charitable",
-	"mall_redemption":           "mall_redemption",
+	"duiba_alipay":              "mall_redemption",
+	"duiba_qb":                  "mall_redemption",
+	"duiba_coupon":              "mall_redemption",
+	"duiba_object":              "mall_redemption",
+	"duiba_phonebill":           "mall_redemption",
+	"duiba_phoneflow":           "mall_redemption",
+	"duiba_virtual":             "mall_redemption",
+	"duiba_hdtool":              "mall_redemption",
 }
 
 func getEvent(paramsType string) string {
