@@ -334,12 +334,6 @@ func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	//成长体系
-	growth_system.GrowthSystemCommunityPush(growthsystemmsg.GrowthSystemParam{
-		TaskSubType: string(entity.POINT_ARTICLE),
-		UserId:      strconv.FormatInt(user.ID, 10),
-		TaskValue:   1,
-	})
 
 	return gin.H{
 		"topic": topic,
@@ -805,7 +799,7 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 func (ctr *TopicController) ShareTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	growth_system.GrowthSystemCommunityShare(growthsystemmsg.GrowthSystemParam{
-		TaskSubType: string(entity.POINT_ARTICLE),
+		TaskSubType: string(entity.POINT_ARTICLE_SHARE),
 		UserId:      strconv.FormatInt(user.ID, 10),
 		TaskValue:   1,
 	})

@@ -23,6 +23,7 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -128,7 +129,12 @@ func (srv DuiBaService) ExchangeCallback(form duibaApi.Exchange) (*service.Excha
 		app.Logger.Errorf("%+v %v", form, err)
 		return nil, errors.New(stat.Message())
 	}
-
+	//成长体系
+	growth_system.GrowthSystemMallRedemption(growthsystemmsg.GrowthSystemParam{
+		TaskSubType: string(pointType),
+		UserId:      strconv.FormatInt(userInfo.ID, 10),
+		TaskValue:   form.Credits,
+	})
 	return &service.ExchangeCallbackResult{
 		BizId:   result.TransactionId,
 		Credits: result.Balance,

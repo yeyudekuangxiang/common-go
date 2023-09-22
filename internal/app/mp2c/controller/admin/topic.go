@@ -9,7 +9,9 @@ import (
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
 	communityPdr "mio/internal/pkg/queue/producer/community"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/types/message/communitymsg"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	communityModel "mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/community"
@@ -257,6 +259,13 @@ func (ctr TopicController) Review(c *gin.Context) (gin.H, error) {
 			}
 			key = "push_topic"
 		}
+
+		//成长体系
+		growth_system.GrowthSystemCommunityPush(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(entity.POINT_ARTICLE),
+			UserId:      strconv.FormatInt(topic.User.ID, 10),
+			TaskValue:   1,
+		})
 	}
 
 	if topic.Status == 4 {
