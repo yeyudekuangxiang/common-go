@@ -1,6 +1,6 @@
 module mio
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Baidu-AIP/golang-sdk v1.1.1
