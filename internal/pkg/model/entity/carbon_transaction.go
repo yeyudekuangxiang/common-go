@@ -174,6 +174,7 @@ const (
 	CARBON_BOTTLES                   CarbonTransactionType = "BOTTLES"                   //旧瓶回收
 	CARBON_CLEAN_PLATE               CarbonTransactionType = "CLEAN_PLATE"               //光盘行动
 	CARBON_ECAR_MIO                  CarbonTransactionType = "ECAR_MIO"                  //绿喵充电
+	CARBON_GREEN_TAKE_OUT            CarbonTransactionType = "GREEN_TAKE_OUT"            //绿色外卖
 )
 
 type CarbonTransaction struct {
