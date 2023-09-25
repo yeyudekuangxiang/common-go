@@ -44,17 +44,26 @@ var (
 	PointCollectBaiGuoYuanTwo = []string{
 		"百果园",
 	}
+	GreenTakeoutOne = []string{
+		"绿色外卖",
+	}
+	SustainablePackageDfOne = []string{
+		"德芙",
+		"Dove",
+	}
 )
 var DefaultPointCollectService = PointCollectService{}
 
 type PointCollectType string
 
 const (
-	PointCollectCoffeeCupType    PointCollectType = "COFFEE_CUP"
-	PointCollectBikeRideType     PointCollectType = "BIKE_RIDE"
-	PointCollectPowerReplaceType PointCollectType = "POWER_REPLACE"
-	PointCollectDiDiType         PointCollectType = "DIDI"
-	PointCollectReducePlastic    PointCollectType = "REDUCE_PLASTIC"
+	PointCollectCoffeeCupType      PointCollectType = "COFFEE_CUP"
+	PointCollectBikeRideType       PointCollectType = "BIKE_RIDE"
+	PointCollectPowerReplaceType   PointCollectType = "POWER_REPLACE"
+	PointCollectDiDiType           PointCollectType = "DIDI"
+	PointCollectReducePlastic      PointCollectType = "REDUCE_PLASTIC"
+	PointCollectGreenTakeout       PointCollectType = "GREEN_TAKE_OUT"
+	PointCollectSustainablePackage PointCollectType = "SUSTAINABLE_PACKAGE"
 )
 
 type PointCollectService struct {
@@ -77,6 +86,24 @@ func (srv PointCollectService) validateCoffeeCupImage(imageUrl string) (bool, []
 
 	if result1 != "" { //&& result2 != ""
 		return true, []string{result1}, nil //result2
+	}
+	return false, nil, nil
+}
+
+func (srv PointCollectService) validateImage(imageUrl string, rules []string) (bool, []string, error) {
+	ocrSrv := DefaultOCRService()
+	imageHash, err := ocrSrv.CheckImageScanCount(imageUrl, 1)
+	if err != nil {
+		return false, nil, err
+	}
+	results, err := ocrSrv.ScanWithHash(imageUrl, imageHash)
+
+	if err != nil {
+		return false, nil, err
+	}
+	result1 := srv.validatePointRule(results, rules)
+	if result1 != "" {
+		return true, []string{result1}, nil
 	}
 	return false, nil, nil
 }
@@ -275,6 +302,120 @@ func (srv PointCollectService) CollectCoffeeCup(uInfo entity.User, risk int, ima
 	_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:       uInfo.OpenId,
 		Type:         entity.POINT_COFFEE_CUP,
+		BizId:        bizId,
+		ChangePoint:  int64(point),
+		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+	})
+
+	return point, err
+}
+
+//绿色外卖
+
+func (srv PointCollectService) CollectGreenTakeoutOne(uInfo entity.User, risk int, imageUrl string) (int, error) {
+	err := DefaultOCRService().CheckIdempotent(uInfo.OpenId)
+	if err != nil {
+		return 0, err
+	}
+	err = DefaultOCRService().CheckRisk(risk)
+	if err != nil {
+		return 0, err
+	}
+	ok, err := NewPointTransactionCountLimitService(context.NewMioContext()).CheckLimit(entity.POINT_GREEN_TAKE_OUT, uInfo.OpenId)
+	if err != nil {
+		return 0, err
+	}
+
+	valid, result, err := srv.validateImage(imageUrl, GreenTakeoutOne)
+	if err != nil {
+		return 0, err
+	}
+	if !valid {
+		return 0, errno.ErrCommon.WithMessage("不是有效的绿色外卖图片")
+	}
+	ctx := context.NewMioContext()
+	bizId := util.UUID()
+	var point int
+	//减碳量
+	_, err = NewCarbonTransactionService(ctx).Create(api_types.CreateCarbonTransactionDto{
+		OpenId: uInfo.OpenId,
+		Type:   entity.CARBON_GREEN_TAKE_OUT,
+		Value:  1,
+		Info:   fmt.Sprintf("%s", result),
+		BizId:  bizId,
+	})
+	if err != nil {
+		app.Logger.Error("添加绿色外卖减碳量失败", uInfo.OpenId, imageUrl, err)
+	}
+	//每日上限检查
+	if !ok {
+		return point, errno.ErrCommon.WithMessage("今日次数已达到上限")
+	}
+	_, err = NewPointCollectHistoryService(ctx).CreateHistory(CreateHistoryParam{
+		OpenId:          uInfo.OpenId,
+		TransactionType: entity.POINT_GREEN_TAKE_OUT,
+		Info:            fmt.Sprintf("coffeeCup=%v", result),
+	})
+	if err != nil {
+		app.Logger.Error("添加绿色外卖杯记录失败", uInfo.OpenId, imageUrl, err)
+	}
+
+	point = entity.PointCollectValueMap[entity.POINT_GREEN_TAKE_OUT]
+	_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       uInfo.OpenId,
+		Type:         entity.POINT_GREEN_TAKE_OUT,
+		BizId:        bizId,
+		ChangePoint:  int64(point),
+		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
+	})
+
+	return point, err
+}
+
+//可持续包装
+
+func (srv PointCollectService) CollectSustainablePackageOne(uInfo entity.User, risk int, imageUrl string) (int, error) {
+	err := DefaultOCRService().CheckIdempotent(uInfo.OpenId)
+	if err != nil {
+		return 0, err
+	}
+	err = DefaultOCRService().CheckRisk(risk)
+	if err != nil {
+		return 0, err
+	}
+	ok, err := NewPointTransactionCountLimitService(context.NewMioContext()).CheckLimit(entity.POINT_SUSTAINABLE_PACKAGE, uInfo.OpenId)
+	if err != nil {
+		return 0, err
+	}
+
+	valid, result, err := srv.validateImage(imageUrl, SustainablePackageDfOne)
+	if err != nil {
+		return 0, err
+	}
+	if !valid {
+		return 0, errno.ErrCommon.WithMessage("不是有效的可持续包装图片")
+	}
+	ctx := context.NewMioContext()
+	bizId := util.UUID()
+	var point int
+
+	//每日上限检查
+	if !ok {
+		return point, errno.ErrCommon.WithMessage("今日次数已达到上限")
+	}
+	_, err = NewPointCollectHistoryService(ctx).CreateHistory(CreateHistoryParam{
+		OpenId:          uInfo.OpenId,
+		TransactionType: entity.POINT_SUSTAINABLE_PACKAGE,
+		Info:            fmt.Sprintf("coffeeCup=%v", result),
+	})
+	if err != nil {
+		app.Logger.Error("添加可持续包装记录失败", uInfo.OpenId, imageUrl, err)
+	}
+
+	point = entity.PointCollectValueMap[entity.POINT_SUSTAINABLE_PACKAGE]
+	_, err = NewPointService(ctx).IncUserPoint(srv_types.IncUserPointDTO{
+		OpenId:       uInfo.OpenId,
+		Type:         entity.POINT_SUSTAINABLE_PACKAGE,
 		BizId:        bizId,
 		ChangePoint:  int64(point),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),

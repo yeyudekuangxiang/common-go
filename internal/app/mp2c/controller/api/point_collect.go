@@ -39,6 +39,10 @@ func (PointCollectController) Collect(ctx *gin.Context) (gin.H, error) {
 		point, err = service.DefaultPointCollectService.CollectPowerReplace(user, user.Risk, form.ImgUrl)
 	case service.PointCollectReducePlastic:
 		point, err = service.DefaultPointCollectService.CollectReducePlastic(user, user.Risk, form.ImgUrl)
+	case service.PointCollectGreenTakeout:
+		point, err = service.DefaultPointCollectService.CollectGreenTakeoutOne(user, user.Risk, form.ImgUrl)
+	case service.PointCollectSustainablePackage:
+		point, err = service.DefaultPointCollectService.CollectSustainablePackageOne(user, user.Risk, form.ImgUrl)
 	}
 	carbon := 0.0
 
