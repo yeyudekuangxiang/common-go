@@ -132,7 +132,7 @@ type SignupInfo struct {
 	Value    interface{} `json:"value"`
 }
 
-//comment
+// comment
 func (a APIComment) ApiComment() *APICommentResp {
 	return &APICommentResp{
 		Id:        a.Id,

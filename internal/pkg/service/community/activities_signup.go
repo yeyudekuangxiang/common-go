@@ -41,7 +41,8 @@ type (
 )
 
 func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter, r *http.Request, topicId int64) {
-	//list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
+	list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
+
 	f := excelize.NewFile()
 
 	// 创建一个工作表
@@ -59,24 +60,50 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	f.SetCellValue("Sheet1", "F1", "性别")
 	f.SetCellValue("Sheet1", "G1", "居住城市")
 	f.SetCellValue("Sheet1", "H1", "报名备注")
-	//
-	//for i, item := range list {
-	//	gender := "未知"
-	//	if item.Gender == 1 {
-	//		gender = "男"
-	//	} else if item.Gender == 2 {
-	//		gender = "女"
-	//	}
-	//
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("A%d", i+2), item.User.Nickname)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("B%d", i+2), item.RealName)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("C%d", i+2), item.Phone)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("D%d", i+2), item.Wechat)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("E%d", i+2), item.Age)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("F%d", i+2), gender)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("G%d", i+2), item.City)
-	//	f.SetCellValue("Sheet1", fmt.Sprintf("H%d", i+2), item.Remarks)
-	//}
+
+	for i, item := range list {
+		gender := "未知"
+		if item.User.Gender == entity.UserGenderMale {
+			gender = "男"
+		} else if item.User.Gender == entity.UserGenderFemale {
+			gender = "女"
+		}
+		signupInfos := make([]SignupInfo, 0)
+		err = json.Unmarshal([]byte(item.SignupInfo), &signupInfos)
+		if err != nil {
+			return
+		}
+		var realName, phone, wechat, city, remarks string
+		var age int
+		for _, signupInfo := range signupInfos {
+			if signupInfo.Code == "realName" {
+				realName = signupInfo.Value.(string)
+			}
+			if signupInfo.Code == "phone" {
+				phone = signupInfo.Value.(string)
+			}
+			if signupInfo.Code == "wechat" {
+				wechat = signupInfo.Value.(string)
+			}
+			if signupInfo.Code == "age" {
+				age = signupInfo.Value.(int)
+			}
+			if signupInfo.Code == "city" {
+				city = signupInfo.Value.(string)
+			}
+			if signupInfo.Code == "remarks" {
+				remarks = signupInfo.Value.(string)
+			}
+		}
+		f.SetCellValue("Sheet1", fmt.Sprintf("A%d", i+2), item.User.Nickname)
+		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", i+2), realName)
+		f.SetCellValue("Sheet1", fmt.Sprintf("C%d", i+2), phone)
+		f.SetCellValue("Sheet1", fmt.Sprintf("D%d", i+2), wechat)
+		f.SetCellValue("Sheet1", fmt.Sprintf("E%d", i+2), age)
+		f.SetCellValue("Sheet1", fmt.Sprintf("F%d", i+2), gender)
+		f.SetCellValue("Sheet1", fmt.Sprintf("G%d", i+2), city)
+		f.SetCellValue("Sheet1", fmt.Sprintf("H%d", i+2), remarks)
+	}
 
 	// 设置工作簿的默认工作表
 	f.SetActiveSheet(index)
