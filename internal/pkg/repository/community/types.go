@@ -36,10 +36,11 @@ type FindAllActivitiesSignupParams struct {
 }
 
 type FindOneActivitiesSignupParams struct {
-	Id           int64 `json:"id"`
-	TopicId      int64 `json:"topicId"`
-	UserId       int64 `json:"userId"`
-	SignupStatus int   `json:"signupStatus"`
+	Id           int64  `json:"id"`
+	TopicId      int64  `json:"topicId"`
+	UserId       int64  `json:"userId"`
+	Phone        string `json:"phone"`
+	SignupStatus int    `json:"signupStatus"`
 }
 
 type FindListCountParams struct {

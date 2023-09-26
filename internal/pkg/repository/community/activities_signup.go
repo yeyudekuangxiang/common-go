@@ -144,6 +144,9 @@ func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesS
 	if params.SignupStatus != 0 {
 		db.Where("signup_status = ?", params.SignupStatus)
 	}
+	if params.Phone != "" {
+		db.Or("phone = ?", params.Phone)
+	}
 	err := db.First(&resp).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
