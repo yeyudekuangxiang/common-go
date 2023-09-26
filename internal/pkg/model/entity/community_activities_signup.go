@@ -10,6 +10,7 @@ type CommunityActivitiesSignup struct {
 	Id           int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	TopicId      int64     `json:"topicId"`
 	UserId       int64     `json:"userId"`
+	Phone        string    `json:"phone"`
 	SignupInfo   string    `json:"signupInfo"`
 	SignupTime   time.Time `json:"signupTime"`
 	CancelTime   time.Time `json:"cancelTime,omitempty"`
@@ -27,6 +28,7 @@ type APIActivitiesSignup struct {
 	CancelTime   model.Time         `json:"cancelTime"`
 	SignupStatus int                `json:"signupStatus"`
 	UserId       int64              `json:"userId"`
+	Phone        string             `json:"phone"`
 	User         ShortUser          `json:"user" gorm:"foreignKey:UserId"`
 	TopicId      int64              `json:"topicId"`
 	Topic        APITopicActivities `json:"topic,omitempty" gorm:"foreignKey:TopicId"`
@@ -37,6 +39,7 @@ type APISignupList struct {
 	SignupInfo string `json:"signupInfo"`
 	//关联数据
 	UserId       int64      `json:"userId"`
+	Phone        string     `json:"phone"`
 	User         ShortUser  `json:"user"`
 	SignupTime   model.Time `json:"signupTime"`
 	SignupStatus int        `json:"signupStatus"`

@@ -188,8 +188,14 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupInfosPara
 	if err != nil {
 		return err
 	}
-	//查看是否已经报名
-	_, err = srv.findSignupRecord(params.TopicId, params.UserId, 1)
+	var phone string
+	for _, item := range params.SignupInfos {
+		if item.Code == "phone" {
+			phone = item.Value.(string)
+		}
+	}
+	//查看是否已经报名 用户id
+	_, err = srv.findSignupRecord(params.TopicId, params.UserId, 1, phone)
 	if err != nil {
 		return err
 	}
@@ -206,6 +212,7 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupInfosPara
 	signupModel := &entity.CommunityActivitiesSignup{
 		TopicId:      params.TopicId,
 		UserId:       params.UserId,
+		Phone:        phone,
 		SignupInfo:   string(marshal),
 		SignupTime:   params.SignupTime,
 		SignupStatus: params.SignupStatus,
@@ -264,10 +271,11 @@ func (srv defaultCommunityActivitiesSignupService) findTopic(id int64, tp, statu
 	return topic, nil
 }
 
-func (srv defaultCommunityActivitiesSignupService) findSignupRecord(id, uid int64, signupStatus int) (*entity.CommunityActivitiesSignup, error) {
+func (srv defaultCommunityActivitiesSignupService) findSignupRecord(id, uid int64, signupStatus int, phone string) (*entity.CommunityActivitiesSignup, error) {
 	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{
 		TopicId:      id,
 		UserId:       uid,
+		Phone:        phone,
 		SignupStatus: signupStatus,
 	})
 	if err != nil {
