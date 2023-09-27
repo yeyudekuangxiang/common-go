@@ -7,7 +7,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	carbonProducer "mio/internal/pkg/queue/producer/carbon"
 	"mio/internal/pkg/queue/producer/quizpdr"
+	carbonmsg "mio/internal/pkg/queue/types/message/carbon"
 	"mio/internal/pkg/queue/types/message/quizmsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
@@ -101,14 +103,29 @@ func (srv QuizService) Submit(openId string, uid int64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	bizId := util.UUID()
 	quizpdr.SendMessage(quizmsg.QuizMessage{
 		Uid:              uid,
 		OpenId:           openId,
 		TodayCorrectNum:  todayResult.CorrectNum,
 		TodayAnsweredNum: todayResult.IncorrectNum,
 		QuizTime:         time.Now().Unix(),
-		BizId:            util.UUID(),
+		BizId:            bizId,
 	})
+
+	//投递mq
+	if err = carbonProducer.ChangeSuccessToQueue(carbonmsg.CarbonChangeSuccess{
+		Openid:        openId,
+		UserId:        uid,
+		TransactionId: bizId,
+		Type:          string(entity.POINT_QUIZ),
+		City:          "",
+		Value:         0,
+		Info:          fmt.Sprintf("%+v", todayResult),
+	}); err != nil {
+		app.Logger.Errorf("ChangeSuccessToQueue 投递失败:%v", err)
+	}
+
 	return answerPoint, nil
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {
