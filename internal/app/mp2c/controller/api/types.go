@@ -114,7 +114,7 @@ type UploadImageForm struct {
 
 type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
-	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC" alias:"类型"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC GREEN_TAKE_OUT SUSTAINABLE_PACKAGE" alias:"类型"`
 }
 
 type NewCollectForm struct {
