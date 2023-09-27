@@ -6,7 +6,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	carbonProducer "mio/internal/pkg/queue/producer/carbon"
 	"mio/internal/pkg/queue/producer/growth_system"
+	carbonmsg "mio/internal/pkg/queue/types/message/carbon"
 	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
@@ -369,7 +371,6 @@ func (srv PointCollectService) CollectGreenTakeoutOne(uInfo entity.User, risk in
 		ChangePoint:  int64(point),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
 	})
-
 	return point, err
 }
 
@@ -421,6 +422,19 @@ func (srv PointCollectService) CollectSustainablePackageOne(uInfo entity.User, r
 		ChangePoint:  int64(point),
 		AdditionInfo: fmt.Sprintf("{imageUrl=%s}", imageUrl),
 	})
+
+	//投递mq
+	if err = carbonProducer.ChangeSuccessToQueue(carbonmsg.CarbonChangeSuccess{
+		Openid:        uInfo.OpenId,
+		UserId:        uInfo.ID,
+		TransactionId: bizId,
+		Type:          string(entity.POINT_SUSTAINABLE_PACKAGE),
+		City:          "",
+		Value:         0,
+		Info:          fmt.Sprintf("%s", result),
+	}); err != nil {
+		app.Logger.Errorf("ChangeSuccessToQueue 投递失败:%v", err)
+	}
 
 	return point, err
 }
