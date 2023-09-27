@@ -48,7 +48,7 @@ var (
 		"百果园",
 	}
 	GreenTakeoutOne = []string{
-		"绿色外卖",
+		"无需餐具",
 	}
 	SustainablePackageDfOne = []string{
 		"德芙",
