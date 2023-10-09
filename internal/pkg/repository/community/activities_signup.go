@@ -20,6 +20,7 @@ type (
 		Update(signup *entity.CommunityActivitiesSignup) error
 		Create(signup *entity.CommunityActivitiesSignup) error
 		FindListCount(params FindListCountParams) ([]*entity.APIListCount, error)
+		CreateV2(signup *entity.CommunityActivitiesSignupV2) error
 	}
 
 	defaultCommunityActivitiesSignupModel struct {
@@ -245,6 +246,18 @@ func (d defaultCommunityActivitiesSignupModel) Update(signup *entity.CommunityAc
 
 func (d defaultCommunityActivitiesSignupModel) Create(signup *entity.CommunityActivitiesSignup) error {
 	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
+		WithContext(d.ctx.Context).
+		Omit(clause.Associations).
+		Omit("cancel_time").
+		Create(signup).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) CreateV2(signup *entity.CommunityActivitiesSignupV2) error {
+	err := d.ctx.DB.Model(&entity.CommunityActivitiesSignupV2{}).
 		WithContext(d.ctx.Context).
 		Omit(clause.Associations).
 		Omit("cancel_time").

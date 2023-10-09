@@ -672,6 +672,36 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+func (ctr *TopicController) SignupTopicV2(c *gin.Context) (gin.H, error) {
+	form := SignupTopicRequestV2{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	params := community.SignupParams{
+		TopicId:      form.TopicId,
+		UserId:       user.ID,
+		OpenId:       user.OpenId,
+		RealName:     form.RealName,
+		Phone:        form.Phone,
+		Gender:       form.Gender,
+		Age:          form.Age,
+		Wechat:       form.Wechat,
+		City:         form.City,
+		Remarks:      form.Remarks,
+		SignupTime:   time.Now(),
+		SignupStatus: communityModel.SignupStatusTrue,
+	}
+	err := signupService.SignupV2(params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
 func (ctr *TopicController) CancelSignupTopic(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {

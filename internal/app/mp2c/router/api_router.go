@@ -229,7 +229,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/update", apiutil.Format(community.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(community.DefaultTopicController.DelTopic))
 			topicRouter.POST("/share", apiutil.Format(community.DefaultTopicController.ShareTopic))
-			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
+			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopicV2))
 			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
 			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
 			topicRouter.GET("/activities/signup-path", apiutil.FormatContent(community.DefaultTopicController.ExportSignupList))
