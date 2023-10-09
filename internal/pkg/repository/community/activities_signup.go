@@ -22,6 +22,8 @@ type (
 		FindListCount(params FindListCountParams) ([]*entity.APIListCount, error)
 		CreateV2(signup *entity.CommunityActivitiesSignupV2) error
 		FindAllAPISignupV2(params FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
+		FindOneAPISignupV2(params FindOneActivitiesSignupParams) (*entity.APIActivitiesSignupV2, error)
+		FindOneV2(params FindOneActivitiesSignupParams) (*entity.CommunityActivitiesSignupV2, error)
 	}
 
 	defaultCommunityActivitiesSignupModel struct {
@@ -156,6 +158,31 @@ func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesS
 	return resp, nil
 }
 
+func (d defaultCommunityActivitiesSignupModel) FindOneV2(params FindOneActivitiesSignupParams) (*entity.CommunityActivitiesSignupV2, error) {
+	var resp *entity.CommunityActivitiesSignupV2
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignupV2{})
+	if params.Id != 0 {
+		db.Where("id = ?", params.Id)
+	}
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.SignupStatus != 0 {
+		db.Where("signup_status = ?", params.SignupStatus)
+	}
+	err := db.First(&resp).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &entity.CommunityActivitiesSignupV2{}, nil
+		}
+		return &entity.CommunityActivitiesSignupV2{}, err
+	}
+	return resp, nil
+}
+
 func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, error) {
 	var resp *entity.APIActivitiesSignup
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{})
@@ -172,6 +199,26 @@ func (d defaultCommunityActivitiesSignupModel) FindOneAPISignup(params FindOneAc
 	err := db.Unscoped().Order("signup_time desc").First(&resp).Error
 	if err != nil {
 		return &entity.APIActivitiesSignup{}, err
+	}
+	return resp, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindOneAPISignupV2(params FindOneActivitiesSignupParams) (*entity.APIActivitiesSignupV2, error) {
+	var resp *entity.APIActivitiesSignupV2
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignupV2{})
+	if params.Id != 0 {
+		db.Where("id = ?", params.Id)
+	}
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+
+	err := db.Unscoped().Order("signup_time desc").First(&resp).Error
+	if err != nil {
+		return &entity.APIActivitiesSignupV2{}, err
 	}
 	return resp, nil
 }

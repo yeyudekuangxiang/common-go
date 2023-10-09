@@ -35,6 +35,7 @@ type (
 		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
 		SignupV2(params SignupParams) error
 		GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
+		GetSignupInfoV2(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignupV2, bool, error)
 	}
 
 	defaultCommunityActivitiesSignupService struct {
@@ -173,6 +174,23 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 	return signup, true, nil
 }
 
+func (srv defaultCommunityActivitiesSignupService) GetSignupInfoV2(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignupV2, bool, error) {
+	signup, err := srv.signupModel.FindOneAPISignupV2(community.FindOneActivitiesSignupParams{
+		Id:           params.Id,
+		TopicId:      params.TopicId,
+		UserId:       params.UserId,
+		SignupStatus: params.SignupStatus,
+	})
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &entity.APIActivitiesSignupV2{}, false, nil
+		}
+		return &entity.APIActivitiesSignupV2{}, false, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+
+	return signup, true, nil
+}
+
 func (srv defaultCommunityActivitiesSignupService) Signup(params SignupInfosParams) error {
 	topic, err := srv.findTopic(params.TopicId, 1, 3)
 	if err != nil {
@@ -227,7 +245,7 @@ func (srv defaultCommunityActivitiesSignupService) SignupV2(params SignupParams)
 		return errno.ErrCommon.WithMessage(err.Error())
 	}
 
-	signup, err := srv.signupModel.FindOne(community.FindOneActivitiesSignupParams{
+	signup, err := srv.signupModel.FindOneV2(community.FindOneActivitiesSignupParams{
 		TopicId:      params.TopicId,
 		UserId:       params.UserId,
 		SignupStatus: 1,
