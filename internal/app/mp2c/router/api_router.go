@@ -159,7 +159,7 @@ func apiRouter(router *gin.Engine) {
 			//userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(deleteRoute))                                   //绑定手机
 			userRouter.GET("/my-topic", apiutil.Format(community.DefaultTopicController.MyTopic))                //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                    //我的奖励
-			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignup))              //我的报名
+			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignupV2))            //我的报名
 			userRouter.GET("/my-signup-detail", apiutil.Format(community.DefaultTopicController.MySignupDetail)) //我的报名
 
 			userRouter.GET("/topic-collection", apiutil.Format(community.DefaultCollectionController.TopicCollection))    //我的收藏(文章)

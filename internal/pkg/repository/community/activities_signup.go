@@ -21,6 +21,7 @@ type (
 		Create(signup *entity.CommunityActivitiesSignup) error
 		FindListCount(params FindListCountParams) ([]*entity.APIListCount, error)
 		CreateV2(signup *entity.CommunityActivitiesSignupV2) error
+		FindAllAPISignupV2(params FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
 	}
 
 	defaultCommunityActivitiesSignupModel struct {
@@ -179,6 +180,48 @@ func (d defaultCommunityActivitiesSignupModel) FindAllAPISignup(params FindAllAc
 	list := make([]*entity.APIActivitiesSignup, 0)
 	var total int64
 	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignup{}).
+		Preload("User").
+		Preload("Topic").
+		Preload("Topic.User").
+		Preload("Topic.Activity")
+
+	if params.TopicId != 0 {
+		db.Where("topic_id = ?", params.TopicId)
+	}
+	if params.UserId != 0 {
+		db.Where("user_id = ?", params.UserId)
+	}
+	if params.City != "" {
+		db.Where("city = ?", params.City)
+	}
+	if params.Age != 0 {
+		db.Where("age = ?", params.Age)
+	}
+	if params.Gender != 0 {
+		db.Where("gender = ?", params.Gender)
+	}
+	if params.Phone != "" {
+		db.Where("phone = ?", params.Phone)
+	}
+	if params.RealName != "" {
+		db.Where("real_name = ?", params.RealName)
+	}
+	if params.Wechat != "" {
+		db.Where("wechat = ?", params.Wechat)
+	}
+
+	err := db.Count(&total).Offset(params.Offset).Limit(params.Limit).Order("signup_time desc").Unscoped().Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return list, total, nil
+}
+
+func (d defaultCommunityActivitiesSignupModel) FindAllAPISignupV2(params FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error) {
+	list := make([]*entity.APIActivitiesSignupV2, 0)
+	var total int64
+	db := d.ctx.DB.Model(&entity.CommunityActivitiesSignupV2{}).
 		Preload("User").
 		Preload("Topic").
 		Preload("Topic.User").

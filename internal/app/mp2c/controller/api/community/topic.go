@@ -744,6 +744,33 @@ func (ctr *TopicController) MySignup(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+func (ctr *TopicController) MySignupV2(c *gin.Context) (gin.H, error) {
+	form := MySignupRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	list, total, err := signupService.GetPageList(communityModel.FindAllActivitiesSignupParams{
+		UserId: user.ID,
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
 func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {

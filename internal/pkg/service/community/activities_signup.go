@@ -34,6 +34,7 @@ type (
 		Export(w http.ResponseWriter, r *http.Request, topicId int64)
 		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
 		SignupV2(params SignupParams) error
+		GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
 	}
 
 	defaultCommunityActivitiesSignupService struct {
@@ -142,6 +143,19 @@ func (srv defaultCommunityActivitiesSignupService) GetPageList(params community.
 	return list, total, nil
 }
 
+func (srv defaultCommunityActivitiesSignupService) GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error) {
+	list, total, err := srv.signupModel.FindAllAPISignupV2(params)
+	if err != nil {
+		return nil, 0, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+	for _, item := range list {
+		item.Topic.Activity.Status = 1
+		if item.Topic.Activity.SignupDeadline.Before(time.Now()) {
+			item.Topic.Activity.Status = 2
+		}
+	}
+	return list, total, nil
+}
 func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, bool, error) {
 	signup, err := srv.signupModel.FindOneAPISignup(community.FindOneActivitiesSignupParams{
 		Id:           params.Id,
