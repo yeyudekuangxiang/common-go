@@ -754,7 +754,7 @@ func (ctr *TopicController) MySignupV2(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	list, total, err := signupService.GetPageList(communityModel.FindAllActivitiesSignupParams{
+	list, total, err := signupService.GetPageListV2(communityModel.FindAllActivitiesSignupParams{
 		UserId: user.ID,
 		Offset: form.Offset(),
 		Limit:  form.Limit(),
