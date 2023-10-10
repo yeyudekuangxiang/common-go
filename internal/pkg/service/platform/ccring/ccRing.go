@@ -76,9 +76,8 @@ func (srv ccRingService) CallBack() (string, error) {
 	authToken := httptool.HttpWithHeader("Authorization", srv.Authorization)
 	body, err := httptool.PostJson(srv.Domain+srv.Url, srv.Option, authToken)
 	if err != nil {
-		app.Logger.Errorf("回调光环错误: post error %s", err.Error())
+		app.Logger.Errorf("回调光环错误 url:%v option: %+v Authorization: %v body: %v error: %+v", srv.Domain+srv.Url, srv.Option, srv.Authorization, string(body), err)
 		return fmt.Sprintf("%s", body), err
 	}
 	return fmt.Sprintf("%s", body), nil
-
 }
