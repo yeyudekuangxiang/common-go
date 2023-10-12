@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gorm.io/gorm"
+	"math/rand"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
@@ -26,8 +27,39 @@ var DefaultQuizService = QuizService{}
 type QuizService struct {
 }
 
-func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestionV2, error) {
+func (srv QuizService) DailyQuestions(openid string, ActivityChannel string) ([]entity.QuizQuestionV2, error) {
 	DefaultQuizSingleRecordService.ClearTodayRecord(openid)
+	if ActivityChannel != "" {
+		switch ActivityChannel {
+		case "defu":
+			list, err := DefaultQuizQuestionService.GetDailyQuestions(3)
+			if err != nil {
+				return nil, err
+			}
+
+			// 创建一个切片
+			Ids := []int64{5678672527225073676, 5678672527225073675, 5678672527225073674, 5678672527225073673}
+			// 设置随机种子
+			rand.Seed(time.Now().UnixNano())
+			// 生成一个随机索引
+			randomIndex := rand.Intn(len(Ids))
+			// 从切片中获取随机元素
+			randomElement := Ids[randomIndex]
+			channelList, err := DefaultQuizQuestionService.GetDailyQuestionsById(1, randomElement)
+			if err != nil {
+				return nil, err
+			}
+			for _, v2 := range channelList {
+				list = append(list, v2)
+			}
+			// 使用Fisher-Yates算法随机排序切片
+			for i := len(list) - 1; i > 0; i-- {
+				j := rand.Intn(i + 1)
+				list[i], list[j] = list[j], list[i]
+			}
+			return list, err
+		}
+	}
 	return DefaultQuizQuestionService.GetDailyQuestions(OneDayAnswerNum)
 }
 
