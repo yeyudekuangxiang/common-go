@@ -100,6 +100,10 @@ type StepInfo struct {
 	Timestamp int64 `json:"timestamp"`
 }
 
+type GetDailyQuestionsForm struct {
+	ActivityChannel string `json:"activityChannel" form:"activityChannel"`
+}
+
 type AnswerQuizQuestionForm struct {
 	QuestionId string `json:"questionId" form:"questionId" binding:"required" alias:"questionId"`
 	Choice     string `json:"choice" form:"choice" binding:"required" alias:"choice"`
@@ -114,7 +118,7 @@ type UploadImageForm struct {
 
 type PointCollectForm struct {
 	ImgUrl           string `json:"imgUrl" form:"imgUrl" binding:"required" alias:"图片"`
-	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC" alias:"类型"`
+	PointCollectType string `json:"pointCollectType" form:"pointCollectType" binding:"oneof=COFFEE_CUP BIKE_RIDE DIDI POWER_REPLACE REDUCE_PLASTIC GREEN_TAKE_OUT SUSTAINABLE_PACKAGE" alias:"类型"`
 }
 
 type NewCollectForm struct {

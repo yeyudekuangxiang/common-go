@@ -8,6 +8,7 @@ type QuizQuestionV2 struct {
 	AnswerStatement     string `json:"answerStatement"`
 	DetailedDescription string `json:"detailedDescription"`
 	Type                int    `json:"type"`
+	Channel             string `json:"channel"`
 }
 
 func (m QuizQuestionV2) TableName() string {

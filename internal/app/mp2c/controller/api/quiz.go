@@ -17,8 +17,11 @@ type QuizController struct {
 
 func (QuizController) GetDailyQuestions(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
-
-	list, err := quiz.DefaultQuizService.DailyQuestions(user.OpenId)
+	form := GetDailyQuestionsForm{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	list, err := quiz.DefaultQuizService.DailyQuestions(user.OpenId, form.ActivityChannel)
 	result := make([]QuizQuestionAPI, 0, len(list))
 	for _, item := range list {
 		var choice []string
