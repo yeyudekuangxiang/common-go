@@ -31,7 +31,7 @@ func (srv QuizService) DailyQuestions(openid string, ActivityChannel string) ([]
 	DefaultQuizSingleRecordService.ClearTodayRecord(openid)
 	if ActivityChannel != "" {
 		switch ActivityChannel {
-		case "defu":
+		case "dove-low-carbon-chellenge":
 			list, err := DefaultQuizQuestionService.GetDailyQuestions(3)
 			if err != nil {
 				return nil, err
