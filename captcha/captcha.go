@@ -25,7 +25,6 @@ var store = base64Captcha.DefaultMemStore
 type Captcha struct {
 	B64s string
 	Id   string
-	Code string
 }
 
 func GetCaptchaString() (*Captcha, error) {
@@ -206,7 +205,6 @@ func getCaptcha(param configJsonBody) (*Captcha, error) {
 	return &Captcha{
 		B64s: VerifyValue,
 		Id:   id,
-		Code: store.Get(id, true),
 	}, nil
 }
 
