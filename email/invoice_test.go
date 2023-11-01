@@ -5,10 +5,10 @@ import (
 )
 
 func Test555(t *testing.T) {
+	//mxk ceoeneoq w i y sr _ _ _ _ _ _ _ _ _ _
+	a := NewEmailClient("lvmiao@miotech.com", "mxkceoeneoqwiysr").SendInvoice(SendInvoiceParam{
 
-	//	a := NewEmailClient("mei.liu@miotech.com", "dadynuhualdsrmfi").SendInvoice(SendInvoiceParam{
-
-	a := NewEmailClient("", "").SendInvoice(SendInvoiceParam{
+		//a := NewEmailClient("", "").SendInvoice(SendInvoiceParam{
 		ToUser:      "18840853003@163.com",
 		Subject:     "测试",
 		ApplyDate:   "2023年1月1日",

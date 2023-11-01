@@ -1,10 +1,38 @@
 package hellobike
 
 import (
+	"fmt"
 	"testing"
 )
 
 //{"orderNo":"TP20230317181438200002103590028"}
+
+func TestName(t *testing.T) {
+	u := (*User)(nil)
+	u.Name()
+	u.Age()
+
+}
+
+type User struct {
+}
+
+func (u *User) Name() {
+	fmt.Println("1111")
+}
+func (u *User) Age() {
+	fmt.Println("2222")
+}
+
+func TestUser(t *testing.T) {
+	u := User{}
+	u.Name()
+	u.Age()
+}
+
+func TestRefundCardParam(t *testing.T) {
+
+}
 
 func TestRefundCard(t *testing.T) {
 	c := Client{

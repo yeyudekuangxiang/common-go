@@ -220,10 +220,17 @@ func TestGetConnectorID(t *testing.T) {
 
 }
 
+/**
+HelloBike:
+  SignSecret: 0tlrEVZtRE
+  AESSecret: OzxlBNxflRPwbePa
+  AESIv: xnEKN6vfqegWRsbw
+*/
+
 func TestPhoneEncrypt(t *testing.T) {
-	AESSecret := "AebQAP0jpebtoSKr"
-	AESIv := "Cwee61s8E067nfW4"
-	pkcs5, err := encrypttool.AesEncryptPKCS5([]byte("17601258539"), []byte(AESSecret), []byte(AESIv))
+	AESSecret := "OzxlBNxflRPwbePa"
+	AESIv := "xnEKN6vfqegWRsbw"
+	pkcs5, err := encrypttool.AesEncryptPKCS5([]byte("17850017223"), []byte(AESSecret), []byte(AESIv))
 	if err != nil {
 		return
 	}
