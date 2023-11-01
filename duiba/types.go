@@ -36,3 +36,31 @@ func (param AutoLoginParam) ToMap() map[string]string {
 		"signKeys": param.SignKeys,
 	}
 }
+
+// AddActivityTimesParam https://www.duiba.com.cn/tech_doc_book/optional/activitynum.html
+type AddActivityTimesParam struct {
+	ActivityId string
+	Times      int64
+	ValidType  int
+	Uid        string
+	BizId      string
+}
+
+func (param AddActivityTimesParam) ToMap() map[string]string {
+	return map[string]string{
+		"activityId": param.ActivityId,
+		"times":      strconv.FormatInt(param.Times, 10),
+		"validType":  strconv.Itoa(param.ValidType),
+		"uid":        param.Uid,
+		"bizId":      param.BizId,
+	}
+}
+
+type Resp struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+type AddActivityTimesParamResp struct {
+	Resp
+	Count string `json:"count"`
+}

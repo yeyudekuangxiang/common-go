@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
-	"sort"
-
-	"strings"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/sorttool"
+	"net/url"
 )
 
 func MapTo(data interface{}, v interface{}) error {
@@ -21,24 +20,15 @@ func MapTo(data interface{}, v interface{}) error {
 	return errors.WithStack(decoder.Decode(data))
 }
 func BuildQuery(params map[string]string) string {
-	kList := make([]string, 0)
-	for k := range params {
-		kList = append(kList, k)
-	}
-
-	sort.Strings(kList)
-
-	query := strings.Builder{}
-	for _, k := range kList {
-		if params[k] == "" {
-			continue
+	vals := url.Values{}
+	sorttool.Map(params, func(key interface{}) {
+		k := key.(string)
+		if k == "" {
+			return
 		}
-		query.WriteString(k)
-		query.WriteString("=")
-		query.WriteString(params[k])
-		query.WriteString("&")
-	}
-	return strings.TrimRight(query.String(), "&")
+		vals.Set(k, params[k])
+	})
+	return vals.Encode()
 }
 func Assign(m1 map[string]string, m2 map[string]string) map[string]string {
 	m := make(map[string]string)
