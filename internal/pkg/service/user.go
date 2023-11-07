@@ -757,10 +757,9 @@ func (u *UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
 	return &UserAccountInfo{
 		Balance:     point.Balance,
-		CertNum:     certCount,
+		CertNum:     certCount + certHotelCount,
 		CarbonToday: carbonInfo.CarbonToday,
 		CarbonAll:   carbonInfo.Carbon,
-		CertNumAll:  certCount + certHotelCount,
 	}, nil
 }
 
