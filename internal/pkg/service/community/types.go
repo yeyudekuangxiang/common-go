@@ -123,6 +123,22 @@ type SignupInfosParams struct {
 	OpenId string `json:"openId"`
 }
 
+// activity
+
+type SignupParams struct {
+	TopicId      int64     `json:"topicId"`
+	UserId       int64     `json:"userId"`
+	RealName     string    `json:"realName"`
+	Phone        string    `json:"phone"`
+	Gender       int       `json:"gender"`
+	Age          int       `json:"age"`
+	Wechat       string    `json:"wechat"`
+	City         string    `json:"city"`
+	Remarks      string    `json:"remarks"`
+	SignupTime   time.Time `json:"signupTime"`
+	SignupStatus int       `json:"signupStatus"`
+	OpenId       string    `json:"openId"`
+}
 type SignupInfo struct {
 	Title    string      `json:"title"`
 	Code     string      `json:"code"`

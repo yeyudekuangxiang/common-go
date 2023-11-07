@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gorm.io/gorm"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/repository"
 	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
@@ -31,6 +33,9 @@ type (
 		CancelSignup(Id, userId int64) error   //取消报名
 		Export(w http.ResponseWriter, r *http.Request, topicId int64)
 		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
+		SignupV2(params SignupParams) error
+		GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
+		GetSignupInfoV2(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignupV2, bool, error)
 	}
 
 	defaultCommunityActivitiesSignupService struct {
@@ -166,6 +171,19 @@ func (srv defaultCommunityActivitiesSignupService) GetPageList(params community.
 	return list, total, nil
 }
 
+func (srv defaultCommunityActivitiesSignupService) GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error) {
+	list, total, err := srv.signupModel.FindAllAPISignupV2(params)
+	if err != nil {
+		return nil, 0, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+	for _, item := range list {
+		item.Topic.Activity.Status = 1
+		if item.Topic.Activity.SignupDeadline.Before(time.Now()) {
+			item.Topic.Activity.Status = 2
+		}
+	}
+	return list, total, nil
+}
 func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignup, bool, error) {
 	signup, err := srv.signupModel.FindOneAPISignup(community.FindOneActivitiesSignupParams{
 		Id:           params.Id,
@@ -178,6 +196,23 @@ func (srv defaultCommunityActivitiesSignupService) GetSignupInfo(params communit
 			return &entity.APIActivitiesSignup{}, false, nil
 		}
 		return &entity.APIActivitiesSignup{}, false, errno.ErrInternalServer.WithMessage(err.Error())
+	}
+
+	return signup, true, nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) GetSignupInfoV2(params community.FindOneActivitiesSignupParams) (*entity.APIActivitiesSignupV2, bool, error) {
+	signup, err := srv.signupModel.FindOneAPISignupV2(community.FindOneActivitiesSignupParams{
+		Id:           params.Id,
+		TopicId:      params.TopicId,
+		UserId:       params.UserId,
+		SignupStatus: params.SignupStatus,
+	})
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &entity.APIActivitiesSignupV2{}, false, nil
+		}
+		return &entity.APIActivitiesSignupV2{}, false, errno.ErrInternalServer.WithMessage(err.Error())
 	}
 
 	return signup, true, nil
@@ -228,6 +263,63 @@ func (srv defaultCommunityActivitiesSignupService) Signup(params SignupInfosPara
 		"topic_id":   int(params.TopicId),
 		"apply_time": params.SignupTime,
 	})
+	return nil
+}
+
+func (srv defaultCommunityActivitiesSignupService) SignupV2(params SignupParams) error {
+	topic, err := srv.topicModel.FindOneTopic(repository.FindTopicParams{
+		TopicId: params.TopicId,
+		Type:    converttool.PointerInt(1),
+		Status:  3,
+	})
+	if err != nil {
+		if err == entity.ErrNotFount {
+			return errno.ErrCommon.WithMessage("活动不存在")
+		}
+		return errno.ErrCommon.WithMessage(err.Error())
+	}
+
+	signup, err := srv.signupModel.FindOneV2(community.FindOneActivitiesSignupParams{
+		TopicId:      params.TopicId,
+		UserId:       params.UserId,
+		SignupStatus: 1,
+	})
+	if err != nil {
+		return err
+	}
+	if signup.Id != 0 {
+		return errno.ErrCommon.WithMessage("不能重复报名哦")
+	}
+
+	signupModel := &entity.CommunityActivitiesSignupV2{}
+	marshal, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(marshal, signupModel)
+	if err != nil {
+		return err
+	}
+	err = srv.signupModel.CreateV2(signupModel)
+	if err != nil {
+		return err
+	}
+	//诸葛打点
+	/*	zhuGeAttr := make(map[string]interface{}, 0)
+		zhuGeAttr["活动id"] = params.TopicId
+		zhuGeAttr["活动名称"] = topic.Title
+		zhuGeAttr["作者名称"] = topic.User.Nickname
+		zhuGeAttr["报名者id"] = params.UserId
+		zhuGeAttr["报名时间"] = params.SignupTime
+		track.DefaultZhuGeService().Track(config.ZhuGeEventName.PostSignUp, params.OpenId, zhuGeAttr)
+	*/
+	track.DefaultSensorsService().Track(false, config.SensorsEventName.ActivityApply, params.OpenId, map[string]interface{}{
+		"title":      topic.Title,
+		"topic_id":   int(params.TopicId),
+		"apply_time": params.SignupTime,
+	})
+
 	return nil
 }
 

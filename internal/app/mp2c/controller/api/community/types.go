@@ -129,6 +129,18 @@ type SignupTopicRequest struct {
 	SignupInfos []SignupInfo `json:"signupInfos" form:"signupInfos" binding:"required"`
 }
 
+// activity
+type SignupTopicRequestV2 struct {
+	TopicId  int64  `json:"topicId" form:"topicId" binding:"required"`
+	RealName string `json:"realName" form:"realName"`
+	Gender   int    `json:"gender" form:"gender"`
+	Age      int    `json:"age" form:"age"`
+	Phone    string `json:"phone" form:"phone" `
+	Wechat   string `json:"wechat" form:"wechat"`
+	City     string `json:"city" form:"city"`
+	Remarks  string `json:"remarks" form:"remarks"`
+}
+
 type SignupInfo struct {
 	Title    string      `json:"title"`
 	Code     string      `json:"code"`

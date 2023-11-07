@@ -666,6 +666,36 @@ func (ctr *TopicController) SignupTopic(c *gin.Context) (gin.H, error) {
 	return nil, nil
 }
 
+func (ctr *TopicController) SignupTopicV2(c *gin.Context) (gin.H, error) {
+	form := SignupTopicRequestV2{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	params := community.SignupParams{
+		TopicId:      form.TopicId,
+		UserId:       user.ID,
+		OpenId:       user.OpenId,
+		RealName:     form.RealName,
+		Phone:        form.Phone,
+		Gender:       form.Gender,
+		Age:          form.Age,
+		Wechat:       form.Wechat,
+		City:         form.City,
+		Remarks:      form.Remarks,
+		SignupTime:   time.Now(),
+		SignupStatus: communityModel.SignupStatusTrue,
+	}
+	err := signupService.SignupV2(params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
 func (ctr *TopicController) CancelSignupTopic(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -708,6 +738,33 @@ func (ctr *TopicController) MySignup(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
+func (ctr *TopicController) MySignupV2(c *gin.Context) (gin.H, error) {
+	form := MySignupRequest{}
+	if err := apiutil.BindForm(c, &form); err != nil {
+		return nil, err
+	}
+
+	user := apiutil.GetAuthUser(c)
+
+	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
+	signupService := community.NewCommunityActivitiesSignupService(ctx)
+	list, total, err := signupService.GetPageListV2(communityModel.FindAllActivitiesSignupParams{
+		UserId: user.ID,
+		Offset: form.Offset(),
+		Limit:  form.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     form.Page,
+		"pageSize": form.PageSize,
+	}, nil
+}
+
 func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -716,7 +773,7 @@ func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	signInfo, _, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
+	signInfo, _, err := signupService.GetSignupInfoV2(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
 	if err != nil {
 		return nil, err
 	}
