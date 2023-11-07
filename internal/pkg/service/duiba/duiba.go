@@ -7,6 +7,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/duiba"
 	duibaApi "gitlab.miotech.com/miotech-application/backend/common-go/duiba/api/model"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/coupon"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
 	"google.golang.org/grpc/status"
 	"mio/config"
@@ -21,6 +22,8 @@ import (
 	"mio/internal/pkg/service/srv_types"
 	"mio/internal/pkg/util"
 	"mio/pkg/errno"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -217,6 +220,29 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		})
 		if err != nil {
 			return err
+		}
+		if strings.Contains(orderItem.MerchantCode, "coupon_") {
+			app.Logger.Errorf("【大转盘优惠券回调】发放奖励中: %s, 用户: %s, 渠道: %d", orderItem.MerchantCode, user.OpenId, user.ChannelId)
+			merchantCodeArr := strings.Split(orderItem.MerchantCode, "_")
+			if len(merchantCodeArr) < 2 {
+				continue
+			}
+			CouponCardTypeId, err := strconv.ParseInt(merchantCodeArr[2], 10, 64)
+			if err != nil {
+				fmt.Println("转换失败:", err)
+				continue
+			}
+			data := &coupon.SendCouponV2Req{
+				UserId:              user.ID,
+				ThirdUserId:         orderItem.Code,
+				CouponCardTypeId:    CouponCardTypeId,
+				BizId:               fmt.Sprintf("_%d_%s", user.ID, "大转盘优惠券"),
+				DistributionChannel: "大转盘优惠券回调",
+			}
+			_, err = app.RpcService.CouponRpcSrv.SendCouponV2(context.NewMioContext(), data)
+			if err != nil {
+				app.Logger.Errorf("【大转盘优惠券回调】发放奖励失败: %s, 用户: %s, 渠道: %d", err.Error(), user.OpenId, user.ChannelId)
+			}
 		}
 	}
 	orderItemData, err := json.Marshal(orderItemList)
