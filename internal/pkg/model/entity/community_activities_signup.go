@@ -17,6 +17,24 @@ type CommunityActivitiesSignup struct {
 	SignupStatus int       `json:"signupStatus"`
 }
 
+// CommunityActivitiesSignup 社区活动 报名表
+
+type CommunityActivitiesSignupV2 struct {
+	Id           int64     `gorm:"primaryKey;autoIncrement" json:"id"`
+	TopicId      int64     `json:"topicId"`
+	UserId       int64     `json:"userId"`
+	RealName     string    `json:"realName"`
+	Phone        string    `json:"phone"`
+	Gender       int       `json:"gender"`
+	Age          int       `json:"age"`
+	Wechat       string    `json:"wechat"`
+	City         string    `json:"city"`
+	Remarks      string    `json:"remarks"`
+	SignupTime   time.Time `json:"signupTime"`
+	CancelTime   time.Time `json:"cancelTime,omitempty"`
+	SignupStatus int       `json:"signupStatus"`
+}
+
 func (CommunityActivitiesSignup) TableName() string {
 	return "community_activities_signup"
 }
@@ -29,6 +47,24 @@ type APIActivitiesSignup struct {
 	SignupStatus int                `json:"signupStatus"`
 	UserId       int64              `json:"userId"`
 	Phone        string             `json:"phone"`
+	User         ShortUser          `json:"user" gorm:"foreignKey:UserId"`
+	TopicId      int64              `json:"topicId"`
+	Topic        APITopicActivities `json:"topic,omitempty" gorm:"foreignKey:TopicId"`
+}
+
+type APIActivitiesSignupV2 struct {
+	Id           int64              `json:"id"`
+	RealName     string             `json:"realName"`
+	Phone        string             `json:"phone"`
+	Gender       int                `json:"gender"`
+	Age          int                `json:"age"`
+	Wechat       string             `json:"wechat"`
+	City         string             `json:"city"`
+	Remarks      string             `json:"remarks"`
+	SignupTime   model.Time         `json:"signupTime"`
+	CancelTime   model.Time         `json:"cancelTime"`
+	SignupStatus int                `json:"signupStatus"`
+	UserId       int64              `json:"userId"`
 	User         ShortUser          `json:"user" gorm:"foreignKey:UserId"`
 	TopicId      int64              `json:"topicId"`
 	Topic        APITopicActivities `json:"topic,omitempty" gorm:"foreignKey:TopicId"`

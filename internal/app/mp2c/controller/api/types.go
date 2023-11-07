@@ -100,6 +100,10 @@ type StepInfo struct {
 	Timestamp int64 `json:"timestamp"`
 }
 
+type GetDailyQuestionsForm struct {
+	ActivityChannel string `json:"activityChannel" form:"activityChannel"`
+}
+
 type AnswerQuizQuestionForm struct {
 	QuestionId string `json:"questionId" form:"questionId" binding:"required" alias:"questionId"`
 	Choice     string `json:"choice" form:"choice" binding:"required" alias:"choice"`

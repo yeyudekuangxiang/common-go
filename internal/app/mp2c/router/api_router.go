@@ -159,7 +159,7 @@ func apiRouter(router *gin.Engine) {
 			//userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(deleteRoute))                                   //绑定手机
 			userRouter.GET("/my-topic", apiutil.Format(community.DefaultTopicController.MyTopic))                //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                    //我的奖励
-			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignup))              //我的报名
+			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignupV2))            //我的报名
 			userRouter.GET("/my-signup-detail", apiutil.Format(community.DefaultTopicController.MySignupDetail)) //我的报名
 
 			userRouter.GET("/topic-collection", apiutil.Format(community.DefaultCollectionController.TopicCollection))    //我的收藏(文章)
@@ -229,7 +229,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/update", apiutil.Format(community.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(community.DefaultTopicController.DelTopic))
 			topicRouter.POST("/share", apiutil.Format(community.DefaultTopicController.ShareTopic))
-			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
+			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopicV2))
 			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
 			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
 			topicRouter.GET("/activities/signup-path", apiutil.FormatContent(community.DefaultTopicController.ExportSignupList))

@@ -748,17 +748,19 @@ func (u *UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 		return nil, err
 	}
 	go DefaultUserService.SendUserIdentifyToZhuGe(point.OpenId) //用户基本信息诸葛打点
-	certCount, err := DefaultBadgeService.GetUserCertCountById(userId)
+	certCount, err := DefaultBadgeService.GetUserCertCountById(userId, "mio")
+	certHotelCount, err := DefaultBadgeService.GetUserCertCountById(userId, "hotel")
+
 	if err != nil {
 		return nil, err
 	}
 	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
-
 	return &UserAccountInfo{
 		Balance:     point.Balance,
 		CertNum:     certCount,
 		CarbonToday: carbonInfo.CarbonToday,
 		CarbonAll:   carbonInfo.Carbon,
+		CertNumAll:  certCount + certHotelCount,
 	}, nil
 }
 

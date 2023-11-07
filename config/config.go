@@ -27,11 +27,12 @@ var Config = app{
 	TokenCenterRpc: zrpc.RpcClientConf{},
 	ActivityRpc:    zrpc.RpcClientConf{},
 	//args
-	MqArgs:      mqArgs{},
-	BaiDuMap:    baiDuMap{},
-	GaoDeMap:    gaoDeMap{},
-	Saas:        saas{},
-	MioSassCert: mioSassCertConf{},
+	MqArgs:           mqArgs{},
+	BaiDuMap:         baiDuMap{},
+	GaoDeMap:         gaoDeMap{},
+	Saas:             saas{},
+	MioSassCert:      mioSassCertConf{},
+	MioHotelSassCert: mioSassCertConf{},
 }
 
 type mioSassCertConf struct {
@@ -83,6 +84,7 @@ type app struct {
 	GaoDeMap            gaoDeMap           `ini:"gaodeMap" json:"gaodeMap"`
 	Saas                saas               `ini:"saas" json:"saas"`
 	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
+	MioHotelSassCert    mioSassCertConf    `ini:"mioHotelSassCert" json:"mioHotelSassCert"`
 	Sensors             SensorsConf        `ini:"sensors" json:"sensors"`
 }
 

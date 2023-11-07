@@ -91,12 +91,23 @@ func (srv BadgeService) GenerateRuleCode() string {
 	code.WriteString("0001")
 	return code.String()
 }
-func (srv BadgeService) GetUserCertCount(openId string) (int64, error) {
-	c := miosass.Client{
-		Domain:    config.Config.MioSassCert.Domain,
-		AppKey:    config.Config.MioSassCert.AppKey,
-		AccessKey: config.Config.MioSassCert.AccessKey,
+func (srv BadgeService) GetUserCertCount(openId string, project string) (int64, error) {
+	c := miosass.Client{}
+	switch project {
+	case "hotel":
+		c = miosass.Client{
+			Domain:    config.Config.MioHotelSassCert.Domain,
+			AppKey:    config.Config.MioHotelSassCert.AppKey,
+			AccessKey: config.Config.MioHotelSassCert.AccessKey,
+		}
+	default:
+		c = miosass.Client{
+			Domain:    config.Config.MioSassCert.Domain,
+			AppKey:    config.Config.MioSassCert.AppKey,
+			AccessKey: config.Config.MioSassCert.AccessKey,
+		}
 	}
+
 	certNumResp, err := c.CertificateCount(miosass.CertificateCountParam{
 		UserId: openId,
 	})
@@ -110,7 +121,7 @@ func (srv BadgeService) GetUserCertCount(openId string) (int64, error) {
 	}
 	return certNumResp.Data.Count, nil
 }
-func (srv BadgeService) GetUserCertCountById(userId int64) (int64, error) {
+func (srv BadgeService) GetUserCertCountById(userId int64, project string) (int64, error) {
 	user, err := DefaultUserService.GetUserById(userId)
 	if err != nil {
 		return 0, err
@@ -118,7 +129,7 @@ func (srv BadgeService) GetUserCertCountById(userId int64) (int64, error) {
 	if user.ID == 0 {
 		return 0, nil
 	}
-	return srv.GetUserCertCount(user.OpenId)
+	return srv.GetUserCertCount(user.OpenId, project)
 }
 func (srv BadgeService) FindBadge(param srv_types.FindBadgeParam) (*entity.Badge, error) {
 	return srv.repo.FindBadge(repotypes.FindBadgeBy{
