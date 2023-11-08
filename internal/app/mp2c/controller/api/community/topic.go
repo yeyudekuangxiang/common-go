@@ -773,7 +773,7 @@ func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	signupService := community.NewCommunityActivitiesSignupService(ctx)
-	signInfo, _, err := signupService.GetSignupInfoV2(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
+	signInfo, _, err := signupService.GetSignupInfo(communityModel.FindOneActivitiesSignupParams{Id: form.ID})
 	if err != nil {
 		return nil, err
 	}
