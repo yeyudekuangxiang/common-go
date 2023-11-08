@@ -7,7 +7,6 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/httptool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/common/tool/idtool"
 	"math/rand"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -131,21 +130,21 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		app.Logger.Errorf("亿通行 未找到绑定关系: %s; 红包金额:%f", user.OpenId, amount)
 		return "", errno.ErrBindRecordNotFound
 	}
+	/*
+		//记录
+		_, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+			CouponCardTypeId: typeId,
+			UserId:           user.ID,
+			BizId:            idtool.UUID(),
+			CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+			StartTime:        time.Now().UnixMilli(),
+			EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
+		})
 
-	//记录
-	_, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
-		CouponCardTypeId: typeId,
-		UserId:           user.ID,
-		BizId:            idtool.UUID(),
-		CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
-		StartTime:        time.Now().UnixMilli(),
-		EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
-	})
-
-	if err != nil {
-		app.Logger.Errorf("亿通行 红包发放失败: %s; openId: %s; 金额: %f\n", err.Error(), user.OpenId, amount)
-		return "", err
-	}
+		if err != nil {
+			app.Logger.Errorf("亿通行 红包发放失败: %s; openId: %s; 金额: %f\n", err.Error(), user.OpenId, amount)
+			return "", err
+		}*/
 
 	rand.Seed(time.Now().UnixNano())
 	grantV2Request := GrantV2Request{

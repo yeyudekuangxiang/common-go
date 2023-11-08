@@ -18,10 +18,9 @@ type CommunityActivities struct {
 	SignupDeadline model.Time `json:"signupDeadline" gorm:"signup_deadline"`
 	SignupNumber   int        `json:"signupNumber" gorm:"signup_number"`
 	//数据库没有的字段
-	Status       int    `json:"status,omitempty" gorm:"-"`
-	SignupStatus int    `json:"signupStatus" gorm:"-"`
-	NumOfSignup  int    `json:"numOfSignup" gorm:"-"`
-	TagIds       string `json:"tagIds" gorm:"tag_ids"`
+	Status       int `json:"status,omitempty" gorm:"-"`
+	SignupStatus int `json:"signupStatus" gorm:"-"`
+	NumOfSignup  int `json:"numOfSignup" gorm:"-"`
 }
 
 func (CommunityActivities) TableName() string {
