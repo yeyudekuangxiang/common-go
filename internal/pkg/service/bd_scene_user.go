@@ -1,9 +1,9 @@
 package service
 
 import (
+	"fmt"
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
-	"mio/pkg/errno"
 )
 
 var DefaultBdSceneUserService = BdSceneUserService{}
@@ -40,13 +40,15 @@ func (srv BdSceneUserService) Create(data *entity.BdSceneUser) error {
 }
 
 func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, memberId string) (*entity.BdSceneUser, error) {
-	sceneUser := srv.FindOne(repository.GetSceneUserOne{
+	//检查第三方账户是否已经有绑定
+	sceneUser := srv.CheckBind(repository.GetSceneUserOne{
 		PlatformKey:    scene.Ch,
 		PlatformUserId: memberId,
+		OpenId:         user.OpenId,
 	})
 
 	if sceneUser.ID != 0 {
-		return sceneUser, errno.ErrExisting
+		return sceneUser, fmt.Errorf("重复绑定")
 	}
 
 	sceneUser.PlatformKey = scene.Ch
@@ -59,4 +61,8 @@ func (srv BdSceneUserService) Bind(user entity.User, scene entity.BdScene, membe
 		return nil, err
 	}
 	return sceneUser, nil
+}
+
+func (srv BdSceneUserService) CheckBind(params repository.GetSceneUserOne) *entity.BdSceneUser {
+	return repository.DefaultBdSceneUserRepository.CheckBind(params)
 }

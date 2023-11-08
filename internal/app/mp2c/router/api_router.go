@@ -5,7 +5,6 @@ import (
 	"mio/internal/app/mp2c/controller/api"
 	activityApi "mio/internal/app/mp2c/controller/api/activity"
 	authApi "mio/internal/app/mp2c/controller/api/auth"
-	"mio/internal/app/mp2c/controller/api/badge"
 	"mio/internal/app/mp2c/controller/api/business"
 	"mio/internal/app/mp2c/controller/api/common"
 	"mio/internal/app/mp2c/controller/api/community"
@@ -14,12 +13,12 @@ import (
 	"mio/internal/app/mp2c/controller/api/message"
 	rabbitmqApi "mio/internal/app/mp2c/controller/api/mq"
 	"mio/internal/app/mp2c/controller/api/points"
-	"mio/internal/app/mp2c/controller/api/product"
 	"mio/internal/app/mp2c/controller/api/qnr"
 	"mio/internal/app/mp2c/controller/api/question"
 	"mio/internal/app/mp2c/controller/open"
 	"mio/internal/app/mp2c/middleware"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 )
 
 func apiRouter(router *gin.Engine) {
@@ -46,7 +45,7 @@ func apiRouter(router *gin.Engine) {
 			userRouter.GET("/business/token", apiutil.Format(business.DefaultUserController.GetToken))
 		}
 
-		authRouter.GET("/product-item/list", apiutil.Format(product.DefaultProductController.ProductList))
+		authRouter.GET("/product-item/list", apiutil.Format(deleteRoute))
 		authRouter.GET("/openid-coupon/list", apiutil.Format(coupon.DefaultCouponController.CouponListOfOpenid))
 		//tag
 		tagRouter := authRouter.Group("/tag")
@@ -95,13 +94,14 @@ func apiRouter(router *gin.Engine) {
 		eventRouter := authRouter.Group("/event")
 		{
 			eventRouter.GET("category/list", apiutil.Format(event.DefaultEventController.GetEventCategoryList))
-			eventRouter.GET("/list", apiutil.Format(event.DefaultEventController.GetEventList))
-			eventRouter.GET("detail", apiutil.Format(event.DefaultEventController.GetEventFullDetail))
+			eventRouter.GET("/list", apiutil.Format(deleteRoute))
+			eventRouter.GET("detail", apiutil.Format(deleteRoute))
 		}
 
 		authRouter.GET("banner/list", apiutil.Format(api.DefaultBannerController.GetBannerList))
 		authRouter.GET("upload/token", apiutil.Format(api.DefaultUploadController.GetUploadTokenInfo))
-		authRouter.GET("upload/sts/token", apiutil.Format(api.DefaultUploadController.GetUploadSTSTokenInfo))
+		// Deprecated: 即将废弃
+		//authRouter.GET("upload/sts/token", apiutil.Format(api.DefaultUploadController.GetUploadSTSTokenInfo))
 		authRouter.Any("upload/callback", apiutil.Format(api.DefaultUploadController.UploadCallback))
 		authRouter.GET("icon/list", apiutil.Format(api.DefaultIndexIconController.Page))
 	}
@@ -153,13 +153,13 @@ func apiRouter(router *gin.Engine) {
 		{
 			userRouter.GET("/", apiutil.Format(api.DefaultUserController.GetUserInfo))
 			userRouter.GET("/summary", apiutil.Format(api.DefaultUserController.GetUserSummary))
-			//userRouter.POST("/info/update", apiutil.Format(api.DefaultUserController.UpdateUserInfo))
+			//userRouter.POST("/info/update", apiutil.Format(deleteRoute))
 			userRouter.GET("/account-info", apiutil.Format(api.DefaultUserController.GetUserAccountInfo))
-			//userRouter.POST("/mobile/bind-by-code", apiutil.Format(api.DefaultUserController.BindMobileByCode))
-			//userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(api.DefaultUserController.BindMobileByYZM))     //绑定手机
+			//userRouter.POST("/mobile/bind-by-code", apiutil.Format(deleteRoute))
+			//userRouter.GET("/mobile/bind-by-yzm", apiutil.Format(deleteRoute))                                   //绑定手机
 			userRouter.GET("/my-topic", apiutil.Format(community.DefaultTopicController.MyTopic))                //我的帖子列表
 			userRouter.GET("/my-reward", apiutil.Format(api.DefaultPointController.MyReward))                    //我的奖励
-			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignup))              //我的报名
+			userRouter.GET("/my-signup", apiutil.Format(community.DefaultTopicController.MySignupV2))            //我的报名
 			userRouter.GET("/my-signup-detail", apiutil.Format(community.DefaultTopicController.MySignupDetail)) //我的报名
 
 			userRouter.GET("/topic-collection", apiutil.Format(community.DefaultCollectionController.TopicCollection))    //我的收藏(文章)
@@ -228,7 +228,8 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/create", apiutil.Format(community.DefaultTopicController.CreateTopic))
 			topicRouter.POST("/update", apiutil.Format(community.DefaultTopicController.UpdateTopic))
 			topicRouter.POST("/delete", apiutil.Format(community.DefaultTopicController.DelTopic))
-			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
+			topicRouter.POST("/share", apiutil.Format(community.DefaultTopicController.ShareTopic))
+			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopicV2))
 			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
 			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
 			topicRouter.GET("/activities/signup-path", apiutil.FormatContent(community.DefaultTopicController.ExportSignupList))
@@ -248,8 +249,8 @@ func apiRouter(router *gin.Engine) {
 		//积分相关路由
 		pointRouter := mustAuthRouter.Group("/point")
 		{
-			pointRouter.Any("/list", apiutil.Format(api.DefaultPointController.GetPointTransactionList))
-			pointRouter.GET("/", apiutil.Format(api.DefaultPointController.GetPoint))
+			pointRouter.Any("/list", apiutil.Format(deleteRoute))
+			pointRouter.GET("/", apiutil.Format(deleteRoute))
 		}
 
 		//步行相关的路由
@@ -292,24 +293,24 @@ func apiRouter(router *gin.Engine) {
 		//OCR识别
 		mustAuthRouter.POST("/ocr/gm/ticket", apiutil.Format(api.DefaultOCRController.GmTicket))
 
-		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(api.DefaultOrderController.SubmitOrderForGreen))
-		mustAuthRouter.POST("/order/submit-from-event", apiutil.Format(api.DefaultOrderController.SubmitOrderForEvent))
-		mustAuthRouter.POST("/order/submit-from-event-gd", apiutil.Format(api.DefaultOrderController.SubmitOrderForEventGD))
+		mustAuthRouter.POST("/order/submit-from-green", apiutil.FormatInterface(deleteRouteInterface))
+		mustAuthRouter.POST("/order/submit-from-event", apiutil.Format(deleteRoute))
+		mustAuthRouter.POST("/order/submit-from-event-gd", apiutil.Format(deleteRoute))
 
-		mustAuthRouter.GET("/order/list", apiutil.FormatInterface(api.DefaultOrderController.GetUserOrderList))
+		mustAuthRouter.GET("/order/list", apiutil.FormatInterface(deleteRouteInterface))
 
 		mustAuthRouter.GET("/duiba/autologin", apiutil.Format(api.DefaultDuiBaController.AutoLogin))
 
-		mustAuthRouter.POST("/badge/image", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeImage))
-		mustAuthRouter.GET("/badge/list", apiutil.Format(badge.DefaultBadgeController.GetBadgeList))
-		mustAuthRouter.POST("/badge/looked", apiutil.Format(badge.DefaultBadgeController.UpdateBadgeIsNew))
-		mustAuthRouter.GET("/badge/upload/setting", apiutil.FormatInterface(badge.DefaultBadgeController.UploadOldBadgeImage))
+		mustAuthRouter.POST("/badge/image", apiutil.Format(deleteRoute))
+		mustAuthRouter.GET("/badge/list", apiutil.Format(deleteRoute))
+		mustAuthRouter.POST("/badge/looked", apiutil.Format(deleteRoute))
+		mustAuthRouter.GET("/badge/upload/setting", apiutil.FormatInterface(deleteRouteInterface))
 
 		//兑换券相关
 		couponRouter := mustAuthRouter.Group("/coupon")
 		{
-			couponRouter.GET("/record/list", apiutil.FormatInterface(coupon.DefaultCouponController.GetPageUserCouponRecord))
-			couponRouter.POST("/redeem-code", apiutil.FormatInterface(coupon.DefaultCouponController.RedeemCode))
+			couponRouter.GET("/record/list", apiutil.FormatInterface(deleteRouteInterface))
+			couponRouter.POST("/redeem-code", apiutil.FormatInterface(deleteRouteInterface))
 		}
 
 		//获取第三方数据
@@ -345,4 +346,11 @@ func apiRouter(router *gin.Engine) {
 			mqRouter.POST("/send_yzm_sms", apiutil.Format(rabbitmqApi.DefaultMqController.SendYzmSms))
 		}
 	}
+}
+
+func deleteRoute(context *gin.Context) (gin.H, error) {
+	return nil, errno.ErrCommon.WithMessage("请升级版本后再试")
+}
+func deleteRouteInterface(context *gin.Context) (interface{}, error) {
+	return nil, errno.ErrCommon.WithMessage("请升级版本后再试")
 }

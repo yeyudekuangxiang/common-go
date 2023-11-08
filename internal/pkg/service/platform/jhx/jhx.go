@@ -103,15 +103,16 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 	url := srv.option.Domain + "/busticket/ticket_create"
 	body, err := httptool.PostJson(url, commonParams)
 
-	fmt.Printf("ticket_create response body: %s\n", body)
 	if err != nil {
+		app.Logger.Errorf("金华行 post ticket_create err:%s", err.Error())
 		return "", err
 	}
 
 	response := jhxCommonResponse{}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		fmt.Printf("Unmarshal body: %s\n", err.Error())
+		fmt.Printf("金华行 Unmarshal body: %s\n", err.Error())
+		app.Logger.Errorf("金华行 Unmarshal body:%s", err.Error())
 		return "", err
 	}
 
@@ -142,7 +143,7 @@ func (srv Service) TicketCreate(typeId int64, user entity.User) (string, error) 
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行发券记录插入失败:%s", err.Error())
+		app.Logger.Errorf("金华行发券记录插入失败:%s", err.Error())
 	}
 
 	_, err = app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{

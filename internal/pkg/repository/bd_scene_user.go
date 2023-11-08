@@ -11,6 +11,7 @@ var DefaultBdSceneUserRepository = NewBdSceneUserModel(mioContext.NewMioContext(
 type (
 	BdSceneUserModel interface {
 		FindOne(params GetSceneUserOne) *entity.BdSceneUser
+		CheckBind(params GetSceneUserOne) *entity.BdSceneUser
 		FindByCh(platformKey string) entity.BdSceneUser
 		FindPlatformUserByPlatformUserId(memberId string, platformKey string) entity.BdSceneUser
 		FindPlatformUser(openId, platformKey string) entity.BdSceneUser
@@ -22,6 +23,27 @@ type (
 		ctx *mioContext.MioContext
 	}
 )
+
+func (m defaultBdSceneUserModel) CheckBind(params GetSceneUserOne) *entity.BdSceneUser {
+	one := entity.BdSceneUser{}
+	query := m.ctx.DB.Model(&one)
+
+	if params.Id != 0 {
+		query.Where("id = ?", params.Id)
+	}
+	if params.PlatformKey == "" || params.PlatformUserId == "" || params.OpenId == "" {
+		return &one
+	}
+
+	err := query.Where("platform_key = ?", params.PlatformKey).
+		Where("platform_user_id = ? or open_id = ?", params.PlatformUserId, params.OpenId).
+		First(&one).Error
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	return &one
+}
 
 func NewBdSceneUserModel(ctx *mioContext.MioContext) BdSceneUserModel {
 	return &defaultBdSceneUserModel{
@@ -92,7 +114,6 @@ func (m defaultBdSceneUserModel) FindOne(params GetSceneUserOne) *entity.BdScene
 	if params.PlatformUserId != "" {
 		query.Where("platform_user_id = ?", params.PlatformUserId)
 	}
-
 	if params.OpenId != "" {
 		query.Where("open_id = ?", params.OpenId)
 	}

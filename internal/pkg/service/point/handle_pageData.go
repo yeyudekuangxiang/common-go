@@ -7,7 +7,7 @@ import (
 )
 
 //电池换电 奥动 before 弹框数据
-func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) powerReplacePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -25,7 +25,7 @@ func (c *defaultClientHandle) powerReplacePageData() (map[string]interface{}, er
 }
 
 //oola旧物回收before弹框数据
-func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) oolaRecyclePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -45,7 +45,7 @@ func (c *defaultClientHandle) oolaRecyclePageData() (map[string]interface{}, err
 }
 
 //飞蚂蚁
-func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) fmyRecyclePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -65,7 +65,7 @@ func (c *defaultClientHandle) fmyRecyclePageData() (map[string]interface{}, erro
 }
 
 //环保减塑
-func (c *defaultClientHandle) reducePlasticPageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) reducePlasticPageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -84,7 +84,7 @@ func (c *defaultClientHandle) reducePlasticPageData() (map[string]interface{}, e
 }
 
 //toCharge 快电、云快充
-func (c *defaultClientHandle) toChargePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) toChargePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -104,7 +104,7 @@ func (c *defaultClientHandle) toChargePageData() (map[string]interface{}, error)
 }
 
 //金华行
-func (c *defaultClientHandle) jhxPageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) jhxPageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -122,7 +122,7 @@ func (c *defaultClientHandle) jhxPageData() (map[string]interface{}, error) {
 }
 
 //亿通行
-func (c *defaultClientHandle) ytxPageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) ytxPageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -139,7 +139,7 @@ func (c *defaultClientHandle) ytxPageData() (map[string]interface{}, error) {
 	return res, nil
 }
 
-func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) ahsRecyclePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -156,7 +156,7 @@ func (c *defaultClientHandle) ahsRecyclePageData() (map[string]interface{}, erro
 	return res, nil
 }
 
-func (c *defaultClientHandle) sshsRecyclePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) sshsRecyclePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -173,7 +173,7 @@ func (c *defaultClientHandle) sshsRecyclePageData() (map[string]interface{}, err
 	return res, nil
 }
 
-func (c *defaultClientHandle) ddyxRecyclePageData() (map[string]interface{}, error) {
+func (c *DefaultClientHandle) ddyxRecyclePageData() (map[string]interface{}, error) {
 	types := c.getCarbonType(string(c.clientHandle.Type))
 	result, count, err := c.getCarbonDayData(c.clientHandle.OpenId, types)
 	if err != nil {
@@ -190,14 +190,14 @@ func (c *defaultClientHandle) ddyxRecyclePageData() (map[string]interface{}, err
 	return res, nil
 }
 
-func (c *defaultClientHandle) getPointTodayData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
+func (c *DefaultClientHandle) getPointTodayData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
 	return repository.NewPointTransactionRepository(c.ctx).CountByToday(repository.GetPointTransactionCountBy{
 		OpenIds: openIds,
 		Types:   types,
 	})
 }
 
-func (c *defaultClientHandle) getCarbonDayData(openId string, tps []entity.CarbonTransactionType) ([]entity.CarbonTransaction, int64, error) {
+func (c *DefaultClientHandle) getCarbonDayData(openId string, tps []entity.CarbonTransactionType) ([]entity.CarbonTransaction, int64, error) {
 	result, count, err := service.NewCarbonTransactionService(c.ctx).GetTodayCarbonByType(openId, tps)
 	if err != nil {
 		return nil, 0, err
@@ -208,14 +208,14 @@ func (c *defaultClientHandle) getCarbonDayData(openId string, tps []entity.Carbo
 	return result, count, nil
 }
 
-func (c *defaultClientHandle) getMonthData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
+func (c *DefaultClientHandle) getMonthData(openIds []string, types []entity.PointTransactionType) ([]map[string]interface{}, int64, error) {
 	return repository.NewPointTransactionRepository(c.ctx).CountByMonth(repository.GetPointTransactionCountBy{
 		OpenIds: openIds,
 		Types:   types,
 	})
 }
 
-func (c *defaultClientHandle) getPointType(tp string) []entity.PointTransactionType {
+func (c *DefaultClientHandle) getPointType(tp string) []entity.PointTransactionType {
 	switch tp {
 	case "POWER_REPLACE":
 		return []entity.PointTransactionType{entity.POINT_POWER_REPLACE} //换电
@@ -242,7 +242,7 @@ func (c *defaultClientHandle) getPointType(tp string) []entity.PointTransactionT
 	}
 	return []entity.PointTransactionType{}
 }
-func (c *defaultClientHandle) getCarbonType(tp string) []entity.CarbonTransactionType {
+func (c *DefaultClientHandle) getCarbonType(tp string) []entity.CarbonTransactionType {
 	switch tp {
 	case "POWER_REPLACE":
 		return []entity.CarbonTransactionType{entity.CARBON_POWER_REPLACE} //换电

@@ -14,7 +14,6 @@ type ActivitiesTagController struct {
 
 // List 获取话题列表
 func (ActivitiesTagController) List(c *gin.Context) (gin.H, error) {
-
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
 	tagService := community.NewCommunityActivitiesTagService(ctx)
 

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	flagConf = flag.String("c", "./config.ini", "-c")
+	flagConf = flag.String("c", "./config.yaml", "-c")
 )
 
 func init() {

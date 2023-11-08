@@ -217,7 +217,10 @@ const (
 	POINT_SECONDHAND_ORDER           PointTransactionType = "SECONDHAND_ORDER"
 	POINT_SECONDHAND_ORDER_AWARD     PointTransactionType = "SECONDHAND_ORDER_AWARD"
 	POINT_NEW_TASK_PUBLISH_COMMODITY PointTransactionType = "NEW_TASK_PUBLISH_COMMODITY"
-	POINT_HELLO_BIKE_RIDE            PointTransactionType = "HELLO_BIKE_RIDE" //哈啰骑行
+	POINT_HELLO_BIKE_RIDE            PointTransactionType = "HELLO_BIKE_RIDE"     //哈啰骑行
+	POINT_GREEN_TAKE_OUT             PointTransactionType = "GREEN_TAKE_OUT"      //绿色外卖
+	POINT_SUSTAINABLE_PACKAGE        PointTransactionType = "SUSTAINABLE_PACKAGE" //可持续包装
+
 )
 
 var PointTransactionTypeList = []PointTransactionType{
@@ -275,17 +278,19 @@ const (
 
 // 积分限制
 var PointCollectValueMap = map[PointTransactionType]int{
-	POINT_COFFEE_CUP:     39,  //	每次
-	POINT_BIKE_RIDE:      42,  //	每次
-	POINT_INVITE:         500, //	每人/天
-	POINT_POWER_REPLACE:  300, //	每人/天
-	POINT_ARTICLE:        150, //	每次
-	POINT_COMMENT:        10,  //每次
-	POINT_LIKE:           5,   //每次
-	POINT_RECOMMEND:      50,  //每次
-	POINT_REDUCE_PLASTIC: 28,  //每次
-	POINT_ZCYP_SIGNUP:    2500,
-	POINT_ZCYP_APPLY:     50,
+	POINT_COFFEE_CUP:          39,  //	每次
+	POINT_BIKE_RIDE:           42,  //	每次
+	POINT_INVITE:              500, //	每人/天
+	POINT_POWER_REPLACE:       300, //	每人/天
+	POINT_ARTICLE:             150, //	每次
+	POINT_COMMENT:             10,  //每次
+	POINT_LIKE:                5,   //每次
+	POINT_RECOMMEND:           50,  //每次
+	POINT_REDUCE_PLASTIC:      28,  //每次
+	POINT_ZCYP_SIGNUP:         2500,
+	POINT_ZCYP_APPLY:          50,
+	POINT_GREEN_TAKE_OUT:      15, //每次
+	POINT_SUSTAINABLE_PACKAGE: 30, //每次
 }
 
 var PointCollectLimitOnceMap = map[PointTransactionType]int{
@@ -294,8 +299,8 @@ var PointCollectLimitOnceMap = map[PointTransactionType]int{
 }
 
 var PointTypesMap = map[string]PointTransactionType{
-	"yitongxing":  POINT_YTX,
-	"jinghuaxing": POINT_JHX,
+	"yitongxing": POINT_YTX,
+	"jinhuaxing": POINT_JHX,
 }
 
 //每天获取 （多少）次积分
@@ -305,9 +310,11 @@ var PointCollectLimitMap = map[PointTransactionType]int{
 	POINT_INVITE:        5, //	次
 	POINT_POWER_REPLACE: 1, //	次
 	//POINT_ARTICLE:        2, //	次
-	POINT_COMMENT:        3, // 次
-	POINT_LIKE:           6, // 次
-	POINT_REDUCE_PLASTIC: 2, // 次
+	POINT_COMMENT:             3, // 次
+	POINT_LIKE:                6, // 次
+	POINT_REDUCE_PLASTIC:      2, // 次
+	POINT_GREEN_TAKE_OUT:      3, //次
+	POINT_SUSTAINABLE_PACKAGE: 2, //次
 }
 
 //b端渠道对应操作类型

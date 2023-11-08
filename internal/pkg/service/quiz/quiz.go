@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"gorm.io/gorm"
+	"math/rand"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	carbonProducer "mio/internal/pkg/queue/producer/carbon"
 	"mio/internal/pkg/queue/producer/quizpdr"
+	carbonmsg "mio/internal/pkg/queue/types/message/carbon"
 	"mio/internal/pkg/queue/types/message/quizmsg"
 	"mio/internal/pkg/service"
 	"mio/internal/pkg/service/srv_types"
@@ -24,8 +27,39 @@ var DefaultQuizService = QuizService{}
 type QuizService struct {
 }
 
-func (srv QuizService) DailyQuestions(openid string) ([]entity.QuizQuestion, error) {
+func (srv QuizService) DailyQuestions(openid string, ActivityChannel string) ([]entity.QuizQuestionV2, error) {
 	DefaultQuizSingleRecordService.ClearTodayRecord(openid)
+	if ActivityChannel != "" {
+		switch ActivityChannel {
+		case "dove-low-carbon-chellenge":
+			list, err := DefaultQuizQuestionService.GetDailyQuestions(3)
+			if err != nil {
+				return nil, err
+			}
+
+			// 创建一个切片
+			Ids := []int64{5678672527225073676, 5678672527225073675, 5678672527225073674, 5678672527225073673}
+			// 设置随机种子
+			rand.Seed(time.Now().UnixNano())
+			// 生成一个随机索引
+			randomIndex := rand.Intn(len(Ids))
+			// 从切片中获取随机元素
+			randomElement := Ids[randomIndex]
+			channelList, err := DefaultQuizQuestionService.GetDailyQuestionsById(1, randomElement)
+			if err != nil {
+				return nil, err
+			}
+			for _, v2 := range channelList {
+				list = append(list, v2)
+			}
+			// 使用Fisher-Yates算法随机排序切片
+			for i := len(list) - 1; i > 0; i-- {
+				j := rand.Intn(i + 1)
+				list[i], list[j] = list[j], list[i]
+			}
+			return list, err
+		}
+	}
 	return DefaultQuizQuestionService.GetDailyQuestions(OneDayAnswerNum)
 }
 
@@ -53,7 +87,7 @@ func (srv QuizService) AnswerQuestion(openid, questionId, answer string) (*Answe
 		return nil, errno.ErrCommon.WithMessage("答题数量超出限制")
 	}
 
-	question := entity.QuizQuestion{}
+	question := entity.QuizQuestionV2{}
 
 	err := app.DB.Where("id = ?", questionId).Take(&question).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -101,14 +135,29 @@ func (srv QuizService) Submit(openId string, uid int64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	bizId := util.UUID()
 	quizpdr.SendMessage(quizmsg.QuizMessage{
 		Uid:              uid,
 		OpenId:           openId,
 		TodayCorrectNum:  todayResult.CorrectNum,
 		TodayAnsweredNum: todayResult.IncorrectNum,
 		QuizTime:         time.Now().Unix(),
-		BizId:            util.UUID(),
+		BizId:            bizId,
 	})
+
+	//投递mq
+	if err = carbonProducer.ChangeSuccessToQueue(carbonmsg.CarbonChangeSuccess{
+		Openid:        openId,
+		UserId:        uid,
+		TransactionId: bizId,
+		Type:          string(entity.POINT_QUIZ),
+		City:          "",
+		Value:         0,
+		Info:          fmt.Sprintf("%+v", todayResult),
+	}); err != nil {
+		app.Logger.Errorf("ChangeSuccessToQueue 投递失败:%v", err)
+	}
+
 	return answerPoint, nil
 }
 func (srv QuizService) SendAnswerPoint(openId string, correctNum int) (int, error) {

@@ -50,6 +50,8 @@ func (p CarbonTransactionType) Text() string {
 		return "旧瓶回收"
 	case CARBON_CLEAN_PLATE:
 		return "光盘行动"
+	case CARBON_ECAR_MIO:
+		return "绿喵充电"
 	}
 	return "未知积分"
 }
@@ -90,6 +92,8 @@ func (p CarbonTransactionType) Cover() string {
 		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
 	case CARBON_CLEAN_PLATE:
 		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_declutter.png"
+	case CARBON_ECAR_MIO:
+		return config.Config.OSS.CdnDomain + "/static/mp2c/images/mp2c2.0/assets/classify_newenergy.png"
 	}
 	return ""
 }
@@ -139,6 +143,8 @@ func (p CarbonTransactionType) RealText() string {
 		return "骑行"
 	case CARBON_BOTTLES:
 		return "旧瓶回收"
+	case CARBON_ECAR_MIO:
+		return "绿喵充电"
 	}
 	return p.Text()
 }
@@ -167,6 +173,8 @@ const (
 	CARBON_HELLO_BIKE_RIDE           CarbonTransactionType = "HELLO_BIKE_RIDE"           //哈啰骑行
 	CARBON_BOTTLES                   CarbonTransactionType = "BOTTLES"                   //旧瓶回收
 	CARBON_CLEAN_PLATE               CarbonTransactionType = "CLEAN_PLATE"               //光盘行动
+	CARBON_ECAR_MIO                  CarbonTransactionType = "ECAR_MIO"                  //绿喵充电
+	CARBON_GREEN_TAKE_OUT            CarbonTransactionType = "GREEN_TAKE_OUT"            //绿色外卖
 )
 
 type CarbonTransaction struct {

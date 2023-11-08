@@ -2,6 +2,7 @@ package open
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/avast/retry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
@@ -11,7 +12,9 @@ import (
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
 	"mio/internal/pkg/model/entity"
+	"mio/internal/pkg/queue/producer/growth_system"
 	"mio/internal/pkg/queue/producer/userpdr"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 	"mio/internal/pkg/queue/types/message/usermsg"
 	"mio/internal/pkg/queue/types/routerkey"
 	"mio/internal/pkg/repository"
@@ -25,6 +28,8 @@ import (
 	platformUtil "mio/internal/pkg/util/platform"
 	"mio/internal/pkg/util/validator"
 	"mio/pkg/errno"
+	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -52,19 +57,24 @@ func (receiver PlatformController) BindPlatformUser(c *gin.Context) (gin.H, erro
 
 	if scene.Key == "" || scene.Key == "e" {
 		app.Logger.Info("渠道查询失败", form)
-		return nil, errno.ErrCommon.WithMessage("第三方绑定 渠道查询失败")
+		return nil, errno.ErrCommon.WithMessage("渠道查询失败")
 	}
 
 	if user.ID == 0 {
-		return nil, errno.ErrCommon.WithMessage("第三方绑定 用户未登陆")
+		return nil, errno.ErrCommon.WithMessage("用户未登陆")
+	}
+	//是否存在被转移的
+	sign, err := urlEncodedEqualSign(form.MemberId)
+	if err != nil {
+		return nil, err
 	}
 
-	app.Logger.Infof("第三方绑定 入库: platformId:%s; openId:%s", form.MemberId, user.OpenId)
-	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, form.MemberId)
+	app.Logger.Infof("第三方绑定 [%s] 开始绑定: platformId:%s; openId:%s", form.PlatformKey, sign, user.OpenId)
+	sceneUser, err := service.DefaultBdSceneUserService.Bind(user, *scene, sign)
 	if err != nil {
-		app.Logger.Errorf("第三方绑定 绑定失败: platformId:%s; openId:%s, error:%s", form.MemberId, user.OpenId, err.Error())
+		app.Logger.Infof("第三方绑定 [%s] 绑定失败: platformId:%s; openId:%s, error:%v", form.PlatformKey, form.MemberId, user.OpenId, err)
 		if err != errno.ErrExisting {
-			return nil, nil
+			return gin.H{}, nil
 		}
 		return gin.H{
 			"memberId":     sceneUser.PlatformUserId,
@@ -128,7 +138,10 @@ func (receiver PlatformController) SyncPoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
 	//查询渠道号
 	scene := service.DefaultBdSceneService.FindByCh(form.PlatformKey)
 	if scene.Key == "" || scene.Key == "e" {
@@ -211,6 +224,11 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
 	}
 
+	//form.MemberId, err = url.QueryUnescape(form.MemberId)
+	//if err != nil {
+	//	return nil, err
+	//}
+
 	typeString := service.DefaultBdSceneService.SceneToType(scene.Ch)
 
 	//幂等
@@ -225,23 +243,28 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("重复提交订单")
 	}
 
-	//入参保存
-	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeString),
-		Data: form,
-		Ip:   c.ClientIP(),
-	})
-
 	var openId, mobile string
 	sceneUser := repository.DefaultBdSceneUserRepository.FindOne(repository.GetSceneUserOne{
 		PlatformKey:    form.PlatformKey,
 		PlatformUserId: form.MemberId,
 	})
-
+	var userId int64
 	if sceneUser.ID != 0 {
 		openId = sceneUser.OpenId
 		mobile = sceneUser.Phone
+		userInfo, b, err := repository.DefaultUserRepository.GetUser(repository.GetUserBy{OpenId: openId})
+		if err == nil && b {
+			userId = userInfo.ID
+		}
 	}
+
+	//入参保存
+	defer trackBehaviorInteraction(trackInteractionParam{
+		Tp:     string(typeString),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userId,
+	})
 
 	//预加积分
 	err = repository.DefaultBdScenePrePointRepository.Create(&entity.BdScenePrePoint{
@@ -259,19 +282,16 @@ func (receiver PlatformController) PrePoint(c *gin.Context) (gin.H, error) {
 	if err != nil {
 		return nil, errno.ErrCommon.WithErr(err)
 	}
+
 	if openId != "" {
-
-		/*eventName := config.ZhuGeEventName.YTXOrder
-		if form.PlatformKey == "yitongxing" {
-			eventName = config.ZhuGeEventName.YTXOrder
+		if userId != 0 {
+			//成长体系
+			growth_system.GrowthSystemSubway(growthsystemmsg.GrowthSystemParam{
+				TaskSubType: string(entity.PointTypesMap[form.PlatformKey]),
+				UserId:      strconv.FormatInt(userId, 10),
+				TaskValue:   1,
+			})
 		}
-
-		zhuGeAttr := make(map[string]interface{}, 0)
-		zhuGeAttr["用户openId"] = mobile
-		zhuGeAttr["用户mobile"] = openId
-		track.DefaultZhuGeService().Track(eventName, openId, zhuGeAttr)
-		*/
-
 		track.DefaultSensorsService().Track(false, config.SensorsEventName.YTX, openId, map[string]interface{}{
 			"type": "完成乘车",
 		})
@@ -314,6 +334,11 @@ func (receiver PlatformController) GetPrePointList(c *gin.Context) (gin.H, error
 
 	if err = platformUtil.CheckSign(sign, params, scene.Key, "&"); err != nil {
 		return nil, errno.ErrCommon.WithMessage("sign:" + form.Sign + " 验证失败")
+	}
+
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
 	}
 
 	res, total, err := repository.DefaultBdScenePrePointRepository.FindBy(repository.GetScenePrePoint{
@@ -382,6 +407,12 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		app.Logger.Info("校验sign失败", form)
 		return nil, errno.ErrCommon.WithMessage(err.Error())
 	}
+
+	form.MemberId, err = url.QueryUnescape(form.MemberId)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx := context.NewMioContext()
 
 	tp := entity.PointTypesMap[form.PlatformKey]
@@ -438,14 +469,14 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 		isHalf = true
 		halfPoint = p - incPoint
 	}
-
+	bizId := util.UUID()
 	app.Redis.Set(ctx, key, totalPoint, 24*time.Hour)
 	pointService := service.NewPointService(ctx)
 	//积分
 	point, err := pointService.IncUserPoint(srv_types.IncUserPointDTO{
 		OpenId:      sceneUser.OpenId,
 		Type:        tp,
-		BizId:       util.UUID(),
+		BizId:       bizId,
 		ChangePoint: incPoint,
 		AdminId:     0,
 		Note:        form.PlatformKey + "#" + one.Tradeno,
@@ -479,6 +510,7 @@ func (receiver PlatformController) CollectPrePoint(c *gin.Context) (gin.H, error
 			Type:   typeCarbonStr,
 			Value:  amount,
 			Ip:     ip,
+			BizId:  bizId,
 		})
 		if err != nil {
 			app.Logger.Errorf("预加积分 err:%s", err.Error())
@@ -606,9 +638,26 @@ func trackBehaviorInteraction(form trackInteractionParam) {
 		Ip:         form.Ip,
 		Result:     form.Result,
 		ResultCode: form.ResultCode,
+		UserId:     form.UserId,
 	})
 	if err != nil {
 		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())
 		return
 	}
+}
+
+func urlEncodedEqualSign(str string) (string, error) {
+	pattern := `%2B|%3D` // URL 编码后的等号"="
+	match, _ := regexp.MatchString(pattern, str)
+	if match {
+		unescape, err := url.QueryUnescape(str)
+		if err != nil {
+			return "", err
+		}
+		if containsSpace := strings.Contains(str, " "); containsSpace {
+			return "", errors.New("非法参数")
+		}
+		return unescape, nil
+	}
+	return str, nil
 }

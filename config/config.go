@@ -29,6 +29,7 @@ var Config = app{
 	//args
 	MqArgs:      mqArgs{},
 	BaiDuMap:    baiDuMap{},
+	GaoDeMap:    gaoDeMap{},
 	Saas:        saas{},
 	MioSassCert: mioSassCertConf{},
 }
@@ -43,6 +44,9 @@ type saas struct {
 }
 
 type baiDuMap struct {
+	AccessKey string
+}
+type gaoDeMap struct {
 	AccessKey string
 }
 type app struct {
@@ -74,7 +78,9 @@ type app struct {
 	PointRpc            zrpc.RpcClientConf `ini:"pointRpc" json:"pointRpc"`
 	UserRpc             zrpc.RpcClientConf `ini:"userRpc" json:"userRpc"`
 	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
+	PlatformRpc         zrpc.RpcClientConf `ini:"platformRpc" json:"platformRpc"`
 	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
+	GaoDeMap            gaoDeMap           `ini:"gaodeMap" json:"gaodeMap"`
 	Saas                saas               `ini:"saas" json:"saas"`
 	MioSassCert         mioSassCertConf    `ini:"mioSassCert" json:"mioSassCert"`
 	Sensors             SensorsConf        `ini:"sensors" json:"sensors"`
@@ -112,8 +118,8 @@ type logSetting struct {
 }
 type aliLogSetting struct {
 	Endpoint     string
-	AccessKey    string
-	AccessSecret string
+	AccessKey    string `json:",optional"`
+	AccessSecret string `json:",optional"`
 	ProjectName  string
 	LogStore     string
 	Topic        string `json:",optional"`
@@ -137,8 +143,8 @@ type duiBaSetting struct {
 type ossSetting struct {
 	CdnDomain    string
 	Endpoint     string
-	AccessKey    string
-	AccessSecret string
+	AccessKey    string `json:",optional"`
+	AccessSecret string `json:",optional"`
 	BasePath     string
 	Bucket       string
 	Region       string

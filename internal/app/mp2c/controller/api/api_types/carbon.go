@@ -91,6 +91,7 @@ type CreateCarbonTransactionDto struct {
 	AdminId  int
 	Ip       string
 	AddValue float64
+	BizId    string
 }
 
 type GetCarbonTransactionBankDto struct {

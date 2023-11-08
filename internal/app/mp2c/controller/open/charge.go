@@ -12,6 +12,8 @@ import (
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
+	"mio/internal/pkg/queue/producer/growth_system"
+	"mio/internal/pkg/queue/types/message/growthsystemmsg"
 
 	"mio/internal/pkg/model/entity"
 	"mio/internal/pkg/repository"
@@ -101,16 +103,17 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   string(typeString),
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     string(typeString),
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userInfo.ID,
 	})
 
 	//回调光环
 	go ctr.turnPlatform(userInfo, form)
 
 	totalPower, _ := strconv.ParseFloat(form.TotalPower, 64)
-
+	bizId := util.UUID()
 	//加碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
 	if typeCarbonStr != "" && totalPower != 0 {
@@ -122,10 +125,17 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			Info:    form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + fmt.Sprintf("%f", totalPower) + "#" + form.Sign,
 			AdminId: 0,
 			Ip:      "",
+			BizId:   bizId,
 		})
 		if errCarbon != nil {
 			fmt.Println("charge 加碳失败", form)
 		}
+		//成长体系
+		growth_system.GrowthSystemRERecharge(growthsystemmsg.GrowthSystemParam{
+			TaskSubType: string(typeString),
+			UserId:      strconv.FormatInt(userInfo.ID, 10),
+			TaskValue:   int64(totalPower),
+		})
 	}
 
 	//查询今日积分总量
@@ -156,7 +166,7 @@ func (ctr ChargeController) Push(c *gin.Context) (gin.H, error) {
 			OpenId:       userInfo.OpenId,
 			Type:         typeString,
 			ChangePoint:  int64(thisPoint),
-			BizId:        util.UUID(),
+			BizId:        bizId,
 			AdditionInfo: form.OutTradeNo + "#" + form.Mobile + "#" + form.Ch + "#" + strconv.Itoa(thisPoint) + "#" + form.Sign,
 		})
 		if err != nil {
@@ -234,21 +244,16 @@ func (ctr ChargeController) sendCoupon(ctx context.Context, platformKey string, 
 }
 
 func (ctr ChargeController) checkRule(ctx context.Context, platformKey string) (*activity.ActivityRule, error) {
-	rule, err := app.RpcService.ActivityRpcSrv.ActiveRule(ctx, &activity.ActiveRuleReq{
-		Code: platformKey,
+	rule, err := app.RpcService.ActivityRpcSrv.ActiveActivity(ctx, &activity.ActiveActivityReq{
+		ActivityCode: platformKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if !rule.GetExist() {
+	if !rule.ActivityRuleExist {
 		return nil, errno.ErrRecordNotFound
 	}
-	startTime := time.UnixMilli(rule.GetActivityRule().GetStartTime())
-	endTime := time.UnixMilli(rule.GetActivityRule().GetEndTime())
-	if time.Now().Before(startTime) || time.Now().After(endTime) {
-		return nil, errno.ErrMisMatchCondition.WithMessage("活动未开始或已失效")
-	}
-	return rule.GetActivityRule(), nil
+	return rule.ActiveActivity.ActivityRule, nil
 }
 
 func (ctr ChargeController) checkLimitOfDay(ctx context.Context, platformKey string, userId int64) error {
@@ -366,11 +371,11 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	//入参保存
 	defer trackBehaviorInteraction(trackInteractionParam{
-		Tp:   tp,
-		Data: form,
-		Ip:   c.ClientIP(),
+		Tp:     tp,
+		Data:   form,
+		Ip:     c.ClientIP(),
+		UserId: userId,
 	})
-
 	info, _ := json.Marshal(form)
 	//加减碳量
 	typeCarbonStr := service.DefaultBdSceneService.SceneToCarbonType(scene.Ch)
@@ -383,6 +388,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 			Info:    string(info),
 			AdminId: 0,
 			Ip:      "",
+			BizId:   form.TradeSeq,
 		})
 		if errCarbon != nil {
 			app.Logger.Errorf(fmt.Sprintf("[ykc]加碳失败: %s; query: %v", err.Error(), fmt.Sprint(info)))
@@ -401,6 +407,7 @@ func (ctr ChargeController) Ykc(c *gin.Context) (gin.H, error) {
 
 	thisPoint := int(form.ChargedPower * float64(scene.Override))
 	totalPoint := lastPoint + thisPoint
+
 	if totalPoint > scene.PointLimit {
 		fmt.Printf("%s 充电量限制修正 thisPoint:%d, lastPoint:%d", ch, thisPoint, lastPoint)
 		thisPoint = scene.PointLimit - lastPoint

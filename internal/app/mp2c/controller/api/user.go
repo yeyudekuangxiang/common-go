@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
-	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
+	"gitlab.miotech.com/miotech-application/backend/common-go/gaode"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -288,20 +288,17 @@ func (ctr UserController) HomePage(c *gin.Context) (gin.H, error) {
 
 	//归属地
 	//location, err := common.NewCityService(mioctx.NewMioContext()).GetByCityCode(common.GetByCityCodeParams{CityCode: user.CityCode})
-	location, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(c.ClientIP())
+	//location, err := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(c.ClientIP())
 
-	if err != nil {
-		return nil, err
+	location, err := gaode.NewMapClient(config.Config.GaoDeMap.AccessKey).LocationIp(c.ClientIP())
+	province := ""
+	if err == nil && location.Status == "1" {
+		province = location.Province
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
 	shortUser := user.ShortUser()
 	result := make(map[string]interface{}, 0)
 	_ = util.MapTo(&shortUser, &result)
-	result["ipLocation"] = location.Content.AddressDetail.Province
+	result["ipLocation"] = province
 	return result, nil
 }
 
@@ -401,6 +398,7 @@ func trackBehaviorInteraction(form trackInteractionParam) {
 		Ip:         form.Ip,
 		Result:     form.Result,
 		ResultCode: form.ResultCode,
+		UserId:     form.UserId,
 	})
 	if err != nil {
 		app.Logger.Errorf("PublishDataLogErr:%s", err.Error())

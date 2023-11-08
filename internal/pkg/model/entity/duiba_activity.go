@@ -25,6 +25,7 @@ type DuiBaActivity struct {
 	VipType             DuiBaActivityVipType
 	VipOpenid           string
 	VipId               int
+	BlackWhiteType      int
 }
 
 type DuiBaActivityType int8

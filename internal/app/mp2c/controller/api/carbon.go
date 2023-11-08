@@ -72,6 +72,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 	params["pointValue"] = form.PointValue
 	params["uid"] = form.Uid
 	params["time"] = form.Time
+	params["info"] = form.Info
 	params["privateKey"] = "mio2022"
 	params["info"] = form.Info
 
@@ -102,6 +103,7 @@ func (c CarbonController) Create(ctx *gin.Context) (interface{}, error) {
 		Info:     form.Info,
 		AdminId:  0,
 		Ip:       "", //ctx.ClientIP()*/
+		BizId:    util.UUID(),
 	})
 	if err != nil {
 		return gin.H{

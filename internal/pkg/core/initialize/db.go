@@ -9,7 +9,7 @@ import (
 	"mio/internal/pkg/core/app"
 )
 
-//Silent Error Warn Info
+// Silent Error Warn Info
 var gormLevelMap = map[string]logger.LogLevel{
 	"silent": logger.Silent,
 	"error":  logger.Error,

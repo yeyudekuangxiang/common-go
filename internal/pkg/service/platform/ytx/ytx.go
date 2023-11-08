@@ -130,6 +130,21 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 		app.Logger.Errorf("亿通行 未找到绑定关系: %s; 红包金额:%f", user.OpenId, amount)
 		return "", errno.ErrBindRecordNotFound
 	}
+	/*
+		//记录
+		_, err := app.RpcService.CouponRpcSrv.SendCoupon(srv.ctx, &couponclient.SendCouponReq{
+			CouponCardTypeId: typeId,
+			UserId:           user.ID,
+			BizId:            idtool.UUID(),
+			CouponCardTitle:  "亿通行" + fmt.Sprintf("%.0f", amount) + "元出行红包",
+			StartTime:        time.Now().UnixMilli(),
+			EndTime:          time.Now().AddDate(0, 0, 90).UnixMilli(),
+		})
+
+		if err != nil {
+			app.Logger.Errorf("亿通行 红包发放失败: %s; openId: %s; 金额: %f\n", err.Error(), user.OpenId, amount)
+			return "", err
+		}*/
 
 	rand.Seed(time.Now().UnixNano())
 	grantV2Request := GrantV2Request{
@@ -170,7 +185,7 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 保存记录失败: %s; openId: %s\n", err.Error(), user.OpenId)
+		app.Logger.Errorf("亿通行 method [saveLog] 保存记录失败: %v; openId: %s; amount:%.2f \n", err, user.OpenId, amount)
 	}
 
 	if response.SubCode != "0000" {
@@ -189,8 +204,8 @@ func (srv *Service) SendCoupon(typeId int64, amount float64, user entity.User) (
 	})
 
 	if err != nil {
-		app.Logger.Errorf("亿通行 红包发放失败: %s; openId: %s; 金额: %f\n", err.Error(), user.OpenId, amount)
-		return "", err
+		app.Logger.Errorf("亿通行 method [SendCoupon] 保存记录失败: %v; openId: %s; amount:%.2f\n", err, user.OpenId, amount)
+		//return "", err
 	}
 
 	return response.SubData.OrderNo, nil

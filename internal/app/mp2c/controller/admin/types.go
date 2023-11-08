@@ -227,14 +227,15 @@ type GetBannerPageForm struct {
 }
 
 type CreateDuiBaActivityForm struct {
-	Name        string                      `json:"name" form:"name" binding:"required" alias:"链接名称"`
-	Cid         int64                       `json:"cid" form:"cid" binding:"" alias:"渠道id"`
-	Type        entity.DuiBaActivityType    `json:"type" form:"type" binding:"oneof=1 2" alias:"类别"`
-	IsShare     entity.DuiBaActivityIsShare `json:"isShare" form:"isShare" binding:"oneof=1 2" alias:"是否分享"`
-	IsPhone     entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
-	ActivityUrl string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
-	ActivityId  string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
-	RiskLimit   int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
+	Name           string                      `json:"name" form:"name" binding:"required" alias:"链接名称"`
+	Cid            int64                       `json:"cid" form:"cid" binding:"" alias:"渠道id"`
+	Type           entity.DuiBaActivityType    `json:"type" form:"type" binding:"oneof=1 2" alias:"类别"`
+	IsShare        entity.DuiBaActivityIsShare `json:"isShare" form:"isShare" binding:"oneof=1 2" alias:"是否分享"`
+	IsPhone        entity.DuiBaActivityIsPhone `json:"isPhone" form:"isPhone" binding:"oneof=1 2" alias:"是否绑定手机号"`
+	ActivityUrl    string                      `json:"activityUrl" form:"activityUrl" binding:"required" alias:"链接"`
+	ActivityId     string                      `json:"activityId" form:"activityId" binding:"required" alias:"活动"`
+	RiskLimit      int                         `json:"riskLimit" form:"riskLimit" binding:"oneof=0 1 2 3 4" alias:"允许的风险等级"`
+	BlackWhiteType int                         `json:"blackWhiteType" form:"blackWhiteType" binding:"oneof=0 1 2"`
 }
 
 type UpdateDuiBaActivityForm struct {

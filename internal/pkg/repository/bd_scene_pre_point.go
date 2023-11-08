@@ -125,8 +125,10 @@ func (m defaultBdScenePrePointModel) FindBy(by GetScenePrePoint) ([]entity.BdSce
 
 func (m defaultBdScenePrePointModel) FindOne(by GetScenePrePoint) (entity.BdScenePrePoint, bool, error) {
 	var item entity.BdScenePrePoint
-
-	query := m.ctx.DB.Where("id = ?", by.Id)
+	query := m.ctx.DB
+	if by.Id != 0 {
+		query = query.Where("id = ?", by.Id)
+	}
 	if by.OpenId != "" {
 		query = query.Where("open_id = ?", by.OpenId)
 	}

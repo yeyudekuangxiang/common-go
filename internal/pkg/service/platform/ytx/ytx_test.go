@@ -11,7 +11,7 @@ import (
 )
 
 func TestGoFunc(t *testing.T) {
-	flagConf := flag.String("c", "/Users/yunfeng/Documents/workspace/mp2c-go/config.ini", "-c")
+	flagConf := flag.String("c", "/Users/yunfeng/Documents/workspace/mp2c-go/config.yaml", "-c")
 	initialize.Initialize(*flagConf)
 
 	user := entity.User{

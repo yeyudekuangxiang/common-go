@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/shopspring/decimal"
-	"gitlab.miotech.com/miotech-application/backend/common-go/baidu"
+	"gitlab.miotech.com/miotech-application/backend/common-go/gaode"
 	"mio/config"
 	"mio/internal/app/mp2c/controller/api/api_types"
 	"mio/internal/pkg/core/app"
@@ -47,9 +47,9 @@ type CarbonTransactionService struct {
 func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransactionDto) (float64, error) {
 	//获取ip地址
 	cityCode := ""
-	cityInfoResp, cityErr := baidu.NewMapClient(config.Config.BaiDuMap.AccessKey).LocationIp(dto.Ip)
-	if cityErr == nil && cityInfoResp.IsSuccess() {
-		cityCode = cityInfoResp.Content.AddressDetail.Adcode
+	cityInfoResp, cityErr := gaode.NewMapClient(config.Config.GaoDeMap.AccessKey).LocationIp(dto.Ip)
+	if cityErr == nil && cityInfoResp.Status == "1" {
+		cityCode = cityInfoResp.Adcode
 	}
 	//查询场景配置
 	scene := srv.repoScene.FindBy(repotypes.CarbonSceneBy{Type: dto.Type})
@@ -78,11 +78,13 @@ func (srv CarbonTransactionService) Create(dto api_types.CreateCarbonTransaction
 			return 0, nil
 		}
 	}
-
+	if dto.BizId == "" {
+		dto.BizId = util.UUID()
+	}
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
 		Type:         dto.Type,
-		BizId:        util.UUID(),
+		BizId:        dto.BizId,
 		ChangePoint:  carbon,
 		AdditionInfo: dto.Info,
 		CityCode:     cityCode,
@@ -102,11 +104,14 @@ func (srv CarbonTransactionService) CreateV2(dto api_types.CreateCarbonTransacti
 			dto.UserId = infoV2.ID
 		}
 	}
+	if dto.BizId == "" {
+		dto.BizId = util.UUID()
+	}
 	//获取碳量
 	_, err := NewCarbonService(context.NewMioContext()).IncUserCarbon(srv_types.IncUserCarbonDTO{
 		OpenId:       dto.OpenId,
 		Type:         dto.Type,
-		BizId:        util.UUID(),
+		BizId:        dto.BizId,
 		ChangePoint:  dto.Value,
 		AdditionInfo: dto.Info,
 		CityCode:     "",
