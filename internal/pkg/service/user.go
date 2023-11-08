@@ -754,6 +754,7 @@ func (u *UserService) AccountInfo(userId int64) (*UserAccountInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	carbonInfo, _ := NewCarbonTransactionService(mioctx.NewMioContext()).Info(api_types.GetCarbonTransactionInfoDto{UserId: userId})
 	return &UserAccountInfo{
 		Balance:     point.Balance,
