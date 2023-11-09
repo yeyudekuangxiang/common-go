@@ -43,10 +43,10 @@ func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, 
 		return nil, false, nil
 	}
 	if admin.Status != 1 {
-		return nil, false, errno.ErrCommon.WithMessage("账号已被禁用")
+		return nil, false, errno.ErrAuth.WithMessage("账号已被禁用")
 	}
 	if admin.DeletedAt.Valid {
-		return nil, false, errno.ErrCommon.WithMessage("账号已被删除")
+		return nil, false, errno.ErrAuth.WithMessage("账号已被删除")
 	}
 	return &admin, true, nil
 }
