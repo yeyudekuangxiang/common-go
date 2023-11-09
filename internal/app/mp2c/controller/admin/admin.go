@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"mio/internal/pkg/repository"
 	"mio/internal/pkg/service"
@@ -13,7 +14,9 @@ type AdminController struct {
 }
 
 func (AdminController) GetAdminList(ctx *gin.Context) (gin.H, error) {
-	list, err := service.DefaultSystemAdminService.GetAdminList(repository.GetAdminListBy{})
+	list, err := service.DefaultSystemAdminService.GetAdminList(repository.GetAdminListBy{
+		DeletedAt: &sql.NullTime{},
+	})
 
 	return gin.H{
 		"list": list,

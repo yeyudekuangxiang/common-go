@@ -246,9 +246,11 @@ type GetFileExportPageListBy struct {
 	Limit          int
 }
 type GetAdminListBy struct {
+	DeletedAt *sql.NullTime
 }
 type FindAdminBy struct {
-	Account string
+	Account   string
+	DeletedAt *sql.NullTime
 }
 
 type FindOaAuthWhiteBy struct {
