@@ -40,7 +40,15 @@ func (repo SystemAdminRepository) Save(admin *entity.SystemAdmin) error {
 }
 func (repo SystemAdminRepository) GetAdminList(param GetAdminListBy) []entity.SystemAdmin {
 	list := make([]entity.SystemAdmin, 0)
-	err := repo.DB.Find(&list).Error
+	db := app.DB.Model(entity.SystemAdmin{})
+	if param.DeletedAt != nil {
+		if param.DeletedAt.Valid {
+			db.Where("deleted_at = ?", param.DeletedAt.Time)
+		} else {
+			db.Where("deleted_at is null")
+		}
+	}
+	err := db.Find(&list).Error
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +60,13 @@ func (repo SystemAdminRepository) FindAdminBy(by FindAdminBy) entity.SystemAdmin
 	db := app.DB.Model(admin)
 	if by.Account != "" {
 		db.Where("account = ?", by.Account)
+	}
+	if by.DeletedAt != nil {
+		if by.DeletedAt.Valid {
+			db.Where("deleted_at = ?", by.DeletedAt.Time)
+		} else {
+			db.Where("deleted_at is null")
+		}
 	}
 	err := db.First(&admin).Error
 	if err != nil && err != gorm.ErrRecordNotFound {

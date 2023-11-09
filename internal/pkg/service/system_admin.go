@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"mio/internal/pkg/model/auth"
 	"mio/internal/pkg/model/entity"
@@ -44,6 +45,9 @@ func (a SystemAdminService) GetAdminByToken(token string) (*entity.SystemAdmin, 
 	if admin.Status != 1 {
 		return nil, false, errno.ErrCommon.WithMessage("账号已被禁用")
 	}
+	if admin.DeletedAt.Valid {
+		return nil, false, errno.ErrCommon.WithMessage("账号已被删除")
+	}
 	return &admin, true, nil
 }
 
@@ -59,7 +63,8 @@ func (a SystemAdminService) GetAdminList(by repository.GetAdminListBy) ([]entity
 }
 func (a SystemAdminService) Login(account, password string) (string, error) {
 	admin := a.r.FindAdminBy(repository.FindAdminBy{
-		Account: account,
+		Account:   account,
+		DeletedAt: &sql.NullTime{},
 	})
 	if admin.ID == 0 {
 		return "", errno.ErrAdminNotFound
