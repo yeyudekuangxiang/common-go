@@ -41,6 +41,7 @@ type redisKey struct {
 	MessageLimitChargeRemind string
 	PeriodLimit              string
 	StarCharge               string
+	QuizBlackList            string
 }
 
 var RedisKey = redisKey{
@@ -84,4 +85,5 @@ var RedisKey = redisKey{
 	ReportYear:               "mp2c:report_year_v1",        //年终报告
 	PeriodLimit:              "mp2c:period_limit",
 	StarCharge:               "mp2c:star_charge",
+	QuizBlackList:            "mp2c:quiz_blacklist", //答题黑名单
 }
