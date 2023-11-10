@@ -453,6 +453,7 @@ type UserAccountInfo struct {
 	CertNum     int64  `json:"certNum"`     //证书数量
 	CarbonToday string `json:"carbonToday"` //今日碳量
 	CarbonAll   string `json:"carbonAll"`   //所有的碳量
+
 }
 
 type CreateCarbonTransactionParam struct {
