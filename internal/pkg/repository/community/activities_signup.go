@@ -149,7 +149,7 @@ func (d defaultCommunityActivitiesSignupModel) FindOne(params FindOneActivitiesS
 		db.Where("signup_status = ?", params.SignupStatus)
 	}
 	if params.Phone != "" {
-		db.Or("phone = ?", params.Phone)
+		db.Where("phone = ?", params.Phone)
 	}
 	err := db.First(&resp).Error
 	if err != nil {
