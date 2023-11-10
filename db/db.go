@@ -173,7 +173,7 @@ func NewPostgresDB(conf Config, opts ...Option) (*gorm.DB, error) {
 	options := initOptions(opts...)
 
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable statement_cache_capacity=0",
 		conf.Host,
 		conf.UserName,
 		conf.Password,
