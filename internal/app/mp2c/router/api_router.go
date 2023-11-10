@@ -125,6 +125,8 @@ func apiRouter(router *gin.Engine) {
 			quizRouter.POST("/submit", apiutil.Format(api.DefaultQuizController.Submit))
 			quizRouter.GET("/daily-result", apiutil.Format(api.DefaultQuizController.DailyResult))
 			quizRouter.GET("/summary", apiutil.Format(api.DefaultQuizController.GetSummary))
+			quizRouter.POST("/addAvailability", apiutil.Format(api.DefaultQuizController.AddAvailability))
+
 		}
 		questRouter := mustAuthRouter.Group("/question") //通用答题
 		{

@@ -1,13 +1,18 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"math/rand"
+	"mio/config"
+	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/service/quiz"
 	"mio/internal/pkg/util/apiutil"
+	"mio/pkg/errno"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var DefaultQuizController = QuizController{}
@@ -48,13 +53,59 @@ func randomOptions(options []string) []string {
 	})
 	return options
 }
+
 func (QuizController) Availability(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
 	availability, err := quiz.DefaultQuizService.Availability(user.OpenId)
-
+	isBlack := app.Redis.SIsMember(context.Background(), config.RedisKey.QuizBlackList, user.OpenId)
+	status := int64(0)
+	desc := ""
+	if isBlack.Val() {
+		status = 1
+		desc = "已加入答题黑名单"
+	}
 	return gin.H{
 		"availability": availability,
+		"status":       status, // 0正常 1 答题黑名单
+		"desc":         desc,
 	}, err
+}
+
+func (QuizController) AddAvailability(ctx *gin.Context) (gin.H, error) {
+	form := AddAvailabilityReq{}
+	if err := apiutil.BindForm(ctx, &form); err != nil {
+		return nil, err
+	}
+	if form.Openid == "" || form.Key != "liumei_init" {
+		return gin.H{
+			"status": "Openid未空或者Key有误",
+		}, nil
+	}
+	openIds := strings.Split(form.Openid, ",")
+	for _, openid := range openIds {
+		if form.Type == "add" {
+			ret := app.Redis.SAdd(context.Background(), config.RedisKey.QuizBlackList, openid)
+			if ret.Err() != nil {
+				return gin.H{
+					"status": "redis入库失败",
+				}, nil
+			}
+		}
+		if form.Type == "sub" {
+			ret := app.Redis.SRem(context.Background(), config.RedisKey.QuizBlackList, openid)
+			if ret.Err() != nil {
+				return gin.H{
+					"status": "redis入库失败",
+				}, nil
+			}
+		}
+
+	}
+	members := app.Redis.SMembers(context.Background(), config.RedisKey.QuizBlackList)
+
+	return gin.H{
+		"status": members.Val(),
+	}, nil
 }
 
 func (QuizController) AnswerQuestion(ctx *gin.Context) (gin.H, error) {
@@ -70,6 +121,10 @@ func (QuizController) AnswerQuestion(ctx *gin.Context) (gin.H, error) {
 }
 func (QuizController) Submit(ctx *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(ctx)
+	isBlack := app.Redis.SIsMember(context.Background(), config.RedisKey.QuizBlackList, user.OpenId)
+	if isBlack.Val() {
+		return nil, errno.ErrCommon.WithMessage("您的账号异常，无法参与答题")
+	}
 	point, err := quiz.DefaultQuizService.Submit(user.OpenId, user.ID)
 	if err != nil {
 		return nil, err
