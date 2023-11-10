@@ -191,3 +191,9 @@ type QuizQuestionAPI struct {
 	Type                int      `json:"type"`
 	QuestionID          string   `json:"questionId"`
 }
+
+type AddAvailabilityReq struct {
+	Openid string `json:"openid"`
+	Key    string `json:"key"`
+	Type   string `json:"type"`
+}

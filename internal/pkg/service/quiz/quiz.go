@@ -118,7 +118,6 @@ func (srv QuizService) Submit(openId string, uid int64) (int, error) {
 		return 0, errno.ErrLimit
 	}
 	defer util.DefaultLock.UnLock(fmt.Sprintf("QUIZ_Ssubmit%s", openId))
-
 	todayResult, err := DefaultQuizDailyResultService.CompleteTodayQuiz(openId, timetool.Now())
 	if err != nil {
 		return 0, err
