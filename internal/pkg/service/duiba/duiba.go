@@ -240,6 +240,7 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 				BizId:               fmt.Sprintf("_%d_%s", user.ID, "大转盘优惠券"),
 				DistributionChannel: "大转盘优惠券回调",
 				CouponCardCode:      orderItem.Code,
+				Title:               orderItem.Title,
 			}
 			_, err = app.RpcService.CouponRpcSrv.SendCouponV3(context.NewMioContext(), data)
 			if err != nil {
