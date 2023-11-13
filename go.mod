@@ -32,8 +32,8 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.2.45
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.11.2
+	gitlab.miotech.com/miotech-application/backend/common-go v1.2.47
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro  v1.11.3
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.14.0
 	google.golang.org/grpc v1.50.1
@@ -193,6 +193,6 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro  v1.11.2 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.2
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro   v1.11.3 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git  v1.11.3
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.45 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.45
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.47 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.47

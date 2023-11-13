@@ -960,6 +960,10 @@ gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.40 h1:9HDpohGz
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.40/go.mod h1:GeGH7XZBpW15lFF//ULNLWeJuNSIO7cppHQKdjamR54=
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.45 h1:gREX9ynr86lmmUuQTLXZOJWI8sXxzigiRzPZRRhTTx8=
 gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.45/go.mod h1:eo1Ye4VKC3h6CNeYBgBMH6mZHZdHIaRddcFOdIPILPQ=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.46 h1:zzxKCX+pSybK8OE/UnrGImWgL9WskTPEI4diB+98/us=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.46/go.mod h1:eo1Ye4VKC3h6CNeYBgBMH6mZHZdHIaRddcFOdIPILPQ=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.47 h1:13SlvtQf8X/0sxd3nlDI2B0FuzNTu1W6ey9j+oDkOr0=
+gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.47/go.mod h1:eo1Ye4VKC3h6CNeYBgBMH6mZHZdHIaRddcFOdIPILPQ=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.21 h1:a/z+vC97KZVgyw5tCpiDcZufwYCoPBJK3W513zTHsUo=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.10.21/go.mod h1:wsjfiuP6EOJwYYosPzUXbDE2tUAgLv+9jp6vqqfYeuA=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.0 h1:8PTpcKe9k7dmU3aX2qVuIob9DxYymW5BgK1akUaQtzY=
@@ -968,6 +972,8 @@ gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.1 h1:s0M+1aC
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.1/go.mod h1:yFEwjvfM0f1Bj61S0dN4efQ1pyU0QJ8QfoJxS01Tvcs=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.2 h1:lyeqJMFbbiVOwSQU+XQKwczuTjo+vFf3BBsbuW6/pkU=
 gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.2/go.mod h1:yFEwjvfM0f1Bj61S0dN4efQ1pyU0QJ8QfoJxS01Tvcs=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.3 h1:mByyzUo+5lKmSGJdKEAQxRTORILDw2embsGiiWMSZ4k=
+gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.3/go.mod h1:yFEwjvfM0f1Bj61S0dN4efQ1pyU0QJ8QfoJxS01Tvcs=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738/go.mod h1:dnLIgRNXwCJa5e+c6mIZCrds/GIG4ncV9HhK5PX7jPg=
