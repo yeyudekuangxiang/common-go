@@ -188,8 +188,6 @@ func (srv DuiBaService) ExchangeResultNoticeCallback(form duibaApi.ExchangeResul
 }
 
 func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
-	app.Logger.Error("兑吧商城回调 data:%+v", form)
-
 	user, err := service.DefaultUserService.GetUserByOpenId(form.Uid)
 	if err != nil {
 		return err
@@ -223,8 +221,8 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		if err != nil {
 			return err
 		}
+		app.Logger.Infof("【大转盘优惠券回调】发放奖励中: %s, 用户: %s, 渠道: %d", orderItem.MerchantCode, user.OpenId, user.ChannelId)
 		if strings.Contains(orderItem.MerchantCode, "hotel_") {
-			app.Logger.Errorf("【大转盘优惠券回调】发放奖励中: %s, 用户: %s, 渠道: %d", orderItem.MerchantCode, user.OpenId, user.ChannelId)
 			merchantCodeArr := strings.Split(orderItem.MerchantCode, "_")
 			if len(merchantCodeArr) < 2 {
 				continue
