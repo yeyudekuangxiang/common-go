@@ -385,6 +385,10 @@ func (srv defaultCommunityActivitiesSignupService) checkSignupNum(id, num int64)
 		return nil
 	}
 
+	if num == 0 {
+		return errno.ErrCommon.WithMessage("报名人数已满")
+	}
+
 	if len(count) > 0 && count[0].NumOfSignup >= num {
 		return errno.ErrCommon.WithMessage("报名人数已满")
 	}
