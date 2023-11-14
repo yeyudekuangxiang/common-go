@@ -18,6 +18,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +47,24 @@ type (
 	}
 )
 
+func ToExcelColumn(column int) string {
+	if column <= 0 {
+		return ""
+	}
+
+	columnName := ""
+	for column > 0 {
+		// 由于Excel列从1开始，所以减去1以便从0开始计数
+		column--
+		// 计算当前位置的字母
+		letter := rune('A' + (column % 26))
+		// 将字母添加到列名的开头
+		columnName = string(letter) + columnName
+		// 移动到下一个字母位置
+		column = column / 26
+	}
+	return columnName
+}
 func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter, r *http.Request, topicId int64) {
 	list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
 
@@ -66,6 +86,8 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	f.SetCellValue("Sheet1", "G1", "居住城市")
 	f.SetCellValue("Sheet1", "H1", "报名备注")
 
+	otherColsRow := make(map[string][]string)
+	colMap := make(map[string]string)
 	for i, item := range list {
 		gender := "未知"
 		if item.User.Gender == entity.UserGenderMale {
@@ -91,7 +113,7 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 				wechat = signupInfo.Value.(string)
 			}
 			if signupInfo.Code == "age" {
-				age = signupInfo.Value.(int)
+				age = int(signupInfo.Value.(float64))
 			}
 			if signupInfo.Code == "city" {
 				city = signupInfo.Value.(string)
@@ -99,7 +121,32 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 			if signupInfo.Code == "remarks" {
 				remarks = signupInfo.Value.(string)
 			}
+
+			colName := signupInfo.Code
+			rows, ok := otherColsRow[colName]
+			colMap[colName] = signupInfo.Title
+			if !ok {
+				rows = make([]string, len(list))
+			}
+			if signupInfo.Type == 4 {
+				//多选
+				v := strings.Builder{}
+				opts := signupInfo.Value.([]interface{})
+				for _, opt := range opts {
+					v.WriteString(opt.(string))
+					v.WriteString("/")
+				}
+				if v.Len() > 0 {
+					rows[i] = v.String()[:v.Len()-1]
+				} else {
+					rows[i] = ""
+				}
+			} else {
+				rows[i] = signupInfo.Value.(string)
+			}
+			otherColsRow[colName] = rows
 		}
+
 		f.SetCellValue("Sheet1", fmt.Sprintf("A%d", i+2), item.User.Nickname)
 		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", i+2), realName)
 		f.SetCellValue("Sheet1", fmt.Sprintf("C%d", i+2), phone)
@@ -110,6 +157,15 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 		f.SetCellValue("Sheet1", fmt.Sprintf("H%d", i+2), remarks)
 	}
 
+	colI := 9
+	for k, v := range colMap {
+		f.SetCellValue("Sheet1", string(rune(colI))+"1", v)
+		list := otherColsRow[k]
+		for i, v := range list {
+			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+		}
+		colI++
+	}
 	// 设置工作簿的默认工作表
 	f.SetActiveSheet(index)
 	// 根据指定路径保存文件
@@ -140,7 +196,6 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	content := bytes.NewReader(buf.Bytes())
 	http.ServeContent(w, r, fileName, time.Now(), content)
 }
-
 func (srv defaultCommunityActivitiesSignupService) FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error) {
 	list, total, err := srv.signupModel.FindSignupList(params)
 	if err != nil {
