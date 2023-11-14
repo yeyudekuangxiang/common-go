@@ -78,6 +78,7 @@ type saTag struct {
 	Category int      `json:"category"`
 	Title    string   `json:"title"`
 	Options  []string `json:"options"`
+	Limit    string   `json:"limit"`
 }
 
 type UpdateTopicParams struct {
