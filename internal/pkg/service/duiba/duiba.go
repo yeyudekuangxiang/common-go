@@ -228,25 +228,26 @@ func (srv DuiBaService) OrderCallback(form duibaApi.OrderInfo) error {
 		if err != nil {
 			return err
 		}
-		if strings.Contains(orderItem.MerchantCode, "coupon_") {
-			app.Logger.Errorf("【大转盘优惠券回调】发放奖励中: %s, 用户: %s, 渠道: %d", orderItem.MerchantCode, user.OpenId, user.ChannelId)
+		app.Logger.Infof("【大转盘优惠券回调】发放奖励中: %s, 用户: %s, 渠道: %d", orderItem.MerchantCode, user.OpenId, user.ChannelId)
+		if strings.Contains(orderItem.MerchantCode, "hotel_") {
 			merchantCodeArr := strings.Split(orderItem.MerchantCode, "_")
 			if len(merchantCodeArr) < 2 {
 				continue
 			}
-			CouponCardTypeId, err := strconv.ParseInt(merchantCodeArr[2], 10, 64)
+			CouponCardTypeId, err := strconv.ParseInt(merchantCodeArr[1], 10, 64)
 			if err != nil {
 				fmt.Println("转换失败:", err)
 				continue
 			}
-			data := &coupon.SendCouponV2Req{
+			data := &coupon.SendCouponV3Req{
 				UserId:              user.ID,
-				ThirdUserId:         orderItem.Code,
 				CouponCardTypeId:    CouponCardTypeId,
 				BizId:               fmt.Sprintf("_%d_%s", user.ID, "大转盘优惠券"),
 				DistributionChannel: "大转盘优惠券回调",
+				CouponCardCode:      orderItem.Code,
+				Title:               orderItem.Title,
 			}
-			_, err = app.RpcService.CouponRpcSrv.SendCouponV2(context.NewMioContext(), data)
+			_, err = app.RpcService.CouponRpcSrv.SendCouponV3(context.NewMioContext(), data)
 			if err != nil {
 				app.Logger.Errorf("【大转盘优惠券回调】发放奖励失败: %s, 用户: %s, 渠道: %d", err.Error(), user.OpenId, user.ChannelId)
 			}

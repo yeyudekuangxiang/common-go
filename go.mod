@@ -32,8 +32,8 @@ require (
 	github.com/wagslane/go-rabbitmq v0.10.0
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/zeromicro/go-zero v1.4.2
-	gitlab.miotech.com/miotech-application/backend/common-go v1.2.40
-	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.4.29-develop
+	gitlab.miotech.com/miotech-application/backend/common-go v1.2.47
+	gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.11.3
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.14.0
 	google.golang.org/grpc v1.50.1
@@ -140,7 +140,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/sony/sonyflake v1.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/minify/v2 v2.9.4 // indirect
@@ -172,7 +171,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/term v0.11.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 // indirect
@@ -193,6 +192,6 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.4.29-develop => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.4.29-develop
+replace gitlab.miotech.com/miotech-application/backend/mp2c-micro v1.11.3 => gitlab.miotech.com/miotech-application/backend/mp2c-micro.git v1.11.3
 
-replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.40 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.40
+replace gitlab.miotech.com/miotech-application/backend/common-go v1.2.47 => gitlab.miotech.com/miotech-application/backend/common-go.git v1.2.47
