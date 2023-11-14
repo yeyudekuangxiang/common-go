@@ -52,7 +52,7 @@ type TopicService struct {
 	activityTagModel community.ActivitiesTagModel
 }
 
-//将 entity.Topic 列表填充为 TopicDetailResp 列表
+// 将 entity.Topic 列表填充为 TopicDetailResp 列表
 func (srv TopicService) fillTopicList(topicList []entity.Topic, userId int64) ([]TopicDetailResp, error) {
 	//查询点赞信息
 	topicIds := make([]int64, 0)
@@ -307,7 +307,7 @@ func (srv TopicService) UpdateTopicFlowListShowCount(list []entity.Topic, userId
 	}
 }
 
-//根据id列表对 entity.Topic 列表排序
+// 根据id列表对 entity.Topic 列表排序
 func (srv TopicService) sortTopicListByIds(list []entity.Topic, ids []int64) []entity.Topic {
 	topicMap := make(map[int64]entity.Topic)
 	for _, topic := range list {
@@ -628,7 +628,7 @@ func (srv TopicService) ImportTopic(filename string, baseImportId int) error {
 	return nil
 }
 
-//CreateTopic 创建文章
+// CreateTopic 创建文章
 func (srv TopicService) CreateTopic(userId int64, params CreateTopicParams) (*entity.Topic, error) {
 	topicModel := &entity.Topic{}
 
@@ -782,6 +782,18 @@ func (srv TopicService) DetailTopic(params FindTopicParams) (*entity.Topic, erro
 	}
 	if err := srv.topicModel.AddTopicSeeCount(topic.Id, 1); err != nil {
 		app.Logger.Errorf("更新topic查看次数失败 : %s", err.Error())
+	}
+	if topic.Type == community.TopicTypeActivity {
+		activitiesSignupService := NewCommunityActivitiesSignupService(srv.ctx)
+		countList, err := activitiesSignupService.FindListCount(FindListCountReq{TopicIds: []int64{params.TopicId}})
+		if err != nil {
+			return nil, err
+		}
+		signupCountMap := make(map[int64]int64)
+		for _, item := range countList {
+			signupCountMap[item.TopicId] = item.NumOfSignup
+		}
+		topic.Activity.NumOfSignup = int(signupCountMap[params.TopicId])
 	}
 	return topic, nil
 }
