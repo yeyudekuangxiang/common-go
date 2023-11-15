@@ -106,31 +106,27 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 		for _, signupInfo := range signupInfos {
 			if signupInfo.Code == "realName" {
 				realName = srv.toString(signupInfo.Value)
-			}
-			if signupInfo.Code == "phone" {
+			} else if signupInfo.Code == "phone" {
 				phone = srv.toString(signupInfo.Value)
-			}
-			if signupInfo.Code == "wechat" {
+			} else if signupInfo.Code == "wechat" {
 				wechat = srv.toString(signupInfo.Value)
-			}
-			if signupInfo.Code == "age" {
+			} else if signupInfo.Code == "age" {
 				age = int(signupInfo.Value.(float64))
-			}
-			if signupInfo.Code == "city" {
+			} else if signupInfo.Code == "city" {
 				city = srv.toString(signupInfo.Value)
-			}
-			if signupInfo.Code == "remarks" {
+			} else if signupInfo.Code == "remarks" {
 				remarks = srv.toString(signupInfo.Value)
+			} else {
+				colName := signupInfo.Code
+				rows, ok := otherColsRow[colName]
+				colMap[colName] = signupInfo.Title
+				if !ok {
+					rows = make([]string, len(list))
+				}
+				rows[i] = srv.toString(signupInfo.Value)
+				otherColsRow[colName] = rows
 			}
 
-			colName := signupInfo.Code
-			rows, ok := otherColsRow[colName]
-			colMap[colName] = signupInfo.Title
-			if !ok {
-				rows = make([]string, len(list))
-			}
-			rows[i] = srv.toString(signupInfo.Value)
-			otherColsRow[colName] = rows
 		}
 
 		f.SetCellValue("Sheet1", fmt.Sprintf("A%d", i+2), item.User.Nickname)
@@ -144,8 +140,8 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	}
 
 	colI := 9
-	for k, v := range colMap {
-		f.SetCellValue("Sheet1", string(rune(colI))+"1", v)
+	for k, title := range colMap {
+		f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", title)
 		list := otherColsRow[k]
 		for i, v := range list {
 			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
