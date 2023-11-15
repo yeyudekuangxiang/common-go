@@ -7,6 +7,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gorm.io/gorm"
+	"math"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	mioContext "mio/internal/pkg/core/context"
@@ -104,22 +105,22 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 		var age int
 		for _, signupInfo := range signupInfos {
 			if signupInfo.Code == "realName" {
-				realName = signupInfo.Value.(string)
+				realName = srv.toString(signupInfo.Value)
 			}
 			if signupInfo.Code == "phone" {
-				phone = signupInfo.Value.(string)
+				phone = srv.toString(signupInfo.Value)
 			}
 			if signupInfo.Code == "wechat" {
-				wechat = signupInfo.Value.(string)
+				wechat = srv.toString(signupInfo.Value)
 			}
 			if signupInfo.Code == "age" {
 				age = int(signupInfo.Value.(float64))
 			}
 			if signupInfo.Code == "city" {
-				city = signupInfo.Value.(string)
+				city = srv.toString(signupInfo.Value)
 			}
 			if signupInfo.Code == "remarks" {
-				remarks = signupInfo.Value.(string)
+				remarks = srv.toString(signupInfo.Value)
 			}
 
 			colName := signupInfo.Code
@@ -128,22 +129,7 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 			if !ok {
 				rows = make([]string, len(list))
 			}
-			if signupInfo.Type == 4 {
-				//多选
-				v := strings.Builder{}
-				opts := signupInfo.Value.([]interface{})
-				for _, opt := range opts {
-					v.WriteString(opt.(string))
-					v.WriteString("/")
-				}
-				if v.Len() > 0 {
-					rows[i] = v.String()[:v.Len()-1]
-				} else {
-					rows[i] = ""
-				}
-			} else {
-				rows[i] = signupInfo.Value.(string)
-			}
+			rows[i] = srv.toString(signupInfo.Value)
 			otherColsRow[colName] = rows
 		}
 
@@ -195,6 +181,34 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	buf, _ := f.WriteToBuffer()
 	content := bytes.NewReader(buf.Bytes())
 	http.ServeContent(w, r, fileName, time.Now(), content)
+}
+func (srv defaultCommunityActivitiesSignupService) toString(v interface{}) string {
+	switch v.(type) {
+	case bool:
+		return strconv.FormatBool(v.(bool))
+	case float64:
+		v2 := v.(float64)
+		if v2 == math.Trunc(v2) {
+			return strconv.FormatInt(int64(v2), 10)
+		} else {
+			return fmt.Sprintf("%.2f", v2)
+		}
+	case string:
+		return v.(string)
+	case []interface{}:
+		list := v.([]interface{})
+		b := strings.Builder{}
+		for _, item := range list {
+			b.WriteString(srv.toString(item))
+			b.WriteString("/")
+		}
+		return strings.TrimRight(b.String(), "/")
+	case map[string]interface{}:
+		return fmt.Sprintf("%+v", v)
+	case nil:
+		return ""
+	}
+	return fmt.Sprintf("%+v", v)
 }
 func (srv defaultCommunityActivitiesSignupService) FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error) {
 	list, total, err := srv.signupModel.FindSignupList(params)
