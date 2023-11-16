@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/xuri/excelize/v2"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/sorttool"
 	"gorm.io/gorm"
 	"math"
 	"mio/config"
@@ -77,77 +78,50 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
 	}
 
-	// 设置单元格的值
-	f.SetCellValue("Sheet1", "A1", "昵称")
-	f.SetCellValue("Sheet1", "B1", "真实姓名")
-	f.SetCellValue("Sheet1", "C1", "联系电话")
-	f.SetCellValue("Sheet1", "D1", "wechat")
-	f.SetCellValue("Sheet1", "E1", "年龄")
-	f.SetCellValue("Sheet1", "F1", "性别")
-	f.SetCellValue("Sheet1", "G1", "居住城市")
-	f.SetCellValue("Sheet1", "H1", "报名备注")
-
 	otherColsRow := make(map[string][]string)
 	colMap := make(map[string]string)
 	for i, item := range list {
-		gender := "未知"
-		if item.User.Gender == entity.UserGenderMale {
-			gender = "男"
-		} else if item.User.Gender == entity.UserGenderFemale {
-			gender = "女"
-		}
+
 		signupInfos := make([]SignupInfo, 0)
 		err = json.Unmarshal([]byte(item.SignupInfo), &signupInfos)
 		if err != nil {
 			return
 		}
-		var realName, phone, wechat, city, remarks string
-		var age int
+
 		for _, signupInfo := range signupInfos {
-			if signupInfo.Code == "realName" {
-				realName = srv.toString(signupInfo.Value)
-			} else if signupInfo.Code == "phone" {
-				phone = srv.toString(signupInfo.Value)
-			} else if signupInfo.Code == "wechat" {
-				wechat = srv.toString(signupInfo.Value)
-			} else if signupInfo.Code == "age" {
-				age = int(signupInfo.Value.(float64))
-			} else if signupInfo.Code == "city" {
-				city = srv.toString(signupInfo.Value)
-			} else if signupInfo.Code == "remarks" {
-				remarks = srv.toString(signupInfo.Value)
-			} else {
-				colName := signupInfo.Code
-				rows, ok := otherColsRow[colName]
-				colMap[colName] = signupInfo.Title
-				if !ok {
-					rows = make([]string, len(list))
+			value := signupInfo.Value
+			if signupInfo.Code == "gender" {
+				gender := srv.toString(signupInfo.Value)
+				if gender == "1" {
+					value = "女"
+				} else if gender == "2" {
+					value = "男"
 				}
-				rows[i] = srv.toString(signupInfo.Value)
-				otherColsRow[colName] = rows
 			}
 
+			colName := signupInfo.Code
+			rows, ok := otherColsRow[colName]
+			colMap[colName] = signupInfo.Title
+			if !ok {
+				rows = make([]string, len(list))
+			}
+			rows[i] = srv.toString(value)
+			otherColsRow[colName] = rows
 		}
-
-		f.SetCellValue("Sheet1", fmt.Sprintf("A%d", i+2), item.User.Nickname)
-		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", i+2), realName)
-		f.SetCellValue("Sheet1", fmt.Sprintf("C%d", i+2), phone)
-		f.SetCellValue("Sheet1", fmt.Sprintf("D%d", i+2), wechat)
-		f.SetCellValue("Sheet1", fmt.Sprintf("E%d", i+2), age)
-		f.SetCellValue("Sheet1", fmt.Sprintf("F%d", i+2), gender)
-		f.SetCellValue("Sheet1", fmt.Sprintf("G%d", i+2), city)
-		f.SetCellValue("Sheet1", fmt.Sprintf("H%d", i+2), remarks)
 	}
 
-	colI := 9
-	for k, title := range colMap {
+	colI := 1
+	sorttool.Map(colMap, func(key interface{}) {
+		k := key.(string)
+		title := colMap[k]
 		f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", title)
 		list := otherColsRow[k]
 		for i, v := range list {
 			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
 		}
 		colI++
-	}
+	})
+
 	// 设置工作簿的默认工作表
 	f.SetActiveSheet(index)
 	// 根据指定路径保存文件
