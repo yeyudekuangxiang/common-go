@@ -34,7 +34,7 @@ var DefaultTopicController = TopicController{}
 type TopicController struct {
 }
 
-//List 获取文章列表
+// List 获取文章列表
 func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 	form := GetTopicPageListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -90,7 +90,7 @@ func (ctr *TopicController) List(c *gin.Context) (gin.H, error) {
 //	}, nil
 //}
 
-//GetShareWeappQrCode 获取分享二维码
+// GetShareWeappQrCode 获取分享二维码
 func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	form := GetWeappQrCodeRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -115,7 +115,7 @@ func (ctr *TopicController) GetShareWeappQrCode(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//ChangeTopicLike 点赞 / 取消点赞
+// ChangeTopicLike 点赞 / 取消点赞
 func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	form := ChangeTopicLikeRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -182,7 +182,7 @@ func (ctr *TopicController) ChangeTopicLike(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//ListTopic 帖子列表+顶级评论+顶级评论下子评论3条
+// ListTopic 帖子列表+顶级评论+顶级评论下子评论3条
 func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	form := GetTopicPageListRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -263,7 +263,7 @@ func (ctr *TopicController) ListTopic(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//CreateTopic 创建帖子
+// CreateTopic 创建帖子
 func (ctr *TopicController) CreateTopic(c *gin.Context) (gin.H, error) {
 	user := apiutil.GetAuthUser(c)
 	if user.Auth != 1 {
@@ -788,7 +788,7 @@ func (ctr *TopicController) MySignupDetail(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//报名数据
+// 报名数据
 func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
@@ -831,11 +831,11 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 	}, nil
 }
 
-//导出报名数据excel文件路径
-func (ctr *TopicController) ExportSignupList(c *gin.Context) {
+// 导出报名数据excel文件路径
+func (ctr *TopicController) ExportSignupList(c *gin.Context) (gin.H, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
-		app.Logger.Errorf("参数错误")
+		return nil, err
 	}
 
 	ctx := context.NewMioContext(context.WithContext(c.Request.Context()))
@@ -849,14 +849,20 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) {
 	})
 	//仅发起人可查看
 	if err != nil {
-		app.Logger.Errorf(err.Error())
+		return nil, err
 	}
 
 	if topic.UserId != user.ID {
-		app.Logger.Errorf("非创建者本人查看")
+		return nil, errno.ErrCommon.WithMessage("没有权限")
 	}
 
-	signupService.Export(c.Writer, c.Request, topic.Id)
+	path, err := signupService.Export(topic.Id)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"path": path,
+	}, nil
 }
 
 func (ctr *TopicController) ShareTopic(c *gin.Context) (gin.H, error) {
