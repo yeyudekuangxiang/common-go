@@ -45,7 +45,8 @@ type (
 	defaultCommunityActivitiesSignupService struct {
 		ctx         *mioContext.MioContext
 		signupModel community.ActivitiesSignupModel
-		topicModel  community.TopicModel
+
+		topicModel community.TopicModel
 	}
 )
 
@@ -68,26 +69,38 @@ func ToExcelColumn(column int) string {
 	return columnName
 }
 func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter, r *http.Request, topicId int64) {
-	list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
 
-	f := excelize.NewFile()
-
-	// 创建一个工作表
-	index, err := f.NewSheet("Sheet1")
+	//获取报名信息
+	activityInfo := entity.CommunityActivities{}
+	err := app.DB.Where("id = ?", topicId).Find(&activityInfo).Error
 	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
+		app.Logger.Errorf(fmt.Sprintf("报名信息不存在 %d Error:%s", topicId, err.Error()))
+		return
 	}
 
-	otherColsRow := make(map[string][]string)
-	colMap := make(map[string]string)
-	for i, item := range list {
+	//获取列信息
+	colInfoList := make([]SignupInfo, 0)
+	err = json.Unmarshal([]byte(activityInfo.SATag), &colInfoList)
+	if err != nil {
+		app.Logger.Errorf(fmt.Sprintf("解析报名信息异常 %d Error:%s", topicId, err.Error()))
+		return
+	}
 
+	//获取报名列表
+	list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
+
+	// 用于存储没一列的数据
+	colsListMap := make(map[string][]string)
+	// 用户存储列信息
+	colMap := make(map[string]string)
+
+	// 处理数据
+	for i, item := range list {
 		signupInfos := make([]SignupInfo, 0)
 		err = json.Unmarshal([]byte(item.SignupInfo), &signupInfos)
 		if err != nil {
 			return
 		}
-
 		for _, signupInfo := range signupInfos {
 			value := signupInfo.Value
 			if signupInfo.Code == "gender" {
@@ -100,22 +113,41 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 			}
 
 			colName := signupInfo.Code
-			rows, ok := otherColsRow[colName]
+			rows, ok := colsListMap[colName]
 			colMap[colName] = signupInfo.Title
 			if !ok {
 				rows = make([]string, len(list))
 			}
 			rows[i] = srv.toString(value)
-			otherColsRow[colName] = rows
+			colsListMap[colName] = rows
 		}
 	}
 
+	// 导出到excel
+	f := excelize.NewFile()
+	index, err := f.NewSheet("Sheet1")
+	if err != nil {
+		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
+	}
+
 	colI := 1
+	// 先按照发起人最后一次编辑的顺序设置列数据
+	for _, col := range colInfoList {
+		f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", col.Title)
+		list := colsListMap[col.Code]
+		for i, v := range list {
+			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+		}
+		delete(colMap, col.Code)
+		colI++
+	}
+
+	//剩余的列数据按照ascii码循序设置列数据
 	sorttool.Map(colMap, func(key interface{}) {
 		k := key.(string)
 		title := colMap[k]
 		f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", title)
-		list := otherColsRow[k]
+		list := colsListMap[k]
 		for i, v := range list {
 			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
 		}
