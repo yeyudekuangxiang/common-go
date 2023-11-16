@@ -13,6 +13,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/wxoa"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/activity/activityclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/activity/cmd/rpc/carbonpk/carbonpkclient"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/common/cmd/rpc/commonclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/coupon/cmd/rpc/couponclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/platform/cmd/rpc/platformclient"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/point/cmd/rpc/pointclient"
@@ -55,6 +56,7 @@ type RpcClient struct {
 	CarbonPkRpcSrv    carbonpkclient.Carbonpk
 	UserRpcSrv        userclient.User
 	CouponRpcSrv      couponclient.Coupon
+	CommonRpcSrc      commonclient.Common
 	TokenCenterRpcSrv tokencenterclient.TokenCenter
 	PointRpcSrv       pointclient.Point
 	ActivityRpcSrv    activityclient.Activity

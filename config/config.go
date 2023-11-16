@@ -80,6 +80,7 @@ type app struct {
 	UserRpc             zrpc.RpcClientConf `ini:"userRpc" json:"userRpc"`
 	ActivityCarbonPkRpc zrpc.RpcClientConf `ini:"activityCarbonPkRpc" json:"activityCarbonPkRpc"`
 	PlatformRpc         zrpc.RpcClientConf `ini:"platformRpc" json:"platformRpc"`
+	CommonRpc           zrpc.RpcClientConf `ini:"commonRpc" json:"commonRpc"`
 	BaiDuMap            baiDuMap           `ini:"baiduMap" json:"baiduMap"`
 	GaoDeMap            gaoDeMap           `ini:"gaodeMap" json:"gaodeMap"`
 	Saas                saas               `ini:"saas" json:"saas"`

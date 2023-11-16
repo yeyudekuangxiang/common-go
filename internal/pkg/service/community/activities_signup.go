@@ -1,12 +1,12 @@
 package community
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/sorttool"
+	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/common/cmd/rpc/commonclient"
 	"gorm.io/gorm"
 	"math"
 	"mio/config"
@@ -17,9 +17,6 @@ import (
 	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
-	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -35,7 +32,7 @@ type (
 		FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error)
 		Signup(params SignupInfosParams) error //报名
 		CancelSignup(Id, userId int64) error   //取消报名
-		Export(w http.ResponseWriter, r *http.Request, topicId int64)
+		Export(topicId int64) (string, error)
 		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
 		SignupV2(params SignupParams) error
 		GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
@@ -68,14 +65,14 @@ func ToExcelColumn(column int) string {
 	}
 	return columnName
 }
-func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter, r *http.Request, topicId int64) {
+func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string, error) {
 
 	//获取报名信息
 	activityInfo := entity.CommunityActivities{}
 	err := app.DB.Where("id = ?", topicId).Find(&activityInfo).Error
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("报名信息不存在 %d Error:%s", topicId, err.Error()))
-		return
+		return "", err
 	}
 
 	//获取列信息
@@ -83,12 +80,14 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	err = json.Unmarshal([]byte(activityInfo.SATag), &colInfoList)
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("解析报名信息异常 %d Error:%s", topicId, err.Error()))
-		return
+		return "", err
 	}
 
 	//获取报名列表
 	list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
-
+	if err != nil {
+		return "", err
+	}
 	// 用于存储没一列的数据
 	colsListMap := make(map[string][]string)
 	// 用户存储列信息
@@ -99,7 +98,7 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 		signupInfos := make([]SignupInfo, 0)
 		err = json.Unmarshal([]byte(item.SignupInfo), &signupInfos)
 		if err != nil {
-			return
+			return "", err
 		}
 		for _, signupInfo := range signupInfos {
 			value := signupInfo.Value
@@ -128,61 +127,75 @@ func (srv defaultCommunityActivitiesSignupService) Export(w http.ResponseWriter,
 	index, err := f.NewSheet("Sheet1")
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
+		return "", err
 	}
 
 	colI := 1
 	// 先按照发起人最后一次编辑的顺序设置列数据
 	for _, col := range colInfoList {
-		f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", col.Title)
+		err = f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", col.Title)
+		if err != nil {
+			return "", err
+		}
 		list := colsListMap[col.Code]
 		for i, v := range list {
-			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+			err = f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+			if err != nil {
+				return "", err
+			}
 		}
 		delete(colMap, col.Code)
 		colI++
 	}
 
+	var setErr error
 	//剩余的列数据按照ascii码循序设置列数据
 	sorttool.Map(colMap, func(key interface{}) {
+		if setErr != nil {
+			return
+		}
 		k := key.(string)
 		title := colMap[k]
-		f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", title)
+		setErr = f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", title)
+		if setErr != nil {
+			return
+		}
 		list := colsListMap[k]
 		for i, v := range list {
-			f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+			setErr = f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+			if setErr != nil {
+				return
+			}
 		}
 		colI++
 	})
+	if setErr != nil {
+		return "", setErr
+	}
 
 	// 设置工作簿的默认工作表
 	f.SetActiveSheet(index)
 	// 根据指定路径保存文件
-	fileName := fmt.Sprintf("export_data_%d-%d.xlsx", time.Now().Unix(), topicId)
+	fileName := fmt.Sprintf("export_data_%d.xlsx", topicId)
 
-	file, err := os.OpenFile(filepath.Clean(fileName), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	buf, err := f.WriteToBuffer()
 	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
+		return "", err
 	}
-	_ = f.Write(file)
-
-	defer func() {
-		if err := file.Close(); err != nil {
-			app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
-		}
-		if err := f.Close(); err != nil {
-			app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
-		}
-	}()
+	uploadClient, err := app.RpcService.CommonRpcSrc.UploadFile(srv.ctx)
+	err = uploadClient.Send(&commonclient.UploadFileReq{
+		Filename: fileName,
+		Scene:    "export_topic_signup_user_list",
+		Content:  buf.Bytes(),
+	})
 	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
+		return "", err
 	}
-	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
-	w.Header().Add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-	//var buffer bytes.Buffer
-	buf, _ := f.WriteToBuffer()
-	content := bytes.NewReader(buf.Bytes())
-	http.ServeContent(w, r, fileName, time.Now(), content)
+	uploadResp, err := uploadClient.CloseAndRecv()
+	if err != nil {
+		return "", err
+	}
+	return uploadResp.Domain + "/" + uploadResp.Path, nil
 }
 func (srv defaultCommunityActivitiesSignupService) toString(v interface{}) string {
 	switch v.(type) {
