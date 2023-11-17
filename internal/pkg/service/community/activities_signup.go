@@ -8,6 +8,7 @@ import (
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/sorttool"
 	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/common/cmd/rpc/commonclient"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"math"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -17,6 +18,7 @@ import (
 	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -168,19 +170,29 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 		return "", setErr
 	}
 
-	buf, err := f.WriteToBuffer()
+	/*buf, err := f.WriteToBuffer()
+	if err != nil {
+		return "", err
+	}*/
+
+	// 根据指定路径保存文件
+	fileName := fmt.Sprintf("export_data_%s_%d.xlsx", time.Now().Format("20060102150405"), topicId)
+
+	err = f.SaveAs(fileName)
 	if err != nil {
 		return "", err
 	}
+	defer os.Remove(fileName)
 
-	// 根据指定路径保存文件
-	fileName := fmt.Sprintf("export_data_%d_%d.xlsx", time.Now().Unix(), topicId)
-
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return "", err
+	}
 	uploadClient, err := app.RpcService.CommonRpcSrc.UploadFile(srv.ctx)
 	err = uploadClient.Send(&commonclient.UploadFileReq{
 		Filename: fileName,
 		Scene:    "export_topic_signup_user_list",
-		Content:  buf.Bytes(),
+		Content:  data,
 	})
 	if err != nil {
 		return "", err
