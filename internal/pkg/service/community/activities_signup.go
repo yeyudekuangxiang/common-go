@@ -124,22 +124,17 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 
 	// 导出到excel
 	f := excelize.NewFile()
-	index, err := f.NewSheet("Sheet1")
-	if err != nil {
-		app.Logger.Errorf(fmt.Sprintf("活动报名数据Export Error:%s", err.Error()))
-		return "", err
-	}
-
+	defer f.Close()
 	colI := 1
 	// 先按照发起人最后一次编辑的顺序设置列数据
 	for _, col := range colInfoList {
-		err = f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", col.Title)
+		err = f.SetCellStr("Sheet1", ToExcelColumn(colI)+"1", col.Title)
 		if err != nil {
 			return "", err
 		}
 		list := colsListMap[col.Code]
 		for i, v := range list {
-			err = f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+			err = f.SetCellStr("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
 			if err != nil {
 				return "", err
 			}
@@ -156,13 +151,13 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 		}
 		k := key.(string)
 		title := colMap[k]
-		setErr = f.SetCellValue("Sheet1", ToExcelColumn(colI)+"1", title)
+		setErr = f.SetCellStr("Sheet1", ToExcelColumn(colI)+"1", title)
 		if setErr != nil {
 			return
 		}
 		list := colsListMap[k]
 		for i, v := range list {
-			setErr = f.SetCellValue("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
+			setErr = f.SetCellStr("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
 			if setErr != nil {
 				return
 			}
@@ -173,15 +168,14 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 		return "", setErr
 	}
 
-	// 设置工作簿的默认工作表
-	f.SetActiveSheet(index)
-	// 根据指定路径保存文件
-	fileName := fmt.Sprintf("export_data_%d.xlsx", topicId)
-
 	buf, err := f.WriteToBuffer()
 	if err != nil {
 		return "", err
 	}
+
+	// 根据指定路径保存文件
+	fileName := fmt.Sprintf("export_data_%d_%d.xlsx", time.Now().Unix(), topicId)
+
 	uploadClient, err := app.RpcService.CommonRpcSrc.UploadFile(srv.ctx)
 	err = uploadClient.Send(&commonclient.UploadFileReq{
 		Filename: fileName,
