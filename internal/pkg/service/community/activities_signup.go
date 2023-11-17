@@ -1,14 +1,13 @@
 package community
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/xuri/excelize/v2"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/converttool"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/sorttool"
-	"gitlab.miotech.com/miotech-application/backend/mp2c-micro/app/common/cmd/rpc/commonclient"
 	"gorm.io/gorm"
-	"io/ioutil"
 	"math"
 	"mio/config"
 	"mio/internal/pkg/core/app"
@@ -18,7 +17,6 @@ import (
 	"mio/internal/pkg/repository/community"
 	"mio/internal/pkg/service/track"
 	"mio/pkg/errno"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -34,7 +32,7 @@ type (
 		FindSignupList(params community.FindAllActivitiesSignupParams) ([]*entity.APISignupList, int64, error)
 		Signup(params SignupInfosParams) error //报名
 		CancelSignup(Id, userId int64) error   //取消报名
-		Export(topicId int64) (string, error)
+		Export(topicId int64) (*bytes.Buffer, error)
 		FindListCount(params FindListCountReq) ([]*entity.APIListCount, error)
 		SignupV2(params SignupParams) error
 		GetPageListV2(params community.FindAllActivitiesSignupParams) ([]*entity.APIActivitiesSignupV2, int64, error)
@@ -67,14 +65,14 @@ func ToExcelColumn(column int) string {
 	}
 	return columnName
 }
-func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string, error) {
+func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (*bytes.Buffer, error) {
 
 	//获取报名信息
 	activityInfo := entity.CommunityActivities{}
 	err := app.DB.Where("id = ?", topicId).Find(&activityInfo).Error
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("报名信息不存在 %d Error:%s", topicId, err.Error()))
-		return "", err
+		return nil, err
 	}
 
 	//获取列信息
@@ -82,13 +80,13 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 	err = json.Unmarshal([]byte(activityInfo.SATag), &colInfoList)
 	if err != nil {
 		app.Logger.Errorf(fmt.Sprintf("解析报名信息异常 %d Error:%s", topicId, err.Error()))
-		return "", err
+		return nil, err
 	}
 
 	//获取报名列表
 	list, _, err := srv.signupModel.FindSignupList(community.FindAllActivitiesSignupParams{TopicId: topicId})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	// 用于存储没一列的数据
 	colsListMap := make(map[string][]string)
@@ -100,7 +98,7 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 		signupInfos := make([]SignupInfo, 0)
 		err = json.Unmarshal([]byte(item.SignupInfo), &signupInfos)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		for _, signupInfo := range signupInfos {
 			value := signupInfo.Value
@@ -132,13 +130,13 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 	for _, col := range colInfoList {
 		err = f.SetCellStr("Sheet1", ToExcelColumn(colI)+"1", col.Title)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		list := colsListMap[col.Code]
 		for i, v := range list {
 			err = f.SetCellStr("Sheet1", ToExcelColumn(colI)+strconv.Itoa(i+2), v)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 		}
 		delete(colMap, col.Code)
@@ -167,41 +165,14 @@ func (srv defaultCommunityActivitiesSignupService) Export(topicId int64) (string
 		colI++
 	})
 	if setErr != nil {
-		return "", setErr
+		return nil, setErr
 	}
 
-	/*buf, err := f.WriteToBuffer()
+	buf, err := f.WriteToBuffer()
 	if err != nil {
-		return "", err
-	}*/
-
-	// 根据指定路径保存文件
-	fileName := fmt.Sprintf("export_data_%s_%d.xlsx", time.Now().Format("20060102150405"), topicId)
-
-	err = f.SaveAs(fileName)
-	if err != nil {
-		return "", err
+		return nil, err
 	}
-	defer os.Remove(fileName)
-
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return "", err
-	}
-	uploadClient, err := app.RpcService.CommonRpcSrc.UploadFile(srv.ctx)
-	err = uploadClient.Send(&commonclient.UploadFileReq{
-		Filename: fileName,
-		Scene:    "export_topic_signup_user_list",
-		Content:  data,
-	})
-	if err != nil {
-		return "", err
-	}
-	uploadResp, err := uploadClient.CloseAndRecv()
-	if err != nil {
-		return "", err
-	}
-	return uploadResp.Domain + "/" + uploadResp.Path, nil
+	return buf, nil
 }
 func (srv defaultCommunityActivitiesSignupService) toString(v interface{}) string {
 	switch v.(type) {

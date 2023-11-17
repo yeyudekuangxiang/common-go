@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/render"
+	"gitlab.miotech.com/miotech-application/backend/common-go/tool/timetool"
 	"mio/config"
 	"mio/internal/pkg/core/app"
 	"mio/internal/pkg/core/context"
@@ -832,7 +834,7 @@ func (ctr *TopicController) SignupList(c *gin.Context) (gin.H, error) {
 }
 
 // 导出报名数据excel文件路径
-func (ctr *TopicController) ExportSignupList(c *gin.Context) (gin.H, error) {
+func (ctr *TopicController) ExportSignupList(c *gin.Context) (render.Render, error) {
 	form := IdRequest{}
 	if err := apiutil.BindForm(c, &form); err != nil {
 		return nil, err
@@ -856,12 +858,21 @@ func (ctr *TopicController) ExportSignupList(c *gin.Context) (gin.H, error) {
 		return nil, errno.ErrCommon.WithMessage("没有权限")
 	}
 
-	path, err := signupService.Export(topic.Id)
+	buf, err := signupService.Export(topic.Id)
 	if err != nil {
 		return nil, err
 	}
-	return gin.H{
-		"path": path,
+
+	fileName := fmt.Sprintf("export_%s.xlsx", timetool.Now().Format("20060102150405"))
+
+	return render.Reader{
+		Headers: map[string]string{
+			"Content-Disposition": `attachment; filename="` + fileName + `"`,
+			"Cache-Control":       "no-cache",
+		},
+		ContentType:   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		ContentLength: int64(buf.Len()),
+		Reader:        buf,
 	}, nil
 }
 
