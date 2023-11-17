@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/render"
 	"gitlab.miotech.com/miotech-application/backend/common-go/tool/encrypttool"
 	"io/ioutil"
 	"mio/config"
@@ -14,6 +15,17 @@ import (
 	"strings"
 )
 
+func FormatRender(f func(*gin.Context) (render.Render, error)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		r, err := f(ctx)
+		if err != nil {
+			_, _, message := errno.DecodeErr(err)
+			ctx.String(500, message)
+		} else {
+			ctx.Render(200, r)
+		}
+	}
+}
 func Format(f func(*gin.Context) (gin.H, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := f(ctx)

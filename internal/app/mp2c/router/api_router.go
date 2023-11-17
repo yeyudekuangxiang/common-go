@@ -234,7 +234,7 @@ func apiRouter(router *gin.Engine) {
 			topicRouter.POST("/activities/signup", apiutil.Format(community.DefaultTopicController.SignupTopic))
 			topicRouter.POST("/activities/cancel-signup", apiutil.Format(community.DefaultTopicController.CancelSignupTopic))
 			topicRouter.GET("/activities/signup-list", apiutil.Format(community.DefaultTopicController.SignupList))
-			topicRouter.GET("/activities/signup-path", apiutil.Format(community.DefaultTopicController.ExportSignupList))
+			topicRouter.GET("/activities/signup-path", apiutil.FormatRender(community.DefaultTopicController.ExportSignupList))
 		}
 
 		//社区2.0 评论相关
