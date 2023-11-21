@@ -11,16 +11,19 @@ import (
 
 func InitOss() {
 	log.Println("初始化阿里云oss组件...")
-	provider, err := aliyuntool.NewOssCredentialProvider(nil)
-	if err != nil && err != aliyuntool.ErrCredentialNotFound {
-		log.Panic("初始化阿里云ossProvider异常", err)
-	}
 	options := make([]oss.ClientOption, 0)
-	if provider != nil {
-		log.Printf("配置:%+v provider:%+v\n", config.Config.OSS, provider)
-		log.Println("provider key ", provider.GetCredentials().GetAccessKeyID(), provider.GetCredentials().GetAccessKeySecret(), provider.GetCredentials().GetSecurityToken())
-		//options = append(options, oss.SetCredentialsProvider(provider))
+	if config.Config.OSS.AccessKey == "" || config.Config.OSS.AccessSecret == "" {
+		provider, err := aliyuntool.NewOssCredentialProvider(nil)
+		if err != nil && err != aliyuntool.ErrCredentialNotFound {
+			log.Panic("初始化阿里云ossProvider异常", err)
+		}
+		if provider != nil {
+			log.Printf("配置:%+v provider:%+v\n", config.Config.OSS, provider)
+			log.Println("provider key ", provider.GetCredentials().GetAccessKeyID(), provider.GetCredentials().GetAccessKeySecret(), provider.GetCredentials().GetSecurityToken())
+			options = append(options, oss.SetCredentialsProvider(provider))
+		}
 	}
+
 	client, err := oss.New(config.Config.OSS.Endpoint, config.Config.OSS.AccessKey, config.Config.OSS.AccessSecret, options...)
 	if err != nil {
 		log.Panic(err)
