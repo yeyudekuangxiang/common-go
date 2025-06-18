@@ -47,3 +47,9 @@ func FuncLogger(f func(data LogData, err error)) Logger {
 		f: f,
 	}
 }
+
+type NilLogger struct{}
+
+func (n NilLogger) Log(data LogData, err error) {
+	return
+}

@@ -37,7 +37,19 @@ func HttpWithHeader(key, value string) RequestOption {
 		req.Header.Set(key, value)
 	}
 }
-func (c HttpClient) PutJson(url string, data interface{}, options ...RequestOption) ([]byte, error) {
+func (c *HttpClient) SetProxy(proxyUrl string) error {
+	if proxyUrl != "" {
+		fixedURL, err := url.Parse(proxyUrl)
+		if err != nil {
+			return err
+		}
+		tr := &http.Transport{}
+		tr.Proxy = http.ProxyURL(fixedURL)
+		c.client.Transport = tr
+	}
+	return nil
+}
+func (c *HttpClient) PutJson(url string, data interface{}, options ...RequestOption) ([]byte, error) {
 	body, err := c.json(data)
 	if err != nil {
 		return nil, err
@@ -49,21 +61,21 @@ func (c HttpClient) PutJson(url string, data interface{}, options ...RequestOpti
 	}
 	return result.Body, nil
 }
-func (c HttpClient) PostJson(url string, data interface{}, options ...RequestOption) ([]byte, error) {
+func (c *HttpClient) PostJson(url string, data interface{}, options ...RequestOption) ([]byte, error) {
 	body, err := c.json(data)
 	if err != nil {
 		return nil, err
 	}
 	return c.PostJsonBytes(url, body, options...)
 }
-func (c HttpClient) PostJsonBytes(url string, data []byte, options ...RequestOption) ([]byte, error) {
+func (c *HttpClient) PostJsonBytes(url string, data []byte, options ...RequestOption) ([]byte, error) {
 	result, err := c.OriginJson(url, "POST", data, options...)
 	if err != nil {
 		return nil, err
 	}
 	return result.Body, nil
 }
-func (c HttpClient) PostMapFrom(url string, data map[string]string, options ...RequestOption) ([]byte, error) {
+func (c *HttpClient) PostMapFrom(url string, data map[string]string, options ...RequestOption) ([]byte, error) {
 	body := c.encode(data)
 	result, err := c.OriginForm(url, "POST", []byte(body), options...)
 	if err != nil {
@@ -71,7 +83,7 @@ func (c HttpClient) PostMapFrom(url string, data map[string]string, options ...R
 	}
 	return result.Body, nil
 }
-func (c HttpClient) PostFrom(url string, data url.Values, options ...RequestOption) ([]byte, error) {
+func (c *HttpClient) PostFrom(url string, data url.Values, options ...RequestOption) ([]byte, error) {
 	body := data.Encode()
 
 	result, err := c.OriginForm(url, "POST", []byte(body), options...)
@@ -80,14 +92,14 @@ func (c HttpClient) PostFrom(url string, data url.Values, options ...RequestOpti
 	}
 	return result.Body, nil
 }
-func (c HttpClient) Get(url string, options ...RequestOption) ([]byte, error) {
+func (c *HttpClient) Get(url string, options ...RequestOption) ([]byte, error) {
 	result, err := c.OriginGet(url, options...)
 	if err != nil {
 		return nil, err
 	}
 	return result.Body, nil
 }
-func (c HttpClient) OriginJson(url string, method string, data []byte, options ...RequestOption) (*HttpResult, error) {
+func (c *HttpClient) OriginJson(url string, method string, data []byte, options ...RequestOption) (*HttpResult, error) {
 	start := time.Now()
 
 	req, err := c.newRequest(method, url, data, start)
@@ -98,7 +110,7 @@ func (c HttpClient) OriginJson(url string, method string, data []byte, options .
 
 	return c.do(start, data, req, options...)
 }
-func (c HttpClient) OriginForm(url string, method string, data []byte, options ...RequestOption) (*HttpResult, error) {
+func (c *HttpClient) OriginForm(url string, method string, data []byte, options ...RequestOption) (*HttpResult, error) {
 	start := time.Now()
 	req, err := c.newRequest(method, url, data, start)
 	if err != nil {
@@ -108,7 +120,7 @@ func (c HttpClient) OriginForm(url string, method string, data []byte, options .
 
 	return c.do(start, data, req, options...)
 }
-func (c HttpClient) OriginGet(url string, options ...RequestOption) (*HttpResult, error) {
+func (c *HttpClient) OriginGet(url string, options ...RequestOption) (*HttpResult, error) {
 	start := time.Now()
 	req, err := c.newRequest("GET", url, nil, start)
 	if err != nil {
@@ -119,7 +131,7 @@ func (c HttpClient) OriginGet(url string, options ...RequestOption) (*HttpResult
 
 	return result, err
 }
-func (c HttpClient) do(start time.Time, data []byte, req *http.Request, options ...RequestOption) (*HttpResult, error) {
+func (c *HttpClient) do(start time.Time, data []byte, req *http.Request, options ...RequestOption) (*HttpResult, error) {
 	for _, op := range options {
 		op(req)
 	}
@@ -185,7 +197,7 @@ func (c HttpClient) do(start time.Time, data []byte, req *http.Request, options 
 	}, nil)
 	return &HttpResult{Response: res, Body: body}, nil
 }
-func (c HttpClient) encode(data map[string]string) string {
+func (c *HttpClient) encode(data map[string]string) string {
 	var buf strings.Builder
 	keys := make([]string, 0, len(data))
 	for k := range data {
@@ -202,7 +214,7 @@ func (c HttpClient) encode(data map[string]string) string {
 	}
 	return buf.String()
 }
-func (c HttpClient) newRequest(method string, url string, data []byte, start time.Time) (*http.Request, error) {
+func (c *HttpClient) newRequest(method string, url string, data []byte, start time.Time) (*http.Request, error) {
 	var reader io.Reader
 	if data != nil {
 		reader = bytes.NewReader(data)
@@ -222,13 +234,13 @@ func (c HttpClient) newRequest(method string, url string, data []byte, start tim
 
 	return req, nil
 }
-func (c HttpClient) log(data LogData, err error) {
+func (c *HttpClient) log(data LogData, err error) {
 	if c.logger == nil {
 		return
 	}
 	c.logger.Log(data, err)
 }
-func (c HttpClient) json(data interface{}) ([]byte, error) {
+func (c *HttpClient) json(data interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	encoder := json.NewEncoder(buf)
 	encoder.SetEscapeHTML(false)
